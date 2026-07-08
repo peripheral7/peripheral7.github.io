@@ -1,3 +1,6 @@
+import fs from "fs"
+import path from "path"
+
 export type Category = "RESEARCH" | "PHOTOGRAPHY" | "MOTORCYCLE"
 
 export type Post = {
@@ -22,40 +25,47 @@ export type Post = {
   tags?: string[]
 }
 
-export const posts: Post[] = [
-  {
-    id: "m1",
-    variant: "photo",
-    category: "MOTORCYCLE",
-    title: "CBR650F (2016)",
-    meta: "Garage log",
-    ref: "MOTO-2016",
-    // TODO: 실제 파일을 public/images/202604-05.JPEG 경로에 넣어주세요.
-    // (윈도우는 대소문자를 구분 안 하지만, GitHub Pages는 대소문자를 구분합니다 —
-    //  실제 파일명의 대소문자까지 이 경로와 정확히 일치해야 합니다.)
-    image: "/images/202604-05.JPEG",
-    imageAlt: "Honda CBR650F 2016",
-    rotate: 2,
-    pin: "tape",
-    date: "2026.04.05",
-  },
-  {
-    id: "r1",
-    variant: "interactive",
-    category: "RESEARCH",
-    // TODO: 정확한 논문 제목으로 교체해주세요
-    title: "도시경제학적 접근을 통한 신도시 아파트 가격 결정요인 분석",
-    meta: "광교 · 동탄 · 운정 비교연구 · 클러스터 지도 3종 + 종합 결과",
-    ref: "02_02_03 / 06",
-    // TODO: 실제 PNG 파일을 이 경로(public/images/)에 넣어주세요.
-    // 파일명이 다르면 이 경로를 실제 파일명으로 맞춰주세요.
-    image: "/images/02_02_03_map_integrated_Dongtan_200_cluster.png",
-    imageAlt: "동탄 200m 공원 및 상권 클러스터 지도",
-    rotate: -2,
-    pin: "pin",
-    href: "/reports/research-index.html",
-    linkLabel: "Open research",
-    date: "2026.07.08",
-    tags: ["Urban Economics", "GIS", "Hedonic Regression"],
-  },
-]
+// Everything except id/rotate/pin must come from the post's JSON file.
+// rotate/pin are optional there — auto-filled below if omitted, so most
+// posts don't need to specify them at all.
+type PostMeta = Omit<Post, "id" | "rotate" | "pin"> & {
+  rotate?: number
+  pin?: "pin" | "tape" | "clip"
+}
+
+const POSTS_DIR = path.join(process.cwd(), "content/posts")
+const PIN_CYCLE: Array<"pin" | "tape" | "clip"> = ["pin", "tape", "clip"]
+
+// Deterministic pseudo-random "crooked pin" tilt derived from the filename,
+// so the scrapbook look doesn't require hand-picking a rotate value per post.
+function autoRotate(slug: string): number {
+  let hash = 0
+  for (let i = 0; i < slug.length; i++) {
+    hash = (hash * 31 + slug.charCodeAt(i)) % 1000
+  }
+  return (hash % 7) - 3 // -3..3 degrees
+}
+
+function loadPosts(): Post[] {
+  if (!fs.existsSync(POSTS_DIR)) return []
+
+  const files = fs
+    .readdirSync(POSTS_DIR)
+    .filter((f) => f.endsWith(".json"))
+    .sort() // filename controls board order, e.g. 01-*.json, 02-*.json, ...
+
+  return files.map((file, i) => {
+    const slug = file.replace(/\.json$/, "")
+    const raw = fs.readFileSync(path.join(POSTS_DIR, file), "utf-8")
+    const meta = JSON.parse(raw) as PostMeta
+
+    return {
+      id: slug,
+      rotate: autoRotate(slug),
+      pin: PIN_CYCLE[i % PIN_CYCLE.length],
+      ...meta, // explicit values in the JSON win over the auto-filled defaults
+    }
+  })
+}
+
+export const posts: Post[] = loadPosts()
