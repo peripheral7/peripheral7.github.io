@@ -1,0 +1,362 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Apartment Price Determinants — Spatial Analysis</title>
+<style>
+  :root {
+    --bg: #f6f3ee;
+    --ink: #1a1a1a;
+    --muted: #6b6b6b;
+    --accent: #b5432f;
+    --border: #d9d3c8;
+    --card: #ffffff;
+    --nav-w: 220px;
+  }
+
+  * { box-sizing: border-box; }
+
+  body {
+    margin: 0;
+    background: var(--bg);
+    color: var(--ink);
+    font-family: -apple-system, "Segoe UI", "Pretendard", "Noto Sans KR", sans-serif;
+    line-height: 1.5;
+  }
+
+  /* ---------- layout shell ---------- */
+  .shell {
+    display: flex;
+    min-height: 100vh;
+  }
+
+  /* ---------- sticky side index ---------- */
+  .side-nav {
+    position: sticky;
+    top: 0;
+    align-self: flex-start;
+    height: 100vh;
+    width: var(--nav-w);
+    flex-shrink: 0;
+    background: var(--ink);
+    color: #eee;
+    padding: 28px 20px;
+    overflow-y: auto;
+  }
+
+  .side-nav .brand {
+    font-family: monospace;
+    font-size: 0.65rem;
+    text-transform: uppercase;
+    letter-spacing: 0.2em;
+    color: var(--accent);
+    margin-bottom: 4px;
+  }
+
+  .side-nav h1 {
+    font-size: 0.95rem;
+    line-height: 1.35;
+    margin: 0 0 28px 0;
+    font-weight: 700;
+  }
+
+  .side-nav nav a {
+    display: block;
+    padding: 10px 0;
+    color: #cfcfcf;
+    text-decoration: none;
+    font-size: 0.8rem;
+    border-top: 1px solid rgba(255,255,255,0.12);
+    transition: color 0.15s ease, padding-left 0.15s ease;
+  }
+  .side-nav nav a:first-child { border-top: none; }
+  .side-nav nav a:hover,
+  .side-nav nav a.active {
+    color: #fff;
+    padding-left: 6px;
+  }
+  .side-nav nav a .idx {
+    color: var(--accent);
+    font-family: monospace;
+    margin-right: 8px;
+  }
+
+  /* ---------- main content ---------- */
+  .content {
+    flex: 1;
+    min-width: 0;
+    padding: 40px clamp(16px, 4vw, 48px) 80px;
+  }
+
+  section { scroll-margin-top: 24px; }
+
+  .section-head {
+    max-width: 1100px;
+    margin: 0 auto 18px;
+  }
+  .section-head .eyebrow {
+    font-family: monospace;
+    font-size: 0.65rem;
+    text-transform: uppercase;
+    letter-spacing: 0.2em;
+    color: var(--accent);
+  }
+  .section-head h2 {
+    margin: 6px 0 0;
+    font-size: 1.35rem;
+    font-weight: 800;
+  }
+  .section-head p {
+    margin: 6px 0 0;
+    color: var(--muted);
+    font-size: 0.9rem;
+    max-width: 640px;
+  }
+
+  #overview { max-width: 1100px; margin: 0 auto 48px; }
+  #overview h1 {
+    font-size: clamp(1.4rem, 3vw, 2rem);
+    font-weight: 800;
+    margin: 8px 0 10px;
+  }
+  #overview p { color: var(--muted); max-width: 720px; }
+
+  /* ---------- map grid ---------- */
+  .map-grid {
+    max-width: 1300px;
+    margin: 0 auto 64px;
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 18px;
+  }
+
+  .map-card {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 4px;
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
+  }
+
+  .map-card .map-label {
+    padding: 10px 14px;
+    border-bottom: 1px solid var(--border);
+    display: flex;
+    align-items: baseline;
+    justify-content: space-between;
+  }
+  .map-card .map-label strong {
+    font-size: 0.85rem;
+  }
+  .map-card .map-label span {
+    font-family: monospace;
+    font-size: 0.6rem;
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    color: var(--muted);
+  }
+
+  .map-frame-wrap {
+    position: relative;
+    width: 100%;
+    aspect-ratio: 4 / 5;
+    background: #eee;
+  }
+  .map-frame-wrap iframe {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    border: 0;
+  }
+
+  .map-card .open-full {
+    padding: 8px 14px;
+    border-top: 1px solid var(--border);
+    font-size: 0.7rem;
+    text-align: right;
+  }
+  .map-card .open-full a {
+    color: var(--accent);
+    text-decoration: none;
+    font-weight: 600;
+  }
+  .map-card .open-full a:hover { text-decoration: underline; }
+
+  /* below ~1024px: still try 3-up but let it get tighter before dropping */
+  @media (max-width: 1024px) {
+    .map-grid { gap: 12px; }
+  }
+
+  /* mobile: stack to 1 per row */
+  @media (max-width: 768px) {
+    .shell { flex-direction: column; }
+    .side-nav {
+      position: static;
+      width: 100%;
+      height: auto;
+      padding: 16px 20px;
+    }
+    .side-nav nav { display: flex; overflow-x: auto; gap: 4px; }
+    .side-nav nav a {
+      border-top: none;
+      white-space: nowrap;
+      padding: 8px 10px;
+      font-size: 0.75rem;
+    }
+    .map-grid { grid-template-columns: 1fr; }
+    .map-frame-wrap { aspect-ratio: 16 / 11; }
+    .content { padding: 28px 16px 60px; }
+  }
+
+  /* ---------- results section ---------- */
+  #results .report-frame-wrap {
+    max-width: 1300px;
+    margin: 0 auto;
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 4px;
+    overflow: hidden;
+  }
+  #results iframe {
+    width: 100%;
+    height: 1400px;
+    border: 0;
+    display: block;
+  }
+</style>
+</head>
+<body>
+<div class="shell">
+
+  <!-- ---------- sticky side index ---------- -->
+  <aside class="side-nav">
+    <p class="brand">Field File / Research</p>
+    <h1>공간계량경제학적 접근을 통한 신도시 아파트 가격 결정요인 분석</h1>
+    <nav id="side-index">
+      <a href="#overview"><span class="idx">00</span>개요</a>
+      <a href="#gwanggyo"><span class="idx">01</span>광교 클러스터 지도</a>
+      <a href="#dongtan"><span class="idx">02</span>동탄 클러스터 지도</a>
+      <a href="#unjeong"><span class="idx">03</span>운정 클러스터 지도</a>
+      <a href="#results"><span class="idx">04</span>종합 결과</a>
+    </nav>
+  </aside>
+
+  <!-- ---------- main content ---------- -->
+  <main class="content">
+
+    <section id="overview">
+      <p class="eyebrow">Spatial Econometrics · New Town Comparison</p>
+      <h1>광교 · 동탄 · 운정 신도시 아파트 가격 결정요인 비교연구</h1>
+      <p>
+        OSM 기반 접근성 변수, 상업시설 중력지수(gravity index), DBSCAN 클러스터링을 결합해
+        세 신도시의 공간구조 차이를 지도로 시각화하고, 헤도닉 회귀 및 공간자기상관 분석(Moran's I,
+        SAR/SEM/SDM)을 통해 지역 간 이질성을 검증했습니다. 아래 지도에서 각 도시의 200m 클러스터
+        구조를 확인하고, 하단 결과 섹션에서 종합 분석 결과를 확인할 수 있습니다.
+      </p>
+    </section>
+
+    <!-- ---------- 3-map responsive grid ---------- -->
+    <div class="section-head">
+      <p class="eyebrow">01 – 03</p>
+      <h2>200m 클러스터 통합 지도</h2>
+      <p>데스크톱에서는 3개 지도가 한 행에 나란히, 화면이 좁아지면(모바일 기준 768px 이하) 1열로 쌓입니다.</p>
+    </div>
+
+    <div class="map-grid">
+
+      <section id="gwanggyo" class="map-card">
+        <div class="map-label">
+          <strong>광교 (Gwanggyo)</strong>
+          <span>Cluster 01</span>
+        </div>
+        <div class="map-frame-wrap">
+          <iframe
+            src="02_02_03_map_integrated_Gwanggyo_200_cluster_interactive.html"
+            loading="lazy"
+            title="Gwanggyo 200m cluster interactive map"
+          ></iframe>
+        </div>
+        <div class="open-full">
+          <a href="02_02_03_map_integrated_Gwanggyo_200_cluster_interactive.html" target="_blank" rel="noopener noreferrer">전체 화면으로 열기 ↗</a>
+        </div>
+      </section>
+
+      <section id="dongtan" class="map-card">
+        <div class="map-label">
+          <strong>동탄 (Dongtan)</strong>
+          <span>Cluster 02</span>
+        </div>
+        <div class="map-frame-wrap">
+          <iframe
+            src="02_02_03_map_integrated_Dongtan_200_cluster_interactive.html"
+            loading="lazy"
+            title="Dongtan 200m cluster interactive map"
+          ></iframe>
+        </div>
+        <div class="open-full">
+          <a href="02_02_03_map_integrated_Dongtan_200_cluster_interactive.html" target="_blank" rel="noopener noreferrer">전체 화면으로 열기 ↗</a>
+        </div>
+      </section>
+
+      <section id="unjeong" class="map-card">
+        <div class="map-label">
+          <strong>운정 (Unjeong)</strong>
+          <span>Cluster 03</span>
+        </div>
+        <div class="map-frame-wrap">
+          <iframe
+            src="02_02_03_map_integrated_Unjeong_200_cluster_interactive.html"
+            loading="lazy"
+            title="Unjeong 200m cluster interactive map"
+          ></iframe>
+        </div>
+        <div class="open-full">
+          <a href="02_02_03_map_integrated_Unjeong_200_cluster_interactive.html" target="_blank" rel="noopener noreferrer">전체 화면으로 열기 ↗</a>
+        </div>
+      </section>
+
+    </div>
+
+    <!-- ---------- final results ---------- -->
+    <div class="section-head">
+      <p class="eyebrow">04</p>
+      <h2>종합 결과 (Interactive Report)</h2>
+      <p>세 지역의 헤도닉 회귀 및 공간계량 분석 결과를 종합한 대시보드입니다.</p>
+    </div>
+
+    <section id="results">
+      <div class="report-frame-wrap">
+        <iframe
+          src="06_interactive_report.html"
+          loading="lazy"
+          title="Cross-city interactive results report"
+        ></iframe>
+      </div>
+    </section>
+
+  </main>
+</div>
+
+<script>
+  // Highlight the active side-nav link based on scroll position
+  const links = document.querySelectorAll('#side-index a');
+  const targets = Array.from(links).map(a => document.querySelector(a.getAttribute('href')));
+
+  function setActive() {
+    let activeIdx = 0;
+    const scrollPos = window.scrollY + 120;
+    targets.forEach((el, i) => {
+      if (el && el.offsetTop <= scrollPos) activeIdx = i;
+    });
+    links.forEach((a, i) => a.classList.toggle('active', i === activeIdx));
+  }
+
+  window.addEventListener('scroll', setActive, { passive: true });
+  setActive();
+</script>
+
+</body>
+</html>

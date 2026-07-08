@@ -1,9 +1,21 @@
+"use client"
+
 import { posts } from "@/lib/posts"
 import { BoardItem } from "@/components/board-item"
+import { useBoardFilter, type Filter } from "@/components/board-filter-context"
 
-const filters = ["All entries", "Research", "Photography", "Motorcycles"]
+const filters: { label: string; value: Filter }[] = [
+  { label: "All entries", value: "ALL" },
+  { label: "Research", value: "RESEARCH" },
+  { label: "Photography", value: "PHOTOGRAPHY" },
+  { label: "Motorcycles", value: "MOTORCYCLE" },
+]
 
 export function ScrapbookBoard() {
+  const { filter, setFilter } = useBoardFilter()
+  const visiblePosts =
+    filter === "ALL" ? posts : posts.filter((post) => post.category === filter)
+
   return (
     <section
       id="board"
@@ -11,8 +23,8 @@ export function ScrapbookBoard() {
     >
       {/* section masthead */}
       <div className="mx-auto mb-10 max-w-6xl border-y-2 border-foreground py-5">
-        <div className="flex flex-col gap-4 md:flex-row md:items-end md:justify-between">
-          <div>
+        <div className="flex flex-col gap-4">
+          <div className="text-center">
             <p className="font-mono text-xs uppercase tracking-[0.3em] text-accent">
               The board
             </p>
@@ -20,31 +32,33 @@ export function ScrapbookBoard() {
               Everything, unfiled
             </h2>
           </div>
-          <p className="max-w-sm text-pretty text-sm leading-relaxed text-muted-foreground">
-            No feed, no order. Photographs, field research, and machine notes
-            pinned together and connected only by whatever thread you can find.
-          </p>
         </div>
 
         <div className="mt-5 flex flex-wrap items-center gap-2">
-          {filters.map((f, i) => (
-            <button
-              key={f}
-              className={`font-mono text-[0.7rem] uppercase tracking-[0.15em] transition-colors ${
-                i === 0
-                  ? "bg-foreground px-3 py-1.5 text-background"
-                  : "border border-border px-3 py-1.5 text-muted-foreground hover:border-accent hover:text-accent"
-              }`}
-            >
-              {f}
-            </button>
-          ))}
+          {filters.map((f) => {
+            const active = filter === f.value
+            return (
+              <button
+                key={f.value}
+                type="button"
+                onClick={() => setFilter(f.value)}
+                aria-pressed={active}
+                className={`font-mono text-[0.7rem] uppercase tracking-[0.15em] transition-colors ${
+                  active
+                    ? "bg-foreground px-3 py-1.5 text-background"
+                    : "border border-border px-3 py-1.5 text-muted-foreground hover:border-accent hover:text-accent"
+                }`}
+              >
+                {f.label}
+              </button>
+            )
+          })}
         </div>
       </div>
 
       {/* the scrapbook — deliberately unstructured masonry */}
       <div className="mx-auto max-w-6xl columns-1 gap-6 sm:columns-2 lg:columns-3 [&>*:nth-child(3n)]:mt-8 [&>*:nth-child(4n)]:mt-4">
-        {posts.map((post) => (
+        {visiblePosts.map((post) => (
           <BoardItem key={post.id} post={post} />
         ))}
       </div>
