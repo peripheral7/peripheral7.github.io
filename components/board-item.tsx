@@ -70,14 +70,12 @@ function CardBody({ post }: { post: Post }) {
 export function BoardItem({ post }: { post: Post }) {
   const style = { ["--r" as string]: `${post.rotate}deg` }
 
-  // if the post links out somewhere, the entire card becomes a clickable
-  // link (same tab — no target="_blank") instead of only the small
-  // "Open ..." label inside it
+  // pt-4 옵션을 주어 위로 튀어나온 테이프 공간이 레이아웃에 가려지지 않게 차단합니다.
   if (post.href) {
     return (
       <a
         href={post.href}
-        className="scrap group relative mb-6 block break-inside-avoid"
+        className="scrap group relative mb-6 block break-inside-avoid pt-4 overflow-visible"
         style={style}
         tabIndex={0}
       >
@@ -89,7 +87,7 @@ export function BoardItem({ post }: { post: Post }) {
 
   return (
     <article
-      className="scrap group relative mb-6 break-inside-avoid"
+      className="scrap group relative mb-6 break-inside-avoid pt-4 overflow-visible"
       style={style}
       tabIndex={0}
     >

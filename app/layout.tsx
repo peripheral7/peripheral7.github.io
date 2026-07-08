@@ -52,7 +52,7 @@ export default function RootLayout({
   return (
     <html
       lang="en"
-      className={`dark bg-background ${archivo.variable} ${jetbrainsMono.variable}`}
+      className={`bg-background ${archivo.variable} ${jetbrainsMono.variable}`}
     >
       <body className="font-sans antialiased">
         {children}

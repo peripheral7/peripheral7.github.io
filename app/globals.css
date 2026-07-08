@@ -47,41 +47,60 @@
   --radius-4xl: calc(var(--radius) * 2.6);
 }
 
-:root {
-  color-scheme: dark;
-  /* dark background + white text */
-  --background: oklch(0.1 0 0);
-  --foreground: oklch(0.95 0.01 90);
-  --card: oklch(0.15 0 0);
-  --card-foreground: oklch(0.95 0.01 90);
-  --popover: oklch(0.15 0 0);
-  --popover-foreground: oklch(0.95 0.01 90);
-  --primary: oklch(0.95 0.01 90);
-  --primary-foreground: oklch(0.1 0 0);
-  --secondary: oklch(0.2 0.01 0);
-  --secondary-foreground: oklch(0.95 0.01 90);
-  --muted: oklch(0.3 0.01 0);
-  --muted-foreground: oklch(0.65 0.01 90);
-  --accent: oklch(0.505 0.19 27);
-  --accent-foreground: oklch(0.95 0.01 90);
-  --destructive: oklch(0.505 0.19 27);
-  --border: oklch(0.25 0.01 0);
-  --input: oklch(0.25 0.01 0);
-  --ring: oklch(0.505 0.19 27);
-  --chart-1: oklch(0.505 0.19 27);
-  --chart-2: oklch(0.55 0.08 75);
-  --chart-3: oklch(0.439 0.02 60);
-  --chart-4: oklch(0.371 0.02 60);
-  --chart-5: oklch(0.269 0.02 60);
-  --radius: 0.125rem;
-  --sidebar: oklch(0.15 0 0);
-  --sidebar-foreground: oklch(0.95 0.01 90);
-  --sidebar-primary: oklch(0.95 0.01 90);
-  --sidebar-primary-foreground: oklch(0.1 0 0);
-  --sidebar-accent: oklch(0.505 0.19 27);
-  --sidebar-accent-foreground: oklch(0.95 0.01 90);
-  --sidebar-border: oklch(0.25 0.01 0);
-  --sidebar-ring: oklch(0.505 0.19 27);
+@layer base {
+  :root {
+    color-scheme: light; /* 화이트 테마에 맞게 light로 수정 */
+    
+    /* 배경 및 텍스트 */
+    --background: oklch(1 0 0);             /* 순수 흰색 배경 */
+    --foreground: oklch(0.25 0 0);          /* 깊은 차콜 텍스트 */
+    
+    /* 카드 및 팝오버 */
+    --card: oklch(0.98 0 0);                /* 아주 밝은 회색 카드 배경 */
+    --card-foreground: oklch(0.25 0 0);
+    --popover: oklch(1 0 0);                
+    --popover-foreground: oklch(0.25 0 0);
+    
+    /* 주요 색상 & 강조 색상 (토마토 레드 통합) */
+    --primary: oklch(0.505 0.19 27);
+    --primary-foreground: oklch(1 0 0);
+    --accent: oklch(0.505 0.19 27);
+    --accent-foreground: oklch(1 0 0);
+    
+    /* 보조 및 비활성 색상 */
+    --secondary: oklch(0.96 0 0);
+    --secondary-foreground: oklch(0.25 0 0);
+    --muted: oklch(0.96 0 0);               /* 중복된 muted 통합 */
+    --muted-foreground: oklch(0.55 0 0);
+    
+    /* 파괴적/경고 색상 */
+    --destructive: oklch(0.505 0.19 27);
+    --destructive-foreground: oklch(1 0 0);
+    
+    /* 테두리 및 입력창, 포커스 링 */
+    --border: oklch(0.92 0 0);              /* 은은한 경계선 */
+    --input: oklch(0.92 0 0);
+    --ring: oklch(0.505 0.19 27);           /* 포커스 링 (토마토 레드) */
+    
+    /* 차트 (포인트 컬러인 chart-1 외에는 차분한 톤으로 배치) */
+    --chart-1: oklch(0.505 0.19 27);
+    --chart-2: oklch(0.85 0.02 60);
+    --chart-3: oklch(0.75 0.02 60);
+    --chart-4: oklch(0.65 0.02 60);
+    --chart-5: oklch(0.55 0.02 60);
+    
+    --radius: 0.125rem;
+    
+    /* 사이드바 */
+    --sidebar-background: oklch(0.98 0 0);
+    --sidebar-foreground: oklch(0.25 0 0);
+    --sidebar-primary: oklch(0.505 0.19 27);
+    --sidebar-primary-foreground: oklch(1 0 0);
+    --sidebar-accent: oklch(0.96 0 0);
+    --sidebar-accent-foreground: oklch(0.505 0.19 27);
+    --sidebar-border: oklch(0.92 0 0);
+    --sidebar-ring: oklch(0.505 0.19 27);
+  }
 }
 
 .dark {

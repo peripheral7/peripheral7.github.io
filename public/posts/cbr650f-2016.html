@@ -25,10 +25,7 @@
     line-height: 1.5;
   }
 
-  .shell {
-    display: flex;
-    min-height: 100vh;
-  }
+  .shell { display: flex; min-height: 100vh; }
 
   /* ---------- sticky side index (empty — no sections here) ---------- */
   .side-nav {
@@ -43,7 +40,6 @@
     padding: 28px 20px;
     overflow-y: auto;
   }
-
   .side-nav .brand {
     font-family: monospace;
     font-size: 0.65rem;
@@ -52,14 +48,7 @@
     color: var(--accent);
     margin-bottom: 4px;
   }
-
-  .side-nav h1 {
-    font-size: 0.95rem;
-    line-height: 1.35;
-    margin: 0 0 20px 0;
-    font-weight: 700;
-  }
-
+  .side-nav h1 { font-size: 0.95rem; line-height: 1.35; margin: 0 0 20px 0; font-weight: 700; }
   .side-nav .home-link {
     display: block;
     padding-bottom: 14px;
@@ -73,7 +62,7 @@
 
   /* ---------- top bar (main / categories) ---------- */
   .top-bar {
-    max-width: 1100px;
+    max-width: 720px;
     margin: 0 auto 28px;
     display: flex;
     flex-wrap: wrap;
@@ -83,17 +72,9 @@
     padding-bottom: 16px;
     border-bottom: 1px solid var(--border);
   }
-  .top-bar .back-link {
-    font-weight: 700;
-    text-decoration: none;
-    color: var(--ink);
-    font-size: 0.85rem;
-  }
+  .top-bar .back-link { font-weight: 700; text-decoration: none; color: var(--ink); font-size: 0.85rem; }
   .top-bar .back-link:hover { color: var(--accent); }
-  .top-bar .cat-links {
-    display: flex;
-    gap: 14px;
-  }
+  .top-bar .cat-links { display: flex; gap: 14px; }
   .top-bar .cat-links a {
     font-family: monospace;
     font-size: 0.65rem;
@@ -104,19 +85,15 @@
     border: 1px solid var(--border);
     padding: 5px 10px;
   }
-  .top-bar .cat-links a:hover {
-    color: var(--accent);
-    border-color: var(--accent);
-  }
+  .top-bar .cat-links a:hover { color: var(--accent); border-color: var(--accent); }
 
   /* ---------- main content ---------- */
-  .content {
-    flex: 1;
-    min-width: 0;
-    padding: 32px clamp(16px, 4vw, 48px) 80px;
-  }
+  .content { flex: 1; min-width: 0; padding: 32px clamp(16px, 4vw, 48px) 80px; }
 
-  #overview { max-width: 1100px; margin: 0 auto 40px; }
+  /* -----------------------------------------------------------------
+     EDITABLE: 아래 소개글(제목/설명)은 자유롭게 수정하세요.
+     ----------------------------------------------------------------- */
+  #overview { max-width: 720px; margin: 0 auto 40px; }
   #overview .eyebrow {
     font-family: monospace;
     font-size: 0.65rem;
@@ -124,64 +101,52 @@
     letter-spacing: 0.2em;
     color: var(--accent);
   }
-  #overview h1 {
-    font-size: clamp(1.4rem, 3vw, 2rem);
-    font-weight: 800;
-    margin: 8px 0 10px;
-  }
-  #overview p { color: var(--muted); max-width: 720px; }
+  #overview h1 { font-size: clamp(1.4rem, 3vw, 2rem); font-weight: 800; margin: 8px 0 10px; }
+  #overview p { color: var(--muted); max-width: 640px; }
+  /* ----------------------------------------------------------------- */
 
-  /* ---------- photo list: one per row, sequential ---------- */
+  /* ---------- photo list: one per row, original aspect ratio kept ---------- */
   .photo-list {
-    max-width: 1100px;
+    max-width: 720px;
     margin: 0 auto;
-    display: grid;
-    grid-template-columns: 1fr;
-    gap: 28px;
+    display: flex;
+    flex-direction: column;
+    gap: 40px;
   }
 
-  .photo-card {
-    background: var(--card);
-    border: 1px solid var(--border);
-    border-radius: 4px;
-    overflow: hidden;
-  }
+  .photo-card { text-align: center; }
 
-  .photo-card .photo-label {
-    padding: 8px 14px;
-    border-bottom: 1px solid var(--border);
-    font-family: monospace;
-    font-size: 0.6rem;
-    text-transform: uppercase;
-    letter-spacing: 0.1em;
-    color: var(--muted);
-  }
-
-  .photo-frame {
-    position: relative;
-    width: 100%;
-    aspect-ratio: 4 / 3;
+  /* object-fit: contain (no cropping) + max-height so a portrait photo
+     always fits on one screen, on both mobile and desktop */
+  .photo-card img {
+    display: block;
+    margin: 0 auto;
+    max-width: 100%;
+    max-height: 88vh;
+    width: auto;
+    height: auto;
+    object-fit: contain;
     background: #eee;
   }
-  .photo-frame img {
-    position: absolute;
-    inset: 0;
-    width: 100%;
-    height: 100%;
-    object-fit: cover;
+
+  /* -----------------------------------------------------------------
+     EDITABLE: 코멘트(캡션) 스타일. 실제 문구는 이 파일이 아니라
+     public/images/motorcycles/CBR650F/manifest.json 의 "caption" 값을 고치면 됩니다.
+     ----------------------------------------------------------------- */
+  .photo-card figcaption {
+    margin-top: 10px;
+    font-size: 0.75rem;
+    color: var(--muted);
+    text-align: center;
   }
+  /* ----------------------------------------------------------------- */
 
   @media (max-width: 768px) {
     .shell { flex-direction: column; }
-    .side-nav {
-      position: static;
-      width: 100%;
-      height: auto;
-      padding: 16px 20px;
-    }
+    .side-nav { position: static; width: 100%; height: auto; padding: 16px 20px; }
     .content { padding: 24px 16px 60px; }
     .top-bar { flex-direction: column; align-items: flex-start; }
-    .photo-frame { aspect-ratio: 4 / 5; }
+    .photo-card img { max-height: 80vh; }
   }
 </style>
 </head>
@@ -207,64 +172,56 @@
       </div>
     </div>
 
+    <!-- EDITABLE: 아래 소개글은 자유롭게 수정하세요 -->
     <section id="overview">
       <p class="eyebrow">Garage Log · MOTO-2016</p>
       <h1>CBR650F (2016)</h1>
       <p>2016년식 혼다 CBR650F 정비 및 라이딩 기록 사진입니다.</p>
     </section>
 
-    <div class="photo-list">
-      <div class="photo-card">
-        <p class="photo-label">01 — 202604-05</p>
-        <div class="photo-frame">
-          <img src="/images/202604-05.JPEG" alt="CBR650F 사진 01" loading="lazy" />
-        </div>
-      </div>
-
-      <div class="photo-card">
-        <p class="photo-label">02 — 202603 올림푸스35 (28)</p>
-        <div class="photo-frame">
-          <img src="/images/202603%20올림푸스35%20(28).jpg" alt="CBR650F 사진 02" loading="lazy" />
-        </div>
-      </div>
-
-      <div class="photo-card">
-        <p class="photo-label">03 — 20260123</p>
-        <div class="photo-frame">
-          <img src="/images/20260123.JPEG" alt="CBR650F 사진 03" loading="lazy" />
-        </div>
-      </div>
-
-      <div class="photo-card">
-        <p class="photo-label">04 — 202602 (2)</p>
-        <div class="photo-frame">
-          <img src="/images/202602%20(2).JPEG" alt="CBR650F 사진 04" loading="lazy" />
-        </div>
-      </div>
-
-      <div class="photo-card">
-        <p class="photo-label">05 — 202603 올림푸스35 (8)</p>
-        <div class="photo-frame">
-          <img src="/images/202603%20올림푸스35%20(8).jpg" alt="CBR650F 사진 05" loading="lazy" />
-        </div>
-      </div>
-
-      <div class="photo-card">
-        <p class="photo-label">06 — 202603 올림푸스35 (23)</p>
-        <div class="photo-frame">
-          <img src="/images/202603%20올림푸스35%20(23).jpg" alt="CBR650F 사진 06" loading="lazy" />
-        </div>
-      </div>
-
-      <div class="photo-card">
-        <p class="photo-label">07 — 20260329_경희대도서관(2)</p>
-        <div class="photo-frame">
-          <img src="/images/20260329_경희대도서관(2).jpg" alt="CBR650F 사진 07" loading="lazy" />
-        </div>
-      </div>
-    </div>
+    <!-- 사진들은 아래 스크립트가 manifest.json을 읽어서 자동으로 채웁니다.
+         사진 제목 없이 사진 + (있으면) 코멘트만 표시됩니다. -->
+    <div id="gallery" class="photo-list"></div>
 
   </main>
 </div>
+
+<script>
+  // -------------------------------------------------------------------
+  // public/images/motorcycles/CBR650F/ 폴더의 사진을 전부 쓰려면,
+  // 그 폴더 안 manifest.json에 파일명(과 선택적으로 caption)만 추가/삭제하면 됩니다.
+  // 이 스크립트를 직접 고칠 필요는 없습니다.
+  // -------------------------------------------------------------------
+  const IMAGE_FOLDER = "/images/motorcycles/CBR650F/";
+
+  fetch(IMAGE_FOLDER + "manifest.json")
+    .then((res) => res.json())
+    .then((items) => {
+      const gallery = document.getElementById("gallery");
+      items.forEach((item, i) => {
+        const figure = document.createElement("figure");
+        figure.className = "photo-card";
+
+        const img = document.createElement("img");
+        img.src = IMAGE_FOLDER + encodeURIComponent(item.file);
+        img.alt = item.caption || `CBR650F 사진 ${i + 1}`;
+        img.loading = "lazy";
+        figure.appendChild(img);
+
+        // caption is optional — only rendered if manifest.json has one
+        if (item.caption) {
+          const caption = document.createElement("figcaption");
+          caption.textContent = item.caption;
+          figure.appendChild(caption);
+        }
+
+        gallery.appendChild(figure);
+      });
+    })
+    .catch((err) => {
+      console.error("Failed to load photo manifest:", err);
+    });
+</script>
+
 </body>
 </html>

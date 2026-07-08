@@ -1,0 +1,151 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Clockwork — THE FIELD FILE</title>
+  <style>
+    body {
+      margin: 0;
+      padding: 0;
+      background-color: #ffffff;
+      color: #1a1a1a;
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+    }
+    .container {
+      max-width: 900px;
+      margin: 0 auto;
+      padding: 60px 20px;
+    }
+    header {
+      margin-bottom: 50px;
+      border-bottom: 2px solid #1a1a1a;
+      padding-bottom: 20px;
+    }
+    .back-link {
+      display: inline-block;
+      margin-bottom: 30px;
+      color: #1a1a1a;
+      text-decoration: none;
+      font-family: monospace;
+      font-size: 0.85rem;
+      font-weight: bold;
+    }
+    .back-link:hover { color: #E24A35; } /* 토마토 레드 포인트 */
+    
+    h1 {
+      font-size: 2.5rem;
+      font-weight: 800;
+      margin: 0 0 10px 0;
+      letter-spacing: -0.03em;
+    }
+    .meta {
+      font-family: monospace;
+      font-size: 0.85rem;
+      color: #E24A35;
+      text-transform: uppercase;
+      letter-spacing: 0.15em;
+    }
+    .intro-text {
+      margin-top: 20px;
+      line-height: 1.6;
+      color: #4b5563;
+    }
+
+    /* 갤러리 레이아웃: 원본 비율 유지 + 화면에 맞춤 */
+    .gallery {
+      display: flex;
+      flex-direction: column;
+      gap: 60px;
+      margin-top: 40px;
+    }
+    .gallery-item {
+      text-align: center;
+      width: 100%;
+    }
+    .gallery-item img {
+      max-width: 100%;
+      max-height: 88vh; /* 데스크톱 한 화면에 맞춤 */
+      object-fit: contain;
+      display: block;
+      margin: 0 auto;
+      background-color: #f9f9f9; /* 로딩 중 영역 표시 */
+    }
+    .caption {
+      margin-top: 12px;
+      font-size: 0.8rem;
+      color: #6b7280;
+    }
+
+    @media (max-width: 768px) {
+      .gallery-item img {
+        max-height: 80vh; /* 모바일은 UI 고려하여 높이 축소 */
+      }
+      .gallery { gap: 40px; }
+    }
+
+    footer {
+      margin-top: 80px;
+      padding-top: 20px;
+      border-top: 1px solid #e5e7eb;
+      font-family: monospace;
+      font-size: 0.75rem;
+      color: #6b7280;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <a href="/" class="back-link">← BACK TO BOARD</a>
+    
+    <header>
+      <h1>Clockwork</h1>
+      <div class="meta">Category: Photography / Filed: 2026.07.08</div>
+      <div class="intro-text">
+        <p>A roll of film: captured moments and light around the cafe.</p>
+      </div>
+    </header>
+    
+    <div class="gallery" id="gallery"></div>
+
+    <footer>
+      THE FIELD FILE — PHOTOGRAPHY SERIES / ALL RIGHTS RESERVED.
+    </footer>
+  </div>
+
+  <script>
+    document.addEventListener("DOMContentLoaded", async () => {
+      const gallery = document.getElementById("gallery");
+      // 폴더 규칙에 맞춘 manifest 경로
+      const manifestUrl = "/images/photography/aqui/manifest.json";
+
+      try {
+        const response = await fetch(manifestUrl);
+        if (!response.ok) throw new Error("Manifest load failed");
+        
+        const images = await response.json();
+        
+        images.forEach(img => {
+          const item = document.createElement("div");
+          item.className = "gallery-item";
+          
+          // 캡션이 존재할 때만 캡션 태그 렌더링
+          const captionHtml = img.caption 
+            ? `<div class="caption">${img.caption}</div>` 
+            : "";
+
+          item.innerHTML = `
+            <img src="/images/photography/aqui/${img.filename}" alt="AQUI." loading="lazy">
+            ${captionHtml}
+          `;
+          
+          gallery.appendChild(item);
+        });
+      } catch (error) {
+        console.error("Error rendering gallery:", error);
+        gallery.innerHTML = "<p>이미지를 불러오지 못했습니다.</p>";
+      }
+    });
+  </script>
+</body>
+</html>

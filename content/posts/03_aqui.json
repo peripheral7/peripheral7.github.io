@@ -1,0 +1,13 @@
+{
+  "variant": "photo",
+  "category": "PHOTOGRAPHY",
+  "title": "Clockwork",
+  "meta": "A roll of film: captured moments and light.",
+  "ref": "PHOTO-AQUI",
+  "image": "/images/photography/AQUI/20221013-180609-006.jpg",
+  "imageAlt": "AQUI.",
+  "href": "/posts/aqui.html",
+  "linkLabel": "Open gallery",
+  "date": "2026.07.08",
+  "tags": ["cafe", "aqui"]
+}
