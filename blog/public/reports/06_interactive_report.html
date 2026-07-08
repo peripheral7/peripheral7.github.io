@@ -1,0 +1,840 @@
+
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <title>도시 구조에 따른 아파트 가격 형성 요인의 이질성 분석</title>
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@300;400;500;700&display=swap" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdn.datatables.net/1.13.4/css/dataTables.bootstrap5.min.css" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Noto Sans KR', sans-serif;
+            background: #f8f9fa;
+            padding: 20px;
+            display: flex;
+            justify-content: center;
+        }
+        .container-fluid {
+            background: #fff;
+            padding: 30px;
+            border-radius: 10px;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+            max-width: 1100px;
+            width: 100%;
+        }
+        .title-kr { font-weight: 700; margin-bottom: 4px; text-align: center; font-size: 1.9rem; }
+        .title-en { font-weight: 400; margin-bottom: 20px; text-align: center; font-size: 1.05rem; color: #6c757d; font-style: italic; }
+
+        h4 { margin-top: 25px; font-weight: 600; color: #343a40; text-align: center; }
+        h5.grid-title { font-weight: 600; color: #343a40; text-align: center; margin-top: 10px; margin-bottom: 15px; font-size: 1.1rem; }
+
+        .guide-box { background: #fdfdfe; border-left: 5px solid #6c757d; padding: 15px; margin-bottom: 20px; border-radius: 4px; box-shadow: 0 1px 3px rgba(0,0,0,0.05); }
+        .guide-box h5 { color: #495057; font-weight: 700; margin-top: 0; font-size: 1.1rem; }
+        .guide-box ul { margin-bottom: 0; padding-left: 20px; color: #555; }
+
+        .manual-box { background: #e8effd; border-left: 5px solid #0d6efd; padding: 15px; margin-top: 25px; border-radius: 4px; }
+        .manual-box h5 { color: #0d6efd; font-weight: 700; margin-top: 0; font-size: 1.1rem; }
+        .manual-box p { margin-bottom: 0; line-height: 1.6; color: #333; }
+
+        .table-responsive {
+            margin-top: 15px;
+            overflow-x: auto;
+            -webkit-overflow-scrolling: touch;
+        }
+
+        table.dataTable {
+            width: 100% !important;
+            margin: 0 auto !important;
+            white-space: nowrap;
+        }
+
+        .table-bordered th, .table-bordered td {
+            border: 1px solid #dee2e6;
+            vertical-align: middle;
+        }
+
+        .table-bordered th {
+            text-align: center !important;
+            font-weight: 700;
+        }
+
+        .table-bordered td {
+            text-align: center;
+        }
+        /* 독립변수(첫 열)도 중앙정렬로 통일 */
+        .table-bordered td:first-child {
+            text-align: center;
+            font-weight: 500;
+        }
+    </style>
+</head>
+<body>
+
+<div class="container-fluid">
+    <div class="title-kr">도시 구조에 따른 아파트 가격 형성 요인의 이질성 분석</div>
+    <div class="title-en">Heterogeneity in the Determinants of Apartment Prices across Urban Spatial Structures</div>
+
+    <ul class="nav nav-tabs justify-content-center" id="myTab">
+        <li class="nav-item"><button class="nav-link active" data-bs-toggle="tab" data-bs-target="#tab1">Ⅰ. 기초통계 및 상관분석</button></li>
+        <li class="nav-item"><button class="nav-link" data-bs-toggle="tab" data-bs-target="#tab2">Ⅱ. 기본 헤도닉모형</button></li>
+        <li class="nav-item"><button class="nav-link" data-bs-toggle="tab" data-bs-target="#tab3">Ⅲ. 상권접근성 확장모형</button></li>
+        <li class="nav-item"><button class="nav-link" data-bs-toggle="tab" data-bs-target="#tab4">Ⅳ. 공간계량(SAR) 분석</button></li>
+        <li class="nav-item"><button class="nav-link" data-bs-toggle="tab" data-bs-target="#tab5">Ⅴ. 종합 논의</button></li>
+    </ul>
+
+    <div class="tab-content">
+        <!-- 탭 1 -->
+        <div class="tab-pane fade show active" id="tab1">
+            <div class="guide-box mt-3">
+                <h5>💡 통계해석시 유의할 사항</h5>
+                <ul>
+                    <li><strong>기초통계(평균, 표준편차):</strong> 지역별(대분류) 및 통계치(중분류) 분포적 특성과 차이를 확인합니다.</li>
+                    <li><strong>VIF (다중공선성):</strong> 일반적으로 VIF 값이 10 이상일 경우 해당 변수들 간에 다중공선성 문제가 심각함을 의미합니다.</li>
+                </ul>
+            </div>
+            <h4>변수별 기초통계량 및 VIF</h4>
+            <div class="table-responsive"><table class="dataframe table table-bordered table-striped table-hover datatable">
+  <thead>
+    <tr>
+      <th></th>
+      <th colspan="3" halign="left">전체</th>
+      <th colspan="3" halign="left">광교</th>
+      <th colspan="3" halign="left">동탄</th>
+      <th colspan="3" halign="left">운정</th>
+    </tr>
+    <tr>
+      <th>독립변수</th>
+      <th>평균</th>
+      <th>표준편차</th>
+      <th>VIF</th>
+      <th>평균</th>
+      <th>표준편차</th>
+      <th>VIF</th>
+      <th>평균</th>
+      <th>표준편차</th>
+      <th>VIF</th>
+      <th>평균</th>
+      <th>표준편차</th>
+      <th>VIF</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td>ln_walk_park</td>
+      <td>6.939915</td>
+      <td>0.535108</td>
+      <td>1.342756</td>
+      <td>6.971568</td>
+      <td>0.504192</td>
+      <td>2.352282</td>
+      <td>6.837509</td>
+      <td>0.629443</td>
+      <td>1.811583</td>
+      <td>7.041558</td>
+      <td>0.387567</td>
+      <td>1.925499</td>
+    </tr>
+    <tr>
+      <td>ln_dist_bus</td>
+      <td>6.170068</td>
+      <td>0.681846</td>
+      <td>2.188560</td>
+      <td>6.253683</td>
+      <td>0.855055</td>
+      <td>7.928779</td>
+      <td>5.952827</td>
+      <td>0.481903</td>
+      <td>1.807121</td>
+      <td>6.364980</td>
+      <td>0.584530</td>
+      <td>1.618285</td>
+    </tr>
+    <tr>
+      <td>ln_area</td>
+      <td>4.338468</td>
+      <td>0.147273</td>
+      <td>1.274794</td>
+      <td>4.359727</td>
+      <td>0.138041</td>
+      <td>1.862538</td>
+      <td>4.296264</td>
+      <td>0.156509</td>
+      <td>1.815900</td>
+      <td>4.370028</td>
+      <td>0.131142</td>
+      <td>1.031634</td>
+    </tr>
+    <tr>
+      <td>floor</td>
+      <td>12.338776</td>
+      <td>7.460415</td>
+      <td>1.093417</td>
+      <td>14.421260</td>
+      <td>8.786965</td>
+      <td>1.096030</td>
+      <td>11.351254</td>
+      <td>6.227459</td>
+      <td>1.019387</td>
+      <td>11.084158</td>
+      <td>6.614357</td>
+      <td>1.061677</td>
+    </tr>
+    <tr>
+      <td>building_age</td>
+      <td>12.080272</td>
+      <td>4.682174</td>
+      <td>4.290801</td>
+      <td>12.935039</td>
+      <td>2.067336</td>
+      <td>2.305739</td>
+      <td>8.077061</td>
+      <td>1.161691</td>
+      <td>1.950145</td>
+      <td>16.534653</td>
+      <td>5.446905</td>
+      <td>4.872024</td>
+    </tr>
+    <tr>
+      <td>major_brand_dummy</td>
+      <td>0.244898</td>
+      <td>0.430173</td>
+      <td>1.775487</td>
+      <td>0.320866</td>
+      <td>0.467270</td>
+      <td>3.285012</td>
+      <td>0.172043</td>
+      <td>0.377756</td>
+      <td>1.865516</td>
+      <td>0.250000</td>
+      <td>0.433550</td>
+      <td>1.950078</td>
+    </tr>
+    <tr>
+      <td>ln_household</td>
+      <td>6.930558</td>
+      <td>0.421360</td>
+      <td>1.262681</td>
+      <td>6.909149</td>
+      <td>0.561340</td>
+      <td>1.487842</td>
+      <td>6.908992</td>
+      <td>0.307868</td>
+      <td>1.552898</td>
+      <td>6.987264</td>
+      <td>0.339573</td>
+      <td>1.447785</td>
+    </tr>
+    <tr>
+      <td>parking_per_household</td>
+      <td>1.321285</td>
+      <td>0.182053</td>
+      <td>7.912048</td>
+      <td>1.414026</td>
+      <td>0.137571</td>
+      <td>4.380660</td>
+      <td>1.208653</td>
+      <td>0.110475</td>
+      <td>15.927885</td>
+      <td>1.360238</td>
+      <td>0.224068</td>
+      <td>12.639662</td>
+    </tr>
+    <tr>
+      <td>underground_parking_per_household</td>
+      <td>1.266324</td>
+      <td>0.269533</td>
+      <td>8.178279</td>
+      <td>1.392169</td>
+      <td>0.222731</td>
+      <td>3.598580</td>
+      <td>1.194894</td>
+      <td>0.116039</td>
+      <td>14.270720</td>
+      <td>1.206742</td>
+      <td>0.391415</td>
+      <td>17.974192</td>
+    </tr>
+    <tr>
+      <td>ln_gravity</td>
+      <td>-5.321231</td>
+      <td>0.491555</td>
+      <td>1.823254</td>
+      <td>-5.162231</td>
+      <td>0.638428</td>
+      <td>3.203100</td>
+      <td>-5.372340</td>
+      <td>0.412053</td>
+      <td>1.665118</td>
+      <td>-5.450570</td>
+      <td>0.284725</td>
+      <td>2.287148</td>
+    </tr>
+  </tbody>
+</table></div>
+
+            <h4>변수간 상관행렬 (피어슨 상관계수)</h4>
+            <div class="table-responsive"><table class="dataframe table table-bordered table-striped table-hover datatable">
+  <thead>
+    <tr>
+      <th>독립변수</th>
+      <th>전체</th>
+      <th>광교</th>
+      <th>동탄</th>
+      <th>운정</th>
+      <th>해석요약</th>
+    </tr>
+    <tr>
+      <th>ln_walk_park</th>
+      <th>-0.044727</th>
+      <th>-0.015004</th>
+      <th>-0.075351</th>
+      <th>0.098414</th>
+      <th>상관성 미미</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td>ln_dist_bus</td>
+      <td>-0.251942</td>
+      <td>-0.472026</td>
+      <td>-0.650762</td>
+      <td>-0.313037</td>
+      <td>부(-)의 상관: 수치가 증가할수록 가격 낮아짐</td>
+    </tr>
+    <tr>
+      <td>ln_area</td>
+      <td>-0.115908</td>
+      <td>-0.169874</td>
+      <td>-0.179647</td>
+      <td>-0.394565</td>
+      <td>부(-)의 상관: 수치가 증가할수록 가격 낮아짐</td>
+    </tr>
+    <tr>
+      <td>floor</td>
+      <td>0.228880</td>
+      <td>0.130565</td>
+      <td>0.092021</td>
+      <td>0.263761</td>
+      <td>정(+)의 상관: 수치가 증가할수록 가격 높음</td>
+    </tr>
+    <tr>
+      <td>building_age</td>
+      <td>-0.388491</td>
+      <td>-0.210936</td>
+      <td>-0.174292</td>
+      <td>-0.822088</td>
+      <td>부(-)의 상관: 수치가 증가할수록 가격 낮아짐</td>
+    </tr>
+    <tr>
+      <td>major_brand_dummy</td>
+      <td>0.262805</td>
+      <td>0.536329</td>
+      <td>0.304446</td>
+      <td>0.437950</td>
+      <td>정(+)의 상관: 수치가 증가할수록 가격 높음</td>
+    </tr>
+    <tr>
+      <td>ln_household</td>
+      <td>0.039924</td>
+      <td>0.366776</td>
+      <td>0.129759</td>
+      <td>0.005386</td>
+      <td>정(+)의 상관: 수치가 증가할수록 가격 높음</td>
+    </tr>
+    <tr>
+      <td>parking_per_household</td>
+      <td>0.163496</td>
+      <td>0.168790</td>
+      <td>-0.258728</td>
+      <td>0.242193</td>
+      <td>정(+)의 상관: 수치가 증가할수록 가격 높음</td>
+    </tr>
+    <tr>
+      <td>underground_parking_per_household</td>
+      <td>0.360988</td>
+      <td>0.256138</td>
+      <td>-0.243494</td>
+      <td>0.466577</td>
+      <td>정(+)의 상관: 수치가 증가할수록 가격 높음</td>
+    </tr>
+    <tr>
+      <td>ln_gravity</td>
+      <td>0.463958</td>
+      <td>0.748214</td>
+      <td>0.388781</td>
+      <td>0.457682</td>
+      <td>정(+)의 상관: 수치가 증가할수록 가격 높음</td>
+    </tr>
+  </tbody>
+</table></div>
+
+            <div class="manual-box"><h5>📝 연구자 해석 요약</h5><p>
+<ul>
+  <li><strong>상권 접근성(ln_gravity) 상관계수</strong> — 광교 <strong>0.748</strong>(매우 강함) > 운정 0.457 > 동탄 0.388. 광교는 경기도청·컨벤션센터·중심상업지구가 광교중앙역 일대에 밀집된 <strong>'전형적인 단핵(Monocentric) 구조'</strong>이므로 상권 중심력이 집값과 강하게 연동됩니다. 반면 동탄과 운정은 상권이 분산되어 상관성이 상대적으로 낮습니다.</li>
+  <li><strong>건물 연식(building_age) 상관계수</strong> — 운정 <strong>-0.822</strong>로 압도적인 부(-)의 상관. 운정은 자족기능보다 서울 접근성이 중요한 베드타운 성격이 강해, 운정 1·2지구(구축)와 GTX-A 역세권인 3지구(신축) 간의 <strong>개발 시차 및 인프라 격차가 가격 서열을 절대적으로 지배</strong>하고 있습니다.</li>
+  <li><strong>공원 접근성(ln_walk_park) 상관계수</strong> — 세 지역 모두 -0.075~0.098 수준으로 미미함. 신도시 특성상 녹지율이 30% 이상으로 확보되어 있어, 공원 접근성 자체가 희소한 프리미엄으로 작용하지 않음을 시사합니다.</li>
+  <li><strong>다중공선성(VIF) 이질성</strong> — 대다수 변수가 양호하나, 동탄과 운정에서 <strong>주차장 관련 변수(parking_per_household 등)의 VIF가 12~17</strong>로 급등했습니다. 이는 광활한 면적과 다핵 분산 구조로 인해 <strong>'차량 의존도'</strong>가 극히 높아 주차 공간이 평형, 연식 등 핵심 스펙과 강하게 결합되어 있음을 의미합니다.</li>
+</ul>
+</p></div>
+        </div>
+
+        <!-- 탭 2 -->
+        <div class="tab-pane fade" id="tab2">
+            <h4>기본 헤도닉모형 회귀계수 결과 (Baseline Model)</h4>
+            <div class="table-responsive"><table class="dataframe table table-bordered table-striped table-hover datatable">
+  <thead>
+    <tr style="text-align: right;">
+      <th>독립변수</th>
+      <th>전체</th>
+      <th>광교</th>
+      <th>동탄</th>
+      <th>운정</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td>ln_walk_park</td>
+      <td>-0.0494</td>
+      <td>-0.1581***</td>
+      <td>0.0380</td>
+      <td>-0.0202</td>
+    </tr>
+    <tr>
+      <td>(t) ln_walk_park</td>
+      <td>(-1.44)</td>
+      <td>(-2.96)</td>
+      <td>(1.24)</td>
+      <td>(-0.63)</td>
+    </tr>
+    <tr>
+      <td>ln_dist_bus</td>
+      <td>-0.1484***</td>
+      <td>-0.2372***</td>
+      <td>-0.2350***</td>
+      <td>-0.0439*</td>
+    </tr>
+    <tr>
+      <td>(t) ln_dist_bus</td>
+      <td>(-5.74)</td>
+      <td>(-5.86)</td>
+      <td>(-6.71)</td>
+      <td>(-1.89)</td>
+    </tr>
+    <tr>
+      <td>ln_area</td>
+      <td>-0.3861***</td>
+      <td>-0.5784***</td>
+      <td>-0.2237***</td>
+      <td>-0.5409***</td>
+    </tr>
+    <tr>
+      <td>(t) ln_area</td>
+      <td>(-5.54)</td>
+      <td>(-4.65)</td>
+      <td>(-3.75)</td>
+      <td>(-7.40)</td>
+    </tr>
+    <tr>
+      <td>floor</td>
+      <td>0.0020***</td>
+      <td>0.0003</td>
+      <td>0.0024***</td>
+      <td>0.0037***</td>
+    </tr>
+    <tr>
+      <td>(t) floor</td>
+      <td>(3.64)</td>
+      <td>(0.50)</td>
+      <td>(3.58)</td>
+      <td>(5.49)</td>
+    </tr>
+    <tr>
+      <td>building_age</td>
+      <td>-0.0293***</td>
+      <td>-0.0594***</td>
+      <td>-0.0611***</td>
+      <td>-0.0341***</td>
+    </tr>
+    <tr>
+      <td>(t) building_age</td>
+      <td>(-4.95)</td>
+      <td>(-6.74)</td>
+      <td>(-3.15)</td>
+      <td>(-8.23)</td>
+    </tr>
+    <tr>
+      <td>major_brand_dummy</td>
+      <td>0.0469</td>
+      <td>0.0374</td>
+      <td>-0.0590</td>
+      <td>0.0260</td>
+    </tr>
+    <tr>
+      <td>(t) major_brand_dummy</td>
+      <td>(1.19)</td>
+      <td>(0.64)</td>
+      <td>(-0.72)</td>
+      <td>(0.73)</td>
+    </tr>
+    <tr>
+      <td>ln_household</td>
+      <td>0.1074**</td>
+      <td>0.1034**</td>
+      <td>0.1341</td>
+      <td>0.0779</td>
+    </tr>
+    <tr>
+      <td>(t) ln_household</td>
+      <td>(2.33)</td>
+      <td>(2.31)</td>
+      <td>(1.40)</td>
+      <td>(1.49)</td>
+    </tr>
+    <tr>
+      <td>parking_per_household</td>
+      <td>0.0748</td>
+      <td>0.0079</td>
+      <td>0.3372</td>
+      <td>0.2005</td>
+    </tr>
+    <tr>
+      <td>(t) parking_per_household</td>
+      <td>(0.34)</td>
+      <td>(0.03)</td>
+      <td>(0.68)</td>
+      <td>(1.05)</td>
+    </tr>
+    <tr>
+      <td>underground_parking_per_household</td>
+      <td>0.0244</td>
+      <td>0.1722***</td>
+      <td>-0.3427</td>
+      <td>-0.1553</td>
+    </tr>
+    <tr>
+      <td>(t) underground_parking_per_household</td>
+      <td>(0.16)</td>
+      <td>(2.62)</td>
+      <td>(-0.82)</td>
+      <td>(-1.34)</td>
+    </tr>
+    <tr>
+      <td>R² (Adj-R²)</td>
+      <td>0.924 (0.923)</td>
+      <td>0.752 (0.748)</td>
+      <td>0.579 (0.572)</td>
+      <td>0.865 (0.862)</td>
+    </tr>
+    <tr>
+      <td>N</td>
+      <td>1,470</td>
+      <td>508</td>
+      <td>558</td>
+      <td>404</td>
+    </tr>
+  </tbody>
+</table></div>
+            <div class="manual-box"><h5>📝 연구자 해석 요약</h5><p>
+<ul>
+  <li><strong>버스 접근성(ln_dist_bus)의 중요도</strong> — 광교 <strong>-0.237</strong>, 동탄 <strong>-0.235</strong>로 강하게 유의(1% 수준). 특히 면적이 33㎢(광교의 3배)에 달하는 동탄은 SRT/GTX(동탄역) 및 거점 산업단지(삼성전자 등)로 연결되는 <strong>'광역 버스 및 지선 교통망'</strong> 확보가 생활권 쾌적성을 넘어 가격 방어의 핵심 지표로 작용합니다.</li>
+  <li><strong>공원 접근성(ln_walk_park)의 변별력</strong> — 광교에서만 <strong>-0.158(1% 유의)</strong>로 가격에 유의미한 영향을 미침. 광교는 원천·신대호수라는 명확한 <strong>'앵커(Anchor) 시설'</strong>을 중심으로 방사형 보행축을 설계한 경관 도시인 반면, 동탄(치동천 등 선형 공원)과 운정(마을별 근린공원)은 녹지가 고르게 분산되어 특정 공원 거리가 프리미엄을 창출하지 못합니다.</li>
+  <li><strong>모형 설명력(Adj-R²)의 한계</strong> — 광교(0.748), 운정(0.862)에 비해 동탄은 <strong>0.572</strong>로 가장 낮습니다. 동탄은 경부고속도로로 인한 물리적 단절(동/서 분리)과 동탄테크노밸리, 오산단지 등 다양한 직주근접 변수가 혼재되어 있어, 물리적 스펙 위주의 기본 모형만으로는 설명력에 한계가 뚜렷합니다.</li>
+</ul>
+</p></div>
+        </div>
+
+        <!-- 탭 3 -->
+        <div class="tab-pane fade" id="tab3">
+            <h4>상권접근성 변수 투입 모형 회귀계수 결과 (Commercial Accessibility Model)</h4>
+            <div class="table-responsive"><table class="dataframe table table-bordered table-striped table-hover datatable">
+  <thead>
+    <tr style="text-align: right;">
+      <th>독립변수</th>
+      <th>전체</th>
+      <th>광교</th>
+      <th>동탄</th>
+      <th>운정</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td>ln_walk_park</td>
+      <td>0.0077</td>
+      <td>0.0226</td>
+      <td>0.0487</td>
+      <td>-0.0345</td>
+    </tr>
+    <tr>
+      <td>(t) ln_walk_park</td>
+      <td>(0.30)</td>
+      <td>(0.64)</td>
+      <td>(1.38)</td>
+      <td>(-0.90)</td>
+    </tr>
+    <tr>
+      <td>ln_dist_bus</td>
+      <td>-0.0776***</td>
+      <td>-0.0281</td>
+      <td>-0.2145***</td>
+      <td>-0.0353</td>
+    </tr>
+    <tr>
+      <td>(t) ln_dist_bus</td>
+      <td>(-2.72)</td>
+      <td>(-0.59)</td>
+      <td>(-5.07)</td>
+      <td>(-1.59)</td>
+    </tr>
+    <tr>
+      <td>ln_area</td>
+      <td>-0.3994***</td>
+      <td>-0.3655***</td>
+      <td>-0.2386***</td>
+      <td>-0.5436***</td>
+    </tr>
+    <tr>
+      <td>(t) ln_area</td>
+      <td>(-5.87)</td>
+      <td>(-4.70)</td>
+      <td>(-3.97)</td>
+      <td>(-8.08)</td>
+    </tr>
+    <tr>
+      <td>floor</td>
+      <td>0.0017***</td>
+      <td>0.0008*</td>
+      <td>0.0022***</td>
+      <td>0.0036***</td>
+    </tr>
+    <tr>
+      <td>(t) floor</td>
+      <td>(4.06)</td>
+      <td>(1.91)</td>
+      <td>(3.72)</td>
+      <td>(5.52)</td>
+    </tr>
+    <tr>
+      <td>building_age</td>
+      <td>-0.0254***</td>
+      <td>-0.0276***</td>
+      <td>-0.0573***</td>
+      <td>-0.0334***</td>
+    </tr>
+    <tr>
+      <td>(t) building_age</td>
+      <td>(-5.79)</td>
+      <td>(-3.05)</td>
+      <td>(-2.69)</td>
+      <td>(-8.58)</td>
+    </tr>
+    <tr>
+      <td>major_brand_dummy</td>
+      <td>0.0404</td>
+      <td>0.0986</td>
+      <td>-0.0500</td>
+      <td>0.0139</td>
+    </tr>
+    <tr>
+      <td>(t) major_brand_dummy</td>
+      <td>(1.07)</td>
+      <td>(1.57)</td>
+      <td>(-0.57)</td>
+      <td>(0.44)</td>
+    </tr>
+    <tr>
+      <td>ln_household</td>
+      <td>0.1268***</td>
+      <td>0.1138***</td>
+      <td>0.1315</td>
+      <td>0.0873*</td>
+    </tr>
+    <tr>
+      <td>(t) ln_household</td>
+      <td>(4.36)</td>
+      <td>(3.03)</td>
+      <td>(1.44)</td>
+      <td>(1.85)</td>
+    </tr>
+    <tr>
+      <td>parking_per_household</td>
+      <td>0.1544</td>
+      <td>0.1239</td>
+      <td>0.3629</td>
+      <td>0.1805</td>
+    </tr>
+    <tr>
+      <td>(t) parking_per_household</td>
+      <td>(0.94)</td>
+      <td>(0.68)</td>
+      <td>(0.75)</td>
+      <td>(0.95)</td>
+    </tr>
+    <tr>
+      <td>underground_parking_per_household</td>
+      <td>-0.0179</td>
+      <td>0.1189**</td>
+      <td>-0.3604</td>
+      <td>-0.1469</td>
+    </tr>
+    <tr>
+      <td>(t) underground_parking_per_household</td>
+      <td>(-0.16)</td>
+      <td>(2.02)</td>
+      <td>(-0.85)</td>
+      <td>(-1.32)</td>
+    </tr>
+    <tr>
+      <td>ln_gravity</td>
+      <td>0.1833***</td>
+      <td>0.2557***</td>
+      <td>0.0535</td>
+      <td>0.0592</td>
+    </tr>
+    <tr>
+      <td>(t) ln_gravity</td>
+      <td>(4.54)</td>
+      <td>(7.49)</td>
+      <td>(0.86)</td>
+      <td>(0.83)</td>
+    </tr>
+    <tr>
+      <td>R² (Adj-R²)</td>
+      <td>0.946 (0.946)</td>
+      <td>0.902 (0.900)</td>
+      <td>0.591 (0.583)</td>
+      <td>0.868 (0.864)</td>
+    </tr>
+    <tr>
+      <td>N</td>
+      <td>1,470</td>
+      <td>508</td>
+      <td>558</td>
+      <td>404</td>
+    </tr>
+  </tbody>
+</table></div>
+            <div class="manual-box"><h5>📝 연구자 해석 요약</h5><p>
+<ul>
+  <li><strong>광교 (단핵 구조의 증명)</strong> — 중력 변수(ln_gravity) 계수가 <strong>0.255(t=7.49)</strong>로 1% 수준에서 유의하며, 모형 설명력(Adj-R²)을 0.748에서 <strong>0.900</strong>으로 수직 상승시켰습니다. 행정/상업/교통이 하나의 축(중앙역)으로 응집된 공간구조 덕분에, 상권 인력(Gravity) 하나만으로 도시 내 가격 지형을 완벽히 설명합니다.</li>
+  <li><strong>동탄 (다핵·분산 구조의 한계)</strong> — 중력 변수가 <strong>0.053(비유의)</strong>이며 설명력 개선도 전무합니다. 동탄역 역세권, 호수공원 상권, 11자 상권, 테크노밸리 등 <strong>다수의 부도심(Sub-centers)이 병렬 배치된 스프롤(Sprawl) 구조</strong>이므로 단일 거점 중심의 중력 모형이 작동하지 않습니다.</li>
+  <li><strong>운정 (파편화된 마을 구조)</strong> — 중력 변수가 <strong>0.059(비유의)</strong>로 나타남. 운정은 5개 마을(산내, 한울 등) 단위로 근린상권이 쪼개져 있어 도시 전체를 아우르는 구심점이 약한 파편화된 공간계획의 특성을 통계적으로 방증합니다.</li>
+</ul>
+</p></div>
+        </div>
+
+        <!-- 탭 4 -->
+        <div class="tab-pane fade" id="tab4">
+            <div class="guide-box mt-3">
+                <h5>💡 통계해석시 유의할 사항</h5>
+                <ul>
+                    <li><strong>Moran's I:</strong> OLS 모형 잔차에 '공간적 군집 현상'이 있는지를 검정합니다.</li>
+                    <li><strong>LM Test:</strong> 공간시차모형(SAR)과 공간오차모형(SEM) 중 어느 모형이 데이터 구조에 더 적합한지 판단합니다.</li>
+                    <li><strong>Model Fit:</strong> AIC는 값이 작을수록, Log-Likelihood는 값이 클수록 더 우수한 모형입니다.</li>
+                </ul>
+            </div>
+
+            <div class="row mt-4">
+                <div class="col-lg-4 col-md-12 mb-4">
+                    <h5 class="grid-title">1. Moran's I (공간자기상관 검정)</h5>
+                    <div class="table-responsive"><table class="dataframe table table-bordered table-striped table-hover datatable">
+  <thead>
+    <tr style="text-align: right;">
+      <th>구분</th>
+      <th>전체</th>
+      <th>광교</th>
+      <th>동탄</th>
+      <th>운정</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td>Moran's I</td>
+      <td>0.4823</td>
+      <td>0.2077</td>
+      <td>0.0873</td>
+      <td>0.1449</td>
+    </tr>
+    <tr>
+      <td>z-value</td>
+      <td>5.7700</td>
+      <td>1.7300</td>
+      <td>0.8700</td>
+      <td>1.3400</td>
+    </tr>
+    <tr>
+      <td>p-value</td>
+      <td>0.0010</td>
+      <td>0.0560</td>
+      <td>0.1940</td>
+      <td>0.0960</td>
+    </tr>
+  </tbody>
+</table></div>
+                </div>
+                <div class="col-lg-4 col-md-12 mb-4">
+                    <h5 class="grid-title">2. LM Test (모형 선택 검정)</h5>
+                    <div class="table-responsive"><p class='text-muted'>데이터를 가져올 수 없거나 시트가 비어 있습니다.</p></div>
+                </div>
+                <div class="col-lg-4 col-md-12 mb-4">
+                    <h5 class="grid-title">3. OLS vs SAR vs SEM 적합도 비교</h5>
+                    <div class="table-responsive"><p class='text-muted'>데이터를 가져올 수 없거나 시트가 비어 있습니다.</p></div>
+                </div>
+            </div>
+
+            <div class="row mt-2">
+                <div class="col-12">
+                    <h4>4. 최종 공간시차모형(SAR) 추정 결과</h4>
+                    <div class="table-responsive"><p class='text-muted'>데이터를 가져올 수 없거나 시트가 비어 있습니다.</p></div>
+                </div>
+            </div>
+
+            <div class="manual-box"><h5>📝 연구자 해석 요약</h5><p>
+<ul>
+  <li><strong>거시적 공간자기상관 (전체 표본)</strong> — 3개 신도시 통합 데이터의 Moran's I는 <strong>0.482(p=0.001)</strong>로 강한 양(+)의 자기상관을 보입니다. 이는 신도시 간의 체급(광교>동탄>운정) 차이로 인한 거시적인 가격 군집 현상이 명확함을 나타냅니다.</li>
+  <li><strong>미시적 공간 파급의 부재 (개별 신도시)</strong> — 반면, 개별 신도시 내부에서는 광교(p=0.056), 운정(p=0.096), 동탄(p=0.194) 모두 5% 유의수준에서 <strong>유의미한 공간 군집이 기각</strong>되었습니다.</li>
+  <li><strong>공간구조적 원인 (블럭화 및 모자이크)</strong> — 자연 발생한 구도심과 달리, 철저히 계획된 신도시에서는 인접 단지 간의 '자연스러운 가격 전이(Spill-over)'보다 도로 단위로 분절된 <strong>학군, 1군 브랜드 여부, 단지 연식 등 개별 아파트의 스펙이 가격을 독립적으로 결정(모자이크 효과)</strong>하기 때문입니다.</li>
+</ul>
+</p></div>
+        </div>
+
+        <!-- 탭 5: 종합 요약 -->
+        <div class="tab-pane fade" id="tab5">
+            <h4 class="mt-4">분석 결과 종합 논의</h4>
+            <div class="manual-box mt-4">
+                <h5>📝 연구자 종합 결론</h5>
+                <p>
+<ul>
+  <li><strong>광교 (단핵/경관 특화형)</strong>: 신분당선과 도청을 품은 압도적 중심지(CBD)와 호수공원이라는 앵커 시설이 도시 자산가치를 주도합니다. 향후 정책 및 투자는 <strong>거점으로의 보행 연계성 및 방사축 강화</strong>가 가격 방어에 절대적입니다.</li>
+  <li><strong>동탄 (다핵/광역 스케일형)</strong>: 물리적 규모가 거대하고 일자리 거점이 분산된 다핵 구조입니다. 특정 중심지에 대한 접근성보다, 방대한 <strong>거주지와 교통/일자리 노드를 연결하는 대중교통(트램, 버스망)의 효율성</strong>이 도시 전체의 가치를 좌우합니다.</li>
+  <li><strong>운정 (마을 단위/베드타운형)</strong>: 자족기능이 약하고 서울 접근성에 의존하는 구조 탓에 <strong>'연식(GTX 역세권 신축 여부)'</strong>이 시장을 완전히 지배합니다. 구도심(1·2지구)과 신도심(3지구) 간의 양극화 해소를 위한 기반 시설 연계가 가장 시급한 과제입니다.</li>
+  <li><strong>학술 및 실무적 함의</strong>: 일률적인 헤도닉 회귀분석을 넘어, 도시 설계 유형(단핵 집중, 다핵 분산, 마을 분절)을 명시적 변수나 조절 효과로 고려해야 함을 입증했습니다. 신도시 초기 공간계획이 부동산 시장의 가치 결정 알고리즘을 영구적으로 세팅한다는 강력한 실증 근거를 제공합니다.</li>
+</ul>
+</p>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+<script src="https://cdn.datatables.net/1.13.4/js/jquery.dataTables.min.js"></script>
+<script src="https://cdn.datatables.net/1.13.4/js/dataTables.bootstrap5.min.js"></script>
+<script>
+    $(document).ready(function() {
+        var tables = $('.datatable').DataTable({
+            "paging": false,
+            "info": false,
+            "searching": false,
+            "ordering": false,
+            "scrollX": true,
+            "language": { "url": "//cdn.datatables.net/plug-ins/1.13.4/i18n/ko.json" }
+        });
+
+        $('button[data-bs-toggle="tab"]').on('shown.bs.tab', function (e) {
+            $.fn.dataTable.tables({ visible: true, api: true }).columns.adjust();
+        });
+    });
+</script>
+</body>
+</html>
