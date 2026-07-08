@@ -47,13 +47,6 @@ function CardBody({ post }: { post: Post }) {
         {post.title}
       </h3>
 
-      {/* visual affordance only — the whole card is already a link when post.href is set */}
-      {post.href && (
-        <span className="mb-2 inline-flex w-fit items-center gap-1 px-0.5 font-mono text-[0.65rem] uppercase tracking-[0.15em] text-accent">
-          {post.linkLabel ?? "Open"} ↗
-        </span>
-      )}
-
       {/* tags + date */}
       <div className="flex items-center justify-between gap-2 px-0.5 pt-2">
         <div className="flex flex-wrap items-center gap-1">

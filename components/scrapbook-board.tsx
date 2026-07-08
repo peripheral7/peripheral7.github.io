@@ -11,22 +11,16 @@ export function ScrapbookBoard() {
     >
       {/* section masthead */}
       <div className="mx-auto mb-10 max-w-6xl border-y-2 border-foreground py-5">
-        <div className="flex flex-col gap-4 md:flex-row md:items-end md:justify-between">
-          <div>
-            <p className="font-mono text-xs uppercase tracking-[0.3em] text-accent">
-              The board
-            </p>
-            <h2 className="mt-2 font-sans text-3xl font-extrabold uppercase leading-none tracking-tight text-foreground md:text-5xl">
-              Reports
-            </h2>
-          </div>
-          <p className="max-w-sm text-pretty text-sm leading-relaxed text-muted-foreground">
-            No feed, no order. Photographs, field research, and machine notes
-            pinned together and connected only by whatever thread you can find.
+        <div className="flex flex-col items-center text-center">
+          <p className="font-mono text-xs uppercase tracking-[0.3em] text-accent">
+            The board
           </p>
+          <h2 className="mt-2 font-sans text-3xl font-extrabold uppercase leading-none tracking-tight text-foreground md:text-5xl">
+            Reports
+          </h2>
         </div>
 
-        <div className="mt-5 flex flex-wrap items-center gap-2">
+        <div className="mt-5 flex flex-wrap items-center justify-center gap-2">
           {filters.map((f, i) => (
             <button
               key={f}

@@ -24,6 +24,22 @@ export type Post = {
 
 export const posts: Post[] = [
   {
+    id: "m1",
+    variant: "photo",
+    category: "MOTORCYCLE",
+    title: "CBR650F (2016)",
+    meta: "Garage log",
+    ref: "MOTO-2016",
+    // TODO: 실제 파일을 public/images/202604-05.JPEG 경로에 넣어주세요.
+    // (윈도우는 대소문자를 구분 안 하지만, GitHub Pages는 대소문자를 구분합니다 —
+    //  실제 파일명의 대소문자까지 이 경로와 정확히 일치해야 합니다.)
+    image: "/images/202604-05.JPEG",
+    imageAlt: "Honda CBR650F 2016",
+    rotate: 2,
+    pin: "tape",
+    date: "2026.04.05",
+  },
+  {
     id: "r1",
     variant: "interactive",
     category: "RESEARCH",
