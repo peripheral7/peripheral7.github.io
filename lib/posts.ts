@@ -16,6 +16,10 @@ export type Post = {
   href?: string
   /** Label shown on the open-link button, e.g. "Open interactive map". */
   linkLabel?: string
+  /** Display date shown on the card, e.g. "2026.07.08" */
+  date?: string
+  /** Short tag labels shown next to the date, e.g. ["GIS", "Hedonic"] */
+  tags?: string[]
 }
 
 export const posts: Post[] = [
@@ -31,5 +35,7 @@ export const posts: Post[] = [
     pin: "pin",
     href: "/reports/research-index.html",
     linkLabel: "Open research",
+    date: "2026.07.08",
+    tags: ["Spatial Econometrics", "GIS", "Hedonic Regression"],
   },
 ]
