@@ -1,0 +1,270 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>CBR650F (2016)</title>
+<style>
+  :root {
+    --bg: #f6f3ee;
+    --ink: #1a1a1a;
+    --muted: #6b6b6b;
+    --accent: #b5432f;
+    --border: #d9d3c8;
+    --card: #ffffff;
+    --nav-w: 220px;
+  }
+
+  * { box-sizing: border-box; }
+
+  body {
+    margin: 0;
+    background: var(--bg);
+    color: var(--ink);
+    font-family: -apple-system, "Segoe UI", "Pretendard", "Noto Sans KR", sans-serif;
+    line-height: 1.5;
+  }
+
+  .shell {
+    display: flex;
+    min-height: 100vh;
+  }
+
+  /* ---------- sticky side index (empty — no sections here) ---------- */
+  .side-nav {
+    position: sticky;
+    top: 0;
+    align-self: flex-start;
+    height: 100vh;
+    width: var(--nav-w);
+    flex-shrink: 0;
+    background: var(--ink);
+    color: #eee;
+    padding: 28px 20px;
+    overflow-y: auto;
+  }
+
+  .side-nav .brand {
+    font-family: monospace;
+    font-size: 0.65rem;
+    text-transform: uppercase;
+    letter-spacing: 0.2em;
+    color: var(--accent);
+    margin-bottom: 4px;
+  }
+
+  .side-nav h1 {
+    font-size: 0.95rem;
+    line-height: 1.35;
+    margin: 0 0 20px 0;
+    font-weight: 700;
+  }
+
+  .side-nav .home-link {
+    display: block;
+    padding-bottom: 14px;
+    border-bottom: 1px solid rgba(255,255,255,0.18);
+    color: #fff;
+    text-decoration: none;
+    font-size: 0.78rem;
+    font-weight: 600;
+  }
+  .side-nav .home-link:hover { color: var(--accent); }
+
+  /* ---------- top bar (main / categories) ---------- */
+  .top-bar {
+    max-width: 1100px;
+    margin: 0 auto 28px;
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+    padding-bottom: 16px;
+    border-bottom: 1px solid var(--border);
+  }
+  .top-bar .back-link {
+    font-weight: 700;
+    text-decoration: none;
+    color: var(--ink);
+    font-size: 0.85rem;
+  }
+  .top-bar .back-link:hover { color: var(--accent); }
+  .top-bar .cat-links {
+    display: flex;
+    gap: 14px;
+  }
+  .top-bar .cat-links a {
+    font-family: monospace;
+    font-size: 0.65rem;
+    text-transform: uppercase;
+    letter-spacing: 0.15em;
+    color: var(--muted);
+    text-decoration: none;
+    border: 1px solid var(--border);
+    padding: 5px 10px;
+  }
+  .top-bar .cat-links a:hover {
+    color: var(--accent);
+    border-color: var(--accent);
+  }
+
+  /* ---------- main content ---------- */
+  .content {
+    flex: 1;
+    min-width: 0;
+    padding: 32px clamp(16px, 4vw, 48px) 80px;
+  }
+
+  #overview { max-width: 1100px; margin: 0 auto 40px; }
+  #overview .eyebrow {
+    font-family: monospace;
+    font-size: 0.65rem;
+    text-transform: uppercase;
+    letter-spacing: 0.2em;
+    color: var(--accent);
+  }
+  #overview h1 {
+    font-size: clamp(1.4rem, 3vw, 2rem);
+    font-weight: 800;
+    margin: 8px 0 10px;
+  }
+  #overview p { color: var(--muted); max-width: 720px; }
+
+  /* ---------- photo list: one per row, sequential ---------- */
+  .photo-list {
+    max-width: 1100px;
+    margin: 0 auto;
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 28px;
+  }
+
+  .photo-card {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 4px;
+    overflow: hidden;
+  }
+
+  .photo-card .photo-label {
+    padding: 8px 14px;
+    border-bottom: 1px solid var(--border);
+    font-family: monospace;
+    font-size: 0.6rem;
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    color: var(--muted);
+  }
+
+  .photo-frame {
+    position: relative;
+    width: 100%;
+    aspect-ratio: 4 / 3;
+    background: #eee;
+  }
+  .photo-frame img {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+  }
+
+  @media (max-width: 768px) {
+    .shell { flex-direction: column; }
+    .side-nav {
+      position: static;
+      width: 100%;
+      height: auto;
+      padding: 16px 20px;
+    }
+    .content { padding: 24px 16px 60px; }
+    .top-bar { flex-direction: column; align-items: flex-start; }
+    .photo-frame { aspect-ratio: 4 / 5; }
+  }
+</style>
+</head>
+<body>
+<div class="shell">
+
+  <!-- ---------- sticky side index — empty, only Home link ---------- -->
+  <aside class="side-nav">
+    <p class="brand">Field File / Motorcycle</p>
+    <h1>CBR650F (2016)</h1>
+    <a class="home-link" href="/">← 메인으로</a>
+  </aside>
+
+  <!-- ---------- main content ---------- -->
+  <main class="content">
+
+    <div class="top-bar">
+      <a class="back-link" href="/">← 메인으로</a>
+      <div class="cat-links">
+        <a href="/">Research</a>
+        <a href="/">Photography</a>
+        <a href="/">Motorcycle</a>
+      </div>
+    </div>
+
+    <section id="overview">
+      <p class="eyebrow">Garage Log · MOTO-2016</p>
+      <h1>CBR650F (2016)</h1>
+      <p>2016년식 혼다 CBR650F 정비 및 라이딩 기록 사진입니다.</p>
+    </section>
+
+    <div class="photo-list">
+      <div class="photo-card">
+        <p class="photo-label">01 — 202604-05</p>
+        <div class="photo-frame">
+          <img src="/images/202604-05.JPEG" alt="CBR650F 사진 01" loading="lazy" />
+        </div>
+      </div>
+
+      <div class="photo-card">
+        <p class="photo-label">02 — 202603 올림푸스35 (28)</p>
+        <div class="photo-frame">
+          <img src="/images/202603%20올림푸스35%20(28).jpg" alt="CBR650F 사진 02" loading="lazy" />
+        </div>
+      </div>
+
+      <div class="photo-card">
+        <p class="photo-label">03 — 20260123</p>
+        <div class="photo-frame">
+          <img src="/images/20260123.JPEG" alt="CBR650F 사진 03" loading="lazy" />
+        </div>
+      </div>
+
+      <div class="photo-card">
+        <p class="photo-label">04 — 202602 (2)</p>
+        <div class="photo-frame">
+          <img src="/images/202602%20(2).JPEG" alt="CBR650F 사진 04" loading="lazy" />
+        </div>
+      </div>
+
+      <div class="photo-card">
+        <p class="photo-label">05 — 202603 올림푸스35 (8)</p>
+        <div class="photo-frame">
+          <img src="/images/202603%20올림푸스35%20(8).jpg" alt="CBR650F 사진 05" loading="lazy" />
+        </div>
+      </div>
+
+      <div class="photo-card">
+        <p class="photo-label">06 — 202603 올림푸스35 (23)</p>
+        <div class="photo-frame">
+          <img src="/images/202603%20올림푸스35%20(23).jpg" alt="CBR650F 사진 06" loading="lazy" />
+        </div>
+      </div>
+
+      <div class="photo-card">
+        <p class="photo-label">07 — 20260329_경희대도서관(2)</p>
+        <div class="photo-frame">
+          <img src="/images/20260329_경희대도서관(2).jpg" alt="CBR650F 사진 07" loading="lazy" />
+        </div>
+      </div>
+    </div>
+
+  </main>
+</div>
+</body>
+</html>
