@@ -85,7 +85,7 @@ export function BoardItem({ post }: { post: Post }) {
 
   if (post.href) {
     return (
-      
+      <a
         href={post.href}
         className="group relative mb-6 block break-inside-avoid overflow-visible"
         tabIndex={0}
