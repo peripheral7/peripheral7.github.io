@@ -64,13 +64,16 @@ function loadPosts(): Post[] {
     const raw = fs.readFileSync(path.join(POSTS_DIR, file), "utf-8")
     const meta = JSON.parse(raw) as PostMeta
 
-    return {
-      id: slug,
+    const post: Post = {
       rotate: autoRotate(slug),
       pin: PIN_CYCLE[i % PIN_CYCLE.length],
       ...meta, // explicit values in the JSON win over the auto-filled defaults
 
-      // id and href are re-asserted AFTER the meta spread on purpose:
+      // id and href are re-asserted AFTER the meta spread, and each key
+      // appears only once here — TypeScript rejects an object literal
+      // that writes the same key twice, which is what broke the last
+      // build. Functionally this still means: id/href below always win
+      // over anything the spread may have set.
       //
       // - id must always be the filename slug. A stray "id" field left
       //   in a JSON payload (old data model leftovers) would otherwise
@@ -84,6 +87,8 @@ function loadPosts(): Post[] {
       id: slug,
       href: meta.variant === "photo" ? `/gallery/${slug}` : meta.href,
     }
+
+    return post
   })
 }
 
