@@ -5,14 +5,18 @@ export function generateStaticParams() {
   return posts.map((post) => ({ id: post.id }))
 }
 
-export default async function GalleryPage({ params }: { params: Promise<{ id: string }> }) {
+export default async function GalleryPage({
+  params,
+}: {
+  params: Promise<{ id: string }>
+}) {
   const { id } = await params
   const post = posts.find((p) => p.id === id)
 
   if (!post) {
     return (
       <div className="flex min-h-screen items-center justify-center font-mono">
-        Error: [{params.id}] 기록을 찾을 수 없습니다. JSON 데이터를 확인하세요.
+        Error: [{id}] 기록을 찾을 수 없습니다. JSON 데이터를 확인하세요.
       </div>
     )
   }
@@ -20,7 +24,7 @@ export default async function GalleryPage({ params }: { params: Promise<{ id: st
   if (!post.imageFolder) {
     return (
       <div className="flex min-h-screen items-center justify-center font-mono">
-        Error: [{post.id}] imageFolder가 지정되지 않았습니다. content/posts JSON을 확인하세요.
+        Error: [{post.id}] imageFolder가 지정되지 않았습니다. content/posts/{post.id}.json에 imageFolder 필드를 추가하세요.
       </div>
     )
   }
