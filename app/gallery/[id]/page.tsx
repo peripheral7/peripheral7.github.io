@@ -1,149 +1,34 @@
-"use client"
+import { GalleryClient } from "@/components/gallery-client"
 
-import { useEffect, useRef, useState } from "react"
-import Link from "next/link"
-import Image from "next/image"
-import { useParams } from "next/navigation"
-
-// --- 1. 메타데이터 레지스트리 (새로운 갤러리 추가 시 여기만 수정) ---
+// 갤러리 메타데이터 레지스트리 (서버에서 관리)
 const galleryRegistry: Record<string, any> = {
   aqui: {
     title: "Clockwork",
     sidebar: "Clockwork",
     eyebrow: "Photography / Filed: 2026.07.08",
-    desc: "A roll of film: captured moments and light around the cafe.",
+    desc: "",
     folder: "/images/photography/aqui/",
   },
   cbr650f: {
     title: "CBR650F (2016)",
     sidebar: "CBR650F (2016)",
     eyebrow: "Garage Log · MOTO-2016",
-    desc: "기록과 유지보수, 그리고 도로 위에서의 순간들.",
+    desc: "",
     folder: "/images/motorcycles/CBR650F/",
   },
 }
 
-export default function GalleryTemplate() {
-  const params = useParams()
-  const id = (params?.id as string) || "aqui"
-  const config = galleryRegistry[id] || galleryRegistry.aqui
-  
-  const [images, setImages] = useState<any[]>([])
-  const containerRef = useRef<HTMLDivElement>(null)
-
-  // --- 2. 매니페스트 데이터 페치 ---
-  useEffect(() => {
-    fetch(`${config.folder}manifest.json`)
-      .then((res) => res.json())
-      .then((data) => setImages(data))
-      .catch((err) => console.error("Manifest load error:", err))
-  }, [config.folder])
-
-  // --- 3. 스크롤 페이드인 옵저버 (Intersection Observer) ---
-  useEffect(() => {
-    if (!containerRef.current) return
-    const observer = new IntersectionObserver(
-      (entries, obs) => {
-        entries.forEach((entry) => {
-          if (entry.isIntersecting) {
-            entry.target.classList.add("opacity-100", "translate-y-0")
-            entry.target.classList.remove("opacity-0", "translate-y-8")
-            obs.unobserve(entry.target)
-          }
-        })
-      },
-      { threshold: 0.1, rootMargin: "0px 0px -40px 0px" }
-    )
-
-    const items = containerRef.current.querySelectorAll(".gallery-item")
-    items.forEach((item) => observer.observe(item))
-
-    return () => observer.disconnect()
-  }, [images]) // 이미지가 로드된 후 옵저버 실행
-
-  return (
-    <div className="flex min-h-screen flex-col bg-background text-foreground md:flex-row">
-      
-      {/* --- 사이드바 (데스크톱 고정, 모바일 상단) --- */}
-      <aside className="sticky top-0 z-10 w-full shrink-0 border-b border-border bg-background p-6 md:h-screen md:w-60 md:overflow-y-auto md:border-b-0 md:border-r md:p-10">
-        <p className="mb-2 font-mono text-[0.7rem] uppercase tracking-widest text-accent">
-          Field File
-        </p>
-        <h1 className="mb-8 text-lg font-extrabold tracking-tight">
-          {config.sidebar}
-        </h1>
-        <Link 
-          href="/" 
-          className="inline-block border-b border-border pb-3 font-semibold text-foreground transition-colors hover:text-accent"
-        >
-          ← 메인으로
-        </Link>
-      </aside>
-
-      {/* --- 메인 콘텐츠 영역 --- */}
-      <main className="flex-1 px-5 py-10 md:px-12 md:py-12 lg:px-20">
-        
-        {/* 상단 네비게이션 바 */}
-        <div className="mb-12 flex flex-wrap items-center justify-between gap-4 border-b border-border pb-6">
-          <Link href="/" className="text-sm font-bold transition-colors hover:text-accent">
-            ← BACK TO BOARD
-          </Link>
-          <div className="flex gap-3 font-mono text-[0.65rem] uppercase tracking-widest text-muted-foreground">
-            <span className="rounded border border-border px-2 py-1">Research</span>
-            <span className="rounded border border-border px-2 py-1">Photography</span>
-            <span className="rounded border border-border px-2 py-1">Motorcycle</span>
-          </div>
-        </div>
-
-        {/* 텍스트 소개 블록 */}
-        <section className="mb-16 max-w-4xl">
-          <p className="mb-2 font-mono text-[0.7rem] uppercase tracking-widest text-accent">
-            {config.eyebrow}
-          </p>
-          <h2 className="mb-4 text-3xl font-extrabold tracking-tight md:text-4xl">
-            {config.title}
-          </h2>
-          <p className="text-muted-foreground leading-relaxed">
-            {config.desc}
-          </p>
-        </section>
-
-        {/* 핀보드(Masonry) 이미지 갤러리 영역 */}
-        <div 
-          ref={containerRef}
-          className="columns-2 gap-4 md:columns-3 lg:gap-6"
-        >
-          {images.map((img, i) => {
-            const fileName = img.file || img.filename // 키값 호환성
-            return (
-              <figure 
-                key={i} 
-                className="gallery-item mb-4 break-inside-avoid opacity-0 translate-y-8 transition-all duration-700 ease-out lg:mb-6"
-              >
-                <div className="overflow-hidden rounded-md bg-neutral-100">
-                  <img
-                    src={`${config.folder}${fileName}`}
-                    alt={img.caption || `${config.title} photo ${i + 1}`}
-                    loading="lazy"
-                    className="w-full h-auto object-cover"
-                  />
-                </div>
-                {img.caption && (
-                  <figcaption className="mt-2 text-center text-xs text-muted-foreground">
-                    {img.caption}
-                  </figcaption>
-                )}
-              </figure>
-            )
-          })}
-        </div>
-      </main>
-    </div>
-  )
-}
-
+// 빌드 시점에 정적 라우팅 생성
 export function generateStaticParams() {
   return Object.keys(galleryRegistry).map((key) => ({
     id: key,
   }))
+}
+
+// 클라이언트 컴포넌트로 데이터 주입
+export default function GalleryPage({ params }: { params: { id: string } }) {
+  const id = params.id || "aqui"
+  const config = galleryRegistry[id] || galleryRegistry.aqui
+
+  return <GalleryClient config={config} />
 }
