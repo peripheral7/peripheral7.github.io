@@ -1,5 +1,0 @@
-allowBuilds:
-  msw: true
-  sharp: true
-minimumReleaseAgeExclude:
-  - '@types/node@24.13.3'
