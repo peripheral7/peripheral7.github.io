@@ -1,4 +1,5 @@
 {
+  "id": "cbr650f-2016",
   "variant": "photo",
   "category": "MOTORCYCLE",
   "title": "CBR650F (2016)",
@@ -6,8 +7,7 @@
   "ref": "MOTO-2016",
   "image": "/images/motorcycles/CBR650F/202604-05.JPEG",
   "imageAlt": "Honda CBR650F 2016",
-  "href": "/posts/cbr650f-2016.html",
+  "imageFolder": "/images/motorcycles/CBR650F/",
   "date": "2026.04.05",
-  "tags": ["Honda", "Motorcycle"],
-  "id":"aqui"
+  "tags": ["Honda", "Motorcycle"]
 }

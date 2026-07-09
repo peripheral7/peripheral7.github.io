@@ -1,4 +1,5 @@
 {
+  "id": "aqui",
   "variant": "photo",
   "category": "PHOTOGRAPHY",
   "title": "Clockwork",
@@ -6,9 +7,8 @@
   "ref": "PHOTO-AQUI",
   "image": "/images/photography/AQUI/20221013-180609-006.jpg",
   "imageAlt": "AQUI.",
-  "href": "/posts/aqui.html",
+  "imageFolder": "/images/photography/AQUI/",
   "linkLabel": "Open gallery",
   "date": "2026.07.08",
-  "tags": ["cafe", "aqui"],
-  "id":"cbr650"
+  "tags": ["cafe", "aqui"]
 }

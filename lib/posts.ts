@@ -23,6 +23,11 @@ export type Post = {
   date?: string
   /** Short tag labels shown next to the date, e.g. ["GIS", "Hedonic"] */
   tags?: string[]
+  /**
+   * Folder under /public holding the full-res photo set + manifest.json,
+   * used by the /gallery/[id] template. Required when variant is "photo".
+   */
+  imageFolder?: string
 }
 
 // Everything except id/rotate/pin must come from the post's JSON file.
@@ -64,6 +69,20 @@ function loadPosts(): Post[] {
       rotate: autoRotate(slug),
       pin: PIN_CYCLE[i % PIN_CYCLE.length],
       ...meta, // explicit values in the JSON win over the auto-filled defaults
+
+      // id and href are re-asserted AFTER the meta spread on purpose:
+      //
+      // - id must always be the filename slug. A stray "id" field left
+      //   in a JSON payload (old data model leftovers) would otherwise
+      //   silently win the spread and override it — this is exactly how
+      //   the cbr650f/aqui pages ended up swapped before.
+      //
+      // - href is derived from variant, not hand-written per post. Every
+      //   "photo" post routes through the same /gallery/[id] template;
+      //   "interactive"/"map" posts keep an explicit href pointing at a
+      //   standalone HTML file (reports, Folium maps, etc).
+      id: slug,
+      href: meta.variant === "photo" ? `/gallery/${slug}` : meta.href,
     }
   })
 }
