@@ -1,34 +1,34 @@
 import { GalleryClient } from "@/components/gallery-client"
+import { posts } from "@/lib/posts"
 
-// 갤러리 메타데이터 레지스트리 (서버에서 관리)
-const galleryRegistry: Record<string, any> = {
-  aqui: {
-    title: "Clockwork",
-    sidebar: "Clockwork",
-    eyebrow: "Photography / Filed: 2026.07.08",
-    desc: "",
-    folder: "/images/photography/aqui/",
-  },
-  cbr650f: {
-    title: "CBR650F (2016)",
-    sidebar: "CBR650F (2016)",
-    eyebrow: "Garage Log · MOTO-2016",
-    desc: "",
-    folder: "/images/motorcycles/CBR650F/",
-  },
-}
-
-// 빌드 시점에 정적 라우팅 생성
 export function generateStaticParams() {
-  return Object.keys(galleryRegistry).map((key) => ({
-    id: key,
-  }))
+  return posts.map((post) => ({ id: post.id }))
 }
 
-// 클라이언트 컴포넌트로 데이터 주입
 export default function GalleryPage({ params }: { params: { id: string } }) {
-  const id = params.id || "aqui"
-  const config = galleryRegistry[id] || galleryRegistry.aqui
+  const post = posts.find((p) => p.id === params.id)
+
+  if (!post) {
+    return (
+      <div className="flex min-h-screen items-center justify-center font-mono">
+        Error: [{params.id}] 기록을 찾을 수 없습니다. JSON 데이터를 확인하세요.
+      </div>
+    )
+  }
+
+  // 카테고리에 따른 정확한 이미지 폴더 경로 생성 (대소문자/복수형 예외처리)
+  let folderPath = `/images/${post.category.toLowerCase()}/${post.id}/`
+  if (post.category.toUpperCase() === "MOTORCYCLE") {
+    folderPath = `/images/motorcycles/${post.id === "cbr650f" ? "CBR650F" : post.id}/`
+  }
+
+  const config = {
+    title: post.title,
+    sidebar: post.title,
+    eyebrow: `${post.category} / Filed: ${post.date}`,
+    desc: post.description || "",
+    folder: folderPath, // 예: "/images/photography/aqui/"
+  }
 
   return <GalleryClient config={config} />
 }

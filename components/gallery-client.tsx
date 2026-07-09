@@ -5,13 +5,21 @@ import Link from "next/link"
 
 export function GalleryClient({ config }: { config: any }) {
   const [images, setImages] = useState<any[]>([])
+  const [error, setError] = useState<boolean>(false)
   const containerRef = useRef<HTMLDivElement>(null)
 
   useEffect(() => {
+    // manifest.json 호출 (경로 오류 시 콘솔 및 화면에 에러 표시)
     fetch(`${config.folder}manifest.json`)
-      .then((res) => res.json())
+      .then((res) => {
+        if (!res.ok) throw new Error(`Manifest not found at: ${config.folder}manifest.json`)
+        return res.json()
+      })
       .then((data) => setImages(data))
-      .catch((err) => console.error("Manifest load error:", err))
+      .catch((err) => {
+        console.error(err)
+        setError(true)
+      })
   }, [config.folder])
 
   useEffect(() => {
@@ -37,7 +45,7 @@ export function GalleryClient({ config }: { config: any }) {
 
   return (
     <div className="flex min-h-screen flex-col bg-background text-foreground md:flex-row">
-      {/* 사이드바 */}
+      {/* 고정 사이드바 */}
       <aside className="sticky top-0 z-10 w-full shrink-0 border-b border-border bg-background p-6 md:h-screen md:w-60 md:overflow-y-auto md:border-b-0 md:border-r md:p-10">
         <p className="mb-2 font-mono text-[0.7rem] uppercase tracking-widest text-accent">
           Field File
@@ -55,7 +63,6 @@ export function GalleryClient({ config }: { config: any }) {
 
       {/* 메인 콘텐츠 영역 */}
       <main className="flex-1 px-5 py-10 md:px-12 md:py-12 lg:px-20">
-        {/* 상단 네비게이션 바 */}
         <div className="mb-12 flex flex-wrap items-center justify-between gap-4 border-b border-border pb-6">
           <Link href="/" className="text-sm font-bold transition-colors hover:text-accent">
             ← BACK TO BOARD
@@ -67,7 +74,6 @@ export function GalleryClient({ config }: { config: any }) {
           </div>
         </div>
 
-        {/* 텍스트 소개 블록 */}
         <section className="mb-16 max-w-4xl">
           <p className="mb-2 font-mono text-[0.7rem] uppercase tracking-widest text-accent">
             {config.eyebrow}
@@ -80,35 +86,39 @@ export function GalleryClient({ config }: { config: any }) {
           </p>
         </section>
 
-        {/* 핀보드(Masonry) 이미지 갤러리 영역 */}
-        <div 
-          ref={containerRef}
-          className="columns-2 gap-4 md:columns-3 lg:gap-6"
-        >
-          {images.map((img, i) => {
-            const fileName = img.file || img.filename
-            return (
-              <figure 
-                key={i} 
-                className="gallery-item mb-4 break-inside-avoid opacity-0 translate-y-8 transition-all duration-700 ease-out lg:mb-6"
-              >
-                <div className="overflow-hidden rounded-md bg-neutral-100">
-                  <img
-                    src={`${config.folder}${fileName}`}
-                    alt={img.caption || `${config.title} photo ${i + 1}`}
-                    loading="lazy"
-                    className="w-full h-auto object-cover"
-                  />
-                </div>
-                {img.caption && (
-                  <figcaption className="mt-2 text-center text-xs text-muted-foreground">
-                    {img.caption}
-                  </figcaption>
-                )}
-              </figure>
-            )
-          })}
-        </div>
+        {/* 에러 또는 이미지 갤러리 렌더링 */}
+        {error ? (
+          <div className="rounded border border-dashed border-border bg-neutral-50 p-10 text-center font-mono text-sm text-muted-foreground">
+            [에러] 사진 매니페스트를 찾을 수 없습니다.<br/>
+            경로 확인: <code>public{config.folder}manifest.json</code>
+          </div>
+        ) : (
+          <div ref={containerRef} className="columns-2 gap-4 md:columns-3 lg:gap-6">
+            {images.map((img, i) => {
+              const fileName = img.file || img.filename
+              return (
+                <figure 
+                  key={i} 
+                  className="gallery-item mb-4 break-inside-avoid opacity-0 translate-y-8 transition-all duration-700 ease-out lg:mb-6"
+                >
+                  <div className="overflow-hidden rounded-md bg-neutral-100">
+                    <img
+                      src={`${config.folder}${fileName}`}
+                      alt={img.caption || `${config.title} photo ${i + 1}`}
+                      loading="lazy"
+                      className="w-full h-auto object-cover"
+                    />
+                  </div>
+                  {img.caption && (
+                    <figcaption className="mt-2 text-center text-xs text-muted-foreground">
+                      {img.caption}
+                    </figcaption>
+                  )}
+                </figure>
+              )
+            })}
+          </div>
+        )}
       </main>
     </div>
   )
