@@ -26,7 +26,7 @@ export default function GalleryPage({ params }: { params: { id: string } }) {
     title: post.title,
     sidebar: post.title,
     eyebrow: `${post.category} / Filed: ${post.date}`,
-    desc: post.description || "",
+    desc: "",
     folder: folderPath, // 예: "/images/photography/aqui/"
   }
 
