@@ -16,10 +16,10 @@ const jetbrainsMono = JetBrains_Mono({
 })
 
 export const metadata: Metadata = {
-  title: 'THE FIELD FILE — Land, Light & Machines',
+  title: 'MOOOOON',
   description:
-    'A working notebook: research on land evaluation, photography, and motorcycles. Filed, pinned, and cross-referenced.',
-  generator: 'v0.app',
+    'A working notebook: research on land evaluation, photography, and motorcycles. ',
+  generator: '',
   icons: {
     icon: [
       {
