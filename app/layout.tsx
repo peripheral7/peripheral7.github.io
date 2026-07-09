@@ -40,10 +40,9 @@ export const metadata: Metadata = {
 }
 
 export const viewport: Viewport = {
-  colorScheme: 'dark',
-  themeColor: '#1a1a1a',
+  colorScheme: 'light', // 'dark'에서 'light'로 변경
+  themeColor: '#ffffff', // 어두운 색('#1a1a1a')에서 순백색('#ffffff')으로 변경
 }
-
 export default function RootLayout({
   children,
 }: Readonly<{
