@@ -2,11 +2,15 @@ import Image from "next/image"
 import type { Post } from "@/lib/posts"
 
 function Tape() {
-  // a strip of masking tape holding the card to the board
+  // A strip of masking tape holding the card to the board.
+  // Rendered INSIDE CardBody (not as a sibling in BoardItem), so the
+  // tape is always structurally part of the card itself — it can never
+  // end up detached, duplicated incorrectly, or missing when a new
+  // card is generated.
   return (
     <span
       aria-hidden
-      className="tape absolute -top-3 left-1/2 z-10 h-6 w-24 -translate-x-1/2 -rotate-2"
+      className="tape pointer-events-none absolute -top-4 left-1/2 z-20 h-7 w-28 -translate-x-1/2 -rotate-2"
     />
   )
 }
@@ -16,11 +20,10 @@ function CardBody({ post }: { post: Post }) {
   const previewText = post.body ?? post.meta
 
   return (
-    <div className="bg-card p-3 pb-4 shadow-scrap ring-1 ring-black/5">
-      {/* media: image, or a fixed amount of text when there is no image —
-          which one renders is decided per-post, dynamically, from post.image */}
+    <div className="relative bg-card p-3 pb-4 shadow-scrap ring-1 ring-black/5">
+      <Tape />
+
       <div className="relative">
-        {/* category — faint, floated top-right, overlaid on the media */}
         <span className="pointer-events-none absolute right-1.5 top-1.5 z-10 rounded-sm bg-background/70 px-1.5 py-0.5 font-mono text-[0.58rem] font-medium uppercase tracking-[0.18em] text-muted-foreground/70 backdrop-blur-[1px]">
           {post.category}
         </span>
@@ -42,12 +45,10 @@ function CardBody({ post }: { post: Post }) {
         )}
       </div>
 
-      {/* title */}
       <h3 className="text-balance px-0.5 pb-1 pt-3 font-sans text-base font-bold leading-tight text-card-foreground">
         {post.title}
       </h3>
 
-      {/* tags + date */}
       <div className="flex items-center justify-between gap-2 px-0.5 pt-2">
         <div className="flex flex-wrap items-center gap-1">
           {post.tags?.map((tag) => (
@@ -70,29 +71,36 @@ function CardBody({ post }: { post: Post }) {
 export function BoardItem({ post }: { post: Post }) {
   const style = { ["--r" as string]: `${post.rotate}deg` }
 
-  // pt-4 옵션을 주어 위로 튀어나온 테이프 공간이 레이아웃에 가려지지 않게 차단합니다.
+  // `.scrap` (the hover transform) now lives on an INNER wrapper, not on
+  // the outer <a>/<article>. The outer element is the actual multi-column
+  // "break-inside-avoid" fragment and must never transform itself — that
+  // combination is what caused the tape to get clipped/hidden on hover
+  // on some cards. The inner wrapper carries the tape+card together as
+  // one visual unit, so they always move as one on hover.
+  const inner = (
+    <div className="scrap relative pt-4" style={style}>
+      <CardBody post={post} />
+    </div>
+  )
+
   if (post.href) {
     return (
-      <a
+      
         href={post.href}
-        className="scrap group relative mb-6 block break-inside-avoid pt-4 overflow-visible"
-        style={style}
+        className="group relative mb-6 block break-inside-avoid overflow-visible"
         tabIndex={0}
       >
-        <Tape />
-        <CardBody post={post} />
+        {inner}
       </a>
     )
   }
 
   return (
     <article
-      className="scrap group relative mb-6 break-inside-avoid pt-4 overflow-visible"
-      style={style}
+      className="group relative mb-6 break-inside-avoid overflow-visible"
       tabIndex={0}
     >
-      <Tape />
-      <CardBody post={post} />
+      {inner}
     </article>
   )
 }
