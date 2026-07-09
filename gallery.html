@@ -1,0 +1,264 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Field File — Gallery</title>
+<style>
+  :root {
+    --bg: #ffffff;
+    --ink: #1a1a1a;
+    --muted: #6b7280;
+    --accent: #E24A35; /* 빨간색 포인트 */
+    --border: #e5e7eb;
+    --nav-w: 240px;
+  }
+
+  * { box-sizing: border-box; }
+
+  body {
+    margin: 0;
+    background: var(--bg);
+    color: var(--ink);
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+    line-height: 1.5;
+  }
+
+  .shell { display: flex; min-height: 100vh; }
+
+  /* ---------- 고정 사이드바 (좌측) ---------- */
+  .side-nav {
+    position: sticky;
+    top: 0;
+    align-self: flex-start;
+    height: 100vh;
+    width: var(--nav-w);
+    flex-shrink: 0;
+    background: var(--bg);
+    color: var(--ink);
+    padding: 40px 24px;
+    overflow-y: auto;
+    border-right: 1px solid var(--border);
+  }
+  .side-nav .brand {
+    font-family: monospace;
+    font-size: 0.7rem;
+    text-transform: uppercase;
+    letter-spacing: 0.2em;
+    color: var(--accent);
+    margin-bottom: 6px;
+  }
+  .side-nav h1 { 
+    font-size: 1.1rem; 
+    line-height: 1.4; 
+    margin: 0 0 24px 0; 
+    font-weight: 800; 
+    letter-spacing: -0.02em;
+  }
+  .side-nav .home-link {
+    display: block;
+    padding-bottom: 14px;
+    border-bottom: 1px solid var(--border);
+    color: var(--ink);
+    text-decoration: none;
+    font-size: 0.8rem;
+    font-weight: 600;
+  }
+  .side-nav .home-link:hover { color: var(--accent); }
+
+  /* ---------- 본문 영역 ---------- */
+  .content { flex: 1; min-width: 0; padding: 40px clamp(16px, 4vw, 48px) 80px; }
+
+  /* ---------- 상단바 ---------- */
+  .top-bar {
+    max-width: 1200px;
+    margin: 0 auto 40px;
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+    padding-bottom: 16px;
+    border-bottom: 1px solid var(--border);
+  }
+  .top-bar .back-link { font-weight: 700; text-decoration: none; color: var(--ink); font-size: 0.85rem; }
+  .top-bar .back-link:hover { color: var(--accent); }
+  .top-bar .cat-links { display: flex; gap: 14px; }
+  .top-bar .cat-links a {
+    font-family: monospace;
+    font-size: 0.65rem;
+    text-transform: uppercase;
+    letter-spacing: 0.15em;
+    color: var(--muted);
+    text-decoration: none;
+    border: 1px solid var(--border);
+    padding: 5px 10px;
+    border-radius: 3px;
+  }
+  .top-bar .cat-links a:hover { color: var(--accent); border-color: var(--accent); }
+
+  /* ---------- 소개글 ---------- */
+  #overview { max-width: 1200px; margin: 0 auto 48px; }
+  #overview .eyebrow {
+    font-family: monospace;
+    font-size: 0.7rem;
+    text-transform: uppercase;
+    letter-spacing: 0.2em;
+    color: var(--accent);
+  }
+  #overview h2 { font-size: clamp(1.6rem, 3vw, 2.2rem); font-weight: 800; margin: 8px 0 12px; letter-spacing: -0.03em; }
+  #overview p { color: var(--muted); max-width: 720px; margin: 0; line-height: 1.6; }
+
+  /* ---------- 비정형 핀보드 (Masonry) 그리드 ---------- */
+  .gallery-masonry {
+    max-width: 1200px;
+    margin: 0 auto;
+    column-count: 3; /* 웹 브라우저에서 3~4개 열 구성 */
+    column-gap: 24px;
+  }
+
+  .photo-card {
+    break-inside: avoid;
+    margin: 0 0 24px 0;
+    opacity: 0;
+    transform: translateY(30px);
+    transition: opacity 0.6s ease-out, transform 0.6s ease-out;
+    text-align: center;
+  }
+  .photo-card.visible { opacity: 1; transform: translateY(0); }
+  
+  .photo-card img {
+    width: 100%;
+    height: auto;
+    display: block;
+    border-radius: 4px;
+    background: #f9f9f9;
+  }
+  
+  .photo-card figcaption {
+    margin-top: 10px;
+    font-size: 0.8rem;
+    color: var(--muted);
+  }
+
+  /* ---------- 반응형 레이아웃 (모바일) ---------- */
+  @media (max-width: 768px) {
+    .shell { flex-direction: column; }
+    .side-nav { position: static; width: 100%; height: auto; padding: 24px 16px; border-right: none; border-bottom: 1px solid var(--border); }
+    .content { padding: 32px 16px 60px; }
+    .top-bar { flex-direction: column; align-items: flex-start; gap: 16px; }
+    .gallery-masonry {
+      column-count: 2; /* 모바일에서 2~3개 열 구성 */
+      column-gap: 14px;
+    }
+    .photo-card { margin-bottom: 14px; }
+  }
+</style>
+</head>
+<body>
+<div class="shell">
+
+  <aside class="side-nav">
+    <p class="brand">Field File</p>
+    <h1 id="side-title">Loading...</h1>
+    <a class="home-link" href="/">← 메인으로</a>
+  </aside>
+
+  <main class="content">
+    <div class="top-bar">
+      <a class="back-link" href="/">← BACK TO BOARD</a>
+      <div class="cat-links">
+        <a href="/">Research</a>
+        <a href="/">Photography</a>
+        <a href="/">Motorcycle</a>
+      </div>
+    </div>
+
+    <section id="overview">
+      <p class="eyebrow" id="page-eyebrow">Category</p>
+      <h2 id="page-title">Loading Title...</h2>
+      <p id="page-desc"></p>
+    </section>
+
+    <div id="gallery" class="gallery-masonry"></div>
+  </main>
+</div>
+
+<script>
+  // 1. 페이지별 고유 메타데이터 정의 (확장 가능)
+  const galleryRegistry = {
+    aqui: {
+      title: "Clockwork",
+      sidebar: "Clockwork",
+      eyebrow: "Photography / Filed: 2026.07.08",
+      desc: "A roll of film: captured moments and light around the cafe.",
+      folder: "/images/photography/aqui/"
+    },
+    cbr650f: {
+      title: "CBR650F (2016)",
+      sidebar: "CBR650F (2016)",
+      eyebrow: "Garage Log · MOTO-2016",
+      desc: "기록과 유지보수, 그리고 도로 위에서의 순간들.",
+      folder: "/images/motorcycles/CBR650F/"
+    }
+  };
+
+  // 2. URL 파라미터 감지 (?id=값)
+  const urlParams = new URLSearchParams(window.location.search);
+  const currentId = urlParams.get('id') || 'aqui';
+  const config = galleryRegistry[currentId] || galleryRegistry.aqui;
+
+  // 3. 텍스트 정보 매핑
+  document.getElementById('side-title').textContent = config.sidebar;
+  document.getElementById('page-eyebrow').textContent = config.eyebrow;
+  document.getElementById('page-title').textContent = config.title;
+  document.getElementById('page-desc').textContent = config.desc;
+
+  // 4. 비정형 스크롤 애니메이션 옵저버 설정
+  const observer = new IntersectionObserver((entries, obs) => {
+    entries.forEach(entry => {
+      if (entry.isIntersecting) {
+        entry.target.classList.add('visible');
+        obs.unobserve(entry.target);
+      }
+    });
+  }, { threshold: 0.1, rootMargin: "0px 0px -40px 0px" });
+
+  // 5. 매니페스트 페치 및 빌드
+  fetch(config.folder + "manifest.json")
+    .then(res => {
+      if (!res.ok) throw new Error("Manifest load fail");
+      return res.json();
+    })
+    .then(items => {
+      const gallery = document.getElementById("gallery");
+      items.forEach((item, i) => {
+        const figure = document.createElement("figure");
+        figure.className = "photo-card";
+
+        // 키값 유연성 확보 (file 또는 filename)
+        const fileName = item.file || item.filename;
+        
+        const img = document.createElement("img");
+        img.src = config.folder + encodeURIComponent(fileName);
+        img.alt = item.caption || `Photo ${i + 1}`;
+        img.loading = "lazy";
+        figure.appendChild(img);
+
+        if (item.caption) {
+          const caption = document.createElement("figcaption");
+          caption.textContent = item.caption;
+          figure.appendChild(caption);
+        }
+
+        gallery.appendChild(figure);
+        observer.observe(figure);
+      });
+    })
+    .catch(err => {
+      console.error(err);
+      document.getElementById("gallery").innerHTML = "<p>이미지를 불러오지 못했습니다. 매니페스트 설정을 확인하세요.</p>";
+    });
+</script>
+</body>
+</html>

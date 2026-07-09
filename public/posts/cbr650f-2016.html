@@ -5,164 +5,58 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0" />
 <title>CBR650F (2016)</title>
 <style>
-  :root {
-    --bg: #f6f3ee;
-    --ink: #1a1a1a;
-    --muted: #6b6b6b;
-    --accent: #b5432f;
-    --border: #d9d3c8;
-    --card: #ffffff;
-    --nav-w: 220px;
-  }
-
+  :root { --bg: #f6f3ee; --ink: #1a1a1a; --muted: #6b6b6b; --accent: #b5432f; --border: #d9d3c8; --card: #ffffff; --nav-w: 220px; }
   * { box-sizing: border-box; }
-
-  body {
-    margin: 0;
-    background: var(--bg);
-    color: var(--ink);
-    font-family: -apple-system, "Segoe UI", "Pretendard", "Noto Sans KR", sans-serif;
-    line-height: 1.5;
-  }
-
+  body { margin: 0; background: var(--bg); color: var(--ink); font-family: -apple-system, "Segoe UI", "Pretendard", "Noto Sans KR", sans-serif; line-height: 1.5; }
   .shell { display: flex; min-height: 100vh; }
 
-  /* ---------- sticky side index (empty — no sections here) ---------- */
-  .side-nav {
-    position: sticky;
-    top: 0;
-    align-self: flex-start;
-    height: 100vh;
-    width: var(--nav-w);
-    flex-shrink: 0;
-    background: var(--ink);
-    color: #eee;
-    padding: 28px 20px;
-    overflow-y: auto;
-  }
-  .side-nav .brand {
-    font-family: monospace;
-    font-size: 0.65rem;
-    text-transform: uppercase;
-    letter-spacing: 0.2em;
-    color: var(--accent);
-    margin-bottom: 4px;
-  }
+  .side-nav { position: sticky; top: 0; align-self: flex-start; height: 100vh; width: var(--nav-w); flex-shrink: 0; background: var(--ink); color: #eee; padding: 28px 20px; overflow-y: auto; }
+  .side-nav .brand { font-family: monospace; font-size: 0.65rem; text-transform: uppercase; letter-spacing: 0.2em; color: var(--accent); margin-bottom: 4px; }
   .side-nav h1 { font-size: 0.95rem; line-height: 1.35; margin: 0 0 20px 0; font-weight: 700; }
-  .side-nav .home-link {
-    display: block;
-    padding-bottom: 14px;
-    border-bottom: 1px solid rgba(255,255,255,0.18);
-    color: #fff;
-    text-decoration: none;
-    font-size: 0.78rem;
-    font-weight: 600;
-  }
+  .side-nav .home-link { display: block; padding-bottom: 14px; border-bottom: 1px solid rgba(255,255,255,0.18); color: #fff; text-decoration: none; font-size: 0.78rem; font-weight: 600; }
   .side-nav .home-link:hover { color: var(--accent); }
 
-  /* ---------- top bar (main / categories) ---------- */
-  .top-bar {
-    max-width: 720px;
-    margin: 0 auto 28px;
-    display: flex;
-    flex-wrap: wrap;
-    align-items: center;
-    justify-content: space-between;
-    gap: 12px;
-    padding-bottom: 16px;
-    border-bottom: 1px solid var(--border);
-  }
+  .top-bar { max-width: 1000px; margin: 0 auto 28px; display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 12px; padding-bottom: 16px; border-bottom: 1px solid var(--border); }
   .top-bar .back-link { font-weight: 700; text-decoration: none; color: var(--ink); font-size: 0.85rem; }
   .top-bar .back-link:hover { color: var(--accent); }
   .top-bar .cat-links { display: flex; gap: 14px; }
-  .top-bar .cat-links a {
-    font-family: monospace;
-    font-size: 0.65rem;
-    text-transform: uppercase;
-    letter-spacing: 0.15em;
-    color: var(--muted);
-    text-decoration: none;
-    border: 1px solid var(--border);
-    padding: 5px 10px;
-  }
+  .top-bar .cat-links a { font-family: monospace; font-size: 0.65rem; text-transform: uppercase; letter-spacing: 0.15em; color: var(--muted); text-decoration: none; border: 1px solid var(--border); padding: 5px 10px; }
   .top-bar .cat-links a:hover { color: var(--accent); border-color: var(--accent); }
 
-  /* ---------- main content ---------- */
   .content { flex: 1; min-width: 0; padding: 32px clamp(16px, 4vw, 48px) 80px; }
 
-  /* -----------------------------------------------------------------
-     EDITABLE: 아래 소개글(제목/설명)은 자유롭게 수정하세요.
-     ----------------------------------------------------------------- */
-  #overview { max-width: 720px; margin: 0 auto 40px; }
-  #overview .eyebrow {
-    font-family: monospace;
-    font-size: 0.65rem;
-    text-transform: uppercase;
-    letter-spacing: 0.2em;
-    color: var(--accent);
-  }
+  #overview { max-width: 1000px; margin: 0 auto 40px; }
+  #overview .eyebrow { font-family: monospace; font-size: 0.65rem; text-transform: uppercase; letter-spacing: 0.2em; color: var(--accent); }
   #overview h1 { font-size: clamp(1.4rem, 3vw, 2rem); font-weight: 800; margin: 8px 0 10px; }
   #overview p { color: var(--muted); max-width: 640px; }
-  /* ----------------------------------------------------------------- */
 
-  /* ---------- photo list: one per row, original aspect ratio kept ---------- */
-  .photo-list {
-    max-width: 720px;
-    margin: 0 auto;
-    display: flex;
-    flex-direction: column;
-    gap: 40px;
-  }
-
-  .photo-card { text-align: center; }
-
-  /* object-fit: contain (no cropping) + max-height so a portrait photo
-     always fits on one screen, on both mobile and desktop */
-  .photo-card img {
-    display: block;
-    margin: 0 auto;
-    max-width: 100%;
-    max-height: 88vh;
-    width: auto;
-    height: auto;
-    object-fit: contain;
-    background: #eee;
-  }
-
-  /* -----------------------------------------------------------------
-     EDITABLE: 코멘트(캡션) 스타일. 실제 문구는 이 파일이 아니라
-     public/images/motorcycles/CBR650F/manifest.json 의 "caption" 값을 고치면 됩니다.
-     ----------------------------------------------------------------- */
-  .photo-card figcaption {
-    margin-top: 10px;
-    font-size: 0.75rem;
-    color: var(--muted);
-    text-align: center;
-  }
-  /* ----------------------------------------------------------------- */
+  /* Masonry & Animation */
+  .gallery-masonry { max-width: 1000px; margin: 0 auto; column-count: 3; column-gap: 20px; }
+  .photo-card { break-inside: avoid; margin: 0 0 20px 0; opacity: 0; transform: translateY(30px); transition: opacity 0.6s ease-out, transform 0.6s ease-out; text-align: center; }
+  .photo-card.visible { opacity: 1; transform: translateY(0); }
+  .photo-card img { width: 100%; height: auto; display: block; border-radius: 4px; background: #eee; }
+  .photo-card figcaption { margin-top: 8px; font-size: 0.75rem; color: var(--muted); }
 
   @media (max-width: 768px) {
     .shell { flex-direction: column; }
     .side-nav { position: static; width: 100%; height: auto; padding: 16px 20px; }
     .content { padding: 24px 16px 60px; }
     .top-bar { flex-direction: column; align-items: flex-start; }
-    .photo-card img { max-height: 80vh; }
+    .gallery-masonry { column-count: 2; column-gap: 12px; }
+    .photo-card { margin-bottom: 12px; }
   }
 </style>
 </head>
 <body>
 <div class="shell">
 
-  <!-- ---------- sticky side index — empty, only Home link ---------- -->
   <aside class="side-nav">
     <p class="brand">Field File / Motorcycle</p>
     <h1>CBR650F (2016)</h1>
     <a class="home-link" href="/">← 메인으로</a>
   </aside>
 
-  <!-- ---------- main content ---------- -->
   <main class="content">
-
     <div class="top-bar">
       <a class="back-link" href="/">← 메인으로</a>
       <div class="cat-links">
@@ -172,27 +66,27 @@
       </div>
     </div>
 
-    <!-- EDITABLE: 아래 소개글은 자유롭게 수정하세요 -->
     <section id="overview">
       <p class="eyebrow">Garage Log · MOTO-2016</p>
       <h1>CBR650F (2016)</h1>
-      <p>2016년식 혼다 CBR650F 정비 및 라이딩 기록 사진입니다.</p>
+      <p></p>
     </section>
 
-    <!-- 사진들은 아래 스크립트가 manifest.json을 읽어서 자동으로 채웁니다.
-         사진 제목 없이 사진 + (있으면) 코멘트만 표시됩니다. -->
-    <div id="gallery" class="photo-list"></div>
-
+    <div id="gallery" class="gallery-masonry"></div>
   </main>
 </div>
 
 <script>
-  // -------------------------------------------------------------------
-  // public/images/motorcycles/CBR650F/ 폴더의 사진을 전부 쓰려면,
-  // 그 폴더 안 manifest.json에 파일명(과 선택적으로 caption)만 추가/삭제하면 됩니다.
-  // 이 스크립트를 직접 고칠 필요는 없습니다.
-  // -------------------------------------------------------------------
   const IMAGE_FOLDER = "/images/motorcycles/CBR650F/";
+
+  const observer = new IntersectionObserver((entries, obs) => {
+    entries.forEach(entry => {
+      if (entry.isIntersecting) {
+        entry.target.classList.add('visible');
+        obs.unobserve(entry.target);
+      }
+    });
+  }, { threshold: 0.1, rootMargin: "0px 0px -50px 0px" });
 
   fetch(IMAGE_FOLDER + "manifest.json")
     .then((res) => res.json())
@@ -202,13 +96,13 @@
         const figure = document.createElement("figure");
         figure.className = "photo-card";
 
+        const fileName = item.file || item.filename;
         const img = document.createElement("img");
-        img.src = IMAGE_FOLDER + encodeURIComponent(item.file);
+        img.src = IMAGE_FOLDER + encodeURIComponent(fileName);
         img.alt = item.caption || `CBR650F 사진 ${i + 1}`;
         img.loading = "lazy";
         figure.appendChild(img);
 
-        // caption is optional — only rendered if manifest.json has one
         if (item.caption) {
           const caption = document.createElement("figcaption");
           caption.textContent = item.caption;
@@ -216,12 +110,12 @@
         }
 
         gallery.appendChild(figure);
+        observer.observe(figure);
       });
     })
     .catch((err) => {
       console.error("Failed to load photo manifest:", err);
     });
 </script>
-
 </body>
 </html>
