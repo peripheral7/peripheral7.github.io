@@ -141,3 +141,9 @@ export default function GalleryTemplate() {
     </div>
   )
 }
+
+export function generateStaticParams() {
+  return Object.keys(galleryRegistry).map((key) => ({
+    id: key,
+  }))
+}
