@@ -324,7 +324,7 @@ export function PostBoard({
           <p className="mb-3 font-mono text-[0.65rem] uppercase tracking-widest text-accent">Sections</p>
           <nav className="mb-6 flex flex-col gap-2">
             {sections.map((s) => (
-              
+              <a
                 key={s.id}
                 href={`#${s.id}`}
                 className="text-sm text-muted-foreground transition-colors hover:text-accent"
