@@ -10,10 +10,11 @@
     <link href="https://cdn.datatables.net/1.13.4/css/dataTables.bootstrap5.min.css" rel="stylesheet">
     <style>
         /*
-          fluid scaling(clamp 기반): 브레이크포인트에서 폰트/폭이 갑자기 튀는 문제를 없애기 위해
-          뷰포트 폭(vw)에 비례해 연속적으로 줄어들도록 처리.
+          [변경] fluid scaling(clamp 기반) 전체 +2pt(≈+2.66px) 상향.
+          모바일 하한(min)도 함께 올려 좁은 화면에서도 폰트가 커진 것이 체감되도록 함.
+          이전: clamp(11px, 1.55vw, 15px) → 이번: clamp(13.5px, 1.55vw, 17.5px)
         */
-        html { font-size: clamp(11px, 1.55vw, 15px); }
+        html { font-size: clamp(13.5px, 1.55vw, 17.5px); }
 
         body {
             font-family: 'Noto Sans KR', sans-serif;
@@ -24,9 +25,8 @@
         }
 
         /*
-          [변경] 페이지 컨테이너 폭: 데스크톱에서는 화면의 약 2/3(66.67vw)까지 확대(상한 1040px).
-          아이패드 최대 크기(≤1024px) 이하부터는 전체 폭(100%)으로 전환하여
-          좁은 화면에서 여백 낭비 없이 표/텍스트가 최대한 넓게 보이도록 함.
+          페이지 컨테이너 폭: 데스크톱에서는 화면의 약 2/3(66.67vw)까지 확대(상한 1040px).
+          아이패드 최대 크기(≤1024px) 이하부터는 전체 폭(100%)으로 전환.
         */
         .container-fluid {
             background: #fff;
@@ -97,39 +97,45 @@
             margin-bottom: 20px;
             border-radius: 4px;
             font-size: clamp(0.64rem, 1.85vw, 0.82rem);
-            /* [변경] 자식 요소(표 포함)가 박스 밖으로 넘치지 않도록 명시 */
             overflow: hidden;
         }
         .manual-box h5 { color: #0d6efd; font-weight: 700; margin-top: 0; font-size: clamp(0.78rem, 2vw, 0.95rem); }
         .manual-box p { margin-bottom: 0.5rem; line-height: 1.55; color: #333; }
         .manual-box ul { margin-bottom: 0.5rem; padding-left: 18px; line-height: 1.55; color: #333; }
 
-        /* [변경] .manual-box 내부 표는 table-responsive 로 감싸져 가로 스크롤 처리됨.
-           표 자체 스타일은 통계표와 통일. */
-        .manual-box .table-responsive { margin-top: 8px; margin-bottom: 8px; }
+        .manual-box .table-responsive {
+            margin-top: 8px;
+            margin-bottom: 8px;
+            /* [변경] Ⅴ탭 등 해석 요약 내부 표는 가로 스크롤 대신 줄바꿈되도록 스크롤 해제 */
+            overflow-x: visible;
+        }
         .manual-box table {
             background: #fff;
             font-size: clamp(0.6rem, 1.6vw, 0.75rem);
-            width: auto;
-            min-width: 100%;
+            width: 100%;
+            /* [변경] 고정 레이아웃 + 자동 줄바꿈으로 표가 박스 폭 안에서 여러 줄로 표시되도록 함 */
+            table-layout: fixed;
         }
         .manual-box table th, .manual-box table td {
             border: 1px solid #dee2e6;
-            padding: 5px 8px;
+            padding: 5px 6px;
             text-align: center;
             vertical-align: middle;
-            white-space: nowrap;
+            /* [변경] nowrap 대신 자연스러운 줄바꿈 적용 (한글은 keep-all로 단어 단위 줄바꿈) */
+            white-space: normal;
+            word-break: keep-all;
+            overflow-wrap: break-word;
         }
-        /* [신규] 도시구조 비교표의 첫 번째 열('구조 요인' 등)은 한글 8자가 들어갈 폭을 최소 보장 */
+        /* 도시구조 비교표의 첫 번째 열('구조 요인' 등)은 한글 8자가 들어갈 폭을 최소 보장 */
         .manual-box table th:first-child,
         .manual-box table td:first-child {
             min-width: 8ch;
-            white-space: nowrap;
+            font-weight: 600;
         }
 
         /*
           통계표(차트)는 화면 크기와 무관하게 원래 레이아웃(폰트 크기, 셀 폭)을 유지하고,
-          가로 스크롤(overflow-x: auto)로 확인하도록 통일.
+          가로 스크롤(overflow-x: auto)로 확인하도록 통일. (Ⅴ탭 해석요약 표 제외)
         */
         .table-responsive {
             margin-top: 12px;
