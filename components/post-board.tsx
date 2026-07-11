@@ -13,30 +13,30 @@ export type CaptionPlacement =
 export type CaptionSize = "sm" | "md" | "lg"
 export type Orientation = "horizontal" | "vertical"
 
-/** A pinned photo cell. */
+/** A pinned photo cell. Height is derived from aspectRatio — never cropped. */
 export type BoardPhoto = {
-  kind?: "photo" // omit for photos — only labels need to declare kind
+  kind?: "photo"
   id: string
   src: string
   alt: string
+  /** e.g. "4 / 5", "3 / 4", "1 / 1", "16 / 9". Default: "4 / 5". */
+  aspectRatio?: string
   caption?: string
   captionPlacement?: CaptionPlacement
   captionSize?: CaptionSize
   captionOrientation?: Orientation
-  /** Starting column line (1-based). Omit to auto-place in reading order. */
+  /** Starting column line (1-based). Omit to auto-place. */
   colStart?: number
   /** Width in grid columns. Default: 3 (→ 4 per row on a 12-col board). */
   colSpan?: number
-  /** Starting row line (1-based). Omit to auto-place. */
+  /** Starting row line (1-based) — for manual staggering. Omit to auto-place. */
   rowStart?: number
-  /** Height in grid rows. Default: 6. */
-  rowSpan?: number
   rotate?: number
   pin?: PinStyle
   z?: number
 }
 
-/** A standalone text/word chip (title cards, single-word tags, vertical labels). */
+/** A standalone text/word chip (title cards, single-word tags). */
 export type BoardLabel = {
   kind: "label"
   id: string
@@ -47,12 +47,23 @@ export type BoardLabel = {
   colStart?: number
   colSpan?: number
   rowStart?: number
-  rowSpan?: number
   rotate?: number
   z?: number
 }
 
-export type BoardCell = BoardPhoto | BoardLabel
+/** A row of color swatches, like a palette reference chip. */
+export type BoardPalette = {
+  kind: "palette"
+  id: string
+  colors: string[]
+  label?: string
+  colStart?: number
+  colSpan?: number
+  rowStart?: number
+  z?: number
+}
+
+export type BoardCell = BoardPhoto | BoardLabel | BoardPalette
 
 export type BoardSection = {
   id: string
@@ -60,25 +71,23 @@ export type BoardSection = {
   note?: string
   /** Grid column count, desktop only. Default: 12. */
   columns?: number
-  /** Pixel height of ONE grid row, desktop only. Default: 32. */
-  rowHeight?: number
   gap?: number
   items: BoardCell[]
 }
 
-function gridVars(cell: {
-  colStart?: number
-  colSpan?: number
-  rowStart?: number
-  rowSpan?: number
-  z?: number
-}) {
+function parseAspectRatio(ratio: string): { width: number; height: number } {
+  const [w, h] = ratio.split("/").map((n) => parseFloat(n.trim()))
+  const width = 1000
+  const height = Math.round((width * (h || 5)) / (w || 4))
+  return { width, height }
+}
+
+function gridVars(cell: { colStart?: number; colSpan?: number; rowStart?: number; z?: number }) {
   const style: Record<string, string | number> = { zIndex: cell.z ?? 1 }
   if (cell.colStart !== undefined) style["--col-start"] = cell.colStart
   if (cell.colSpan !== undefined) style["--col-span"] = cell.colSpan
   if (cell.rowStart !== undefined) style["--row-start"] = cell.rowStart
-  if (cell.rowSpan !== undefined) style["--row-span"] = cell.rowSpan
-  return style as React.CSSProperties
+  return style
 }
 
 function Tape() {
@@ -116,13 +125,10 @@ function CaptionText({
   className?: string
 }) {
   const sizeClass = size === "lg" ? "text-base" : size === "md" ? "text-sm" : "text-[0.7rem]"
-  const orientationStyle: React.CSSProperties =
+  const orientationStyle: Record<string, string> =
     orientation === "vertical" ? { writingMode: "vertical-rl" } : {}
   return (
-    <p
-      className={`${sizeClass} font-mono leading-snug ${className}`}
-      style={orientationStyle}
-    >
+    <p className={`${sizeClass} font-mono leading-snug ${className}`} style={orientationStyle}>
       {text}
     </p>
   )
@@ -136,6 +142,7 @@ function PhotoCell({ item }: { item: BoardPhoto }) {
   const pin = item.pin ?? "tape"
   const isOverlay = placement === "overlay-bottom" || placement === "overlay-top"
   const isSide = placement === "left" || placement === "right"
+  const { width, height } = parseAspectRatio(item.aspectRatio ?? "4 / 5")
 
   const flexDirClass =
     placement === "above" ? "flex-col-reverse" : placement === "left" ? "flex-row-reverse" : "flex-col"
@@ -143,20 +150,25 @@ function PhotoCell({ item }: { item: BoardPhoto }) {
   return (
     <div className="board-item group relative" style={gridVars(item)}>
       <div
-        className={`scrap flex h-full ${flexDirClass} ${isSide ? "items-start gap-3" : "gap-2"}`}
+        className={`scrap flex ${flexDirClass} ${isSide ? "items-start gap-3" : "gap-2"}`}
         style={{ ["--r" as string]: `${rotate}deg` }}
       >
-        <div className="relative h-full min-h-0 flex-1 overflow-hidden bg-muted shadow-scrap ring-1 ring-black/5">
+        <div className="relative w-full overflow-hidden bg-muted shadow-scrap ring-1 ring-black/5">
           {pin === "tape" && <Tape />}
           {pin === "pin" && <Pin />}
           {pin === "clip" && <Clip />}
 
+          {/* No `fill` + object-cover here on purpose: width/height give Next.js
+              the aspect ratio to reserve space, but `height: auto` in style
+              means the browser always renders the image's TRUE native ratio
+              once loaded — never stretched, never cropped. */}
           <Image
             src={item.src}
             alt={item.alt}
-            fill
+            width={width}
+            height={height}
             sizes="(max-width: 768px) 45vw, 25vw"
-            className="object-cover"
+            style={{ width: "100%", height: "auto", display: "block" }}
           />
 
           {isOverlay && item.caption && (
@@ -201,7 +213,7 @@ function LabelCell({ item }: { item: BoardLabel }) {
   return (
     <div className="board-item relative" style={gridVars(item)}>
       <div
-        className={`scrap flex h-full items-center justify-center p-2 text-center font-sans font-extrabold uppercase tracking-tight shadow-scrap ring-1 ring-black/5 ${
+        className={`scrap flex min-h-20 items-center justify-center p-3 text-center font-sans font-extrabold uppercase tracking-tight shadow-scrap ring-1 ring-black/5 ${
           tone === "dark" ? "bg-neutral-900 text-white" : "bg-neutral-100 text-neutral-900"
         } ${sizeClass}`}
         style={{
@@ -215,13 +227,33 @@ function LabelCell({ item }: { item: BoardLabel }) {
   )
 }
 
+function PaletteCell({ item }: { item: BoardPalette }) {
+  return (
+    <div className="board-item relative" style={gridVars(item)}>
+      <div className="flex gap-2">
+        {item.colors.map((c, i) => (
+          <span
+            key={i}
+            className="aspect-square flex-1 rounded-[2px] shadow-scrap ring-1 ring-black/10"
+            style={{ backgroundColor: c }}
+          />
+        ))}
+      </div>
+      {item.label && (
+        <p className="mt-2 font-mono text-[0.6rem] uppercase tracking-widest text-muted-foreground">
+          {item.label}
+        </p>
+      )}
+    </div>
+  )
+}
+
 function BoardSectionBlock({ section }: { section: BoardSection }) {
   const columns = section.columns ?? 12
-  const rowHeight = section.rowHeight ?? 32
   const gap = section.gap ?? 20
 
   return (
-    <section className="mx-auto mb-20 max-w-6xl px-4 md:px-8">
+    <section id={section.id} className="mb-20">
       <header className="mb-6 border-b border-border pb-4">
         <h2 className="font-sans text-2xl font-extrabold uppercase tracking-tight text-foreground md:text-3xl">
           {section.title}
@@ -231,17 +263,19 @@ function BoardSectionBlock({ section }: { section: BoardSection }) {
         )}
       </header>
 
+      {/* no background color here — the board sits directly on the page background */}
       <div
-        className="board-grid cork relative rounded-sm p-4 md:p-8"
+        className="board-grid relative"
         style={{
           ["--board-cols" as string]: columns,
-          ["--board-row-h" as string]: `${rowHeight}px`,
           ["--board-gap" as string]: `${gap}px`,
         }}
       >
-        {section.items.map((item) =>
-          item.kind === "label" ? <LabelCell key={item.id} item={item} /> : <PhotoCell key={item.id} item={item} />,
-        )}
+        {section.items.map((item) => {
+          if (item.kind === "label") return <LabelCell key={item.id} item={item} />
+          if (item.kind === "palette") return <PaletteCell key={item.id} item={item} />
+          return <PhotoCell key={item.id} item={item} />
+        })}
       </div>
     </section>
   )
@@ -249,33 +283,76 @@ function BoardSectionBlock({ section }: { section: BoardSection }) {
 
 export function PostBoard({
   title,
+  sidebarTitle,
   eyebrow,
   intro,
   backHref = "/",
   sections,
 }: {
   title: string
+  sidebarTitle?: string
   eyebrow?: string
   intro?: string
   backHref?: string
   sections: BoardSection[]
 }) {
-  return (
-    <div className="bg-background text-foreground">
-      <div className="mx-auto max-w-6xl px-4 pb-10 pt-10 md:px-8 md:pt-16">
-        <Link href={backHref} className="mb-8 inline-block text-sm font-bold transition-colors hover:text-accent">
-          ← BACK TO BOARD
-        </Link>
-        {eyebrow && (
-          <p className="mb-2 font-mono text-[0.7rem] uppercase tracking-widest text-accent">{eyebrow}</p>
-        )}
-        <h1 className="text-balance text-3xl font-extrabold tracking-tight md:text-5xl">{title}</h1>
-        {intro && <p className="mt-4 max-w-2xl leading-relaxed text-muted-foreground">{intro}</p>}
-      </div>
+  const pinLegend: { pin: PinStyle; label: string; note: string }[] = [
+    { pin: "tape", label: "테이프", note: "정면으로 고정" },
+    { pin: "pin", label: "핀", note: "살짝 들뜬 느낌" },
+    { pin: "clip", label: "클립", note: "집게로 고정" },
+  ]
 
-      {sections.map((section) => (
-        <BoardSectionBlock key={section.id} section={section} />
-      ))}
+  return (
+    <div className="flex min-h-screen flex-col bg-background text-foreground md:flex-row">
+      {/* 사이드바 — gallery-client.tsx와 동일한 톤/구조 */}
+      <aside className="sticky top-0 z-10 w-full shrink-0 border-b border-border bg-background p-6 md:h-screen md:w-60 md:overflow-y-auto md:border-b-0 md:border-r md:p-10">
+        <p className="mb-2 font-mono text-[0.7rem] uppercase tracking-widest text-accent">Field File</p>
+        <h1 className="mb-1 text-lg font-extrabold tracking-tight">{sidebarTitle ?? title}</h1>
+        {eyebrow && (
+          <p className="mb-6 font-mono text-[0.65rem] uppercase tracking-widest text-muted-foreground">{eyebrow}</p>
+        )}
+
+        <Link
+          href={backHref}
+          className="mb-8 inline-block border-b border-border pb-3 font-semibold text-foreground transition-colors hover:text-accent"
+        >
+          ← 메인으로
+        </Link>
+
+        {/* 범례 */}
+        <div className="border-t border-border pt-6">
+          <p className="mb-3 font-mono text-[0.65rem] uppercase tracking-widest text-accent">Sections</p>
+          <nav className="mb-6 flex flex-col gap-2">
+            {sections.map((s) => (
+              
+                key={s.id}
+                href={`#${s.id}`}
+                className="text-sm text-muted-foreground transition-colors hover:text-accent"
+              >
+                {s.title}
+              </a>
+            ))}
+          </nav>
+
+          <p className="mb-3 font-mono text-[0.65rem] uppercase tracking-widest text-accent">Legend</p>
+          <ul className="flex flex-col gap-2">
+            {pinLegend.map((p) => (
+              <li key={p.pin} className="flex items-baseline gap-2 text-xs text-muted-foreground">
+                <span className="font-mono font-bold text-foreground">{p.label}</span>
+                <span>— {p.note}</span>
+              </li>
+            ))}
+          </ul>
+        </div>
+      </aside>
+
+      {/* 메인 보드 영역 */}
+      <main className="flex-1 px-5 py-10 md:px-12 md:py-12 lg:px-20">
+        {intro && <p className="mb-12 max-w-2xl leading-relaxed text-muted-foreground">{intro}</p>}
+        {sections.map((section) => (
+          <BoardSectionBlock key={section.id} section={section} />
+        ))}
+      </main>
     </div>
   )
 }

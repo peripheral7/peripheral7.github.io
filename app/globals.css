@@ -143,25 +143,30 @@
     coordinate grid driven by --board-cols/--board-row-h/--board-gap
     on the container and --col-start/--col-span/--row-start/--row-span
      on each item. */
+  /* 모바일: 고정 2열, 순서대로 쌓임(간단하게 유지).
+    데스크탑(≥768px): --board-cols로 열 개수 조절, 각 아이템은
+    --col-start/--col-span(가로 위치·크기)와 --row-start(세로 시작점)만 사용.
+     세로 크기는 이제 사진의 실제 비율에 따라 자동으로 정해짐(자르지 않음). */
   .board-grid {
     display: grid;
-    grid-template-columns: 1fr;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
     grid-auto-rows: auto;
-    gap: 1.5rem;
+    gap: 1rem;
   }
   .board-item {
-    grid-column: auto;
+    grid-column: span 1;
     grid-row: auto;
   }
   @media (min-width: 768px) {
     .board-grid {
       grid-template-columns: repeat(var(--board-cols), minmax(0, 1fr));
-      grid-auto-rows: var(--board-row-h);
+      grid-auto-rows: auto;
+      grid-auto-flow: row dense;
       gap: var(--board-gap);
     }
     .board-item {
-      grid-column: var(--col-start, auto) / span var(--col-span, 1);
-      grid-row: var(--row-start, auto) / span var(--row-span, 1);
+      grid-column: var(--col-start, auto) / span var(--col-span, 3);
+      grid-row: var(--row-start, auto) / span 1;
     }
   }
 }
