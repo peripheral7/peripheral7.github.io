@@ -36,7 +36,6 @@ export type BoardSection = {
   title?: string
   note?: string
   columns?: number
-  rows?: number
   items: BoardCell[]
 }
 
@@ -70,7 +69,7 @@ function PhotoCell({ item }: { item: BoardPhoto }) {
   const { width, height } = parseAspectRatio(item.aspectRatio ?? "4 / 5")
 
   return (
-    <div className="relative w-full overflow-hidden bg-muted ring-1 ring-black/5">
+    <div className="relative w-full h-full overflow-hidden bg-muted ring-1 ring-black/5">
       {pin === "tape" && <Tape />}
       {pin === "pin" && <Pin />}
       {pin === "clip" && <Clip />}
@@ -81,7 +80,7 @@ function PhotoCell({ item }: { item: BoardPhoto }) {
         width={width}
         height={height}
         quality={50}
-        sizes="(max-width: 768px) 100vw, 66vw"
+        sizes="(max-width: 1280px) 100vw, 66vw"
         style={{ width: "100%", height: "auto", display: "block" }}
       />
     </div>
@@ -90,10 +89,6 @@ function PhotoCell({ item }: { item: BoardPhoto }) {
 
 function BoardSectionBlock({ section }: { section: BoardSection }) {
   const columns = section.columns ?? 24
-  const rows = section.rows ?? 275
-  
-  const rowHeightPercent = 1.5 
-  const totalHeightPercent = rows * rowHeightPercent
 
   return (
     <section id={section.id} className="mb-12">
@@ -106,31 +101,36 @@ function BoardSectionBlock({ section }: { section: BoardSection }) {
         )}
       </header>
 
+      {/* 확대 시 배치가 깨지거나 이미지가 작아지지 않도록 
+        픽셀(px) 기반의 고정 행 높이(`grid-auto-rows-[12px]`)를 사용하는 CSS Grid 시스템으로 전면 수정했습니다.
+      */}
       <div
-        className="relative w-full"
-        style={{ paddingBottom: `${totalHeightPercent}%` }}
+        className="relative grid gap-x-4 items-start"
+        style={{
+          gridTemplateColumns: `repeat(${columns}, minmax(0, 1fr))`,
+          gridAutoRows: "12px",
+        }}
       >
         {section.items.map((item) => {
           if (item.kind === "label" || item.kind === "palette") return null
           
           const photoItem = item as BoardPhoto
+          const { width, height } = parseAspectRatio(photoItem.aspectRatio ?? "4 / 5")
           
-          const w = (photoItem.colSpan ?? 6) / columns * 100
-          const l = ((photoItem.colStart ?? 1) - 1) / columns * 100
-          
-          const t_vw = ((photoItem.rowStart ?? 1) - 1) * rowHeightPercent
-          const topPercentOfHeight = (t_vw / totalHeightPercent) * 100
+          // 각 이미지의 가로 span 크기와 고유 종횡비를 연산하여, 
+          // 고정 픽셀 그리드 안에서 차지할 수직 row span 개수를 완벽히 매칭합니다. (이미지 찌그러짐 방지)
+          const approxRowSpan = Math.ceil(((photoItem.colSpan ?? 6) * (height / width) * 2.85))
 
           return (
             <div
               key={photoItem.id}
-              className="absolute"
               style={{
-                left: `${l}%`,
-                top: `${topPercentOfHeight}%`,
-                width: `${w}%`,
+                gridColumn: `${photoItem.colStart ?? "auto"} / span ${photoItem.colSpan ?? 6}`,
+                gridRowStart: photoItem.rowStart ?? "auto",
+                gridRowEnd: photoItem.rowStart ? `span ${approxRowSpan}` : "auto",
                 zIndex: photoItem.z ?? 1
               }}
+              className="w-full h-full"
             >
               <PhotoCell item={photoItem} />
             </div>
@@ -153,10 +153,7 @@ export function PostBoard({
   sections: BoardSection[]
 }) {
   return (
-    /* 최외곽 도화지를 bg-black으로 설정하여 양옆에 완벽한 검은색 여백 생성 */
     <div className="relative min-h-screen bg-black text-foreground overflow-x-hidden">
-      
-      {/* 좌측 상단 고정 플로팅 버튼 */}
       <Link
         href={backHref}
         className="fixed left-4 top-4 z-50 flex h-10 items-center justify-center rounded-full border border-neutral-800 bg-neutral-900/90 px-4 font-mono text-sm font-semibold text-white shadow-lg backdrop-blur-md transition-colors hover:border-accent hover:text-accent md:left-8 md:top-8"
@@ -164,11 +161,10 @@ export function PostBoard({
         ← BACK
       </Link>
       
-      {/* 중앙 2/3 레이아웃 핵심 박스:
-        - 기본 모바일/웹 반 스크린 (w-full): 여백 없이 화면 100% 꽉 차게 동작
-        - 데스크톱 스크린 환경 (md:w-2/3): 화면 중앙 2/3 영역만 차지하며 본문 배경색(bg-background) 유지
+      {/* - 표준 아이패드 해상도 가로/세로 영역(1024px 이하)까지는 w-full로 채워 검은색 여백을 제거합니다.
+        - 모니터 스크린 크기인 xl(1280px) 이상 환경에서만 2/3 레이아웃과 양옆 검은색 여백이 나타나도록 상향 조정했습니다.
       */}
-      <main className="mx-auto w-full md:w-2/3 min-h-screen bg-background px-4 pt-24 pb-32 md:px-12 lg:px-16 shadow-2xl transition-all duration-300">
+      <main className="mx-auto w-full xl:w-2/3 min-h-screen bg-background px-4 pt-24 pb-32 md:px-12 lg:px-16 shadow-2xl transition-all duration-300">
         {sections.map((section) => (
           <BoardSectionBlock key={section.id} section={section} />
         ))}
