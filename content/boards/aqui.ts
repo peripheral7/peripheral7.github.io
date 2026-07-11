@@ -6,7 +6,7 @@ export const aquiBoard: BoardSection[] = [
   {
     id: "clockwork-collage",
     title: "Clockwork",
-    note: "One roll of film, shot over a year at the same café.",
+    note: "@aquicoffee",
     columns: 24, // 정밀 배치를 위한 24칸 그리드
     rows: 275,   // 비율 기반 반응형 스크롤 길이를 위한 275열
     items: [

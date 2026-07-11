@@ -80,8 +80,8 @@ function PhotoCell({ item }: { item: BoardPhoto }) {
         alt={item.alt}
         width={width}
         height={height}
-        quality={50} /* 50% 화질 최적화 */
-        sizes="(max-width: 768px) 80vw, 50vw"
+        quality={50}
+        sizes="(max-width: 768px) 100vw, 66vw"
         style={{ width: "100%", height: "auto", display: "block" }}
       />
     </div>
@@ -92,13 +92,11 @@ function BoardSectionBlock({ section }: { section: BoardSection }) {
   const columns = section.columns ?? 24
   const rows = section.rows ?? 275
   
-  // 1 row = 1.5% of container width
   const rowHeightPercent = 1.5 
   const totalHeightPercent = rows * rowHeightPercent
 
   return (
     <section id={section.id} className="mb-12">
-      {/* 기존 양식 헤더 복구 */}
       <header className="mb-10 border-b border-border pb-4">
         <h2 className="font-sans text-2xl font-extrabold uppercase tracking-tight text-foreground md:text-3xl">
           {section.title}
@@ -108,22 +106,18 @@ function BoardSectionBlock({ section }: { section: BoardSection }) {
         )}
       </header>
 
-      {/* CSS Grid 대신 완벽한 비율 유지를 위한 Absolute Percentage 컨테이너 */}
       <div
         className="relative w-full"
         style={{ paddingBottom: `${totalHeightPercent}%` }}
       >
         {section.items.map((item) => {
-          // PhotoCell 렌더링 (Label과 Palette는 현재 생략)
           if (item.kind === "label" || item.kind === "palette") return null
           
           const photoItem = item as BoardPhoto
           
-          // Width & Left (가로 축)
           const w = (photoItem.colSpan ?? 6) / columns * 100
           const l = ((photoItem.colStart ?? 1) - 1) / columns * 100
           
-          // Top (세로 축): 부모의 Height(%) 대비 자신의 Top(%) 위치를 계산
           const t_vw = ((photoItem.rowStart ?? 1) - 1) * rowHeightPercent
           const topPercentOfHeight = (t_vw / totalHeightPercent) * 100
 
@@ -159,16 +153,22 @@ export function PostBoard({
   sections: BoardSection[]
 }) {
   return (
-    <div className="relative min-h-screen bg-background text-foreground">
+    /* 최외곽 도화지를 bg-black으로 설정하여 양옆에 완벽한 검은색 여백 생성 */
+    <div className="relative min-h-screen bg-black text-foreground overflow-x-hidden">
+      
+      {/* 좌측 상단 고정 플로팅 버튼 */}
       <Link
         href={backHref}
-        className="fixed left-4 top-4 z-50 flex h-10 items-center justify-center rounded-full border border-border bg-background/80 px-4 font-mono text-sm font-semibold shadow-sm backdrop-blur-md transition-colors hover:border-accent hover:text-accent md:left-8 md:top-8"
+        className="fixed left-4 top-4 z-50 flex h-10 items-center justify-center rounded-full border border-neutral-800 bg-neutral-900/90 px-4 font-mono text-sm font-semibold text-white shadow-lg backdrop-blur-md transition-colors hover:border-accent hover:text-accent md:left-8 md:top-8"
       >
         ← BACK
       </Link>
       
-      {/* 최대 폭 설정 (max-w-2xl) 및 중앙 정렬 */}
-      <main className="mx-auto max-w-2xl px-4 pt-24 pb-32 md:px-8">
+      {/* 중앙 2/3 레이아웃 핵심 박스:
+        - 기본 모바일/웹 반 스크린 (w-full): 여백 없이 화면 100% 꽉 차게 동작
+        - 데스크톱 스크린 환경 (md:w-2/3): 화면 중앙 2/3 영역만 차지하며 본문 배경색(bg-background) 유지
+      */}
+      <main className="mx-auto w-full md:w-2/3 min-h-screen bg-background px-4 pt-24 pb-32 md:px-12 lg:px-16 shadow-2xl transition-all duration-300">
         {sections.map((section) => (
           <BoardSectionBlock key={section.id} section={section} />
         ))}
