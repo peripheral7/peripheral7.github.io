@@ -1,13 +1,13 @@
 {
-  "id": "cbr650f-2016",
   "variant": "photo",
   "category": "MOTORCYCLE",
-  "title": "CBR650F (2016)",
-  "meta": "Garage log",
-  "ref": "MOTO-2016",
+  "title": "Honda CBR650F (2016)",
+  "meta": "Maintenance logs, gear reviews, and ride journals.",
+  "ref": "MC-CBR-2016",
   "image": "/images/motorcycles/CBR650F/202604-05.JPEG",
-  "imageAlt": "Honda CBR650F 2016",
-  "imageFolder": "/images/motorcycles/CBR650F/",
-  "date": "2026.04.05",
-  "tags": ["Honda", "Motorcycle"]
+  "imageAlt": "Honda CBR650F",
+  "href": "/board/cbr650f",
+  "linkLabel": "Open journal",
+  "date": "2026.04.12",
+  "tags": ["Honda", "CBR650F", "Maintenance", "Log"]
 }
