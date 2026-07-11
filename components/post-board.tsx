@@ -93,19 +93,21 @@ function BoardSectionBlock({ section }: { section: BoardSection }) {
   const columns = section.columns ?? 24
   const rows = section.rows ?? 160
   
-  // 전체 높이(padding-bottom)를 가로 너비(%) 기준으로 계산하여 화면을 줄이거나 늘려도 비율이 깨지지 않습니다.
   const paddingBottomPercent = (rows / columns) * 100
 
   return (
     <section id={section.id} className="mb-12">
-      <header className="mb-10 border-b border-border pb-4">
-        <h2 className="font-sans text-2xl font-extrabold uppercase tracking-tight text-foreground md:text-3xl">
-          {section.title}
-        </h2>
-        {section.note && (
-          <p className="mt-2 max-w-2xl font-mono text-sm leading-relaxed text-muted-foreground">{section.note}</p>
-        )}
-      </header>
+      {/* title이 존재할 때만 헤더 영역 전체를 렌더링하도록 조건부 처리 */}
+      {section.title && (
+        <header className="mb-10 border-b border-border pb-4">
+          <h2 className="font-sans text-2xl font-extrabold uppercase tracking-tight text-foreground md:text-3xl">
+            {section.title}
+          </h2>
+          {section.note && (
+            <p className="mt-2 max-w-2xl font-mono text-sm leading-relaxed text-muted-foreground">{section.note}</p>
+          )}
+        </header>
+      )}
 
       {/* 자유 배치를 위한 캔버스 영역 */}
       <div
