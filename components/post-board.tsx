@@ -3,8 +3,6 @@ import Link from "next/link"
 
 export type PinStyle = "pin" | "tape" | "clip" | "none"
 export type Orientation = "horizontal" | "vertical"
-export type CaptionPlacement = "below" | "above" | "left" | "right" | "overlay-bottom" | "overlay-top" | "none"
-export type CaptionSize = "sm" | "md" | "lg"
 
 export type BoardPhoto = {
   kind?: "photo"
@@ -12,14 +10,9 @@ export type BoardPhoto = {
   src: string
   alt: string
   aspectRatio?: string
-  caption?: string
-  captionPlacement?: CaptionPlacement
-  captionSize?: CaptionSize
-  captionOrientation?: Orientation
   colStart?: number
   colSpan?: number
   rowStart?: number
-  rotate?: number
   pin?: PinStyle
   z?: number
 }
@@ -28,35 +21,22 @@ export type BoardLabel = {
   kind: "label"
   id: string
   text: string
-  size?: CaptionSize | "xl"
-  tone?: "dark" | "light"
-  orientation?: Orientation
-  colStart?: number
-  colSpan?: number
-  rowStart?: number
-  rotate?: number
-  z?: number
 }
 
 export type BoardPalette = {
   kind: "palette"
   id: string
   colors: string[]
-  label?: string
-  colStart?: number
-  colSpan?: number
-  rowStart?: number
-  z?: number
 }
 
 export type BoardCell = BoardPhoto | BoardLabel | BoardPalette
 
 export type BoardSection = {
   id: string
-  title: string
+  title?: string
   note?: string
   columns?: number
-  gap?: number
+  rows?: number
   items: BoardCell[]
 }
 
@@ -65,15 +45,6 @@ function parseAspectRatio(ratio: string): { width: number; height: number } {
   const width = 1000
   const height = Math.round((width * (h || 5)) / (w || 4))
   return { width, height }
-}
-
-// 흩뿌려진 배치를 위해 CSS Grid의 절대 좌표계를 직접 주입합니다.
-function gridVars(cell: { colStart?: number; colSpan?: number; rowStart?: number; z?: number }) {
-  return {
-    gridColumn: `${cell.colStart ?? "auto"} / span ${cell.colSpan ?? 3}`,
-    gridRowStart: cell.rowStart ?? "auto",
-    zIndex: cell.z ?? 1,
-  }
 }
 
 function Tape() {
@@ -94,116 +65,82 @@ function Clip() {
   )
 }
 
-// 캡션 렌더링 컴포넌트 복구
-function CaptionText({
-  text,
-  size = "sm",
-  orientation = "horizontal",
-  className = "",
-}: {
-  text: string
-  size?: CaptionSize
-  orientation?: Orientation
-  className?: string
-}) {
-  const sizeClass = size === "lg" ? "text-base" : size === "md" ? "text-sm" : "text-[0.7rem]"
-  const orientationStyle: Record<string, string> =
-    orientation === "vertical" ? { writingMode: "vertical-rl" } : {}
-  return (
-    <p className={`${sizeClass} font-mono leading-snug ${className}`} style={orientationStyle}>
-      {text}
-    </p>
-  )
-}
-
 function PhotoCell({ item }: { item: BoardPhoto }) {
-  const placement = item.captionPlacement ?? "below"
-  const size = item.captionSize ?? "sm"
-  const orientation = item.captionOrientation ?? "horizontal"
   const pin = item.pin ?? "none"
-  const isOverlay = placement === "overlay-bottom" || placement === "overlay-top"
-  const isSide = placement === "left" || placement === "right"
   const { width, height } = parseAspectRatio(item.aspectRatio ?? "4 / 5")
 
-  const flexDirClass =
-    placement === "above" ? "flex-col-reverse" : placement === "left" ? "flex-row-reverse" : "flex-col"
-
   return (
-    <div className="board-item group relative" style={gridVars(item)}>
-      <div className={`flex ${flexDirClass} ${isSide ? "items-start gap-3" : "gap-2"}`}>
-        <div className="relative w-full overflow-hidden bg-muted ring-1 ring-black/5">
-          {pin === "tape" && <Tape />}
-          {pin === "pin" && <Pin />}
-          {pin === "clip" && <Clip />}
+    <div className="relative w-full overflow-hidden bg-muted ring-1 ring-black/5">
+      {pin === "tape" && <Tape />}
+      {pin === "pin" && <Pin />}
+      {pin === "clip" && <Clip />}
 
-          <Image
-            src={item.src}
-            alt={item.alt}
-            width={width}
-            height={height}
-            quality={50} /* 화질 50% 축소로 로딩 속도 최적화 */
-            sizes="(max-width: 768px) 50vw, 33vw"
-            style={{ width: "100%", height: "auto", display: "block" }}
-          />
-
-          {isOverlay && item.caption && (
-            <div
-              className={`pointer-events-none absolute inset-x-0 z-10 p-3 text-white ${
-                placement === "overlay-bottom"
-                  ? "bottom-0 bg-gradient-to-t from-black/75 to-transparent"
-                  : "top-0 bg-gradient-to-b from-black/75 to-transparent"
-              }`}
-            >
-              <CaptionText text={item.caption} size={size} orientation={orientation} className="text-white" />
-            </div>
-          )}
-        </div>
-
-        {!isOverlay && item.caption && placement !== "none" && (
-          <CaptionText
-            text={item.caption}
-            size={size}
-            orientation={orientation}
-            className={`text-card-foreground/80 ${isSide ? "w-8 shrink-0 text-center" : ""}`}
-          />
-        )}
-      </div>
+      <Image
+        src={item.src}
+        alt={item.alt}
+        width={width}
+        height={height}
+        quality={50} /* 50% 화질 최적화 */
+        sizes="(max-width: 768px) 80vw, 50vw"
+        style={{ width: "100%", height: "auto", display: "block" }}
+      />
     </div>
   )
 }
 
-// (LabelCell, PaletteCell은 불필요한 장식이므로 렌더링 코드만 최소화 보존)
-function LabelCell({ item }: { item: BoardLabel }) {
-  return null;
-}
-function PaletteCell({ item }: { item: BoardPalette }) {
-  return null;
-}
-
 function BoardSectionBlock({ section }: { section: BoardSection }) {
-  const columns = section.columns ?? 12
-  const gap = section.gap ?? 8
+  const columns = section.columns ?? 24
+  const rows = section.rows ?? 275
+  
+  // 1 row = 1.5% of container width
+  const rowHeightPercent = 1.5 
+  const totalHeightPercent = rows * rowHeightPercent
 
   return (
     <section id={section.id} className="mb-12">
-      {/* 반응형 콜라주 핵심 로직: 
-        화면 너비에 비례(vw)하는 미세한 가로줄(gridAutoRows)을 무수히 깔아두고, 
-        rowStart를 통해 자유로운 Y축 겹침과 계단식 배치를 연출합니다.
-      */}
+      {/* 기존 양식 헤더 복구 */}
+      <header className="mb-10 border-b border-border pb-4">
+        <h2 className="font-sans text-2xl font-extrabold uppercase tracking-tight text-foreground md:text-3xl">
+          {section.title}
+        </h2>
+        {section.note && (
+          <p className="mt-2 max-w-2xl font-mono text-sm leading-relaxed text-muted-foreground">{section.note}</p>
+        )}
+      </header>
+
+      {/* CSS Grid 대신 완벽한 비율 유지를 위한 Absolute Percentage 컨테이너 */}
       <div
-        className="relative grid"
-        style={{
-          gridTemplateColumns: `repeat(${columns}, minmax(0, 1fr))`,
-          gridAutoRows: "1.2vw", 
-          columnGap: `${gap}px`,
-          rowGap: "0",
-          paddingBottom: "15vw" 
-        }}
+        className="relative w-full"
+        style={{ paddingBottom: `${totalHeightPercent}%` }}
       >
         {section.items.map((item) => {
-          if (item.kind === "label") return <LabelCell key={item.id} item={item as BoardLabel} />
-          if (item.kind === "palette") return <PaletteCell key={item.id} item={item as BoardPalette} />
-          return <PhotoCell key={item.id} item={item as BoardPhoto} />
+          // PhotoCell 렌더링 (Label과 Palette는 현재 생략)
+          if (item.kind === "label" || item.kind === "palette") return null
+          
+          const photoItem = item as BoardPhoto
+          
+          // Width & Left (가로 축)
+          const w = (photoItem.colSpan ?? 6) / columns * 100
+          const l = ((photoItem.colStart ?? 1) - 1) / columns * 100
+          
+          // Top (세로 축): 부모의 Height(%) 대비 자신의 Top(%) 위치를 계산
+          const t_vw = ((photoItem.rowStart ?? 1) - 1) * rowHeightPercent
+          const topPercentOfHeight = (t_vw / totalHeightPercent) * 100
+
+          return (
+            <div
+              key={photoItem.id}
+              className="absolute"
+              style={{
+                left: `${l}%`,
+                top: `${topPercentOfHeight}%`,
+                width: `${w}%`,
+                zIndex: photoItem.z ?? 1
+              }}
+            >
+              <PhotoCell item={photoItem} />
+            </div>
+          )
         })}
       </div>
     </section>
@@ -229,7 +166,9 @@ export function PostBoard({
       >
         ← BACK
       </Link>
-      <main className="mx-auto max-w-screen-xl px-2 pt-24 md:px-8 lg:px-12">
+      
+      {/* 최대 폭 설정 (max-w-2xl) 및 중앙 정렬 */}
+      <main className="mx-auto max-w-2xl px-4 pt-24 pb-32 md:px-8">
         {sections.map((section) => (
           <BoardSectionBlock key={section.id} section={section} />
         ))}
