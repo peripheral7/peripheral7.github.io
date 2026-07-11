@@ -3,58 +3,153 @@
 <html lang="ko">
 <head>
     <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>도시 구조에 따른 아파트 가격 형성 요인의 이질성 분석</title>
     <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@300;400;500;700&display=swap" rel="stylesheet">
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <link href="https://cdn.datatables.net/1.13.4/css/dataTables.bootstrap5.min.css" rel="stylesheet">
     <style>
+        /*
+          fluid scaling(clamp 기반): 브레이크포인트에서 폰트/폭이 갑자기 튀는 문제를 없애기 위해
+          뷰포트 폭(vw)에 비례해 연속적으로 줄어들도록 처리.
+        */
+        html { font-size: clamp(11px, 1.55vw, 15px); }
+
         body {
             font-family: 'Noto Sans KR', sans-serif;
             background: #f8f9fa;
-            padding: 20px;
+            padding: clamp(8px, 2vw, 20px);
             display: flex;
             justify-content: center;
         }
+
+        /*
+          [변경] 페이지 컨테이너 폭: 데스크톱에서는 화면의 약 2/3(66.67vw)까지 확대(상한 1040px).
+          아이패드 최대 크기(≤1024px) 이하부터는 전체 폭(100%)으로 전환하여
+          좁은 화면에서 여백 낭비 없이 표/텍스트가 최대한 넓게 보이도록 함.
+        */
         .container-fluid {
             background: #fff;
-            padding: 30px;
+            padding: clamp(12px, 3vw, 24px);
             border-radius: 10px;
             box-shadow: 0 4px 6px rgba(0,0,0,0.1);
-            max-width: 1100px;
+            max-width: min(66.67vw, 1040px);
             width: 100%;
+            margin: 0 auto;
+            font-size: 1rem;
         }
-        .title-kr { font-weight: 700; margin-bottom: 4px; text-align: center; font-size: 1.9rem; }
-        .title-en { font-weight: 400; margin-bottom: 20px; text-align: center; font-size: 1.05rem; color: #6c757d; font-style: italic; }
 
-        h4 { margin-top: 25px; font-weight: 600; color: #343a40; text-align: center; }
-        h5.grid-title { font-weight: 600; color: #343a40; text-align: center; margin-top: 10px; margin-bottom: 15px; font-size: 1.1rem; }
+        @media (max-width: 1024px) {
+            .container-fluid { max-width: 100%; }
+        }
 
-        .guide-box { background: #fdfdfe; border-left: 5px solid #6c757d; padding: 15px; margin-bottom: 20px; border-radius: 4px; box-shadow: 0 1px 3px rgba(0,0,0,0.05); }
-        .guide-box h5 { color: #495057; font-weight: 700; margin-top: 0; font-size: 1.1rem; }
-        .guide-box ul { margin-bottom: 0; padding-left: 20px; color: #555; }
+        .title-kr {
+            font-weight: 700;
+            margin-bottom: 4px;
+            text-align: center;
+            font-size: clamp(1.15rem, 3.4vw, 1.45rem);
+        }
+        .title-en {
+            font-weight: 400;
+            margin-bottom: 16px;
+            text-align: center;
+            font-size: clamp(0.62rem, 2vw, 0.8rem);
+            color: #6c757d;
+            font-style: italic;
+        }
 
-        .manual-box { background: #e8effd; border-left: 5px solid #0d6efd; padding: 15px; margin-top: 25px; border-radius: 4px; }
-        .manual-box h5 { color: #0d6efd; font-weight: 700; margin-top: 0; font-size: 1.1rem; }
-        .manual-box p { margin-bottom: 0.6rem; line-height: 1.6; color: #333; }
-        .manual-box ul { margin-bottom: 0.6rem; padding-left: 20px; line-height: 1.6; color: #333; }
-        .manual-box table { background: #fff; margin: 10px 0; font-size: 0.9rem; }
-        .manual-box table th, .manual-box table td { border: 1px solid #dee2e6; padding: 6px 10px; text-align: center; vertical-align: middle; }
+        .nav-tabs { font-size: clamp(0.62rem, 1.8vw, 0.78rem); }
+        .nav-tabs .nav-link { padding: clamp(4px, 1vw, 6px) clamp(4px, 1.2vw, 8px); }
 
+        h4 {
+            margin-top: 20px;
+            font-weight: 600;
+            color: #343a40;
+            text-align: center;
+            font-size: clamp(0.85rem, 2.2vw, 1.05rem);
+        }
+        h5.grid-title {
+            font-weight: 600;
+            color: #343a40;
+            text-align: center;
+            margin-top: 8px;
+            margin-bottom: 10px;
+            font-size: clamp(0.72rem, 1.9vw, 0.9rem);
+        }
+
+        /* 설명 텍스트(가이드/해석 요약 박스): 화면폭에 비례해 자연스럽게 축소 */
+        .guide-box {
+            background: #fdfdfe;
+            border-left: 5px solid #6c757d;
+            padding: 12px;
+            margin-bottom: 16px;
+            border-radius: 4px;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+            font-size: clamp(0.66rem, 1.9vw, 0.84rem);
+        }
+        .guide-box h5 { color: #495057; font-weight: 700; margin-top: 0; font-size: clamp(0.78rem, 2vw, 0.95rem); }
+        .guide-box ul { margin-bottom: 0; padding-left: 18px; color: #555; }
+
+        .manual-box {
+            background: #e8effd;
+            border-left: 5px solid #0d6efd;
+            padding: 12px;
+            margin-bottom: 20px;
+            border-radius: 4px;
+            font-size: clamp(0.64rem, 1.85vw, 0.82rem);
+            /* [변경] 자식 요소(표 포함)가 박스 밖으로 넘치지 않도록 명시 */
+            overflow: hidden;
+        }
+        .manual-box h5 { color: #0d6efd; font-weight: 700; margin-top: 0; font-size: clamp(0.78rem, 2vw, 0.95rem); }
+        .manual-box p { margin-bottom: 0.5rem; line-height: 1.55; color: #333; }
+        .manual-box ul { margin-bottom: 0.5rem; padding-left: 18px; line-height: 1.55; color: #333; }
+
+        /* [변경] .manual-box 내부 표는 table-responsive 로 감싸져 가로 스크롤 처리됨.
+           표 자체 스타일은 통계표와 통일. */
+        .manual-box .table-responsive { margin-top: 8px; margin-bottom: 8px; }
+        .manual-box table {
+            background: #fff;
+            font-size: clamp(0.6rem, 1.6vw, 0.75rem);
+            width: auto;
+            min-width: 100%;
+        }
+        .manual-box table th, .manual-box table td {
+            border: 1px solid #dee2e6;
+            padding: 5px 8px;
+            text-align: center;
+            vertical-align: middle;
+            white-space: nowrap;
+        }
+        /* [신규] 도시구조 비교표의 첫 번째 열('구조 요인' 등)은 한글 8자가 들어갈 폭을 최소 보장 */
+        .manual-box table th:first-child,
+        .manual-box table td:first-child {
+            min-width: 8ch;
+            white-space: nowrap;
+        }
+
+        /*
+          통계표(차트)는 화면 크기와 무관하게 원래 레이아웃(폰트 크기, 셀 폭)을 유지하고,
+          가로 스크롤(overflow-x: auto)로 확인하도록 통일.
+        */
         .table-responsive {
-            margin-top: 15px;
+            margin-top: 12px;
             overflow-x: auto;
             -webkit-overflow-scrolling: touch;
         }
 
         table.dataTable {
-            width: 100% !important;
+            width: auto !important;
+            min-width: 100%;
             margin: 0 auto !important;
             white-space: nowrap;
+            font-size: 0.78rem;
         }
 
         .table-bordered th, .table-bordered td {
             border: 1px solid #dee2e6;
             vertical-align: middle;
+            padding: 5px 8px;
+            white-space: nowrap;
         }
 
         .table-bordered th {
@@ -70,22 +165,8 @@
             font-weight: 500;
         }
 
-        @media (max-width: 768px) {
-            body, html { overflow-x: hidden; }
-            .table-responsive { overflow-x: hidden !important; }
-            table.dataTable {
-                table-layout: fixed !important;
-                min-width: 100% !important;
-            }
-            .table-bordered th, .table-bordered td {
-                font-size: 0.65rem !important; 
-                padding: 4px 2px !important;   
-                white-space: normal !important;
-                word-break: break-all !important; 
-            }
-            .dataTables_scrollBody { overflow-x: hidden !important; }
-            .manual-box table { font-size: 0.65rem; }
-            .manual-box table th, .manual-box table td { padding: 4px 2px; word-break: keep-all; }
+        @media (max-width: 400px) {
+            .container-fluid { padding: 10px; }
         }
     </style>
 </head>
@@ -105,6 +186,14 @@
 
     <div class="tab-content">
         <div class="tab-pane fade show active" id="tab1">
+            <div class="manual-box"><h5>📝 해석 요약</h5><ul>
+<li><strong>선행연구 대비 위치</strong>: 기존 신도시 아파트가격 연구(신분당선·광교테크노밸리 연구, 2020; 호수공원 연구, 2026)는 대부분 <strong>단일 신도시</strong>를 대상으로 회귀모형을 1회 추정하는 구조였다. 본 연구는 동일한 헤도닉 변수셋(면적, 층수, 건축연한, 브랜드, 세대수, 주차, 접근성)을 <strong>광교·동탄·운정 3개 신도시에 동형적으로 적용</strong>하여 기초통계 단계에서부터 지역 간 분산구조 자체를 비교 가능한 데이터로 전환했다는 점이 차별점이다. 개별 신도시 연구에서는 드러나지 않는 "같은 변수, 다른 분산"의 패턴이 본 설계의 핵심 관찰 대상이다.</li>
+<li><strong>다중공선성의 공간구조적 기원</strong>: 광교의 `comm_grav`·`edu_grav` VIF(22.5, 21.7)는 임계치(10)를 두 배 이상 상회하는 반면 동탄(6.1/5.7)·운정(2.6/6.2)은 안정적이다. 이는 추정상의 결함이 아니라, 광교호수공원을 중심으로 상업·교육 시설이 물리적으로 압축 배치된 <strong>콤팩트 순환형 도심구조</strong>가 두 중력지수를 통계적으로 거의 동일한 정보로 수렴시킨 결과로 해석된다. 즉 다중공선성 진단표 자체가 도시형태(compact vs. dispersed)의 대리지표로 기능한다.</li>
+<li><strong>건축연한 분산의 개발단계 대비</strong>: 동탄은 표준편차 1.17(단일 시기 집중공급), 운정은 5.75(1·2지구 순차개발에 따른 준공연도 혼재)로 극단적으로 대비된다. 단순상관도 동탄 -0.02(무관), 운정 -0.86(강한 음)으로 갈리며, 이는 선행연구들이 흔히 "신축=고가"로 일반화하는 명제가 <strong>개발이 단계적으로 이루어진 신도시에서만 강하게 성립</strong>함을 보여준다.</li>
+<li><strong>주차대수 변수의 부호역전과 하위시장 함의</strong>: `parking_per_household`는 광교·운정에서 양의 상관이나 동탄만 음(-)이다. 인과관계로 보기보다, 동탄 내 역세권 고밀단지(주차 원단위 낮음·가격 높음)와 외곽 저밀단지가 하나의 표본에 혼재하는 <strong>구성효과(compositional effect)</strong>로 판단되며, Ⅲ탭의 중력모형 결과와 결합해 동탄의 다핵적 하위시장 가능성을 시사하는 첫 번째 신호로 기능한다.</li>
+<li><strong>학군지수 상관의 소거 패턴</strong>: 운정만 `edu_grav` 단순상관이 음(-0.29)이나 다중회귀(Ⅲ탭)에서는 유의성이 사라진다. 이는 진짜 음의 학군효과가 아니라 건축연한 등 교란변수의 매개효과이며, 단순상관만으로 정책적 해석(예: "학군이 나쁠수록 비싸다")을 내리는 것이 왜 위험한지를 보여주는 방법론적 사례로 제시한다.</li>
+</ul></div>
+
             <h4>변수별 기초통계량 및 VIF</h4>
             <div class="table-responsive"><table class="dataframe table table-bordered table-striped table-hover datatable">
   <thead>
@@ -335,17 +424,17 @@
     </tr>
   </tbody>
 </table></div>
-
-            <div class="manual-box"><h5>📝 연구자 해석 요약</h5><ul>
-<li><strong>종속변수 추정 근거</strong>: `ln_area` 계수가 세 지역 모두 강한 음(-)의 유의성을 보이는 점(회귀표 참조)을 볼 때, 종속변수는 총액가격이 아닌 <strong>면적당 단가</strong>로 추정됩니다. 총액가격이라면 면적계수는 이론상 양(+)이어야 하므로, 이는 대형 평형일수록 단가가 하락하는 국내 아파트 시장의 전형적 규모의 경제(size discount) 패턴과 부합합니다.</li>
-<li><strong>다중공선성(VIF)의 지역차</strong>: 광교의 `comm_grav`·`edu_grav` VIF는 각각 22.5, 21.7 수준으로 심각한 다중공선성(통상 임계치 10 초과)을 보이는 반면, 동탄(6.1/5.7)·운정(2.6/6.2)은 상대적으로 양호합니다. 이는 광교의 상권·학군 클러스터가 공간적으로 근접 배치되어 두 지수가 사실상 동일 지점을 참조하기 때문으로 해석됩니다.</li>
-<li><strong>건축연한 분산의 극단적 대비</strong>: 동탄의 `building_age` 표준편차는 1.17로 세 지역 중 가장 좁고, 운정은 5.75로 가장 넓습니다. 이에 따라 단순상관도 동탄은 -0.02(사실상 무관), 운정은 -0.86(매우 강한 음의 상관)으로 극단적으로 갈립니다 — 동탄은 단일 시기 집중개발, 운정은 개발 시차가 큰 단지 혼재를 시사합니다.</li>
-<li><strong>주차대수 변수의 부호역전</strong>: `parking_per_household`는 광교·운정에서 양의 상관이나 동탄만 음(-)의 상관을 보입니다. 이는 인과관계라기보다 구성효과(compositional effect) — 동탄 내 역세권 고밀단지가 주차 원단위는 낮으면서 가격은 높은 하위시장을 형성하기 때문일 가능성이 높습니다 (Ⅲ탭 참조).</li>
-<li><strong>학군지수 상관의 지역 이질성</strong>: 운정만 `edu_grav` 단순상관이 음(-0.29)입니다. 다중회귀에서는 유의성이 사라지므로, 진짜 음의 관계라기보다 건축연한 등 다른 변수와의 교란효과로 판단됩니다.</li>
-</ul></div>
         </div>
 
         <div class="tab-pane fade" id="tab2">
+            <div class="manual-box"><h5>📝 해석 요약</h5><ul>
+<li><strong>적합도 격차와 기존 헤도닉 모형의 한계</strong>: 베이스라인 Adj-R²는 광교 0.809, 운정 0.885인 반면 동탄은 0.603에 그친다. 선행연구(신분당선·광교 연구, 2020)가 사용한 전통적 헤도닉 변수(면적·층수·연한·거리)만으로는 <strong>다핵적·광역적 신도시(동탄)</strong>의 가격변이를 설명하는 데 구조적 한계가 있음을 수치로 확인한 결과이며, 이는 Ⅲ탭에서 중력변수 투입의 이론적 필요성을 정당화하는 근거로 이어진다.</li>
+<li><strong>층수 프리미엄의 입지유형별 차별화</strong>: 광교는 `floor`가 비유의(t=0.97)한 반면 동탄·운정은 강하게 유의(t=4.37, 5.57)하다. 광교는 호수 조망 등 수평적 입지 프리미엄이 층고 프리미엄을 대체하는 구조이며, 이는 "층수=조망가치"라는 일반적 헤도닉 가정(기존 연구 다수 채택)이 <strong>수변 특화형 신도시에서는 성립하지 않을 수 있다</strong>는 반증사례를 제공한다.</li>
+<li><strong>거리지표 자체의 측정오차 진단</strong>: 본 연구의 개별성은 거리변수를 결과가 아니라 <strong>측정대상</strong>으로 다룬 데 있다. 직선거리-보행망거리 피어슨 상관은 광교 0.931 > 운정 0.740 > 동탄 0.616 순이며, 동탄은 우회율 표준편차(1.18)와 일치한계 폭(약 1,600m)도 최대다. 선행연구들이 통상 GIS 네트워크거리 또는 직선거리 중 하나만 채택해 왔다는 점에서, 본 연구는 <strong>두 지표를 병행 산출·비교함으로써 거리변수 선택이 결과에 미치는 영향을 실증적으로 정량화</strong>했다.</li>
+<li><strong>감쇠편의(attenuation bias)의 발견</strong>: 직선거리 대체 시 적합도 개선폭은 동탄(+0.027) > 운정(+0.006) > 광교(+0.004) 순으로, 상관계수가 가장 낮은 지역(동탄)에서 개선폭이 가장 크다는 정합적 패턴이 확인된다. 이는 우연이 아니라 네트워크거리의 측정잡음이 클수록 회귀계수가 0으로 수축되었다가 잡음이 적은 지표로 대체 시 설명력이 회복되는 고전적 계량경제 현상이며, <strong>거리변수의 측정방식이 신도시 유형별로 다른 편의(bias)를 유발한다</strong>는 명제를 데이터로 입증한 사례다.</li>
+<li><strong>실무·방법론적 시사점</strong>: 대형 슈퍼블록·광폭 간선도로가 많은 동탄형 신도시에서 OSM 기반 보행망거리를 무비판적으로 채택하면 어메니티 접근성의 가격효과가 실제보다 과소추정될 위험이 있다. 후속 신도시 비교연구에서는 거리지표 선택 이전에 <strong>네트워크-직선거리 상관진단</strong>을 표준 절차로 포함할 필요가 있다는 것이 본 탭의 방법론적 제언이다.</li>
+</ul></div>
+
             <h4>기본 헤도닉모형 회귀계수 결과 (Baseline Model)</h4>
             <div class="table-responsive"><table class="dataframe table table-bordered table-striped table-hover datatable">
   <thead>
@@ -467,7 +556,7 @@
     </tr>
   </tbody>
 </table></div>
-            
+
             <h4 class="mt-5 border-top pt-4">공원 접근성 측정방식 비교 (보행거리 vs 직선거리)</h4>
             <div class="row">
                 <div class="col-12 mb-3">
@@ -594,17 +683,17 @@
 </table></div>
                 </div>
             </div>
-
-            <div class="manual-box"><h5>📝 연구자 해석 요약</h5><ul>
-<li><strong>적합도 격차</strong>: 베이스라인 모형의 Adj-R²는 광교 0.809, 운정 0.885인 반면 동탄은 0.603에 그칩니다. 기초 헤도닉 변수만으로는 동탄의 가격변이를 설명하기 어렵다는 의미로, 중력변수 투입(Ⅲ탭) 이후 이 격차가 얼마나 좁혀지는지가 핵심 분석 포인트입니다.</li>
-<li><strong>층수 프리미엄의 지역차</strong>: 광교는 `floor`가 비유의(t=0.97)인 반면 동탄·운정은 강하게 유의(t=4.4, 5.6)합니다. 광교는 호수 조망 등 입지 프리미엄이 층고와 무관하게 형성되는 반면, 동탄·운정은 고층=조망/일조 프리미엄이 표준적으로 작동함을 시사합니다.</li>
-<li><strong>거리지표 진단</strong>: 직선거리-보행네트워크거리 간 피어슨 상관은 광교 0.931 > 운정 0.740 > 동탄 0.616 순입니다. 동탄은 우회율 표준편차(1.18)와 일치한계 폭(약 1,600m)도 가장 넓어, 네트워크거리 측정치의 <strong>구조적 노이즈가 가장 크다</strong>는 뜻입니다.</li>
-<li><strong>직선거리 대체 시 적합도 개선폭</strong>: 세 지역 모두 직선거리 모형이 근소하게 우월하나, 개선폭은 <strong>동탄(+0.027) > 운정(+0.006) > 광교(+0.004)</strong> 순으로, 위 상관계수 순위(동탄 최저 → 개선폭 최대)와 정확히 일치합니다. 이는 우연이 아니라 <strong>측정오차 감쇠편의(attenuation bias)</strong>로 설명됩니다 — 네트워크거리 잡음이 클수록 해당 계수가 0으로 수축되었다가, 잡음이 적은 직선거리로 대체하면 적합도가 크게 개선되는 것입니다.</li>
-<li><strong>실무적 함의</strong>: 동탄처럼 대형 슈퍼블록·광폭 간선도로가 많은 신도시에서는 OSM 기반 보행네트워크 거리의 우회 경로 변동성이 매우 크므로, 측정오차를 검증하지 않으면 회귀계수가 과소추정될 위험이 있습니다.</li>
-</ul></div>
         </div>
 
         <div class="tab-pane fade" id="tab3">
+            <div class="manual-box"><h5>📝 해석 요약</h5><ul>
+<li><strong>개별거리변수에서 종합중심성으로</strong>: 중력변수(`comm_grav`, `edu_grav`) 투입 시 `ln_walk_park`, `ln_dist_bus`는 세 지역 모두 유의성을 상실한다. 선행연구 대부분이 공원·역·학교까지의 개별거리를 병렬적으로 투입하는 데 그쳤다면, 본 연구는 이들이 결국 <strong>종합적 중심성 지수의 대리변수(proxy)</strong>였음을 실증적으로 분리해낸다는 점에서 변수설계 자체의 기여를 갖는다.</li>
+<li><strong>억제변수(suppressor) 패턴의 재발견</strong>: `floor`는 오히려 중력모형에서 광교까지 유의해진다(t=0.97→3.88). 상권접근성을 통제하자 순수한 층고 프리미엄이 비로소 드러나는 것으로, Ⅱ탭에서 "광교는 층수효과가 없다"고 단정했던 해석이 <strong>모형 설계(통제변수 포함 여부)에 따라 번복될 수 있음</strong>을 보여주는 방법론적 반례다.</li>
+<li><strong>상권 중력지수의 지역별 설명력 차이</strong>: 광교·동탄은 `comm_grav`가 강하게 유의하나 운정은 비유의(t=1.38)하다. 운정의 가격형성은 상권 접근성보다 구조특성(면적, 건축연한)에 더 크게 의존하며, 이는 Ⅰ탭의 극단적 연한-가격 상관(-0.86)과 정합적으로 연결되어 <strong>"운정=구조특성 주도형 시장"</strong>이라는 본 연구 고유의 유형화 근거가 된다.</li>
+<li><strong>학군중력지수의 전면적 무력화와 그 원인 분리</strong>: 세 지역 모두 `edu_grav`가 비유의하지만 원인은 상이하다. 광교는 VIF 22 수준의 다중공선성이 직접 원인(부호역전 포함)이며, 동탄·운정은 VIF는 낮으나 `comm_grav`와의 정보중복(collinearity in effect, not in diagnostic)으로 순한계효과가 희석된 것으로 추정된다. 동일한 "비유의"라는 결과라도 <strong>원인이 다르면 정책적 처방도 달라야 한다</strong>는 점을 명시적으로 구분한 것이 본 해석의 개별성이다.</li>
+<li><strong>Chow Test와 풀링모형 기각</strong>: F=942.83(df1=22, df2=1543, p≈0)으로 전체 풀링모형 대 신도시별 개별모형 간 구조적 차이가 극히 유의하다. 자유도(N=1,576, 파라미터 11개×3지역)도 표본구조와 정확히 일치해 검정 자체의 정합성이 확인된다. 선행연구들이 신도시를 개별 사례연구로 다루거나 혹은 암묵적으로 동일 가격함수를 가정해 왔다면, 본 연구는 <strong>이를 통계적으로 직접 검증</strong>하여 "신도시 간 가격함수 통합이 부적절하다"는 명제를 계량적으로 확정했다는 점에서 방법론적 기여를 갖는다. 다만 Chow Test는 구조차이의 존재만을 검증하므로, 어느 변수가 차이를 주도하는지는 상호작용항(지역더미×변수) 회귀 등 후속 분석이 필요하다.</li>
+</ul></div>
+
             <h4>상권접근성 변수 투입 모형 회귀계수 결과 (Commercial Accessibility Model)</h4>
             <div class="table-responsive"><table class="dataframe table table-bordered table-striped table-hover datatable">
   <thead>
@@ -750,7 +839,7 @@
     </tr>
   </tbody>
 </table></div>
-            
+
             <h4 class="mt-5 border-top pt-4">하위시장 구조차이 검증 (Chow Test)</h4>
             <div class="table-responsive"><table class="dataframe table table-bordered table-striped table-hover datatable">
   <thead>
@@ -774,17 +863,17 @@
     </tr>
   </tbody>
 </table></div>
-
-            <div class="manual-box"><h5>📝 연구자 해석 요약</h5><ul>
-<li><strong>개별거리변수의 유의성 소실</strong>: 중력변수(`comm_grav`, `edu_grav`) 투입 시 `ln_walk_park`, `ln_dist_bus`는 세 지역 모두 유의성을 상실합니다. 개별 어메니티까지의 단순거리는 결국 종합적 중심성(중력지수)에 흡수되는 대리변수였다는 의미입니다.</li>
-<li><strong>층수효과의 재발견(억제변수 패턴)</strong>: `floor`는 오히려 중력모형에서 광교까지 유의해집니다(t=0.97→3.88). 상권접근성을 통제하자 순수한 층고 프리미엄이 비로소 드러나는 전형적 억제변수(suppressor) 패턴입니다.</li>
-<li><strong>comm_grav의 지역차</strong>: 광교·동탄은 상권중력지수가 강하게 유의하나 운정은 비유의(t=1.38)합니다. 운정의 가격형성은 상권 접근성보다 구조특성(면적, 건축연한)에 더 크게 의존함을 시사하며, Ⅰ탭의 극단적 연한-가격 상관(-0.86)과 정합적입니다.</li>
-<li><strong>edu_grav의 전면적 유의성 상실</strong>: 세 지역 모두 학군중력지수가 비유의합니다. 광교는 VIF 22 수준의 다중공선성이 직접 원인으로 판단되며(부호까지 음전환), 동탄·운정은 VIF는 낮으나 comm_grav와의 정보중복으로 순한계효과가 약화된 것으로 보입니다.</li>
-<li><strong>Chow Test</strong>: F=942.83(df1=22, df2=1543, p≈0)으로 전체 풀링모형 대 신도시별 개별모형 간 구조적 차이가 극히 유의합니다. df1·df2는 표본구조(N=1,576, 파라미터 11개×3지역)와 정확히 일치해 검정 자체의 정합성도 확인됩니다. <strong>풀링 추정은 기각</strong>되며, 앞서 확인한 계수부호·유의성의 지역별 차이가 누적되어 나타난 결과로 해석됩니다. 다만 Chow Test는 "구조가 다르다"는 사실만 검증할 뿐 "어느 변수가 차이를 주도하는가"는 알려주지 않으므로, 후속 분석에서는 상호작용항(지역더미×변수) 회귀가 필요합니다.</li>
-</ul></div>
         </div>
 
         <div class="tab-pane fade" id="tab4">
+            <div class="manual-box"><h5>📝 해석 요약</h5><ul>
+<li><strong>"신도시=공간자기상관"이라는 통념에 대한 반증</strong>: 선행 호수공원 연구(2026)는 4개 신도시 중 광교에서만 공간군집이 유의했다고 보고했으며, 본 연구의 Moran's I 결과(광교 0.383, p=.005; 동탄 p=.375; 운정 p=.196) 역시 동일한 패턴을 재현한다. 두 개의 독립된 데이터셋·모형에서 같은 결과가 반복된다는 것은, 이 현상이 표본 특유의 우연이 아니라 <strong>콤팩트 순환형 신도시 특유의 구조적 속성</strong>일 가능성을 뒷받침하는 교차검증(cross-validation) 증거로 제시할 수 있다.</li>
+<li><strong>광교 모형선택의 절차적 엄밀성</strong>: LM-lag는 유의(p=.029)하나 LM-error는 비유의(p=.769)하여 공간시차모형(SAR)이 이론적으로 타당하며, Log-Likelihood·AIC 비교에서도 SAR이 SEM·OLS를 모두 상회한다. 선행연구(2026)가 광교에 SEM을 적용한 것과 달리 본 연구는 LM 진단에 따라 <strong>SAR을 선택</strong>했다는 차이가 있으며, 이는 동일한 공간자기상관 현상이라도 파급 메커니즘(오차 vs. 종속변수 자기상관)에 대한 이론적 가정에 따라 처방이 달라질 수 있음을 보여준다.</li>
+<li><strong>공간파급효과의 정량화</strong>: 광교 SAR 최종모형의 rho=0.179(p<.05)는 인접 단지 가격의 약 18%가 해당 단지 가격에 공간적으로 전이됨을 의미한다. 이는 개별거리변수만으로는 포착되지 않는 <strong>단지 간 가격 동조화(co-movement)</strong> 효과이며, 콤팩트형 신도시의 가격결정이 개별 속성뿐 아니라 인접 시장 전체의 가격수준에 종속적임을 시사한다.</li>
+<li><strong>공간교란(spatial confounding)에 대한 신중한 해석</strong>: SAR 최종모형에서 `ln_walk_park`이 OLS 중력모형(비유의)과 달리 유의한 양(+)으로 전환된다. 공원과 멀수록 가격이 높다는 표면적 해석은 어메니티 자본화 이론과 배치되므로, 상권중력으로 통제된 중심상업지구 인접구역이 소규모 근린공원과는 오히려 이격 배치되는 도시구조적 특성에 기인한 것으로 보는 것이 타당하다. `edu_grav`가 SAR에서도 유의한 음(-)으로 남는 것 역시 다중공선성(VIF 22)에 따른 계수불안정으로 해석하며, 본 연구는 이 계수를 인과적으로 과잉해석하지 않는다.</li>
+<li><strong>비유의 지역에 대한 해석의 한계 명시</strong>: 동탄·운정의 전역적 Moran's I 비유의는 실제 공간의존성 부재를 의미할 수도 있으나, 다핵적 도시구조에서는 국지적 군집이 핵 간에 상쇄되어 전역통계량이 희석될 가능성도 배제할 수 없다. 본 연구는 전역지수만으로 "공간계량모형이 불필요하다"고 단정하지 않으며, 국지 모란지수(LISA) 등 후속 검증이 필요하다는 점을 한계로 명시한다.</li>
+</ul></div>
+
             <div class="guide-box mt-3">
                 <h5>💡 통계해석시 유의할 사항</h5>
                 <ul>
@@ -792,7 +881,7 @@
                     <li><strong>LM Test:</strong> 공간시차(SAR)와 공간오차(SEM) 중 어느 모형이 데이터 구조에 적합한지 판단합니다.</li>
                 </ul>
             </div>
-            
+
             <h4>1. Moran's I (공간자기상관 검정)</h4><div class='table-responsive'><table class="dataframe table table-bordered table-striped table-hover datatable">
   <thead>
     <tr style="text-align: right;">
@@ -822,7 +911,7 @@
       <td>0.1960</td>
     </tr>
   </tbody>
-</table></div><div class='row mt-5 pt-3 border-top'><div class='col-12'><h4 style='color: #0d6efd;'>▶ [광교] 공간계량 분석</h4></div><div class='col-lg-4 col-md-12 mb-4'><h5 class='grid-title'>LM Test</h5><div class='table-responsive'><table class="dataframe table table-bordered table-striped table-hover datatable">
+</table></div><div class='row mt-5 pt-3 border-top'><div class='col-12'><h4 style='color: #0d6efd;'>▶ [광교] 공간계량 분석</h4></div><div class='col-lg-6 col-md-12 mb-4'><h5 class='grid-title'>LM Test</h5><div class='table-responsive'><table class="dataframe table table-bordered table-striped table-hover datatable">
   <thead>
     <tr style="text-align: right;">
       <th>구분</th>
@@ -852,7 +941,7 @@
       <td>0.696707</td>
     </tr>
   </tbody>
-</table></div></div><div class='col-lg-4 col-md-12 mb-4'><h5 class='grid-title'>적합도 비교</h5><div class='table-responsive'><table class="dataframe table table-bordered table-striped table-hover datatable">
+</table></div><h5 class='grid-title mt-4'>적합도 비교</h5><div class='table-responsive'><table class="dataframe table table-bordered table-striped table-hover datatable">
   <thead>
     <tr style="text-align: right;">
       <th>구분</th>
@@ -881,7 +970,7 @@
       <td>-46.089916</td>
     </tr>
   </tbody>
-</table></div></div><div class='col-lg-4 col-md-12 mb-4'><h5 class='grid-title'>최종 공간모형</h5><div class='table-responsive'><table class="dataframe table table-bordered table-striped table-hover datatable">
+</table></div></div><div class='col-lg-6 col-md-12 mb-4'><h5 class='grid-title'>최종 공간모형</h5><div class='table-responsive'><table class="dataframe table table-bordered table-striped table-hover datatable">
   <thead>
     <tr style="text-align: right;">
       <th>독립변수</th>
@@ -987,37 +1076,29 @@
     </tr>
   </tbody>
 </table></div></div></div>
-
-            <div class="manual-box"><h5>📝 연구자 해석 요약</h5><ul>
-<li><strong>전역적 공간자기상관의 지역 한정성</strong>: Moran's I는 <strong>광교에서만 유의</strong>합니다(0.383, p=.005). 동탄(p=.375)·운정(p=.196)은 비유의하여, 별도의 공간계량모형(SAR/SEM) 적용 근거가 부족합니다. 즉 "신도시=공간자기상관 존재"라는 일반화는 성립하지 않으며, 세 지역에 동일한 공간계량 처방을 일괄 적용하는 것은 부적절합니다.</li>
-<li><strong>광교 모형 선택</strong>: LM검정에서 LM-lag는 유의(p=.029)하나 LM-error는 비유의(p=.769)하여 <strong>공간시차모형(SAR)</strong>이 이론적으로 타당하며, 적합도 비교(Log-Likelihood, AIC 모두 SAR이 최적)에서도 동일하게 확인됩니다.</li>
-<li><strong>공간파급효과</strong>: 광교 SAR 최종모형의 rho=0.179(p<.05)는 인접 단지 가격의 약 18%가 해당 단지 가격에 공간적으로 전이됨을 의미하며, 뚜렷한 가격 스필오버가 존재함을 보여줍니다.</li>
-<li><strong>계수 부호역전에 대한 유의사항</strong>: SAR 최종모형에서 `ln_walk_park`이 OLS 중력모형(비유의)과 달리 유의한 양(+)으로 전환됩니다. 공원과 멀수록 가격이 높다는 표면적 해석은 경제이론과 배치되므로, 이는 진짜 인과관계라기보다 <strong>공간교란(spatial confounding)</strong> — 상권중력으로 통제된 중심상업지구 인접구역이 소규모 근린공원과는 오히려 이격된 도시구조적 배치 때문일 가능성이 높습니다. 단정적 인과해석 대신 공원 유형 세분화 등 후속 강건성 검토가 필요합니다. `edu_grav`가 SAR에서도 유의한 음(-)으로 남는 것 역시 다중공선성(Ⅰ탭 VIF 22)에 따른 계수불안정으로 보는 것이 통계적으로 더 타당합니다.</li>
-<li><strong>동탄·운정에 대한 시사점</strong>: 전역 Moran's I 비유의는 실제 공간의존성이 없다는 뜻일 수도 있지만, 다핵적 도시구조에서는 국지적으로 공간군집이 존재해도 핵 간에 상쇄되어 전역통계량이 유의하지 않게 나타날 수 있습니다. 따라서 후속 분석에서는 국지 모란지수(LISA)를 통한 재검토를 권고합니다.</li>
-</ul></div>
         </div>
 
         <div class="tab-pane fade" id="tab5">
-            <h4 class="mt-4">분석 결과 종합 논의</h4>
             <div class="manual-box mt-4">
-                <h5>📝 연구자 종합 결론</h5>
+                <h5>📝 종합 결론</h5>
                 <ul>
-<li><strong>구조적 이질성의 통계적 확증</strong>: Chow Test(F=942.83, p≈0)로 확인된 풀링 기각은 세 신도시가 단일 가격함수로 통합될 수 없는 이질적 시장임을 확증하며, 개별모형 접근(town-by-town modeling)이 방법론적으로 정당함을 뒷받침합니다.</li>
+<li><strong>연구설계의 개별적 기여</strong>: 본 연구는 (1) 3개 신도시에 동형 모형을 적용한 비교설계, (2) 거리지표(보행망 vs 직선거리)의 측정오차를 진단대상으로 명시화, (3) 개별 어메니티 거리 대신 종합중력지수를 도입, (4) Chow Test로 풀링 타당성을 직접 검증, (5) 공간계량모형을 진단(Moran's I·LM) 결과에 따라 선택적으로만 적용한 점에서, 단일 신도시·단일 모형 중심의 선행연구들과 방법론적으로 구별된다.</li>
 <li><strong>도시구조 요인 비교</strong></li>
 </ul>
-<table class='table table-bordered table-striped'><thead><tr>
+<div class="table-responsive"><table class='table table-bordered table-striped'><thead><tr>
 <th>구조 요인</th><th>광교</th><th>동탄</th><th>운정</th>
 </tr></thead><tbody>
 <tr><td><strong>공간구조</strong></td><td>광교호수공원 중심 콤팩트 순환형 시가지, 업무·상업기능이 호수 인접부에 집중</td><td>동탄1·2지구를 아우르는 광역적 신도시, GTX-A/SRT 역세권 중심 고밀개발</td><td>파주 운정1지구~확장지구로 이어지는 단계적(phased) 개발, 서울 접근성 낮은 배후주거지</td></tr>
-<tr><td><strong>상권·학군 배치</strong></td><td>상권·학군 클러스터가 공간적으로 근접 배치(중력지수 간 VIF 22 수준)</td><td>역세권-외곽 간 다핵적 하위시장 가능성</td><td>상대적으로 단핵·소규모 상권구조</td></tr>
-<tr><td><strong>가로·보행망</strong></td><td>호수 순환형 보행로, 직선-네트워크거리 상관 0.931(최고)</td><td>대규모 슈퍼블록·광폭 간선도로, 상관 0.616(최저), 우회 변동성 최대</td><td>상관 0.740, 우회 변동성 중간</td></tr>
+<tr><td><strong>상권·학군 배치</strong></td><td>상권·학군 클러스터가 공간적으로 근접 배치(중력지수 간 VIF 22 수준)</td><td>역세권-외곽 간 다핵적 하위시장 가능성(주차변수 부호역전)</td><td>상대적으로 단핵·소규모 상권구조, 구조특성 주도형</td></tr>
+<tr><td><strong>가로·보행망</strong></td><td>호수 순환형 보행로, 직선-네트워크거리 상관 0.931(최고), 측정오차 최소</td><td>대규모 슈퍼블록·광폭 간선도로, 상관 0.616(최저), 측정오차 최대(개선폭 +0.027)</td><td>상관 0.740, 측정오차 중간</td></tr>
 <tr><td><strong>개발이력</strong></td><td>단일 시기 개발, 건축연한 분산 협소</td><td>단일 시기 집중개발, 건축연한 SD 1.17(최소)</td><td>다단계 개발, 건축연한 SD 5.75(최대)</td></tr>
-</tbody></table>
+<tr><td><strong>공간자기상관</strong></td><td>Moran's I 유의(0.383, p=.005), SAR 적용(rho=0.179)</td><td>비유의(p=.375), OLS/중력모형이 적정</td><td>비유의(p=.196), OLS/중력모형이 적정</td></tr>
+</tbody></table></div>
 <ul>
-<li><strong>중력모형의 설명력 우위</strong>: 개별거리변수에서 중력지수로 이행할 때 Adj-R²가 전 지역에서 상승하며, 특히 동탄에서 개선폭이 가장 큽니다(0.603→0.806). 대규모·다핵적 신도시일수록 단일 어메니티까지의 거리보다 종합적 중심성 지수가 가격설명에 더 적합함을 시사합니다.</li>
-<li><strong>공간계량모형의 선택적 적용 필요성</strong>: 전역적 Moran's I가 광교에서만 유의했다는 사실은, 신도시 비교연구에서 지역별 사전진단(Moran's I, LM검정) 없이 동일한 공간모형을 일괄 적용해서는 안 된다는 방법론적 교훈을 제공합니다.</li>
-<li><strong>다중공선성과 계수해석의 한계</strong>: 광교 `edu_grav`의 지속적 부호역전은 진정한 음의 학군효과가 아니라 `comm_grav`와의 극심한 다중공선성(VIF 22)에 기인한 것으로 판단됩니다. 다중클러스터 중력지수 설계 시(특히 n=1, 임계거리 3km처럼 좁게 설정할 경우) 상권·학군 클러스터가 근접한 콤팩트형 신도시에서는 두 지수를 독립적으로 해석하기 어렵다는 시사점을 남기며, 후속 분석에서는 직교화(orthogonalization)를 고려할 필요가 있습니다.</li>
-<li><strong>종합</strong>: 광교는 콤팩트 호수중심형 구조로 공간파급효과(rho=0.179)가 뚜렷한 단핵시장, 동탄은 광역·다핵적 역세권 구조로 개별모형 설명력의 한계가 뚜렷한 복합시장, 운정은 단계적 개발에 따른 구조특성(연한) 주도형 시장으로, 각각 상이한 가격형성 메커니즘을 갖는다는 것이 통계적으로도 도시구조적으로도 정합적으로 확인됩니다.</li>
+<li><strong>중력모형의 설명력 우위와 그 함의</strong>: 개별거리변수에서 중력지수로 이행할 때 Adj-R²가 전 지역에서 상승하며, 개선폭은 동탄에서 가장 크다(0.603→0.806). 이는 대규모·다핵적 신도시일수록 단일 어메니티까지의 거리보다 종합적 중심성 지수가 가격설명에 더 적합함을 시사하며, 향후 신도시 비교연구에서 변수설계 시 참고할 수 있는 실증적 기준을 제공한다.</li>
+<li><strong>공간계량모형의 선택적 적용이라는 방법론적 교훈</strong>: 전역적 Moran's I가 광교에서만 유의했다는 사실—그리고 이것이 독립된 선행연구(2026)에서도 재현되었다는 사실—은, 신도시 비교연구에서 지역별 사전진단 없이 동일한 공간모형을 일괄 적용해서는 안 된다는 명제를 두 개의 데이터셋으로 교차확인한 결과다.</li>
+<li><strong>다중공선성과 계수해석의 한계</strong>: 광교 `edu_grav`의 지속적 부호역전은 진정한 음의 학군효과가 아니라 `comm_grav`와의 극심한 다중공선성(VIF 22)에 기인한 것으로 판단된다. 상권·학군 클러스터가 근접한 콤팩트형 신도시에서는 두 지수를 독립적으로 해석하기 어려우며, 후속 분석에서는 중력지수의 직교화(orthogonalization) 또는 클러스터 임계거리 재설정을 고려할 필요가 있다.</li>
+<li><strong>종합</strong>: 광교는 콤팩트 호수중심형 구조로 공간파급효과(rho=0.179)가 뚜렷한 단핵시장, 동탄은 광역·다핵적 역세권 구조로 개별거리모형의 설명력 한계가 뚜렷하나 중력모형으로 상당 부분 보완되는 복합시장, 운정은 단계적 개발에 따른 구조특성(건축연한) 주도형 시장으로, 각각 상이한 가격형성 메커니즘을 갖는다는 것이 본 연구의 비교설계와 진단 절차를 통해 통계적·도시구조적으로 정합적으로 확인된다.</li>
 </ul>
             </div>
         </div>
@@ -1040,6 +1121,10 @@
         });
 
         $('button[data-bs-toggle="tab"]').on('shown.bs.tab', function (e) {
+            $.fn.dataTable.tables({ visible: true, api: true }).columns.adjust();
+        });
+
+        $(window).on('resize', function () {
             $.fn.dataTable.tables({ visible: true, api: true }).columns.adjust();
         });
     });
