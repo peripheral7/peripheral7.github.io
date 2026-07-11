@@ -25,7 +25,8 @@ export type Post = {
   tags?: string[]
   /**
    * Folder under /public holding the full-res photo set + manifest.json,
-   * used by the /gallery/[id] template. Required when variant is "photo".
+   * used by the /gallery/[id] template. Required when variant is "photo"
+   * AND the post is not listed in BOARD_ROUTES below.
    */
   imageFolder?: string
 }
@@ -40,6 +41,22 @@ type PostMeta = Omit<Post, "id" | "rotate" | "pin"> & {
 
 const POSTS_DIR = path.join(process.cwd(), "content/posts")
 const PIN_CYCLE: Array<"pin" | "tape" | "clip"> = ["pin", "tape", "clip"]
+
+/**
+ * Posts that use the standalone /board/<slug> mood-board layout
+ * (components/post-board.tsx) instead of the default /gallery/[id]
+ * masonry template. Keyed by the post's id — which is always its
+ * content/posts/<id>.json filename (without extension).
+ *
+ * To move a post from the default gallery to a custom board page:
+ *   1. Build app/board/<name>/page.tsx + content/boards/<name>.ts
+ *   2. Add an entry here: "<post-id>": "/board/<name>"
+ * That's the only change needed — no other file has to know about it.
+ */
+const BOARD_ROUTES: Record<string, string> = {
+  "03_aqui": "/board/aqui",
+  "02-cbr650f-2016": "/board/cbr650f",
+}
 
 // Deterministic pseudo-random "crooked pin" tilt derived from the filename,
 // so the scrapbook look doesn't require hand-picking a rotate value per post.
@@ -64,28 +81,27 @@ function loadPosts(): Post[] {
     const raw = fs.readFileSync(path.join(POSTS_DIR, file), "utf-8")
     const meta = JSON.parse(raw) as PostMeta
 
+    // Resolution order for href:
+    //   1. BOARD_ROUTES  — explicit override, wins over everything
+    //   2. variant "photo" → /gallery/[id] (default masonry template)
+    //   3. otherwise       → whatever href the JSON itself specifies
+    //      (used by "interactive"/"map" posts pointing at static reports)
+    const resolvedHref =
+      BOARD_ROUTES[slug] ?? (meta.variant === "photo" ? `/gallery/${slug}` : meta.href)
+
     const post: Post = {
       rotate: autoRotate(slug),
       pin: PIN_CYCLE[i % PIN_CYCLE.length],
       ...meta, // explicit values in the JSON win over the auto-filled defaults
 
       // id and href are re-asserted AFTER the meta spread, and each key
-      // appears only once here — TypeScript rejects an object literal
-      // that writes the same key twice, which is what broke the last
-      // build. Functionally this still means: id/href below always win
-      // over anything the spread may have set.
-      //
-      // - id must always be the filename slug. A stray "id" field left
-      //   in a JSON payload (old data model leftovers) would otherwise
-      //   silently win the spread and override it — this is exactly how
-      //   the cbr650f/aqui pages ended up swapped before.
-      //
-      // - href is derived from variant, not hand-written per post. Every
-      //   "photo" post routes through the same /gallery/[id] template;
-      //   "interactive"/"map" posts keep an explicit href pointing at a
-      //   standalone HTML file (reports, Folium maps, etc).
+      // appears only once here — an object literal can't repeat a key.
+      // This still means: id/href below always win over anything the
+      // spread may have set, which is what prevents id/href drift
+      // (this is exactly how the cbr650f/aqui pages ended up swapped,
+      // and later pointed at the wrong route, before).
       id: slug,
-      href: meta.variant === "photo" ? `/gallery/${slug}` : meta.href,
+      href: resolvedHref,
     }
 
     return post
