@@ -5,7 +5,7 @@ const FOLDER = "/images/motorcycles/CBR650F/"
 export const cbr650fBoard: BoardSection[] = [
   {
     id: "cbr650f-journal",
-    // title과 note 삭제 (헤더 렌더링 방지)
+    // title과 note 속성을 삭제했습니다.
     columns: 24,
     rows: 165,
     items: [
