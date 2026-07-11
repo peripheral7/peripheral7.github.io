@@ -1,4 +1,5 @@
 {
+  "id": "cbr650f-2016",
   "variant": "photo",
   "category": "MOTORCYCLE",
   "title": "Honda CBR650F (2016)",
@@ -6,9 +7,9 @@
   "ref": "MC-CBR-2016",
   "image": "/images/motorcycles/CBR650F/202604-05.JPEG",
   "imageAlt": "Honda CBR650F",
+  "imageFolder": "/images/motorcycles/CBR650F/",
   "href": "/board/cbr650f",
   "linkLabel": "Open journal",
   "date": "2026.04.12",
-  "tags": ["Honda", "CBR650F", "Maintenance", "Log"],
-  "imageFolder": "/images/motorcycles/CBR650F/"
+  "tags": ["Honda", "CBR650F", "Maintenance", "Log"]
 }
