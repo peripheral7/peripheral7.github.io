@@ -3,6 +3,7 @@
 @import 'shadcn/tailwind.css';
 
 @theme inline {
+  --font-kr: var(--font-noto-kr), 'Noto Sans KR Fallback', sans-serif;
   --font-sans: var(--font-archivo), 'Archivo Fallback', sans-serif;
   --font-mono: var(--font-jetbrains), 'JetBrains Mono Fallback', monospace;
   --color-sidebar-ring: var(--sidebar-ring);
