@@ -4,21 +4,20 @@ import Link from "next/link"
 export type PinStyle = "pin" | "tape" | "clip" | "none"
 export type CaptionPlacement = "below" | "above" | "left" | "right" | "overlay-bottom" | "overlay-top" | "none"
 export type CaptionSize = "sm" | "md" | "lg"
+export type CaptionAlign = "left" | "right"
 
 export type BoardPhoto = {
   kind?: "photo"
   id: string
   src: string
   alt: string
-  /** Designed frame shape, e.g. "4 / 5" (portrait), "3 / 2" (landscape).
-   *  This is the SHAPE the design calls for — the photo is cropped
-   *  (object-fit: cover) to fill it, matching how the original mood
-   *  board actually works (most frames are deliberate crops of
-   *  landscape source photos, not their native ratio). */
   aspectRatio?: string
   caption?: string
+  /** Default: "below" if caption is set. */
   captionPlacement?: CaptionPlacement
   captionSize?: CaptionSize
+  /** Text alignment for "below" captions — left photo → "left", center/right photo → "right". Default: "left". */
+  captionAlign?: CaptionAlign
   colStart?: number
   colSpan?: number
   rowStart?: number
@@ -62,38 +61,27 @@ function Clip() {
   )
 }
 
-// Korean text must never fall back to font-mono (JetBrains Mono has no
-// Hangul glyphs) or Archivo (Latin-only) — both would render Korean in
-// whatever ugly fallback the OS picks. Captions always use the Noto Sans
-// KR variable set up in layout.tsx/globals.css.
-function CaptionText({ text, size = "sm", className = "" }: { text: string; size?: CaptionSize; className?: string }) {
+// 한글 캡션은 절대 font-mono(JetBrains Mono, 한글 글리프 없음)나
+// Archivo(라틴 전용)로 폴백되면 안 되므로, --font-kr을 명시적으로 사용합니다.
+function CaptionText({ text, size = "sm", align = "left", className = "" }: { text: string; size?: CaptionSize; align?: CaptionAlign; className?: string }) {
   const sizeClass = size === "lg" ? "text-sm md:text-base" : size === "md" ? "text-xs md:text-sm" : "text-[0.7rem] md:text-xs"
-  return (
-    <p className={`${sizeClass} font-[family-name:var(--font-kr)] tracking-wide ${className}`}>
-      {text}
-    </p>
-  )
+  const alignClass = align === "right" ? "text-right" : "text-left"
+  return <p className={`${sizeClass} ${alignClass} font-[family-name:var(--font-kr)] tracking-wide ${className}`}>{text}</p>
 }
 
 function PhotoCell({ item }: { item: BoardPhoto }) {
   const pin = item.pin ?? "none"
   const placement: CaptionPlacement = item.captionPlacement ?? (item.caption ? "below" : "none")
+  const align = item.captionAlign ?? "left"
   const size = item.captionSize ?? "sm"
   const isOverlay = placement === "overlay-bottom" || placement === "overlay-top"
-  const isSide = placement === "left" || placement === "right"
   const paddingBottom = frameHeightPercent(item.aspectRatio ?? "4 / 5")
-
-  const flexDirClass =
-    placement === "above" ? "flex-col-reverse" : placement === "left" ? "flex-row-reverse items-center" : placement === "right" ? "flex-row items-center" : "flex-col"
 
   const frame = (
     <div className="relative w-full overflow-hidden bg-muted ring-1 ring-black/5 shadow-md" style={{ paddingBottom: `${paddingBottom}%` }}>
       {pin === "tape" && <Tape />}
       {pin === "pin" && <Pin />}
       {pin === "clip" && <Clip />}
-
-      {/* fill + object-cover: crops to the designed frame shape above,
-          matching the reference mood board (which crops most photos). */}
       <Image src={item.src} alt={item.alt} fill quality={55} sizes="(max-width: 1024px) 100vw, 1024px" className="object-cover" />
 
       {isOverlay && item.caption && (
@@ -102,7 +90,7 @@ function PhotoCell({ item }: { item: BoardPhoto }) {
             placement === "overlay-bottom" ? "bottom-0 bg-gradient-to-t from-black/70 to-transparent" : "top-0 bg-gradient-to-b from-black/70 to-transparent"
           }`}
         >
-          <CaptionText text={item.caption} size={size} className="text-white" />
+          <CaptionText text={item.caption} size={size} align={align} className="text-white" />
         </div>
       )}
     </div>
@@ -110,10 +98,11 @@ function PhotoCell({ item }: { item: BoardPhoto }) {
 
   if (placement === "none" || isOverlay || !item.caption) return frame
 
+  // "below": 사진 아래, 좌측 배치 사진이면 좌측 정렬, 중앙~우측이면 우측 정렬
   return (
-    <div className={`flex ${flexDirClass} ${isSide ? "gap-3" : "gap-2"}`}>
+    <div className="flex flex-col gap-1.5">
       {frame}
-      <CaptionText text={item.caption} size={size} className={`shrink-0 whitespace-nowrap text-foreground/80 ${isSide ? "" : ""}`} />
+      <CaptionText text={item.caption} size={size} align={align} className="text-foreground/80" />
     </div>
   )
 }
