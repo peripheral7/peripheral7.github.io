@@ -1,6 +1,6 @@
 import { Analytics } from '@vercel/analytics/next'
 import type { Metadata, Viewport } from 'next'
-import { Archivo, JetBrains_Mono } from 'next/font/google'
+import { Archivo, JetBrains_Mono, Noto_Sans_KR, Orbit } from 'next/font/google'
 import './globals.css'
 
 const archivo = Archivo({
@@ -15,33 +15,36 @@ const jetbrainsMono = JetBrains_Mono({
   weight: ['400', '500', '700'],
 })
 
+const notoSansKR = Noto_Sans_KR({
+  subsets: ['latin'],
+  variable: '--font-noto-kr',
+  weight: ['400', '500', '700', '900'],
+})
+
+const orbit = Orbit({
+  subsets: ['latin'],
+  variable: '--font-orbit-raw',
+  weight: ['400'],
+})
+
 export const metadata: Metadata = {
-  title: 'MOOOOON',
+  title: 'THE FIELD FILE — Land, Light & Machines',
   description:
-    'A working notebook: research on land evaluation, photography, and motorcycles. ',
-  generator: '',
+    'A working notebook: research on land evaluation, photography, and motorcycles. Filed, pinned, and cross-referenced.',
+  generator: 'v0.app',
   icons: {
     icon: [
-      {
-        url: '/icon-light-32x32.png',
-        media: '(prefers-color-scheme: light)',
-      },
-      {
-        url: '/icon-dark-32x32.png',
-        media: '(prefers-color-scheme: dark)',
-      },
-      {
-        url: '/icon.svg',
-        type: 'image/svg+xml',
-      },
+      { url: '/icon-light-32x32.png', media: '(prefers-color-scheme: light)' },
+      { url: '/icon-dark-32x32.png', media: '(prefers-color-scheme: dark)' },
+      { url: '/icon.svg', type: 'image/svg+xml' },
     ],
     apple: '/apple-icon.png',
   },
 }
 
 export const viewport: Viewport = {
-  colorScheme: 'light', // 'dark'에서 'light'로 변경
-  themeColor: '#ffffff', // 어두운 색('#1a1a1a')에서 순백색('#ffffff')으로 변경
+  colorScheme: 'light',
+  themeColor: '#ffffff',
 }
 
 export default function RootLayout({
@@ -51,8 +54,8 @@ export default function RootLayout({
 }>) {
   return (
     <html
-      lang="en"
-      className={`bg-background ${archivo.variable} ${jetbrainsMono.variable}`}
+      lang="ko"
+      className={`bg-background ${archivo.variable} ${jetbrainsMono.variable} ${notoSansKR.variable} ${orbit.variable}`}
     >
       <body className="font-sans antialiased">
         {children}
