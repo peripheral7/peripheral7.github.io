@@ -1,7 +1,7 @@
 import fs from "fs"
 import path from "path"
 
-export type Category = "RESEARCH" | "PHOTOGRAPHY" | "MOTORCYCLE"
+export type Category = "RESEARCH" | "PHOTOGRAPHY" | "MOTORCYCLE" | "STUDY"
 
 export type Post = {
   id: string

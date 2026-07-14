@@ -8,7 +8,8 @@ const filterOptions = [
   { label: "All entries", value: "ALL" },
   { label: "Research", value: "RESEARCH" },
   { label: "Photography", value: "PHOTOGRAPHY" },
-  { label: "Motorcycles", value: "MOTORCYCLE" }
+  { label: "Motorcycles", value: "MOTORCYCLE" },
+  { label: "Study", value: "STUDY" }
 ] as const
 
 export function ScrapbookBoard({ initialPosts }: { initialPosts: Post[] }) {

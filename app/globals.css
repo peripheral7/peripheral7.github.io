@@ -139,6 +139,30 @@
   }
 
 
+/* ── 감정평가사 별자리 스킬트리 전용 ─────────────────────── */
+  .nebula-bg {
+    background:
+      radial-gradient(ellipse 60% 40% at 20% 30%, oklch(0.35 0.12 280 / 0.35), transparent 60%),
+      radial-gradient(ellipse 50% 35% at 80% 70%, oklch(0.3 0.1 250 / 0.3), transparent 60%),
+      radial-gradient(ellipse 70% 50% at 50% 100%, oklch(0.25 0.08 300 / 0.25), transparent 70%),
+      #05060c;
+  }
+  @keyframes star-twinkle {
+    0%, 100% { opacity: 0.35; }
+    50% { opacity: 1; }
+  }
+  .star-twinkle {
+    animation: star-twinkle var(--twinkle-duration, 3s) ease-in-out infinite;
+  }
+  @keyframes star-pulse {
+    0%, 100% { transform: translate(-50%, -50%) scale(1); }
+    50% { transform: translate(-50%, -50%) scale(1.25); }
+  }
+  .star-pulse {
+    animation: star-pulse 2.4s ease-in-out infinite;
+  }
+  
+  
   /* Mood-board grid: mobile stacks in one simple column (auto height,
     aspect-ratio governs photo size). From md up, it becomes the real
     coordinate grid driven by --board-cols/--board-row-h/--board-gap
