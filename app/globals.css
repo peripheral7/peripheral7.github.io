@@ -166,27 +166,15 @@
     animation: select-glow 1.8s ease-in-out infinite;
     filter: blur(6px);
   }
-  @keyframes sparkle-flare {
-    0%, 100% { opacity: 0; transform: translate(-50%, -50%) scale(0.5); }
-    50% { opacity: 0.9; transform: translate(-50%, -50%) scale(1); }
+  @keyframes sparkle-glint {
+    0%, 100% { opacity: 0; transform: scale(0.35) rotate(0deg); }
+    50% { opacity: 1; transform: scale(1) rotate(25deg); }
   }
-  .star-sparkle {
-    position: relative;
+  .sparkle-glint {
+    animation-name: sparkle-glint;
+    animation-timing-function: ease-in-out;
+    animation-iteration-count: infinite;
   }
-  .star-sparkle::before,
-  .star-sparkle::after {
-    content: "";
-    position: absolute;
-    left: 50%;
-    top: 50%;
-    background: linear-gradient(to bottom, transparent, var(--sparkle-color, rgba(255,255,255,0.9)) 50%, transparent);
-    transform: translate(-50%, -50%);
-    animation: sparkle-flare var(--twinkle-duration, 3s) ease-in-out infinite;
-    animation-delay: var(--twinkle-delay, 0s);
-    pointer-events: none;
-  }
-  .star-sparkle::before { width: 1.5px; height: 280%; }
-  .star-sparkle::after { width: 280%; height: 1.5px; }
 
   
 }

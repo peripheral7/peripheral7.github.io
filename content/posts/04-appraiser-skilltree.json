@@ -1,8 +1,8 @@
 {
   "variant": "interactive",
   "category": "STUDY",
-  "title": "감정평가사 스킬트리 — 별자리 학습맵",
-  "meta": "유도은 감정평가실무 기본서 기반 · 1차 5개 + 2차 3개 별자리",
+  "title": "감정평가사 별자리",
+  "meta": "유도은 감정평가실무",
   "ref": "APPRAISER-01",
   "body": "감정평가실무를 스카이림 스킬트리처럼 별자리 형태로 재구성한 학습 맵. 별을 클릭해 습득 여부를 표시하고, 학습·복습 기록을 날짜와 함께 저장한다.",
   "image": "/images/study/skyrim.jpg",

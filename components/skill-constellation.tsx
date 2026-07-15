@@ -2,6 +2,7 @@
 
 import { useEffect, useMemo, useRef, useState } from "react"
 import Link from "next/link"
+import { Sparkle } from "lucide-react"
 import { skillTree, sections, layoutTree } from "@/content/appraiser/skilltree"
 import defaultProgress from "@/content/appraiser/progress.default.json"
 
@@ -429,26 +430,49 @@ export function SkillConstellation() {
                   />
                 )}
 
-                <button
+<button
                   onClick={() => selectStar(n.id)}
                   aria-label={n.name}
-                  className={`star-sparkle absolute -translate-x-1/2 -translate-y-1/2 rounded-full transition-shadow ${
+                  className={`absolute -translate-x-1/2 -translate-y-1/2 rounded-full transition-shadow ${
                     glowing ? "star-pulse" : "star-twinkle"
                   }`}
                   style={{
                     width: size,
                     height: size,
-                    // 단색 대신 방사형 그라데이션으로 보석 같은 입체감
                     background: `radial-gradient(circle at 35% 30%, rgba(255,255,255,0.95), rgba(${rgb},0.9) 55%, rgba(${rgb},0.35) 100%)`,
                     boxShadow: glowing
                       ? `0 0 6px 2px rgba(255,255,255,0.9), 0 0 18px 6px rgba(${rgb},0.55), 0 0 34px 14px rgba(${rgb},0.22)`
                       : `0 0 4px 1px rgba(${rgb},0.35)`,
                     ["--twinkle-duration" as string]: `${3 + (delay % 3)}s`,
-                    ["--twinkle-delay" as string]: `${delay * 0.1}s`,
-                    ["--sparkle-color" as string]: `rgba(${rgb},0.9)`,
                     animationDelay: `${delay * 0.1}s`,
                   }}
                 />
+
+                {/* 십자선 대신: 안쪽이 오목한 4각 별(표창) 모양 글린트.
+                    lucide-react의 Sparkle 아이콘을 채워서(fill) 사용 —
+                    static translate를 쓰지 않고 margin으로 중앙정렬해서,
+                    애니메이션의 scale/rotate가 위치값을 덮어쓰는 문제를 피함 */}
+                {(() => {
+                  const glintSize = glowing ? size * 3.2 : size * 2.2
+                  return (
+                    <Sparkle
+                      aria-hidden
+                      fill={`rgba(${rgb},1)`}
+                      stroke="none"
+                      className="sparkle-glint pointer-events-none absolute left-1/2 top-1/2"
+                      style={{
+                        width: glintSize,
+                        height: glintSize,
+                        marginLeft: -glintSize / 2,
+                        marginTop: -glintSize / 2,
+                        filter: `drop-shadow(0 0 3px rgba(${rgb},0.9)) drop-shadow(0 0 8px rgba(${rgb},0.5))`,
+                        animationDuration: `${3.4 + (delay % 3)}s`,
+                        animationDelay: `${delay * 0.15}s`,
+                        opacity: glowing ? undefined : 0.7,
+                      }}
+                    />
+                  )
+                })()}
                 <p className="pointer-events-none absolute left-1/2 top-4 -translate-x-1/2 whitespace-nowrap text-[11px] leading-none text-white/80">
                   {n.name}
                 </p>
@@ -461,11 +485,11 @@ export function SkillConstellation() {
       {selectedNode && (
         <div
           className="fixed z-50 h-[70vh] w-[92vw] max-w-sm overflow-y-auto rounded-2xl border border-neutral-700 bg-neutral-950/90 p-6 shadow-2xl backdrop-blur-md"
-          style={{
-            left: "50%",
-            top: "50%",
-            transform: isDesktop ? "translate(calc(-50% + 260px), -50%)" : "translate(-50%, -50%)",
-          }}
+          style={
+            isDesktop
+              ? { top: "50%", right: "4rem", transform: "translateY(-50%)" }
+              : { left: "50%", top: "50%", transform: "translate(-50%, -50%)" }
+          }
         >
           <button onClick={() => setSelectedId(null)} className="absolute right-4 top-4 text-white/50 transition-colors hover:text-white">
             ✕
