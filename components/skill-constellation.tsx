@@ -2,7 +2,7 @@
 
 import { useEffect, useMemo, useRef, useState } from "react"
 import Link from "next/link"
-import { appraiserSkillTree, sections } from "@/content/appraiser/skilltree"
+import { skillTree, sections, layoutTree } from "@/content/appraiser/skilltree"
 import defaultProgress from "@/content/appraiser/progress.default.json"
 
 type LogEntry = { date: string; type: "study" | "review"; text: string }
@@ -17,6 +17,10 @@ const ZOOM_MAX = 2.4
 const PAN_MARGIN = 260
 const RESISTANCE = 0.35
 
+// ── 1.1: 별 사이 간격은 이 두 값만 바꾸면 전체가 재조정됩니다 ──────
+const X_SPACING = 190
+const Y_SPACING = 190
+
 function formatDateYMD(d: Date) {
   const y = d.getFullYear()
   const m = String(d.getMonth() + 1).padStart(2, "0")
@@ -28,7 +32,6 @@ function clamp(v: number, min: number, max: number) {
   return Math.min(Math.max(v, min), max)
 }
 
-// 범위를 벗어나면 저항이 걸려 조금만 밀리는 "고무줄" 효과
 function rubberBand(value: number, min: number, max: number, resistance = RESISTANCE) {
   if (value < min) return min - (min - value) * resistance
   if (value > max) return max + (value - max) * resistance
@@ -93,11 +96,19 @@ function StarfieldCanvas() {
 }
 
 export function SkillConstellation() {
-  const { nodes, edges } = appraiserSkillTree
+  // ── 1.3: 좌표를 손으로 정하지 않고 트리 구조에서 자동 계산 ──────
+  const { positions, edges } = useMemo(
+    () => layoutTree(skillTree, { xSpacing: X_SPACING, ySpacing: Y_SPACING }),
+    [],
+  )
+  const nodeList = useMemo(
+    () => [...positions.entries()].map(([id, p]) => ({ id, ...p })),
+    [positions],
+  )
 
   const bounds = useMemo(() => {
-    const xs = nodes.map((n) => n.x)
-    const ys = nodes.map((n) => n.y)
+    const xs = nodeList.map((n) => n.x)
+    const ys = nodeList.map((n) => n.y)
     return {
       minX: Math.min(...xs) - PAN_MARGIN,
       maxX: Math.max(...xs) + PAN_MARGIN,
@@ -106,9 +117,8 @@ export function SkillConstellation() {
       centerX: (Math.min(...xs) + Math.max(...xs)) / 2,
       centerY: (Math.min(...ys) + Math.max(...ys)) / 2,
     }
-  }, [nodes])
+  }, [nodeList])
 
-  const nodeById = useMemo(() => new Map(nodes.map((n) => [n.id, n])), [nodes])
   const adjacency = useMemo(() => {
     const map = new Map<string, string[]>()
     for (const [a, b] of edges) {
@@ -142,7 +152,6 @@ export function SkillConstellation() {
     return () => window.removeEventListener("resize", update)
   }, [])
 
-  // 진행상황 로드/저장
   useEffect(() => {
     try {
       const raw = localStorage.getItem(STORAGE_KEY)
@@ -168,16 +177,14 @@ export function SkillConstellation() {
     setReviewInput("")
   }
 
-  // 선택된 별로 카메라 자동 이동+확대
   useEffect(() => {
     if (!selectedId) return
-    const n = nodeById.get(selectedId)
+    const n = positions.get(selectedId)
     if (!n) return
     setSmooth(true)
     setCamera({ x: n.x, y: n.y, zoom: FOCUS_ZOOM })
-  }, [selectedId, nodeById])
+  }, [selectedId, positions])
 
-  // WASD: 연결된 이웃 중 방향이 가장 잘 맞는 별로 이동
   useEffect(() => {
     function isTypingTarget(el: EventTarget | null) {
       const tag = (el as HTMLElement)?.tagName
@@ -190,13 +197,13 @@ export function SkillConstellation() {
       e.preventDefault()
 
       const currentId = selectedId ?? "root0"
-      const current = nodeById.get(currentId)
+      const current = positions.get(currentId)
       if (!current) return
-      const dir = DIR_VECTORS[key]
+      const dir = DIR_VECTORS[key as "w" | "a" | "s" | "d"]
       const neighborIds = adjacency.get(currentId) ?? []
       let best: { id: string; score: number } | null = null
       for (const nid of neighborIds) {
-        const n = nodeById.get(nid)
+        const n = positions.get(nid)
         if (!n) continue
         const dx = n.x - current.x
         const dy = n.y - current.y
@@ -209,7 +216,7 @@ export function SkillConstellation() {
     }
     window.addEventListener("keydown", onKeyDown)
     return () => window.removeEventListener("keydown", onKeyDown)
-  }, [selectedId, nodeById, adjacency])
+  }, [selectedId, positions, adjacency])
 
   function toggleAcquired(starId: string) {
     setProgress((prev) => {
@@ -218,7 +225,6 @@ export function SkillConstellation() {
     })
   }
 
-  // 내용을 저장하면 자동으로 습득 처리
   function addLog(starId: string, type: "study" | "review", text: string) {
     const trimmed = text.trim()
     if (!trimmed) return
@@ -229,7 +235,6 @@ export function SkillConstellation() {
     })
   }
 
-  // ── 드래그 팬 (고무줄 클램프) ────────────────────────────────
   function onPointerDown(e: React.PointerEvent) {
     dragRef.current = {
       active: true,
@@ -266,7 +271,6 @@ export function SkillConstellation() {
     }))
   }
 
-  // ── 휠 확대/축소 (고무줄 + 멈추면 튕겨 복귀) ──────────────────
   function onWheel(e: React.WheelEvent) {
     e.preventDefault()
     setSmooth(false)
@@ -312,15 +316,12 @@ export function SkillConstellation() {
     }
   }
 
-  const selectedNode = selectedId ? nodeById.get(selectedId) : null
+  const selectedNode = selectedId ? positions.get(selectedId) : null
   const selectedSection = selectedNode ? sections[selectedNode.section] : null
   const isDesktop = stage.width >= 768
 
   return (
-    <div
-      className="relative min-h-screen w-full overflow-hidden bg-[#05060c] text-white font-[family-name:var(--font-orbit)]"
-    >
-      {/* 배경: 카메라 이동량의 3~5%만 따라가 "아주 조금만" 움직임 */}
+    <div className="relative min-h-screen w-full overflow-hidden bg-[#05060c] text-white font-[family-name:var(--font-orbit)]">
       <div
         className="pointer-events-none fixed inset-0 z-0"
         style={{
@@ -344,7 +345,7 @@ export function SkillConstellation() {
       </Link>
 
       <div className="fixed left-1/2 top-4 z-50 -translate-x-1/2 rounded-full border border-neutral-700 bg-neutral-900/80 px-4 py-2 font-mono text-xs uppercase tracking-widest text-white/80 backdrop-blur-md md:top-8">
-        습득 {Object.values(progress).filter((p) => p?.acquired).length} / {nodes.length}
+        습득 {Object.values(progress).filter((p) => p?.acquired).length} / {nodeList.length}
       </div>
 
       <div className="fixed right-4 top-4 z-50 flex gap-2 md:right-8 md:top-8">
@@ -370,7 +371,6 @@ export function SkillConstellation() {
         </button>
       </div>
 
-      {/* 드래그·휠 캡처 스테이지 */}
       <div
         className="relative z-10 h-screen w-full touch-none select-none"
         onPointerDown={onPointerDown}
@@ -379,7 +379,6 @@ export function SkillConstellation() {
         onPointerLeave={onPointerUp}
         onWheel={onWheel}
       >
-        {/* 월드 컨테이너: 카메라값 하나로 전체를 이동/확대 (개별 좌표 재계산 불필요) */}
         <div
           className="absolute left-0 top-0"
           style={{
@@ -390,8 +389,8 @@ export function SkillConstellation() {
         >
           <svg style={{ position: "absolute", left: 0, top: 0, overflow: "visible" }} width={1} height={1}>
             {edges.map(([a, b], i) => {
-              const na = nodeById.get(a)
-              const nb = nodeById.get(b)
+              const na = positions.get(a)
+              const nb = positions.get(b)
               if (!na || !nb) return null
               const bothAcquired = progress[a]?.acquired && progress[b]?.acquired
               return (
@@ -405,33 +404,48 @@ export function SkillConstellation() {
             })}
           </svg>
 
-          {nodes.map((n) => {
+          {nodeList.map((n) => {
             const acquired = Boolean(progress[n.id]?.acquired)
             const isRoot = n.id === "root0"
             const isSelected = selectedId === n.id
+            const glowing = isRoot || acquired
             const delay = (n.id.charCodeAt(0) + n.id.charCodeAt(n.id.length - 1)) % 30
+            const rgb = isRoot ? "255,255,255" : acquired ? "255,214,140" : "170,195,255"
+            const size = isRoot ? 20 : 14
+
             return (
               <div key={n.id} className="absolute" style={{ left: n.x, top: n.y }}>
+                {/* 선택 효과: 링 대신, 별보다 먼저 그려서 항상 뒤에 깔리는
+                    부드러운 발광 블롭. 커졌다 작아지며 은은하게 빛남 */}
                 {isSelected && (
                   <span
                     aria-hidden
-                    className="select-ring pointer-events-none absolute left-0 top-0 h-5 w-5 rounded-full border-2 border-amber-300"
+                    className="select-glow pointer-events-none absolute left-1/2 top-1/2 rounded-full"
+                    style={{
+                      width: size * 2.6,
+                      height: size * 2.6,
+                      background: `radial-gradient(circle, rgba(255,255,255,0.9), rgba(${rgb},0.55) 55%, transparent 75%)`,
+                    }}
                   />
                 )}
+
                 <button
                   onClick={() => selectStar(n.id)}
                   aria-label={n.name}
-                  className={`absolute h-3.5 w-3.5 -translate-x-1/2 -translate-y-1/2 rounded-full transition-colors ${
-                    isRoot
-                      ? "star-pulse bg-white shadow-[0_0_16px_6px_rgba(255,255,255,0.5)]"
-                      : acquired
-                        ? "star-pulse bg-amber-300 shadow-[0_0_12px_4px_rgba(255,212,121,0.55)]"
-                        : "star-twinkle bg-slate-300/70"
+                  className={`star-sparkle absolute -translate-x-1/2 -translate-y-1/2 rounded-full transition-shadow ${
+                    glowing ? "star-pulse" : "star-twinkle"
                   }`}
                   style={{
-                    width: isRoot ? 20 : 14,
-                    height: isRoot ? 20 : 14,
+                    width: size,
+                    height: size,
+                    // 단색 대신 방사형 그라데이션으로 보석 같은 입체감
+                    background: `radial-gradient(circle at 35% 30%, rgba(255,255,255,0.95), rgba(${rgb},0.9) 55%, rgba(${rgb},0.35) 100%)`,
+                    boxShadow: glowing
+                      ? `0 0 6px 2px rgba(255,255,255,0.9), 0 0 18px 6px rgba(${rgb},0.55), 0 0 34px 14px rgba(${rgb},0.22)`
+                      : `0 0 4px 1px rgba(${rgb},0.35)`,
                     ["--twinkle-duration" as string]: `${3 + (delay % 3)}s`,
+                    ["--twinkle-delay" as string]: `${delay * 0.1}s`,
+                    ["--sparkle-color" as string]: `rgba(${rgb},0.9)`,
                     animationDelay: `${delay * 0.1}s`,
                   }}
                 />
@@ -444,7 +458,6 @@ export function SkillConstellation() {
         </div>
       </div>
 
-      {/* 플로팅 학습/복습 패널 — 중앙 근처, 위아래 안 붙음, 높이 70% */}
       {selectedNode && (
         <div
           className="fixed z-50 h-[70vh] w-[92vw] max-w-sm overflow-y-auto rounded-2xl border border-neutral-700 bg-neutral-950/90 p-6 shadow-2xl backdrop-blur-md"
@@ -462,14 +475,14 @@ export function SkillConstellation() {
           <h2 className="mt-1 text-xl font-bold leading-snug">{selectedNode.name}</h2>
 
           <button
-            onClick={() => toggleAcquired(selectedNode.id)}
+            onClick={() => selectedId && toggleAcquired(selectedId)}
             className={`mt-4 rounded-full border px-4 py-2 font-mono text-xs uppercase tracking-widest transition-colors ${
-              progress[selectedNode.id]?.acquired
+              selectedId && progress[selectedId]?.acquired
                 ? "border-amber-300 bg-amber-300/10 text-amber-300"
                 : "border-neutral-700 text-white/60 hover:border-white/40"
             }`}
           >
-            {progress[selectedNode.id]?.acquired ? "습득 완료" : "미습득"}
+            {selectedId && progress[selectedId]?.acquired ? "습득 완료" : "미습득"}
           </button>
 
           <div className="mt-8">
@@ -479,8 +492,8 @@ export function SkillConstellation() {
                 value={studyInput}
                 onChange={(e) => setStudyInput(e.target.value)}
                 onKeyDown={(e) => {
-                  if (e.key === "Enter") {
-                    addLog(selectedNode.id, "study", studyInput)
+                  if (e.key === "Enter" && selectedId) {
+                    addLog(selectedId, "study", studyInput)
                     setStudyInput("")
                   }
                 }}
@@ -489,8 +502,10 @@ export function SkillConstellation() {
               />
               <button
                 onClick={() => {
-                  addLog(selectedNode.id, "study", studyInput)
-                  setStudyInput("")
+                  if (selectedId) {
+                    addLog(selectedId, "study", studyInput)
+                    setStudyInput("")
+                  }
                 }}
                 className="shrink-0 rounded border border-neutral-700 px-3 font-mono text-xs text-white/70 transition-colors hover:border-accent hover:text-accent"
               >
@@ -506,8 +521,8 @@ export function SkillConstellation() {
                 value={reviewInput}
                 onChange={(e) => setReviewInput(e.target.value)}
                 onKeyDown={(e) => {
-                  if (e.key === "Enter") {
-                    addLog(selectedNode.id, "review", reviewInput)
+                  if (e.key === "Enter" && selectedId) {
+                    addLog(selectedId, "review", reviewInput)
                     setReviewInput("")
                   }
                 }}
@@ -516,8 +531,10 @@ export function SkillConstellation() {
               />
               <button
                 onClick={() => {
-                  addLog(selectedNode.id, "review", reviewInput)
-                  setReviewInput("")
+                  if (selectedId) {
+                    addLog(selectedId, "review", reviewInput)
+                    setReviewInput("")
+                  }
                 }}
                 className="shrink-0 rounded border border-neutral-700 px-3 font-mono text-xs text-white/70 transition-colors hover:border-accent hover:text-accent"
               >
@@ -527,25 +544,26 @@ export function SkillConstellation() {
           </div>
 
           <div className="mt-8 flex flex-col gap-3">
-            {(progress[selectedNode.id]?.logs ?? [])
-              .slice()
-              .reverse()
-              .map((log, i) => (
-                <div key={i} className="rounded border border-neutral-800 bg-neutral-900/60 p-3">
-                  <div className="mb-1 flex items-center gap-2">
-                    <span
-                      className={`rounded px-1.5 py-0.5 font-mono text-[0.6rem] uppercase tracking-widest ${
-                        log.type === "study" ? "bg-sky-400/20 text-sky-300" : "bg-emerald-400/20 text-emerald-300"
-                      }`}
-                    >
-                      {log.type === "study" ? "학습" : "복습"}
-                    </span>
-                    <span className="font-mono text-[0.65rem] text-white/40">{log.date}</span>
+            {selectedId &&
+              (progress[selectedId]?.logs ?? [])
+                .slice()
+                .reverse()
+                .map((log, i) => (
+                  <div key={i} className="rounded border border-neutral-800 bg-neutral-900/60 p-3">
+                    <div className="mb-1 flex items-center gap-2">
+                      <span
+                        className={`rounded px-1.5 py-0.5 font-mono text-[0.6rem] uppercase tracking-widest ${
+                          log.type === "study" ? "bg-sky-400/20 text-sky-300" : "bg-emerald-400/20 text-emerald-300"
+                        }`}
+                      >
+                        {log.type === "study" ? "학습" : "복습"}
+                      </span>
+                      <span className="font-mono text-[0.65rem] text-white/40">{log.date}</span>
+                    </div>
+                    <p className="text-sm text-white/85">{log.text}</p>
                   </div>
-                  <p className="text-sm text-white/85">{log.text}</p>
-                </div>
-              ))}
-            {(progress[selectedNode.id]?.logs?.length ?? 0) === 0 && (
+                ))}
+            {selectedId && (progress[selectedId]?.logs?.length ?? 0) === 0 && (
               <p className="text-sm text-white/30">아직 기록이 없습니다.</p>
             )}
           </div>
