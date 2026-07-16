@@ -1,6 +1,6 @@
 import { Analytics } from '@vercel/analytics/next'
 import type { Metadata, Viewport } from 'next'
-import { Archivo, JetBrains_Mono, Noto_Sans_KR, Orbit } from 'next/font/google'
+import { Archivo, JetBrains_Mono, Noto_Sans_KR, Orbit, Hahmlet } from 'next/font/google'
 import './globals.css'
 
 const archivo = Archivo({
@@ -25,6 +25,12 @@ const orbit = Orbit({
   subsets: ['latin'],
   variable: '--font-orbit-raw',
   weight: ['400'],
+})
+
+const hahmlet = Hahmlet({
+  subsets: ['latin'],
+  variable: '--font-hahmlet-raw',
+  weight: ['400', '500', '600', '700'],
 })
 
 export const metadata: Metadata = {
@@ -55,7 +61,8 @@ export default function RootLayout({
   return (
     <html
       lang="ko"
-      className={`bg-background ${archivo.variable} ${jetbrainsMono.variable} ${notoSansKR.variable} ${orbit.variable}`}
+      className={`bg-background ${archivo.variable} ${jetbrainsMono.variable} ${notoSansKR.variable} ${orbit.variable} ${hahmlet.variable}`}
+      
     >
       <body className="font-sans antialiased">
         {children}
