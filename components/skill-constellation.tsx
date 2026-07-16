@@ -43,18 +43,17 @@ function rubberBand(value: number, min: number, max: number, resistance = RESIST
   return value
 }
 
-// 스페이스 포함 7자 초과 시 공백 근처에서 두 줄로 분리
+// 정확히 7글자 지점 근처 공백에서 두 줄로 분리 (줄간격 1.2는 렌더링부에서 처리)
 function wrapLabel(name: string): [string, string?] {
   if (name.length <= TITLE_WRAP_LEN) return [name]
-  const mid = Math.ceil(name.length / 2)
   let breakIdx = -1
   for (let offset = 0; offset < name.length; offset++) {
-    const left = mid - offset
-    const right = mid + offset
+    const left = TITLE_WRAP_LEN - offset
+    const right = TITLE_WRAP_LEN + offset
     if (name[left] === " ") { breakIdx = left; break }
     if (name[right] === " ") { breakIdx = right; break }
   }
-  if (breakIdx === -1) breakIdx = mid
+  if (breakIdx === -1) breakIdx = TITLE_WRAP_LEN
   return [name.slice(0, breakIdx).trim(), name.slice(breakIdx).trim()]
 }
 
@@ -118,11 +117,12 @@ function getTier(isRoot: boolean, acquired: boolean, reinforced: boolean): Tier 
 
 type LayoutMode = "mobile" | "narrow" | "wide"
 
+// wide: 별은 좌측 2/3 중앙(x = width/3)에, 우측 1/3은 패널 영역으로 비워둠
 function getFocal(mode: LayoutMode, hasSelection: boolean, width: number, height: number) {
   if (!hasSelection) return { x: width / 2, y: height / 2 }
   if (mode === "mobile") return { x: width / 2, y: height * 0.75 }
   if (mode === "narrow") return { x: width * 0.25, y: height / 2 }
-  return { x: width / 2, y: height / 2 }
+  return { x: width / 3, y: height / 2 }
 }
 
 export function SkillConstellation() {
@@ -156,7 +156,7 @@ export function SkillConstellation() {
   }, [edges])
   const parentOf = useMemo(() => new Map(edges.map(([p, c]) => [c, p])), [edges])
 
-  // 각 노드 아래 하위트리가 뻗어나간 최대 깊이 (아래 방향키 우선순위 계산용)
+  // 각 노드 아래 하위트리가 뻗어나간 최대 깊이 (시각적 위쪽 이동 우선순위 계산용)
   const subtreeDepth = useMemo(() => {
     const map = new Map<string, number>()
     function compute(id: string): number {
@@ -244,10 +244,10 @@ export function SkillConstellation() {
     setCamera({ x: n.x, y: n.y, zoom: FOCUS_ZOOM })
   }, [selectedId, positions])
 
-  // 방향키 트리 이동
-  // ↑ : 부모로 (트리 구조상 유일하므로 모호함 없음)
-  // ↓ : 자식 중 하위트리가 가장 길게 뻗은 방향 (동률이면 좌측)
-  // ←/→ : 같은 부모를 공유하는 형제 사이에서만 이동 (깊이가 항상 같아 상하 이동 없음)
+  // 방향키 트리 이동 (시각 기준으로 재정의)
+  // ↑ : 화면상 위쪽 = 구조적으로 하위 자식 (하위트리가 가장 길게 뻗은 자식, 동률이면 좌측)
+  // ↓ : 화면상 아래쪽 = 구조적으로 부모
+  // ←/→ : 같은 부모를 공유하는 형제 사이에서만 이동
   useEffect(() => {
     function isTypingTarget(el: EventTarget | null) {
       const tag = (el as HTMLElement)?.tagName
@@ -266,12 +266,6 @@ export function SkillConstellation() {
       }
 
       if (key === "ArrowUp") {
-        const parent = parentOf.get(current)
-        if (parent) selectStar(parent)
-        return
-      }
-
-      if (key === "ArrowDown") {
         const kids = childrenOf.get(current) ?? []
         if (kids.length === 0) return
         let best = kids[0]
@@ -287,6 +281,12 @@ export function SkillConstellation() {
           }
         }
         selectStar(best)
+        return
+      }
+
+      if (key === "ArrowDown") {
+        const parent = parentOf.get(current)
+        if (parent) selectStar(parent)
         return
       }
 
@@ -411,6 +411,13 @@ export function SkillConstellation() {
     }, 220)
   }
 
+  // 배경(빈 공간) 클릭 시 선택 해제 및 메뉴 닫기 — 드래그였다면 무시
+  function onStageClick() {
+    if (dragRef.current.moved) return
+    setSelectedId(null)
+    setToolsOpen(false)
+  }
+
   const focal = getFocal(layoutMode, Boolean(selectedId), stage.width, stage.height)
   const worldTransform = {
     left: focal.x - camera.x * camera.zoom,
@@ -458,9 +465,10 @@ export function SkillConstellation() {
   } else if (layoutMode === "narrow") {
     panelClass = "fixed inset-y-0 right-0 h-full w-1/2 rounded-l-2xl"
   } else {
-    panelClass = "fixed h-[70vh] w-[92vw] max-w-sm rounded-2xl"
-    panelStyle = { top: "50%", right: "4rem", transform: "translateY(-50%)" }
+    // wide: 우측 1/3 전체를 패널 영역으로 사용
+    panelClass = "fixed inset-y-0 right-0 h-full w-1/3 rounded-l-2xl"
   }
+  const panelBgClass = layoutMode === "wide" ? "bg-neutral-950/30" : "bg-neutral-950/90"
 
   return (
     <div className="relative min-h-screen w-full overflow-hidden bg-[#05060c] text-white font-[family-name:var(--font-hahmlet)]">
@@ -489,11 +497,11 @@ export function SkillConstellation() {
         습득 {Object.values(progress).filter((p) => p?.acquired).length} / {nodeList.length}
       </div>
 
-      <div className="fixed right-4 top-4 z-50 md:right-8 md:top-8">
+      <div className="fixed right-4 top-4 z-50 md:right-8 md:top-8" onClick={(e) => e.stopPropagation()}>
         <button
           onClick={() => setToolsOpen((o) => !o)}
           aria-label="메뉴 열기"
-          className="flex h-10 w-10 items-center justify-center rounded-full border border-neutral-700 bg-neutral-900/80 text-white/80 backdrop-blur-md transition-colors hover:border-accent hover:text-accent"
+          className="flex h-10 w-10 items-center justify-center rounded-full border border-neutral-700 bg-neutral-900/80 text-white/80 outline-none backdrop-blur-md transition-colors hover:border-accent hover:text-accent focus:outline-none focus-visible:outline-none"
         >
           <MoreVertical size={18} />
         </button>
@@ -552,6 +560,7 @@ export function SkillConstellation() {
         onPointerCancel={onPointerUp}
         onPointerLeave={onPointerUp}
         onWheel={onWheel}
+        onClick={onStageClick}
       >
         <div
           className="absolute left-0 top-0"
@@ -595,15 +604,18 @@ export function SkillConstellation() {
                 {isSelected && (
                   <span
                     aria-hidden
-                    className="select-glow pointer-events-none absolute rounded-full"
+                    className="select-glow pointer-events-none absolute"
                     style={{
                       left: 0,
                       top: 0,
-                      width: size * 2.6,
-                      height: size * 2.6,
-                      marginLeft: -(size * 2.6) / 2,
-                      marginTop: -(size * 2.6) / 2,
-                      background: `radial-gradient(circle, rgba(255,255,255,0.85), rgba(${tier.rgb},0.5) 55%, transparent 75%)`,
+                      width: size * 3.2,
+                      height: size * 3.2,
+                      marginLeft: -(size * 3.2) / 2,
+                      marginTop: -(size * 3.2) / 2,
+                      background: `radial-gradient(circle, rgba(255,255,255,0.95), rgba(${tier.rgb},0.65) 45%, transparent 72%)`,
+                      clipPath:
+                        "polygon(40% 0%, 60% 0%, 60% 40%, 100% 40%, 100% 60%, 60% 60%, 60% 100%, 40% 100%, 40% 60%, 0% 60%, 0% 40%, 40% 40%)",
+                      filter: "blur(1.5px)",
                     }}
                   />
                 )}
@@ -626,9 +638,12 @@ export function SkillConstellation() {
                 />
 
                 <button
-                  onClick={() => selectStar(n.id)}
+                  onClick={(e) => {
+                    e.stopPropagation()
+                    selectStar(n.id)
+                  }}
                   aria-label={n.name}
-                  className="absolute flex items-center justify-center rounded-full transition-transform hover:scale-110"
+                  className="absolute flex items-center justify-center rounded-full outline-none transition-transform hover:scale-110 focus:outline-none focus-visible:outline-none"
                   style={{
                     left: 0,
                     top: 0,
@@ -636,6 +651,7 @@ export function SkillConstellation() {
                     height: hitSize,
                     marginLeft: -hitSize / 2,
                     marginTop: -hitSize / 2,
+                    WebkitTapHighlightColor: "transparent",
                   }}
                 >
                   <StarGlyph
@@ -651,11 +667,12 @@ export function SkillConstellation() {
                 </button>
 
                 <p
-                  className="pointer-events-none absolute text-center text-[11px] leading-tight text-white/80"
+                  className="pointer-events-none absolute text-center text-[11px] text-white/80"
                   style={{
                     left: 0,
                     top: size,
                     transform: "translateX(-50%)",
+                    lineHeight: 1.2,
                     whiteSpace: line2 ? "normal" : "nowrap",
                     maxWidth: line2 ? 88 : undefined,
                   }}
@@ -676,10 +693,10 @@ export function SkillConstellation() {
 
       {selectedNode && (
         <div
-          className={`z-50 overflow-y-auto border border-neutral-700 bg-neutral-950/90 p-6 shadow-2xl backdrop-blur-md ${panelClass}`}
-          style={panelStyle}
+          className={`z-50 overflow-y-auto border border-neutral-700 p-6 shadow-2xl backdrop-blur-md ${panelBgClass} ${panelClass}`}
+          onClick={(e) => e.stopPropagation()}
         >
-          <button onClick={() => setSelectedId(null)} className="absolute right-4 top-4 text-white/50 transition-colors hover:text-white">
+          <button onClick={() => setSelectedId(null)} className="absolute right-4 top-4 text-white/50 outline-none transition-colors hover:text-white focus:outline-none">
             ✕
           </button>
 
@@ -688,7 +705,7 @@ export function SkillConstellation() {
 
           <button
             onClick={() => selectedId && toggleAcquired(selectedId)}
-            className={`mt-4 rounded-full border px-4 py-2 text-xs uppercase tracking-widest transition-colors ${
+            className={`mt-4 rounded-full border px-4 py-2 text-xs uppercase tracking-widest outline-none transition-colors focus:outline-none ${
               selectedId && progress[selectedId]?.acquired
                 ? "border-amber-300 bg-amber-300/10 text-amber-300"
                 : "border-neutral-700 text-white/60 hover:border-white/40"
@@ -719,7 +736,7 @@ export function SkillConstellation() {
                     setReviewInput("")
                   }
                 }}
-                className="shrink-0 rounded border border-neutral-700 px-3 text-xs text-white/70 transition-colors hover:border-accent hover:text-accent"
+                className="shrink-0 rounded border border-neutral-700 px-3 text-xs text-white/70 outline-none transition-colors hover:border-accent hover:text-accent focus:outline-none"
               >
                 확인
               </button>
