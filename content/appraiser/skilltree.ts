@@ -123,5 +123,75 @@ export function layoutTree(
   root: TreeNode,
   opts: { xSpacing: number; ySpacing: number; rootY?: number },
 ) {
-  // ... 기존 구현 그대로 사용 ...
+  const rootY = opts.rootY ?? 700
+  const baseX = new Map<string, number>()
+  const depthOf = new Map<string, number>()
+  const scaleOf = new Map<string, number>()
+  const edges: [string, string][] = []
+  let cursorX = 0
+
+  function computeBase(node: TreeNode, depth: number, inheritedScale: number): number {
+    const scale = node.spacingScale ?? inheritedScale
+    scaleOf.set(node.id, scale)
+    depthOf.set(node.id, depth)
+
+    let x: number
+    if (!node.children || node.children.length === 0) {
+      x = cursorX
+      cursorX += opts.xSpacing * scale
+    } else {
+      const childXs = node.children.map((child) => {
+        edges.push([node.id, child.id])
+        return computeBase(child, depth + 1, scale)
+      })
+      x = childXs.reduce((a, b) => a + b, 0) / childXs.length
+    }
+    baseX.set(node.id, x)
+    return x
+  }
+
+  computeBase(root, 0, 1)
+
+  const xs = [...baseX.values()]
+  const centerX = (Math.min(...xs) + Math.max(...xs)) / 2
+
+  const positions = new Map<string, { x: number; y: number; name: string; section: string }>()
+  const TRUNK_IDS = new Set(["root0", "t1", "t2", "t3", "t4"])
+
+  function applySway(
+    node: TreeNode,
+    swayActive: boolean,
+    seed: number,
+    startDepth: number,
+  ) {
+    const depth = depthOf.get(node.id)!
+    const scale = scaleOf.get(node.id)!
+    const isTrunk = TRUNK_IDS.has(node.id)
+
+    let x = baseX.get(node.id)! - centerX
+    if (swayActive && !isTrunk) {
+      const amplitude = opts.xSpacing * scale * 0.4
+      x += Math.sin((depth - startDepth) * 0.55 + seed) * amplitude
+    }
+    const y = rootY - depth * opts.ySpacing
+    positions.set(node.id, { x, y, name: node.name, section: node.section })
+
+    if (!node.children) return
+
+    const nextActive = swayActive || node.id === "t4"
+
+    if (node.children.length > 1) {
+      for (const child of node.children) {
+        applySway(child, nextActive, hashSeed(child.id), depth + 1)
+      }
+    } else {
+      for (const child of node.children) {
+        applySway(child, nextActive, seed, startDepth)
+      }
+    }
+  }
+
+  applySway(root, false, 0, 0)
+
+  return { positions, edges }
 }
