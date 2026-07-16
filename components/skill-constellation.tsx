@@ -2,7 +2,7 @@
 
 import { useEffect, useMemo, useRef, useState } from "react"
 import Link from "next/link"
-import { Sparkle } from "lucide-react"
+import { Sparkle, MoreVertical } from "lucide-react"
 import { skillTree, sections, layoutTree } from "@/content/appraiser/skilltree"
 import defaultProgress from "@/content/appraiser/progress.default.json"
 
@@ -17,10 +17,12 @@ const ZOOM_MIN = 0.4
 const ZOOM_MAX = 2.4
 const PAN_MARGIN = 260
 const RESISTANCE = 0.35
-
-// ── 1.1: 별 사이 간격은 이 두 값만 바꾸면 전체가 재조정됩니다 ──────
 const X_SPACING = 190
 const Y_SPACING = 190
+
+// 반응형 배치 기준점 — 값만 바꾸면 화면 폭 기준을 조정할 수 있습니다
+const MOBILE_BP = 768
+const NARROW_BP = 1300
 
 function formatDateYMD(d: Date) {
   const y = d.getFullYear()
@@ -46,66 +48,21 @@ const DIR_VECTORS: Record<"w" | "a" | "s" | "d", { x: number; y: number }> = {
   d: { x: 1, y: 0 },
 }
 
-function StarfieldCanvas() {
-  const canvasRef = useRef<HTMLCanvasElement>(null)
-  useEffect(() => {
-    const canvas = canvasRef.current
-    if (!canvas) return
-    const ctx = canvas.getContext("2d")
-    if (!ctx) return
-    let raf = 0
-    const dpr = Math.min(window.devicePixelRatio || 1, 2)
-    type Dot = { x: number; y: number; r: number; phase: number; speed: number }
-    let dots: Dot[] = []
+type LayoutMode = "mobile" | "narrow" | "wide"
 
-    function resize() {
-      canvas!.width = window.innerWidth * dpr
-      canvas!.height = window.innerHeight * dpr
-      canvas!.style.width = `${window.innerWidth}px`
-      canvas!.style.height = `${window.innerHeight}px`
-      const count = Math.floor((window.innerWidth * window.innerHeight) / 3200)
-      dots = Array.from({ length: count }, () => ({
-        x: Math.random() * window.innerWidth,
-        y: Math.random() * window.innerHeight,
-        r: Math.random() * 1.3 + 0.3,
-        phase: Math.random() * Math.PI * 2,
-        speed: 0.5 + Math.random() * 1.2,
-      }))
-    }
-    function draw(t: number) {
-      if (!ctx || !canvas) return
-      ctx.setTransform(dpr, 0, 0, dpr, 0, 0)
-      ctx.clearRect(0, 0, window.innerWidth, window.innerHeight)
-      for (const d of dots) {
-        const alpha = 0.35 + 0.55 * (0.5 + 0.5 * Math.sin(t * 0.0006 * d.speed + d.phase))
-        ctx.beginPath()
-        ctx.arc(d.x, d.y, d.r, 0, Math.PI * 2)
-        ctx.fillStyle = `rgba(255,255,255,${alpha})`
-        ctx.fill()
-      }
-      raf = requestAnimationFrame(draw)
-    }
-    resize()
-    window.addEventListener("resize", resize)
-    raf = requestAnimationFrame(draw)
-    return () => {
-      cancelAnimationFrame(raf)
-      window.removeEventListener("resize", resize)
-    }
-  }, [])
-  return <canvas ref={canvasRef} className="pointer-events-none fixed inset-0 z-0" />
+function getFocal(mode: LayoutMode, hasSelection: boolean, width: number, height: number) {
+  if (!hasSelection) return { x: width / 2, y: height / 2 }
+  if (mode === "mobile") return { x: width / 2, y: height * 0.75 } // 하단 1/2 중앙
+  if (mode === "narrow") return { x: width * 0.25, y: height / 2 } // 좌측 1/2 중앙
+  return { x: width / 2, y: height / 2 } // 넓은 데스크탑: 정중앙
 }
 
 export function SkillConstellation() {
-  // ── 1.3: 좌표를 손으로 정하지 않고 트리 구조에서 자동 계산 ──────
   const { positions, edges } = useMemo(
     () => layoutTree(skillTree, { xSpacing: X_SPACING, ySpacing: Y_SPACING }),
     [],
   )
-  const nodeList = useMemo(
-    () => [...positions.entries()].map(([id, p]) => ({ id, ...p })),
-    [positions],
-  )
+  const nodeList = useMemo(() => [...positions.entries()].map(([id, p]) => ({ id, ...p })), [positions])
 
   const bounds = useMemo(() => {
     const xs = nodeList.map((n) => n.x)
@@ -137,10 +94,12 @@ export function SkillConstellation() {
   const [selectedId, setSelectedId] = useState<string | null>(null)
   const [progress, setProgress] = useState<ProgressMap>({})
   const [loaded, setLoaded] = useState(false)
-  const [studyInput, setStudyInput] = useState("")
   const [reviewInput, setReviewInput] = useState("")
+  const [toolsOpen, setToolsOpen] = useState(false)
 
   const dragRef = useRef({ active: false, startX: 0, startY: 0, startCamX: 0, startCamY: 0, moved: false })
+  const pointers = useRef(new Map<number, { x: number; y: number }>())
+  const pinchRef = useRef<{ active: boolean; startDist: number; startZoom: number } | null>(null)
   const wheelTimeout = useRef<number | undefined>(undefined)
   const fileInputRef = useRef<HTMLInputElement>(null)
 
@@ -172,9 +131,11 @@ export function SkillConstellation() {
     }
   }, [progress, loaded])
 
+  const layoutMode: LayoutMode =
+    stage.width < MOBILE_BP ? "mobile" : stage.width < NARROW_BP ? "narrow" : "wide"
+
   function selectStar(id: string) {
     setSelectedId(id)
-    setStudyInput("")
     setReviewInput("")
   }
 
@@ -186,6 +147,7 @@ export function SkillConstellation() {
     setCamera({ x: n.x, y: n.y, zoom: FOCUS_ZOOM })
   }, [selectedId, positions])
 
+  // WASD: 연결된 이웃 중 방향이 가장 잘 맞는 별로 이동
   useEffect(() => {
     function isTypingTarget(el: EventTarget | null) {
       const tag = (el as HTMLElement)?.tagName
@@ -226,29 +188,54 @@ export function SkillConstellation() {
     })
   }
 
-  function addLog(starId: string, type: "study" | "review", text: string) {
+  // 복습 기록만 남김. 저장하면 자동으로 습득 처리됩니다.
+  function addLog(starId: string, text: string) {
     const trimmed = text.trim()
     if (!trimmed) return
     setProgress((prev) => {
       const cur = prev[starId] ?? { acquired: false, logs: [] }
-      const entry: LogEntry = { date: formatDateYMD(new Date()), type, text: trimmed }
+      const entry: LogEntry = { date: formatDateYMD(new Date()), type: "review", text: trimmed }
       return { ...prev, [starId]: { acquired: true, logs: [...cur.logs, entry] } }
     })
   }
 
+  // ── 포인터(드래그 + 두 손가락 핀치줌) ─────────────────────────
   function onPointerDown(e: React.PointerEvent) {
-    dragRef.current = {
-      active: true,
-      startX: e.clientX,
-      startY: e.clientY,
-      startCamX: camera.x,
-      startCamY: camera.y,
-      moved: false,
-    }
+    pointers.current.set(e.pointerId, { x: e.clientX, y: e.clientY })
     setSmooth(false)
+
+    if (pointers.current.size === 1) {
+      dragRef.current = {
+        active: true,
+        startX: e.clientX,
+        startY: e.clientY,
+        startCamX: camera.x,
+        startCamY: camera.y,
+        moved: false,
+      }
+    } else if (pointers.current.size === 2) {
+      dragRef.current.active = false
+      const [p1, p2] = [...pointers.current.values()]
+      const dist = Math.hypot(p1.x - p2.x, p1.y - p2.y) || 1
+      pinchRef.current = { active: true, startDist: dist, startZoom: camera.zoom }
+    }
   }
+
   function onPointerMove(e: React.PointerEvent) {
-    if (!dragRef.current.active) return
+    if (!pointers.current.has(e.pointerId)) return
+    pointers.current.set(e.pointerId, { x: e.clientX, y: e.clientY })
+
+    // 핀치줌 (모바일/터치)
+    if (pinchRef.current?.active && pointers.current.size >= 2) {
+      const [p1, p2] = [...pointers.current.values()]
+      const dist = Math.hypot(p1.x - p2.x, p1.y - p2.y) || 1
+      const ratio = dist / pinchRef.current.startDist
+      setCamera((c) => ({ ...c, zoom: rubberBand(pinchRef.current!.startZoom * ratio, ZOOM_MIN, ZOOM_MAX, 0.4) }))
+      return
+    }
+
+    // 한 손가락/마우스 드래그
+    if (!dragRef.current.active || pointers.current.size !== 1) return
     const dx = e.clientX - dragRef.current.startX
     const dy = e.clientY - dragRef.current.startY
     if (Math.abs(dx) > 4 || Math.abs(dy) > 4) dragRef.current.moved = true
@@ -261,15 +248,36 @@ export function SkillConstellation() {
       y: rubberBand(rawY, bounds.minY, bounds.maxY),
     }))
   }
-  function onPointerUp() {
-    if (!dragRef.current.active) return
-    dragRef.current.active = false
-    setSmooth(true)
-    setCamera((c) => ({
-      ...c,
-      x: clamp(c.x, bounds.minX, bounds.maxX),
-      y: clamp(c.y, bounds.minY, bounds.maxY),
-    }))
+
+  function onPointerUp(e: React.PointerEvent) {
+    pointers.current.delete(e.pointerId)
+
+    if (pointers.current.size < 2 && pinchRef.current?.active) {
+      pinchRef.current = null
+      setSmooth(true)
+      setCamera((c) => ({ ...c, zoom: clamp(c.zoom, ZOOM_MIN, ZOOM_MAX) }))
+    }
+
+    if (pointers.current.size === 1) {
+      // 남은 손가락으로 드래그 재개 — 점프 방지를 위해 기준점 초기화
+      const [remaining] = [...pointers.current.values()]
+      dragRef.current = {
+        active: true,
+        startX: remaining.x,
+        startY: remaining.y,
+        startCamX: camera.x,
+        startCamY: camera.y,
+        moved: false,
+      }
+    } else if (pointers.current.size === 0) {
+      dragRef.current.active = false
+      setSmooth(true)
+      setCamera((c) => ({
+        ...c,
+        x: clamp(c.x, bounds.minX, bounds.maxX),
+        y: clamp(c.y, bounds.minY, bounds.maxY),
+      }))
+    }
   }
 
   function onWheel(e: React.WheelEvent) {
@@ -284,9 +292,10 @@ export function SkillConstellation() {
     }, 220)
   }
 
+  const focal = getFocal(layoutMode, Boolean(selectedId), stage.width, stage.height)
   const worldTransform = {
-    left: stage.width / 2 - camera.x * camera.zoom,
-    top: stage.height / 2 - camera.y * camera.zoom,
+    left: focal.x - camera.x * camera.zoom,
+    top: focal.y - camera.y * camera.zoom,
   }
 
   function handleExport() {
@@ -319,10 +328,21 @@ export function SkillConstellation() {
 
   const selectedNode = selectedId ? positions.get(selectedId) : null
   const selectedSection = selectedNode ? sections[selectedNode.section] : null
-  const isDesktop = stage.width >= 768
+
+  // ── 패널 위치/크기: 화면 폭에 따라 반씩 나눠 갖도록 ────────────
+  let panelClass = ""
+  let panelStyle: React.CSSProperties = {}
+  if (layoutMode === "mobile") {
+    panelClass = "fixed inset-x-0 top-0 h-[50vh] w-full rounded-b-2xl"
+  } else if (layoutMode === "narrow") {
+    panelClass = "fixed inset-y-0 right-0 h-full w-1/2 rounded-l-2xl"
+  } else {
+    panelClass = "fixed h-[70vh] w-[92vw] max-w-sm rounded-2xl"
+    panelStyle = { top: "50%", right: "4rem", transform: "translateY(-50%)" }
+  }
 
   return (
-    <div className="relative min-h-screen w-full overflow-hidden bg-[#05060c] text-white font-[family-name:var(--font-orbit)]">
+    <div className="relative min-h-screen w-full overflow-hidden bg-[#05060c] text-white">
       <div
         className="pointer-events-none fixed inset-0 z-0"
         style={{
@@ -336,7 +356,6 @@ export function SkillConstellation() {
         className="pointer-events-none fixed inset-0 z-0"
         style={{ background: "radial-gradient(ellipse at center, transparent 30%, rgba(0,0,0,0.65) 100%)" }}
       />
-      <StarfieldCanvas />
 
       <Link
         href="/"
@@ -345,17 +364,52 @@ export function SkillConstellation() {
         ← BACK
       </Link>
 
-      <div className="fixed left-1/2 top-4 z-50 -translate-x-1/2 rounded-full border border-neutral-700 bg-neutral-900/80 px-4 py-2 font-mono text-xs uppercase tracking-widest text-white/80 backdrop-blur-md md:top-8">
+      <div className="fixed left-1/2 top-4 z-40 -translate-x-1/2 rounded-full border border-neutral-700 bg-neutral-900/80 px-4 py-2 font-mono text-xs uppercase tracking-widest text-white/80 backdrop-blur-md md:top-8">
         습득 {Object.values(progress).filter((p) => p?.acquired).length} / {nodeList.length}
       </div>
 
-      <div className="fixed right-4 top-4 z-50 flex gap-2 md:right-8 md:top-8">
-        <button onClick={handleExport} className="rounded-full border border-neutral-700 bg-neutral-900/80 px-3 py-2 font-mono text-xs text-white/80 backdrop-blur-md transition-colors hover:border-accent hover:text-accent">
-          내보내기
+      {/* 도구 메뉴: 카운터와 겹치지 않는 아코디언형 축약 메뉴 */}
+      <div className="fixed right-4 top-4 z-50 md:right-8 md:top-8">
+        <button
+          onClick={() => setToolsOpen((o) => !o)}
+          aria-label="메뉴 열기"
+          className="flex h-10 w-10 items-center justify-center rounded-full border border-neutral-700 bg-neutral-900/80 text-white/80 backdrop-blur-md transition-colors hover:border-accent hover:text-accent"
+        >
+          <MoreVertical size={18} />
         </button>
-        <button onClick={() => fileInputRef.current?.click()} className="rounded-full border border-neutral-700 bg-neutral-900/80 px-3 py-2 font-mono text-xs text-white/80 backdrop-blur-md transition-colors hover:border-accent hover:text-accent">
-          불러오기
-        </button>
+
+        {toolsOpen && (
+          <div className="absolute right-0 top-12 flex w-40 flex-col gap-1 rounded-2xl border border-neutral-700 bg-neutral-900/95 p-2 shadow-2xl backdrop-blur-md animate-in fade-in slide-in-from-top-2 duration-150">
+            <button
+              onClick={() => {
+                handleExport()
+                setToolsOpen(false)
+              }}
+              className="rounded-lg px-3 py-2 text-left font-mono text-xs text-white/80 transition-colors hover:bg-neutral-800 hover:text-accent"
+            >
+              내보내기
+            </button>
+            <button
+              onClick={() => {
+                fileInputRef.current?.click()
+                setToolsOpen(false)
+              }}
+              className="rounded-lg px-3 py-2 text-left font-mono text-xs text-white/80 transition-colors hover:bg-neutral-800 hover:text-accent"
+            >
+              불러오기
+            </button>
+            <button
+              onClick={() => {
+                handleReset()
+                setToolsOpen(false)
+              }}
+              className="rounded-lg px-3 py-2 text-left font-mono text-xs text-white/50 transition-colors hover:bg-neutral-800 hover:text-red-400"
+            >
+              초기화
+            </button>
+          </div>
+        )}
+
         <input
           ref={fileInputRef}
           type="file"
@@ -367,9 +421,6 @@ export function SkillConstellation() {
             e.target.value = ""
           }}
         />
-        <button onClick={handleReset} className="rounded-full border border-neutral-700 bg-neutral-900/80 px-3 py-2 font-mono text-xs text-white/50 backdrop-blur-md transition-colors hover:border-red-400 hover:text-red-400">
-          초기화
-        </button>
       </div>
 
       <div
@@ -377,6 +428,7 @@ export function SkillConstellation() {
         onPointerDown={onPointerDown}
         onPointerMove={onPointerMove}
         onPointerUp={onPointerUp}
+        onPointerCancel={onPointerUp}
         onPointerLeave={onPointerUp}
         onWheel={onWheel}
       >
@@ -412,68 +464,76 @@ export function SkillConstellation() {
             const glowing = isRoot || acquired
             const delay = (n.id.charCodeAt(0) + n.id.charCodeAt(n.id.length - 1)) % 30
             const rgb = isRoot ? "255,255,255" : acquired ? "255,214,140" : "170,195,255"
-            const size = isRoot ? 20 : 14
+            const size = isRoot ? 26 : 18
+            const hitSize = size + 14 // 시각 크기보다 넉넉한 탭 히트영역
 
             return (
               <div key={n.id} className="absolute" style={{ left: n.x, top: n.y }}>
-                {/* 선택 효과: 링 대신, 별보다 먼저 그려서 항상 뒤에 깔리는
-                    부드러운 발광 블롭. 커졌다 작아지며 은은하게 빛남 */}
+                {/* 선택 효과: 별 뒤에서 부풀었다 줄었다 하는 은은한 발광 (원이 아니라 흐릿한 후광) */}
                 {isSelected && (
                   <span
                     aria-hidden
-                    className="select-glow pointer-events-none absolute left-1/2 top-1/2 rounded-full"
+                    className="select-glow pointer-events-none absolute rounded-full"
                     style={{
+                      left: 0,
+                      top: 0,
                       width: size * 2.6,
                       height: size * 2.6,
-                      background: `radial-gradient(circle, rgba(255,255,255,0.9), rgba(${rgb},0.55) 55%, transparent 75%)`,
+                      marginLeft: -(size * 2.6) / 2,
+                      marginTop: -(size * 2.6) / 2,
+                      background: `radial-gradient(circle, rgba(255,255,255,0.85), rgba(${rgb},0.5) 55%, transparent 75%)`,
                     }}
                   />
                 )}
 
-<button
-                  onClick={() => selectStar(n.id)}
-                  aria-label={n.name}
-                  className={`absolute -translate-x-1/2 -translate-y-1/2 rounded-full transition-shadow ${
-                    glowing ? "star-pulse" : "star-twinkle"
-                  }`}
+                {/* 상시 은은한 발광 (원이 아니라 흐릿한 배경광, 별 모양과 겹치는 원 없음) */}
+                <span
+                  aria-hidden
+                  className={`pointer-events-none absolute rounded-full ${glowing ? "ambient-pulse" : "ambient-twinkle"}`}
                   style={{
-                    width: size,
-                    height: size,
-                    background: `radial-gradient(circle at 35% 30%, rgba(255,255,255,0.95), rgba(${rgb},0.9) 55%, rgba(${rgb},0.35) 100%)`,
-                    boxShadow: glowing
-                      ? `0 0 6px 2px rgba(255,255,255,0.9), 0 0 18px 6px rgba(${rgb},0.55), 0 0 34px 14px rgba(${rgb},0.22)`
-                      : `0 0 4px 1px rgba(${rgb},0.35)`,
-                    ["--twinkle-duration" as string]: `${3 + (delay % 3)}s`,
-                    animationDelay: `${delay * 0.1}s`,
+                    left: 0,
+                    top: 0,
+                    width: size * 1.8,
+                    height: size * 1.8,
+                    marginLeft: -(size * 1.8) / 2,
+                    marginTop: -(size * 1.8) / 2,
+                    background: `radial-gradient(circle, rgba(${rgb},0.55), transparent 70%)`,
+                    filter: "blur(1px)",
                   }}
                 />
 
-                {/* 십자선 대신: 안쪽이 오목한 4각 별(표창) 모양 글린트.
-                    lucide-react의 Sparkle 아이콘을 채워서(fill) 사용 —
-                    static translate를 쓰지 않고 margin으로 중앙정렬해서,
-                    애니메이션의 scale/rotate가 위치값을 덮어쓰는 문제를 피함 */}
-                {(() => {
-                  const glintSize = glowing ? size * 3.2 : size * 2.2
-                  return (
-                    <Sparkle
-                      aria-hidden
-                      fill={`rgba(${rgb},1)`}
-                      stroke="none"
-                      className="sparkle-glint pointer-events-none absolute left-1/2 top-1/2"
-                      style={{
-                        width: glintSize,
-                        height: glintSize,
-                        marginLeft: -glintSize / 2,
-                        marginTop: -glintSize / 2,
-                        filter: `drop-shadow(0 0 3px rgba(${rgb},0.9)) drop-shadow(0 0 8px rgba(${rgb},0.5))`,
-                        animationDuration: `${3.4 + (delay % 3)}s`,
-                        animationDelay: `${delay * 0.15}s`,
-                        opacity: glowing ? undefined : 0.7,
-                      }}
-                    />
-                  )
-                })()}
-                <p className="pointer-events-none absolute left-1/2 top-4 -translate-x-1/2 whitespace-nowrap text-[11px] leading-none text-white/80">
+                {/* 별 자체: 원 없이 반짝이는 스파클 아이콘 하나만 */}
+                <button
+                  onClick={() => selectStar(n.id)}
+                  aria-label={n.name}
+                  className="absolute flex items-center justify-center rounded-full transition-transform hover:scale-110"
+                  style={{
+                    left: 0,
+                    top: 0,
+                    width: hitSize,
+                    height: hitSize,
+                    marginLeft: -hitSize / 2,
+                    marginTop: -hitSize / 2,
+                  }}
+                >
+                  <Sparkle
+                    fill={`rgba(${rgb},1)`}
+                    stroke="none"
+                    className={glowing ? "star-pulse" : "star-twinkle"}
+                    style={{
+                      width: size,
+                      height: size,
+                      filter: `drop-shadow(0 0 3px rgba(${rgb},0.9)) drop-shadow(0 0 8px rgba(${rgb},0.5))`,
+                      animationDelay: `${delay * 0.1}s`,
+                      ["--twinkle-duration" as string]: `${3 + (delay % 3)}s`,
+                    }}
+                  />
+                </button>
+
+                <p
+                  className="pointer-events-none absolute whitespace-nowrap text-[11px] leading-none text-white/80"
+                  style={{ left: 0, top: size, transform: "translateX(-50%)" }}
+                >
                   {n.name}
                 </p>
               </div>
@@ -482,14 +542,11 @@ export function SkillConstellation() {
         </div>
       </div>
 
+      {/* 복습 패널: 화면 폭에 따라 상단 절반 / 우측 절반 / 우측 플로팅 카드 */}
       {selectedNode && (
         <div
-          className="fixed z-50 h-[70vh] w-[92vw] max-w-sm overflow-y-auto rounded-2xl border border-neutral-700 bg-neutral-950/90 p-6 shadow-2xl backdrop-blur-md"
-          style={
-            isDesktop
-              ? { top: "50%", right: "4rem", transform: "translateY(-50%)" }
-              : { left: "50%", top: "50%", transform: "translate(-50%, -50%)" }
-          }
+          className={`z-50 overflow-y-auto border border-neutral-700 bg-neutral-950/90 p-6 shadow-2xl backdrop-blur-md ${panelClass}`}
+          style={panelStyle}
         >
           <button onClick={() => setSelectedId(null)} className="absolute right-4 top-4 text-white/50 transition-colors hover:text-white">
             ✕
@@ -510,53 +567,24 @@ export function SkillConstellation() {
           </button>
 
           <div className="mt-8">
-            <p className="mb-2 font-mono text-[0.65rem] uppercase tracking-widest text-white/50">학습 내용</p>
-            <div className="flex gap-2">
-              <input
-                value={studyInput}
-                onChange={(e) => setStudyInput(e.target.value)}
-                onKeyDown={(e) => {
-                  if (e.key === "Enter" && selectedId) {
-                    addLog(selectedId, "study", studyInput)
-                    setStudyInput("")
-                  }
-                }}
-                placeholder="오늘의 학습 내용을 적어주세요"
-                className="flex-1 rounded border border-neutral-700 bg-neutral-900 px-3 py-2 text-sm text-white placeholder:text-white/30 focus:border-accent focus:outline-none"
-              />
-              <button
-                onClick={() => {
-                  if (selectedId) {
-                    addLog(selectedId, "study", studyInput)
-                    setStudyInput("")
-                  }
-                }}
-                className="shrink-0 rounded border border-neutral-700 px-3 font-mono text-xs text-white/70 transition-colors hover:border-accent hover:text-accent"
-              >
-                확인
-              </button>
-            </div>
-          </div>
-
-          <div className="mt-4">
-            <p className="mb-2 font-mono text-[0.65rem] uppercase tracking-widest text-white/50">복습 내용</p>
+            <p className="mb-2 font-mono text-[0.65rem] uppercase tracking-widest text-white/50">복습</p>
             <div className="flex gap-2">
               <input
                 value={reviewInput}
                 onChange={(e) => setReviewInput(e.target.value)}
                 onKeyDown={(e) => {
                   if (e.key === "Enter" && selectedId) {
-                    addLog(selectedId, "review", reviewInput)
+                    addLog(selectedId, reviewInput)
                     setReviewInput("")
                   }
                 }}
-                placeholder="오늘의 복습 내용을 적어주세요"
+                placeholder="오늘 배운 것 중 잊지 않고 싶은 것"
                 className="flex-1 rounded border border-neutral-700 bg-neutral-900 px-3 py-2 text-sm text-white placeholder:text-white/30 focus:border-accent focus:outline-none"
               />
               <button
                 onClick={() => {
                   if (selectedId) {
-                    addLog(selectedId, "review", reviewInput)
+                    addLog(selectedId, reviewInput)
                     setReviewInput("")
                   }
                 }}

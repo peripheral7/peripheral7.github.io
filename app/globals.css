@@ -135,46 +135,42 @@
   }
 
   /* ── 감정평가사 별자리 스킬트리 전용 ─────────────────────── */
-  .nebula-bg {
-    background:
-      radial-gradient(ellipse 60% 40% at 20% 30%, oklch(0.35 0.12 280 / 0.35), transparent 60%),
-      radial-gradient(ellipse 50% 35% at 80% 70%, oklch(0.3 0.1 250 / 0.3), transparent 60%),
-      radial-gradient(ellipse 70% 50% at 50% 100%, oklch(0.25 0.08 300 / 0.25), transparent 70%),
-      #05060c;
-  }
-  @keyframes star-twinkle {
-    0%, 100% { opacity: 0.35; }
-    50% { opacity: 1; }
-  }
-  .star-twinkle {
-    animation: star-twinkle var(--twinkle-duration, 3s) ease-in-out infinite;
-  }
+  /* 모든 중심정렬은 margin 기반으로 통일했으므로, 아래 애니메이션은
+     절대 transform에 translate를 포함하지 않습니다 (scale/opacity만). */
   @keyframes star-pulse {
-    0%, 100% { transform: translate(-50%, -50%) scale(1); }
-    50% { transform: translate(-50%, -50%) scale(1.25); }
+    0%, 100% { transform: scale(1); }
+    50% { transform: scale(1.2); }
   }
   .star-pulse {
     animation: star-pulse 2.4s ease-in-out infinite;
   }
-
-
+  @keyframes star-twinkle {
+    0%, 100% { opacity: 0.4; transform: scale(0.9); }
+    50% { opacity: 1; transform: scale(1); }
+  }
+  .star-twinkle {
+    animation: star-twinkle var(--twinkle-duration, 3s) ease-in-out infinite;
+  }
+  @keyframes ambient-pulse {
+    0%, 100% { transform: scale(1); opacity: 0.5; }
+    50% { transform: scale(1.25); opacity: 0.85; }
+  }
+  .ambient-pulse {
+    animation: ambient-pulse 2.4s ease-in-out infinite;
+  }
+  @keyframes ambient-twinkle {
+    0%, 100% { opacity: 0.2; }
+    50% { opacity: 0.55; }
+  }
+  .ambient-twinkle {
+    animation: ambient-twinkle 3s ease-in-out infinite;
+  }
   @keyframes select-glow {
-    0%, 100% { transform: translate(-50%, -50%) scale(1); opacity: 0.55; }
-    50% { transform: translate(-50%, -50%) scale(1.35); opacity: 0.9; }
+    0%, 100% { transform: scale(1); opacity: 0.55; }
+    50% { transform: scale(1.35); opacity: 0.9; }
   }
   .select-glow {
     animation: select-glow 1.8s ease-in-out infinite;
     filter: blur(6px);
   }
-  @keyframes sparkle-glint {
-    0%, 100% { opacity: 0; transform: scale(0.35) rotate(0deg); }
-    50% { opacity: 1; transform: scale(1) rotate(25deg); }
-  }
-  .sparkle-glint {
-    animation-name: sparkle-glint;
-    animation-timing-function: ease-in-out;
-    animation-iteration-count: infinite;
-  }
-
-  
 }
