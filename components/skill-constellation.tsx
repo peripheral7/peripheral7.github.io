@@ -70,9 +70,82 @@ function StarGlyph({
   className?: string
   style?: React.CSSProperties
 }) {
+  const gradientId = `star-core-${size}-${fill.replace(/[^a-zA-Z0-9]/g, "")}`
+
   return (
-    <svg viewBox="0 0 24 24" width={size} height={size} className={className} style={style}>
-      <path d="M12 0 L13.6 10.4 L24 12 L13.6 13.6 L12 24 L10.4 13.6 L0 12 L10.4 10.4 Z" fill={fill} />
+    <svg
+      viewBox="0 0 64 64"
+      width={size}
+      height={size}
+      className={className}
+      style={{ overflow: "visible", ...style }}
+      aria-hidden
+    >
+      <defs>
+        <radialGradient id={gradientId} cx="32%" cy="25%" r="72%">
+          <stop offset="0%" stopColor="rgba(255,255,255,1)" />
+          <stop offset="18%" stopColor={fill} />
+          <stop offset="60%" stopColor={fill} stopOpacity="0.88" />
+          <stop offset="100%" stopColor="rgba(8,12,24,0.92)" />
+        </radialGradient>
+
+        <linearGradient id={`${gradientId}-ray`} x1="0" y1="0" x2="1" y2="1">
+          <stop offset="0%" stopColor="rgba(255,255,255,0)" />
+          <stop offset="42%" stopColor={fill} stopOpacity="0.8" />
+          <stop offset="50%" stopColor="rgba(255,255,255,0.98)" />
+          <stop offset="58%" stopColor={fill} stopOpacity="0.8" />
+          <stop offset="100%" stopColor="rgba(255,255,255,0)" />
+        </linearGradient>
+
+        <filter id={`${gradientId}-inner`} x="-70%" y="-70%" width="240%" height="240%">
+          <feGaussianBlur in="SourceAlpha" stdDeviation="1.3" result="blur" />
+          <feOffset in="blur" dx="1.5" dy="2.3" result="offsetBlur" />
+          <feComposite in="SourceGraphic" in2="offsetBlur" operator="over" />
+        </filter>
+      </defs>
+
+      {/* 긴 날카로운 십자 끝: 수직 */}
+      <path
+        d="M32 0 L35.5 27.5 L32 32 L28.5 27.5 Z
+           M32 64 L35.5 36.5 L32 32 L28.5 36.5 Z"
+        fill={`url(#${gradientId}-ray)`}
+        opacity="0.94"
+      />
+
+      {/* 긴 날카로운 십자 끝: 수평 */}
+      <path
+        d="M0 32 L27.5 28.5 L32 32 L27.5 35.5 Z
+           M64 32 L36.5 28.5 L32 32 L36.5 35.5 Z"
+        fill={`url(#${gradientId}-ray)`}
+        opacity="0.94"
+      />
+
+      {/* 구체 뒤쪽의 어두운 외곽 */}
+      <circle cx="32" cy="32.8" r="14.4" fill="rgba(0,0,0,0.72)" />
+
+      {/* 원형 3D 중심 */}
+      <circle
+        cx="32"
+        cy="32"
+        r="13.2"
+        fill={`url(#${gradientId})`}
+        stroke="rgba(255,255,255,0.68)"
+        strokeWidth="0.8"
+        filter={`url(#${gradientId}-inner)`}
+      />
+
+      {/* 중심 반사광 */}
+      <ellipse
+        cx="27.6"
+        cy="26.4"
+        rx="5.4"
+        ry="3.3"
+        fill="rgba(255,255,255,0.62)"
+        transform="rotate(-28 27.6 26.4)"
+      />
+
+      {/* 중심의 날카로운 핀포인트 */}
+      <circle cx="32" cy="32" r="2.1" fill="rgba(255,255,255,0.96)" />
     </svg>
   )
 }
@@ -605,8 +678,8 @@ export function SkillConstellation() {
             const reinforced = Boolean(st?.reinforced)
             const tier = getTier(isRoot, acquired, reinforced)
             const delay = (n.id.charCodeAt(0) + n.id.charCodeAt(n.id.length - 1)) % 30
-            const size = isRoot ? 26 : 18
-            const hitSize = size + 14
+            const size = isRoot ? 42 : 30
+            const hitSize = size + 18
             const [line1, line2] = wrapLabel(n.name)
             
 
@@ -616,27 +689,40 @@ export function SkillConstellation() {
                 {isSelected && (
                   <span
                     aria-hidden
-                    className="select-glow pointer-events-none absolute"
+                    className="star-selected-halo pointer-events-none absolute"
                     style={{
                       left: 0,
                       top: 0,
-                      width: size * 3.2,
-                      height: size * 3.2,
-                      marginLeft: -(size * 3.2) / 2,
-                      marginTop: -(size * 3.2) / 2,
-                      background: `radial-gradient(circle, rgba(255,255,255,0.95), rgba(${tier.rgb},0.65) 45%, transparent 72%)`,
-                      clipPath:
-                        "polygon(40% 0%, 60% 0%, 60% 40%, 100% 40%, 100% 60%, 60% 60%, 60% 100%, 40% 100%, 40% 60%, 0% 60%, 0% 40%, 40% 40%)",
-                      filter: "blur(1.5px)",
+                      width: size * 2.35,
+                      height: size * 2.35,
+                      marginLeft: -(size * 2.35) / 2,
+                      marginTop: -(size * 2.35) / 2,
+                      color: `rgb(${tier.rgb})`,
                     }}
-                  />
+                  >
+                    <svg viewBox="0 0 64 64" width="100%" height="100%" style={{ overflow: "visible" }}>
+                      <path
+                        d="M32 1 L35.2 27.2 L63 32 L35.2 36.8 L32 63 L28.8 36.8 L1 32 L28.8 27.2 Z"
+                        fill="none"
+                        stroke="currentColor"
+                        strokeWidth="1.05"
+                        opacity="0.9"
+                      />
+                      <circle
+                        cx="32"
+                        cy="32"
+                        r="13.8"
+                        fill="none"
+                        stroke="rgba(255,255,255,0.72)"
+                        strokeWidth="0.6"
+                      />
+                    </svg>
+                  </span>
                 )}
 
                 <span
                   aria-hidden
-                  className={`pointer-events-none absolute rounded-full ${
-                    tier.glowClass === "star-pulse" ? "ambient-pulse" : "ambient-twinkle"
-                  }`}
+                  className="star-ambient pointer-events-none absolute rounded-full"
                   style={{
                     left: 0,
                     top: 0,
@@ -666,23 +752,22 @@ export function SkillConstellation() {
                     WebkitTapHighlightColor: "transparent",
                   }}
                 >
-                  <StarGlyph
-                    size={size}
-                    fill={`rgba(${tier.rgb},${tier.fillAlpha})`}
-                    className={tier.glowClass}
-                    style={{
-                      filter: tier.shadow,
-                      animationDelay: `${delay * 0.1}s`,
-                      ["--twinkle-duration" as string]: `${3 + (delay % 3)}s`,
-                    }}
-                  />
+                <StarGlyph
+                  size={size}
+                  fill={`rgb(${tier.rgb})`}
+                  className={isSelected ? "star-gem star-gem-selected" : "star-gem"}
+                  style={{
+                    filter: tier.shadow,
+                    animationDelay: `${delay * 0.07}s`,
+                  }}
+                />
                 </button>
 
                 <p
                   className="pointer-events-none absolute text-center text-[11px] text-white/80"
                   style={{
                     left: 0,
-                    top: size + 4,
+                    top: size + 8,
                     transform: "translateX(-50%)",
                     lineHeight: 1.2,
                     whiteSpace: line2 ? "normal" : "nowrap",
