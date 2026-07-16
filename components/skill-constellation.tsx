@@ -6,6 +6,7 @@ import { MoreVertical } from "lucide-react"
 import { skillTree, sections, layoutTree } from "@/content/appraiser/skilltree"
 import defaultProgress from "@/content/appraiser/progress.default.json"
 
+
 type LogEntry = { date: string; type: "study" | "review"; text: string }
 type StarProgress = { acquired: boolean; logs: LogEntry[]; reinforced?: boolean }
 type ProgressMap = Record<string, StarProgress>
@@ -121,8 +122,8 @@ type LayoutMode = "mobile" | "narrow" | "wide"
 function getFocal(mode: LayoutMode, hasSelection: boolean, width: number, height: number) {
   if (!hasSelection) return { x: width / 2, y: height / 2 }
   if (mode === "mobile") return { x: width / 2, y: height * 0.75 }
-  if (mode === "narrow") return { x: width * 0.25, y: height / 2 }
-  return { x: width / 3, y: height / 2 }
+  if (mode === "narrow") return { x: width * 0.32, y: height / 2 }
+  return { x: width * 0.35, y: height / 2 }
 }
 
 export function SkillConstellation() {
@@ -462,11 +463,20 @@ export function SkillConstellation() {
   let panelStyle: React.CSSProperties = {}
   if (layoutMode === "mobile") {
     panelClass = "fixed inset-x-0 top-0 h-[50vh] w-full rounded-b-2xl"
+    panelStyle = {}
   } else if (layoutMode === "narrow") {
     panelClass = "fixed inset-y-0 right-0 h-full w-1/2 rounded-l-2xl"
+    panelStyle = {}
   } else {
-    // wide: 우측 1/3 전체를 패널 영역으로 사용
-    panelClass = "fixed inset-y-0 right-0 h-full w-1/3 rounded-l-2xl"
+    // wide: 우측 1/3, 상단 절반 영역에 떠 있는 카드
+    panelClass = "fixed rounded-2xl"
+    panelStyle = {
+      right: "6%",
+      top: "8%",
+      width: "28%",
+      maxWidth: "420px",
+      maxHeight: "60vh",
+    }
   }
   const panelBgClass = layoutMode === "wide" ? "bg-neutral-950/30" : "bg-neutral-950/90"
 
@@ -598,7 +608,9 @@ export function SkillConstellation() {
             const size = isRoot ? 26 : 18
             const hitSize = size + 14
             const [line1, line2] = wrapLabel(n.name)
+            
 
+            
             return (
               <div key={n.id} className="absolute" style={{ left: n.x, top: n.y }}>
                 {isSelected && (
@@ -670,11 +682,11 @@ export function SkillConstellation() {
                   className="pointer-events-none absolute text-center text-[11px] text-white/80"
                   style={{
                     left: 0,
-                    top: size,
+                    top: size + 4,
                     transform: "translateX(-50%)",
                     lineHeight: 1.2,
                     whiteSpace: line2 ? "normal" : "nowrap",
-                    maxWidth: line2 ? 88 : undefined,
+                    maxWidth: 96, // 고정 폭
                   }}
                 >
                   {line1}
@@ -692,10 +704,11 @@ export function SkillConstellation() {
       </div>
 
       {selectedNode && (
-        <div
-          className={`z-50 overflow-y-auto border border-neutral-700 p-6 shadow-2xl backdrop-blur-md ${panelBgClass} ${panelClass}`}
-          onClick={(e) => e.stopPropagation()}
-        >
+          <div
+            className={`z-50 overflow-y-auto border border-neutral-700 p-6 shadow-2xl backdrop-blur-md ${panelClass}`}
+            style={panelStyle}
+            onClick={(e) => e.stopPropagation()}
+          >
           <button onClick={() => setSelectedId(null)} className="absolute right-4 top-4 text-white/50 outline-none transition-colors hover:text-white focus:outline-none">
             ✕
           </button>
