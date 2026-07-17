@@ -410,6 +410,7 @@ export function layoutTree(
   const weightById = new Map<string, number>()
   const angleById = new Map<string, number>()
   const depthById = new Map<string, number>()
+  const SIBLING_ARC_COMPRESSION = 0.82
 
   const positions = new Map<
     string,
@@ -464,7 +465,11 @@ export function layoutTree(
       0,
     )
 
-    let cursor = start
+    const center = (start + end) / 2
+    const compactSpan = (end - start) * SIBLING_ARC_COMPRESSION
+    const compactStart = center - compactSpan / 2
+
+    let cursor = compactStart
 
     for (const child of children) {
       const childWeight = weightById.get(child.id) ?? 1
@@ -484,7 +489,7 @@ export function layoutTree(
 
     // 이전 150px보다 줄인 128px 간격.
     // 컴포넌트의 X_SPACING 값과 함께 사용되어 전체 간격도 조밀해집니다.
-    const radius = depth * Math.min(opts.xSpacing, 128)
+    const radius = depth * opts.xSpacing
 
     positions.set(node.id, {
       x: Math.cos(angle) * radius,
