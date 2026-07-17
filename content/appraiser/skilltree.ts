@@ -400,51 +400,93 @@ function hashSeed(id: string): number {
 
 export function layoutTree(
   root: TreeNode,
-  opts: { xSpacing: number; ySpacing: number; rootY?: number },
+  opts: {
+    xSpacing: number
+    ySpacing: number
+    rootY?: number
+  },
 ) {
-  const rootY = opts.rootY ?? 1180
+  const rootY = opts.rootY ?? 1800
+  const baseX = new Map<string, number>()
+  const depthOf = new Map<string, number>()
+  const scaleOf = new Map<string, number>()
+  const edges: [string, string][] = []
+  let cursorX = 0
+
+  function computeBase(
+    node: TreeNode,
+    depth: number,
+    inheritedScale: number,
+  ): number {
+    // 기존 0.5 배율 데이터가 있더라도 최소 간격은 유지
+    const requestedScale = node.spacingScale ?? inheritedScale
+    const scale = Math.max(requestedScale, 1)
+
+    depthOf.set(node.id, depth)
+    scaleOf.set(node.id, scale)
+
+    if (!node.children || node.children.length === 0) {
+      const x = cursorX
+      cursorX += opts.xSpacing * scale
+      baseX.set(node.id, x)
+      return x
+    }
+
+    const childXs = node.children.map((child) => {
+      edges.push([node.id, child.id])
+      return computeBase(child, depth + 1, scale)
+    })
+
+    const x = childXs.reduce((sum, childX) => sum + childX, 0) / childXs.length
+    baseX.set(node.id, x)
+
+    return x
+  }
+
+  computeBase(root, 0, 1)
+
+  const allX = [...baseX.values()]
+  const centerX = (Math.min(...allX) + Math.max(...allX)) / 2
   const positions = new Map<
     string,
-    { x: number; y: number; name: string; section: string }
+    {
+      x: number
+      y: number
+      name: string
+      section: string
+    }
   >()
-  const edges: [string, string][] = []
 
   const trunkIds = new Set(["root0", "t1", "t2", "t3", "t4"])
 
-  const directionVector: Record<BranchDirection, number> = {
-    left: -1,
-    center: 0,
-    right: 1,
-  }
+  function hashSeed(id: string) {
+    let hash = 0
 
-  function getDirection(
-    parent: TreeNode,
-    child: TreeNode,
-    inherited: BranchDirection,
-    index: number,
-    count: number,
-  ): BranchDirection {
-    if (child.branchDirection) return child.branchDirection
-    if (count === 1) return inherited
-
-    if (inherited === "left") {
-      return index % 2 === 0 ? "left" : "center"
+    for (let index = 0; index < id.length; index += 1) {
+      hash = (hash * 31 + id.charCodeAt(index)) % 1000
     }
 
-    if (inherited === "right") {
-      return index % 2 === 0 ? "right" : "center"
-    }
-
-    return index % 2 === 0 ? "left" : "right"
+    return (hash / 1000) * Math.PI * 2
   }
 
-  function walk(
+  function applySway(
     node: TreeNode,
-    depth: number,
-    x: number,
-    direction: BranchDirection,
+    swayActive: boolean,
     seed: number,
+    startDepth: number,
   ) {
+    const depth = depthOf.get(node.id) ?? 0
+    const scale = scaleOf.get(node.id) ?? 1
+    const isTrunk = trunkIds.has(node.id)
+
+    let x = (baseX.get(node.id) ?? 0) - centerX
+
+    if (swayActive && !isTrunk) {
+      // xSpacing의 16%로 제한: 가지의 자연스러움은 유지하면서 교차를 줄임
+      const amplitude = opts.xSpacing * scale * 0.16
+      x += Math.sin((depth - startDepth) * 0.55 + seed) * amplitude
+    }
+
     const y = rootY - depth * opts.ySpacing
 
     positions.set(node.id, {
@@ -454,47 +496,32 @@ export function layoutTree(
       section: node.section,
     })
 
-    const children = node.children ?? []
-    const isTrunk = trunkIds.has(node.id)
+    if (!node.children) return
 
-    children.forEach((child, index) => {
-      edges.push([node.id, child.id])
+    const nextSwayActive = swayActive || node.id === "t4"
 
-      const nextDirection = getDirection(
-        node,
-        child,
-        direction,
-        index,
-        children.length,
-      )
+    if (node.children.length > 1) {
+      for (const child of node.children) {
+        applySway(
+          child,
+          nextSwayActive,
+          hashSeed(child.id),
+          depth + 1,
+        )
+      }
 
-      const directionX = directionVector[nextDirection]
-      const siblingCenter = index - (children.length - 1) / 2
+      return
+    }
 
-      // 대분류는 명확한 60도 사선, 소분류는 넓은 부채꼴로 퍼짐
-      const branchStep =
-        nextDirection === "center"
-          ? 0
-          : directionX * opts.ySpacing * 0.58
-
-      const siblingSpread =
-        siblingCenter * opts.xSpacing * (isTrunk ? 0.08 : 0.62)
-
-      const organicOffset = isTrunk
-        ? 0
-        : Math.sin(depth * 0.58 + hashSeed(child.id) + seed) * 20
-
-      walk(
-        child,
-        depth + 1,
-        x + branchStep + siblingSpread + organicOffset,
-        nextDirection,
-        hashSeed(child.id),
-      )
-    })
+    for (const child of node.children) {
+      applySway(child, nextSwayActive, seed, startDepth)
+    }
   }
 
-  walk(root, 0, 0, "center", 0)
+  applySway(root, false, 0, 0)
 
-  return { positions, edges }
+  return {
+    positions,
+    edges,
+  }
 }
