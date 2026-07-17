@@ -31,8 +31,8 @@ const PAN_MARGIN = 320
 const RESISTANCE = 0.35
 
 // 방사형 트리의 반지름 단계 간격
-const X_SPACING = 150
-const Y_SPACING = 150
+const X_SPACING = 120
+const Y_SPACING = 120
 
 const MOBILE_BP = 768
 const NARROW_BP = 1300
@@ -414,6 +414,12 @@ export function SkillConstellation() {
     setReviewInput("")
     setToolsOpen(false)
   }
+
+  function toggleTools() {
+  setSelectedId(null)
+  setReviewInput("")
+  setToolsOpen((open) => !open)
+  } 
 
   useEffect(() => {
     if (!selectedId) return
@@ -828,7 +834,7 @@ export function SkillConstellation() {
         <button
           type="button"
           aria-label="메뉴 열기"
-          onClick={() => setToolsOpen((open) => !open)}
+          onClick={toggleTools}
           className="flex h-10 w-10 items-center justify-center rounded-full border border-white/20 bg-black/40 text-white/80 backdrop-blur-md transition-colors hover:border-white/60 hover:text-white"
         >
           <MoreVertical size={18} />
@@ -986,16 +992,16 @@ export function SkillConstellation() {
                     WebkitTapHighlightColor: "transparent",
                   }}
                 >
-                  <StarGlyph
-                    size={size}
-                    fill={`rgba(${tier.rgb}, ${tier.fillAlpha})`}
-                    className={isSelected ? "selected-neutral-glow" : undefined}
-                    style={{
-                      filter: isSelected
-                        ? "drop-shadow(0 0 3px rgba(255,255,255,0.58)) drop-shadow(0 0 9px rgba(255,255,255,0.26))"
-                        : tier.shadow,
-                    }}
-                  />
+                <StarGlyph
+                  size={size}
+                  fill={`rgba(${tier.rgb}, ${tier.fillAlpha})`}
+                  className={isSelected ? "selected-neutral-glow" : undefined}
+                  style={{
+                    filter: isSelected
+                      ? "drop-shadow(0 0 5px rgba(255,255,255,0.92)) drop-shadow(0 0 18px rgba(255,255,255,0.62)) drop-shadow(0 0 30px rgba(255,255,255,0.26))"
+                      : tier.shadow,
+                  }}
+                />
                 </button>
 
                 <p
@@ -1071,7 +1077,7 @@ export function SkillConstellation() {
               복습
             </p>
 
-            <div className="flex gap-1.5">
+            <div className="flex gap-1.5 min-[1300px]:items-center">
               <input
                 value={reviewInput}
                 onChange={(event) => setReviewInput(event.target.value)}
@@ -1082,7 +1088,7 @@ export function SkillConstellation() {
                   }
                 }}
                 placeholder="오늘 배운 것"
-                className="min-w-0 flex-1 rounded-md border border-white/15 bg-black/30 px-2 py-1.5 text-[10px] text-white placeholder:text-[9px] placeholder:text-white/30 outline-none focus:border-amber-100/60"
+                className="min-w-0 flex-1 rounded-md border border-white/15 bg-black/30 px-2 py-1.5 text-[10px] text-white placeholder:text-[9px] placeholder:text-white/30 outline-none focus:border-amber-100/60 min-[1300px]:h-[112px]"
               />
 
               <button

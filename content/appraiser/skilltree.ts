@@ -407,9 +407,10 @@ export function layoutTree(
   },
 ) {
   const edges: [string, string][] = []
-  const leafCountById = new Map<string, number>()
-  const depthById = new Map<string, number>()
+  const weightById = new Map<string, number>()
   const angleById = new Map<string, number>()
+  const depthById = new Map<string, number>()
+
   const positions = new Map<
     string,
     {
@@ -420,46 +421,60 @@ export function layoutTree(
     }
   >()
 
-  function countLeaves(node: TreeNode): number {
-    if (!node.children || node.children.length === 0) {
-      leafCountById.set(node.id, 1)
-      return 1
+  // 화면 좌표계에서 위쪽은 y가 감소합니다.
+  // 215도~325도 부채꼴은 루트에서 위쪽으로만 펼쳐집니다.
+  const FAN_START = (215 * Math.PI) / 180
+  const FAN_END = (325 * Math.PI) / 180
+
+  function calculateWeight(node: TreeNode, inheritedScale: number): number {
+    const scale = node.spacingScale ?? inheritedScale
+    const children = node.children ?? []
+
+    if (children.length === 0) {
+      const weight = scale
+      weightById.set(node.id, weight)
+      return weight
     }
 
-    const count = node.children.reduce(
-      (sum, child) => sum + countLeaves(child),
+    const weight = children.reduce(
+      (total, child) => total + calculateWeight(child, scale),
       0,
     )
 
-    leafCountById.set(node.id, count)
-    return count
+    weightById.set(node.id, weight)
+    return weight
   }
 
-  function assignAngles(
+  function assignLayout(
     node: TreeNode,
     depth: number,
-    startLeaf: number,
-    totalLeaves: number,
+    start: number,
+    end: number,
   ) {
-    const leafCount = leafCountById.get(node.id) ?? 1
-    const centerLeaf = startLeaf + leafCount / 2
+    const angle = (start + end) / 2
 
-    // 시작점을 화면 상단으로 두고 시계 방향으로 배치합니다.
-    const angle = (centerLeaf / totalLeaves) * Math.PI * 2 - Math.PI / 2
-
-    depthById.set(node.id, depth)
     angleById.set(node.id, angle)
+    depthById.set(node.id, depth)
 
-    if (!node.children) return
+    const children = node.children ?? []
+    if (children.length === 0) return
 
-    let cursor = startLeaf
+    const totalWeight = children.reduce(
+      (total, child) => total + (weightById.get(child.id) ?? 1),
+      0,
+    )
 
-    for (const child of node.children) {
+    let cursor = start
+
+    for (const child of children) {
+      const childWeight = weightById.get(child.id) ?? 1
+      const childArc = ((end - start) * childWeight) / totalWeight
+      const childEnd = cursor + childArc
+
       edges.push([node.id, child.id])
+      assignLayout(child, depth + 1, cursor, childEnd)
 
-      assignAngles(child, depth + 1, cursor, totalLeaves)
-
-      cursor += leafCountById.get(child.id) ?? 1
+      cursor = childEnd
     }
   }
 
@@ -467,8 +482,9 @@ export function layoutTree(
     const depth = depthById.get(node.id) ?? 0
     const angle = angleById.get(node.id) ?? -Math.PI / 2
 
-    // 각 깊이는 중심에서 바깥으로 한 단계씩 퍼집니다.
-    const radius = depth * opts.xSpacing
+    // 이전 150px보다 줄인 128px 간격.
+    // 컴포넌트의 X_SPACING 값과 함께 사용되어 전체 간격도 조밀해집니다.
+    const radius = depth * Math.min(opts.xSpacing, 128)
 
     positions.set(node.id, {
       x: Math.cos(angle) * radius,
@@ -482,9 +498,8 @@ export function layoutTree(
     }
   }
 
-  const totalLeaves = countLeaves(root)
-
-  assignAngles(root, 0, 0, totalLeaves)
+  calculateWeight(root, 1)
+  assignLayout(root, 0, FAN_START, FAN_END)
   createPositions(root)
 
   return {
