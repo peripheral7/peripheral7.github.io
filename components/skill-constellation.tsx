@@ -23,16 +23,16 @@ type LayoutMode = "mobile" | "narrow" | "wide"
 
 const STORAGE_KEY = "appraiser-skilltree-progress-v1"
 
-const FOCUS_ZOOM = 1.04
-const DEFAULT_ZOOM = 0.42
 const ZOOM_MIN = 0.2
-const ZOOM_MAX = 1.8
+const ZOOM_MAX = 2.0
+const FOCUS_ZOOM = ZOOM_MAX
+const DEFAULT_ZOOM = 0.42
 const PAN_MARGIN = 320
 const RESISTANCE = 0.35
 
 // 방사형 트리의 반지름 단계 간격
-const X_SPACING = 120
-const Y_SPACING = 120
+const X_SPACING = 130
+const Y_SPACING = 130
 
 const MOBILE_BP = 768
 const NARROW_BP = 1300
