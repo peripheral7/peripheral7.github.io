@@ -406,47 +406,10 @@ export function layoutTree(
     rootY?: number
   },
 ) {
-  const rootY = opts.rootY ?? 1800
-  const baseX = new Map<string, number>()
-  const depthOf = new Map<string, number>()
-  const scaleOf = new Map<string, number>()
   const edges: [string, string][] = []
-  let cursorX = 0
-
-  function computeBase(
-    node: TreeNode,
-    depth: number,
-    inheritedScale: number,
-  ): number {
-    // 기존 0.5 배율 데이터가 있더라도 최소 간격은 유지
-    const requestedScale = node.spacingScale ?? inheritedScale
-    const scale = Math.max(requestedScale, 1)
-
-    depthOf.set(node.id, depth)
-    scaleOf.set(node.id, scale)
-
-    if (!node.children || node.children.length === 0) {
-      const x = cursorX
-      cursorX += opts.xSpacing * scale
-      baseX.set(node.id, x)
-      return x
-    }
-
-    const childXs = node.children.map((child) => {
-      edges.push([node.id, child.id])
-      return computeBase(child, depth + 1, scale)
-    })
-
-    const x = childXs.reduce((sum, childX) => sum + childX, 0) / childXs.length
-    baseX.set(node.id, x)
-
-    return x
-  }
-
-  computeBase(root, 0, 1)
-
-  const allX = [...baseX.values()]
-  const centerX = (Math.min(...allX) + Math.max(...allX)) / 2
+  const leafCountById = new Map<string, number>()
+  const depthById = new Map<string, number>()
+  const angleById = new Map<string, number>()
   const positions = new Map<
     string,
     {
@@ -457,68 +420,72 @@ export function layoutTree(
     }
   >()
 
-  const trunkIds = new Set(["root0", "t1", "t2", "t3", "t4"])
-
-  function hashSeed(id: string) {
-    let hash = 0
-
-    for (let index = 0; index < id.length; index += 1) {
-      hash = (hash * 31 + id.charCodeAt(index)) % 1000
+  function countLeaves(node: TreeNode): number {
+    if (!node.children || node.children.length === 0) {
+      leafCountById.set(node.id, 1)
+      return 1
     }
 
-    return (hash / 1000) * Math.PI * 2
+    const count = node.children.reduce(
+      (sum, child) => sum + countLeaves(child),
+      0,
+    )
+
+    leafCountById.set(node.id, count)
+    return count
   }
 
-  function applySway(
+  function assignAngles(
     node: TreeNode,
-    swayActive: boolean,
-    seed: number,
-    startDepth: number,
+    depth: number,
+    startLeaf: number,
+    totalLeaves: number,
   ) {
-    const depth = depthOf.get(node.id) ?? 0
-    const scale = scaleOf.get(node.id) ?? 1
-    const isTrunk = trunkIds.has(node.id)
+    const leafCount = leafCountById.get(node.id) ?? 1
+    const centerLeaf = startLeaf + leafCount / 2
 
-    let x = (baseX.get(node.id) ?? 0) - centerX
+    // 시작점을 화면 상단으로 두고 시계 방향으로 배치합니다.
+    const angle = (centerLeaf / totalLeaves) * Math.PI * 2 - Math.PI / 2
 
-    if (swayActive && !isTrunk) {
-      // xSpacing의 16%로 제한: 가지의 자연스러움은 유지하면서 교차를 줄임
-      const amplitude = opts.xSpacing * scale * 0.16
-      x += Math.sin((depth - startDepth) * 0.55 + seed) * amplitude
+    depthById.set(node.id, depth)
+    angleById.set(node.id, angle)
+
+    if (!node.children) return
+
+    let cursor = startLeaf
+
+    for (const child of node.children) {
+      edges.push([node.id, child.id])
+
+      assignAngles(child, depth + 1, cursor, totalLeaves)
+
+      cursor += leafCountById.get(child.id) ?? 1
     }
+  }
 
-    const y = rootY - depth * opts.ySpacing
+  function createPositions(node: TreeNode) {
+    const depth = depthById.get(node.id) ?? 0
+    const angle = angleById.get(node.id) ?? -Math.PI / 2
+
+    // 각 깊이는 중심에서 바깥으로 한 단계씩 퍼집니다.
+    const radius = depth * opts.xSpacing
 
     positions.set(node.id, {
-      x,
-      y,
+      x: Math.cos(angle) * radius,
+      y: Math.sin(angle) * radius,
       name: node.name,
       section: node.section,
     })
 
-    if (!node.children) return
-
-    const nextSwayActive = swayActive || node.id === "t4"
-
-    if (node.children.length > 1) {
-      for (const child of node.children) {
-        applySway(
-          child,
-          nextSwayActive,
-          hashSeed(child.id),
-          depth + 1,
-        )
-      }
-
-      return
-    }
-
-    for (const child of node.children) {
-      applySway(child, nextSwayActive, seed, startDepth)
+    for (const child of node.children ?? []) {
+      createPositions(child)
     }
   }
 
-  applySway(root, false, 0, 0)
+  const totalLeaves = countLeaves(root)
+
+  assignAngles(root, 0, 0, totalLeaves)
+  createPositions(root)
 
   return {
     positions,

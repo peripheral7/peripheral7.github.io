@@ -23,15 +23,16 @@ type LayoutMode = "mobile" | "narrow" | "wide"
 
 const STORAGE_KEY = "appraiser-skilltree-progress-v1"
 
-const FOCUS_ZOOM = 1.06
-const DEFAULT_ZOOM = 0.31
+const FOCUS_ZOOM = 1.04
+const DEFAULT_ZOOM = 0.42
 const ZOOM_MIN = 0.2
 const ZOOM_MAX = 1.8
-const PAN_MARGIN = 420
+const PAN_MARGIN = 320
 const RESISTANCE = 0.35
 
-const X_SPACING = 260
-const Y_SPACING = 195
+// 방사형 트리의 반지름 단계 간격
+const X_SPACING = 150
+const Y_SPACING = 150
 
 const MOBILE_BP = 768
 const NARROW_BP = 1300
@@ -134,35 +135,47 @@ function getTier(
   isRoot: boolean,
   acquired: boolean,
   reinforced: boolean,
+  hasLogs: boolean,
 ): Tier {
   if (isRoot) {
     return {
       rgb: "255,255,255",
       fillAlpha: 1,
-      shadow: "drop-shadow(0 0 4px rgba(255,255,255,0.72))",
+      shadow:
+        "drop-shadow(0 0 4px rgba(255,255,255,0.9)) drop-shadow(0 0 12px rgba(255,255,255,0.55))",
     }
   }
 
   if (reinforced) {
     return {
       rgb: "255,214,140",
-      fillAlpha: 0.96,
-      shadow: "drop-shadow(0 0 3px rgba(255,214,140,0.50))",
+      fillAlpha: 1,
+      shadow:
+        "drop-shadow(0 0 4px rgba(255,214,140,0.95)) drop-shadow(0 0 14px rgba(255,214,140,0.72))",
+    }
+  }
+
+  if (hasLogs) {
+    return {
+      rgb: "255,224,168",
+      fillAlpha: 0.92,
+      shadow:
+        "drop-shadow(0 0 3px rgba(255,224,168,0.82)) drop-shadow(0 0 10px rgba(255,224,168,0.52))",
     }
   }
 
   if (acquired) {
     return {
       rgb: "225,205,175",
-      fillAlpha: 0.67,
-      shadow: "drop-shadow(0 0 2px rgba(225,205,175,0.30))",
+      fillAlpha: 0.65,
+      shadow: "drop-shadow(0 0 2px rgba(225,205,175,0.36))",
     }
   }
 
   return {
     rgb: "150,160,180",
     fillAlpha: 0.38,
-    shadow: "drop-shadow(0 0 1px rgba(150,160,180,0.18))",
+    shadow: "drop-shadow(0 0 1px rgba(150,160,180,0.2))",
   }
 }
 
@@ -181,8 +194,8 @@ function getFocal(
 
   if (mode === "mobile" || mode === "narrow") {
     return {
-      x: width / 6,
-      y: height / 2,
+      x: width * 0.25,
+      y: height * (5 / 6),
     }
   }
 
@@ -729,18 +742,20 @@ export function SkillConstellation() {
 
   if (layoutMode === "mobile") {
     panelStyle = {
-      top: "6vh",
-      right: "4vw",
-      width: "57vw",
-      maxHeight: "27vh",
+      left: "67%",
+      top: "25%",
+      width: "52vw",
+      maxHeight: "38vh",
+      transform: "translate(-50%, -50%)",
     }
   } else if (layoutMode === "narrow") {
     panelStyle = {
-      top: "7vh",
-      right: "4vw",
-      width: "57vw",
-      maxWidth: "640px",
-      maxHeight: "29vh",
+      left: "67%",
+      top: "25%",
+      width: "50vw",
+      maxWidth: "560px",
+      maxHeight: "40vh",
+      transform: "translate(-50%, -50%)",
     }
   } else {
     panelStyle = {
@@ -755,10 +770,10 @@ export function SkillConstellation() {
   return (
     <main className="relative min-h-screen overflow-hidden bg-[#05060c] text-white">
       <div
-        className="pointer-events-none fixed inset-0"
+        className="pointer-events-none fixed inset-0 z-0"
         style={{
           backgroundImage:
-            "linear-gradient(rgba(3, 5, 12, 0.48), rgba(3, 5, 12, 0.74)), url('/images/study/universe-background.jpg')",
+            "linear-gradient(rgba(3, 5, 12, 0.38), rgba(3, 5, 12, 0.68)), url('/images/study/universe-background.jpg')",
           backgroundPosition: "center",
           backgroundSize: "cover",
           backgroundRepeat: "no-repeat",
@@ -910,10 +925,13 @@ export function SkillConstellation() {
             const status = progress[node.id]
             const isRoot = node.id === "root0"
             const isSelected = selectedId === node.id
+            const hasLogs = (status?.logs.length ?? 0) > 0
+
             const tier = getTier(
               isRoot,
               Boolean(status?.acquired),
               Boolean(status?.reinforced),
+              hasLogs,
             )
 
             const size = isRoot ? 35 : 26
