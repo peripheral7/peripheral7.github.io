@@ -6,59 +6,89 @@ import { MoreVertical } from "lucide-react"
 import { skillTree, sections, layoutTree } from "@/content/appraiser/skilltree"
 import defaultProgress from "@/content/appraiser/progress.default.json"
 
+type LogEntry = {
+  date: string
+  type: "study" | "review"
+  text: string
+}
 
-type LogEntry = { date: string; type: "study" | "review"; text: string }
-type StarProgress = { acquired: boolean; logs: LogEntry[]; reinforced?: boolean }
+type StarProgress = {
+  acquired: boolean
+  logs: LogEntry[]
+  reinforced?: boolean
+}
+
 type ProgressMap = Record<string, StarProgress>
+type LayoutMode = "mobile" | "narrow" | "wide"
 
 const STORAGE_KEY = "appraiser-skilltree-progress-v1"
-const FOCUS_ZOOM = 1.6
-const DEFAULT_ZOOM = 0.5
-const ZOOM_MIN = 0.4
-const ZOOM_MAX = 2.4
-const PAN_MARGIN = 260
+const FOCUS_ZOOM = 1.08
+const DEFAULT_ZOOM = 0.34
+const ZOOM_MIN = 0.24
+const ZOOM_MAX = 1.8
+const PAN_MARGIN = 420
 const RESISTANCE = 0.35
-const X_SPACING = 190
-const Y_SPACING = 190
+
+// 별 크기를 키웠으므로 노드 간 물리적 간격도 함께 확장
+const X_SPACING = 330
+const Y_SPACING = 265
+
 const MOBILE_BP = 768
 const NARROW_BP = 1300
 const REINFORCE_GAP_DAYS = 7
 const TITLE_WRAP_LEN = 7
 
-function formatDateYMD(d: Date) {
-  const y = d.getFullYear()
-  const m = String(d.getMonth() + 1).padStart(2, "0")
-  const day = String(d.getDate()).padStart(2, "0")
-  return `${y}/${m}/${day}`
+function formatDateYMD(date: Date) {
+  const year = date.getFullYear()
+  const month = String(date.getMonth() + 1).padStart(2, "0")
+  const day = String(date.getDate()).padStart(2, "0")
+
+  return `${year}/${month}/${day}`
 }
-function parseYMD(s: string) {
-  const [y, m, d] = s.split("/").map(Number)
-  return new Date(y, (m || 1) - 1, d || 1)
+
+function parseYMD(value: string) {
+  const [year, month, day] = value.split("/").map(Number)
+  return new Date(year, (month || 1) - 1, day || 1)
 }
-function clamp(v: number, min: number, max: number) {
-  return Math.min(Math.max(v, min), max)
+
+function clamp(value: number, min: number, max: number) {
+  return Math.min(Math.max(value, min), max)
 }
+
 function rubberBand(value: number, min: number, max: number, resistance = RESISTANCE) {
   if (value < min) return min - (min - value) * resistance
   if (value > max) return max + (value - max) * resistance
   return value
 }
 
-// 정확히 7글자 지점 근처 공백에서 두 줄로 분리 (줄간격 1.2는 렌더링부에서 처리)
 function wrapLabel(name: string): [string, string?] {
   if (name.length <= TITLE_WRAP_LEN) return [name]
-  let breakIdx = -1
-  for (let offset = 0; offset < name.length; offset++) {
+
+  let breakIndex = -1
+
+  for (let offset = 0; offset < name.length; offset += 1) {
     const left = TITLE_WRAP_LEN - offset
     const right = TITLE_WRAP_LEN + offset
-    if (name[left] === " ") { breakIdx = left; break }
-    if (name[right] === " ") { breakIdx = right; break }
+
+    if (name[left] === " ") {
+      breakIndex = left
+      break
+    }
+
+    if (name[right] === " ") {
+      breakIndex = right
+      break
+    }
   }
-  if (breakIdx === -1) breakIdx = TITLE_WRAP_LEN
-  return [name.slice(0, breakIdx).trim(), name.slice(breakIdx).trim()]
+
+  if (breakIndex === -1) breakIndex = TITLE_WRAP_LEN
+
+  return [
+    name.slice(0, breakIndex).trim(),
+    name.slice(breakIndex).trim(),
+  ]
 }
 
-// 얇고 날카로운 4각 별(스파클) — 직선으로만 이루어져 각이 예리함
 function StarGlyph({
   size,
   fill,
@@ -70,145 +100,93 @@ function StarGlyph({
   className?: string
   style?: React.CSSProperties
 }) {
-  const gradientId = `star-core-${size}-${fill.replace(/[^a-zA-Z0-9]/g, "")}`
-
   return (
     <svg
-      viewBox="0 0 64 64"
+      viewBox="0 0 24 24"
       width={size}
       height={size}
       className={className}
-      style={{ overflow: "visible", ...style }}
+      style={style}
       aria-hidden
     >
-      <defs>
-        <radialGradient id={gradientId} cx="32%" cy="25%" r="72%">
-          <stop offset="0%" stopColor="rgba(255,255,255,1)" />
-          <stop offset="18%" stopColor={fill} />
-          <stop offset="60%" stopColor={fill} stopOpacity="0.88" />
-          <stop offset="100%" stopColor="rgba(8,12,24,0.92)" />
-        </radialGradient>
-
-        <linearGradient id={`${gradientId}-ray`} x1="0" y1="0" x2="1" y2="1">
-          <stop offset="0%" stopColor="rgba(255,255,255,0)" />
-          <stop offset="42%" stopColor={fill} stopOpacity="0.8" />
-          <stop offset="50%" stopColor="rgba(255,255,255,0.98)" />
-          <stop offset="58%" stopColor={fill} stopOpacity="0.8" />
-          <stop offset="100%" stopColor="rgba(255,255,255,0)" />
-        </linearGradient>
-
-        <filter id={`${gradientId}-inner`} x="-70%" y="-70%" width="240%" height="240%">
-          <feGaussianBlur in="SourceAlpha" stdDeviation="1.3" result="blur" />
-          <feOffset in="blur" dx="1.5" dy="2.3" result="offsetBlur" />
-          <feComposite in="SourceGraphic" in2="offsetBlur" operator="over" />
-        </filter>
-      </defs>
-
-      {/* 긴 날카로운 십자 끝: 수직 */}
       <path
-        d="M32 0 L35.5 27.5 L32 32 L28.5 27.5 Z
-           M32 64 L35.5 36.5 L32 32 L28.5 36.5 Z"
-        fill={`url(#${gradientId}-ray)`}
-        opacity="0.94"
+        d="M12 0 L13.65 10.35 L24 12 L13.65 13.65 L12 24 L10.35 13.65 L0 12 L10.35 10.35 Z"
+        fill={fill}
       />
-
-      {/* 긴 날카로운 십자 끝: 수평 */}
-      <path
-        d="M0 32 L27.5 28.5 L32 32 L27.5 35.5 Z
-           M64 32 L36.5 28.5 L32 32 L36.5 35.5 Z"
-        fill={`url(#${gradientId}-ray)`}
-        opacity="0.94"
-      />
-
-      {/* 구체 뒤쪽의 어두운 외곽 */}
-      <circle cx="32" cy="32.8" r="14.4" fill="rgba(0,0,0,0.72)" />
-
-      {/* 원형 3D 중심 */}
-      <circle
-        cx="32"
-        cy="32"
-        r="13.2"
-        fill={`url(#${gradientId})`}
-        stroke="rgba(255,255,255,0.68)"
-        strokeWidth="0.8"
-        filter={`url(#${gradientId}-inner)`}
-      />
-
-      {/* 중심 반사광 */}
-      <ellipse
-        cx="27.6"
-        cy="26.4"
-        rx="5.4"
-        ry="3.3"
-        fill="rgba(255,255,255,0.62)"
-        transform="rotate(-28 27.6 26.4)"
-      />
-
-      {/* 중심의 날카로운 핀포인트 */}
-      <circle cx="32" cy="32" r="2.1" fill="rgba(255,255,255,0.96)" />
     </svg>
   )
 }
 
-type Tier = { rgb: string; fillAlpha: number; ambientAlpha: number; glowClass: string; shadow: string }
+type Tier = {
+  rgb: string
+  fillAlpha: number
+  shadow: string
+}
 
 function getTier(isRoot: boolean, acquired: boolean, reinforced: boolean): Tier {
   if (isRoot) {
     return {
       rgb: "255,255,255",
       fillAlpha: 1,
-      ambientAlpha: 0.6,
-      glowClass: "star-pulse",
-      shadow: "drop-shadow(0 0 3px rgba(255,255,255,0.9)) drop-shadow(0 0 10px rgba(255,255,255,0.6))",
+      shadow: "drop-shadow(0 0 4px rgba(255,255,255,0.72))",
     }
   }
+
   if (reinforced) {
     return {
       rgb: "255,214,140",
-      fillAlpha: 1,
-      ambientAlpha: 0.55,
-      glowClass: "star-pulse",
-      shadow: "drop-shadow(0 0 3px rgba(255,214,140,0.9)) drop-shadow(0 0 10px rgba(255,214,140,0.6))",
+      fillAlpha: 0.96,
+      shadow: "drop-shadow(0 0 3px rgba(255,214,140,0.54))",
     }
   }
+
   if (acquired) {
     return {
       rgb: "225,205,175",
-      fillAlpha: 0.55,
-      ambientAlpha: 0.3,
-      glowClass: "star-twinkle",
-      shadow: "drop-shadow(0 0 2px rgba(225,205,175,0.5))",
+      fillAlpha: 0.67,
+      shadow: "drop-shadow(0 0 2px rgba(225,205,175,0.32))",
     }
   }
+
   return {
     rgb: "150,160,180",
-    fillAlpha: 0.3,
-    ambientAlpha: 0.18,
-    glowClass: "star-twinkle",
-    shadow: "drop-shadow(0 0 1px rgba(150,160,180,0.25))",
+    fillAlpha: 0.38,
+    shadow: "drop-shadow(0 0 1px rgba(150,160,180,0.18))",
   }
 }
 
-type LayoutMode = "mobile" | "narrow" | "wide"
-
-// wide: 별은 좌측 2/3 중앙(x = width/3)에, 우측 1/3은 패널 영역으로 비워둠
-function getFocal(mode: LayoutMode, hasSelection: boolean, width: number, height: number) {
+function getFocal(
+  mode: LayoutMode,
+  hasSelection: boolean,
+  width: number,
+  height: number,
+) {
   if (!hasSelection) return { x: width / 2, y: height / 2 }
-  if (mode === "mobile") return { x: width / 2, y: height * 0.75 }
-  if (mode === "narrow") return { x: width * 0.32, y: height / 2 }
-  return { x: width * 0.35, y: height / 2 }
+  if (mode === "mobile") return { x: width / 2, y: height * 0.74 }
+  if (mode === "narrow") return { x: width * 0.31, y: height / 2 }
+
+  return { x: width / 3, y: height / 2 }
 }
 
 export function SkillConstellation() {
   const { positions, edges } = useMemo(
-    () => layoutTree(skillTree, { xSpacing: X_SPACING, ySpacing: Y_SPACING }),
+    () =>
+      layoutTree(skillTree, {
+        xSpacing: X_SPACING,
+        ySpacing: Y_SPACING,
+      }),
     [],
   )
-  const nodeList = useMemo(() => [...positions.entries()].map(([id, p]) => ({ id, ...p })), [positions])
+
+  const nodeList = useMemo(
+    () => [...positions.entries()].map(([id, position]) => ({ id, ...position })),
+    [positions],
+  )
 
   const bounds = useMemo(() => {
-    const xs = nodeList.map((n) => n.x)
-    const ys = nodeList.map((n) => n.y)
+    const xs = nodeList.map((node) => node.x)
+    const ys = nodeList.map((node) => node.y)
+
     return {
       minX: Math.min(...xs) - PAN_MARGIN,
       maxX: Math.max(...xs) + PAN_MARGIN,
@@ -219,47 +197,61 @@ export function SkillConstellation() {
     }
   }, [nodeList])
 
-  // edges는 [부모id, 자식id] 방향쌍이므로 그대로 부모/자식 맵을 만들 수 있습니다
   const childrenOf = useMemo(() => {
     const map = new Map<string, string[]>()
-    for (const [p, c] of edges) {
-      if (!map.has(p)) map.set(p, [])
-      map.get(p)!.push(c)
+
+    for (const [parent, child] of edges) {
+      if (!map.has(parent)) map.set(parent, [])
+      map.get(parent)!.push(child)
     }
+
     return map
   }, [edges])
-  const parentOf = useMemo(() => new Map(edges.map(([p, c]) => [c, p])), [edges])
 
-  // 각 노드 아래 하위트리가 뻗어나간 최대 깊이 (시각적 위쪽 이동 우선순위 계산용)
+  const parentOf = useMemo(
+    () => new Map<string, string>(edges.map(([parent, child]) => [child, parent])),
+    [edges],
+  )
+
   const subtreeDepth = useMemo(() => {
     const map = new Map<string, number>()
+
     function compute(id: string): number {
       if (map.has(id)) return map.get(id)!
-      const kids = childrenOf.get(id) ?? []
-      const d = kids.length === 0 ? 0 : 1 + Math.max(...kids.map(compute))
-      map.set(id, d)
-      return d
+
+      const children = childrenOf.get(id) ?? []
+      const depth = children.length === 0 ? 0 : 1 + Math.max(...children.map(compute))
+
+      map.set(id, depth)
+      return depth
     }
+
     compute("root0")
     return map
   }, [childrenOf])
 
-  // 루트로부터의 실제 깊이 (3D 기울임 효과 계산용)
   const depthOf = useMemo(() => {
     const map = new Map<string, number>([["root0", 0]])
     const queue = ["root0"]
+
     while (queue.length) {
       const id = queue.shift()!
-      const d = map.get(id)!
+      const depth = map.get(id)!
+
       for (const child of childrenOf.get(id) ?? []) {
-        map.set(child, d + 1)
+        map.set(child, depth + 1)
         queue.push(child)
       }
     }
+
     return map
   }, [childrenOf])
 
-  const [camera, setCamera] = useState({ x: bounds.centerX, y: bounds.centerY, zoom: DEFAULT_ZOOM })
+  const [camera, setCamera] = useState({
+    x: bounds.centerX,
+    y: bounds.centerY,
+    zoom: DEFAULT_ZOOM,
+  })
   const [smooth, setSmooth] = useState(true)
   const [stage, setStage] = useState({ width: 1200, height: 800 })
   const [selectedId, setSelectedId] = useState<string | null>(null)
@@ -268,19 +260,35 @@ export function SkillConstellation() {
   const [reviewInput, setReviewInput] = useState("")
   const [toolsOpen, setToolsOpen] = useState(false)
 
-  const dragRef = useRef({ active: false, startX: 0, startY: 0, startCamX: 0, startCamY: 0, moved: false })
+  const dragRef = useRef({
+    active: false,
+    startX: 0,
+    startY: 0,
+    startCamX: 0,
+    startCamY: 0,
+    moved: false,
+  })
   const pointers = useRef(new Map<number, { x: number; y: number }>())
-  const pinchRef = useRef<{ active: boolean; startDist: number; startZoom: number } | null>(null)
+  const pinchRef = useRef<{
+    active: boolean
+    startDist: number
+    startZoom: number
+  } | null>(null)
   const wheelTimeout = useRef<number | undefined>(undefined)
   const fileInputRef = useRef<HTMLInputElement>(null)
 
   useEffect(() => {
-    function update() {
-      setStage({ width: window.innerWidth, height: window.innerHeight })
+    function updateStage() {
+      setStage({
+        width: window.innerWidth,
+        height: window.innerHeight,
+      })
     }
-    update()
-    window.addEventListener("resize", update)
-    return () => window.removeEventListener("resize", update)
+
+    updateStage()
+    window.addEventListener("resize", updateStage)
+
+    return () => window.removeEventListener("resize", updateStage)
   }, [])
 
   useEffect(() => {
@@ -293,328 +301,454 @@ export function SkillConstellation() {
       setLoaded(true)
     }
   }, [])
+
   useEffect(() => {
     if (!loaded) return
+
     try {
       localStorage.setItem(STORAGE_KEY, JSON.stringify(progress))
     } catch {
-      /* 저장 실패는 조용히 무시 */
+      // 저장 실패는 UI 동작을 막지 않음
     }
-  }, [progress, loaded])
+  }, [loaded, progress])
 
   const layoutMode: LayoutMode =
-    stage.width < MOBILE_BP ? "mobile" : stage.width < NARROW_BP ? "narrow" : "wide"
+    stage.width < MOBILE_BP
+      ? "mobile"
+      : stage.width < NARROW_BP
+        ? "narrow"
+        : "wide"
 
   function selectStar(id: string) {
     setSelectedId(id)
     setReviewInput("")
+    setToolsOpen(false)
   }
 
   useEffect(() => {
     if (!selectedId) return
-    const n = positions.get(selectedId)
-    if (!n) return
+
+    const node = positions.get(selectedId)
+    if (!node) return
+
     setSmooth(true)
-    setCamera({ x: n.x, y: n.y, zoom: FOCUS_ZOOM })
-  }, [selectedId, positions])
+    setCamera({
+      x: node.x,
+      y: node.y,
+      zoom: FOCUS_ZOOM,
+    })
+  }, [positions, selectedId])
 
-  // 방향키 트리 이동 (시각 기준으로 재정의)
-  // ↑ : 화면상 위쪽 = 구조적으로 하위 자식 (하위트리가 가장 길게 뻗은 자식, 동률이면 좌측)
-  // ↓ : 화면상 아래쪽 = 구조적으로 부모
-  // ←/→ : 같은 부모를 공유하는 형제 사이에서만 이동
   useEffect(() => {
-    function isTypingTarget(el: EventTarget | null) {
-      const tag = (el as HTMLElement)?.tagName
-      return tag === "INPUT" || tag === "TEXTAREA"
+    function isTypingTarget(target: EventTarget | null) {
+      const tagName = (target as HTMLElement)?.tagName
+      return tagName === "INPUT" || tagName === "TEXTAREA"
     }
-    function onKeyDown(e: KeyboardEvent) {
-      if (isTypingTarget(e.target)) return
-      const key = e.key
-      if (!["ArrowUp", "ArrowDown", "ArrowLeft", "ArrowRight"].includes(key)) return
-      e.preventDefault()
 
-      const current = selectedId ?? "root0"
+    function onKeyDown(event: KeyboardEvent) {
+      if (isTypingTarget(event.target)) return
+      if (!["ArrowUp", "ArrowDown", "ArrowLeft", "ArrowRight"].includes(event.key)) {
+        return
+      }
+
+      event.preventDefault()
+
       if (!selectedId) {
         selectStar("root0")
         return
       }
 
-      if (key === "ArrowUp") {
-        const kids = childrenOf.get(current) ?? []
-        if (kids.length === 0) return
-        let best = kids[0]
+      if (event.key === "ArrowUp") {
+        const children = childrenOf.get(selectedId) ?? []
+        if (children.length === 0) return
+
+        let best = children[0]
         let bestDepth = subtreeDepth.get(best) ?? 0
         let bestX = positions.get(best)?.x ?? 0
-        for (const c of kids.slice(1)) {
-          const d = subtreeDepth.get(c) ?? 0
-          const x = positions.get(c)?.x ?? 0
-          if (d > bestDepth || (d === bestDepth && x < bestX)) {
-            best = c
-            bestDepth = d
-            bestX = x
+
+        for (const child of children.slice(1)) {
+          const childDepth = subtreeDepth.get(child) ?? 0
+          const childX = positions.get(child)?.x ?? 0
+
+          if (childDepth > bestDepth || (childDepth === bestDepth && childX < bestX)) {
+            best = child
+            bestDepth = childDepth
+            bestX = childX
           }
         }
+
         selectStar(best)
         return
       }
 
-      if (key === "ArrowDown") {
-        const parent = parentOf.get(current)
+      if (event.key === "ArrowDown") {
+        const parent = parentOf.get(selectedId)
         if (parent) selectStar(parent)
         return
       }
 
-      // ArrowLeft / ArrowRight
-      const parent = parentOf.get(current)
+      const parent = parentOf.get(selectedId)
       if (!parent) return
+
       const siblings = (childrenOf.get(parent) ?? [])
         .slice()
         .sort((a, b) => (positions.get(a)?.x ?? 0) - (positions.get(b)?.x ?? 0))
-      const idx = siblings.indexOf(current)
-      if (key === "ArrowLeft" && idx > 0) selectStar(siblings[idx - 1])
-      if (key === "ArrowRight" && idx < siblings.length - 1) selectStar(siblings[idx + 1])
+
+      const index = siblings.indexOf(selectedId)
+
+      if (event.key === "ArrowLeft" && index > 0) {
+        selectStar(siblings[index - 1])
+      }
+
+      if (event.key === "ArrowRight" && index < siblings.length - 1) {
+        selectStar(siblings[index + 1])
+      }
     }
+
     window.addEventListener("keydown", onKeyDown)
     return () => window.removeEventListener("keydown", onKeyDown)
-  }, [selectedId, positions, parentOf, childrenOf, subtreeDepth])
+  }, [childrenOf, parentOf, positions, selectedId, subtreeDepth])
 
   function toggleAcquired(starId: string) {
-    setProgress((prev) => {
-      const cur = prev[starId] ?? { acquired: false, logs: [] }
-      return { ...prev, [starId]: { ...cur, acquired: !cur.acquired } }
+    setProgress((previous) => {
+      const current = previous[starId] ?? { acquired: false, logs: [] }
+
+      return {
+        ...previous,
+        [starId]: {
+          ...current,
+          acquired: !current.acquired,
+        },
+      }
     })
   }
 
-  // 복습 기록만 저장. 직전 기록과 7일 이상 간격이면 이후 영구적으로 진하게 빛남(reinforced)
   function addLog(starId: string, text: string) {
     const trimmed = text.trim()
     if (!trimmed) return
-    setProgress((prev) => {
-      const cur = prev[starId] ?? { acquired: false, logs: [], reinforced: false }
-      const now = new Date()
-      let reinforced = cur.reinforced ?? false
-      if (cur.logs.length > 0) {
-        const lastDate = parseYMD(cur.logs[cur.logs.length - 1].date)
-        const diffDays = Math.floor((now.getTime() - lastDate.getTime()) / 86400000)
-        if (diffDays >= REINFORCE_GAP_DAYS) reinforced = true
+
+    setProgress((previous) => {
+      const current = previous[starId] ?? {
+        acquired: false,
+        logs: [],
+        reinforced: false,
       }
-      const entry: LogEntry = { date: formatDateYMD(now), type: "review", text: trimmed }
-      return { ...prev, [starId]: { acquired: true, logs: [...cur.logs, entry], reinforced } }
+
+      const now = new Date()
+      let reinforced = current.reinforced ?? false
+
+      if (current.logs.length > 0) {
+        const lastDate = parseYMD(current.logs[current.logs.length - 1].date)
+        const days = Math.floor((now.getTime() - lastDate.getTime()) / 86400000)
+
+        if (days >= REINFORCE_GAP_DAYS) reinforced = true
+      }
+
+      const log: LogEntry = {
+        date: formatDateYMD(now),
+        type: "review",
+        text: trimmed,
+      }
+
+      return {
+        ...previous,
+        [starId]: {
+          acquired: true,
+          logs: [...current.logs, log],
+          reinforced,
+        },
+      }
     })
   }
 
-  function onPointerDown(e: React.PointerEvent) {
-    pointers.current.set(e.pointerId, { x: e.clientX, y: e.clientY })
+  function onPointerDown(event: React.PointerEvent) {
+    pointers.current.set(event.pointerId, {
+      x: event.clientX,
+      y: event.clientY,
+    })
+
     setSmooth(false)
+
     if (pointers.current.size === 1) {
       dragRef.current = {
         active: true,
-        startX: e.clientX,
-        startY: e.clientY,
+        startX: event.clientX,
+        startY: event.clientY,
         startCamX: camera.x,
         startCamY: camera.y,
         moved: false,
       }
-    } else if (pointers.current.size === 2) {
-      dragRef.current.active = false
-      const [p1, p2] = [...pointers.current.values()]
-      const dist = Math.hypot(p1.x - p2.x, p1.y - p2.y) || 1
-      pinchRef.current = { active: true, startDist: dist, startZoom: camera.zoom }
-    }
-  }
-  function onPointerMove(e: React.PointerEvent) {
-    if (!pointers.current.has(e.pointerId)) return
-    pointers.current.set(e.pointerId, { x: e.clientX, y: e.clientY })
-
-    if (pinchRef.current?.active && pointers.current.size >= 2) {
-      const [p1, p2] = [...pointers.current.values()]
-      const dist = Math.hypot(p1.x - p2.x, p1.y - p2.y) || 1
-      const ratio = dist / pinchRef.current.startDist
-      setCamera((c) => ({ ...c, zoom: rubberBand(pinchRef.current!.startZoom * ratio, ZOOM_MIN, ZOOM_MAX, 0.4) }))
       return
     }
+
+    if (pointers.current.size === 2) {
+      dragRef.current.active = false
+
+      const [first, second] = [...pointers.current.values()]
+      const distance = Math.hypot(first.x - second.x, first.y - second.y) || 1
+
+      pinchRef.current = {
+        active: true,
+        startDist: distance,
+        startZoom: camera.zoom,
+      }
+    }
+  }
+
+  function onPointerMove(event: React.PointerEvent) {
+    if (!pointers.current.has(event.pointerId)) return
+
+    pointers.current.set(event.pointerId, {
+      x: event.clientX,
+      y: event.clientY,
+    })
+
+    if (pinchRef.current?.active && pointers.current.size >= 2) {
+      const [first, second] = [...pointers.current.values()]
+      const distance = Math.hypot(first.x - second.x, first.y - second.y) || 1
+      const ratio = distance / pinchRef.current.startDist
+
+      setCamera((current) => ({
+        ...current,
+        zoom: rubberBand(
+          pinchRef.current!.startZoom * ratio,
+          ZOOM_MIN,
+          ZOOM_MAX,
+          0.4,
+        ),
+      }))
+      return
+    }
+
     if (!dragRef.current.active || pointers.current.size !== 1) return
-    const dx = e.clientX - dragRef.current.startX
-    const dy = e.clientY - dragRef.current.startY
-    if (Math.abs(dx) > 4 || Math.abs(dy) > 4) dragRef.current.moved = true
+
+    const dx = event.clientX - dragRef.current.startX
+    const dy = event.clientY - dragRef.current.startY
+
+    if (Math.abs(dx) > 4 || Math.abs(dy) > 4) {
+      dragRef.current.moved = true
+    }
+
     if (!dragRef.current.moved) return
+
     const rawX = dragRef.current.startCamX - dx / camera.zoom
     const rawY = dragRef.current.startCamY - dy / camera.zoom
-    setCamera((c) => ({
-      ...c,
+
+    setCamera((current) => ({
+      ...current,
       x: rubberBand(rawX, bounds.minX, bounds.maxX),
       y: rubberBand(rawY, bounds.minY, bounds.maxY),
     }))
   }
-  function onPointerUp(e: React.PointerEvent) {
-    pointers.current.delete(e.pointerId)
+
+  function onPointerUp(event: React.PointerEvent) {
+    pointers.current.delete(event.pointerId)
+
     if (pointers.current.size < 2 && pinchRef.current?.active) {
       pinchRef.current = null
       setSmooth(true)
-      setCamera((c) => ({ ...c, zoom: clamp(c.zoom, ZOOM_MIN, ZOOM_MAX) }))
+
+      setCamera((current) => ({
+        ...current,
+        zoom: clamp(current.zoom, ZOOM_MIN, ZOOM_MAX),
+      }))
     }
-    if (pointers.current.size === 1) {
-      const [remaining] = [...pointers.current.values()]
-      dragRef.current = {
-        active: true,
-        startX: remaining.x,
-        startY: remaining.y,
-        startCamX: camera.x,
-        startCamY: camera.y,
-        moved: false,
-      }
-    } else if (pointers.current.size === 0) {
+
+    if (pointers.current.size === 0) {
       dragRef.current.active = false
       setSmooth(true)
-      setCamera((c) => ({
-        ...c,
-        x: clamp(c.x, bounds.minX, bounds.maxX),
-        y: clamp(c.y, bounds.minY, bounds.maxY),
+
+      setCamera((current) => ({
+        ...current,
+        x: clamp(current.x, bounds.minX, bounds.maxX),
+        y: clamp(current.y, bounds.minY, bounds.maxY),
       }))
     }
   }
-  function onWheel(e: React.WheelEvent) {
-    e.preventDefault()
+
+  function onWheel(event: React.WheelEvent) {
+    event.preventDefault()
     setSmooth(false)
-    const delta = -e.deltaY * 0.0015
-    setCamera((c) => ({ ...c, zoom: rubberBand(c.zoom + delta, ZOOM_MIN, ZOOM_MAX, 0.4) }))
+
+    const delta = -event.deltaY * 0.0015
+
+    setCamera((current) => ({
+      ...current,
+      zoom: rubberBand(current.zoom + delta, ZOOM_MIN, ZOOM_MAX, 0.4),
+    }))
+
     window.clearTimeout(wheelTimeout.current)
+
     wheelTimeout.current = window.setTimeout(() => {
       setSmooth(true)
-      setCamera((c) => ({ ...c, zoom: clamp(c.zoom, ZOOM_MIN, ZOOM_MAX) }))
+
+      setCamera((current) => ({
+        ...current,
+        zoom: clamp(current.zoom, ZOOM_MIN, ZOOM_MAX),
+      }))
     }, 220)
   }
 
-  // 배경(빈 공간) 클릭 시 선택 해제 및 메뉴 닫기 — 드래그였다면 무시
   function onStageClick() {
     if (dragRef.current.moved) return
+
     setSelectedId(null)
     setToolsOpen(false)
   }
 
-  const focal = getFocal(layoutMode, Boolean(selectedId), stage.width, stage.height)
+  function handleExport() {
+    const blob = new Blob([JSON.stringify(progress, null, 2)], {
+      type: "application/json",
+    })
+    const url = URL.createObjectURL(blob)
+    const anchor = document.createElement("a")
+
+    anchor.href = url
+    anchor.download = `appraiser-progress-${formatDateYMD(new Date()).replaceAll("/", "-")}.json`
+    anchor.click()
+
+    URL.revokeObjectURL(url)
+  }
+
+  function handleImportFile(file: File) {
+    const reader = new FileReader()
+
+    reader.onload = () => {
+      try {
+        const parsed = JSON.parse(String(reader.result))
+
+        if (confirm("불러온 파일로 현재 진행상황을 덮어쓸까요?")) {
+          setProgress(parsed)
+        }
+      } catch {
+        alert("올바른 JSON 파일이 아닙니다.")
+      }
+    }
+
+    reader.readAsText(file)
+  }
+
+  function handleReset() {
+    if (!confirm("모든 습득 기록과 복습 로그를 초기화할까요? 되돌릴 수 없습니다.")) {
+      return
+    }
+
+    setProgress({})
+    localStorage.removeItem(STORAGE_KEY)
+  }
+
+  const focal = getFocal(
+    layoutMode,
+    Boolean(selectedId),
+    stage.width,
+    stage.height,
+  )
+
   const worldTransform = {
     left: focal.x - camera.x * camera.zoom,
     top: focal.y - camera.y * camera.zoom,
   }
 
-  // 별자리 선택 시 "타고 올라가는" 느낌의 입체 기울임 — 깊이가 깊을수록 더 크게 기울어짐
-  const tiltDeg = selectedId ? Math.min((depthOf.get(selectedId) ?? 0) * 1.1, 14) : 0
-
-  function handleExport() {
-    const blob = new Blob([JSON.stringify(progress, null, 2)], { type: "application/json" })
-    const url = URL.createObjectURL(blob)
-    const a = document.createElement("a")
-    a.href = url
-    a.download = `appraiser-progress-${formatDateYMD(new Date()).replaceAll("/", "-")}.json`
-    a.click()
-    URL.revokeObjectURL(url)
-  }
-  function handleImportFile(file: File) {
-    const reader = new FileReader()
-    reader.onload = () => {
-      try {
-        const parsed = JSON.parse(String(reader.result))
-        if (confirm("불러온 파일로 현재 진행상황을 덮어쓸까요?")) setProgress(parsed)
-      } catch {
-        alert("올바른 JSON 파일이 아닙니다.")
-      }
-    }
-    reader.readAsText(file)
-  }
-  function handleReset() {
-    if (confirm("모든 습득 기록과 학습 로그를 초기화할까요? 되돌릴 수 없습니다.")) {
-      setProgress({})
-      localStorage.removeItem(STORAGE_KEY)
-    }
-  }
+  const tiltDeg = selectedId
+    ? Math.min((depthOf.get(selectedId) ?? 0) * 0.7, 8)
+    : 0
 
   const selectedNode = selectedId ? positions.get(selectedId) : null
   const selectedSection = selectedNode ? sections[selectedNode.section] : null
 
   let panelClass = ""
   let panelStyle: React.CSSProperties = {}
+
   if (layoutMode === "mobile") {
-    panelClass = "fixed inset-x-0 top-0 h-[50vh] w-full rounded-b-2xl"
-    panelStyle = {}
+    panelClass = "fixed inset-x-4 top-4 max-h-[58vh] rounded-2xl"
   } else if (layoutMode === "narrow") {
-    panelClass = "fixed inset-y-0 right-0 h-full w-1/2 rounded-l-2xl"
-    panelStyle = {}
+    panelClass = "fixed right-5 top-5 max-h-[68vh] w-[42vw] max-w-md rounded-2xl"
   } else {
-    // wide: 우측 1/3, 상단 절반 영역에 떠 있는 카드
     panelClass = "fixed rounded-2xl"
     panelStyle = {
-      right: "6%",
-      top: "8%",
-      width: "28%",
-      maxWidth: "420px",
-      maxHeight: "60vh",
+      top: "7vh",
+      right: "3vw",
+      width: "28vw",
+      maxWidth: "430px",
+      maxHeight: "43vh",
     }
   }
-  const panelBgClass = layoutMode === "wide" ? "bg-neutral-950/30" : "bg-neutral-950/90"
 
   return (
-    <div className="relative min-h-screen w-full overflow-hidden bg-[#05060c] text-white font-[family-name:var(--font-hahmlet)]">
+    <div className="relative min-h-screen w-full overflow-hidden bg-[#05060c] text-white">
       <div
         className="pointer-events-none fixed inset-0 z-0"
         style={{
           backgroundImage: "url(/images/study/universe-background.jpg)",
+          backgroundPosition: `calc(50% - ${camera.x * 0.02}px) calc(50% - ${camera.y * 0.02}px)`,
           backgroundSize: "cover",
-          backgroundPosition: `calc(50% - ${camera.x * 0.03}px) calc(50% - ${camera.y * 0.03}px)`,
-          filter: "brightness(0.4)",
+          filter: "brightness(0.38)",
         }}
       />
       <div
         className="pointer-events-none fixed inset-0 z-0"
-        style={{ background: "radial-gradient(ellipse at center, transparent 30%, rgba(0,0,0,0.65) 100%)" }}
+        style={{
+          background:
+            "radial-gradient(ellipse at center, transparent 25%, rgba(0,0,0,0.76) 100%)",
+        }}
       />
 
       <Link
         href="/"
-        className="fixed left-4 top-4 z-50 flex h-10 items-center justify-center rounded-full border border-neutral-700 bg-neutral-900/80 px-4 text-sm font-semibold text-white shadow-lg backdrop-blur-md transition-colors hover:border-accent hover:text-accent md:left-8 md:top-8"
+        className="fixed left-4 top-4 z-50 rounded-full border border-neutral-700 bg-neutral-950/75 px-4 py-2 text-sm text-white/85 backdrop-blur-md transition-colors hover:border-white/70 hover:text-white md:left-8 md:top-8"
       >
         ← BACK
       </Link>
 
-      <div className="fixed left-1/2 top-4 z-40 -translate-x-1/2 rounded-full border border-neutral-700 bg-neutral-900/80 px-4 py-2 text-xs uppercase tracking-widest text-white/80 backdrop-blur-md md:top-8">
-        습득 {Object.values(progress).filter((p) => p?.acquired).length} / {nodeList.length}
+      <div className="fixed left-1/2 top-4 z-40 -translate-x-1/2 rounded-full border border-neutral-700 bg-neutral-950/75 px-4 py-2 text-xs tracking-widest text-white/80 backdrop-blur-md md:top-8">
+        습득 {Object.values(progress).filter((value) => value?.acquired).length} /{" "}
+        {nodeList.length}
       </div>
 
-      <div className="fixed right-4 top-4 z-50 md:right-8 md:top-8" onClick={(e) => e.stopPropagation()}>
+      <div
+        className="fixed right-4 top-4 z-50 md:right-8 md:top-8"
+        onClick={(event) => event.stopPropagation()}
+      >
         <button
-          onClick={() => setToolsOpen((o) => !o)}
+          type="button"
+          onClick={() => setToolsOpen((open) => !open)}
+          className="flex h-10 w-10 items-center justify-center rounded-full border border-neutral-700 bg-neutral-950/75 text-white/80 outline-none backdrop-blur-md transition-colors hover:border-white/70 hover:text-white focus:outline-none"
           aria-label="메뉴 열기"
-          className="flex h-10 w-10 items-center justify-center rounded-full border border-neutral-700 bg-neutral-900/80 text-white/80 outline-none backdrop-blur-md transition-colors hover:border-accent hover:text-accent focus:outline-none focus-visible:outline-none"
         >
           <MoreVertical size={18} />
         </button>
 
         {toolsOpen && (
-          <div className="absolute right-0 top-12 flex w-40 flex-col gap-1 rounded-2xl border border-neutral-700 bg-neutral-900/95 p-2 shadow-2xl backdrop-blur-md">
+          <div className="absolute right-0 top-12 flex w-40 flex-col gap-1 rounded-2xl border border-neutral-700 bg-neutral-950/95 p-2 shadow-2xl backdrop-blur-md">
             <button
+              type="button"
               onClick={() => {
                 handleExport()
                 setToolsOpen(false)
               }}
-              className="rounded-lg px-3 py-2 text-left text-xs text-white/80 transition-colors hover:bg-neutral-800 hover:text-accent"
+              className="rounded-lg px-3 py-2 text-left text-xs text-white/80 hover:bg-white/10"
             >
               내보내기
             </button>
+
             <button
+              type="button"
               onClick={() => {
                 fileInputRef.current?.click()
                 setToolsOpen(false)
               }}
-              className="rounded-lg px-3 py-2 text-left text-xs text-white/80 transition-colors hover:bg-neutral-800 hover:text-accent"
+              className="rounded-lg px-3 py-2 text-left text-xs text-white/80 hover:bg-white/10"
             >
               불러오기
             </button>
+
             <button
+              type="button"
               onClick={() => {
                 handleReset()
                 setToolsOpen(false)
               }}
-              className="rounded-lg px-3 py-2 text-left text-xs text-white/50 transition-colors hover:bg-neutral-800 hover:text-red-400"
+              className="rounded-lg px-3 py-2 text-left text-xs text-red-200/75 hover:bg-red-400/10"
             >
               초기화
             </button>
@@ -626,10 +760,10 @@ export function SkillConstellation() {
           type="file"
           accept="application/json"
           className="hidden"
-          onChange={(e) => {
-            const file = e.target.files?.[0]
+          onChange={(event) => {
+            const file = event.target.files?.[0]
             if (file) handleImportFile(file)
-            e.target.value = ""
+            event.target.value = ""
           }}
         />
       </div>
@@ -650,98 +784,79 @@ export function SkillConstellation() {
           style={{
             transform: `translate(${worldTransform.left}px, ${worldTransform.top}px) scale(${camera.zoom}) rotateX(${-tiltDeg}deg)`,
             transformOrigin: "center bottom",
-            transition: smooth ? "transform 0.45s cubic-bezier(0.16,1,0.3,1)" : "none",
+            transition: smooth
+              ? "transform 0.45s cubic-bezier(0.16, 1, 0.3, 1)"
+              : "none",
           }}
         >
-          <svg style={{ position: "absolute", left: 0, top: 0, overflow: "visible" }} width={1} height={1}>
-            {edges.map(([a, b], i) => {
-              const na = positions.get(a)
-              const nb = positions.get(b)
-              if (!na || !nb) return null
-              const bothAcquired = progress[a]?.acquired && progress[b]?.acquired
+          <svg
+            width="1"
+            height="1"
+            style={{
+              position: "absolute",
+              left: 0,
+              top: 0,
+              overflow: "visible",
+            }}
+          >
+            {edges.map(([from, to]) => {
+              const start = positions.get(from)
+              const end = positions.get(to)
+
+              if (!start || !end) return null
+
+              const bothAcquired =
+                progress[from]?.acquired && progress[to]?.acquired
+
               return (
                 <line
-                  key={i}
-                  x1={na.x} y1={na.y} x2={nb.x} y2={nb.y}
-                  stroke={bothAcquired ? "rgba(255,212,121,0.6)" : "rgba(255,255,255,0.16)"}
-                  strokeWidth={1.2}
+                  key={`${from}-${to}`}
+                  x1={start.x}
+                  y1={start.y}
+                  x2={end.x}
+                  y2={end.y}
+                  stroke={
+                    bothAcquired
+                      ? "rgba(255,213,142,0.48)"
+                      : "rgba(220,230,255,0.17)"
+                  }
+                  strokeWidth={1.25}
                 />
               )
             })}
           </svg>
 
-          {nodeList.map((n) => {
-            const st = progress[n.id]
-            const isRoot = n.id === "root0"
-            const isSelected = selectedId === n.id
-            const acquired = Boolean(st?.acquired)
-            const reinforced = Boolean(st?.reinforced)
-            const tier = getTier(isRoot, acquired, reinforced)
-            const delay = (n.id.charCodeAt(0) + n.id.charCodeAt(n.id.length - 1)) % 30
-            const size = isRoot ? 42 : 30
-            const hitSize = size + 18
-            const [line1, line2] = wrapLabel(n.name)
-            
+          {nodeList.map((node) => {
+            const status = progress[node.id]
+            const isRoot = node.id === "root0"
+            const isSelected = selectedId === node.id
+            const tier = getTier(
+              isRoot,
+              Boolean(status?.acquired),
+              Boolean(status?.reinforced),
+            )
 
-            
+            const size = isRoot ? 34 : 25
+            const hitSize = size + 22
+            const [line1, line2] = wrapLabel(node.name)
+
             return (
-              <div key={n.id} className="absolute" style={{ left: n.x, top: n.y }}>
-                {isSelected && (
-                  <span
-                    aria-hidden
-                    className="star-selected-halo pointer-events-none absolute"
-                    style={{
-                      left: 0,
-                      top: 0,
-                      width: size * 2.35,
-                      height: size * 2.35,
-                      marginLeft: -(size * 2.35) / 2,
-                      marginTop: -(size * 2.35) / 2,
-                      color: `rgb(${tier.rgb})`,
-                    }}
-                  >
-                    <svg viewBox="0 0 64 64" width="100%" height="100%" style={{ overflow: "visible" }}>
-                      <path
-                        d="M32 1 L35.2 27.2 L63 32 L35.2 36.8 L32 63 L28.8 36.8 L1 32 L28.8 27.2 Z"
-                        fill="none"
-                        stroke="currentColor"
-                        strokeWidth="1.05"
-                        opacity="0.9"
-                      />
-                      <circle
-                        cx="32"
-                        cy="32"
-                        r="13.8"
-                        fill="none"
-                        stroke="rgba(255,255,255,0.72)"
-                        strokeWidth="0.6"
-                      />
-                    </svg>
-                  </span>
-                )}
-
-                <span
-                  aria-hidden
-                  className="star-ambient pointer-events-none absolute rounded-full"
-                  style={{
-                    left: 0,
-                    top: 0,
-                    width: size * 1.8,
-                    height: size * 1.8,
-                    marginLeft: -(size * 1.8) / 2,
-                    marginTop: -(size * 1.8) / 2,
-                    background: `radial-gradient(circle, rgba(${tier.rgb},${tier.ambientAlpha}), transparent 70%)`,
-                    filter: "blur(1px)",
-                  }}
-                />
-
+              <div
+                key={node.id}
+                className="absolute"
+                style={{
+                  left: node.x,
+                  top: node.y,
+                }}
+              >
                 <button
-                  onClick={(e) => {
-                    e.stopPropagation()
-                    selectStar(n.id)
+                  type="button"
+                  onClick={(event) => {
+                    event.stopPropagation()
+                    selectStar(node.id)
                   }}
-                  aria-label={n.name}
-                  className="absolute flex items-center justify-center rounded-full outline-none transition-transform hover:scale-110 focus:outline-none focus-visible:outline-none"
+                  aria-label={node.name}
+                  className="absolute flex items-center justify-center rounded-full outline-none transition-transform hover:scale-110 focus:outline-none"
                   style={{
                     left: 0,
                     top: 0,
@@ -752,26 +867,31 @@ export function SkillConstellation() {
                     WebkitTapHighlightColor: "transparent",
                   }}
                 >
-                <StarGlyph
-                  size={size}
-                  fill={`rgb(${tier.rgb})`}
-                  className={isSelected ? "star-gem star-gem-selected" : "star-gem"}
-                  style={{
-                    filter: tier.shadow,
-                    animationDelay: `${delay * 0.07}s`,
-                  }}
-                />
+                  <StarGlyph
+                    size={size}
+                    fill={`rgba(${tier.rgb}, ${tier.fillAlpha})`}
+                    className={isSelected ? "selected-star-glow" : undefined}
+                    style={{
+                      filter: isSelected
+                        ? `drop-shadow(0 0 3px rgba(${tier.rgb},0.72)) drop-shadow(0 0 10px rgba(${tier.rgb},0.40))`
+                        : tier.shadow,
+                    }}
+                  />
                 </button>
 
                 <p
-                  className="pointer-events-none absolute text-center text-[11px] text-white/80"
+                  className="pointer-events-none absolute m-0 text-center text-[12px] font-medium text-white/85"
                   style={{
                     left: 0,
-                    top: size + 8,
-                    transform: "translateX(-50%)",
-                    lineHeight: 1.2,
-                    whiteSpace: line2 ? "normal" : "nowrap",
-                    maxWidth: 96, // 고정 폭
+                    top: size + 12,
+                    width: 154,
+                    marginLeft: -77,
+                    lineHeight: 1.25,
+                    whiteSpace: "normal",
+                    wordBreak: "keep-all",
+                    overflowWrap: "normal",
+                    writingMode: "horizontal-tb",
+                    textOrientation: "mixed",
                   }}
                 >
                   {line1}
@@ -789,79 +909,94 @@ export function SkillConstellation() {
       </div>
 
       {selectedNode && (
-          <div
-            className={`z-50 overflow-y-auto border border-neutral-700 p-6 shadow-2xl backdrop-blur-md ${panelClass}`}
-            style={panelStyle}
-            onClick={(e) => e.stopPropagation()}
+        <aside
+          className={`z-50 overflow-y-auto border border-white/15 bg-neutral-950/55 p-6 shadow-2xl backdrop-blur-xl ${panelClass}`}
+          style={panelStyle}
+          onClick={(event) => event.stopPropagation()}
+        >
+          <button
+            type="button"
+            onClick={() => setSelectedId(null)}
+            className="absolute right-4 top-4 text-white/45 outline-none transition-colors hover:text-white focus:outline-none"
+            aria-label="닫기"
           >
-          <button onClick={() => setSelectedId(null)} className="absolute right-4 top-4 text-white/50 outline-none transition-colors hover:text-white focus:outline-none">
             ✕
           </button>
 
-          <p className="text-[0.7rem] uppercase tracking-widest text-accent">{selectedSection?.title}</p>
-          <h2 className="mt-1 text-xl font-bold leading-snug">{selectedNode.name}</h2>
+          <p className="pr-8 text-[11px] tracking-[0.16em] text-amber-200/85">
+            {selectedSection?.title}
+          </p>
+
+          <h2 className="mt-2 pr-8 text-xl font-bold leading-snug text-white">
+            {selectedNode.name}
+          </h2>
 
           <button
+            type="button"
             onClick={() => selectedId && toggleAcquired(selectedId)}
-            className={`mt-4 rounded-full border px-4 py-2 text-xs uppercase tracking-widest outline-none transition-colors focus:outline-none ${
+            className={`mt-4 rounded-full border px-4 py-2 text-xs tracking-widest outline-none transition-colors focus:outline-none ${
               selectedId && progress[selectedId]?.acquired
-                ? "border-amber-300 bg-amber-300/10 text-amber-300"
-                : "border-neutral-700 text-white/60 hover:border-white/40"
+                ? "border-amber-200/70 bg-amber-200/10 text-amber-100"
+                : "border-white/25 text-white/65 hover:border-white/60"
             }`}
           >
             {selectedId && progress[selectedId]?.acquired ? "습득 완료" : "미습득"}
           </button>
 
-          <div className="mt-8">
-            <p className="mb-2 text-[0.65rem] uppercase tracking-widest text-white/50">복습</p>
+          <section className="mt-7">
+            <p className="mb-2 text-[11px] tracking-[0.14em] text-white/45">
+              복습
+            </p>
+
             <div className="flex gap-2">
               <input
                 value={reviewInput}
-                onChange={(e) => setReviewInput(e.target.value)}
-                onKeyDown={(e) => {
-                  if (e.key === "Enter" && selectedId) {
+                onChange={(event) => setReviewInput(event.target.value)}
+                onKeyDown={(event) => {
+                  if (event.key === "Enter" && selectedId) {
                     addLog(selectedId, reviewInput)
                     setReviewInput("")
                   }
                 }}
                 placeholder="오늘 배운 것 중 잊지 않고 싶은 것"
-                className="flex-1 rounded border border-neutral-700 bg-neutral-900 px-3 py-2 text-sm text-white placeholder:text-white/30 focus:border-accent focus:outline-none"
+                className="min-w-0 flex-1 rounded-lg border border-white/15 bg-black/35 px-3 py-2 text-sm text-white placeholder:text-white/30 outline-none focus:border-amber-100/60"
               />
+
               <button
+                type="button"
                 onClick={() => {
-                  if (selectedId) {
-                    addLog(selectedId, reviewInput)
-                    setReviewInput("")
-                  }
+                  if (!selectedId) return
+                  addLog(selectedId, reviewInput)
+                  setReviewInput("")
                 }}
-                className="shrink-0 rounded border border-neutral-700 px-3 text-xs text-white/70 outline-none transition-colors hover:border-accent hover:text-accent focus:outline-none"
+                className="rounded-lg border border-white/20 px-3 text-xs text-white/75 transition-colors hover:border-white/60 hover:text-white"
               >
                 확인
               </button>
             </div>
-          </div>
+          </section>
 
-          <div className="mt-8 flex flex-col gap-3">
-            {selectedId &&
-              (progress[selectedId]?.logs ?? [])
-                .slice()
-                .reverse()
-                .map((log, i) => (
-                  <div key={i} className="rounded border border-neutral-800 bg-neutral-900/60 p-3">
-                    <div className="mb-1 flex items-center gap-2">
-                      <span className="rounded bg-emerald-400/20 px-1.5 py-0.5 text-[0.6rem] uppercase tracking-widest text-emerald-300">
-                        복습
-                      </span>
-                      <span className="text-[0.65rem] text-white/40">{log.date}</span>
-                    </div>
-                    <p className="text-sm text-white/85">{log.text}</p>
-                  </div>
-                ))}
-            {selectedId && (progress[selectedId]?.logs?.length ?? 0) === 0 && (
-              <p className="text-sm text-white/30">아직 기록이 없습니다.</p>
+          <section className="mt-6 flex flex-col gap-2">
+            {(progress[selectedId]?.logs ?? [])
+              .slice()
+              .reverse()
+              .map((log, index) => (
+                <div
+                  key={`${log.date}-${index}`}
+                  className="rounded-lg border border-white/10 bg-black/20 p-3"
+                >
+                  <p className="mb-1 text-[10px] tracking-wider text-white/40">
+                    {log.date}
+                  </p>
+                  <p className="text-sm leading-relaxed text-white/85">{log.text}</p>
+                </div>
+              ))}
+
+            {(progress[selectedId]?.logs?.length ?? 0) === 0 && (
+              <p className="text-sm text-white/35">아직 기록이 없습니다.</p>
             )}
-          </div>
-        </div>
+          </section>
+        </aside>
       )}
     </div>
   )
