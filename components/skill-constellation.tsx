@@ -799,9 +799,14 @@ export function SkillConstellation() {
         style={{
           backgroundImage:
             "linear-gradient(rgba(3, 5, 12, 0.38), rgba(3, 5, 12, 0.68)), url('/images/study/universe-background.jpg')",
-          backgroundPosition: "center",
+
+          // 배경 이동 숫자 (0.015 ~ 0.04)
+          backgroundPosition: `calc(50% - ${camera.x * 0.025}px) calc(50% - ${camera.y * 0.025}px)`,
           backgroundSize: "cover",
           backgroundRepeat: "no-repeat",
+          transition: smooth
+            ? "background-position 0.42s cubic-bezier(0.16, 1, 0.3, 1)"
+            : "none",
         }}
       />
 
