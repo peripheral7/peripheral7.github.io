@@ -28,6 +28,7 @@ const DEFAULT_ZOOM = 0.31
 const ZOOM_MIN = 0.2
 const ZOOM_MAX = 1.8
 const PAN_MARGIN = 420
+const RESISTANCE = 0.35
 
 const X_SPACING = 260
 const Y_SPACING = 195
