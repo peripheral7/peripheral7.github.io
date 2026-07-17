@@ -239,7 +239,7 @@ function getTier(
 }
 
 function getFocal(
-  mode: LayoutMode,
+  _mode: LayoutMode,
   hasSelection: boolean,
   width: number,
   height: number,
@@ -251,16 +251,9 @@ function getFocal(
     }
   }
 
-  if (mode === "mobile" || mode === "narrow") {
-    return {
-      x: width * 0.25,
-      y: height * (5 / 6),
-    }
-  }
-
   return {
-    x: width * 0.32,
-    y: height / 2,
+    x: width / 2,
+    y: height * 0.6,
   }
 }
 
@@ -996,10 +989,10 @@ export function SkillConstellation() {
                   <StarGlyph
                     size={size}
                     fill={`rgba(${tier.rgb}, ${tier.fillAlpha})`}
-                    className={isSelected ? "selected-star-glow" : undefined}
+                    className={isSelected ? "selected-neutral-glow" : undefined}
                     style={{
                       filter: isSelected
-                        ? `drop-shadow(0 0 3px rgba(${tier.rgb}, 0.7)) drop-shadow(0 0 10px rgba(${tier.rgb}, 0.38))`
+                        ? "drop-shadow(0 0 3px rgba(255,255,255,0.58)) drop-shadow(0 0 9px rgba(255,255,255,0.26))"
                         : tier.shadow,
                     }}
                   />

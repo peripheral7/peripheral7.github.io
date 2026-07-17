@@ -170,3 +170,20 @@
   }
 }
 }
+
+@keyframes selected-neutral-glow {
+  0%,
+  100% {
+    opacity: 0.72;
+    transform: scale(1);
+  }
+
+  50% {
+    opacity: 1;
+    transform: scale(1.1);
+  }
+}
+
+.selected-neutral-glow {
+  animation: selected-neutral-glow 1.8s ease-in-out infinite;
+}
