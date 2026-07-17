@@ -535,6 +535,24 @@ export function SkillConstellation() {
     })
   }
 
+  function removeLog(starId: string, index: number) {
+    setProgress((previous) => {
+      const current = previous[starId]
+      if (!current) return previous
+
+      const nextLogs = current.logs.slice()
+      nextLogs.splice(index, 1)
+
+      return {
+        ...previous,
+        [starId]: {
+          ...current,
+          logs: nextLogs,
+        },
+      }
+    })
+  }
+
   function onPointerDown(event: React.PointerEvent<HTMLDivElement>) {
     const target = event.target as HTMLElement
     const isInteractive = target.closest("[data-overlay-interactive]")
@@ -784,11 +802,11 @@ export function SkillConstellation() {
     }
   } else {
     panelStyle = {
-      top: "10vh",
-      right: "5vw",
-      width: "30vw",
-      maxWidth: "460px",
-      maxHeight: "62vh",
+      top: "8vh",
+      right: "4vw",
+      width: "60vw",
+      maxWidth: "920px",
+      maxHeight: "80vh",
     }
   }
 
@@ -1093,7 +1111,7 @@ export function SkillConstellation() {
                   }
                 }}
                 placeholder="오늘 배운 것"
-                className="min-w-0 flex-1 rounded-md border border-white/15 bg-black/30 px-2 py-1.5 text-[10px] text-white placeholder:text-[9px] placeholder:text-white/30 outline-none focus:border-amber-100/60 min-[1300px]:h-[112px]"
+                className="min-w-0 flex-1 rounded-md border border-white/18 bg-black/35 px-2 py-1.5 text-[10px] text-white placeholder:text-[9px] placeholder:text-white/30 outline-none focus:border-amber-100/70 min-[1300px]:h-[72px]"
               />
 
               <button
@@ -1103,7 +1121,7 @@ export function SkillConstellation() {
                   addLog(selectedId, reviewInput)
                   setReviewInput("")
                 }}
-                className="rounded-md border border-white/20 px-2 text-[9px] text-white/75 transition-colors hover:border-white/60 hover:text-white"
+                className="rounded-md border border-white/22 px-2.5 py-1.5 text-[9px] text-white/78 transition-colors hover:border-amber-100/80 hover:text-amber-50 min-[1300px]:text-[10px]"
               >
                 확인
               </button>
@@ -1114,19 +1132,37 @@ export function SkillConstellation() {
             {(selectedProgress?.logs ?? [])
               .slice()
               .reverse()
-              .map((log, index) => (
-                <div
-                  key={`${log.date}-${index}`}
-                  className="rounded-md border border-white/10 bg-black/20 p-2"
-                >
-                  <p className="mb-0.5 text-[8px] tracking-wider text-white/40">
-                    {log.date}
-                  </p>
-                  <p className="text-[10px] leading-relaxed text-white/85">
-                    {log.text}
-                  </p>
-                </div>
-              ))}
+              .map((log, indexFromTop) => {
+                const originalIndex =
+                  (selectedProgress?.logs.length ?? 0) - 1 - indexFromTop
+
+                return (
+                  <div
+                    key={`${log.date}-${indexFromTop}`}
+                    className="relative rounded-md border border-white/10 bg-black/24 p-2 pr-6"
+                  >
+                    <p className="mb-0.5 text-[8px] tracking-wider text-white/40">
+                      {log.date}
+                    </p>
+
+                    <p className="text-[10px] leading-relaxed text-white/85">
+                      {log.text}
+                    </p>
+
+                    <button
+                      type="button"
+                      aria-label="이 복습 기록 삭제"
+                      onClick={() => {
+                        if (!selectedId) return
+                        removeLog(selectedId, originalIndex)
+                      }}
+                      className="absolute right-1.5 top-1.5 rounded-full bg-black/40 px-1.5 py-0.5 text-[8px] text-white/45 transition-colors hover:bg-red-500/30 hover:text-red-100"
+                    >
+                      삭제
+                    </button>
+                  </div>
+                )
+              })}
 
             {(selectedProgress?.logs.length ?? 0) === 0 && (
               <p className="text-[10px] text-white/35">아직 기록이 없습니다.</p>
