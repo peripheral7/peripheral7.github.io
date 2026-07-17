@@ -655,6 +655,7 @@ export function SkillConstellation() {
 
   const selectedNode = selectedId ? positions.get(selectedId) : null
   const selectedSection = selectedNode ? sections[selectedNode.section] : null
+  const selectedProgress = selectedId ? progress[selectedId] : undefined
 
   let panelClass = ""
   let panelStyle: React.CSSProperties = {}
@@ -935,12 +936,13 @@ export function SkillConstellation() {
             type="button"
             onClick={() => selectedId && toggleAcquired(selectedId)}
             className={`mt-4 rounded-full border px-4 py-2 text-xs tracking-widest outline-none transition-colors focus:outline-none ${
-              selectedId && progress[selectedId]?.acquired
+              selectedProgress?.acquired
                 ? "border-amber-200/70 bg-amber-200/10 text-amber-100"
                 : "border-white/25 text-white/65 hover:border-white/60"
             }`}
           >
-            {selectedId && progress[selectedId]?.acquired ? "습득 완료" : "미습득"}
+            {selectedProgress?.acquired ? "습득 완료" : "미습득"}
+
           </button>
 
           <section className="mt-7">
@@ -977,7 +979,7 @@ export function SkillConstellation() {
           </section>
 
           <section className="mt-6 flex flex-col gap-2">
-            {(progress[selectedId]?.logs ?? [])
+            {(selectedProgress?.logs ?? [])
               .slice()
               .reverse()
               .map((log, index) => (
@@ -988,11 +990,13 @@ export function SkillConstellation() {
                   <p className="mb-1 text-[10px] tracking-wider text-white/40">
                     {log.date}
                   </p>
-                  <p className="text-sm leading-relaxed text-white/85">{log.text}</p>
+                  <p className="text-sm leading-relaxed text-white/85">
+                    {log.text}
+                  </p>
                 </div>
               ))}
 
-            {(progress[selectedId]?.logs?.length ?? 0) === 0 && (
+            {(selectedProgress?.logs.length ?? 0) === 0 && (
               <p className="text-sm text-white/35">아직 기록이 없습니다.</p>
             )}
           </section>
