@@ -23,16 +23,14 @@ type LayoutMode = "mobile" | "narrow" | "wide"
 
 const STORAGE_KEY = "appraiser-skilltree-progress-v1"
 
-const FOCUS_ZOOM = 0.92
-const DEFAULT_ZOOM = 0.22
-const ZOOM_MIN = 0.16
+const FOCUS_ZOOM = 1.06
+const DEFAULT_ZOOM = 0.31
+const ZOOM_MIN = 0.2
 const ZOOM_MAX = 1.8
-const PAN_MARGIN = 680
-const RESISTANCE = 0.35
+const PAN_MARGIN = 420
 
-// 라벨(약 154px)과 별이 겹치지 않도록 충분히 확장
-const X_SPACING = 520
-const Y_SPACING = 390
+const X_SPACING = 260
+const Y_SPACING = 195
 
 const MOBILE_BP = 768
 const NARROW_BP = 1300
@@ -180,17 +178,16 @@ function getFocal(
     }
   }
 
-  // 선택 중에는 별자리 영역을 좌측 1/3에 고정.
   if (mode === "mobile" || mode === "narrow") {
     return {
-      x: width * 0.18,
-      y: height * 0.5,
+      x: width / 6,
+      y: height / 2,
     }
   }
 
   return {
     x: width * 0.32,
-    y: height * 0.5,
+    y: height / 2,
   }
 }
 
@@ -386,12 +383,6 @@ export function SkillConstellation() {
       }
 
       if (event.key === "ArrowUp") {
-        const parent = parentOf.get(selectedId)
-        if (parent) selectStar(parent)
-        return
-      }
-
-      if (event.key === "ArrowDown") {
         const children = childrenOf.get(selectedId) ?? []
         if (children.length === 0) return
 
@@ -414,6 +405,12 @@ export function SkillConstellation() {
         }
 
         selectStar(bestChild)
+        return
+      }
+
+      if (event.key === "ArrowDown") {
+        const parent = parentOf.get(selectedId)
+        if (parent) selectStar(parent)
         return
       }
 
@@ -731,18 +728,18 @@ export function SkillConstellation() {
 
   if (layoutMode === "mobile") {
     panelStyle = {
-      top: "12vh",
-      right: "5vw",
-      width: "61vw",
-      maxHeight: "72vh",
+      top: "6vh",
+      right: "4vw",
+      width: "57vw",
+      maxHeight: "27vh",
     }
   } else if (layoutMode === "narrow") {
     panelStyle = {
-      top: "12vh",
-      right: "5vw",
-      width: "59vw",
-      maxWidth: "600px",
-      maxHeight: "72vh",
+      top: "7vh",
+      right: "4vw",
+      width: "57vw",
+      maxWidth: "640px",
+      maxHeight: "29vh",
     }
   } else {
     panelStyle = {
@@ -759,13 +756,16 @@ export function SkillConstellation() {
       <div
         className="pointer-events-none fixed inset-0"
         style={{
-          background:
-            "radial-gradient(circle at 50% 35%, #1d2742 0%, #0a0d18 42%, #03040a 100%)",
+          backgroundImage:
+            "linear-gradient(rgba(3, 5, 12, 0.48), rgba(3, 5, 12, 0.74)), url('/images/study/universe-background.jpg')",
+          backgroundPosition: "center",
+          backgroundSize: "cover",
+          backgroundRepeat: "no-repeat",
         }}
       />
 
       <div
-        className="pointer-events-none fixed inset-0 opacity-30"
+        className="pointer-events-none fixed inset-0 opacity-18"
         style={{
           backgroundImage:
             "radial-gradient(rgba(255,255,255,0.7) 0.6px, transparent 0.6px)",
@@ -992,7 +992,7 @@ export function SkillConstellation() {
       {selectedNode && (
         <aside
           data-overlay-interactive
-          className="fixed z-50 overflow-y-auto rounded-2xl border border-white/15 bg-neutral-950/30 p-5 shadow-2xl backdrop-blur-xl md:p-6"
+          className="fixed z-50 overflow-y-auto rounded-xl border border-white/15 bg-neutral-950/30 p-3 text-xs shadow-2xl backdrop-blur-xl md:p-4"
           style={panelStyle}
           onPointerDown={(event) => event.stopPropagation()}
           onClick={(event) => event.stopPropagation()}
@@ -1006,11 +1006,11 @@ export function SkillConstellation() {
             ✕
           </button>
 
-          <p className="pr-8 text-[10px] tracking-[0.16em] text-amber-200/80">
+          <p className="pr-7 text-[9px] tracking-[0.13em] text-amber-200/80">
             {selectedSection?.title}
           </p>
 
-          <h2 className="mt-2 pr-8 text-lg font-bold leading-snug text-white md:text-xl">
+          <h2 className="mt-1 pr-7 text-sm font-bold leading-snug text-white md:text-base">
             {selectedNode.name}
           </h2>
 
@@ -1019,7 +1019,7 @@ export function SkillConstellation() {
             onClick={() => {
               if (selectedId) toggleAcquired(selectedId)
             }}
-            className={`mt-4 rounded-full border px-4 py-2 text-[11px] tracking-widest transition-colors ${
+            className={`mt-3 rounded-full border px-3 py-1.5 text-[10px] tracking-widest transition-colors ${
               selectedProgress?.acquired
                 ? "border-amber-200/70 bg-amber-200/10 text-amber-100"
                 : "border-white/25 text-white/65 hover:border-white/60"
@@ -1028,12 +1028,12 @@ export function SkillConstellation() {
             {selectedProgress?.acquired ? "습득 완료" : "미습득"}
           </button>
 
-          <section className="mt-6">
-            <p className="mb-2 text-[10px] tracking-[0.14em] text-white/45">
+          <section className="mt-4">
+            <p className="mb-1.5 text-[9px] tracking-[0.14em] text-white/45">
               복습
             </p>
 
-            <div className="flex gap-2">
+            <div className="flex gap-1.5">
               <input
                 value={reviewInput}
                 onChange={(event) => setReviewInput(event.target.value)}
@@ -1043,45 +1043,44 @@ export function SkillConstellation() {
                     setReviewInput("")
                   }
                 }}
-                placeholder="오늘 배운 것 중 잊지 않고 싶은 것"
-                className="min-w-0 flex-1 rounded-lg border border-white/15 bg-black/30 px-3 py-2 text-xs text-white placeholder:text-[11px] placeholder:text-white/30 outline-none focus:border-amber-100/60"
+                placeholder="오늘 배운 것"
+                className="min-w-0 flex-1 rounded-md border border-white/15 bg-black/30 px-2 py-1.5 text-[10px] text-white placeholder:text-[9px] placeholder:text-white/30 outline-none focus:border-amber-100/60"
               />
 
               <button
                 type="button"
                 onClick={() => {
                   if (!selectedId) return
-
                   addLog(selectedId, reviewInput)
                   setReviewInput("")
                 }}
-                className="rounded-lg border border-white/20 px-3 text-[11px] text-white/75 transition-colors hover:border-white/60 hover:text-white"
+                className="rounded-md border border-white/20 px-2 text-[9px] text-white/75 transition-colors hover:border-white/60 hover:text-white"
               >
                 확인
               </button>
             </div>
           </section>
 
-          <section className="mt-5 flex flex-col gap-2">
+          <section className="mt-3 flex flex-col gap-1.5">
             {(selectedProgress?.logs ?? [])
               .slice()
               .reverse()
               .map((log, index) => (
                 <div
                   key={`${log.date}-${index}`}
-                  className="rounded-lg border border-white/10 bg-black/20 p-3"
+                  className="rounded-md border border-white/10 bg-black/20 p-2"
                 >
-                  <p className="mb-1 text-[10px] tracking-wider text-white/40">
+                  <p className="mb-0.5 text-[8px] tracking-wider text-white/40">
                     {log.date}
                   </p>
-                  <p className="text-xs leading-relaxed text-white/85">
+                  <p className="text-[10px] leading-relaxed text-white/85">
                     {log.text}
                   </p>
                 </div>
               ))}
 
             {(selectedProgress?.logs.length ?? 0) === 0 && (
-              <p className="text-xs text-white/35">아직 기록이 없습니다.</p>
+              <p className="text-[10px] text-white/35">아직 기록이 없습니다.</p>
             )}
           </section>
         </aside>
