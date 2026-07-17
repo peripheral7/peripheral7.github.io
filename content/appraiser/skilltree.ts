@@ -388,14 +388,27 @@ export const skillTree: TreeNode = {
   ],
 }
 
-function hashSeed(id: string): number {
-  let hash = 0
+type TreeMetrics = {
+  leafWeight: number
+  maxDepth: number
+  branchCount: number
+  scale: number
+}
 
-  for (let i = 0; i < id.length; i += 1) {
-    hash = (hash * 31 + id.charCodeAt(i)) % 1000
+function hashSeed(id: string) {
+  let hash = 2166136261
+
+  for (let index = 0; index < id.length; index += 1) {
+    hash ^= id.charCodeAt(index)
+    hash = Math.imul(hash, 16777619)
   }
 
-  return (hash / 1000) * Math.PI * 2
+  return ((hash >>> 0) % 1000) / 1000
+}
+
+function normalizeAngle(angle: number) {
+  const fullTurn = Math.PI * 2
+  return ((angle % fullTurn) + fullTurn) % fullTurn
 }
 
 export function layoutTree(
@@ -406,12 +419,6 @@ export function layoutTree(
     rootY?: number
   },
 ) {
-  const edges: [string, string][] = []
-  const weightById = new Map<string, number>()
-  const angleById = new Map<string, number>()
-  const depthById = new Map<string, number>()
-  const SIBLING_ARC_COMPRESSION = 0.82
-
   const positions = new Map<
     string,
     {
@@ -422,90 +429,206 @@ export function layoutTree(
     }
   >()
 
-  // 화면 좌표계에서 위쪽은 y가 감소합니다.
-  // 215도~325도 부채꼴은 루트에서 위쪽으로만 펼쳐집니다.
-  const FAN_START = (215 * Math.PI) / 180
-  const FAN_END = (325 * Math.PI) / 180
+  const edges: [string, string][] = []
+  const metricsById = new Map<string, TreeMetrics>()
 
-  function calculateWeight(node: TreeNode, inheritedScale: number): number {
+  /*
+   * 300deg만 사용합니다.
+   * 아래쪽 60deg(60deg~120deg)는 비워 두어,
+   * 줄기 시작점과 패널 영역에 과도한 노드 밀집을 피합니다.
+   *
+   * 화면 좌표는 y가 아래로 증가하므로 -90deg가 화면 위쪽입니다.
+   */
+  const OPENING_ANGLE = (60 * Math.PI) / 180
+  const USABLE_ANGLE = Math.PI * 2 - OPENING_ANGLE
+  const START_ANGLE = Math.PI / 2 + OPENING_ANGLE / 2
+  const ROOT_AXIS_ANGLE = -Math.PI / 2
+
+  /*
+   * 노드 라벨과 글로우를 고려한 최소 각 간격입니다.
+   * X_SPACING 155 기준, 이 값이면 가까운 형제도 읽기 어렵지 않습니다.
+   */
+  const MIN_CHILD_GAP = (8 * Math.PI) / 180
+
+  /*
+   * 직선 트렁크의 끝입니다.
+   * root0 -> t1 -> t2 -> t3 -> t4는 아래에서 위로 유지되고,
+   * t4의 자식부터 사방으로 퍼집니다.
+   */
+  const TRUNK_IDS = new Set(["root0", "t1", "t2", "t3", "t4"])
+
+  function calculateMetrics(
+    node: TreeNode,
+    inheritedScale: number,
+  ): TreeMetrics {
     const scale = node.spacingScale ?? inheritedScale
     const children = node.children ?? []
 
     if (children.length === 0) {
-      const weight = scale
-      weightById.set(node.id, weight)
-      return weight
+      const result: TreeMetrics = {
+        leafWeight: scale,
+        maxDepth: 0,
+        branchCount: 0,
+        scale,
+      }
+
+      metricsById.set(node.id, result)
+      return result
     }
 
-    const weight = children.reduce(
-      (total, child) => total + calculateWeight(child, scale),
-      0,
+    const childMetrics = children.map((child) =>
+      calculateMetrics(child, scale),
     )
 
-    weightById.set(node.id, weight)
-    return weight
+    const result: TreeMetrics = {
+      leafWeight: childMetrics.reduce(
+        (total, child) => total + child.leafWeight,
+        0,
+      ),
+      maxDepth:
+        1 + Math.max(...childMetrics.map((child) => child.maxDepth)),
+      branchCount: children.length,
+      scale,
+    }
+
+    metricsById.set(node.id, result)
+    return result
   }
 
-  function assignLayout(
+  /*
+   * 각도 배분 가중치:
+   * - leafWeight: 실제 말단 수가 많을수록 더 넓은 면적
+   * - maxDepth: 긴 가지는 바깥 원에서 충돌할 가능성이 높으므로 추가 여유
+   * - branchCount: 당장 여러 갈래로 나뉘는 부모도 추가 여유
+   */
+  function getAngularWeight(node: TreeNode) {
+    const metrics = metricsById.get(node.id)!
+
+    return (
+      metrics.leafWeight * 1 +
+      metrics.maxDepth * 0.8 +
+      metrics.branchCount * 0.45
+    )
+  }
+
+  function getRadius(depth: number, scale: number) {
+    /*
+     * 첫 단계는 줄기와 분기점의 인지성을 위해 약간 짧게,
+     * 깊어질수록 소폭 넓혀 라벨·선 겹침을 줄입니다.
+     */
+    const depthExpansion = 1 + Math.min(depth, 8) * 0.035
+
+    return depth * opts.xSpacing * depthExpansion * scale
+  }
+
+  function getChildSectors(
+    children: TreeNode[],
+    startAngle: number,
+    endAngle: number,
+  ) {
+    const availableAngle = endAngle - startAngle
+    const totalGap = Math.max(0, children.length - 1) * MIN_CHILD_GAP
+    const distributableAngle = Math.max(
+      availableAngle - totalGap,
+      availableAngle * 0.55,
+    )
+
+    const weights = children.map(getAngularWeight)
+    const totalWeight = weights.reduce((total, weight) => total + weight, 0)
+
+    let cursor = startAngle
+
+    return children.map((child, index) => {
+      const share = distributableAngle * (weights[index] / totalWeight)
+      const sector = {
+        child,
+        startAngle: cursor,
+        endAngle: cursor + share,
+      }
+
+      cursor += share + MIN_CHILD_GAP
+      return sector
+    })
+  }
+
+  function placeNode(
     node: TreeNode,
     depth: number,
-    start: number,
-    end: number,
+    angle: number,
+    sectorStart: number,
+    sectorEnd: number,
+    inheritedScale: number,
   ) {
-    const angle = (start + end) / 2
-
-    angleById.set(node.id, angle)
-    depthById.set(node.id, depth)
-
+    const metrics = metricsById.get(node.id)!
     const children = node.children ?? []
-    if (children.length === 0) return
+    const isTrunk = TRUNK_IDS.has(node.id)
 
-    const totalWeight = children.reduce(
-      (total, child) => total + (weightById.get(child.id) ?? 1),
-      0,
-    )
-
-    const center = (start + end) / 2
-    const compactSpan = (end - start) * SIBLING_ARC_COMPRESSION
-    const compactStart = center - compactSpan / 2
-
-    let cursor = compactStart
-
-    for (const child of children) {
-      const childWeight = weightById.get(child.id) ?? 1
-      const childArc = ((end - start) * childWeight) / totalWeight
-      const childEnd = cursor + childArc
-
-      edges.push([node.id, child.id])
-      assignLayout(child, depth + 1, cursor, childEnd)
-
-      cursor = childEnd
-    }
-  }
-
-  function createPositions(node: TreeNode) {
-    const depth = depthById.get(node.id) ?? 0
-    const angle = angleById.get(node.id) ?? -Math.PI / 2
-
-    // 이전 150px보다 줄인 128px 간격.
-    // 컴포넌트의 X_SPACING 값과 함께 사용되어 전체 간격도 조밀해집니다.
-    const radius = depth * opts.xSpacing
+    const radius = getRadius(depth, metrics.scale)
+    const positionAngle = isTrunk ? ROOT_AXIS_ANGLE : angle
 
     positions.set(node.id, {
-      x: Math.cos(angle) * radius,
-      y: Math.sin(angle) * radius,
+      x: Math.cos(positionAngle) * radius,
+      y: Math.sin(positionAngle) * radius,
       name: node.name,
       section: node.section,
     })
 
-    for (const child of node.children ?? []) {
-      createPositions(child)
+    if (children.length === 0) return
+
+    /*
+     * 단일 자식은 부모 방향을 유지해 불필요한 꺾임을 만들지 않습니다.
+     * t4부터 최초로 나뉘는 노드만 전체 300도 부채꼴을 배정받습니다.
+     */
+    if (children.length === 1) {
+      const child = children[0]
+
+      edges.push([node.id, child.id])
+
+      placeNode(
+        child,
+        depth + 1,
+        positionAngle,
+        sectorStart,
+        sectorEnd,
+        metrics.scale,
+      )
+
+      return
+    }
+
+    const childStart = isTrunk ? START_ANGLE : sectorStart
+    const childEnd = isTrunk
+      ? START_ANGLE + USABLE_ANGLE
+      : sectorEnd
+
+    const sectors = getChildSectors(children, childStart, childEnd)
+
+    for (const sector of sectors) {
+      const childAngle = (sector.startAngle + sector.endAngle) / 2
+
+      edges.push([node.id, sector.child.id])
+
+      placeNode(
+        sector.child,
+        depth + 1,
+        childAngle,
+        sector.startAngle,
+        sector.endAngle,
+        metrics.scale,
+      )
     }
   }
 
-  calculateWeight(root, 1)
-  assignLayout(root, 0, FAN_START, FAN_END)
-  createPositions(root)
+  calculateMetrics(root, 1)
+
+  placeNode(
+    root,
+    0,
+    ROOT_AXIS_ANGLE,
+    START_ANGLE,
+    START_ANGLE + USABLE_ANGLE,
+    1,
+  )
 
   return {
     positions,
