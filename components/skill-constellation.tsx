@@ -68,6 +68,65 @@ function rubberBand(
   return value
 }
 
+type Direction = "ArrowUp" | "ArrowDown" | "ArrowLeft" | "ArrowRight"
+
+const KEY_DIRECTIONS: Record<Direction, { x: number; y: number }> = {
+  ArrowUp: { x: 0, y: -1 },
+  ArrowDown: { x: 0, y: 1 },
+  ArrowLeft: { x: -1, y: 0 },
+  ArrowRight: { x: 1, y: 0 },
+}
+
+type PositionedNode = {
+  id: string
+  x: number
+  y: number
+}
+
+function findNearestNodeInDirection(
+  currentId: string,
+  direction: Direction,
+  nodes: PositionedNode[],
+): string | null {
+  const current = nodes.find((node) => node.id === currentId)
+
+  if (!current) return null
+
+  const directionVector = KEY_DIRECTIONS[direction]
+  let bestId: string | null = null
+  let bestScore = Number.NEGATIVE_INFINITY
+
+  for (const candidate of nodes) {
+    if (candidate.id === currentId) continue
+
+    const dx = candidate.x - current.x
+    const dy = candidate.y - current.y
+    const distance = Math.hypot(dx, dy)
+
+    if (distance === 0) continue
+
+    const unitX = dx / distance
+    const unitY = dy / distance
+
+    // -1: 완전 반대, 0: 수직, 1: 정확히 같은 방향
+    const alignment =
+      unitX * directionVector.x + unitY * directionVector.y
+
+    // 요청한 방향의 반대편 노드는 제외
+    if (alignment <= 0.15) continue
+
+    // 방향 일치도를 가장 중요하게, 거리를 그 다음 기준으로 사용
+    const score = alignment * 10000 - distance
+
+    if (score > bestScore) {
+      bestScore = score
+      bestId = candidate.id
+    }
+  }
+
+  return bestId
+}
+
 function wrapLabel(name: string): [string, string?] {
   if (name.length <= TITLE_WRAP_LEN) return [name]
 
@@ -378,77 +437,44 @@ export function SkillConstellation() {
   }, [positions, selectedId])
 
   useEffect(() => {
-    function isTypingTarget(target: EventTarget | null) {
-      const tagName = (target as HTMLElement | null)?.tagName
-      return tagName === "INPUT" || tagName === "TEXTAREA"
+  function isTypingTarget(target: EventTarget | null) {
+    const tagName = (target as HTMLElement | null)?.tagName
+
+    return tagName === "INPUT" || tagName === "TEXTAREA"
+  }
+
+  function onKeyDown(event: KeyboardEvent) {
+    if (isTypingTarget(event.target)) return
+
+    const key = event.key as Direction
+
+    if (!Object.hasOwn(KEY_DIRECTIONS, key)) return
+
+    event.preventDefault()
+
+    // 처음 화살표를 누르면 루트를 선택
+    if (!selectedId) {
+      selectStar("root0")
+      return
     }
 
-    function onKeyDown(event: KeyboardEvent) {
-      if (isTypingTarget(event.target)) return
-      if (!["ArrowUp", "ArrowDown", "ArrowLeft", "ArrowRight"].includes(event.key)) {
-        return
-      }
+    const nextId = findNearestNodeInDirection(
+      selectedId,
+      key,
+      nodeList,
+    )
 
-      event.preventDefault()
-
-      if (!selectedId) {
-        selectStar("root0")
-        return
-      }
-
-      if (event.key === "ArrowUp") {
-        const children = childrenOf.get(selectedId) ?? []
-        if (children.length === 0) return
-
-        let bestChild = children[0]
-        let bestDepth = subtreeDepth.get(bestChild) ?? 0
-        let bestX = positions.get(bestChild)?.x ?? 0
-
-        for (const child of children.slice(1)) {
-          const childDepth = subtreeDepth.get(child) ?? 0
-          const childX = positions.get(child)?.x ?? 0
-
-          if (
-            childDepth > bestDepth ||
-            (childDepth === bestDepth && childX < bestX)
-          ) {
-            bestChild = child
-            bestDepth = childDepth
-            bestX = childX
-          }
-        }
-
-        selectStar(bestChild)
-        return
-      }
-
-      if (event.key === "ArrowDown") {
-        const parent = parentOf.get(selectedId)
-        if (parent) selectStar(parent)
-        return
-      }
-
-      const parent = parentOf.get(selectedId)
-      if (!parent) return
-
-      const siblings = (childrenOf.get(parent) ?? [])
-        .slice()
-        .sort((a, b) => (positions.get(a)?.x ?? 0) - (positions.get(b)?.x ?? 0))
-
-      const currentIndex = siblings.indexOf(selectedId)
-
-      if (event.key === "ArrowLeft" && currentIndex > 0) {
-        selectStar(siblings[currentIndex - 1])
-      }
-
-      if (event.key === "ArrowRight" && currentIndex < siblings.length - 1) {
-        selectStar(siblings[currentIndex + 1])
-      }
+    if (nextId) {
+      selectStar(nextId)
     }
+  }
 
-    window.addEventListener("keydown", onKeyDown)
-    return () => window.removeEventListener("keydown", onKeyDown)
-  }, [childrenOf, parentOf, positions, selectedId, subtreeDepth])
+  window.addEventListener("keydown", onKeyDown)
+
+  return () => {
+    window.removeEventListener("keydown", onKeyDown)
+  }
+}, [nodeList, selectedId])
 
   function toggleAcquired(starId: string) {
     setProgress((previous) => {
