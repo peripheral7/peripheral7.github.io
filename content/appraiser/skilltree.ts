@@ -448,7 +448,7 @@ export function layoutTree(
    * 노드 라벨과 글로우를 고려한 최소 각 간격입니다.
    * X_SPACING 155 기준, 이 값이면 가까운 형제도 읽기 어렵지 않습니다.
    */
-  const MIN_CHILD_GAP = (5 * Math.PI) / 180
+  const MIN_CHILD_GAP = (6 * Math.PI) / 180
 
   /*
    * 직선 트렁크의 끝입니다.
