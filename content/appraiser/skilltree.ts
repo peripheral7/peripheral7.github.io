@@ -1,386 +1,256 @@
-export type BranchDirection = "left" | "center" | "right"
-
 export type TreeNode = {
   id: string
   name: string
   section: string
   children?: TreeNode[]
-  branchDirection?: BranchDirection
+  /** 이 노드 아래 하위 잎(leaf)들의 간격 배율. 1이면 기본 간격, 0.5면 절반 */
   spacingScale?: number
 }
 
 export const sections: Record<string, { title: string; tier: number }> = {
-  root: { title: "감정평가실무", tier: 0 },
-  trunk: { title: "기초·평가방식·유형별 평가", tier: 0 },
-  land: { title: "토지평가", tier: 1 },
-  building: { title: "건물평가", tier: 1 },
-  comparison: { title: "비교방식", tier: 1 },
-  cost: { title: "원가방식", tier: 1 },
-  income: { title: "수익방식", tier: 1 },
-  rent: { title: "임대료·권리평가", tier: 2 },
-  typeEval: { title: "유형별·기타평가", tier: 2 },
-  purpose: { title: "목적별·도시정비평가", tier: 2 },
-  special: { title: "특수토지평가", tier: 2 },
+  root: { title: "감정평가 실무", tier: 0 },
+
+  fundamentals: { title: "기초 및 기본 원리", tier: 1 },
+  approaches: { title: "감정평가 3방식", tier: 1 },
+  purpose: { title: "목적별 감정평가", tier: 1 },
+  property: { title: "물건별 감정평가", tier: 1 },
+  compensation: { title: "보상 감정평가", tier: 1 },
 }
 
 export const skillTree: TreeNode = {
   id: "root0",
-  name: "감정평가실무",
+  name: "감정평가 실무",
   section: "root",
   children: [
     {
-      id: "t1",
-      name: "감정평가기초",
-      section: "trunk",
+      id: "f0",
+      name: "기초 및 기본 원리",
+      section: "fundamentals",
       children: [
         {
-          id: "t2",
-          name: "감정평가 3방식",
-          section: "trunk",
+          id: "f1",
+          name: "기초 및 기본 규정",
+          section: "fundamentals",
           children: [
-            {
-              id: "t3",
-              name: "관련법령·실무기준",
-              section: "trunk",
-              children: [
-                {
-                  id: "t4",
-                  name: "유형별 평가",
-                  section: "trunk",
-                  children: [
-                    {
-                      id: "bldg0",
-                      name: "건물평가",
-                      section: "building",
-                      branchDirection: "left",
-                      children: [
-                        {
-                          id: "bldg1",
-                          name: "건물평가 개관",
-                          section: "building",
-                          children: [
-                            {
-                              id: "bldg2",
-                              name: "원가방식",
-                              section: "cost",
-                              children: [
-                                {
-                                  id: "bldg3",
-                                  name: "재조달원가",
-                                  section: "cost",
-                                },
-                                {
-                                  id: "bldg4",
-                                  name: "감가수정",
-                                  section: "cost",
-                                  children: [
-                                    {
-                                      id: "bldg5",
-                                      name: "내용연수·잔가율",
-                                      section: "cost",
-                                    },
-                                  ],
-                                },
-                              ],
-                            },
-                            {
-                              id: "bldg6",
-                              name: "건물 거래사례비교법",
-                              section: "comparison",
-                              children: [
-                                {
-                                  id: "bldg7",
-                                  name: "회귀분석",
-                                  section: "comparison",
-                                },
-                              ],
-                            },
-                          ],
-                        },
-                        {
-                          id: "bldg8",
-                          name: "토지·건물 결합평가",
-                          section: "building",
-                          children: [
-                            {
-                              id: "bldg9",
-                              name: "토지건물 일괄평가",
-                              section: "building",
-                            },
-                          ],
-                        },
-                        {
-                          id: "bldg10",
-                          name: "구분소유 부동산",
-                          section: "building",
-                          children: [
-                            {
-                              id: "bldg11",
-                              name: "구분건물 감정평가",
-                              section: "building",
-                            },
-                          ],
-                        },
-                      ],
-                    },
-
-                    {
-                      id: "land0",
-                      name: "토지평가",
-                      section: "land",
-                      branchDirection: "center",
-                      children: [
-                        {
-                          id: "land1",
-                          name: "토지평가 개관",
-                          section: "land",
-                          children: [
-                            {
-                              id: "land2",
-                              name: "공시지가기준법",
-                              section: "land",
-                              children: [
-                                {
-                                  id: "land3",
-                                  name: "지역·개별요인 분석",
-                                  section: "land",
-                                },
-                                {
-                                  id: "land4",
-                                  name: "나지상정평가",
-                                  section: "land",
-                                },
-                              ],
-                            },
-                            {
-                              id: "land5",
-                              name: "거래사례비교법",
-                              section: "comparison",
-                              children: [
-                                {
-                                  id: "land6",
-                                  name: "사례선택·사정보정",
-                                  section: "comparison",
-                                },
-                                {
-                                  id: "land7",
-                                  name: "시점수정",
-                                  section: "comparison",
-                                },
-                              ],
-                            },
-                          ],
-                        },
-                        {
-                          id: "land8",
-                          name: "특수토지평가",
-                          section: "special",
-                          children: [
-                            {
-                              id: "land9",
-                              name: "둘 이상의 용도지역 토지",
-                              section: "special",
-                            },
-                            {
-                              id: "land10",
-                              name: "도시계획시설저촉토지",
-                              section: "special",
-                            },
-                            {
-                              id: "land11",
-                              name: "개발법",
-                              section: "special",
-                            },
-                            {
-                              id: "land12",
-                              name: "골프장 평가",
-                              section: "special",
-                            },
-                          ],
-                        },
-                        {
-                          id: "land13",
-                          name: "토지 권리평가",
-                          section: "rent",
-                          children: [
-                            {
-                              id: "land14",
-                              name: "지상권 평가",
-                              section: "rent",
-                            },
-                            {
-                              id: "land15",
-                              name: "구분지상권 설정토지",
-                              section: "rent",
-                            },
-                          ],
-                        },
-                      ],
-                    },
-
-                    {
-                      id: "type0",
-                      name: "유형별·기타평가",
-                      section: "typeEval",
-                      branchDirection: "right",
-                      children: [
-                        {
-                          id: "type1",
-                          name: "수익성 부동산 평가",
-                          section: "income",
-                          children: [
-                            {
-                              id: "type2",
-                              name: "수익환원법",
-                              section: "income",
-                              children: [
-                                {
-                                  id: "type3",
-                                  name: "직접환원법",
-                                  section: "income",
-                                },
-                                {
-                                  id: "type4",
-                                  name: "할인현금흐름법",
-                                  section: "income",
-                                },
-                                {
-                                  id: "type5",
-                                  name: "환원율·순수익 산정",
-                                  section: "income",
-                                },
-                              ],
-                            },
-                            {
-                              id: "type6",
-                              name: "오피스 투자평가",
-                              section: "purpose",
-                              children: [
-                                {
-                                  id: "type7",
-                                  name: "오피스 매입 감정평가",
-                                  section: "purpose",
-                                },
-                                {
-                                  id: "type8",
-                                  name: "타당성분석",
-                                  section: "purpose",
-                                },
-                                {
-                                  id: "type9",
-                                  name: "매후환대차",
-                                  section: "purpose",
-                                },
-                              ],
-                            },
-                          ],
-                        },
-                        {
-                          id: "type10",
-                          name: "임대료평가",
-                          section: "rent",
-                          children: [
-                            {
-                              id: "type11",
-                              name: "임대사례비교법",
-                              section: "rent",
-                            },
-                            {
-                              id: "type12",
-                              name: "적산법",
-                              section: "rent",
-                            },
-                            {
-                              id: "type13",
-                              name: "수익분석법",
-                              section: "rent",
-                            },
-                            {
-                              id: "type14",
-                              name: "신규·계속임대료",
-                              section: "rent",
-                            },
-                          ],
-                        },
-                        {
-                          id: "type15",
-                          name: "기업·무형자산평가",
-                          section: "typeEval",
-                          children: [
-                            {
-                              id: "type16",
-                              name: "기업가치평가",
-                              section: "typeEval",
-                            },
-                            {
-                              id: "type17",
-                              name: "기계기구평가",
-                              section: "typeEval",
-                            },
-                            {
-                              id: "type18",
-                              name: "지식재산권 평가",
-                              section: "typeEval",
-                              children: [
-                                {
-                                  id: "type19",
-                                  name: "영업권 감정평가",
-                                  section: "typeEval",
-                                },
-                                {
-                                  id: "type20",
-                                  name: "비상장주식 감정평가",
-                                  section: "typeEval",
-                                },
-                                {
-                                  id: "type21",
-                                  name: "총자산가치 산정",
-                                  section: "typeEval",
-                                },
-                              ],
-                            },
-                          ],
-                        },
-                        {
-                          id: "type22",
-                          name: "목적별·도시정비평가",
-                          section: "purpose",
-                          children: [
-                            {
-                              id: "type23",
-                              name: "담보 및 경매평가",
-                              section: "purpose",
-                            },
-                            {
-                              id: "type24",
-                              name: "최유효이용분석",
-                              section: "purpose",
-                            },
-                            {
-                              id: "type25",
-                              name: "도시정비평가",
-                              section: "purpose",
-                              children: [
-                                {
-                                  id: "type26",
-                                  name: "종전자산평가",
-                                  section: "purpose",
-                                },
-                                {
-                                  id: "type27",
-                                  name: "관리처분계획",
-                                  section: "purpose",
-                                },
-                              ],
-                            },
-                          ],
-                        },
-                      ],
-                    },
-                  ],
-                },
-              ],
-            },
+            { id: "f1a", name: "감평법 개요 및 핵심 조항", section: "fundamentals" },
+            { id: "f1b", name: "감정평가에 관한 규칙 구조", section: "fundamentals" },
+          ],
+        },
+        {
+          id: "f2",
+          name: "가치의 다원론과 경제적 원칙",
+          section: "fundamentals",
+          children: [
+            { id: "f2a", name: "시장가치", section: "fundamentals" },
+            { id: "f2b", name: "시장가치 외의 가치", section: "fundamentals" },
+            { id: "f2c", name: "최유효이용의 원칙", section: "fundamentals" },
+            { id: "f2d", name: "13가지 경제적 원칙", section: "fundamentals" },
+          ],
+        },
+        {
+          id: "f3",
+          name: "기초 금융 수학",
+          section: "fundamentals",
+          children: [
+            { id: "f3a", name: "화폐의 시간가치", section: "fundamentals" },
+            { id: "f3b", name: "6단 계수 활용", section: "fundamentals" },
+            { id: "f3c", name: "자본환원율과 할인율의 관계", section: "fundamentals" },
+          ],
+        },
+      ],
+    },
+    {
+      id: "a0",
+      name: "감정평가 3방식",
+      section: "approaches",
+      children: [
+        {
+          id: "a1",
+          name: "비교방식",
+          section: "approaches",
+          children: [
+            { id: "a1a", name: "공시지가기준법", section: "approaches" },
+            { id: "a1b", name: "거래사례비교법", section: "approaches" },
+            { id: "a1c", name: "임대사례비교법", section: "approaches" },
+          ],
+        },
+        {
+          id: "a2",
+          name: "원가방식",
+          section: "approaches",
+          children: [
+            { id: "a2a", name: "원가법", section: "approaches" },
+            { id: "a2b", name: "재조달원가", section: "approaches" },
+            { id: "a2c", name: "감가수정", section: "approaches" },
+            { id: "a2d", name: "정액법", section: "approaches" },
+            { id: "a2e", name: "정률법", section: "approaches" },
+            { id: "a2f", name: "상환기금법", section: "approaches" },
+            { id: "a2g", name: "관찰감가법", section: "approaches" },
+            { id: "a2h", name: "적산법", section: "approaches" },
+            { id: "a2i", name: "기대이율", section: "approaches" },
+            { id: "a2j", name: "필요제경비", section: "approaches" },
+          ],
+        },
+        {
+          id: "a3",
+          name: "수익방식",
+          section: "approaches",
+          children: [
+            { id: "a3a", name: "수익환원법", section: "approaches" },
+            { id: "a3b", name: "직접환원법", section: "approaches" },
+            { id: "a3c", name: "DCF", section: "approaches" },
+            { id: "a3d", name: "자본환원율 산정", section: "approaches" },
+            { id: "a3e", name: "시장추출법", section: "approaches" },
+            { id: "a3f", name: "조성법", section: "approaches" },
+            { id: "a3g", name: "투자결합법", section: "approaches" },
+            { id: "a3h", name: "에르우드법", section: "approaches" },
+            { id: "a3i", name: "수익분석법", section: "approaches" },
+            { id: "a3j", name: "기업용 임대료", section: "approaches" },
+          ],
+        },
+      ],
+    },
+    {
+      id: "p0",
+      name: "목적별 감정평가",
+      section: "purpose",
+      children: [
+        {
+          id: "p1",
+          name: "담보 및 경매",
+          section: "purpose",
+          children: [
+            { id: "p1a", name: "은행 담보평가", section: "purpose" },
+            { id: "p1b", name: "회수전망액", section: "purpose" },
+            { id: "p1c", name: "법원 경매평가", section: "purpose" },
+            { id: "p1d", name: "권리분석", section: "purpose" },
+          ],
+        },
+        {
+          id: "p2",
+          name: "국공유재산",
+          section: "purpose",
+          children: [
+            { id: "p2a", name: "국유재산법 기준 처분·매입", section: "purpose" },
+            { id: "p2b", name: "공유재산법 기준 처분·매입", section: "purpose" },
+          ],
+        },
+        {
+          id: "p3",
+          name: "도시정비사업",
+          section: "purpose",
+          children: [
+            { id: "p3a", name: "종전자산 평가", section: "purpose" },
+            { id: "p3b", name: "종후자산 평가", section: "purpose" },
+            { id: "p3c", name: "국공유지 무상양도", section: "purpose" },
+            { id: "p3d", name: "국공유지 무상양수", section: "purpose" },
+          ],
+        },
+        {
+          id: "p4",
+          name: "재무보고",
+          section: "purpose",
+          children: [
+            { id: "p4a", name: "K-IFRS 유형자산 공정가치 평가", section: "purpose" },
+          ],
+        },
+      ],
+    },
+    {
+      id: "t0",
+      name: "물건별 감정평가",
+      section: "property",
+      children: [
+        {
+          id: "t1",
+          name: "복합부동산",
+          section: "property",
+          children: [
+            { id: "t1a", name: "구분소유권 및 집합건물 일괄평가", section: "property" },
+            { id: "t1b", name: "적산가치와 비준가치의 조정", section: "property" },
+          ],
+        },
+        {
+          id: "t2",
+          name: "특수토지 및 권리",
+          section: "property",
+          children: [
+            { id: "t2a", name: "맹지", section: "property" },
+            { id: "t2b", name: "선하지", section: "property" },
+            { id: "t2c", name: "대규모 조성지", section: "property" },
+            { id: "t2d", name: "지상권", section: "property" },
+            { id: "t2e", name: "임차권", section: "property" },
+            { id: "t2f", name: "소유권 외의 권리", section: "property" },
+          ],
+        },
+        {
+          id: "t3",
+          name: "무형자산 및 기타",
+          section: "property",
+          children: [
+            { id: "t3a", name: "영업권", section: "property" },
+            { id: "t3b", name: "특허권", section: "property" },
+            { id: "t3c", name: "지식재산권", section: "property" },
+            { id: "t3d", name: "공장재단", section: "property" },
+            { id: "t3e", name: "광업재단", section: "property" },
+            { id: "t3f", name: "자동차", section: "property" },
+            { id: "t3g", name: "선박", section: "property" },
+          ],
+        },
+      ],
+    },
+    {
+      id: "c0",
+      name: "보상 감정평가",
+      section: "compensation",
+      children: [
+        {
+          id: "c1",
+          name: "손실보상 기본 원칙",
+          section: "compensation",
+          children: [
+            { id: "c1a", name: "공시지가 선택 기준", section: "compensation" },
+            { id: "c1b", name: "사업인정 전후", section: "compensation" },
+            { id: "c1c", name: "개발이익 배제", section: "compensation" },
+            { id: "c1d", name: "현황평가 원칙", section: "compensation" },
+          ],
+        },
+        {
+          id: "c2",
+          name: "토지 보상",
+          section: "compensation",
+          children: [
+            { id: "c2a", name: "공법상 제한을 받는 토지 평가", section: "compensation" },
+            { id: "c2b", name: "무허가 건축물 부지", section: "compensation" },
+            { id: "c2c", name: "불법형질변경 토지", section: "compensation" },
+            { id: "c2d", name: "잔여지 가치하락", section: "compensation" },
+            { id: "c2e", name: "수용 청구", section: "compensation" },
+          ],
+        },
+        {
+          id: "c3",
+          name: "지상물 및 지장물 보상",
+          section: "compensation",
+          children: [
+            { id: "c3a", name: "이전비 원칙", section: "compensation" },
+            { id: "c3b", name: "취득가격 기준", section: "compensation" },
+            { id: "c3c", name: "건축물 평가", section: "compensation" },
+            { id: "c3d", name: "농작물 평가", section: "compensation" },
+            { id: "c3e", name: "수목 평가", section: "compensation" },
+            { id: "c3f", name: "분묘 평가", section: "compensation" },
+          ],
+        },
+        {
+          id: "c4",
+          name: "권리 및 영업손실 보상",
+          section: "compensation",
+          children: [
+            { id: "c4a", name: "영업보상", section: "compensation" },
+            { id: "c4b", name: "폐업", section: "compensation" },
+            { id: "c4c", name: "휴업", section: "compensation" },
+            { id: "c4d", name: "광업권", section: "compensation" },
+            { id: "c4e", name: "어업권", section: "compensation" },
+            { id: "c4f", name: "농업손실 보상", section: "compensation" },
           ],
         },
       ],
@@ -388,250 +258,172 @@ export const skillTree: TreeNode = {
   ],
 }
 
-type TreeMetrics = {
-  leafWeight: number
+type Metrics = {
+  leafCount: number
   maxDepth: number
-  branchCount: number
+  childCount: number
   scale: number
 }
 
-function hashSeed(id: string) {
-  let hash = 2166136261
+function computeMetrics(
+  node: TreeNode,
+  map: Map<string, Metrics>,
+  inheritedScale: number,
+): Metrics {
+  const scale = node.spacingScale ?? inheritedScale
+  const children = node.children ?? []
 
-  for (let index = 0; index < id.length; index += 1) {
-    hash ^= id.charCodeAt(index)
-    hash = Math.imul(hash, 16777619)
+  if (children.length === 0) {
+    const metrics: Metrics = {
+      leafCount: 1,
+      maxDepth: 0,
+      childCount: 0,
+      scale,
+    }
+    map.set(node.id, metrics)
+    return metrics
   }
 
-  return ((hash >>> 0) % 1000) / 1000
+  const childMetrics = children.map((child) =>
+    computeMetrics(child, map, scale),
+  )
+
+  const metrics: Metrics = {
+    leafCount: childMetrics.reduce((sum, child) => sum + child.leafCount, 0),
+    maxDepth: 1 + Math.max(...childMetrics.map((child) => child.maxDepth)),
+    childCount: children.length,
+    scale,
+  }
+
+  map.set(node.id, metrics)
+  return metrics
 }
 
-function normalizeAngle(angle: number) {
-  const fullTurn = Math.PI * 2
-  return ((angle % fullTurn) + fullTurn) % fullTurn
+function getWeight(metrics: Metrics) {
+  return (
+    metrics.leafCount * 1 +
+    metrics.maxDepth * 0.9 +
+    metrics.childCount * 0.55
+  )
 }
 
 export function layoutTree(
   root: TreeNode,
-  opts: {
-    xSpacing: number
-    ySpacing: number
-    rootY?: number
-  },
+  opts: { xSpacing: number; ySpacing: number; rootY?: number },
 ) {
   const positions = new Map<
     string,
-    {
-      x: number
-      y: number
-      name: string
-      section: string
-    }
+    { x: number; y: number; name: string; section: string }
   >()
-
   const edges: [string, string][] = []
-  const metricsById = new Map<string, TreeMetrics>()
+  const metricsById = new Map<string, Metrics>()
 
-  /*
-   * 300deg만 사용합니다.
-   * 아래쪽 60deg(60deg~120deg)는 비워 두어,
-   * 줄기 시작점과 패널 영역에 과도한 노드 밀집을 피합니다.
-   *
-   * 화면 좌표는 y가 아래로 증가하므로 -90deg가 화면 위쪽입니다.
-   */
-  const OPENING_ANGLE = (60 * Math.PI) / 180
-  const USABLE_ANGLE = Math.PI * 2 - OPENING_ANGLE
-  const START_ANGLE = Math.PI / 2 + OPENING_ANGLE / 2
-  const ROOT_AXIS_ANGLE = -Math.PI / 2
+  computeMetrics(root, metricsById, 1)
 
-  /*
-   * 노드 라벨과 글로우를 고려한 최소 각 간격입니다.
-   * X_SPACING 155 기준, 이 값이면 가까운 형제도 읽기 어렵지 않습니다.
-   */
-  const MIN_CHILD_GAP = (6 * Math.PI) / 180
+  const fullTurn = Math.PI * 2
+  const rootChildren = root.children ?? []
+  const rootSlice = rootChildren.length > 0 ? fullTurn / rootChildren.length : fullTurn
+  const siblingGap = (6 * Math.PI) / 180
 
-  /*
-   * 직선 트렁크의 끝입니다.
-   * root0 -> t1 -> t2 -> t3 -> t4는 아래에서 위로 유지되고,
-   * t4의 자식부터 사방으로 퍼집니다.
-   */
-  const TRUNK_IDS = new Set(["root0", "t1", "t2", "t3", "t4"])
-
-  function calculateMetrics(
-    node: TreeNode,
-    inheritedScale: number,
-  ): TreeMetrics {
-    const scale = node.spacingScale ?? inheritedScale
-    const children = node.children ?? []
-
-    if (children.length === 0) {
-      const result: TreeMetrics = {
-        leafWeight: scale,
-        maxDepth: 0,
-        branchCount: 0,
-        scale,
-      }
-
-      metricsById.set(node.id, result)
-      return result
-    }
-
-    const childMetrics = children.map((child) =>
-      calculateMetrics(child, scale),
-    )
-
-    const result: TreeMetrics = {
-      leafWeight: childMetrics.reduce(
-        (total, child) => total + child.leafWeight,
-        0,
-      ),
-      maxDepth:
-        1 + Math.max(...childMetrics.map((child) => child.maxDepth)),
-      branchCount: children.length,
-      scale,
-    }
-
-    metricsById.set(node.id, result)
-    return result
-  }
-
-  /*
-   * 각도 배분 가중치:
-   * - leafWeight: 실제 말단 수가 많을수록 더 넓은 면적
-   * - maxDepth: 긴 가지는 바깥 원에서 충돌할 가능성이 높으므로 추가 여유
-   * - branchCount: 당장 여러 갈래로 나뉘는 부모도 추가 여유
-   */
-  function getAngularWeight(node: TreeNode) {
-    const metrics = metricsById.get(node.id)!
-
-    return (
-      metrics.leafWeight * 1 +
-      metrics.maxDepth * 0.8 +
-      metrics.branchCount * 0.45
-    )
-  }
-
-  function getRadius(depth: number, scale: number) {
-    /*
-     * 첫 단계는 줄기와 분기점의 인지성을 위해 약간 짧게,
-     * 깊어질수록 소폭 넓혀 라벨·선 겹침을 줄입니다.
-     */
-    const depthExpansion = 1 + Math.min(depth, 8) * 0.035
-
-    return depth * opts.xSpacing * depthExpansion * scale
-  }
-
-  function getChildSectors(
-    children: TreeNode[],
-    startAngle: number,
-    endAngle: number,
-  ) {
-    const availableAngle = endAngle - startAngle
-    const totalGap = Math.max(0, children.length - 1) * MIN_CHILD_GAP
-    const distributableAngle = Math.max(
-      availableAngle - totalGap,
-      availableAngle * 0.55,
-    )
-
-    const weights = children.map(getAngularWeight)
-    const totalWeight = weights.reduce((total, weight) => total + weight, 0)
-
-    let cursor = startAngle
-
-    return children.map((child, index) => {
-      const share = distributableAngle * (weights[index] / totalWeight)
-      const sector = {
-        child,
-        startAngle: cursor,
-        endAngle: cursor + share,
-      }
-
-      cursor += share + MIN_CHILD_GAP
-      return sector
-    })
+  function radiusFor(depth: number, scale: number) {
+    const depthFactor = 1 + Math.min(depth, 8) * 0.04
+    return depth * opts.xSpacing * depthFactor * scale
   }
 
   function placeNode(
     node: TreeNode,
     depth: number,
     angle: number,
-    sectorStart: number,
-    sectorEnd: number,
+    startAngle: number,
+    endAngle: number,
     inheritedScale: number,
   ) {
-    const metrics = metricsById.get(node.id)!
-    const children = node.children ?? []
-    const isTrunk = TRUNK_IDS.has(node.id)
-
-    const radius = getRadius(depth, metrics.scale)
-    const positionAngle = isTrunk ? ROOT_AXIS_ANGLE : angle
+    const scale = node.spacingScale ?? inheritedScale
+    const radius = radiusFor(depth, scale)
 
     positions.set(node.id, {
-      x: Math.cos(positionAngle) * radius,
-      y: Math.sin(positionAngle) * radius,
+      x: Math.cos(angle) * radius,
+      y: Math.sin(angle) * radius,
       name: node.name,
       section: node.section,
     })
 
+    const children = node.children ?? []
     if (children.length === 0) return
 
-    /*
-     * 단일 자식은 부모 방향을 유지해 불필요한 꺾임을 만들지 않습니다.
-     * t4부터 최초로 나뉘는 노드만 전체 300도 부채꼴을 배정받습니다.
-     */
+    if (depth === 0) {
+      children.forEach((child, index) => {
+        const sectorStart = -Math.PI / 2 + index * rootSlice
+        const sectorEnd = sectorStart + rootSlice
+        const childAngle = (sectorStart + sectorEnd) / 2
+
+        edges.push([node.id, child.id])
+
+        placeNode(
+          child,
+          depth + 1,
+          childAngle,
+          sectorStart,
+          sectorEnd,
+          scale,
+        )
+      })
+      return
+    }
+
     if (children.length === 1) {
       const child = children[0]
+      edges.push([node.id, child.id])
+
+      placeNode(
+        child,
+        depth + 1,
+        angle,
+        startAngle,
+        endAngle,
+        scale,
+      )
+      return
+    }
+
+    const totalGap = siblingGap * Math.max(0, children.length - 1)
+    const rawSpan = endAngle - startAngle
+    const usableAngle = Math.max(rawSpan - totalGap, rawSpan * 0.6)
+
+    const weights = children.map((child) => getWeight(metricsById.get(child.id)!))
+    const weightSum = weights.reduce((sum, value) => sum + value, 0)
+
+    let cursor = startAngle + (rawSpan - usableAngle) / 2
+
+    children.forEach((child, index) => {
+      const angleShare = usableAngle * (weights[index] / weightSum)
+      const sectorStart = cursor
+      const sectorEnd = cursor + angleShare
+      const childAngle = (sectorStart + sectorEnd) / 2
 
       edges.push([node.id, child.id])
 
       placeNode(
         child,
         depth + 1,
-        positionAngle,
+        childAngle,
         sectorStart,
         sectorEnd,
-        metrics.scale,
+        scale,
       )
 
-      return
-    }
-
-    const childStart = isTrunk ? START_ANGLE : sectorStart
-    const childEnd = isTrunk
-      ? START_ANGLE + USABLE_ANGLE
-      : sectorEnd
-
-    const sectors = getChildSectors(children, childStart, childEnd)
-
-    for (const sector of sectors) {
-      const childAngle = (sector.startAngle + sector.endAngle) / 2
-
-      edges.push([node.id, sector.child.id])
-
-      placeNode(
-        sector.child,
-        depth + 1,
-        childAngle,
-        sector.startAngle,
-        sector.endAngle,
-        metrics.scale,
-      )
-    }
+      cursor = sectorEnd + siblingGap
+    })
   }
 
-  calculateMetrics(root, 1)
+  positions.set(root.id, {
+    x: 0,
+    y: 0,
+    name: root.name,
+    section: root.section,
+  })
 
-  placeNode(
-    root,
-    0,
-    ROOT_AXIS_ANGLE,
-    START_ANGLE,
-    START_ANGLE + USABLE_ANGLE,
-    1,
-  )
+  placeNode(root, 0, -Math.PI / 2, -Math.PI, Math.PI, 1)
 
-  return {
-    positions,
-    edges,
-  }
+  return { positions, edges }
 }
