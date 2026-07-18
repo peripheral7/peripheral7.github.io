@@ -31,8 +31,8 @@ const PAN_MARGIN = 320
 const RESISTANCE = 0.35
 
 // 방사형 트리의 반지름 단계 간격
-const X_SPACING = 150
-const Y_SPACING = 150
+const X_SPACING = 180
+const Y_SPACING = 180
 
 const WIDE_PANEL_RIGHT = 64
 const WIDE_PANEL_TOP_BOTTOM = 64
