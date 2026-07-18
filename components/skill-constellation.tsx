@@ -31,8 +31,11 @@ const PAN_MARGIN = 320
 const RESISTANCE = 0.35
 
 // 방사형 트리의 반지름 단계 간격
-const X_SPACING = 145
-const Y_SPACING = 130
+const X_SPACING = 150
+const Y_SPACING = 150
+
+const WIDE_PANEL_RIGHT = 64
+const WIDE_PANEL_TOP_BOTTOM = 64
 
 const MOBILE_BP = 768
 const NARROW_BP = 1300
@@ -108,14 +111,11 @@ function findNearestNodeInDirection(
     const unitX = dx / distance
     const unitY = dy / distance
 
-    // -1: 완전 반대, 0: 수직, 1: 정확히 같은 방향
     const alignment =
       unitX * directionVector.x + unitY * directionVector.y
 
-    // 요청한 방향의 반대편 노드는 제외
     if (alignment <= 0.15) continue
 
-    // 방향 일치도를 가장 중요하게, 거리를 그 다음 기준으로 사용
     const score = alignment * 10000 - distance
 
     if (score > bestScore) {
@@ -416,10 +416,10 @@ export function SkillConstellation() {
   }
 
   function toggleTools() {
-  setSelectedId(null)
-  setReviewInput("")
-  setToolsOpen((open) => !open)
-  } 
+    setSelectedId(null)
+    setReviewInput("")
+    setToolsOpen((open) => !open)
+  }
 
   useEffect(() => {
     if (!selectedId) return
@@ -436,44 +436,43 @@ export function SkillConstellation() {
   }, [positions, selectedId])
 
   useEffect(() => {
-  function isTypingTarget(target: EventTarget | null) {
-    const tagName = (target as HTMLElement | null)?.tagName
+    function isTypingTarget(target: EventTarget | null) {
+      const tagName = (target as HTMLElement | null)?.tagName
 
-    return tagName === "INPUT" || tagName === "TEXTAREA"
-  }
-
-  function onKeyDown(event: KeyboardEvent) {
-    if (isTypingTarget(event.target)) return
-
-    const key = event.key as Direction
-
-    if (!Object.hasOwn(KEY_DIRECTIONS, key)) return
-
-    event.preventDefault()
-
-    // 처음 화살표를 누르면 루트를 선택
-    if (!selectedId) {
-      selectStar("root0")
-      return
+      return tagName === "INPUT" || tagName === "TEXTAREA"
     }
 
-    const nextId = findNearestNodeInDirection(
-      selectedId,
-      key,
-      nodeList,
-    )
+    function onKeyDown(event: KeyboardEvent) {
+      if (isTypingTarget(event.target)) return
 
-    if (nextId) {
-      selectStar(nextId)
+      const key = event.key as Direction
+
+      if (!Object.hasOwn(KEY_DIRECTIONS, key)) return
+
+      event.preventDefault()
+
+      if (!selectedId) {
+        selectStar("root0")
+        return
+      }
+
+      const nextId = findNearestNodeInDirection(
+        selectedId,
+        key,
+        nodeList,
+      )
+
+      if (nextId) {
+        selectStar(nextId)
+      }
     }
-  }
 
-  window.addEventListener("keydown", onKeyDown)
+    window.addEventListener("keydown", onKeyDown)
 
-  return () => {
-    window.removeEventListener("keydown", onKeyDown)
-  }
-}, [nodeList, selectedId])
+    return () => {
+      window.removeEventListener("keydown", onKeyDown)
+    }
+  }, [nodeList, selectedId])
 
   function toggleAcquired(starId: string) {
     setProgress((previous) => {
@@ -557,7 +556,6 @@ export function SkillConstellation() {
     const target = event.target as HTMLElement
     const isInteractive = target.closest("[data-overlay-interactive]")
 
-    // 배경 클릭 또는 드래그 시작 시 패널을 즉시 닫음
     if (!isInteractive) {
       closePanel()
     }
@@ -698,11 +696,9 @@ export function SkillConstellation() {
         0.35,
       )
 
-      // 확대 전, 커서 아래에 있던 월드 좌표
       const worldX = current.x + (pointerX - focal.x) / current.zoom
       const worldY = current.y + (pointerY - focal.y) / current.zoom
 
-      // 확대 후에도 같은 월드 좌표가 커서 아래에 남도록 카메라 이동
       const nextX = worldX - (pointerX - focal.x) / nextZoom
       const nextY = worldY - (pointerY - focal.y) / nextZoom
 
@@ -781,32 +777,21 @@ export function SkillConstellation() {
   const selectedSection = selectedNode ? sections[selectedNode.section] : null
   const selectedProgress = selectedId ? progress[selectedId] : undefined
 
-  let panelStyle: React.CSSProperties
+  let panelClass = ""
+  let panelStyle: React.CSSProperties = {}
 
   if (layoutMode === "mobile") {
-    panelStyle = {
-      left: "67%",
-      top: "25%",
-      width: "52vw",
-      maxHeight: "38vh",
-      transform: "translate(-50%, -50%)",
-    }
+    panelClass = "fixed inset-x-0 top-0 h-[50vh] w-full rounded-b-2xl"
   } else if (layoutMode === "narrow") {
-    panelStyle = {
-      left: "67%",
-      top: "25%",
-      width: "50vw",
-      maxWidth: "560px",
-      maxHeight: "40vh",
-      transform: "translate(-50%, -50%)",
-    }
+    panelClass = "fixed inset-y-0 right-0 h-full w-1/2 rounded-l-2xl"
   } else {
+    panelClass = "fixed rounded-2xl"
     panelStyle = {
-      top: "8vh",
-      right: "4vw",
-      width: "60vw",
-      maxWidth: "920px",
-      maxHeight: "80vh",
+      top: `${WIDE_PANEL_TOP_BOTTOM}px`,
+      right: `${WIDE_PANEL_RIGHT}px`,
+      bottom: `${WIDE_PANEL_TOP_BOTTOM}px`,
+      width: `calc(25vw - ${WIDE_PANEL_RIGHT}px)`,
+      maxWidth: "24rem",
     }
   }
 
@@ -817,8 +802,6 @@ export function SkillConstellation() {
         style={{
           backgroundImage:
             "linear-gradient(rgba(3, 5, 12, 0.38), rgba(3, 5, 12, 0.68)), url('/images/study/universe-background.jpg')",
-
-          // 배경 이동 숫자 (0.015 ~ 0.04)
           backgroundPosition: `calc(50% - ${camera.x * 0.025}px) calc(50% - ${camera.y * 0.025}px)`,
           backgroundSize: "cover",
           backgroundRepeat: "no-repeat",
@@ -1015,20 +998,22 @@ export function SkillConstellation() {
                     WebkitTapHighlightColor: "transparent",
                   }}
                 >
-                <StarGlyph
-                  size={size}
-                  fill={`rgba(${tier.rgb}, ${tier.fillAlpha})`}
-                  className={isSelected ? "selected-neutral-glow" : undefined}
-                  style={{
-                    filter: isSelected
-                      ? "drop-shadow(0 0 5px rgba(255,255,255,0.92)) drop-shadow(0 0 18px rgba(255,255,255,0.62)) drop-shadow(0 0 30px rgba(255,255,255,0.26))"
-                      : tier.shadow,
-                  }}
-                />
+                  <StarGlyph
+                    size={size}
+                    fill={`rgba(${tier.rgb}, ${tier.fillAlpha})`}
+                    className={isSelected ? "selected-neutral-glow" : undefined}
+                    style={{
+                      filter: isSelected
+                        ? "drop-shadow(0 0 5px rgba(255,255,255,0.92)) drop-shadow(0 0 18px rgba(255,255,255,0.62)) drop-shadow(0 0 30px rgba(255,255,255,0.26))"
+                        : tier.shadow,
+                    }}
+                  />
                 </button>
 
                 <p
-                  className="pointer-events-none absolute m-0 text-center text-[12px] font-medium text-white/85"
+                  className={`pointer-events-none absolute m-0 text-center text-[12px] font-medium transition-colors ${
+                    isSelected ? "text-white" : "text-white/72"
+                  }`}
                   style={{
                     left: 0,
                     top: size + 13,
@@ -1040,6 +1025,9 @@ export function SkillConstellation() {
                     overflowWrap: "normal",
                     writingMode: "horizontal-tb",
                     textOrientation: "mixed",
+                    textShadow: isSelected
+                      ? "0 0 10px rgba(255,255,255,0.18)"
+                      : "0 0 8px rgba(255,255,255,0.06)",
                   }}
                 >
                   {line1}
@@ -1059,7 +1047,7 @@ export function SkillConstellation() {
       {selectedNode && (
         <aside
           data-overlay-interactive
-          className="fixed z-50 overflow-y-auto rounded-xl border border-white/15 bg-neutral-950/30 p-3 text-xs shadow-2xl backdrop-blur-xl md:p-4"
+          className={`${panelClass} z-50 overflow-y-auto rounded-xl border border-white/15 bg-neutral-950/30 p-4 text-sm shadow-2xl backdrop-blur-xl md:p-5`}
           style={panelStyle}
           onPointerDown={(event) => event.stopPropagation()}
           onClick={(event) => event.stopPropagation()}
@@ -1073,11 +1061,11 @@ export function SkillConstellation() {
             ✕
           </button>
 
-          <p className="pr-7 text-[9px] tracking-[0.13em] text-amber-200/80">
+          <p className="pr-7 text-[11px] tracking-[0.13em] text-amber-200/80">
             {selectedSection?.title}
           </p>
 
-          <h2 className="mt-1 pr-7 text-sm font-bold leading-snug text-white md:text-base">
+          <h2 className="mt-1 pr-7 text-base font-bold leading-snug text-white md:text-lg">
             {selectedNode.name}
           </h2>
 
@@ -1086,7 +1074,7 @@ export function SkillConstellation() {
             onClick={() => {
               if (selectedId) toggleAcquired(selectedId)
             }}
-            className={`mt-3 rounded-full border px-3 py-1.5 text-[10px] tracking-widest transition-colors ${
+            className={`mt-3 rounded-full border px-3 py-1.5 text-[12px] tracking-widest transition-colors ${
               selectedProgress?.acquired
                 ? "border-amber-200/70 bg-amber-200/10 text-amber-100"
                 : "border-white/25 text-white/65 hover:border-white/60"
@@ -1095,12 +1083,12 @@ export function SkillConstellation() {
             {selectedProgress?.acquired ? "습득 완료" : "미습득"}
           </button>
 
-          <section className="mt-4">
-            <p className="mb-1.5 text-[9px] tracking-[0.14em] text-white/45">
+          <section className="mt-5">
+            <p className="mb-2 text-[11px] tracking-[0.14em] text-white/45">
               복습
             </p>
 
-            <div className="flex gap-1.5 min-[1300px]:items-center">
+            <div className="flex gap-2 min-[1300px]:items-center">
               <input
                 value={reviewInput}
                 onChange={(event) => setReviewInput(event.target.value)}
@@ -1111,7 +1099,7 @@ export function SkillConstellation() {
                   }
                 }}
                 placeholder="오늘 배운 것"
-                className="min-w-0 flex-1 rounded-md border border-white/18 bg-black/35 px-2 py-1.5 text-[10px] text-white placeholder:text-[9px] placeholder:text-white/30 outline-none focus:border-amber-100/70 min-[1300px]:h-[72px]"
+                className="min-w-0 flex-1 rounded-md border border-white/18 bg-black/35 px-2.5 py-2 text-[12px] text-white placeholder:text-[11px] placeholder:text-white/30 outline-none focus:border-amber-100/70 min-[1300px]:h-[72px]"
               />
 
               <button
@@ -1121,14 +1109,14 @@ export function SkillConstellation() {
                   addLog(selectedId, reviewInput)
                   setReviewInput("")
                 }}
-                className="rounded-md border border-white/22 px-2.5 py-1.5 text-[9px] text-white/78 transition-colors hover:border-amber-100/80 hover:text-amber-50 min-[1300px]:text-[10px]"
+                className="rounded-md border border-white/22 px-3 py-2 text-[11px] text-white/78 transition-colors hover:border-amber-100/80 hover:text-amber-50 min-[1300px]:text-[12px]"
               >
                 확인
               </button>
             </div>
           </section>
 
-          <section className="mt-3 flex flex-col gap-1.5">
+          <section className="mt-4 flex flex-col gap-2">
             {(selectedProgress?.logs ?? [])
               .slice()
               .reverse()
@@ -1139,13 +1127,13 @@ export function SkillConstellation() {
                 return (
                   <div
                     key={`${log.date}-${indexFromTop}`}
-                    className="relative rounded-md border border-white/10 bg-black/24 p-2 pr-6"
+                    className="relative rounded-md border border-white/10 bg-black/24 p-2.5 pr-7"
                   >
-                    <p className="mb-0.5 text-[8px] tracking-wider text-white/40">
+                    <p className="mb-1 text-[10px] tracking-wider text-white/40">
                       {log.date}
                     </p>
 
-                    <p className="text-[10px] leading-relaxed text-white/85">
+                    <p className="text-[12px] leading-relaxed text-white/85">
                       {log.text}
                     </p>
 
@@ -1156,7 +1144,7 @@ export function SkillConstellation() {
                         if (!selectedId) return
                         removeLog(selectedId, originalIndex)
                       }}
-                      className="absolute right-1.5 top-1.5 rounded-full bg-black/40 px-1.5 py-0.5 text-[8px] text-white/45 transition-colors hover:bg-red-500/30 hover:text-red-100"
+                      className="absolute right-1.5 top-1.5 rounded-full bg-black/40 px-1.5 py-0.5 text-[10px] text-white/45 transition-colors hover:bg-red-500/30 hover:text-red-100"
                     >
                       삭제
                     </button>
@@ -1165,7 +1153,7 @@ export function SkillConstellation() {
               })}
 
             {(selectedProgress?.logs.length ?? 0) === 0 && (
-              <p className="text-[10px] text-white/35">아직 기록이 없습니다.</p>
+              <p className="text-[12px] text-white/35">아직 기록이 없습니다.</p>
             )}
           </section>
         </aside>
