@@ -325,9 +325,29 @@ export function layoutTree(
   const rootSlice = rootChildren.length > 0 ? fullTurn / rootChildren.length : fullTurn
   const siblingGap = (6 * Math.PI) / 180
 
-  function radiusFor(depth: number, scale: number) {
+  function depth3CrowdingOffset(metrics: Metrics, depth: number, xSpacing: number) {
+    if (depth !== 3) return 0
+
+    const crowdScore =
+      metrics.childCount * 1.0 +
+      metrics.leafCount * 0.15 +
+      metrics.maxDepth * 0.2
+
+    if (crowdScore < 3.5) return -xSpacing * 0.03
+    if (crowdScore < 5.5) return 0
+    if (crowdScore < 7) return xSpacing * 0.06
+    if (crowdScore < 8.5) return xSpacing * 0.12
+    if (crowdScore < 10) return xSpacing * 0.18
+
+    return xSpacing * 0.24
+  }
+
+  function radiusFor(depth: number, scale: number, metrics: Metrics) {
     const depthFactor = 1 + Math.min(depth, 8) * 0.04
-    return depth * opts.xSpacing * depthFactor * scale
+    const baseRadius = depth * opts.xSpacing * depthFactor * scale
+    const crowdingOffset = depth3CrowdingOffset(metrics, depth, opts.xSpacing)
+
+    return baseRadius + crowdingOffset
   }
 
   function placeNode(
@@ -338,8 +358,9 @@ export function layoutTree(
     endAngle: number,
     inheritedScale: number,
   ) {
+    const metrics = metricsById.get(node.id)!
     const scale = node.spacingScale ?? inheritedScale
-    const radius = radiusFor(depth, scale)
+    const radius = radiusFor(depth, scale, metrics)
 
     positions.set(node.id, {
       x: Math.cos(angle) * radius,
