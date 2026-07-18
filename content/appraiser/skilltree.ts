@@ -307,6 +307,21 @@ function getWeight(metrics: Metrics) {
   )
 }
 
+// ── 혼잡도 보정 튜닝 지점 ──────────────────────────────
+// CROWD_NODE_DEPTH: "3단계" 그룹 노드(원가방식, 수익방식 등)의 depth.
+// root=0, 5개 핵심갈래=1, 3단계 그룹=2, 4단계 리프=3 이므로 2가 정확한 값.
+const CROWD_NODE_DEPTH = 2
+
+// childCount(자신의 4단계 자식 수)에 따라 "2→3단계 edge" 길이를 조정하는 배율.
+// 2개 이하: 살짝 축소, 4개 기준 1.0, 이후 자식이 많아질수록 점점 확대.
+// 값을 바꿔서 강도를 조절할 수 있습니다.
+function crowdingMultiplier(childCount: number) {
+  const raw = 0.85 + (childCount - 2) * 0.11
+  return Math.min(Math.max(raw, 0.75), 1.7)
+}
+// 참고: childCount=2→0.85, 3→0.96, 4→1.07, 5→1.18, 6→1.29, 7→1.40, 8→1.51, 10→1.70
+// ─────────────────────────────────────────────────────
+
 export function layoutTree(
   root: TreeNode,
   opts: { xSpacing: number; ySpacing: number; rootY?: number },
@@ -325,29 +340,17 @@ export function layoutTree(
   const rootSlice = rootChildren.length > 0 ? fullTurn / rootChildren.length : fullTurn
   const siblingGap = (6 * Math.PI) / 180
 
-  function depth3CrowdingOffset(metrics: Metrics, depth: number, xSpacing: number) {
-    if (depth !== 3) return 0
-
-    const crowdScore =
-      metrics.childCount * 1.0 +
-      metrics.leafCount * 0.15 +
-      metrics.maxDepth * 0.2
-
-    if (crowdScore < 3.5) return -xSpacing * 0.03
-    if (crowdScore < 5.5) return 0
-    if (crowdScore < 7) return xSpacing * 0.06
-    if (crowdScore < 8.5) return xSpacing * 0.12
-    if (crowdScore < 10) return xSpacing * 0.18
-
-    return xSpacing * 0.24
-  }
-
-  function radiusFor(depth: number, scale: number, metrics: Metrics) {
+  // 부모의 실제 반지름에 자신의 edge 길이를 더하는 누적 방식.
+  // depth === CROWD_NODE_DEPTH일 때만 자신의 childCount로 edge 길이를 보정한다.
+  function edgeLength(depth: number, scale: number, ownChildCount: number) {
     const depthFactor = 1 + Math.min(depth, 8) * 0.04
-    const baseRadius = depth * opts.xSpacing * depthFactor * scale
-    const crowdingOffset = depth3CrowdingOffset(metrics, depth, opts.xSpacing)
+    const base = opts.xSpacing * depthFactor * scale
 
-    return baseRadius + crowdingOffset
+    if (depth === CROWD_NODE_DEPTH) {
+      return base * crowdingMultiplier(ownChildCount)
+    }
+
+    return base
   }
 
   function placeNode(
@@ -357,10 +360,12 @@ export function layoutTree(
     startAngle: number,
     endAngle: number,
     inheritedScale: number,
+    parentRadius: number,
   ) {
     const metrics = metricsById.get(node.id)!
     const scale = node.spacingScale ?? inheritedScale
-    const radius = radiusFor(depth, scale, metrics)
+    const step = depth === 0 ? 0 : edgeLength(depth, scale, metrics.childCount)
+    const radius = parentRadius + step
 
     positions.set(node.id, {
       x: Math.cos(angle) * radius,
@@ -387,6 +392,7 @@ export function layoutTree(
           sectorStart,
           sectorEnd,
           scale,
+          radius,
         )
       })
       return
@@ -403,6 +409,7 @@ export function layoutTree(
         startAngle,
         endAngle,
         scale,
+        radius,
       )
       return
     }
@@ -431,20 +438,14 @@ export function layoutTree(
         sectorStart,
         sectorEnd,
         scale,
+        radius,
       )
 
       cursor = sectorEnd + siblingGap
     })
   }
 
-  positions.set(root.id, {
-    x: 0,
-    y: 0,
-    name: root.name,
-    section: root.section,
-  })
-
-  placeNode(root, 0, -Math.PI / 2, -Math.PI, Math.PI, 1)
+  placeNode(root, 0, -Math.PI / 2, -Math.PI, Math.PI, 1, 0)
 
   return { positions, edges }
 }
