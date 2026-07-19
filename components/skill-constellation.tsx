@@ -287,23 +287,23 @@ function getTier(
   }
 }
 
+// 수정 코드 — mode 매개변수를 다시 사용하도록 변경
 function getFocal(
-  _mode: LayoutMode,
+  mode: LayoutMode,
   hasSelection: boolean,
   width: number,
   height: number,
 ) {
   if (!hasSelection) {
-    return {
-      x: width / 2,
-      y: height / 2,
-    }
+    return { x: width / 2, y: height / 2 }
   }
 
-  return {
-    x: width / 2,
-    y: height * 0.6,
+  // 모바일/태블릿/반쪽 웹 화면: 별을 좌측 1/2 영역 중앙에 고정
+  if (mode === "mobile" || mode === "narrow") {
+    return { x: width * 0.25, y: height / 2 }
   }
+
+  return { x: width / 2, y: height * 0.6 }
 }
 
 // 선택된 별과 동일한 강도의 흰색 발광 필터 (별/엣지 공용, 기존보다 조금 더 진하게)
@@ -863,24 +863,19 @@ export function SkillConstellation() {
     // camera/stage 값이 바뀔 때마다 다시 계산해야 하므로 의존성에 포함
   }, [selectedId, edges, positions, stage.width, stage.height, camera, worldTransform.left, worldTransform.top])
 
+  // 수정 코드
   let panelClass = ""
   let panelStyle: React.CSSProperties = {}
 
-  if (layoutMode === "mobile") {
-    panelClass = "fixed rounded-2xl"
-    panelStyle = {
-      top: COMPACT_PANEL_MARGIN,
-      left: COMPACT_PANEL_MARGIN,
-      right: COMPACT_PANEL_MARGIN,
-      height: "80%",
-    }
-  } else if (layoutMode === "narrow") {
+  if (layoutMode === "mobile" || layoutMode === "narrow") {
+    // 화면을 좌/우 1/2씩 나누어, 우측 1/2 안에 여백을 두고 패널 배치
     panelClass = "fixed rounded-2xl"
     panelStyle = {
       top: COMPACT_PANEL_MARGIN,
       bottom: COMPACT_PANEL_MARGIN,
+      left: "calc(50% + 12px)",
       right: COMPACT_PANEL_MARGIN,
-      width: "40%",
+      opacity: 0.5,
     }
   } else {
     panelClass = "fixed rounded-2xl"

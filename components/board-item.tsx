@@ -83,11 +83,19 @@ export function BoardItem({ post }: { post: Post }) {
     </div>
   )
 
+  // 수정 코드 — style에 contain: layout 추가로 프래그멘테이션 버그 해결
+const fragmentFixStyle: React.CSSProperties = {
+  breakInside: "avoid",
+  WebkitColumnBreakInside: "avoid",
+  contain: "layout",
+}
+
   if (post.href) {
     return (
       <a
         href={post.href}
         className="group relative mb-6 block break-inside-avoid overflow-visible"
+        style={fragmentFixStyle}
         tabIndex={0}
       >
         {inner}
@@ -98,6 +106,7 @@ export function BoardItem({ post }: { post: Post }) {
   return (
     <article
       className="group relative mb-6 break-inside-avoid overflow-visible"
+      style={fragmentFixStyle}
       tabIndex={0}
     >
       {inner}
