@@ -56,10 +56,18 @@ const BG_OFFSET_MAX = 70
 
 // 별 선택 발광의 기준 밝기(alpha). 엣지 밝기 조정의 기준값으로도 사용
 const STAR_SELECT_ALPHA = 0.98
-// 상위(부모) 노드로 이어지는 엣지: 기준보다 0.1% 밝게
-const EDGE_TO_PARENT_ALPHA = Math.min(1, STAR_SELECT_ALPHA * 1.001)
-// 하위(자식) 노드로 이어지는 엣지: 기준보다 0.1% 어둡게
-const EDGE_TO_CHILD_ALPHA = STAR_SELECT_ALPHA * 0.999
+
+// 전체 엣지 밝기 10% 감소, 하위노드 방향 엣지는 추가로 20% 더 감소
+const EDGE_BRIGHTNESS_SCALE = 0.9
+const EDGE_CHILD_EXTRA_DIM = 0.8
+
+const EDGE_BASE_ALPHA = STAR_SELECT_ALPHA * EDGE_BRIGHTNESS_SCALE
+const EDGE_TO_PARENT_ALPHA = Math.min(1, EDGE_BASE_ALPHA * 1.001)
+const EDGE_TO_CHILD_ALPHA = EDGE_BASE_ALPHA * 0.999 * EDGE_CHILD_EXTRA_DIM
+
+// 비선택 상태 엣지의 기본 밝기도 동일하게 10% 감소
+const EDGE_DEFAULT_ALPHA = 0.17 * EDGE_BRIGHTNESS_SCALE
+const EDGE_ACQUIRED_ALPHA = 0.48 * EDGE_BRIGHTNESS_SCALE
 
 // 화면 밖 노드 판정 여백 및 경계 라벨의 화면 가장자리 여백
 const OFFSCREEN_CHECK_MARGIN = 48
@@ -898,7 +906,7 @@ export function SkillConstellation() {
           right: -BG_OVERSCAN,
           bottom: -BG_OVERSCAN,
           backgroundImage:
-            "linear-gradient(rgba(3, 5, 12, 0.38), rgba(3, 5, 12, 0.68)), url('/images/study/universe-background.jpg')",
+            "linear-gradient(rgba(3, 5, 12, 0.52), rgba(3, 5, 12, 0.8)), url('/images/study/universe-background.jpg')",
           backgroundPosition: `calc(50% + ${bgOffsetX}px) calc(50% + ${bgOffsetY}px)`,
           backgroundSize: "cover",
           backgroundRepeat: "no-repeat",
@@ -1028,8 +1036,8 @@ export function SkillConstellation() {
                 progress[from]?.acquired && progress[to]?.acquired,
               )
               const baseColor = bothAcquired
-                ? "rgba(255,213,142,0.48)"
-                : "rgba(220,230,255,0.17)"
+                ? `rgba(255,213,142,${EDGE_ACQUIRED_ALPHA})`
+                : `rgba(220,230,255,${EDGE_DEFAULT_ALPHA})`
 
               const isConnected =
                 Boolean(selectedId) && (from === selectedId || to === selectedId)
@@ -1061,20 +1069,19 @@ export function SkillConstellation() {
 
               return (
                 <g key={`${from}-${to}`}>
-                  <linearGradient
-                    id={gradientId}
-                    gradientUnits="userSpaceOnUse"
-                    x1={selNode.x}
-                    y1={selNode.y}
-                    x2={otherNode.x}
-                    y2={otherNode.y}
-                  >
-                    <stop
-                      offset="0%"
-                      stopColor={`rgba(255,255,255,${highlightAlpha})`}
-                    />
-                    <stop offset="100%" stopColor={baseColor} />
-                  </linearGradient>
+                <linearGradient
+                  id={gradientId}
+                  gradientUnits="userSpaceOnUse"
+                  x1={selNode.x}
+                  y1={selNode.y}
+                  x2={otherNode.x}
+                  y2={otherNode.y}
+                >
+                  <stop offset="0%" stopColor={baseColor} />
+                  <stop offset="14%" stopColor={`rgba(255,255,255,${highlightAlpha})`} />
+                  <stop offset="86%" stopColor={`rgba(255,255,255,${highlightAlpha})`} />
+                  <stop offset="100%" stopColor={baseColor} />
+                </linearGradient>
 
                   <line
                     x1={start.x}
@@ -1261,19 +1268,14 @@ export function SkillConstellation() {
           </h2>
 
           <section className="mt-5">
-            <p className="mb-2 text-[11px] tracking-[0.14em] text-white/45">
-              복습
-            </p>
-
             <div className="flex flex-col gap-2">
               <textarea
                 ref={reviewInputRef}
                 value={reviewInput}
                 onChange={(event) => setReviewInput(event.target.value)}
                 onKeyDown={handleReviewKeyDown}
-                placeholder="오늘 배운 것 (Ctrl+Enter 줄바꿈, **굵게** *기울임* `코드`)"
-                rows={3}
-                className="w-full resize-none rounded-md border border-white/18 bg-black/35 px-2.5 py-2 text-[12px] text-white placeholder:text-[11px] placeholder:text-white/30 outline-none focus:border-amber-100/70"
+                rows={9}
+                className="w-full resize-none rounded-md border border-white/18 bg-black/35 px-2.5 py-2 text-[13px] text-white outline-none focus:border-amber-100/70"
               />
 
               <div className="flex justify-end">
@@ -1292,7 +1294,10 @@ export function SkillConstellation() {
             </div>
           </section>
 
-          <section className="mt-4 flex flex-col gap-2">
+          {/* 기록 버튼과 기록 목록 사이 여백 + 입력창 너비만큼의 얇은 구분선 */}
+          <div className="mt-6 w-full border-t border-white/12" />
+
+          <section className="mt-6 flex flex-col gap-2">
             {(selectedProgress?.logs ?? [])
               .slice()
               .reverse()
@@ -1310,7 +1315,7 @@ export function SkillConstellation() {
                     </p>
 
                     <p
-                      className="text-[12px] leading-relaxed text-white/85"
+                      className="text-[13px] leading-relaxed text-white/85"
                       dangerouslySetInnerHTML={{
                         __html: renderMarkdown(log.text),
                       }}
@@ -1332,7 +1337,7 @@ export function SkillConstellation() {
               })}
 
             {(selectedProgress?.logs.length ?? 0) === 0 && (
-              <p className="text-[12px] text-white/35">아직 기록이 없습니다.</p>
+              <p className="text-[13px] text-white/35">아직 기록이 없습니다.</p>
             )}
           </section>
         </aside>
