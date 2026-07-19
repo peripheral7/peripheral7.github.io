@@ -1,8 +1,8 @@
 {
-  "variant": "photo",
+  "variant": "interactive",
   "category": "PHOTOGRAPHY",
   "title": "Playlist",
-  "meta": "Spotify · currently on repeat",
+  "meta": "Spotify",
   "ref": "AUDIO-01",
   "image": "/images/spotify/playlist_wallpaper.JPG",
   "imageAlt": "Playlist wallpaper",
