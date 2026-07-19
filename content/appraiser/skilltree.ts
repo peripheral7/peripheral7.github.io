@@ -299,28 +299,43 @@ function computeMetrics(
   return metrics
 }
 
+// leafCount(실제 잎 개수)를 지배적 기준으로 삼아, 각도 배분이 실제 혼잡도에 비례하도록 함
 function getWeight(metrics: Metrics) {
   return (
-    metrics.leafCount * 1 +
-    metrics.maxDepth * 0.9 +
-    metrics.childCount * 0.55
+    metrics.leafCount * 1.2 +
+    metrics.maxDepth * 0.5 +
+    metrics.childCount * 0.3
   )
 }
 
-// ── 혼잡도 보정 튜닝 지점 ──────────────────────────────
-// CROWD_NODE_DEPTH: "3단계" 그룹 노드(원가방식, 수익방식 등)의 depth.
-// root=0, 5개 핵심갈래=1, 3단계 그룹=2, 4단계 리프=3 이므로 2가 정확한 값.
+// "3단계 그룹 노드"(원가방식, 수익방식 등)의 depth.
+// root=0, 5개 핵심갈래=1, 3단계 그룹=2, 4단계 리프=3
 const CROWD_NODE_DEPTH = 2
 
-// childCount(자신의 4단계 자식 수)에 따라 "2→3단계 edge" 길이를 조정하는 배율.
-// 2개 이하: 살짝 축소, 4개 기준 1.0, 이후 자식이 많아질수록 점점 확대.
-// 값을 바꿔서 강도를 조절할 수 있습니다.
+// childCount(자신의 4단계 자식 수)에 따라 부모→자신 edge 길이를 늘려 바깥으로 더 밀어냄
 function crowdingMultiplier(childCount: number) {
   const raw = 0.85 + (childCount - 2) * 0.11
   return Math.min(Math.max(raw, 0.75), 1.7)
 }
-// 참고: childCount=2→0.85, 3→0.96, 4→1.07, 5→1.18, 6→1.29, 7→1.40, 8→1.51, 10→1.70
-// ─────────────────────────────────────────────────────
+
+// 형제 간 각도 간격이 부모가 준 공간(rawSpan)을 절대 넘지 않도록,
+// 간격 총합을 rawSpan의 일정 비율(GAP_BUDGET_RATIO) 이하로 항상 자동 축소한다.
+// 이것이 "한쪽으로 쏠리는" 현상의 근본 원인을 제거하는 핵심 로직.
+const GAP_BUDGET_RATIO = 0.45
+
+function computeEffectiveGap(
+  rawSpan: number,
+  siblingCount: number,
+  desiredGap: number,
+) {
+  if (siblingCount <= 1) return 0
+
+  const idealTotal = desiredGap * (siblingCount - 1)
+  const maxTotal = rawSpan * GAP_BUDGET_RATIO
+  const effectiveTotal = Math.min(idealTotal, maxTotal)
+
+  return effectiveTotal / (siblingCount - 1)
+}
 
 export function layoutTree(
   root: TreeNode,
@@ -338,10 +353,8 @@ export function layoutTree(
   const fullTurn = Math.PI * 2
   const rootChildren = root.children ?? []
   const rootSlice = rootChildren.length > 0 ? fullTurn / rootChildren.length : fullTurn
-  const siblingGap = (6 * Math.PI) / 180
+  const desiredSiblingGap = (6 * Math.PI) / 180
 
-  // 부모의 실제 반지름에 자신의 edge 길이를 더하는 누적 방식.
-  // depth === CROWD_NODE_DEPTH일 때만 자신의 childCount로 edge 길이를 보정한다.
   function edgeLength(depth: number, scale: number, ownChildCount: number) {
     const depthFactor = 1 + Math.min(depth, 8) * 0.04
     const base = opts.xSpacing * depthFactor * scale
@@ -414,14 +427,21 @@ export function layoutTree(
       return
     }
 
-    const totalGap = siblingGap * Math.max(0, children.length - 1)
     const rawSpan = endAngle - startAngle
-    const usableAngle = Math.max(rawSpan - totalGap, rawSpan * 0.6)
+    const effectiveGap = computeEffectiveGap(
+      rawSpan,
+      children.length,
+      desiredSiblingGap,
+    )
+    const totalGap = effectiveGap * (children.length - 1)
+    const usableAngle = rawSpan - totalGap
 
     const weights = children.map((child) => getWeight(metricsById.get(child.id)!))
     const weightSum = weights.reduce((sum, value) => sum + value, 0)
 
-    let cursor = startAngle + (rawSpan - usableAngle) / 2
+    // usableAngle + totalGap === rawSpan 이 항상 정확히 성립하므로
+    // startAngle에서 시작해도 endAngle을 절대 넘지 않는다 (침범/쏠림 원천 차단)
+    let cursor = startAngle
 
     children.forEach((child, index) => {
       const angleShare = usableAngle * (weights[index] / weightSum)
@@ -441,7 +461,7 @@ export function layoutTree(
         radius,
       )
 
-      cursor = sectorEnd + siblingGap
+      cursor = sectorEnd + effectiveGap
     })
   }
 
