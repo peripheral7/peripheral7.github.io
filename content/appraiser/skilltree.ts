@@ -3,13 +3,11 @@ export type TreeNode = {
   name: string
   section: string
   children?: TreeNode[]
-  /** 이 노드 아래 하위 잎(leaf)들의 간격 배율. 1이면 기본 간격, 0.5면 절반 */
   spacingScale?: number
 }
 
 export const sections: Record<string, { title: string; tier: number }> = {
   root: { title: "감정평가 실무", tier: 0 },
-
   fundamentals: { title: "기초 및 기본 원리", tier: 1 },
   approaches: { title: "감정평가 3방식", tier: 1 },
   purpose: { title: "목적별 감정평가", tier: 1 },
@@ -63,6 +61,7 @@ export const skillTree: TreeNode = {
       id: "a0",
       name: "감정평가 3방식",
       section: "approaches",
+      spacingScale: 1.05,
       children: [
         {
           id: "a1",
@@ -166,8 +165,9 @@ export const skillTree: TreeNode = {
           name: "복합부동산",
           section: "property",
           children: [
-            { id: "t1a", name: "구분소유권 및 집합건물 일괄평가", section: "property" },
-            { id: "t1b", name: "적산가치와 비준가치의 조정", section: "property" },
+            { id: "t1a", name: "구분소유권 일괄평가", section: "property" },
+            { id: "t1b", name: "집합건물 일괄평가", section: "property" },
+            { id: "t1c", name: "적산가치와 비준가치의 조정", section: "property" },
           ],
         },
         {
@@ -180,7 +180,7 @@ export const skillTree: TreeNode = {
             { id: "t2c", name: "대규모 조성지", section: "property" },
             { id: "t2d", name: "지상권", section: "property" },
             { id: "t2e", name: "임차권", section: "property" },
-            { id: "t2f", name: "소유권 외의 권리", section: "property" },
+            { id: "t2f", name: "소유권 외 권리", section: "property" },
           ],
         },
         {
@@ -220,7 +220,7 @@ export const skillTree: TreeNode = {
           name: "토지 보상",
           section: "compensation",
           children: [
-            { id: "c2a", name: "공법상 제한을 받는 토지 평가", section: "compensation" },
+            { id: "c2a", name: "공법상 제한 토지 평가", section: "compensation" },
             { id: "c2b", name: "무허가 건축물 부지", section: "compensation" },
             { id: "c2c", name: "불법형질변경 토지", section: "compensation" },
             { id: "c2d", name: "잔여지 가치하락", section: "compensation" },
@@ -263,6 +263,17 @@ type Metrics = {
   maxDepth: number
   childCount: number
   scale: number
+  spanDemand: number
+}
+
+type PlacementResult = {
+  angle: number
+  minAngle: number
+  maxAngle: number
+}
+
+function clamp(value: number, min: number, max: number) {
+  return Math.min(Math.max(value, min), max)
 }
 
 function computeMetrics(
@@ -279,6 +290,7 @@ function computeMetrics(
       maxDepth: 0,
       childCount: 0,
       scale,
+      spanDemand: 1 * scale,
     }
     map.set(node.id, metrics)
     return metrics
@@ -288,53 +300,58 @@ function computeMetrics(
     computeMetrics(child, map, scale),
   )
 
+  const leafCount = childMetrics.reduce((sum, child) => sum + child.leafCount, 0)
+  const maxDepth = 1 + Math.max(...childMetrics.map((child) => child.maxDepth))
+  const childCount = children.length
+
+  const rawDemand =
+    leafCount * 1 +
+    childCount * 0.55 +
+    maxDepth * 0.95
+
   const metrics: Metrics = {
-    leafCount: childMetrics.reduce((sum, child) => sum + child.leafCount, 0),
-    maxDepth: 1 + Math.max(...childMetrics.map((child) => child.maxDepth)),
-    childCount: children.length,
+    leafCount,
+    maxDepth,
+    childCount,
     scale,
+    spanDemand: Math.max(1.2, rawDemand) * scale,
   }
 
   map.set(node.id, metrics)
   return metrics
 }
 
-// leafCount(실제 잎 개수)를 지배적 기준으로 삼아, 각도 배분이 실제 혼잡도에 비례하도록 함
-function getWeight(metrics: Metrics) {
-  return (
-    metrics.leafCount * 1.2 +
-    metrics.maxDepth * 0.5 +
-    metrics.childCount * 0.3
+function gapFor(depth: number, childCount: number) {
+  const baseDeg =
+    depth <= 1 ? 8 :
+    depth === 2 ? 7 :
+    depth === 3 ? 6 :
+    5
+
+  const compactAdjust = childCount >= 6 ? -1 : 0
+  return ((baseDeg + compactAdjust) * Math.PI) / 180
+}
+
+function occupancyFor(childCount: number, maxDepth: number) {
+  if (childCount <= 1) return 0.18
+  return clamp(
+    0.66 + Math.min(childCount, 6) * 0.05 + Math.min(maxDepth, 4) * 0.04,
+    0.72,
+    0.96,
   )
 }
 
-// "3단계 그룹 노드"(원가방식, 수익방식 등)의 depth.
-// root=0, 5개 핵심갈래=1, 3단계 그룹=2, 4단계 리프=3
-const CROWD_NODE_DEPTH = 2
-
-// childCount(자신의 4단계 자식 수)에 따라 부모→자신 edge 길이를 늘려 바깥으로 더 밀어냄
-function crowdingMultiplier(childCount: number) {
-  const raw = 0.85 + (childCount - 2) * 0.11
-  return Math.min(Math.max(raw, 0.75), 1.7)
-}
-
-// 형제 간 각도 간격이 부모가 준 공간(rawSpan)을 절대 넘지 않도록,
-// 간격 총합을 rawSpan의 일정 비율(GAP_BUDGET_RATIO) 이하로 항상 자동 축소한다.
-// 이것이 "한쪽으로 쏠리는" 현상의 근본 원인을 제거하는 핵심 로직.
-const GAP_BUDGET_RATIO = 0.45
-
-function computeEffectiveGap(
-  rawSpan: number,
-  siblingCount: number,
-  desiredGap: number,
+function radiusFor(
+  depth: number,
+  step: number,
+  metrics: Metrics,
+  scale: number,
 ) {
-  if (siblingCount <= 1) return 0
+  const complexityBoost =
+    Math.min(metrics.maxDepth, 4) * 0.035 +
+    Math.min(metrics.childCount, 6) * 0.015
 
-  const idealTotal = desiredGap * (siblingCount - 1)
-  const maxTotal = rawSpan * GAP_BUDGET_RATIO
-  const effectiveTotal = Math.min(idealTotal, maxTotal)
-
-  return effectiveTotal / (siblingCount - 1)
+  return depth * step * (1 + complexityBoost) * scale
 }
 
 export function layoutTree(
@@ -347,125 +364,126 @@ export function layoutTree(
   >()
   const edges: [string, string][] = []
   const metricsById = new Map<string, Metrics>()
+  const radialStep = (opts.xSpacing + opts.ySpacing) / 2
+  const originY = opts.rootY ?? 0
 
   computeMetrics(root, metricsById, 1)
 
-  const fullTurn = Math.PI * 2
-  const rootChildren = root.children ?? []
-  const rootSlice = rootChildren.length > 0 ? fullTurn / rootChildren.length : fullTurn
-  const desiredSiblingGap = (6 * Math.PI) / 180
-
-  function edgeLength(depth: number, scale: number, ownChildCount: number) {
-    const depthFactor = 1 + Math.min(depth, 8) * 0.04
-    const base = opts.xSpacing * depthFactor * scale
-
-    if (depth === CROWD_NODE_DEPTH) {
-      return base * crowdingMultiplier(ownChildCount)
-    }
-
-    return base
+  function setPosition(node: TreeNode, depth: number, angle: number, scale: number) {
+    const metrics = metricsById.get(node.id)!
+    const radius = radiusFor(depth, radialStep, metrics, scale)
+    positions.set(node.id, {
+      x: Math.cos(angle) * radius,
+      y: originY + Math.sin(angle) * radius,
+      name: node.name,
+      section: node.section,
+    })
   }
 
   function placeNode(
     node: TreeNode,
     depth: number,
-    angle: number,
-    startAngle: number,
-    endAngle: number,
+    sectorStart: number,
+    sectorEnd: number,
     inheritedScale: number,
-    parentRadius: number,
-  ) {
-    const metrics = metricsById.get(node.id)!
+  ): PlacementResult {
     const scale = node.spacingScale ?? inheritedScale
-    const step = depth === 0 ? 0 : edgeLength(depth, scale, metrics.childCount)
-    const radius = parentRadius + step
-
-    positions.set(node.id, {
-      x: Math.cos(angle) * radius,
-      y: Math.sin(angle) * radius,
-      name: node.name,
-      section: node.section,
-    })
-
     const children = node.children ?? []
-    if (children.length === 0) return
 
-    if (depth === 0) {
-      children.forEach((child, index) => {
-        const sectorStart = -Math.PI / 2 + index * rootSlice
-        const sectorEnd = sectorStart + rootSlice
-        const childAngle = (sectorStart + sectorEnd) / 2
-
-        edges.push([node.id, child.id])
-
-        placeNode(
-          child,
-          depth + 1,
-          childAngle,
-          sectorStart,
-          sectorEnd,
-          scale,
-          radius,
-        )
-      })
-      return
+    if (children.length === 0) {
+      const angle = (sectorStart + sectorEnd) / 2
+      setPosition(node, depth, angle, scale)
+      return { angle, minAngle: angle, maxAngle: angle }
     }
 
     if (children.length === 1) {
-      const child = children[0]
-      edges.push([node.id, child.id])
-
-      placeNode(
-        child,
+      const onlyChild = children[0]
+      edges.push([node.id, onlyChild.id])
+      const childPlacement = placeNode(
+        onlyChild,
         depth + 1,
-        angle,
-        startAngle,
-        endAngle,
-        scale,
-        radius,
-      )
-      return
-    }
-
-    const rawSpan = endAngle - startAngle
-    const effectiveGap = computeEffectiveGap(
-      rawSpan,
-      children.length,
-      desiredSiblingGap,
-    )
-    const totalGap = effectiveGap * (children.length - 1)
-    const usableAngle = rawSpan - totalGap
-
-    const weights = children.map((child) => getWeight(metricsById.get(child.id)!))
-    const weightSum = weights.reduce((sum, value) => sum + value, 0)
-
-    // usableAngle + totalGap === rawSpan 이 항상 정확히 성립하므로
-    // startAngle에서 시작해도 endAngle을 절대 넘지 않는다 (침범/쏠림 원천 차단)
-    let cursor = startAngle
-
-    children.forEach((child, index) => {
-      const angleShare = usableAngle * (weights[index] / weightSum)
-      const sectorStart = cursor
-      const sectorEnd = cursor + angleShare
-      const childAngle = (sectorStart + sectorEnd) / 2
-
-      edges.push([node.id, child.id])
-
-      placeNode(
-        child,
-        depth + 1,
-        childAngle,
         sectorStart,
         sectorEnd,
         scale,
-        radius,
+      )
+      setPosition(node, depth, childPlacement.angle, scale)
+      return {
+        angle: childPlacement.angle,
+        minAngle: childPlacement.minAngle,
+        maxAngle: childPlacement.maxAngle,
+      }
+    }
+
+    const metrics = metricsById.get(node.id)!
+    const gap = gapFor(depth, children.length)
+    const totalGap = gap * (children.length - 1)
+    const fullWidth = sectorEnd - sectorStart
+    const occupancy = occupancyFor(children.length, metrics.maxDepth)
+    const usableWidth = Math.max(fullWidth * occupancy, totalGap + fullWidth * 0.34)
+    const innerStart = sectorStart + (fullWidth - usableWidth) / 2
+    const innerEnd = sectorEnd - (fullWidth - usableWidth) / 2
+    const distributableWidth = Math.max(innerEnd - innerStart - totalGap, fullWidth * 0.18)
+
+    const weights = children.map(
+      (child) => metricsById.get(child.id)?.spanDemand ?? 1,
+    )
+    const weightSum = weights.reduce((sum, value) => sum + value, 0)
+
+    let cursor = innerStart
+    const childPlacements: PlacementResult[] = []
+
+    children.forEach((child, index) => {
+      const width =
+        index === children.length - 1
+          ? innerEnd - cursor
+          : distributableWidth * (weights[index] / weightSum)
+
+      const childStart = cursor
+      const childEnd = index === children.length - 1 ? innerEnd : childStart + width
+
+      edges.push([node.id, child.id])
+
+      const placed = placeNode(
+        child,
+        depth + 1,
+        childStart,
+        childEnd,
+        scale,
       )
 
-      cursor = sectorEnd + effectiveGap
+      childPlacements.push(placed)
+      cursor = childEnd + gap
     })
+
+    const minAngle = Math.min(...childPlacements.map((child) => child.minAngle))
+    const maxAngle = Math.max(...childPlacements.map((child) => child.maxAngle))
+    const angle = (minAngle + maxAngle) / 2
+
+    setPosition(node, depth, angle, scale)
+
+    return { angle, minAngle, maxAngle }
   }
 
-  placeNode(root, 0, -Math.PI / 2, -Math.PI, Math.PI, 1, 0)
+  positions.set(root.id, {
+    x: 0,
+    y: originY,
+    name: root.name,
+    section: root.section,
+  })
+
+  const rootChildren = root.children ?? []
+  const fullTurn = Math.PI * 2
+  const rootSlice = rootChildren.length > 0 ? fullTurn / rootChildren.length : fullTurn
+  const firstCenterAngle = -Math.PI / 2
+
+  rootChildren.forEach((child, index) => {
+    const sectorStart =
+      firstCenterAngle - rootSlice / 2 + index * rootSlice
+    const sectorEnd = sectorStart + rootSlice
+
+    edges.push([root.id, child.id])
+    placeNode(child, 1, sectorStart, sectorEnd, 1)
+  })
 
   return { positions, edges }
 }

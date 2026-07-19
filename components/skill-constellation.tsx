@@ -37,10 +37,16 @@ const Y_SPACING = 220
 const WIDE_PANEL_RIGHT = 64
 const WIDE_PANEL_TOP_BOTTOM = 64
 
+// 모바일/태블릿 패널의 화면 여백 비율 (10%)
+const COMPACT_PANEL_MARGIN = "10%"
+
 const MOBILE_BP = 768
 const NARROW_BP = 1300
 const REINFORCE_GAP_DAYS = 7
 const TITLE_WRAP_LEN = 8
+
+// 선택 후 패널이 자리잡은 뒤 입력창에 포커스를 주기까지의 지연(ms)
+const FOCUS_DELAY_MS = 260
 
 function formatDateYMD(date: Date) {
   const year = date.getFullYear()
@@ -360,6 +366,7 @@ export function SkillConstellation() {
 
   const wheelTimeout = useRef<number | undefined>(undefined)
   const fileInputRef = useRef<HTMLInputElement>(null)
+  const reviewInputRef = useRef<HTMLInputElement>(null)
 
   useEffect(() => {
     function updateStage() {
@@ -434,6 +441,17 @@ export function SkillConstellation() {
       zoom: FOCUS_ZOOM,
     })
   }, [positions, selectedId])
+
+  // 별 클릭(선택) 시 패널이 자리잡은 뒤 복습 입력창에 바로 타이핑할 수 있도록 자동 포커스
+  useEffect(() => {
+    if (!selectedId) return
+
+    const timer = window.setTimeout(() => {
+      reviewInputRef.current?.focus()
+    }, FOCUS_DELAY_MS)
+
+    return () => window.clearTimeout(timer)
+  }, [selectedId])
 
   useEffect(() => {
     function isTypingTarget(target: EventTarget | null) {
@@ -777,13 +795,31 @@ export function SkillConstellation() {
   const selectedSection = selectedNode ? sections[selectedNode.section] : null
   const selectedProgress = selectedId ? progress[selectedId] : undefined
 
+  const acquiredCount = Object.values(progress).filter(
+    (item) => item?.acquired,
+  ).length
+  const totalCount = nodeList.length
+  const progressPct = totalCount > 0 ? (acquiredCount / totalCount) * 100 : 0
+
   let panelClass = ""
   let panelStyle: React.CSSProperties = {}
 
   if (layoutMode === "mobile") {
-    panelClass = "fixed inset-x-0 top-0 h-[50vh] w-full rounded-b-2xl"
+    panelClass = "fixed rounded-2xl"
+    panelStyle = {
+      top: COMPACT_PANEL_MARGIN,
+      left: COMPACT_PANEL_MARGIN,
+      right: COMPACT_PANEL_MARGIN,
+      height: "80%",
+    }
   } else if (layoutMode === "narrow") {
-    panelClass = "fixed inset-y-0 right-0 h-full w-1/2 rounded-l-2xl"
+    panelClass = "fixed rounded-2xl"
+    panelStyle = {
+      top: COMPACT_PANEL_MARGIN,
+      bottom: COMPACT_PANEL_MARGIN,
+      right: COMPACT_PANEL_MARGIN,
+      width: "40%",
+    }
   } else {
     panelClass = "fixed rounded-2xl"
     panelStyle = {
@@ -826,11 +862,6 @@ export function SkillConstellation() {
       >
         ← BACK
       </Link>
-
-      <div className="fixed left-1/2 top-5 z-40 -translate-x-1/2 rounded-full border border-white/15 bg-black/35 px-4 py-2 text-[11px] tracking-wider text-white/75 backdrop-blur-md">
-        습득 {Object.values(progress).filter((item) => item?.acquired).length} /{" "}
-        {nodeList.length}
-      </div>
 
       <div
         data-overlay-interactive
@@ -1044,10 +1075,26 @@ export function SkillConstellation() {
         </div>
       </div>
 
+      {/* 하단 중앙 진행도 바 — "습득" 문구 없이 분수만 표시, 푸른 계열 그라데이션 */}
+      <div
+        data-overlay-interactive
+        className="fixed bottom-5 left-1/2 z-40 -translate-x-1/2"
+      >
+        <div className="relative h-8 w-64 overflow-hidden rounded-md border border-white/15 bg-black/45 backdrop-blur-md md:w-80">
+          <div
+            className="absolute inset-y-0 left-0 bg-gradient-to-r from-sky-700 via-sky-400 to-cyan-300 transition-all duration-500 ease-out"
+            style={{ width: `${progressPct}%` }}
+          />
+          <div className="absolute inset-0 flex items-center justify-center text-xs font-semibold tracking-widest text-white drop-shadow-sm">
+            {acquiredCount}/{totalCount}
+          </div>
+        </div>
+      </div>
+
       {selectedNode && (
         <aside
           data-overlay-interactive
-          className={`${panelClass} z-50 overflow-y-auto rounded-xl border border-white/15 bg-neutral-950/30 p-4 text-sm shadow-2xl backdrop-blur-xl md:p-5`}
+          className={`${panelClass} z-50 overflow-y-auto border border-white/15 bg-neutral-950/40 p-4 text-sm shadow-2xl backdrop-blur-xl md:p-5`}
           style={panelStyle}
           onPointerDown={(event) => event.stopPropagation()}
           onClick={(event) => event.stopPropagation()}
@@ -1090,6 +1137,7 @@ export function SkillConstellation() {
 
             <div className="flex gap-2 min-[1300px]:items-center">
               <input
+                ref={reviewInputRef}
                 value={reviewInput}
                 onChange={(event) => setReviewInput(event.target.value)}
                 onKeyDown={(event) => {
