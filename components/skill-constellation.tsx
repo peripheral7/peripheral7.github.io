@@ -20,6 +20,7 @@ type StarProgress = {
 
 type ProgressMap = Record<string, StarProgress>
 type LayoutMode = "mobile" | "narrow" | "wide"
+type EdgeSide = "top" | "bottom" | "left" | "right"
 
 const STORAGE_KEY = "appraiser-skilltree-progress-v1"
 
@@ -52,6 +53,17 @@ const FOCUS_DELAY_MS = 260
 const BG_OVERSCAN = 100
 const BG_PARALLAX = 0.025
 const BG_OFFSET_MAX = 70
+
+// 별 선택 발광의 기준 밝기(alpha). 엣지 밝기 조정의 기준값으로도 사용
+const STAR_SELECT_ALPHA = 0.98
+// 상위(부모) 노드로 이어지는 엣지: 기준보다 0.1% 밝게
+const EDGE_TO_PARENT_ALPHA = Math.min(1, STAR_SELECT_ALPHA * 1.001)
+// 하위(자식) 노드로 이어지는 엣지: 기준보다 0.1% 어둡게
+const EDGE_TO_CHILD_ALPHA = STAR_SELECT_ALPHA * 0.999
+
+// 화면 밖 노드 판정 여백 및 경계 라벨의 화면 가장자리 여백
+const OFFSCREEN_CHECK_MARGIN = 48
+const EDGE_LABEL_MARGIN = 16
 
 function formatDateYMD(date: Date) {
   const year = date.getFullYear()
@@ -128,6 +140,69 @@ function renderMarkdown(text: string) {
   )
   html = html.replace(/\n/g, "<br/>")
   return html
+}
+
+// 선분(x0,y0)-(x1,y1)을 rect 경계로 잘라, rect 안에서 (x1,y1) 방향으로 가장 먼 교차점을 반환
+function clipSegmentToRect(
+  x0: number,
+  y0: number,
+  x1: number,
+  y1: number,
+  rect: { left: number; top: number; right: number; bottom: number },
+) {
+  const dx = x1 - x0
+  const dy = y1 - y0
+  const p = [-dx, dx, -dy, dy]
+  const q = [x0 - rect.left, rect.right - x0, y0 - rect.top, rect.bottom - y0]
+
+  let u1 = 0
+  let u2 = 1
+
+  for (let i = 0; i < 4; i += 1) {
+    if (p[i] === 0) {
+      if (q[i] < 0) return null
+    } else {
+      const r = q[i] / p[i]
+
+      if (p[i] < 0) {
+        if (r > u2) return null
+        if (r > u1) u1 = r
+      } else {
+        if (r < u1) return null
+        if (r < u2) u2 = r
+      }
+    }
+  }
+
+  return { x: x0 + u2 * dx, y: y0 + u2 * dy }
+}
+
+function sideOfPoint(
+  x: number,
+  y: number,
+  rect: { left: number; top: number; right: number; bottom: number },
+): EdgeSide {
+  const EPS = 0.75
+
+  if (Math.abs(x - rect.left) < EPS) return "left"
+  if (Math.abs(x - rect.right) < EPS) return "right"
+  if (Math.abs(y - rect.top) < EPS) return "top"
+  if (Math.abs(y - rect.bottom) < EPS) return "bottom"
+
+  return "top"
+}
+
+function labelTransformForSide(side: EdgeSide) {
+  switch (side) {
+    case "top":
+      return "translate(-50%, 0%)"
+    case "bottom":
+      return "translate(-50%, -100%)"
+    case "left":
+      return "translate(0%, -50%)"
+    case "right":
+      return "translate(-100%, -50%)"
+  }
 }
 
 function StarGlyph({
@@ -620,12 +695,7 @@ export function SkillConstellation() {
     const rect = event.currentTarget.getBoundingClientRect()
     const pointerX = event.clientX - rect.left
     const pointerY = event.clientY - rect.top
-    const focal = getFocal(
-      layoutMode,
-      false,
-      stage.width,
-      stage.height,
-    )
+    const focal = getFocal(layoutMode, false, stage.width, stage.height)
 
     const zoomFactor = Math.exp(-event.deltaY * 0.0012)
 
@@ -727,6 +797,71 @@ export function SkillConstellation() {
 
   const bgOffsetX = clamp(-camera.x * BG_PARALLAX, -BG_OFFSET_MAX, BG_OFFSET_MAX)
   const bgOffsetY = clamp(-camera.y * BG_PARALLAX, -BG_OFFSET_MAX, BG_OFFSET_MAX)
+
+  // 화면 좌표 변환: 월드 좌표 -> 실제 화면(스테이지) 좌표
+  function toScreen(worldX: number, worldY: number) {
+    return {
+      x: worldTransform.left + worldX * camera.zoom,
+      y: worldTransform.top + worldY * camera.zoom,
+    }
+  }
+
+  // 선택된 노드와 연결되어 있지만 화면 밖에 있는 노드들의 경계 라벨 계산
+  const offscreenLabels = useMemo(() => {
+    if (!selectedId) return []
+
+    const selNode = positions.get(selectedId)
+    if (!selNode) return []
+
+    const rect = {
+      left: EDGE_LABEL_MARGIN,
+      top: EDGE_LABEL_MARGIN,
+      right: stage.width - EDGE_LABEL_MARGIN,
+      bottom: stage.height - EDGE_LABEL_MARGIN,
+    }
+
+    const selScreen = toScreen(selNode.x, selNode.y)
+
+    return edges
+      .filter(([from, to]) => from === selectedId || to === selectedId)
+      .map(([from, to]) => {
+        const otherId = from === selectedId ? to : from
+        const otherNode = positions.get(otherId)
+        if (!otherNode) return null
+
+        const otherScreen = toScreen(otherNode.x, otherNode.y)
+
+        const visible =
+          otherScreen.x >= OFFSCREEN_CHECK_MARGIN &&
+          otherScreen.x <= stage.width - OFFSCREEN_CHECK_MARGIN &&
+          otherScreen.y >= OFFSCREEN_CHECK_MARGIN &&
+          otherScreen.y <= stage.height - OFFSCREEN_CHECK_MARGIN
+
+        if (visible) return null
+
+        const clipped = clipSegmentToRect(
+          selScreen.x,
+          selScreen.y,
+          otherScreen.x,
+          otherScreen.y,
+          rect,
+        )
+
+        if (!clipped) return null
+
+        const side = sideOfPoint(clipped.x, clipped.y, rect)
+
+        return {
+          id: otherId,
+          name: otherNode.name,
+          x: clipped.x,
+          y: clipped.y,
+          side,
+        }
+      })
+      .filter((label): label is NonNullable<typeof label> => label !== null)
+    // camera/stage 값이 바뀔 때마다 다시 계산해야 하므로 의존성에 포함
+  }, [selectedId, edges, positions, stage.width, stage.height, camera, worldTransform.left, worldTransform.top])
 
   let panelClass = ""
   let panelStyle: React.CSSProperties = {}
@@ -894,52 +1029,83 @@ export function SkillConstellation() {
 
               if (!start || !end) return null
 
-              const bothAcquired =
-                progress[from]?.acquired && progress[to]?.acquired
+              const bothAcquired = Boolean(
+                progress[from]?.acquired && progress[to]?.acquired,
+              )
+              const baseColor = bothAcquired
+                ? "rgba(255,213,142,0.48)"
+                : "rgba(220,230,255,0.17)"
 
-              const isConnectedToSelection =
-                Boolean(selectedId) &&
-                (from === selectedId || to === selectedId)
-              const otherEnd = from === selectedId ? to : from
+              const isConnected =
+                Boolean(selectedId) && (from === selectedId || to === selectedId)
+
+              if (!isConnected) {
+                return (
+                  <line
+                    key={`${from}-${to}`}
+                    x1={start.x}
+                    y1={start.y}
+                    x2={end.x}
+                    y2={end.y}
+                    stroke={baseColor}
+                    strokeWidth="1.2"
+                  />
+                )
+              }
+
+              // from === selectedId 이면 to는 하위(자식) 노드, 반대면 상위(부모) 노드
+              const isToChild = from === selectedId
+              const highlightAlpha = isToChild
+                ? EDGE_TO_CHILD_ALPHA
+                : EDGE_TO_PARENT_ALPHA
+
+              const selNode = positions.get(selectedId!)!
+              const otherId = isToChild ? to : from
+              const otherNode = positions.get(otherId)!
+              const gradientId = `edge-glow-${from}-${to}`
 
               return (
                 <g key={`${from}-${to}`}>
+                  <linearGradient
+                    id={gradientId}
+                    gradientUnits="userSpaceOnUse"
+                    x1={selNode.x}
+                    y1={selNode.y}
+                    x2={otherNode.x}
+                    y2={otherNode.y}
+                  >
+                    <stop
+                      offset="0%"
+                      stopColor={`rgba(255,255,255,${highlightAlpha})`}
+                    />
+                    <stop offset="100%" stopColor={baseColor} />
+                  </linearGradient>
+
                   <line
                     x1={start.x}
                     y1={start.y}
                     x2={end.x}
                     y2={end.y}
-                    stroke={
-                      isConnectedToSelection
-                        ? "rgba(255,255,255,0.98)"
-                        : bothAcquired
-                          ? "rgba(255,213,142,0.48)"
-                          : "rgba(220,230,255,0.17)"
-                    }
-                    strokeWidth={isConnectedToSelection ? 2.2 : 1.2}
-                    style={
-                      isConnectedToSelection
-                        ? { filter: SELECTED_GLOW_FILTER }
-                        : undefined
-                    }
+                    stroke={`url(#${gradientId})`}
+                    strokeWidth="2.2"
+                    style={{ filter: SELECTED_GLOW_FILTER }}
                   />
-                  {isConnectedToSelection && (
-                    <line
-                      data-overlay-interactive
-                      x1={start.x}
-                      y1={start.y}
-                      x2={end.x}
-                      y2={end.y}
-                      stroke="transparent"
-                      strokeWidth={20}
-                      style={{ cursor: "pointer", pointerEvents: "stroke" }}
-                      onPointerDown={(event) => event.stopPropagation()}
-                      onClick={(event) => {
-                        event.stopPropagation()
-                        selectStar(otherEnd)
-                      }}
-                    />
-                  )}
+
+                  <line
+                    data-overlay-interactive
+                    x1={start.x}
+                    y1={start.y}
+                    x2={end.x}
+                    y2={end.y}
+                    stroke="transparent"
+                    strokeWidth={20}
+                    style={{ cursor: "pointer", pointerEvents: "stroke" }}
+                    onPointerDown={(event) => event.stopPropagation()}
+                    onClick={(event) => {
+                      event.stopPropagation()
+                      selectStar(otherId)
+                    }}
+                  />
                 </g>
               )
             })}
@@ -1033,6 +1199,22 @@ export function SkillConstellation() {
             )
           })}
         </div>
+
+        {/* 선택된 노드와 연결되어 있지만 화면 밖에 있는 노드의 제목을 화면 경계에 표시 */}
+        {offscreenLabels.map((label) => (
+          <div
+            key={`offscreen-${label.id}`}
+            className="pointer-events-none fixed z-40 whitespace-nowrap rounded bg-black/55 px-1.5 py-0.5 text-[11px] font-medium text-white/90"
+            style={{
+              left: label.x,
+              top: label.y,
+              transform: labelTransformForSide(label.side),
+              textShadow: "0 0 6px rgba(0,0,0,0.8)",
+            }}
+          >
+            {label.name}
+          </div>
+        ))}
       </div>
 
       {/* 하단 중앙 진행도 바 — "습득" 문구 없이 분수만 표시, 진한 블루 그라데이션 */}
