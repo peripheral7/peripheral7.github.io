@@ -48,6 +48,11 @@ const TITLE_WRAP_LEN = 8
 // 선택 후 패널이 자리잡은 뒤 입력창에 포커스를 주기까지의 지연(ms)
 const FOCUS_DELAY_MS = 260
 
+// 배경 오버스캔 및 패럴랙스 오프셋 상한 (드래그 시 검은 틈 방지)
+const BG_OVERSCAN = 100
+const BG_PARALLAX = 0.025
+const BG_OFFSET_MAX = 70
+
 function formatDateYMD(date: Date) {
   const year = date.getFullYear()
   const month = String(date.getMonth() + 1).padStart(2, "0")
@@ -77,62 +82,6 @@ function rubberBand(
   return value
 }
 
-type Direction = "ArrowUp" | "ArrowDown" | "ArrowLeft" | "ArrowRight"
-
-const KEY_DIRECTIONS: Record<Direction, { x: number; y: number }> = {
-  ArrowUp: { x: 0, y: -1 },
-  ArrowDown: { x: 0, y: 1 },
-  ArrowLeft: { x: -1, y: 0 },
-  ArrowRight: { x: 1, y: 0 },
-}
-
-type PositionedNode = {
-  id: string
-  x: number
-  y: number
-}
-
-function findNearestNodeInDirection(
-  currentId: string,
-  direction: Direction,
-  nodes: PositionedNode[],
-): string | null {
-  const current = nodes.find((node) => node.id === currentId)
-
-  if (!current) return null
-
-  const directionVector = KEY_DIRECTIONS[direction]
-  let bestId: string | null = null
-  let bestScore = Number.NEGATIVE_INFINITY
-
-  for (const candidate of nodes) {
-    if (candidate.id === currentId) continue
-
-    const dx = candidate.x - current.x
-    const dy = candidate.y - current.y
-    const distance = Math.hypot(dx, dy)
-
-    if (distance === 0) continue
-
-    const unitX = dx / distance
-    const unitY = dy / distance
-
-    const alignment =
-      unitX * directionVector.x + unitY * directionVector.y
-
-    if (alignment <= 0.15) continue
-
-    const score = alignment * 10000 - distance
-
-    if (score > bestScore) {
-      bestScore = score
-      bestId = candidate.id
-    }
-  }
-
-  return bestId
-}
-
 function wrapLabel(name: string): [string, string?] {
   if (name.length <= TITLE_WRAP_LEN) return [name]
 
@@ -160,6 +109,25 @@ function wrapLabel(name: string): [string, string?] {
     name.slice(0, breakIndex).trim(),
     name.slice(breakIndex).trim(),
   ]
+}
+
+function escapeHtml(value: string) {
+  return value
+    .replace(/&/g, "&amp;")
+    .replace(/</g, "&lt;")
+    .replace(/>/g, "&gt;")
+}
+
+function renderMarkdown(text: string) {
+  let html = escapeHtml(text)
+  html = html.replace(/\*\*(.+?)\*\*/g, "<strong>$1</strong>")
+  html = html.replace(/\*(.+?)\*/g, "<em>$1</em>")
+  html = html.replace(
+    /`(.+?)`/g,
+    '<code class="rounded bg-white/10 px-1 py-0.5 text-[0.9em]">$1</code>',
+  )
+  html = html.replace(/\n/g, "<br/>")
+  return html
 }
 
 function StarGlyph({
@@ -263,6 +231,10 @@ function getFocal(
   }
 }
 
+// 선택된 별과 동일한 강도의 흰색 발광 필터 (별/엣지 공용, 기존보다 조금 더 진하게)
+const SELECTED_GLOW_FILTER =
+  "drop-shadow(0 0 6px rgba(255,255,255,0.98)) drop-shadow(0 0 20px rgba(255,255,255,0.72)) drop-shadow(0 0 34px rgba(255,255,255,0.34))"
+
 export function SkillConstellation() {
   const { positions, edges } = useMemo(
     () =>
@@ -296,44 +268,6 @@ export function SkillConstellation() {
     }
   }, [nodeList])
 
-  const childrenOf = useMemo(() => {
-    const map = new Map<string, string[]>()
-
-    for (const [parent, child] of edges) {
-      const children = map.get(parent) ?? []
-      children.push(child)
-      map.set(parent, children)
-    }
-
-    return map
-  }, [edges])
-
-  const parentOf = useMemo(
-    () => new Map<string, string>(edges.map(([parent, child]) => [child, parent])),
-    [edges],
-  )
-
-  const subtreeDepth = useMemo(() => {
-    const cache = new Map<string, number>()
-
-    function getDepth(id: string): number {
-      const cached = cache.get(id)
-      if (cached !== undefined) return cached
-
-      const children = childrenOf.get(id) ?? []
-      const depth =
-        children.length === 0
-          ? 0
-          : 1 + Math.max(...children.map((child) => getDepth(child)))
-
-      cache.set(id, depth)
-      return depth
-    }
-
-    getDepth("root0")
-    return cache
-  }, [childrenOf])
-
   const [camera, setCamera] = useState({
     x: bounds.centerX,
     y: bounds.centerY,
@@ -366,7 +300,7 @@ export function SkillConstellation() {
 
   const wheelTimeout = useRef<number | undefined>(undefined)
   const fileInputRef = useRef<HTMLInputElement>(null)
-  const reviewInputRef = useRef<HTMLInputElement>(null)
+  const reviewInputRef = useRef<HTMLTextAreaElement>(null)
 
   useEffect(() => {
     function updateStage() {
@@ -453,45 +387,6 @@ export function SkillConstellation() {
     return () => window.clearTimeout(timer)
   }, [selectedId])
 
-  useEffect(() => {
-    function isTypingTarget(target: EventTarget | null) {
-      const tagName = (target as HTMLElement | null)?.tagName
-
-      return tagName === "INPUT" || tagName === "TEXTAREA"
-    }
-
-    function onKeyDown(event: KeyboardEvent) {
-      if (isTypingTarget(event.target)) return
-
-      const key = event.key as Direction
-
-      if (!Object.hasOwn(KEY_DIRECTIONS, key)) return
-
-      event.preventDefault()
-
-      if (!selectedId) {
-        selectStar("root0")
-        return
-      }
-
-      const nextId = findNearestNodeInDirection(
-        selectedId,
-        key,
-        nodeList,
-      )
-
-      if (nextId) {
-        selectStar(nextId)
-      }
-    }
-
-    window.addEventListener("keydown", onKeyDown)
-
-    return () => {
-      window.removeEventListener("keydown", onKeyDown)
-    }
-  }, [nodeList, selectedId])
-
   function toggleAcquired(starId: string) {
     setProgress((previous) => {
       const current = previous[starId] ?? {
@@ -570,6 +465,31 @@ export function SkillConstellation() {
     })
   }
 
+  function handleReviewKeyDown(event: React.KeyboardEvent<HTMLTextAreaElement>) {
+    if (event.key !== "Enter") return
+
+    if (event.ctrlKey || event.metaKey) {
+      // Ctrl(Cmd)+Enter: 줄바꿈 삽입
+      event.preventDefault()
+      const el = event.currentTarget
+      const start = el.selectionStart
+      const end = el.selectionEnd
+      const next = reviewInput.slice(0, start) + "\n" + reviewInput.slice(end)
+      setReviewInput(next)
+      requestAnimationFrame(() => {
+        el.selectionStart = el.selectionEnd = start + 1
+      })
+      return
+    }
+
+    // 단독 Enter: 기록 제출
+    event.preventDefault()
+    if (selectedId) {
+      addLog(selectedId, reviewInput)
+      setReviewInput("")
+    }
+  }
+
   function onPointerDown(event: React.PointerEvent<HTMLDivElement>) {
     const target = event.target as HTMLElement
     const isInteractive = target.closest("[data-overlay-interactive]")
@@ -602,6 +522,7 @@ export function SkillConstellation() {
 
     if (pointers.current.size === 2) {
       dragRef.current.active = false
+      closePanel()
 
       const [first, second] = [...pointers.current.values()]
       const distance = Math.hypot(first.x - second.x, first.y - second.y) || 1
@@ -694,12 +615,14 @@ export function SkillConstellation() {
     event.preventDefault()
     setSmooth(false)
 
+    if (selectedId) closePanel()
+
     const rect = event.currentTarget.getBoundingClientRect()
     const pointerX = event.clientX - rect.left
     const pointerY = event.clientY - rect.top
     const focal = getFocal(
       layoutMode,
-      Boolean(selectedId),
+      false,
       stage.width,
       stage.height,
     )
@@ -794,12 +717,16 @@ export function SkillConstellation() {
   const selectedNode = selectedId ? positions.get(selectedId) : null
   const selectedSection = selectedNode ? sections[selectedNode.section] : null
   const selectedProgress = selectedId ? progress[selectedId] : undefined
+  const isSelectedAcquired = Boolean(selectedProgress?.acquired)
 
   const acquiredCount = Object.values(progress).filter(
     (item) => item?.acquired,
   ).length
   const totalCount = nodeList.length
   const progressPct = totalCount > 0 ? (acquiredCount / totalCount) * 100 : 0
+
+  const bgOffsetX = clamp(-camera.x * BG_PARALLAX, -BG_OFFSET_MAX, BG_OFFSET_MAX)
+  const bgOffsetY = clamp(-camera.y * BG_PARALLAX, -BG_OFFSET_MAX, BG_OFFSET_MAX)
 
   let panelClass = ""
   let panelStyle: React.CSSProperties = {}
@@ -834,13 +761,18 @@ export function SkillConstellation() {
   return (
     <main className="relative min-h-screen overflow-hidden bg-[#05060c] text-white">
       <div
-        className="pointer-events-none fixed inset-0 z-0"
+        className="pointer-events-none fixed z-0"
         style={{
+          top: -BG_OVERSCAN,
+          left: -BG_OVERSCAN,
+          right: -BG_OVERSCAN,
+          bottom: -BG_OVERSCAN,
           backgroundImage:
             "linear-gradient(rgba(3, 5, 12, 0.38), rgba(3, 5, 12, 0.68)), url('/images/study/universe-background.jpg')",
-          backgroundPosition: `calc(50% - ${camera.x * 0.025}px) calc(50% - ${camera.y * 0.025}px)`,
+          backgroundPosition: `calc(50% + ${bgOffsetX}px) calc(50% + ${bgOffsetY}px)`,
           backgroundSize: "cover",
           backgroundRepeat: "no-repeat",
+          backgroundColor: "#05060c",
           transition: smooth
             ? "background-position 0.42s cubic-bezier(0.16, 1, 0.3, 1)"
             : "none",
@@ -965,20 +897,50 @@ export function SkillConstellation() {
               const bothAcquired =
                 progress[from]?.acquired && progress[to]?.acquired
 
+              const isConnectedToSelection =
+                Boolean(selectedId) &&
+                (from === selectedId || to === selectedId)
+              const otherEnd = from === selectedId ? to : from
+
               return (
-                <line
-                  key={`${from}-${to}`}
-                  x1={start.x}
-                  y1={start.y}
-                  x2={end.x}
-                  y2={end.y}
-                  stroke={
-                    bothAcquired
-                      ? "rgba(255,213,142,0.48)"
-                      : "rgba(220,230,255,0.17)"
-                  }
-                  strokeWidth="1.2"
-                />
+                <g key={`${from}-${to}`}>
+                  <line
+                    x1={start.x}
+                    y1={start.y}
+                    x2={end.x}
+                    y2={end.y}
+                    stroke={
+                      isConnectedToSelection
+                        ? "rgba(255,255,255,0.98)"
+                        : bothAcquired
+                          ? "rgba(255,213,142,0.48)"
+                          : "rgba(220,230,255,0.17)"
+                    }
+                    strokeWidth={isConnectedToSelection ? 2.2 : 1.2}
+                    style={
+                      isConnectedToSelection
+                        ? { filter: SELECTED_GLOW_FILTER }
+                        : undefined
+                    }
+                  />
+                  {isConnectedToSelection && (
+                    <line
+                      data-overlay-interactive
+                      x1={start.x}
+                      y1={start.y}
+                      x2={end.x}
+                      y2={end.y}
+                      stroke="transparent"
+                      strokeWidth={20}
+                      style={{ cursor: "pointer", pointerEvents: "stroke" }}
+                      onPointerDown={(event) => event.stopPropagation()}
+                      onClick={(event) => {
+                        event.stopPropagation()
+                        selectStar(otherEnd)
+                      }}
+                    />
+                  )}
+                </g>
               )
             })}
           </svg>
@@ -1034,9 +996,7 @@ export function SkillConstellation() {
                     fill={`rgba(${tier.rgb}, ${tier.fillAlpha})`}
                     className={isSelected ? "selected-neutral-glow" : undefined}
                     style={{
-                      filter: isSelected
-                        ? "drop-shadow(0 0 5px rgba(255,255,255,0.92)) drop-shadow(0 0 18px rgba(255,255,255,0.62)) drop-shadow(0 0 30px rgba(255,255,255,0.26))"
-                        : tier.shadow,
+                      filter: isSelected ? SELECTED_GLOW_FILTER : tier.shadow,
                     }}
                   />
                 </button>
@@ -1075,14 +1035,14 @@ export function SkillConstellation() {
         </div>
       </div>
 
-      {/* 하단 중앙 진행도 바 — "습득" 문구 없이 분수만 표시, 푸른 계열 그라데이션 */}
+      {/* 하단 중앙 진행도 바 — "습득" 문구 없이 분수만 표시, 진한 블루 그라데이션 */}
       <div
         data-overlay-interactive
         className="fixed bottom-5 left-1/2 z-40 -translate-x-1/2"
       >
         <div className="relative h-8 w-64 overflow-hidden rounded-md border border-white/15 bg-black/45 backdrop-blur-md md:w-80">
           <div
-            className="absolute inset-y-0 left-0 bg-gradient-to-r from-sky-700 via-sky-400 to-cyan-300 transition-all duration-500 ease-out"
+            className="absolute inset-y-0 left-0 bg-gradient-to-r from-blue-950 via-blue-700 to-blue-500 transition-all duration-500 ease-out"
             style={{ width: `${progressPct}%` }}
           />
           <div className="absolute inset-0 flex items-center justify-center text-xs font-semibold tracking-widest text-white drop-shadow-sm">
@@ -1112,55 +1072,46 @@ export function SkillConstellation() {
             {selectedSection?.title}
           </p>
 
-          <h2 className="mt-1 pr-7 text-base font-bold leading-snug text-white md:text-lg">
-            {selectedNode.name}
-          </h2>
-
-          <button
-            type="button"
+          <h2
             onClick={() => {
               if (selectedId) toggleAcquired(selectedId)
             }}
-            className={`mt-3 rounded-full border px-3 py-1.5 text-[12px] tracking-widest transition-colors ${
-              selectedProgress?.acquired
-                ? "border-amber-200/70 bg-amber-200/10 text-amber-100"
-                : "border-white/25 text-white/65 hover:border-white/60"
+            className={`mt-1 cursor-pointer pr-7 text-base font-bold leading-snug transition-colors md:text-lg ${
+              isSelectedAcquired ? "text-yellow-500" : "text-white"
             }`}
           >
-            {selectedProgress?.acquired ? "습득 완료" : "미습득"}
-          </button>
+            {selectedNode.name}
+          </h2>
 
           <section className="mt-5">
             <p className="mb-2 text-[11px] tracking-[0.14em] text-white/45">
               복습
             </p>
 
-            <div className="flex gap-2 min-[1300px]:items-center">
-              <input
+            <div className="flex flex-col gap-2">
+              <textarea
                 ref={reviewInputRef}
                 value={reviewInput}
                 onChange={(event) => setReviewInput(event.target.value)}
-                onKeyDown={(event) => {
-                  if (event.key === "Enter" && selectedId) {
-                    addLog(selectedId, reviewInput)
-                    setReviewInput("")
-                  }
-                }}
-                placeholder="오늘 배운 것"
-                className="min-w-0 flex-1 rounded-md border border-white/18 bg-black/35 px-2.5 py-2 text-[12px] text-white placeholder:text-[11px] placeholder:text-white/30 outline-none focus:border-amber-100/70 min-[1300px]:h-[72px]"
+                onKeyDown={handleReviewKeyDown}
+                placeholder="오늘 배운 것 (Ctrl+Enter 줄바꿈, **굵게** *기울임* `코드`)"
+                rows={3}
+                className="w-full resize-none rounded-md border border-white/18 bg-black/35 px-2.5 py-2 text-[12px] text-white placeholder:text-[11px] placeholder:text-white/30 outline-none focus:border-amber-100/70"
               />
 
-              <button
-                type="button"
-                onClick={() => {
-                  if (!selectedId) return
-                  addLog(selectedId, reviewInput)
-                  setReviewInput("")
-                }}
-                className="rounded-md border border-white/22 px-3 py-2 text-[11px] text-white/78 transition-colors hover:border-amber-100/80 hover:text-amber-50 min-[1300px]:text-[12px]"
-              >
-                확인
-              </button>
+              <div className="flex justify-end">
+                <button
+                  type="button"
+                  onClick={() => {
+                    if (!selectedId) return
+                    addLog(selectedId, reviewInput)
+                    setReviewInput("")
+                  }}
+                  className="rounded-md border border-white/22 px-3 py-2 text-[11px] text-white/78 transition-colors hover:border-amber-100/80 hover:text-amber-50 md:text-[12px]"
+                >
+                  기록
+                </button>
+              </div>
             </div>
           </section>
 
@@ -1181,9 +1132,12 @@ export function SkillConstellation() {
                       {log.date}
                     </p>
 
-                    <p className="text-[12px] leading-relaxed text-white/85">
-                      {log.text}
-                    </p>
+                    <p
+                      className="text-[12px] leading-relaxed text-white/85"
+                      dangerouslySetInnerHTML={{
+                        __html: renderMarkdown(log.text),
+                      }}
+                    />
 
                     <button
                       type="button"
@@ -1194,7 +1148,7 @@ export function SkillConstellation() {
                       }}
                       className="absolute right-1.5 top-1.5 rounded-full bg-black/40 px-1.5 py-0.5 text-[10px] text-white/45 transition-colors hover:bg-red-500/30 hover:text-red-100"
                     >
-                      삭제
+                      X
                     </button>
                   </div>
                 )
