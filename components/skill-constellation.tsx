@@ -855,7 +855,7 @@ export function SkillConstellation() {
       left: COMPACT_PANEL_MARGIN,
       right: COMPACT_PANEL_MARGIN,
       bottom: "calc(50% + 12px)",
-      opacity: 0.5,
+      backgroundColor: "rgba(10, 10, 15, 0.6)",
     }
   } else {
     panelClass = "fixed rounded-2xl"
@@ -1137,7 +1137,7 @@ export function SkillConstellation() {
                 >
                   <StarGlyph
                     size={size}
-                    fill={`rgba(${tier.rgb}, ${tier.fillAlpha})`}
+                      fill={`rgba(${tier.rgb}, ${isSelected ? Math.min(1, tier.fillAlpha * 1.15) : tier.fillAlpha})`}
                     className={isSelected ? "selected-neutral-glow" : undefined}
                     style={{
                       filter: isSelected ? SELECTED_GLOW_FILTER : tier.shadow,
