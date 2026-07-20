@@ -84,9 +84,9 @@ export function BoardItem({ post }: { post: Post }) {
   )
 
   // 수정 코드 — style에 contain: layout 추가로 프래그멘테이션 버그 해결
+// 수정 코드
 const fragmentFixStyle: React.CSSProperties = {
   breakInside: "avoid",
-  WebkitColumnBreakInside: "avoid",
   contain: "layout",
 }
 
