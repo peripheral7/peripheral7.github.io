@@ -57,13 +57,12 @@ const BG_OFFSET_MAX = 70
 // 별 선택 발광의 기준 밝기(alpha). 엣지 밝기 조정의 기준값으로도 사용
 const STAR_SELECT_ALPHA = 0.98
 
-// 전체 엣지 밝기 10% 감소, 하위노드 방향 엣지는 추가로 20% 더 감소
+// 수정 코드 — 부모 연결 엣지는 기준치의 70%(30% 낮춤), 자식 연결 엣지는 기준치의 110%(10% 높임)
 const EDGE_BRIGHTNESS_SCALE = 0.9
-const EDGE_CHILD_EXTRA_DIM = 0.8
-
 const EDGE_BASE_ALPHA = STAR_SELECT_ALPHA * EDGE_BRIGHTNESS_SCALE
-const EDGE_TO_PARENT_ALPHA = Math.min(1, EDGE_BASE_ALPHA * 1.001)
-const EDGE_TO_CHILD_ALPHA = EDGE_BASE_ALPHA * 0.999 * EDGE_CHILD_EXTRA_DIM
+
+const EDGE_TO_PARENT_ALPHA = EDGE_BASE_ALPHA * 0.7
+const EDGE_TO_CHILD_ALPHA = Math.min(1, EDGE_BASE_ALPHA * 1.1)
 
 // 비선택 상태 엣지의 기본 밝기도 동일하게 10% 감소
 const EDGE_DEFAULT_ALPHA = 0.17 * EDGE_BRIGHTNESS_SCALE
@@ -247,6 +246,7 @@ type Tier = {
   shadow: string
 }
 
+// 수정 코드 — fillAlpha 상향 (전반적으로 더 불투명)
 function getTier(
   isRoot: boolean,
   acquired: boolean,
@@ -254,46 +254,20 @@ function getTier(
   hasLogs: boolean,
 ): Tier {
   if (isRoot) {
-    return {
-      rgb: "255,255,255",
-      fillAlpha: 1,
-      shadow:
-        "drop-shadow(0 0 4px rgba(255,255,255,0.9)) drop-shadow(0 0 12px rgba(255,255,255,0.55))",
-    }
+    return { rgb: "255,255,255", fillAlpha: 1, shadow: "..." }
   }
-
   if (reinforced) {
-    return {
-      rgb: "255,214,140",
-      fillAlpha: 1,
-      shadow:
-        "drop-shadow(0 0 4px rgba(255,214,140,0.95)) drop-shadow(0 0 14px rgba(255,214,140,0.72))",
-    }
+    return { rgb: "255,214,140", fillAlpha: 1, shadow: "..." }
   }
-
   if (hasLogs) {
-    return {
-      rgb: "255,224,168",
-      fillAlpha: 0.92,
-      shadow:
-        "drop-shadow(0 0 3px rgba(255,224,168,0.82)) drop-shadow(0 0 10px rgba(255,224,168,0.52))",
-    }
+    return { rgb: "255,224,168", fillAlpha: 0.97, shadow: "..." }
   }
-
   if (acquired) {
-    return {
-      rgb: "225,205,175",
-      fillAlpha: 0.65,
-      shadow: "drop-shadow(0 0 2px rgba(225,205,175,0.36))",
-    }
+    return { rgb: "225,205,175", fillAlpha: 0.88, shadow: "..." }
   }
-
-  return {
-    rgb: "150,160,180",
-    fillAlpha: 0.38,
-    shadow: "drop-shadow(0 0 1px rgba(150,160,180,0.2))",
-  }
+  return { rgb: "150,160,180", fillAlpha: 0.78, shadow: "..." }
 }
+
 
 // 수정 코드 — mode 매개변수를 다시 사용하도록 변경
 function getFocal(
@@ -306,9 +280,8 @@ function getFocal(
     return { x: width / 2, y: height / 2 }
   }
 
-  // 모바일/태블릿/반쪽 웹 화면: 별을 좌측 1/2 영역 중앙에 고정
   if (mode === "mobile" || mode === "narrow") {
-    return { x: width * 0.25, y: height / 2 }
+    return { x: width / 2, y: height * 0.75 }
   }
 
   return { x: width / 2, y: height * 0.6 }
@@ -876,13 +849,12 @@ export function SkillConstellation() {
   let panelStyle: React.CSSProperties = {}
 
   if (layoutMode === "mobile" || layoutMode === "narrow") {
-    // 화면을 좌/우 1/2씩 나누어, 우측 1/2 안에 여백을 두고 패널 배치
     panelClass = "fixed rounded-2xl"
     panelStyle = {
       top: COMPACT_PANEL_MARGIN,
-      bottom: COMPACT_PANEL_MARGIN,
-      left: "calc(50% + 12px)",
+      left: COMPACT_PANEL_MARGIN,
       right: COMPACT_PANEL_MARGIN,
+      bottom: "calc(50% + 12px)",
       opacity: 0.5,
     }
   } else {
@@ -926,12 +898,14 @@ export function SkillConstellation() {
         }}
       />
 
-      <Link
-        href="/"
-        className="fixed left-5 top-5 z-50 rounded-full border border-white/20 bg-black/40 px-4 py-2 text-xs text-white/85 backdrop-blur-md transition-colors hover:border-white/60 hover:text-white"
-      >
-        ← BACK
-      </Link>
+      {layoutMode === "wide" && (
+        <Link
+          href="/"
+          className="fixed left-5 top-5 z-50 rounded-full border border-white/20 bg-black/40 px-4 py-2 text-xs text-white/85 backdrop-blur-md transition-colors hover:border-white/60 hover:text-white"
+        >
+          ← BACK
+        </Link>
+      )}
 
       <div
         data-overlay-interactive
@@ -1024,6 +998,7 @@ export function SkillConstellation() {
               left: 0,
               top: 0,
               overflow: "visible",
+              zIndex: 1,
             }}
           >
             {edges.map(([from, to]) => {
@@ -1130,15 +1105,16 @@ export function SkillConstellation() {
             const hitSize = size + 22
             const [line1, line2] = wrapLabel(node.name)
 
-            return (
-              <div
-                key={node.id}
-                className="absolute"
-                style={{
-                  left: node.x,
-                  top: node.y,
-                }}
-              >
+              return (
+                <div
+                  key={node.id}
+                  className="absolute"
+                  style={{
+                    left: node.x,
+                    top: node.y,
+                    zIndex: 2,
+                  }}
+                >
                 <button
                   type="button"
                   data-overlay-interactive
