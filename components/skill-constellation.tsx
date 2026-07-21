@@ -95,8 +95,9 @@ function playStarMoveSound() {
 
   const oscGain = ctx.createGain()
   oscGain.gain.setValueAtTime(0.0001, now)
-  oscGain.gain.exponentialRampToValueAtTime(0.5, now + 0.02)
+  oscGain.gain.exponentialRampToValueAtTime(0.85, now + 0.02)
   oscGain.gain.exponentialRampToValueAtTime(0.0001, now + 0.4)
+
 
   // 미세한 노이즈로 "우주 공간감" 질감 추가
   const bufferSize = ctx.sampleRate * 0.4
@@ -112,7 +113,7 @@ function playStarMoveSound() {
   noiseFilter.frequency.value = 500
 
   const noiseGain = ctx.createGain()
-  noiseGain.gain.setValueAtTime(0.06, now)
+  noiseGain.gain.setValueAtTime(0.12, now)
   noiseGain.gain.exponentialRampToValueAtTime(0.0001, now + 0.35)
 
   osc.connect(oscGain).connect(ctx.destination)
@@ -333,7 +334,7 @@ function getFocal(
   }
 
   if (mode === "mobile" || mode === "narrow") {
-    return { x: width / 2, y: height * 0.75 }
+    return { x: width / 2, y: height * (1 / 3 + (2 / 3) / 2) } // = height * 2/3
   }
 
   return { x: width / 2, y: height * 0.6 }
@@ -901,14 +902,17 @@ export function SkillConstellation() {
   let panelClass = ""
   let panelStyle: React.CSSProperties = {}
 
+  // 수정 코드 — 좌우 5%, 상하 8% 여백 / 상단 1/3 영역 / 배경만 50% 투명
   if (layoutMode === "mobile" || layoutMode === "narrow") {
-    panelClass = "fixed rounded-2xl"
+    panelClass = layoutMode === "mobile"
+      ? "fixed rounded-2xl overflow-y-auto skill-panel-scroll"
+      : "fixed rounded-2xl overflow-y-auto skill-panel-scroll"
     panelStyle = {
-      top: COMPACT_PANEL_MARGIN,
-      left: COMPACT_PANEL_MARGIN,
-      right: COMPACT_PANEL_MARGIN,
-      bottom: "calc(50% + 12px)",
-      backgroundColor: "rgba(10, 10, 15, 0.6)",
+      top: "8%",
+      left: "5%",
+      right: "5%",
+      bottom: "67%",
+      backgroundColor: "rgba(10, 10, 15, 0.5)",
     }
   } else {
     panelClass = "fixed rounded-2xl"
@@ -920,6 +924,12 @@ export function SkillConstellation() {
       maxWidth: "24rem",
     }
   }
+
+    // 웹 및 모바일 등 분리
+  const isCompact = layoutMode === "mobile" || layoutMode === "narrow"
+  const compactTextScale = layoutMode === "mobile" ? "text-[13px]" : "text-[14px]"
+  const compactTitleScale = layoutMode === "mobile" ? "text-lg" : "text-xl"
+  const compactPadding = layoutMode === "mobile" ? "p-4" : "p-5"
 
   return (
     <main className="relative min-h-screen overflow-hidden bg-[#05060c] text-white">
@@ -1267,8 +1277,10 @@ export function SkillConstellation() {
       {selectedNode && (
         <aside
           data-overlay-interactive
-          className={`${panelClass} z-50 overflow-y-auto border border-white/15 bg-neutral-950/40 p-4 text-sm shadow-2xl backdrop-blur-xl md:p-5`}
-          style={panelStyle}
+          className={`${panelClass} z-50 overflow-y-auto border border-white/15 p-4 text-sm shadow-2xl backdrop-blur-xl ${
+            isCompact ? compactPadding : "md:p-5"
+          }`}
+          style={{ ...panelStyle, backgroundColor: isCompact ? panelStyle.backgroundColor : "rgba(10,10,15,0.4)" }}
           onPointerDown={(event) => event.stopPropagation()}
           onClick={(event) => event.stopPropagation()}
         >
@@ -1289,9 +1301,9 @@ export function SkillConstellation() {
             onClick={() => {
               if (selectedId) toggleAcquired(selectedId)
             }}
-            className={`mt-1 cursor-pointer pr-7 text-base font-bold leading-snug transition-colors md:text-lg ${
-              isSelectedAcquired ? "text-yellow-500" : "text-white"
-            }`}
+            className={`mt-1 cursor-pointer pr-7 font-bold leading-snug transition-colors ${
+              isCompact ? compactTitleScale : "text-base md:text-lg"
+            } ${isSelectedAcquired ? "text-yellow-500" : "text-white"}`}
           >
             {selectedNode.name}
           </h2>
@@ -1303,8 +1315,10 @@ export function SkillConstellation() {
                 value={reviewInput}
                 onChange={(event) => setReviewInput(event.target.value)}
                 onKeyDown={handleReviewKeyDown}
-                rows={9}
-                className="w-full resize-none rounded-md border border-white/18 bg-black/35 px-2.5 py-2 text-[13px] text-white outline-none focus:border-amber-100/70"
+                rows={isCompact ? 3 : 5}
+                className={`w-full resize-none rounded-md border border-white/18 bg-black/35 px-2.5 py-2 ${
+                  isCompact ? compactTextScale : "text-[13px]"
+                } text-white outline-none focus:border-amber-100/70`}
               />
 
               <div className="flex justify-end">
@@ -1344,7 +1358,9 @@ export function SkillConstellation() {
                     </p>
 
                     <p
-                      className="text-[13px] leading-relaxed text-white/85"
+                      className={`${
+                        isCompact ? compactTextScale : "text-[13px]"
+                      } leading-relaxed text-white/85`}
                       dangerouslySetInnerHTML={{
                         __html: renderMarkdown(log.text),
                       }}
@@ -1366,7 +1382,11 @@ export function SkillConstellation() {
               })}
 
             {(selectedProgress?.logs.length ?? 0) === 0 && (
-              <p className="text-[13px] text-white/35">아직 기록이 없습니다.</p>
+              <p
+                className={`${isCompact ? compactTextScale : "text-[13px]"} text-white/35`}
+              >
+                아직 기록이 없습니다.
+              </p>
             )}
           </section>
         </aside>
