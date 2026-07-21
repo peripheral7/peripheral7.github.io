@@ -72,6 +72,58 @@ const EDGE_ACQUIRED_ALPHA = 0.48 * EDGE_BRIGHTNESS_SCALE
 const OFFSCREEN_CHECK_MARGIN = 48
 const EDGE_LABEL_MARGIN = 16
 
+
+// 별 선택 효과음
+let sharedAudioCtx: AudioContext | null = null
+
+function playStarMoveSound() {
+  if (typeof window === "undefined") return
+  const AudioCtx = window.AudioContext || (window as any).webkitAudioContext
+  if (!AudioCtx) return
+
+  if (!sharedAudioCtx) sharedAudioCtx = new AudioCtx()
+  const ctx = sharedAudioCtx
+  if (ctx.state === "suspended") ctx.resume()
+
+  const now = ctx.currentTime
+
+  // 묵직한 저음 울림 (사인파, 피치가 살짝 내려가며 짧게 감쇄)
+  const osc = ctx.createOscillator()
+  osc.type = "sine"
+  osc.frequency.setValueAtTime(150, now)
+  osc.frequency.exponentialRampToValueAtTime(60, now + 0.35)
+
+  const oscGain = ctx.createGain()
+  oscGain.gain.setValueAtTime(0.0001, now)
+  oscGain.gain.exponentialRampToValueAtTime(0.5, now + 0.02)
+  oscGain.gain.exponentialRampToValueAtTime(0.0001, now + 0.4)
+
+  // 미세한 노이즈로 "우주 공간감" 질감 추가
+  const bufferSize = ctx.sampleRate * 0.4
+  const noiseBuffer = ctx.createBuffer(1, bufferSize, ctx.sampleRate)
+  const data = noiseBuffer.getChannelData(0)
+  for (let i = 0; i < bufferSize; i++) data[i] = Math.random() * 2 - 1
+
+  const noise = ctx.createBufferSource()
+  noise.buffer = noiseBuffer
+
+  const noiseFilter = ctx.createBiquadFilter()
+  noiseFilter.type = "lowpass"
+  noiseFilter.frequency.value = 500
+
+  const noiseGain = ctx.createGain()
+  noiseGain.gain.setValueAtTime(0.06, now)
+  noiseGain.gain.exponentialRampToValueAtTime(0.0001, now + 0.35)
+
+  osc.connect(oscGain).connect(ctx.destination)
+  noise.connect(noiseFilter).connect(noiseGain).connect(ctx.destination)
+
+  osc.start(now)
+  osc.stop(now + 0.4)
+  noise.start(now)
+  noise.stop(now + 0.4)
+}
+
 function formatDateYMD(date: Date) {
   const year = date.getFullYear()
   const month = String(date.getMonth() + 1).padStart(2, "0")
@@ -404,6 +456,7 @@ export function SkillConstellation() {
     setSelectedId(id)
     setReviewInput("")
     setToolsOpen(false)
+    playStarMoveSound()
   }
 
   function closePanel() {
@@ -524,7 +577,7 @@ export function SkillConstellation() {
   function handleReviewKeyDown(event: React.KeyboardEvent<HTMLTextAreaElement>) {
     if (event.key !== "Enter") return
 
-    if (event.ctrlKey || event.metaKey) {
+    if (event.shiftKey || event.metaKey) {
       // Ctrl(Cmd)+Enter: 줄바꿈 삽입
       event.preventDefault()
       const el = event.currentTarget
