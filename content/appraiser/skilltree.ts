@@ -126,7 +126,6 @@ export const skillTree: TreeNode = {
               ],
             },
             { id: "p1bc", name: "담보·경매평가", section: "purpose" },
-            // 권리금평가 → 오염부동산평가(스티그마) → 개발부담금 순차 체인(짧은 외갈래 연결)
             {
               id: "p1d",
               name: "권리금감정평가",
@@ -268,19 +267,15 @@ function occupancyFor(childCount: number, maxDepth: number) {
 }
 
 // ── 부모-자식 연결선 길이 배율 (자식 개수별 세분화) ─────────────
-// 0(리프) < 2 < 1 < 3(기본) < 4 < 5 < 6+ 순으로 길어지도록 구성.
-// - 자식 2개는 리프(0개)보다도 짧게
-// - 자식 4개는 기존보다 축소
-// - 자식 5개는 4개보다 길게
 const EDGE_MULTIPLIER_BY_CHILD_COUNT: Record<number, number> = {
-  0: 0.8,  // 리프 노드
-  1: 0.7,  // 외갈래(체인) — 짧게
-  2: 0.6,  // 자식 2개: 리프보다 더 짧게
-  3: 1.0,  // 기본
-  4: 1.2,  // 기존(1.4)보다 축소
-  5: 1.5,  // 4개보다 길게
+  0: 0.8,
+  1: 0.7,
+  2: 0.6,
+  3: 1.0,
+  4: 1.2,
+  5: 1.5,
 }
-const MANY_CHILDREN_MULTIPLIER = 1.6 // 6개 이상
+const MANY_CHILDREN_MULTIPLIER = 1.6
 
 function edgeLengthMultiplier(childCount: number): number {
   if (childCount in EDGE_MULTIPLIER_BY_CHILD_COUNT) {
@@ -304,6 +299,9 @@ function edgeLengthFor(
 
   return step * (1 + complexityBoost) * multiplier * scale
 }
+
+// ── 단일 자식 노드의 방향 유지용 지그재그 각도(±5도) ────────────
+const CHAIN_JITTER_RAD = (5 * Math.PI) / 180
 
 export function layoutTree(
   root: TreeNode,
@@ -340,11 +338,17 @@ export function layoutTree(
     sectorEnd: number,
     inheritedScale: number,
     parentRadius: number,
+    chainSign: number,
   ): PlacementResult {
     const scale = node.spacingScale ?? inheritedScale
     const children = node.children ?? []
     const metrics = metricsById.get(node.id)!
-    const radius = parentRadius + edgeLengthFor(node, metrics, radialStep, scale)
+
+    // 요구사항 1: 최상위(root) -> tier1 엣지는 자식 수/spacingScale과 무관하게 항상 동일한 길이
+    const radius =
+      depth === 1
+        ? parentRadius + radialStep
+        : parentRadius + edgeLengthFor(node, metrics, radialStep, scale)
 
     if (children.length === 0) {
       const angle = (sectorStart + sectorEnd) / 2
@@ -355,13 +359,20 @@ export function layoutTree(
     if (children.length === 1) {
       const onlyChild = children[0]
       edges.push([node.id, onlyChild.id])
+
+      // 요구사항 2: 이전 방향과 비슷한 각도(±5도)로 회전, 다음 단일 자식 hop에서는 부호 반전
+      const jitter = CHAIN_JITTER_RAD * chainSign
+      const rotatedStart = sectorStart + jitter
+      const rotatedEnd = sectorEnd + jitter
+
       const childPlacement = placeNode(
         onlyChild,
         depth + 1,
-        sectorStart,
-        sectorEnd,
+        rotatedStart,
+        rotatedEnd,
         scale,
         radius,
+        -chainSign,
       )
       setPosition(node, childPlacement.angle, radius)
       return {
@@ -399,6 +410,7 @@ export function layoutTree(
 
       edges.push([node.id, child.id])
 
+      // 분기점에서는 지그재그 부호를 새로 시작(+1)
       const placed = placeNode(
         child,
         depth + 1,
@@ -406,6 +418,7 @@ export function layoutTree(
         childEnd,
         scale,
         radius,
+        1,
       )
 
       childPlacements.push(placed)
@@ -439,7 +452,7 @@ export function layoutTree(
     const sectorEnd = sectorStart + rootSlice
 
     edges.push([root.id, child.id])
-    placeNode(child, 1, sectorStart, sectorEnd, 1, 0)
+    placeNode(child, 1, sectorStart, sectorEnd, 1, 0, 1)
   })
 
   return { positions, edges }
