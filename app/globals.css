@@ -187,3 +187,29 @@
 .selected-neutral-glow {
   animation: selected-neutral-glow 1.45s ease-in-out infinite;
 }
+
+/* 별 선택 패널 전용 다크 스크롤바 */
+.skill-panel-scroll {
+  scrollbar-width: thin;
+  scrollbar-color: rgba(160, 160, 168, 0.55) rgba(10, 10, 15, 0.4);
+}
+
+.skill-panel-scroll::-webkit-scrollbar {
+  width: 8px;
+}
+
+.skill-panel-scroll::-webkit-scrollbar-track {
+  background: rgba(10, 10, 15, 0.4);
+  border-radius: 8px;
+}
+
+.skill-panel-scroll::-webkit-scrollbar-thumb {
+  background-color: rgba(160, 160, 168, 0.55);
+  border-radius: 8px;
+  border: 2px solid transparent;
+  background-clip: content-box;
+}
+
+.skill-panel-scroll::-webkit-scrollbar-thumb:hover {
+  background-color: rgba(190, 190, 196, 0.7);
+}

@@ -76,6 +76,7 @@ const EDGE_LABEL_MARGIN = 16
 // 별 선택 효과음
 let sharedAudioCtx: AudioContext | null = null
 
+// 수정 코드 — 트랜지언트 완화(부드러운 어택), 저음 위주, 컴프레서로 체감 음량 상향
 function playStarMoveSound() {
   if (typeof window === "undefined") return
   const AudioCtx = window.AudioContext || (window as any).webkitAudioContext
@@ -87,20 +88,44 @@ function playStarMoveSound() {
 
   const now = ctx.currentTime
 
-  // 묵직한 저음 울림 (사인파, 피치가 살짝 내려가며 짧게 감쇄)
+  // 낮은 볼륨(예: 시스템 40%)에서도 또렷하게 들리도록 압축/리미팅
+  const compressor = ctx.createDynamicsCompressor()
+  compressor.threshold.setValueAtTime(-24, now)
+  compressor.knee.setValueAtTime(20, now)
+  compressor.ratio.setValueAtTime(10, now)
+  compressor.attack.setValueAtTime(0.003, now)
+  compressor.release.setValueAtTime(0.25, now)
+  compressor.connect(ctx.destination)
+
+  // 묵직한 저음 울림 — 급격한 피치 스윕 대신 완만한 다운(플럭 느낌 제거)
   const osc = ctx.createOscillator()
   osc.type = "sine"
-  osc.frequency.setValueAtTime(150, now)
-  osc.frequency.exponentialRampToValueAtTime(60, now + 0.35)
+  osc.frequency.setValueAtTime(95, now)
+  osc.frequency.linearRampToValueAtTime(55, now + 0.55)
+
+  // 저음 오실레이터의 배음(고음)만 걸러 뭉툭하게
+  const oscFilter = ctx.createBiquadFilter()
+  oscFilter.type = "lowpass"
+  oscFilter.frequency.value = 220
 
   const oscGain = ctx.createGain()
   oscGain.gain.setValueAtTime(0.0001, now)
-  oscGain.gain.exponentialRampToValueAtTime(0.85, now + 0.02)
-  oscGain.gain.exponentialRampToValueAtTime(0.0001, now + 0.4)
+  // 어택을 60ms로 늘려 "탁" 하는 트랜지언트 대신 서서히 부풀어 오르는 울림
+  oscGain.gain.exponentialRampToValueAtTime(0.95, now + 0.06)
+  oscGain.gain.exponentialRampToValueAtTime(0.0001, now + 0.55)
 
+  // 한 옥타브 아래 서브 오실레이터를 더해 무게감 보강
+  const subOsc = ctx.createOscillator()
+  subOsc.type = "sine"
+  subOsc.frequency.setValueAtTime(48, now)
+  subOsc.frequency.linearRampToValueAtTime(30, now + 0.55)
 
-  // 미세한 노이즈로 "우주 공간감" 질감 추가
-  const bufferSize = ctx.sampleRate * 0.4
+  const subGain = ctx.createGain()
+  subGain.gain.setValueAtTime(0.0001, now)
+  subGain.gain.exponentialRampToValueAtTime(0.6, now + 0.08)
+  subGain.gain.exponentialRampToValueAtTime(0.0001, now + 0.55)
+
+  const bufferSize = ctx.sampleRate * 0.5
   const noiseBuffer = ctx.createBuffer(1, bufferSize, ctx.sampleRate)
   const data = noiseBuffer.getChannelData(0)
   for (let i = 0; i < bufferSize; i++) data[i] = Math.random() * 2 - 1
@@ -110,19 +135,23 @@ function playStarMoveSound() {
 
   const noiseFilter = ctx.createBiquadFilter()
   noiseFilter.type = "lowpass"
-  noiseFilter.frequency.value = 500
+  noiseFilter.frequency.value = 350
 
   const noiseGain = ctx.createGain()
-  noiseGain.gain.setValueAtTime(0.12, now)
-  noiseGain.gain.exponentialRampToValueAtTime(0.0001, now + 0.35)
+  noiseGain.gain.setValueAtTime(0.0001, now)
+  noiseGain.gain.exponentialRampToValueAtTime(0.15, now + 0.05)
+  noiseGain.gain.exponentialRampToValueAtTime(0.0001, now + 0.45)
 
-  osc.connect(oscGain).connect(ctx.destination)
-  noise.connect(noiseFilter).connect(noiseGain).connect(ctx.destination)
+  osc.connect(oscFilter).connect(oscGain).connect(compressor)
+  subOsc.connect(subGain).connect(compressor)
+  noise.connect(noiseFilter).connect(noiseGain).connect(compressor)
 
   osc.start(now)
-  osc.stop(now + 0.4)
+  osc.stop(now + 0.55)
+  subOsc.start(now)
+  subOsc.stop(now + 0.55)
   noise.start(now)
-  noise.stop(now + 0.4)
+  noise.stop(now + 0.5)
 }
 
 function formatDateYMD(date: Date) {
@@ -334,7 +363,11 @@ function getFocal(
   }
 
   if (mode === "mobile" || mode === "narrow") {
-    return { x: width / 2, y: height * (1 / 3 + (2 / 3) / 2) } // = height * 2/3
+    const topZoneEnd = 0.4 // 상단 2/5 경계
+    const bottomZoneStart = topZoneEnd
+    const bottomZoneEnd = 1 - 0.025 // 하단 여백 2.5% 제외
+    const centerY = (bottomZoneStart + bottomZoneEnd) / 2
+    return { x: width / 2, y: height * centerY }
   }
 
   return { x: width / 2, y: height * 0.6 }
@@ -902,17 +935,15 @@ export function SkillConstellation() {
   let panelClass = ""
   let panelStyle: React.CSSProperties = {}
 
-  // 수정 코드 — 좌우 5%, 상하 8% 여백 / 상단 1/3 영역 / 배경만 50% 투명
+  // 수정 코드 — 상하좌우 여백 2.5%, 상단 2/5(=40%) 영역에 패널, 배경 투명도 60%
   if (layoutMode === "mobile" || layoutMode === "narrow") {
-    panelClass = layoutMode === "mobile"
-      ? "fixed rounded-2xl overflow-y-auto skill-panel-scroll"
-      : "fixed rounded-2xl overflow-y-auto skill-panel-scroll"
+    panelClass = "fixed rounded-2xl overflow-y-auto skill-panel-scroll"
     panelStyle = {
-      top: "8%",
-      left: "5%",
-      right: "5%",
-      bottom: "67%",
-      backgroundColor: "rgba(10, 10, 15, 0.5)",
+      top: "2.5%",
+      left: "2.5%",
+      right: "2.5%",
+      height: "37.5%", // 상단 40% 구간에서 위쪽 여백 2.5%를 뺀 실제 패널 높이
+      backgroundColor: "rgba(10, 10, 15, 0.4)",
     }
   } else {
     panelClass = "fixed rounded-2xl"
@@ -927,7 +958,7 @@ export function SkillConstellation() {
 
     // 웹 및 모바일 등 분리
   const isCompact = layoutMode === "mobile" || layoutMode === "narrow"
-  const compactTextScale = layoutMode === "mobile" ? "text-[13px]" : "text-[14px]"
+  const compactTextScale = layoutMode === "mobile" ? "text-[14px]" : "text-[15px]"
   const compactTitleScale = layoutMode === "mobile" ? "text-lg" : "text-xl"
   const compactPadding = layoutMode === "mobile" ? "p-4" : "p-5"
 

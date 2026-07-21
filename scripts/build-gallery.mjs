@@ -30,7 +30,9 @@
 //   --mode     선택. "sequential"(기본, 한 줄에 한 장) | "collage"(AQUI처럼
 //              사진마다 크기를 다르게 섞어 배치)
 //   --columns  선택. 기본 24
-//   --maxWidth 선택. 리사이즈 최대 가로 px, 기본 1600
+//   --maxLongEdge  선택. 긴 변(가로형=가로, 세로형=세로) 최대 px, 기본 3000
+//   --maxShortEdge 선택. 짧은 변 최대 px, 기본 2000
+//              (둘 다 넘을 때만 비율 유지하며 줄임 — 이미 작은 사진은 손 안 댐)
 //   --quality  선택. JPEG 품질, 기본 82
 // ------------------------------------------------------------------
 
@@ -59,7 +61,8 @@ const TITLE = opts.title
 const NOTE = opts.note ?? ""
 const MODE = opts.mode ?? "sequential"
 const COLUMNS = Number(opts.columns ?? 24)
-const MAX_WIDTH = Number(opts.maxWidth ?? 1600)
+const MAX_LONG_EDGE = Number(opts.maxLongEdge ?? 3000)
+const MAX_SHORT_EDGE = Number(opts.maxShortEdge ?? 2000)
 const QUALITY = Number(opts.quality ?? 82)
 const GAP = 2.2 // 겹치지 않게 벌려줄 최소 여백 (row 단위)
 
@@ -93,8 +96,8 @@ async function optimizeAndMeasure() {
   const photos = []
 
   console.log(`\n${files.length}개 파일 처리 중...\n`)
-  console.log("파일명".padEnd(38), "실제 비율".padEnd(16), "크기")
-  console.log("-".repeat(70))
+  console.log("파일명".padEnd(38), "실제 비율".padEnd(16), "크기 변화".padEnd(24), "용량")
+  console.log("-".repeat(90))
 
   for (const file of files) {
     const inputPath = path.join(SOURCE_DIR, file)
@@ -108,14 +111,23 @@ async function optimizeAndMeasure() {
     const outName = file.replace(/\.(jpe?g|png|heic)$/i, ".jpg")
     const outPath = path.join(OUT_IMG_DIR, outName)
 
+    // 긴 변/짧은 변이 기준치를 넘을 때만, 비율을 유지하며 딱 그 안에 들어오도록 축소.
+    // 이미 기준 이하인 사진은 리사이즈 자체를 건너뛰고 재압축만 합니다.
+    const longEdge = Math.max(width, height)
+    const shortEdge = Math.min(width, height)
+    const scale = Math.min(1, MAX_LONG_EDGE / longEdge, MAX_SHORT_EDGE / shortEdge)
+    const targetWidth = Math.round(width * scale)
+
     await image
-      .resize({ width: Math.min(width, MAX_WIDTH), withoutEnlargement: true })
+      .resize({ width: targetWidth, withoutEnlargement: true })
       .jpeg({ quality: QUALITY, mozjpeg: true })
       .toFile(outPath)
 
     const beforeKB = (fs.statSync(inputPath).size / 1024).toFixed(0)
     const afterKB = (fs.statSync(outPath).size / 1024).toFixed(0)
-    console.log(file.padEnd(38), ratio.padEnd(16), `${beforeKB}KB -> ${afterKB}KB`)
+    const targetHeight = Math.round(height * scale)
+    const resizedLabel = scale < 1 ? `${width}x${height} -> ${targetWidth}x${targetHeight}` : `${width}x${height} (그대로)`
+    console.log(file.padEnd(38), ratio.padEnd(16), resizedLabel.padEnd(24), `${beforeKB}KB -> ${afterKB}KB`)
 
     photos.push({
       id: `img-${String(photos.length + 1).padStart(2, "0")}`,
