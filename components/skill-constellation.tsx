@@ -2,7 +2,7 @@
 
 import { useEffect, useMemo, useRef, useState } from "react"
 import Link from "next/link"
-import { MoreVertical } from "lucide-react"
+import { MoreVertical, Search } from "lucide-react"
 import { skillTree, sections, layoutTree } from "@/content/appraiser/skilltree"
 import defaultProgress from "@/content/appraiser/progress.default.json"
 
@@ -23,6 +23,7 @@ type LayoutMode = "mobile" | "narrow" | "wide"
 type EdgeSide = "top" | "bottom" | "left" | "right"
 
 const STORAGE_KEY = "appraiser-skilltree-progress-v1"
+const DRAFTS_STORAGE_KEY = "appraiser-skilltree-drafts-v1"
 
 const ZOOM_MIN = 0.2
 const ZOOM_MAX = 2.0
@@ -31,14 +32,12 @@ const DEFAULT_ZOOM = 1.0
 const PAN_MARGIN = 320
 const RESISTANCE = 0.35
 
-// 방사형 트리의 반지름 단계 간격
 const X_SPACING = 220
 const Y_SPACING = 220
 
 const WIDE_PANEL_RIGHT = 64
 const WIDE_PANEL_TOP_BOTTOM = 64
 
-// 모바일/태블릿 패널의 화면 여백 비율 (10%)
 const COMPACT_PANEL_MARGIN = "10%"
 
 const MOBILE_BP = 768
@@ -46,37 +45,29 @@ const NARROW_BP = 1300
 const REINFORCE_GAP_DAYS = 7
 const TITLE_WRAP_LEN = 8
 
-// 선택 후 패널이 자리잡은 뒤 입력창에 포커스를 주기까지의 지연(ms)
 const FOCUS_DELAY_MS = 260
 
-// 배경 오버스캔 및 패럴랙스 오프셋 상한 (드래그 시 검은 틈 방지)
 const BG_OVERSCAN = 100
 const BG_PARALLAX = 0.025
 const BG_OFFSET_MAX = 70
 
-// 별 선택 발광의 기준 밝기(alpha). 엣지 밝기 조정의 기준값으로도 사용
 const STAR_SELECT_ALPHA = 0.98
 
-// 수정 코드 — 부모 연결 엣지는 기준치의 70%(30% 낮춤), 자식 연결 엣지는 기준치의 110%(10% 높임)
 const EDGE_BRIGHTNESS_SCALE = 0.9
 const EDGE_BASE_ALPHA = STAR_SELECT_ALPHA * EDGE_BRIGHTNESS_SCALE
 
 const EDGE_TO_PARENT_ALPHA = EDGE_BASE_ALPHA * 0.7
 const EDGE_TO_CHILD_ALPHA = Math.min(1, EDGE_BASE_ALPHA * 1.1)
 
-// 비선택 상태 엣지의 기본 밝기도 동일하게 10% 감소
 const EDGE_DEFAULT_ALPHA = 0.17 * EDGE_BRIGHTNESS_SCALE
 const EDGE_ACQUIRED_ALPHA = 0.48 * EDGE_BRIGHTNESS_SCALE
 
-// 화면 밖 노드 판정 여백 및 경계 라벨의 화면 가장자리 여백
 const OFFSCREEN_CHECK_MARGIN = 48
 const EDGE_LABEL_MARGIN = 16
-
 
 // 별 선택 효과음
 let sharedAudioCtx: AudioContext | null = null
 
-// 수정 코드 — 트랜지언트 완화(부드러운 어택), 저음 위주, 컴프레서로 체감 음량 상향
 function playStarMoveSound() {
   if (typeof window === "undefined") return
   const AudioCtx = window.AudioContext || (window as any).webkitAudioContext
@@ -88,7 +79,6 @@ function playStarMoveSound() {
 
   const now = ctx.currentTime
 
-  // 낮은 볼륨(예: 시스템 40%)에서도 또렷하게 들리도록 압축/리미팅
   const compressor = ctx.createDynamicsCompressor()
   compressor.threshold.setValueAtTime(-24, now)
   compressor.knee.setValueAtTime(20, now)
@@ -97,24 +87,20 @@ function playStarMoveSound() {
   compressor.release.setValueAtTime(0.25, now)
   compressor.connect(ctx.destination)
 
-  // 묵직한 저음 울림 — 급격한 피치 스윕 대신 완만한 다운(플럭 느낌 제거)
   const osc = ctx.createOscillator()
   osc.type = "sine"
   osc.frequency.setValueAtTime(95, now)
   osc.frequency.linearRampToValueAtTime(55, now + 0.55)
 
-  // 저음 오실레이터의 배음(고음)만 걸러 뭉툭하게
   const oscFilter = ctx.createBiquadFilter()
   oscFilter.type = "lowpass"
   oscFilter.frequency.value = 220
 
   const oscGain = ctx.createGain()
   oscGain.gain.setValueAtTime(0.0001, now)
-  // 어택을 60ms로 늘려 "탁" 하는 트랜지언트 대신 서서히 부풀어 오르는 울림
   oscGain.gain.exponentialRampToValueAtTime(0.95, now + 0.06)
   oscGain.gain.exponentialRampToValueAtTime(0.0001, now + 0.55)
 
-  // 한 옥타브 아래 서브 오실레이터를 더해 무게감 보강
   const subOsc = ctx.createOscillator()
   subOsc.type = "sine"
   subOsc.frequency.setValueAtTime(48, now)
@@ -219,19 +205,102 @@ function escapeHtml(value: string) {
     .replace(/>/g, "&gt;")
 }
 
-function renderMarkdown(text: string) {
-  let html = escapeHtml(text)
-  html = html.replace(/\*\*(.+?)\*\*/g, "<strong>$1</strong>")
-  html = html.replace(/\*(.+?)\*/g, "<em>$1</em>")
-  html = html.replace(
-    /`(.+?)`/g,
-    '<code class="rounded bg-white/10 px-1 py-0.5 text-[0.9em]">$1</code>',
+// ── 마크다운 인라인 렌더링: 화살표, 위키링크, 코드, 굵게, 기울임 ──
+function renderInline(text: string, nameToId: Map<string, string>) {
+  let out = escapeHtml(text)
+
+  // -> 를 화살표로
+  out = out.replace(/-&gt;/g, "→")
+
+  // 위키링크 [[별 제목]]
+  out = out.replace(/\[\[(.+?)\]\]/g, (_match, title: string) => {
+    const trimmedTitle = title.trim()
+    const targetId = nameToId.get(trimmedTitle)
+    if (!targetId) {
+      return `<span class="text-red-300/70">[[${trimmedTitle}]]</span>`
+    }
+    return `<button type="button" data-star-link="${targetId}" class="text-amber-200 underline underline-offset-2 hover:text-amber-100">${trimmedTitle}</button>`
+  })
+
+  // 인라인 코드
+  out = out.replace(
+    /`([^`]+)`/g,
+    '<code class="rounded bg-white/10 px-1 py-0.5 font-mono text-[0.9em]">$1</code>',
   )
-  html = html.replace(/\n/g, "<br/>")
-  return html
+  // 굵게
+  out = out.replace(/\*\*(.+?)\*\*/g, "<strong>$1</strong>")
+  // 기울임
+  out = out.replace(/\*(.+?)\*/g, "<em>$1</em>")
+
+  return out
 }
 
-// 선분(x0,y0)-(x1,y1)을 rect 경계로 잘라, rect 안에서 (x1,y1) 방향으로 가장 먼 교차점을 반환
+// ── 마크다운 블록 렌더링: 헤더(## / ###), 리스트(중첩 지원) ──
+function renderMarkdown(text: string, nameToId: Map<string, string>) {
+  const lines = text.split("\n")
+  const htmlLines: string[] = []
+  const ulIndentStack: number[] = []
+
+  function closeLists() {
+    while (ulIndentStack.length) {
+      htmlLines.push("</ul>")
+      ulIndentStack.pop()
+    }
+  }
+
+  for (const rawLine of lines) {
+    const headerMatch = rawLine.match(/^(#{2,3})\s+(.*)$/)
+    const listMatch = rawLine.match(/^(\s*)-\s+(.*)$/)
+
+    if (headerMatch) {
+      closeLists()
+      const level = headerMatch[1].length
+      const sizeClass =
+        level === 2
+          ? "text-[calc(1em+2px)] font-bold"
+          : "text-[calc(1em+1px)] font-bold"
+      htmlLines.push(
+        `<div class="${sizeClass} mt-1 mb-0.5">${renderInline(headerMatch[2], nameToId)}</div>`,
+      )
+      continue
+    }
+
+    if (listMatch) {
+      const indent = Math.floor(listMatch[1].length / 2)
+
+      while (
+        ulIndentStack.length &&
+        ulIndentStack[ulIndentStack.length - 1] > indent
+      ) {
+        htmlLines.push("</ul>")
+        ulIndentStack.pop()
+      }
+
+      if (
+        !ulIndentStack.length ||
+        ulIndentStack[ulIndentStack.length - 1] < indent
+      ) {
+        htmlLines.push('<ul class="list-disc pl-5 my-0.5">')
+        ulIndentStack.push(indent)
+      }
+
+      htmlLines.push(`<li>${renderInline(listMatch[2], nameToId)}</li>`)
+      continue
+    }
+
+    closeLists()
+
+    if (rawLine.trim() === "") {
+      htmlLines.push("<br/>")
+    } else {
+      htmlLines.push(`<div>${renderInline(rawLine, nameToId)}</div>`)
+    }
+  }
+
+  closeLists()
+  return htmlLines.join("")
+}
+
 function clipSegmentToRect(
   x0: number,
   y0: number,
@@ -328,7 +397,6 @@ type Tier = {
   shadow: string
 }
 
-// 수정 코드 — fillAlpha 상향 (전반적으로 더 불투명)
 function getTier(
   isRoot: boolean,
   acquired: boolean,
@@ -336,22 +404,43 @@ function getTier(
   hasLogs: boolean,
 ): Tier {
   if (isRoot) {
-    return { rgb: "255,255,255", fillAlpha: 1, shadow: "..." }
+    return {
+      rgb: "255,255,255",
+      fillAlpha: 1,
+      shadow:
+        "drop-shadow(0 0 3px rgba(255,255,255,0.9)) drop-shadow(0 0 10px rgba(255,255,255,0.6))",
+    }
   }
   if (reinforced) {
-    return { rgb: "255,214,140", fillAlpha: 1, shadow: "..." }
+    return {
+      rgb: "255,214,140",
+      fillAlpha: 1,
+      shadow:
+        "drop-shadow(0 0 3px rgba(255,214,140,0.9)) drop-shadow(0 0 10px rgba(255,214,140,0.6))",
+    }
   }
   if (hasLogs) {
-    return { rgb: "255,224,168", fillAlpha: 0.97, shadow: "..." }
+    return {
+      rgb: "255,224,168",
+      fillAlpha: 0.97,
+      shadow: "drop-shadow(0 0 2px rgba(255,224,168,0.6))",
+    }
   }
   if (acquired) {
-    return { rgb: "225,205,175", fillAlpha: 0.88, shadow: "..." }
+    return {
+      rgb: "225,205,175",
+      fillAlpha: 0.88,
+      shadow: "drop-shadow(0 0 2px rgba(225,205,175,0.5))",
+    }
   }
-  return { rgb: "150,160,180", fillAlpha: 0.78, shadow: "..." }
+  return {
+    rgb: "150,160,180",
+    fillAlpha: 0.78,
+    shadow: "drop-shadow(0 0 1px rgba(150,160,180,0.25))",
+  }
 }
 
-
-// 수정 코드 — mode 매개변수를 다시 사용하도록 변경
+// ── 별 위치: 웹은 좌측 2/3 중앙, 모바일/태블릿은 하단 3/5 중앙 ──
 function getFocal(
   mode: LayoutMode,
   hasSelection: boolean,
@@ -363,17 +452,17 @@ function getFocal(
   }
 
   if (mode === "mobile" || mode === "narrow") {
-    const topZoneEnd = 0.4 // 상단 2/5 경계
+    const topZoneEnd = 0.4
     const bottomZoneStart = topZoneEnd
-    const bottomZoneEnd = 1 - 0.025 // 하단 여백 2.5% 제외
+    const bottomZoneEnd = 1 - 0.025
     const centerY = (bottomZoneStart + bottomZoneEnd) / 2
     return { x: width / 2, y: height * centerY }
   }
 
-  return { x: width / 2, y: height * 0.6 }
+  // wide: 별은 좌측 2/3 영역 중앙 (입력 패널이 우측 1/3을 차지)
+  return { x: width * (1 / 3), y: height / 2 }
 }
 
-// 선택된 별과 동일한 강도의 흰색 발광 필터 (별/엣지 공용, 기존보다 조금 더 진하게)
 const SELECTED_GLOW_FILTER =
   "drop-shadow(0 0 6px rgba(255,255,255,0.98)) drop-shadow(0 0 20px rgba(255,255,255,0.72)) drop-shadow(0 0 34px rgba(255,255,255,0.34))"
 
@@ -394,6 +483,11 @@ export function SkillConstellation() {
         ...position,
       })),
     [positions],
+  )
+
+  const nameToId = useMemo(
+    () => new Map(nodeList.map((node) => [node.name, node.id])),
+    [nodeList],
   )
 
   const bounds = useMemo(() => {
@@ -421,8 +515,24 @@ export function SkillConstellation() {
   const [selectedId, setSelectedId] = useState<string | null>(null)
   const [progress, setProgress] = useState<ProgressMap>({})
   const [loaded, setLoaded] = useState(false)
-  const [reviewInput, setReviewInput] = useState("")
   const [toolsOpen, setToolsOpen] = useState(false)
+  const [searchQuery, setSearchQuery] = useState("")
+
+  // 별 id별 입력 중이던 복습 초안(패널을 닫아도 유지됨)
+  const [reviewDrafts, setReviewDrafts] = useState<Record<string, string>>({})
+  const reviewInput = selectedId ? reviewDrafts[selectedId] ?? "" : ""
+
+  function setReviewInput(value: string) {
+    if (!selectedId) return
+    setReviewDrafts((previous) => ({ ...previous, [selectedId]: value }))
+  }
+
+  // 복습 기록 수정 상태
+  const [editingLog, setEditingLog] = useState<{
+    starId: string
+    index: number
+    text: string
+  } | null>(null)
 
   const dragRef = useRef({
     active: false,
@@ -467,6 +577,13 @@ export function SkillConstellation() {
     } finally {
       setLoaded(true)
     }
+
+    try {
+      const rawDrafts = localStorage.getItem(DRAFTS_STORAGE_KEY)
+      if (rawDrafts) setReviewDrafts(JSON.parse(rawDrafts))
+    } catch {
+      // 초안 복원 실패는 무시
+    }
   }, [])
 
   useEffect(() => {
@@ -479,6 +596,16 @@ export function SkillConstellation() {
     }
   }, [loaded, progress])
 
+  useEffect(() => {
+    if (!loaded) return
+
+    try {
+      localStorage.setItem(DRAFTS_STORAGE_KEY, JSON.stringify(reviewDrafts))
+    } catch {
+      // 저장 실패 무시
+    }
+  }, [loaded, reviewDrafts])
+
   const layoutMode: LayoutMode =
     stage.width < MOBILE_BP
       ? "mobile"
@@ -488,20 +615,18 @@ export function SkillConstellation() {
 
   function selectStar(id: string) {
     setSelectedId(id)
-    setReviewInput("")
     setToolsOpen(false)
     playStarMoveSound()
   }
 
   function closePanel() {
     setSelectedId(null)
-    setReviewInput("")
     setToolsOpen(false)
+    setEditingLog(null)
   }
 
   function toggleTools() {
     setSelectedId(null)
-    setReviewInput("")
     setToolsOpen((open) => !open)
   }
 
@@ -519,7 +644,6 @@ export function SkillConstellation() {
     })
   }, [positions, selectedId])
 
-  // 별 클릭(선택) 시 패널이 자리잡은 뒤 복습 입력창에 바로 타이핑할 수 있도록 자동 포커스
   useEffect(() => {
     if (!selectedId) return
 
@@ -590,6 +714,25 @@ export function SkillConstellation() {
     })
   }
 
+  function updateLog(starId: string, index: number, text: string) {
+    const trimmed = text.trim()
+    if (!trimmed) return
+
+    setProgress((previous) => {
+      const current = previous[starId]
+      if (!current) return previous
+
+      const nextLogs = current.logs.slice()
+      nextLogs[index] = { ...nextLogs[index], text: trimmed }
+
+      return {
+        ...previous,
+        [starId]: { ...current, logs: nextLogs },
+      }
+    })
+    setEditingLog(null)
+  }
+
   function removeLog(starId: string, index: number) {
     setProgress((previous) => {
       const current = previous[starId]
@@ -609,10 +752,23 @@ export function SkillConstellation() {
   }
 
   function handleReviewKeyDown(event: React.KeyboardEvent<HTMLTextAreaElement>) {
+    if (event.key === "Tab") {
+      event.preventDefault()
+      const el = event.currentTarget
+      const start = el.selectionStart
+      const end = el.selectionEnd
+      const next = reviewInput.slice(0, start) + "    " + reviewInput.slice(end)
+      setReviewInput(next)
+      requestAnimationFrame(() => {
+        el.selectionStart = el.selectionEnd = start + 4
+      })
+      return
+    }
+
     if (event.key !== "Enter") return
 
     if (event.shiftKey || event.metaKey) {
-      // Ctrl(Cmd)+Enter: 줄바꿈 삽입
+      // Shift+Enter: 줄바꿈 삽입
       event.preventDefault()
       const el = event.currentTarget
       const start = el.selectionStart
@@ -629,7 +785,7 @@ export function SkillConstellation() {
     event.preventDefault()
     if (selectedId) {
       addLog(selectedId, reviewInput)
-      setReviewInput("")
+      setReviewDrafts((previous) => ({ ...previous, [selectedId]: "" }))
     }
   }
 
@@ -866,7 +1022,6 @@ export function SkillConstellation() {
   const bgOffsetX = clamp(-camera.x * BG_PARALLAX, -BG_OFFSET_MAX, BG_OFFSET_MAX)
   const bgOffsetY = clamp(-camera.y * BG_PARALLAX, -BG_OFFSET_MAX, BG_OFFSET_MAX)
 
-  // 화면 좌표 변환: 월드 좌표 -> 실제 화면(스테이지) 좌표
   function toScreen(worldX: number, worldY: number) {
     return {
       x: worldTransform.left + worldX * camera.zoom,
@@ -874,7 +1029,6 @@ export function SkillConstellation() {
     }
   }
 
-  // 선택된 노드와 연결되어 있지만 화면 밖에 있는 노드들의 경계 라벨 계산
   const offscreenLabels = useMemo(() => {
     if (!selectedId) return []
 
@@ -928,39 +1082,74 @@ export function SkillConstellation() {
         }
       })
       .filter((label): label is NonNullable<typeof label> => label !== null)
-    // camera/stage 값이 바뀔 때마다 다시 계산해야 하므로 의존성에 포함
   }, [selectedId, edges, positions, stage.width, stage.height, camera, worldTransform.left, worldTransform.top])
 
-  // 수정 코드
+  // 상단 검색: 별 제목 + 복습 내용
+  const searchResults = useMemo(() => {
+    const q = searchQuery.trim().toLowerCase()
+    if (!q) return []
+
+    const results: { id: string; name: string; snippet: string }[] = []
+
+    for (const node of nodeList) {
+      if (node.name.toLowerCase().includes(q)) {
+        results.push({ id: node.id, name: node.name, snippet: node.name })
+        continue
+      }
+
+      const logs = progress[node.id]?.logs ?? []
+      for (const log of logs) {
+        const idx = log.text.toLowerCase().indexOf(q)
+        if (idx !== -1) {
+          const start = Math.max(0, idx - 15)
+          const end = Math.min(log.text.length, idx + q.length + 25)
+          const snippet = `${start > 0 ? "…" : ""}${log.text.slice(start, end)}${
+            end < log.text.length ? "…" : ""
+          }`
+          results.push({ id: node.id, name: node.name, snippet })
+          break
+        }
+      }
+    }
+
+    return results.slice(0, 8)
+  }, [searchQuery, nodeList, progress])
+
   let panelClass = ""
   let panelStyle: React.CSSProperties = {}
 
-  // 수정 코드 — 상하좌우 여백 2.5%, 상단 2/5(=40%) 영역에 패널, 배경 투명도 60%
   if (layoutMode === "mobile" || layoutMode === "narrow") {
     panelClass = "fixed rounded-2xl overflow-y-auto skill-panel-scroll"
     panelStyle = {
       top: "2.5%",
       left: "2.5%",
       right: "2.5%",
-      height: "37.5%", // 상단 40% 구간에서 위쪽 여백 2.5%를 뺀 실제 패널 높이
+      height: "37.5%",
       backgroundColor: "rgba(10, 10, 15, 0.4)",
     }
   } else {
-    panelClass = "fixed rounded-2xl"
+    panelClass = "fixed rounded-2xl overflow-y-auto skill-panel-scroll"
     panelStyle = {
       top: `${WIDE_PANEL_TOP_BOTTOM}px`,
       right: `${WIDE_PANEL_RIGHT}px`,
       bottom: `${WIDE_PANEL_TOP_BOTTOM}px`,
-      width: `calc(25vw - ${WIDE_PANEL_RIGHT}px)`,
-      maxWidth: "24rem",
+      width: "33.33vw",
+      maxWidth: "28rem",
+      backgroundColor: "rgba(10, 10, 15, 0.4)",
     }
   }
 
-    // 웹 및 모바일 등 분리
   const isCompact = layoutMode === "mobile" || layoutMode === "narrow"
   const compactTextScale = layoutMode === "mobile" ? "text-[14px]" : "text-[15px]"
   const compactTitleScale = layoutMode === "mobile" ? "text-lg" : "text-xl"
   const compactPadding = layoutMode === "mobile" ? "p-4" : "p-5"
+
+  // 위키링크/삭제/수정 버튼 클릭 시 이벤트 위임
+  function handleLogAreaClick(event: React.MouseEvent<HTMLDivElement>) {
+    const target = (event.target as HTMLElement).closest("[data-star-link]")
+    const targetId = target?.getAttribute("data-star-link")
+    if (targetId) selectStar(targetId)
+  }
 
   return (
     <main className="relative min-h-screen overflow-hidden bg-[#05060c] text-white">
@@ -1000,6 +1189,45 @@ export function SkillConstellation() {
           ← BACK
         </Link>
       )}
+
+      {/* 상단 검색 바 */}
+      <div
+        data-overlay-interactive
+        className="fixed left-1/2 top-4 z-50 w-[min(90vw,420px)] -translate-x-1/2"
+        onClick={(event) => event.stopPropagation()}
+      >
+        <div className="relative">
+          <Search
+            size={14}
+            className="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-white/40"
+          />
+          <input
+            value={searchQuery}
+            onChange={(event) => setSearchQuery(event.target.value)}
+            placeholder="제목 또는 복습 내용 검색"
+            className="w-full rounded-full border border-white/20 bg-black/50 py-2 pl-8 pr-4 text-sm text-white placeholder:text-white/35 backdrop-blur-md outline-none focus:border-amber-100/60"
+          />
+        </div>
+
+        {searchResults.length > 0 && (
+          <div className="skill-panel-scroll mt-2 max-h-[50vh] overflow-y-auto rounded-xl border border-white/15 bg-black/60 backdrop-blur-md">
+            {searchResults.map((result) => (
+              <button
+                key={result.id}
+                type="button"
+                onClick={() => {
+                  selectStar(result.id)
+                  setSearchQuery("")
+                }}
+                className="block w-full border-b border-white/10 px-4 py-2 text-left text-sm text-white/85 last:border-b-0 hover:bg-white/10"
+              >
+                <span className="font-semibold text-amber-200">{result.name}</span>
+                <span className="ml-2 text-white/55">{result.snippet}</span>
+              </button>
+            ))}
+          </div>
+        )}
+      </div>
 
       <div
         data-overlay-interactive
@@ -1125,7 +1353,6 @@ export function SkillConstellation() {
                 )
               }
 
-              // from === selectedId 이면 to는 하위(자식) 노드, 반대면 상위(부모) 노드
               const isToChild = from === selectedId
               const highlightAlpha = isToChild
                 ? EDGE_TO_CHILD_ALPHA
@@ -1138,19 +1365,19 @@ export function SkillConstellation() {
 
               return (
                 <g key={`${from}-${to}`}>
-                <linearGradient
-                  id={gradientId}
-                  gradientUnits="userSpaceOnUse"
-                  x1={selNode.x}
-                  y1={selNode.y}
-                  x2={otherNode.x}
-                  y2={otherNode.y}
-                >
-                  <stop offset="0%" stopColor={baseColor} />
-                  <stop offset="14%" stopColor={`rgba(255,255,255,${highlightAlpha})`} />
-                  <stop offset="86%" stopColor={`rgba(255,255,255,${highlightAlpha})`} />
-                  <stop offset="100%" stopColor={baseColor} />
-                </linearGradient>
+                  <linearGradient
+                    id={gradientId}
+                    gradientUnits="userSpaceOnUse"
+                    x1={selNode.x}
+                    y1={selNode.y}
+                    x2={otherNode.x}
+                    y2={otherNode.y}
+                  >
+                    <stop offset="0%" stopColor={baseColor} />
+                    <stop offset="14%" stopColor={`rgba(255,255,255,${highlightAlpha})`} />
+                    <stop offset="86%" stopColor={`rgba(255,255,255,${highlightAlpha})`} />
+                    <stop offset="100%" stopColor={baseColor} />
+                  </linearGradient>
 
                   <line
                     x1={start.x}
@@ -1199,16 +1426,16 @@ export function SkillConstellation() {
             const hitSize = size + 22
             const [line1, line2] = wrapLabel(node.name)
 
-              return (
-                <div
-                  key={node.id}
-                  className="absolute"
-                  style={{
-                    left: node.x,
-                    top: node.y,
-                    zIndex: 2,
-                  }}
-                >
+            return (
+              <div
+                key={node.id}
+                className="absolute"
+                style={{
+                  left: node.x,
+                  top: node.y,
+                  zIndex: 2,
+                }}
+              >
                 <button
                   type="button"
                   data-overlay-interactive
@@ -1231,7 +1458,9 @@ export function SkillConstellation() {
                 >
                   <StarGlyph
                     size={size}
-                      fill={`rgba(${tier.rgb}, ${isSelected ? Math.min(1, tier.fillAlpha * 1.15) : tier.fillAlpha})`}
+                    fill={`rgba(${tier.rgb}, ${
+                      isSelected ? Math.min(1, tier.fillAlpha * 1.15) : tier.fillAlpha
+                    })`}
                     className={isSelected ? "selected-neutral-glow" : undefined}
                     style={{
                       filter: isSelected ? SELECTED_GLOW_FILTER : tier.shadow,
@@ -1272,7 +1501,6 @@ export function SkillConstellation() {
           })}
         </div>
 
-        {/* 선택된 노드와 연결되어 있지만 화면 밖에 있는 노드의 제목을 화면 경계에 표시 */}
         {offscreenLabels.map((label) => (
           <div
             key={`offscreen-${label.id}`}
@@ -1289,7 +1517,6 @@ export function SkillConstellation() {
         ))}
       </div>
 
-      {/* 하단 중앙 진행도 바 — "습득" 문구 없이 분수만 표시, 진한 블루 그라데이션 */}
       <div
         data-overlay-interactive
         className="fixed bottom-5 left-1/2 z-40 -translate-x-1/2"
@@ -1308,10 +1535,10 @@ export function SkillConstellation() {
       {selectedNode && (
         <aside
           data-overlay-interactive
-          className={`${panelClass} z-50 overflow-y-auto border border-white/15 p-4 text-sm shadow-2xl backdrop-blur-xl ${
+          className={`${panelClass} z-50 border border-white/15 p-4 text-sm shadow-2xl backdrop-blur-xl ${
             isCompact ? compactPadding : "md:p-5"
           }`}
-          style={{ ...panelStyle, backgroundColor: isCompact ? panelStyle.backgroundColor : "rgba(10,10,15,0.4)" }}
+          style={panelStyle}
           onPointerDown={(event) => event.stopPropagation()}
           onClick={(event) => event.stopPropagation()}
         >
@@ -1358,7 +1585,7 @@ export function SkillConstellation() {
                   onClick={() => {
                     if (!selectedId) return
                     addLog(selectedId, reviewInput)
-                    setReviewInput("")
+                    setReviewDrafts((previous) => ({ ...previous, [selectedId]: "" }))
                   }}
                   className="rounded-md border border-white/22 px-3 py-2 text-[11px] text-white/78 transition-colors hover:border-amber-100/80 hover:text-amber-50 md:text-[12px]"
                 >
@@ -1368,7 +1595,6 @@ export function SkillConstellation() {
             </div>
           </section>
 
-          {/* 기록 버튼과 기록 목록 사이 여백 + 입력창 너비만큼의 얇은 구분선 */}
           <div className="mt-6 w-full border-t border-white/12" />
 
           <section className="mt-6 flex flex-col gap-2">
@@ -1378,36 +1604,93 @@ export function SkillConstellation() {
               .map((log, indexFromTop) => {
                 const originalIndex =
                   (selectedProgress?.logs.length ?? 0) - 1 - indexFromTop
+                const isEditingThis =
+                  editingLog?.starId === selectedId && editingLog.index === originalIndex
 
                 return (
                   <div
                     key={`${log.date}-${indexFromTop}`}
-                    className="relative rounded-md border border-white/10 bg-black/24 p-2.5 pr-7"
+                    className="relative rounded-md border border-white/10 bg-black/24 p-2.5 pr-14"
                   >
                     <p className="mb-1 text-[10px] tracking-wider text-white/40">
                       {log.date}
                     </p>
 
-                    <p
-                      className={`${
-                        isCompact ? compactTextScale : "text-[13px]"
-                      } leading-relaxed text-white/85`}
-                      dangerouslySetInnerHTML={{
-                        __html: renderMarkdown(log.text),
-                      }}
-                    />
+                    {isEditingThis ? (
+                      <div className="flex flex-col gap-2">
+                        <textarea
+                          value={editingLog.text}
+                          onChange={(event) =>
+                            setEditingLog({ ...editingLog, text: event.target.value })
+                          }
+                          rows={isCompact ? 3 : 4}
+                          className={`w-full resize-none rounded-md border border-white/18 bg-black/35 px-2 py-1.5 ${
+                            isCompact ? compactTextScale : "text-[13px]"
+                          } text-white outline-none focus:border-amber-100/70`}
+                        />
+                        <div className="flex justify-end gap-2">
+                          <button
+                            type="button"
+                            onClick={() => setEditingLog(null)}
+                            className="rounded border border-white/20 px-2 py-1 text-[10px] text-white/60"
+                          >
+                            취소
+                          </button>
+                          <button
+                            type="button"
+                            onClick={() =>
+                              selectedId &&
+                              updateLog(selectedId, originalIndex, editingLog.text)
+                            }
+                            className="rounded border border-amber-200/40 px-2 py-1 text-[10px] text-amber-200"
+                          >
+                            저장
+                          </button>
+                        </div>
+                      </div>
+                    ) : (
+                      <div
+                        className={`${
+                          isCompact ? compactTextScale : "text-[13px]"
+                        } leading-relaxed text-white/85`}
+                        onClick={handleLogAreaClick}
+                        dangerouslySetInnerHTML={{
+                          __html: renderMarkdown(log.text, nameToId),
+                        }}
+                      />
+                    )}
 
-                    <button
-                      type="button"
-                      aria-label="이 복습 기록 삭제"
-                      onClick={() => {
-                        if (!selectedId) return
-                        removeLog(selectedId, originalIndex)
-                      }}
-                      className="absolute right-1.5 top-1.5 rounded-full bg-black/40 px-1.5 py-0.5 text-[10px] text-white/45 transition-colors hover:bg-red-500/30 hover:text-red-100"
-                    >
-                      X
-                    </button>
+                    {!isEditingThis && (
+                      <>
+                        <button
+                          type="button"
+                          aria-label="수정"
+                          onClick={() =>
+                            selectedId &&
+                            setEditingLog({
+                              starId: selectedId,
+                              index: originalIndex,
+                              text: log.text,
+                            })
+                          }
+                          className="absolute right-7 top-1.5 rounded-full bg-black/40 px-1.5 py-0.5 text-[10px] text-white/45 transition-colors hover:text-amber-200"
+                        >
+                          ✎
+                        </button>
+
+                        <button
+                          type="button"
+                          aria-label="이 복습 기록 삭제"
+                          onClick={() => {
+                            if (!selectedId) return
+                            removeLog(selectedId, originalIndex)
+                          }}
+                          className="absolute right-1.5 top-1.5 rounded-full bg-black/40 px-1.5 py-0.5 text-[10px] text-white/45 transition-colors hover:bg-red-500/30 hover:text-red-100"
+                        >
+                          ✕
+                        </button>
+                      </>
+                    )}
                   </div>
                 )
               })}
