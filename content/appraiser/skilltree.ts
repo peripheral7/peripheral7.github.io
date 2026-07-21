@@ -84,7 +84,6 @@ export const skillTree: TreeNode = {
           id: "t2",
           name: "특수토지 및 권리",
           section: "property",
-          // 형제 노드(t3)와 자식들이 겹치지 않도록 간격 확보
           spacingScale: 1.3,
           children: [
             { id: "t2a", name: "지상권", section: "property" },
@@ -97,7 +96,6 @@ export const skillTree: TreeNode = {
           id: "t3",
           name: "기업가치 및 동산·무형자산",
           section: "property",
-          // 형제 노드(t2)와 자식들이 겹치지 않도록 간격 확보
           spacingScale: 1.3,
           children: [
             { id: "t3a", name: "기업가치평가", section: "property" },
@@ -128,9 +126,22 @@ export const skillTree: TreeNode = {
               ],
             },
             { id: "p1bc", name: "담보·경매평가", section: "purpose" },
-            { id: "p1d", name: "권리금감정평가", section: "purpose" },
-            { id: "p1e", name: "오염부동산평가(스티그마)", section: "purpose" },
-            { id: "p1f", name: "개발부담금 산정평가", section: "purpose" },
+            // 권리금평가 → 오염부동산평가(스티그마) → 개발부담금 순차 체인(짧은 외갈래 연결)
+            {
+              id: "p1d",
+              name: "권리금감정평가",
+              section: "purpose",
+              children: [
+                {
+                  id: "p1e",
+                  name: "오염부동산평가(스티그마)",
+                  section: "purpose",
+                  children: [
+                    { id: "p1f", name: "개발부담금 산정평가", section: "purpose" },
+                  ],
+                },
+              ],
+            },
           ],
         },
         {
@@ -256,17 +267,26 @@ function occupancyFor(childCount: number, maxDepth: number) {
   )
 }
 
-// ── 부모-자식 연결선 길이 배율 ─────────────────────────────────
-const MANY_CHILDREN_THRESHOLD = 4
-const FEW_CHILDREN_THRESHOLD = 1
-const MANY_CHILDREN_MULTIPLIER = 1.4
-const FEW_CHILDREN_MULTIPLIER = 0.7
-const DEFAULT_MULTIPLIER = 1.0
+// ── 부모-자식 연결선 길이 배율 (자식 개수별 세분화) ─────────────
+// 0(리프) < 2 < 1 < 3(기본) < 4 < 5 < 6+ 순으로 길어지도록 구성.
+// - 자식 2개는 리프(0개)보다도 짧게
+// - 자식 4개는 기존보다 축소
+// - 자식 5개는 4개보다 길게
+const EDGE_MULTIPLIER_BY_CHILD_COUNT: Record<number, number> = {
+  0: 0.8,  // 리프 노드
+  1: 0.7,  // 외갈래(체인) — 짧게
+  2: 0.6,  // 자식 2개: 리프보다 더 짧게
+  3: 1.0,  // 기본
+  4: 1.2,  // 기존(1.4)보다 축소
+  5: 1.5,  // 4개보다 길게
+}
+const MANY_CHILDREN_MULTIPLIER = 1.6 // 6개 이상
 
 function edgeLengthMultiplier(childCount: number): number {
-  if (childCount >= MANY_CHILDREN_THRESHOLD) return MANY_CHILDREN_MULTIPLIER
-  if (childCount <= FEW_CHILDREN_THRESHOLD) return FEW_CHILDREN_MULTIPLIER
-  return DEFAULT_MULTIPLIER
+  if (childCount in EDGE_MULTIPLIER_BY_CHILD_COUNT) {
+    return EDGE_MULTIPLIER_BY_CHILD_COUNT[childCount]
+  }
+  return MANY_CHILDREN_MULTIPLIER
 }
 
 function edgeLengthFor(
