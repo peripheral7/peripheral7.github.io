@@ -517,6 +517,7 @@ export function SkillConstellation() {
   const [loaded, setLoaded] = useState(false)
   const [toolsOpen, setToolsOpen] = useState(false)
   const [searchQuery, setSearchQuery] = useState("")
+  const searchInputRef = useRef<HTMLInputElement>(null)
 
   // 별 id별 입력 중이던 복습 초안(패널을 닫아도 유지됨)
   const [reviewDrafts, setReviewDrafts] = useState<Record<string, string>>({})
@@ -606,6 +607,8 @@ export function SkillConstellation() {
     }
   }, [loaded, reviewDrafts])
 
+
+
   const layoutMode: LayoutMode =
     stage.width < MOBILE_BP
       ? "mobile"
@@ -653,6 +656,23 @@ export function SkillConstellation() {
 
     return () => window.clearTimeout(timer)
   }, [selectedId])
+
+  // 검색창ctrl+f
+  useEffect(() => {
+    function onKeyDown(event: KeyboardEvent) {
+      const isFindShortcut =
+        (event.ctrlKey || event.metaKey) && event.key.toLowerCase() === "f"
+
+      if (!isFindShortcut) return
+
+      event.preventDefault()
+      searchInputRef.current?.focus()
+      searchInputRef.current?.select()
+    }
+
+    window.addEventListener("keydown", onKeyDown)
+    return () => window.removeEventListener("keydown", onKeyDown)
+  }, [])
 
   function toggleAcquired(starId: string) {
     setProgress((previous) => {
@@ -1202,9 +1222,10 @@ export function SkillConstellation() {
             className="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-white/40"
           />
           <input
+            ref={searchInputRef}
             value={searchQuery}
             onChange={(event) => setSearchQuery(event.target.value)}
-            placeholder="제목 또는 복습 내용 검색"
+            placeholder="제목 또는 복습 내용 검색 (Ctrl+F)"
             className="w-full rounded-full border border-white/20 bg-black/50 py-2 pl-8 pr-4 text-sm text-white placeholder:text-white/35 backdrop-blur-md outline-none focus:border-amber-100/60"
           />
         </div>
