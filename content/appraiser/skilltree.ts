@@ -19,7 +19,6 @@ export const skillTree: TreeNode = {
   id: "root0",
   name: "감정평가 실무",
   section: "root",
-  // 시계방향 배치: 기초 → 3방식 → 물건별 → 목적별 → 보상
   children: [
     {
       id: "f0",
@@ -50,6 +49,8 @@ export const skillTree: TreeNode = {
           section: "approaches",
           children: [
             { id: "a2a", name: "건물의 감정평가", section: "approaches" },
+            // 신규: 원가방식 하위에 "토지의 원가법" 추가
+            { id: "a2b", name: "토지의 원가법", section: "approaches" },
           ],
         },
         {
@@ -86,9 +87,16 @@ export const skillTree: TreeNode = {
           section: "property",
           spacingScale: 1.3,
           children: [
-            { id: "t2a", name: "지상권", section: "property" },
+            // 구분지상권 설정토지를 지상권(t2a)의 자식으로 이동
+            {
+              id: "t2a",
+              name: "지상권",
+              section: "property",
+              children: [
+                { id: "t2c", name: "구분지상권 설정토지", section: "property" },
+              ],
+            },
             { id: "t2b", name: "도시계획시설 저촉토지 평가", section: "property" },
-            { id: "t2c", name: "구분지상권 설정토지", section: "property" },
             { id: "t2d", name: "둘 이상의 용도지역에 걸치는 토지평가", section: "property" },
           ],
         },
@@ -175,7 +183,15 @@ export const skillTree: TreeNode = {
           section: "compensation",
           children: [
             { id: "c2a", name: "지장물보상감정평가", section: "compensation" },
-            { id: "c2b", name: "영업손실보상", section: "compensation" },
+            {
+              id: "c2b",
+              name: "영업손실보상",
+              section: "compensation",
+              // 신규: 영업손실보상 하위에 "어업권" 추가
+              children: [
+                { id: "c2b1", name: "어업권", section: "compensation" },
+              ],
+            },
           ],
         },
       ],
@@ -266,7 +282,6 @@ function occupancyFor(childCount: number, maxDepth: number) {
   )
 }
 
-// ── 부모-자식 연결선 길이 배율 (자식 개수별 세분화) ─────────────
 const EDGE_MULTIPLIER_BY_CHILD_COUNT: Record<number, number> = {
   0: 0.8,
   1: 0.7,
@@ -300,8 +315,9 @@ function edgeLengthFor(
   return step * (1 + complexityBoost) * multiplier * scale
 }
 
-// ── 단일 자식 노드의 방향 유지용 지그재그 각도(±5도) ────────────
-const CHAIN_JITTER_RAD = (5 * Math.PI) / 180
+// 단일 자식 노드의 방향 유지용 지그재그 각도.
+// 요구사항: 직전 엣지와의 각도차가 3도 "미만"이어야 하므로 2.5도로 설정.
+const CHAIN_JITTER_RAD = (2.5 * Math.PI) / 180
 
 export function layoutTree(
   root: TreeNode,
@@ -344,7 +360,6 @@ export function layoutTree(
     const children = node.children ?? []
     const metrics = metricsById.get(node.id)!
 
-    // 요구사항 1: 최상위(root) -> tier1 엣지는 자식 수/spacingScale과 무관하게 항상 동일한 길이
     const radius =
       depth === 1
         ? parentRadius + radialStep
@@ -360,7 +375,6 @@ export function layoutTree(
       const onlyChild = children[0]
       edges.push([node.id, onlyChild.id])
 
-      // 요구사항 2: 이전 방향과 비슷한 각도(±5도)로 회전, 다음 단일 자식 hop에서는 부호 반전
       const jitter = CHAIN_JITTER_RAD * chainSign
       const rotatedStart = sectorStart + jitter
       const rotatedEnd = sectorEnd + jitter
@@ -410,7 +424,6 @@ export function layoutTree(
 
       edges.push([node.id, child.id])
 
-      // 분기점에서는 지그재그 부호를 새로 시작(+1)
       const placed = placeNode(
         child,
         depth + 1,

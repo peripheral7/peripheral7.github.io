@@ -1125,7 +1125,7 @@ export function SkillConstellation() {
       left: "2.5%",
       right: "2.5%",
       height: "37.5%",
-      backgroundColor: "rgba(10, 10, 15, 0.4)",
+      backgroundColor: "rgba(10, 10, 15, 0.3)",
     }
   } else {
     panelClass = "fixed rounded-2xl overflow-y-auto skill-panel-scroll"
@@ -1135,7 +1135,7 @@ export function SkillConstellation() {
       bottom: `${WIDE_PANEL_TOP_BOTTOM}px`,
       width: "33.33vw",
       maxWidth: "28rem",
-      backgroundColor: "rgba(10, 10, 15, 0.4)",
+      backgroundColor: "rgba(10, 10, 15, 0.3)",
     }
   }
 
@@ -1610,7 +1610,9 @@ export function SkillConstellation() {
                 return (
                   <div
                     key={`${log.date}-${indexFromTop}`}
-                    className="relative rounded-md border border-white/10 bg-black/24 p-2.5 pr-14"
+                    className={`relative rounded-md border border-white/10 bg-black/24 p-2.5 ${
+                      isEditingThis ? "" : "pr-14"
+                    }`}
                   >
                     <p className="mb-1 text-[10px] tracking-wider text-white/40">
                       {log.date}
@@ -1620,11 +1622,16 @@ export function SkillConstellation() {
                       <div className="flex flex-col gap-2">
                         <textarea
                           value={editingLog.text}
-                          onChange={(event) =>
+                          onChange={(event) => {
                             setEditingLog({ ...editingLog, text: event.target.value })
-                          }
-                          rows={isCompact ? 3 : 4}
-                          className={`w-full resize-none rounded-md border border-white/18 bg-black/35 px-2 py-1.5 ${
+                            const el = event.currentTarget
+                            requestAnimationFrame(() => {
+                              el.scrollIntoView({ block: "nearest" })
+                              el.scrollTop = el.scrollHeight
+                            })
+                          }}
+                          rows={isCompact ? 3 : 5}
+                          className={`w-full resize-none rounded-md border border-white/18 bg-black/35 px-2.5 py-2 ${
                             isCompact ? compactTextScale : "text-[13px]"
                           } text-white outline-none focus:border-amber-100/70`}
                         />
