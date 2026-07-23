@@ -1,6 +1,0 @@
-# pnpm-workspace.yaml
-packages:
-  - "."
-
-onlyBuiltDependencies:
-  - sharp
