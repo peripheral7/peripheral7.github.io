@@ -1,12 +1,13 @@
 {
-  "variant": "photo",
+  "variant": "interactive",
   "category": "RESEARCH",
   "title": "Mark Minervini VCP 분석",
   "meta": "Volatility Contraction Pattern Screener",
   "ref": "RESEARCH-VCP",
   "image": "/images/reports/vcp-dashboard/thumb.png",
   "imageAlt": "VCP dashboard preview",
-  "reportPath": "/reports/vcp_dashboard.html",
+  "href": "/reports/vcp_dashboard.html",
+  "linkLabel": "리포트 열기",
   "date": "2026.07.23",
   "tags": ["VCP", "Minervini", "Screener"]
 }
