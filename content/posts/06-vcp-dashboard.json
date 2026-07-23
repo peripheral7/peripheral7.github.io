@@ -6,7 +6,7 @@
   "ref": "RESEARCH-VCP",
   "image": "/images/reports/vcp-dashboard/thumb.png",
   "imageAlt": "VCP dashboard preview",
-  "reportFolder": "/reports/vcp-dashboard/",
+  "reportPath": "/reports/vcp_dashboard.html",
   "date": "2026.07.23",
   "tags": ["VCP", "Minervini", "Screener"]
 }

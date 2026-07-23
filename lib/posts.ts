@@ -13,25 +13,19 @@ export type Post = {
   body?: string
   image?: string
   imageAlt?: string
-  rotate: number
+  rotate?: number
   pin?: "pin" | "tape" | "clip"
-  /** Path under /public to a standalone HTML file (interactive maps, reports). */
   href?: string
-  /** Label shown on the open-link button, e.g. "Open interactive map". */
   linkLabel?: string
-  /** Display date shown on the card, e.g. "2026.07.08" */
   date?: string
-  /** Short tag labels shown next to the date, e.g. ["GIS", "Hedonic"] */
   tags?: string[]
-  /**
-   * Folder under /public holding the full-res photo set + manifest.json,
-   * used by the /gallery/[id] template. Required when variant is "photo"
-   * AND the post is not listed in BOARD_ROUTES below.
-   */
   imageFolder?: string
-  reportFolder?: string
-
+  // Path under public to a periodically-replaced HTML report file
+  // (e.g. "/reports/vcp_dashboard.html"). Used by gallery/[id] to render
+  // the report inline via HtmlReport instead of the photo masonry.
+  reportPath?: string
 }
+
 
 // Everything except id/rotate/pin must come from the post's JSON file.
 // rotate/pin are optional there — auto-filled below if omitted, so most
