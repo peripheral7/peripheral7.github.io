@@ -29,6 +29,8 @@ export type Post = {
    * AND the post is not listed in BOARD_ROUTES below.
    */
   imageFolder?: string
+  reportFolder?: string
+
 }
 
 // Everything except id/rotate/pin must come from the post's JSON file.

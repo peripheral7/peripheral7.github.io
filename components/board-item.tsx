@@ -34,6 +34,7 @@ function CardBody({ post }: { post: Post }) {
               src={post.image ?? "/placeholder.svg"}
               alt={post.imageAlt ?? post.title}
               fill
+              quality={90}
               sizes="(max-width: 640px) 90vw, (max-width: 1024px) 45vw, 30vw"
               className="object-cover grayscale-[0.15] transition-all duration-500 group-hover:grayscale-0"
             />
