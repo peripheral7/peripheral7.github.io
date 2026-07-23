@@ -2,10 +2,10 @@
   "variant": "interactive",
   "category": "PHOTOGRAPHY",
   "title": "Playlist",
-  "meta": "Spotify",
+  "meta": "Playlist",
   "ref": "AUDIO-01",
-  "image": "/images/spotify/playlist_wallpaper.JPG",
+  "image": "/images/playlist/playlist_wallpaper.JPG",
   "imageAlt": "Playlist wallpaper",
-  "href": "/spotify",
+  "href": "/playlist",
   "date": "2026.07.19"
 }
