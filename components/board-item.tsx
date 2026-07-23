@@ -36,7 +36,7 @@ function CardBody({ post }: { post: Post }) {
               fill
               quality={90}
               sizes="(max-width: 640px) 90vw, (max-width: 1024px) 45vw, 30vw"
-              className="object-cover grayscale-[0.15] transition-all duration-500 group-hover:grayscale-0"
+              className="object-cover grayscale-[0.15] scale-100 transition-all duration-700 ease-[cubic-bezier(0.22,1,0.36,1)] group-hover:grayscale-0 group-hover:scale-[1.04]"
             />
           </div>
         ) : (
@@ -79,7 +79,10 @@ export function BoardItem({ post }: { post: Post }) {
   // on some cards. The inner wrapper carries the tape+card together as
   // one visual unit, so they always move as one on hover.
   const inner = (
-    <div className="scrap relative pt-4" style={style}>
+    <div
+      className="scrap relative pt-4 transition-[transform,box-shadow] duration-500 ease-[cubic-bezier(0.22,1,0.36,1)] will-change-transform group-hover:-translate-y-1.5 group-hover:shadow-xl"
+      style={style}
+    >
       <CardBody post={post} />
     </div>
   )

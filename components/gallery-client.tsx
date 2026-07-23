@@ -29,7 +29,7 @@ export function GalleryClient({ config }: { config: any }) {
         entries.forEach((entry) => {
           if (entry.isIntersecting) {
             entry.target.classList.add("opacity-100", "translate-y-0")
-            entry.target.classList.remove("opacity-0", "translate-y-8")
+            entry.target.classList.remove("opacity-0", "translate-y-8", "blur-sm")
             obs.unobserve(entry.target)
           }
         })
@@ -97,9 +97,10 @@ export function GalleryClient({ config }: { config: any }) {
             {images.map((img, i) => {
               const fileName = img.file || img.filename
               return (
-                <figure 
-                  key={i} 
-                  className="gallery-item mb-4 break-inside-avoid opacity-0 translate-y-8 transition-all duration-700 ease-out lg:mb-6"
+                <figure
+                  key={i}
+                  className="gallery-item mb-4 break-inside-avoid opacity-0 translate-y-8 blur-sm transition-all duration-700 ease-[cubic-bezier(0.22,1,0.36,1)] lg:mb-6"
+                  style={{ transitionDelay: `${(i % 12) * 40}ms` }}
                 >
                   <div className="overflow-hidden rounded-md bg-neutral-100">
                     <img

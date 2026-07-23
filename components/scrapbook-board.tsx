@@ -56,8 +56,14 @@ export function ScrapbookBoard({ initialPosts }: { initialPosts: Post[] }) {
 
       {/* 반응형 Masonry 그리드 (기존 로직 보존) */}
       <div className="mx-auto max-w-7xl columns-1 gap-6 overflow-visible sm:columns-2 md:columns-3 xl:columns-4 [&>*:nth-child(3n)]:mt-8 [&>*:nth-child(4n)]:mt-4">
-        {filteredPosts.map((post) => (
-          <BoardItem key={post.id} post={post} />
+        {filteredPosts.map((post, i) => (
+          <div
+            key={post.id}
+            className="animate-fade-up"
+            style={{ animationDelay: `${Math.min(i * 60, 480)}ms` }}
+          >
+            <BoardItem post={post} />
+          </div>
         ))}
       </div>
       
