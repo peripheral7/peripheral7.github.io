@@ -170,6 +170,22 @@ function generateLogId() {
   return `log_${Date.now()}_${Math.random().toString(36).slice(2, 9)}`
 }
 
+function migrateProgress(raw: ProgressMap): ProgressMap {
+  const migrated: ProgressMap = {}
+
+  for (const [starId, status] of Object.entries(raw)) {
+    if (!status) continue
+
+    const migratedLogs = (status.logs ?? []).map((log) =>
+      log.id ? log : { ...log, id: generateLogId() },
+    )
+
+    migrated[starId] = { ...status, logs: migratedLogs }
+  }
+
+  return migrated
+}
+
 function formatDateYMD(date: Date) {
   const year = date.getFullYear()
   const month = String(date.getMonth() + 1).padStart(2, "0")
@@ -883,9 +899,10 @@ export function SkillConstellation() {
   useEffect(() => {
     try {
       const raw = localStorage.getItem(STORAGE_KEY)
-      setProgress(raw ? JSON.parse(raw) : (defaultProgress as ProgressMap))
+      const parsed = raw ? JSON.parse(raw) : (defaultProgress as ProgressMap)
+      setProgress(migrateProgress(parsed))
     } catch {
-      setProgress(defaultProgress as ProgressMap)
+      setProgress(migrateProgress(defaultProgress as ProgressMap))
     } finally {
       setLoaded(true)
     }
@@ -1448,7 +1465,7 @@ export function SkillConstellation() {
       try {
         const parsed = JSON.parse(String(reader.result))
         if (confirm("불러온 파일로 현재 진행상황을 덮어쓸까요?")) {
-          setProgress(parsed)
+          setProgress(migrateProgress(parsed))
         }
       } catch {
         alert("올바른 JSON 파일이 아닙니다.")
