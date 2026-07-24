@@ -727,20 +727,27 @@ function ReviewLogCard({
 
         <span className="flex-1" />
 
-        {isLatest && dotInteractive && (
-          <button
-            type="button"
-            aria-label={isDue ? "복습 완료 처리" : "복습 완료 취소"}
-            onClick={(event) => {
-              event.stopPropagation()
-              onToggleReview()
-            }}
-            className={`h-2.5 w-2.5 shrink-0 rounded-full transition-colors ${
-              isDue
-                ? "bg-red-500 hover:bg-red-700"
-                : "border border-white/40 bg-transparent hover:border-white/70"
-            }`}
-          />
+        {isLatest && (
+          dotInteractive ? (
+            <button
+              type="button"
+              aria-label={isDue ? "복습 완료 처리" : "복습 완료 취소"}
+              onClick={(event) => {
+                event.stopPropagation()
+                onToggleReview()
+              }}
+              className={`h-2.5 w-2.5 shrink-0 rounded-full transition-colors ${
+                isDue
+                  ? "bg-red-500 hover:bg-red-700"
+                  : "border border-white/40 bg-transparent hover:border-white/70"
+              }`}
+            />
+          ) : (
+            <span
+              aria-label="복습 대기"
+              className="h-2.5 w-2.5 shrink-0 rounded-full border border-white/40 bg-transparent"
+            />
+          )
         )}
 
         {!isEditing && (
