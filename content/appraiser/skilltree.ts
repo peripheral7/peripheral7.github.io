@@ -49,8 +49,8 @@ export const skillTree: TreeNode = {
           section: "approaches",
           children: [
             { id: "a2a", name: "건물의 감정평가", section: "approaches" },
-            // 신규: 원가방식 하위에 "토지의 원가법" 추가
             { id: "a2b", name: "토지의 원가법", section: "approaches" },
+            { id: "a2c", name: "개발법", section: "approaches" },
           ],
         },
         {
@@ -282,9 +282,10 @@ function occupancyFor(childCount: number, maxDepth: number) {
   )
 }
 
+// 수정 — 자식 1개(체인) 구간을 더 짧게
 const EDGE_MULTIPLIER_BY_CHILD_COUNT: Record<number, number> = {
   0: 0.8,
-  1: 0.7,
+  1: 0.45,
   2: 0.6,
   3: 1.0,
   4: 1.2,
@@ -317,7 +318,7 @@ function edgeLengthFor(
 
 // 단일 자식 노드의 방향 유지용 지그재그 각도.
 // 요구사항: 직전 엣지와의 각도차가 3도 "미만"이어야 하므로 2.5도로 설정.
-const CHAIN_JITTER_RAD = (2.5 * Math.PI) / 180
+const CHAIN_JITTER_RAD = (2 * Math.PI) / 180
 
 export function layoutTree(
   root: TreeNode,
@@ -372,29 +373,32 @@ export function layoutTree(
     }
 
     if (children.length === 1) {
-      const onlyChild = children[0]
-      edges.push([node.id, onlyChild.id])
+    const onlyChild = children[0]
+    edges.push([node.id, onlyChild.id])
 
-      const jitter = CHAIN_JITTER_RAD * chainSign
-      const rotatedStart = sectorStart + jitter
-      const rotatedEnd = sectorEnd + jitter
+    const ownAngle = (sectorStart + sectorEnd) / 2
+    setPosition(node, ownAngle, radius)
 
-      const childPlacement = placeNode(
-        onlyChild,
-        depth + 1,
-        rotatedStart,
-        rotatedEnd,
-        scale,
-        radius,
-        -chainSign,
-      )
-      setPosition(node, childPlacement.angle, radius)
-      return {
-        angle: childPlacement.angle,
-        minAngle: childPlacement.minAngle,
-        maxAngle: childPlacement.maxAngle,
-      }
+    const jitter = CHAIN_JITTER_RAD * chainSign
+    const rotatedStart = sectorStart + jitter
+    const rotatedEnd = sectorEnd + jitter
+
+    const childPlacement = placeNode(
+      onlyChild,
+      depth + 1,
+      rotatedStart,
+      rotatedEnd,
+      scale,
+      radius,
+      -chainSign,
+    )
+
+    return {
+      angle: ownAngle,
+      minAngle: Math.min(ownAngle, childPlacement.minAngle),
+      maxAngle: Math.max(ownAngle, childPlacement.maxAngle),
     }
+  }
 
     const gap = gapFor(depth, children.length)
     const totalGap = gap * (children.length - 1)
