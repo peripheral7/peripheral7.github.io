@@ -567,9 +567,9 @@ function getReviewCardStyle(cycle: ReviewCycle | undefined): {
   }
 }
 
-const FLASH_OUTLINE_COLOR = "rgba(255,235,120,1)"
+const FLASH_OUTLINE_COLOR = "rgba(255,224,170,0.9)"
 const FLASH_GLOW_SHADOW =
-  "0 0 10px 3px rgba(255,220,110,0.95), 0 0 10px 6px rgba(255,200,80,0.7)"
+  "0 0 3px 0px rgba(255,214,150,0.55), 0 0 6px 1px rgba(255,200,120,0.28)"
 
 function getFocal(
   mode: LayoutMode,
@@ -690,12 +690,12 @@ function ReviewLogCard({
       }}
       style={{
         ...dragStyle,
-        outline: isFlashing ? `2px solid ${FLASH_OUTLINE_COLOR}` : "2px solid transparent",
-        outlineOffset: isFlashing ? "1px" : "0px",
+        outline: isFlashing ? `1px solid ${FLASH_OUTLINE_COLOR}` : "1px solid transparent",
+        outlineOffset: "0px",
         boxShadow: isFlashing ? FLASH_GLOW_SHADOW : "none",
         transition: isFlashing
-          ? "none"
-          : `outline-color ${FLASH_FADE_MS}ms ease-out, box-shadow ${FLASH_FADE_MS}ms ease-out, outline-offset ${FLASH_FADE_MS}ms ease-out`,
+          ? "outline-color 220ms ease-out, box-shadow 220ms ease-out"
+          : `outline-color ${FLASH_FADE_MS}ms ease-out, box-shadow ${FLASH_FADE_MS}ms ease-out`,
       }}
       className={`relative rounded-md border bg-black/24 ${cardStyle.borderClass}`}
     >
