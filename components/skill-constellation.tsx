@@ -68,7 +68,8 @@ const TITLE_WRAP_LEN = 8
 
 const FOCUS_DELAY_MS = 260
 const SCROLL_TO_COMMENT_DELAY_MS = 340
-const FLASH_DURATION_MS = 900
+const FLASH_FADE_MS = 1200
+const FLASH_TRIGGER_DELAY_MS = 60
 
 const BG_OVERSCAN = 100
 const BG_PARALLAX = 0.025
@@ -548,23 +549,26 @@ function getReviewCardStyle(cycle: ReviewCycle | undefined): {
   switch (cycle) {
     case 1:
       return {
-        borderClass: "border-amber-900/60",
-        boxShadow: "0 0 4px rgba(180,140,40,0.35)",
+        borderClass: "border-amber-900/45",
+        boxShadow: "0 0 2px rgba(160,125,40,0.2)",
       }
     case 2:
       return {
-        borderClass: "border-amber-500/70",
-        boxShadow: "0 0 6px rgba(255,190,60,0.55)",
+        borderClass: "border-amber-600/55",
+        boxShadow: "0 0 3px rgba(220,165,55,0.3)",
       }
     case 3:
       return {
-        borderClass: "border-amber-300/85",
-        boxShadow: "0 0 8px rgba(255,225,120,0.75)",
+        borderClass: "border-amber-400/65",
+        boxShadow: "0 0 4px rgba(255,200,90,0.4)",
       }
     default:
       return { borderClass: "border-white/10", boxShadow: "none" }
   }
 }
+
+const FLASH_BRIGHT_SHADOW =
+  "0 0 0 2px rgba(255,240,180,0.95), 0 0 16px rgba(255,225,120,0.85)"
 
 function getFocal(
   mode: LayoutMode,
@@ -632,6 +636,7 @@ function ReviewLogCard({
   onSaveEdit,
   onDelete,
   onLogAreaClick,
+  onCompleteReview,
   nameToId,
   setCardRef,
 }: {
@@ -645,6 +650,7 @@ function ReviewLogCard({
   editingText: string
   onEditingTextChange: (value: string) => void
   onEditKeyDown: (event: React.KeyboardEvent<HTMLTextAreaElement>) => void
+  onCompleteReview: () => void // 
   onStartEdit: () => void
   onCancelEdit: () => void
   onSaveEdit: () => void
@@ -670,6 +676,9 @@ function ReviewLogCard({
     opacity: isDragging ? 0.5 : 1,
   }
 
+  const boxShadow = isFlashing ? FLASH_BRIGHT_SHADOW : cardStyle.boxShadow
+  const shadowTransition = isFlashing ? "none" : `box-shadow ${FLASH_FADE_MS}ms ease-out`
+
   const flashShadow = isFlashing
     ? "0 0 0 2px rgba(255,235,150,0.95), 0 0 18px rgba(255,225,120,0.9)"
     : cardStyle.boxShadow
@@ -680,8 +689,13 @@ function ReviewLogCard({
         setNodeRef(el)
         setCardRef(el)
       }}
-      style={{ ...dragStyle, boxShadow: flashShadow, transitionProperty: isFlashing ? "none" : "box-shadow, transform" }}
-      className={`overflow-hidden rounded-md border bg-black/24 transition-shadow duration-[900ms] ease-out ${cardStyle.borderClass}`}
+      style={{
+        ...dragStyle,
+        boxShadow,
+        transitionProperty: isDragging ? "transform" : `transform, box-shadow`,
+        transition: isDragging ? dragStyle.transition : `${dragStyle.transition ? dragStyle.transition + ", " : ""}${shadowTransition}`,
+      }}
+      className={`overflow-hidden rounded-md border bg-black/24 ${cardStyle.borderClass}`}
     >
       <div className="flex items-center gap-1.5 border-b border-white/10 bg-black/20 px-2 py-1.5">
         <button
@@ -705,12 +719,22 @@ function ReviewLogCard({
         <span className="flex-1" />
 
         {isLatest && (
-          <span
-            aria-label={isDue ? "복습 필요" : "복습 대기"}
-            className={`h-2 w-2 rounded-full ${
-              isDue ? "bg-red-500" : "border border-white/40 bg-transparent"
-            }`}
-          />
+          isDue ? (
+            <button
+              type="button"
+              aria-label="복습 완료 처리"
+              onClick={(event) => {
+                event.stopPropagation()
+                onCompleteReview()
+              }}
+              className="h-2.5 w-2.5 shrink-0 rounded-full bg-red-500 transition-transform hover:scale-125 active:scale-95"
+            />
+          ) : (
+            <span
+              aria-label="복습 대기"
+              className="h-2.5 w-2.5 shrink-0 rounded-full border border-white/40 bg-transparent"
+            />
+          )
         )}
 
         {!isEditing && (
@@ -1025,7 +1049,7 @@ export function SkillConstellation() {
 
         window.setTimeout(() => {
           setFlashLogId((current) => (current === targetLogId ? null : current))
-        }, FLASH_DURATION_MS)
+        }, FLASH_TRIGGER_DELAY_MS)
       }, SCROLL_TO_COMMENT_DELAY_MS)
       return () => window.clearTimeout(timer)
     }
@@ -1035,6 +1059,8 @@ export function SkillConstellation() {
     }, FOCUS_DELAY_MS)
     return () => window.clearTimeout(timer)
   }, [selectedId, pendingScrollLogId])
+
+  
 
   function toggleAcquired(starId: string) {
     setProgress((previous) => {
@@ -2347,11 +2373,7 @@ export function SkillConstellation() {
                       onEditKeyDown={handleEditKeyDown}
                       onStartEdit={() =>
                         selectedId &&
-                        setEditingLog({
-                          starId: selectedId,
-                          logId: log.id,
-                          text: log.text,
-                        })
+                        setEditingLog({ starId: selectedId, logId: log.id, text: log.text })
                       }
                       onCancelEdit={() => setEditingLog(null)}
                       onSaveEdit={() =>
@@ -2360,6 +2382,12 @@ export function SkillConstellation() {
                       }
                       onDelete={() => selectedId && removeLog(selectedId, log.id)}
                       onLogAreaClick={handleLogAreaClick}
+                      onCompleteReview={() => {
+                        // 빨간 점 클릭 → 즉시 복습 완료 처리. 같은 progress state이므로 복습알림 리스트에 자동 반영됨
+                        if (selectedId && selectedDueCycle) {
+                          completeReviewCycle(selectedId, selectedDueCycle)
+                        }
+                      }}
                       nameToId={nameToId}
                       setCardRef={(el) => {
                         if (el) logCardRefs.current.set(log.id, el)
