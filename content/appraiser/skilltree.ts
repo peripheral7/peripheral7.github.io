@@ -48,9 +48,22 @@ export const skillTree: TreeNode = {
           name: "원가방식",
           section: "approaches",
           children: [
-            { id: "a2a", name: "건물의 감정평가", section: "approaches" },
-            { id: "a2b", name: "토지의 원가법", section: "approaches" },
-            { id: "a2c", name: "개발법", section: "approaches" },
+            {
+              id: "a2a",
+              name: "건물의 감정평가",
+              section: "approaches",
+              children: [
+                { id: "a2a1", name: "분해법", section: "approaches" },
+              ],
+            },
+            {
+              id: "a2b",
+              name: "토지의 원가법",
+              section: "approaches",
+              children: [
+                { id: "a2c", name: "개발법", section: "approaches" },
+              ],
+            },
           ],
         },
         {

@@ -1,0 +1,4 @@
+allowBuilds:
+  es5-ext: false
+  msw: false
+  sharp: false
