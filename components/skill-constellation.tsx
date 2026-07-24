@@ -18,7 +18,7 @@ type StarProgress = {
   acquired: boolean
   logs: LogEntry[]
   reinforced?: boolean
-  reviewDismissed?: Partial<Record<ReviewMilestone, boolean>>
+  reviewDismissed?: Partial<Record<ReviewMilestone, string>>
 }
 
 type ProgressMap = Record<string, StarProgress>
@@ -229,8 +229,6 @@ function renderInline(text: string, nameToId: Map<string, string>) {
   return out
 }
 
-// 줄 앞쪽 공백(탭으로 삽입된 들여쓰기)을 &nbsp;로 변환해
-// 렌더링 시 브라우저가 연속 공백을 하나로 뭉치지 않고 그대로 보이도록 함
 function preserveLeadingWhitespace(line: string): { indentHtml: string; rest: string } {
   const match = line.match(/^( +)/)
   if (!match) return { indentHtml: "", rest: line }
@@ -461,7 +459,7 @@ function getFocal(
     return { x: width / 2, y: height * centerY }
   }
 
-  return { x: width * (1 / 2), y: height / 2 }
+  return { x: width / 2, y: height / 2 }
 }
 
 const SELECTED_GLOW_FILTER =
@@ -517,6 +515,7 @@ export function SkillConstellation() {
   const [progress, setProgress] = useState<ProgressMap>({})
   const [loaded, setLoaded] = useState(false)
   const [toolsOpen, setToolsOpen] = useState(false)
+  const [reviewQueueOpen, setReviewQueueOpen] = useState(false)
   const [searchQuery, setSearchQuery] = useState("")
 
   const [reviewDrafts, setReviewDrafts] = useState<Record<string, string>>({})
@@ -603,7 +602,6 @@ export function SkillConstellation() {
     }
   }, [loaded, reviewDrafts])
 
-  // Ctrl+F(Cmd+F)를 가로채 상단 검색창으로 포커스
   useEffect(() => {
     function onKeyDown(event: KeyboardEvent) {
       const isFindShortcut =
@@ -629,18 +627,27 @@ export function SkillConstellation() {
   function selectStar(id: string) {
     setSelectedId(id)
     setToolsOpen(false)
+    setReviewQueueOpen(false)
     playStarMoveSound()
   }
 
   function closePanel() {
     setSelectedId(null)
     setToolsOpen(false)
+    setReviewQueueOpen(false)
     setEditingLog(null)
   }
 
   function toggleTools() {
     setSelectedId(null)
+    setReviewQueueOpen(false)
     setToolsOpen((open) => !open)
+  }
+
+  function toggleReviewQueue() {
+    setSelectedId(null)
+    setToolsOpen(false)
+    setReviewQueueOpen((open) => !open)
   }
 
   useEffect(() => {
@@ -717,7 +724,6 @@ export function SkillConstellation() {
           acquired: true,
           logs: [...current.logs, entry],
           reinforced,
-          // 새로 기록하면 복습 경과일이 리셋되므로 알림 해제 상태도 초기화
           reviewDismissed: {},
         },
       }
@@ -772,18 +778,13 @@ export function SkillConstellation() {
           ...current,
           reviewDismissed: {
             ...current.reviewDismissed,
-            [milestoneKey]: true,
+            [milestoneKey]: formatDateYMD(new Date()),
           },
         },
       }
     })
   }
 
-  // 공용: Enter/Shift+Enter/Tab 처리
-  // - Tab: 스페이스 4개 삽입(들여쓰기)
-  // - Enter(단독): 현재 줄 앞에 들여쓰기(공백)가 있으면 "그 들여쓰기를 유지한 채 줄바꿈"
-  //                들여쓰기가 없으면 "저장/제출"
-  // - Shift+Enter / Cmd+Enter: 항상 줄바꿈(들여쓰기 유지 없이 그대로)
   function handleStructuredKeyDown(
     event: React.KeyboardEvent<HTMLTextAreaElement>,
     value: string,
@@ -820,7 +821,6 @@ export function SkillConstellation() {
       return
     }
 
-    // 단독 Enter: 현재 줄의 들여쓰기(탭으로 삽입된 공백) 유지 여부 확인
     const lineStart = value.lastIndexOf("\n", start - 1) + 1
     const currentLine = value.slice(lineStart, start)
     const indentMatch = currentLine.match(/^ +/)
@@ -837,7 +837,6 @@ export function SkillConstellation() {
       return
     }
 
-    // 들여쓰기 없는 줄: 저장/제출
     event.preventDefault()
     onSubmit()
   }
@@ -1176,7 +1175,7 @@ export function SkillConstellation() {
     return results.slice(0, 8)
   }, [searchQuery, nodeList, progress])
 
-  // 경과일 기준 복습 필요 큐 (가장 오래 경과된 항목부터, 마일스톤별 개별 dismiss)
+  // 5/10/20일 경과 복습 필요 큐 (가장 오래 경과된 순, 마일스톤별 개별 처리)
   const dueReviewQueue = useMemo(() => {
     const now = new Date()
 
@@ -1210,6 +1209,34 @@ export function SkillConstellation() {
     return items
   }, [nodeList, progress])
 
+  const completedTodayList = useMemo(() => {
+    const today = formatDateYMD(new Date())
+    const items: {
+      id: string
+      name: string
+      milestoneKey: ReviewMilestone
+      milestoneLabel: string
+    }[] = []
+
+    for (const node of nodeList) {
+      const dismissed = progress[node.id]?.reviewDismissed
+      if (!dismissed) continue
+
+      for (const m of REVIEW_MILESTONES) {
+        if (dismissed[m.key] === today) {
+          items.push({
+            id: node.id,
+            name: node.name,
+            milestoneKey: m.key,
+            milestoneLabel: m.label,
+          })
+        }
+      }
+    }
+
+    return items
+  }, [nodeList, progress])
+
   let panelClass = ""
   let panelStyle: React.CSSProperties = {}
   let dueQueuePanelStyle: React.CSSProperties = {}
@@ -1224,10 +1251,10 @@ export function SkillConstellation() {
       backgroundColor: "rgba(10, 10, 15, 0.3)",
     }
     dueQueuePanelStyle = {
-      bottom: "2.5%",
+      top: "2.5%",
       left: "2.5%",
       right: "2.5%",
-      height: "20%",
+      height: "37.5%",
       backgroundColor: "rgba(10, 10, 15, 0.3)",
     }
   } else {
@@ -1242,7 +1269,7 @@ export function SkillConstellation() {
     }
     dueQueuePanelStyle = {
       top: `${WIDE_PANEL_TOP_BOTTOM}px`,
-      left: `${WIDE_PANEL_RIGHT}px`,
+      right: `${WIDE_PANEL_RIGHT}px`,
       bottom: `${WIDE_PANEL_TOP_BOTTOM}px`,
       width: "33.33vw",
       maxWidth: "28rem",
@@ -1341,54 +1368,74 @@ export function SkillConstellation() {
 
       <div
         data-overlay-interactive
-        className="fixed right-5 top-5 z-50"
+        className="fixed right-5 top-5 z-50 flex items-center gap-2"
         onClick={(event) => event.stopPropagation()}
       >
         <button
           type="button"
-          aria-label="메뉴 열기"
-          onClick={toggleTools}
-          className="flex h-10 w-10 items-center justify-center rounded-full border border-white/20 bg-black/40 text-white/80 backdrop-blur-md transition-colors hover:border-white/60 hover:text-white"
+          aria-label="복습 알림"
+          onClick={toggleReviewQueue}
+          className="relative flex h-10 w-10 items-center justify-center rounded-full border border-white/20 bg-black/40 backdrop-blur-md transition-colors hover:border-white/60"
         >
-          <MoreVertical size={18} />
+          <span
+            className={`h-3 w-3 rounded-full transition-colors ${
+              dueReviewQueue.length > 0 ? "bg-red-500" : "bg-white/25"
+            }`}
+          />
+          {dueReviewQueue.length > 0 && (
+            <span className="absolute -right-1 -top-1 flex h-4 w-4 items-center justify-center rounded-full bg-red-500 text-[9px] font-bold text-white">
+              {dueReviewQueue.length}
+            </span>
+          )}
         </button>
 
-        {toolsOpen && (
-          <div className="absolute right-0 top-12 flex w-36 flex-col gap-1 rounded-xl border border-white/15 bg-neutral-950/90 p-2 shadow-xl backdrop-blur-md">
-            <button
-              type="button"
-              onClick={() => {
-                handleExport()
-                setToolsOpen(false)
-              }}
-              className="rounded-lg px-3 py-2 text-left text-xs text-white/75 hover:bg-white/10"
-            >
-              내보내기
-            </button>
+        <div className="relative">
+          <button
+            type="button"
+            aria-label="메뉴 열기"
+            onClick={toggleTools}
+            className="flex h-10 w-10 items-center justify-center rounded-full border border-white/20 bg-black/40 text-white/80 backdrop-blur-md transition-colors hover:border-white/60 hover:text-white"
+          >
+            <MoreVertical size={18} />
+          </button>
 
-            <button
-              type="button"
-              onClick={() => {
-                fileInputRef.current?.click()
-                setToolsOpen(false)
-              }}
-              className="rounded-lg px-3 py-2 text-left text-xs text-white/75 hover:bg-white/10"
-            >
-              불러오기
-            </button>
+          {toolsOpen && (
+            <div className="absolute right-0 top-12 flex w-36 flex-col gap-1 rounded-xl border border-white/15 bg-neutral-950/90 p-2 shadow-xl backdrop-blur-md">
+              <button
+                type="button"
+                onClick={() => {
+                  handleExport()
+                  setToolsOpen(false)
+                }}
+                className="rounded-lg px-3 py-2 text-left text-xs text-white/75 hover:bg-white/10"
+              >
+                내보내기
+              </button>
 
-            <button
-              type="button"
-              onClick={() => {
-                handleReset()
-                setToolsOpen(false)
-              }}
-              className="rounded-lg px-3 py-2 text-left text-xs text-red-200/75 hover:bg-red-400/10"
-            >
-              초기화
-            </button>
-          </div>
-        )}
+              <button
+                type="button"
+                onClick={() => {
+                  fileInputRef.current?.click()
+                  setToolsOpen(false)
+                }}
+                className="rounded-lg px-3 py-2 text-left text-xs text-white/75 hover:bg-white/10"
+              >
+                불러오기
+              </button>
+
+              <button
+                type="button"
+                onClick={() => {
+                  handleReset()
+                  setToolsOpen(false)
+                }}
+                className="rounded-lg px-3 py-2 text-left text-xs text-red-200/75 hover:bg-red-400/10"
+              >
+                초기화
+              </button>
+            </div>
+          )}
+        </div>
 
         <input
           ref={fileInputRef}
@@ -1641,7 +1688,7 @@ export function SkillConstellation() {
         </div>
       </div>
 
-      {dueReviewQueue.length > 0 && (
+      {reviewQueueOpen && (
         <aside
           data-overlay-interactive
           className={`${panelClass} z-50 border border-white/15 p-4 text-sm shadow-2xl backdrop-blur-xl ${
@@ -1651,48 +1698,96 @@ export function SkillConstellation() {
           onPointerDown={(event) => event.stopPropagation()}
           onClick={(event) => event.stopPropagation()}
         >
+          <button
+            type="button"
+            aria-label="닫기"
+            onClick={() => setReviewQueueOpen(false)}
+            className="absolute right-4 top-4 text-white/45 transition-colors hover:text-white"
+          >
+            ✕
+          </button>
+
           <p className="pr-7 text-[11px] tracking-[0.13em] text-amber-200/80">
-            복습 알림 ({dueReviewQueue.length})
+            복습 알림
           </p>
 
           <h2
-            className={`mt-1 cursor-pointer pr-7 font-bold leading-snug text-white transition-colors ${
+            className={`mt-1 pr-7 font-bold leading-snug text-white ${
               isCompact ? compactTitleScale : "text-base md:text-lg"
             }`}
-            onClick={() => selectStar(dueReviewQueue[0].id)}
           >
-            {dueReviewQueue[0].name}
+            복습 필요 ({dueReviewQueue.length})
           </h2>
 
-          <p className={`mt-1 ${isCompact ? compactTextScale : "text-[13px]"} text-amber-200/85`}>
-            {dueReviewQueue[0].milestone.label} 경과 (D+{dueReviewQueue[0].elapsedDays}) — 복습이 필요합니다
-          </p>
+          <section className="mt-4 flex flex-col gap-2">
+            {dueReviewQueue.length === 0 && (
+              <p className={`${isCompact ? compactTextScale : "text-[13px]"} text-white/35`}>
+                복습이 필요한 항목이 없습니다.
+              </p>
+            )}
 
-          <div className="mt-5 flex justify-end gap-2">
-            <button
-              type="button"
-              onClick={() => selectStar(dueReviewQueue[0].id)}
-              className="rounded-md border border-white/22 px-3 py-2 text-[11px] text-white/78 transition-colors hover:border-amber-100/80 hover:text-amber-50 md:text-[12px]"
-            >
-              열기
-            </button>
+            {dueReviewQueue.map((item) => (
+              <label
+                key={`${item.id}-${item.milestone.key}`}
+                className="flex cursor-pointer items-start gap-2.5 rounded-md border border-white/10 bg-black/24 p-2.5 transition-colors hover:border-amber-100/40"
+              >
+                <input
+                  type="checkbox"
+                  checked={false}
+                  onChange={() => dismissDueReview(item.id, item.milestone.key)}
+                  className="mt-0.5 h-4 w-4 shrink-0 accent-amber-300"
+                />
 
-            <button
-              type="button"
-              onClick={() =>
-                dismissDueReview(dueReviewQueue[0].id, dueReviewQueue[0].milestone.key)
-              }
-              className="rounded-md border border-amber-200/40 px-3 py-2 text-[11px] text-amber-200 transition-colors hover:bg-amber-200/10 md:text-[12px]"
-            >
-              복습완료
-            </button>
-          </div>
+                <span className="flex-1">
+                  <button
+                    type="button"
+                    onClick={(event) => {
+                      event.preventDefault()
+                      selectStar(item.id)
+                    }}
+                    className={`${
+                      isCompact ? compactTextScale : "text-[13px]"
+                    } font-semibold text-amber-200 hover:underline`}
+                  >
+                    {item.name}
+                  </button>
+                  <span className="ml-2 text-[11px] text-white/55">
+                    {item.milestone.label} 경과 (D+{item.elapsedDays})
+                  </span>
+                </span>
+              </label>
+            ))}
+          </section>
 
-          {dueReviewQueue.length > 1 && (
-            <p className="mt-4 text-[10px] tracking-wider text-white/35">
-              다음 대기: {dueReviewQueue.length - 1}건
-            </p>
-          )}
+          <div className="mt-6 w-full border-t border-white/12" />
+
+          <section className="mt-4 flex flex-col gap-2">
+            <h3 className="text-[11px] tracking-[0.13em] text-white/45">
+              복습완료 ({completedTodayList.length})
+            </h3>
+
+            {completedTodayList.length === 0 && (
+              <p className="text-[12px] text-white/30">오늘 완료한 항목이 없습니다.</p>
+            )}
+
+            {completedTodayList.map((item) => (
+              <div
+                key={`${item.id}-${item.milestoneKey}`}
+                className="flex items-center gap-2.5 rounded-md border border-white/8 bg-black/15 p-2.5 opacity-60"
+              >
+                <input
+                  type="checkbox"
+                  checked
+                  disabled
+                  className="h-4 w-4 shrink-0 accent-amber-300"
+                />
+                <span className={`${isCompact ? compactTextScale : "text-[13px]"} text-white/60`}>
+                  {item.name}
+                  <span className="ml-2 text-[11px] text-white/35">{item.milestoneLabel} 완료</span>
+                </span>
+              </div>
+            ))}
+          </section>
         </aside>
       )}
 

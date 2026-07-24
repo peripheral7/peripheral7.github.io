@@ -284,7 +284,7 @@ function occupancyFor(childCount: number, maxDepth: number) {
 
 // 수정 — 자식 1개(체인) 구간을 더 짧게
 const EDGE_MULTIPLIER_BY_CHILD_COUNT: Record<number, number> = {
-  0: 0.8,
+  0: 0.45,
   1: 0.45,
   2: 0.6,
   3: 1.0,
