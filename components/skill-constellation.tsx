@@ -12,10 +12,13 @@ type LogEntry = {
   text: string
 }
 
+type ReviewMilestone = "d5" | "d10" | "d20"
+
 type StarProgress = {
   acquired: boolean
   logs: LogEntry[]
   reinforced?: boolean
+  reviewDismissed?: Partial<Record<ReviewMilestone, boolean>>
 }
 
 type ProgressMap = Record<string, StarProgress>
@@ -37,8 +40,6 @@ const Y_SPACING = 220
 
 const WIDE_PANEL_RIGHT = 64
 const WIDE_PANEL_TOP_BOTTOM = 64
-
-const COMPACT_PANEL_MARGIN = "10%"
 
 const MOBILE_BP = 768
 const NARROW_BP = 1300
@@ -65,7 +66,12 @@ const EDGE_ACQUIRED_ALPHA = 0.48 * EDGE_BRIGHTNESS_SCALE
 const OFFSCREEN_CHECK_MARGIN = 48
 const EDGE_LABEL_MARGIN = 16
 
-// 별 선택 효과음
+const REVIEW_MILESTONES: { key: ReviewMilestone; days: number; label: string }[] = [
+  { key: "d20", days: 20, label: "20일" },
+  { key: "d10", days: 10, label: "10일" },
+  { key: "d5", days: 5, label: "5일" },
+]
+
 let sharedAudioCtx: AudioContext | null = null
 
 function playStarMoveSound() {
@@ -144,7 +150,6 @@ function formatDateYMD(date: Date) {
   const year = date.getFullYear()
   const month = String(date.getMonth() + 1).padStart(2, "0")
   const day = String(date.getDate()).padStart(2, "0")
-
   return `${year}/${month}/${day}`
 }
 
@@ -165,7 +170,6 @@ function rubberBand(
 ) {
   if (value < min) return min - (min - value) * resistance
   if (value > max) return max + (value - max) * resistance
-
   return value
 }
 
@@ -183,7 +187,6 @@ function wrapLabel(name: string): [string, string?] {
       breakIndex = left
       break
     }
-
     if (name[right] === " ") {
       breakIndex = right
       break
@@ -192,10 +195,7 @@ function wrapLabel(name: string): [string, string?] {
 
   if (breakIndex === -1) breakIndex = center
 
-  return [
-    name.slice(0, breakIndex).trim(),
-    name.slice(breakIndex).trim(),
-  ]
+  return [name.slice(0, breakIndex).trim(), name.slice(breakIndex).trim()]
 }
 
 function escapeHtml(value: string) {
@@ -205,14 +205,11 @@ function escapeHtml(value: string) {
     .replace(/>/g, "&gt;")
 }
 
-// ── 마크다운 인라인 렌더링: 화살표, 위키링크, 코드, 굵게, 기울임 ──
 function renderInline(text: string, nameToId: Map<string, string>) {
   let out = escapeHtml(text)
 
-  // -> 를 화살표로
   out = out.replace(/-&gt;/g, "→")
 
-  // 위키링크 [[별 제목]]
   out = out.replace(/\[\[(.+?)\]\]/g, (_match, title: string) => {
     const trimmedTitle = title.trim()
     const targetId = nameToId.get(trimmedTitle)
@@ -222,20 +219,28 @@ function renderInline(text: string, nameToId: Map<string, string>) {
     return `<button type="button" data-star-link="${targetId}" class="text-amber-200 underline underline-offset-2 hover:text-amber-100">${trimmedTitle}</button>`
   })
 
-  // 인라인 코드
   out = out.replace(
     /`([^`]+)`/g,
     '<code class="rounded bg-white/10 px-1 py-0.5 font-mono text-[0.9em]">$1</code>',
   )
-  // 굵게
   out = out.replace(/\*\*(.+?)\*\*/g, "<strong>$1</strong>")
-  // 기울임
   out = out.replace(/\*(.+?)\*/g, "<em>$1</em>")
 
   return out
 }
 
-// ── 마크다운 블록 렌더링: 헤더(## / ###), 리스트(중첩 지원) ──
+// 줄 앞쪽 공백(탭으로 삽입된 들여쓰기)을 &nbsp;로 변환해
+// 렌더링 시 브라우저가 연속 공백을 하나로 뭉치지 않고 그대로 보이도록 함
+function preserveLeadingWhitespace(line: string): { indentHtml: string; rest: string } {
+  const match = line.match(/^( +)/)
+  if (!match) return { indentHtml: "", rest: line }
+
+  return {
+    indentHtml: "&nbsp;".repeat(match[1].length),
+    rest: line.slice(match[1].length),
+  }
+}
+
 function renderMarkdown(text: string, nameToId: Map<string, string>) {
   const lines = text.split("\n")
   const htmlLines: string[] = []
@@ -293,7 +298,8 @@ function renderMarkdown(text: string, nameToId: Map<string, string>) {
     if (rawLine.trim() === "") {
       htmlLines.push("<br/>")
     } else {
-      htmlLines.push(`<div>${renderInline(rawLine, nameToId)}</div>`)
+      const { indentHtml, rest } = preserveLeadingWhitespace(rawLine)
+      htmlLines.push(`<div>${indentHtml}${renderInline(rest, nameToId)}</div>`)
     }
   }
 
@@ -321,7 +327,6 @@ function clipSegmentToRect(
       if (q[i] < 0) return null
     } else {
       const r = q[i] / p[i]
-
       if (p[i] < 0) {
         if (r > u2) return null
         if (r > u1) u1 = r
@@ -341,12 +346,10 @@ function sideOfPoint(
   rect: { left: number; top: number; right: number; bottom: number },
 ): EdgeSide {
   const EPS = 0.75
-
   if (Math.abs(x - rect.left) < EPS) return "left"
   if (Math.abs(x - rect.right) < EPS) return "right"
   if (Math.abs(y - rect.top) < EPS) return "top"
   if (Math.abs(y - rect.bottom) < EPS) return "bottom"
-
   return "top"
 }
 
@@ -440,7 +443,6 @@ function getTier(
   }
 }
 
-// ── 별 위치: 웹은 좌측 2/3 중앙, 모바일/태블릿은 하단 3/5 중앙 ──
 function getFocal(
   mode: LayoutMode,
   hasSelection: boolean,
@@ -459,8 +461,7 @@ function getFocal(
     return { x: width / 2, y: height * centerY }
   }
 
-  // wide: 별은 좌측 2/3 영역 중앙 (입력 패널이 우측 1/3을 차지)
-  return { x: width * (1 / 3), y: height / 2 }
+  return { x: width * (1 / 2), y: height / 2 }
 }
 
 const SELECTED_GLOW_FILTER =
@@ -517,9 +518,7 @@ export function SkillConstellation() {
   const [loaded, setLoaded] = useState(false)
   const [toolsOpen, setToolsOpen] = useState(false)
   const [searchQuery, setSearchQuery] = useState("")
-  const searchInputRef = useRef<HTMLInputElement>(null)
 
-  // 별 id별 입력 중이던 복습 초안(패널을 닫아도 유지됨)
   const [reviewDrafts, setReviewDrafts] = useState<Record<string, string>>({})
   const reviewInput = selectedId ? reviewDrafts[selectedId] ?? "" : ""
 
@@ -528,7 +527,6 @@ export function SkillConstellation() {
     setReviewDrafts((previous) => ({ ...previous, [selectedId]: value }))
   }
 
-  // 복습 기록 수정 상태
   const [editingLog, setEditingLog] = useState<{
     starId: string
     index: number
@@ -554,6 +552,7 @@ export function SkillConstellation() {
   const wheelTimeout = useRef<number | undefined>(undefined)
   const fileInputRef = useRef<HTMLInputElement>(null)
   const reviewInputRef = useRef<HTMLTextAreaElement>(null)
+  const searchInputRef = useRef<HTMLInputElement>(null)
 
   useEffect(() => {
     function updateStage() {
@@ -565,7 +564,6 @@ export function SkillConstellation() {
 
     updateStage()
     window.addEventListener("resize", updateStage)
-
     return () => window.removeEventListener("resize", updateStage)
   }, [])
 
@@ -589,7 +587,6 @@ export function SkillConstellation() {
 
   useEffect(() => {
     if (!loaded) return
-
     try {
       localStorage.setItem(STORAGE_KEY, JSON.stringify(progress))
     } catch {
@@ -599,7 +596,6 @@ export function SkillConstellation() {
 
   useEffect(() => {
     if (!loaded) return
-
     try {
       localStorage.setItem(DRAFTS_STORAGE_KEY, JSON.stringify(reviewDrafts))
     } catch {
@@ -607,7 +603,21 @@ export function SkillConstellation() {
     }
   }, [loaded, reviewDrafts])
 
+  // Ctrl+F(Cmd+F)를 가로채 상단 검색창으로 포커스
+  useEffect(() => {
+    function onKeyDown(event: KeyboardEvent) {
+      const isFindShortcut =
+        (event.ctrlKey || event.metaKey) && event.key.toLowerCase() === "f"
+      if (!isFindShortcut) return
 
+      event.preventDefault()
+      searchInputRef.current?.focus()
+      searchInputRef.current?.select()
+    }
+
+    window.addEventListener("keydown", onKeyDown)
+    return () => window.removeEventListener("keydown", onKeyDown)
+  }, [])
 
   const layoutMode: LayoutMode =
     stage.width < MOBILE_BP
@@ -635,7 +645,6 @@ export function SkillConstellation() {
 
   useEffect(() => {
     if (!selectedId) return
-
     const node = positions.get(selectedId)
     if (!node) return
 
@@ -649,30 +658,11 @@ export function SkillConstellation() {
 
   useEffect(() => {
     if (!selectedId) return
-
     const timer = window.setTimeout(() => {
       reviewInputRef.current?.focus()
     }, FOCUS_DELAY_MS)
-
     return () => window.clearTimeout(timer)
   }, [selectedId])
-
-  // 검색창ctrl+f
-  useEffect(() => {
-    function onKeyDown(event: KeyboardEvent) {
-      const isFindShortcut =
-        (event.ctrlKey || event.metaKey) && event.key.toLowerCase() === "f"
-
-      if (!isFindShortcut) return
-
-      event.preventDefault()
-      searchInputRef.current?.focus()
-      searchInputRef.current?.select()
-    }
-
-    window.addEventListener("keydown", onKeyDown)
-    return () => window.removeEventListener("keydown", onKeyDown)
-  }, [])
 
   function toggleAcquired(starId: string) {
     setProgress((previous) => {
@@ -680,7 +670,6 @@ export function SkillConstellation() {
         acquired: false,
         logs: [],
       }
-
       return {
         ...previous,
         [starId]: {
@@ -711,7 +700,6 @@ export function SkillConstellation() {
         const differenceDays = Math.floor(
           (now.getTime() - lastDate.getTime()) / 86400000,
         )
-
         if (differenceDays >= REINFORCE_GAP_DAYS) {
           reinforced = true
         }
@@ -729,6 +717,8 @@ export function SkillConstellation() {
           acquired: true,
           logs: [...current.logs, entry],
           reinforced,
+          // 새로 기록하면 복습 경과일이 리셋되므로 알림 해제 상태도 초기화
+          reviewDismissed: {},
         },
       }
     })
@@ -771,14 +761,42 @@ export function SkillConstellation() {
     })
   }
 
-  function handleReviewKeyDown(event: React.KeyboardEvent<HTMLTextAreaElement>) {
+  function dismissDueReview(starId: string, milestoneKey: ReviewMilestone) {
+    setProgress((previous) => {
+      const current = previous[starId]
+      if (!current) return previous
+
+      return {
+        ...previous,
+        [starId]: {
+          ...current,
+          reviewDismissed: {
+            ...current.reviewDismissed,
+            [milestoneKey]: true,
+          },
+        },
+      }
+    })
+  }
+
+  // 공용: Enter/Shift+Enter/Tab 처리
+  // - Tab: 스페이스 4개 삽입(들여쓰기)
+  // - Enter(단독): 현재 줄 앞에 들여쓰기(공백)가 있으면 "그 들여쓰기를 유지한 채 줄바꿈"
+  //                들여쓰기가 없으면 "저장/제출"
+  // - Shift+Enter / Cmd+Enter: 항상 줄바꿈(들여쓰기 유지 없이 그대로)
+  function handleStructuredKeyDown(
+    event: React.KeyboardEvent<HTMLTextAreaElement>,
+    value: string,
+    setValue: (next: string) => void,
+    onSubmit: () => void,
+  ) {
     if (event.key === "Tab") {
       event.preventDefault()
       const el = event.currentTarget
       const start = el.selectionStart
       const end = el.selectionEnd
-      const next = reviewInput.slice(0, start) + "    " + reviewInput.slice(end)
-      setReviewInput(next)
+      const next = value.slice(0, start) + "    " + value.slice(end)
+      setValue(next)
       requestAnimationFrame(() => {
         el.selectionStart = el.selectionEnd = start + 4
       })
@@ -787,26 +805,59 @@ export function SkillConstellation() {
 
     if (event.key !== "Enter") return
 
+    const el = event.currentTarget
+    const start = el.selectionStart
+    const end = el.selectionEnd
+
     if (event.shiftKey || event.metaKey) {
-      // Shift+Enter: 줄바꿈 삽입
       event.preventDefault()
-      const el = event.currentTarget
-      const start = el.selectionStart
-      const end = el.selectionEnd
-      const next = reviewInput.slice(0, start) + "\n" + reviewInput.slice(end)
-      setReviewInput(next)
+      const next = value.slice(0, start) + "\n" + value.slice(end)
+      setValue(next)
       requestAnimationFrame(() => {
         el.selectionStart = el.selectionEnd = start + 1
+        el.scrollIntoView({ block: "nearest" })
       })
       return
     }
 
-    // 단독 Enter: 기록 제출
+    // 단독 Enter: 현재 줄의 들여쓰기(탭으로 삽입된 공백) 유지 여부 확인
+    const lineStart = value.lastIndexOf("\n", start - 1) + 1
+    const currentLine = value.slice(lineStart, start)
+    const indentMatch = currentLine.match(/^ +/)
+
+    if (indentMatch) {
+      event.preventDefault()
+      const indent = indentMatch[0]
+      const next = value.slice(0, start) + "\n" + indent + value.slice(end)
+      setValue(next)
+      requestAnimationFrame(() => {
+        el.selectionStart = el.selectionEnd = start + 1 + indent.length
+        el.scrollIntoView({ block: "nearest" })
+      })
+      return
+    }
+
+    // 들여쓰기 없는 줄: 저장/제출
     event.preventDefault()
-    if (selectedId) {
+    onSubmit()
+  }
+
+  function handleReviewKeyDown(event: React.KeyboardEvent<HTMLTextAreaElement>) {
+    handleStructuredKeyDown(event, reviewInput, setReviewInput, () => {
+      if (!selectedId) return
       addLog(selectedId, reviewInput)
       setReviewDrafts((previous) => ({ ...previous, [selectedId]: "" }))
-    }
+    })
+  }
+
+  function handleEditKeyDown(event: React.KeyboardEvent<HTMLTextAreaElement>) {
+    if (!editingLog) return
+    handleStructuredKeyDown(
+      event,
+      editingLog.text,
+      (next) => setEditingLog({ ...editingLog, text: next }),
+      () => updateLog(editingLog.starId, editingLog.index, editingLog.text),
+    )
   }
 
   function onPointerDown(event: React.PointerEvent<HTMLDivElement>) {
@@ -835,7 +886,6 @@ export function SkillConstellation() {
         startCamY: camera.y,
         moved: false,
       }
-
       return
     }
 
@@ -876,7 +926,6 @@ export function SkillConstellation() {
           0.4,
         ),
       }))
-
       return
     }
 
@@ -888,7 +937,6 @@ export function SkillConstellation() {
     if (Math.abs(dx) > 4 || Math.abs(dy) > 4) {
       dragRef.current.moved = true
     }
-
     if (!dragRef.current.moved) return
 
     const nextX = dragRef.current.startCamX - dx / camera.zoom
@@ -911,7 +959,6 @@ export function SkillConstellation() {
     if (pointers.current.size < 2 && pinchRef.current?.active) {
       pinchRef.current = null
       setSmooth(true)
-
       setCamera((current) => ({
         ...current,
         zoom: clamp(current.zoom, ZOOM_MIN, ZOOM_MAX),
@@ -921,7 +968,6 @@ export function SkillConstellation() {
     if (pointers.current.size === 0) {
       dragRef.current.active = false
       setSmooth(true)
-
       setCamera((current) => ({
         ...current,
         x: clamp(current.x, bounds.minX, bounds.maxX),
@@ -968,7 +1014,6 @@ export function SkillConstellation() {
 
     wheelTimeout.current = window.setTimeout(() => {
       setSmooth(true)
-
       setCamera((current) => ({
         x: clamp(current.x, bounds.minX, bounds.maxX),
         y: clamp(current.y, bounds.minY, bounds.maxY),
@@ -997,7 +1042,6 @@ export function SkillConstellation() {
     reader.onload = () => {
       try {
         const parsed = JSON.parse(String(reader.result))
-
         if (confirm("불러온 파일로 현재 진행상황을 덮어쓸까요?")) {
           setProgress(parsed)
         }
@@ -1011,7 +1055,6 @@ export function SkillConstellation() {
 
   function handleReset() {
     if (!confirm("모든 습득 기록과 복습 로그를 초기화할까요?")) return
-
     setProgress({})
     localStorage.removeItem(STORAGE_KEY)
   }
@@ -1088,7 +1131,6 @@ export function SkillConstellation() {
           otherScreen.y,
           rect,
         )
-
         if (!clipped) return null
 
         const side = sideOfPoint(clipped.x, clipped.y, rect)
@@ -1104,7 +1146,6 @@ export function SkillConstellation() {
       .filter((label): label is NonNullable<typeof label> => label !== null)
   }, [selectedId, edges, positions, stage.width, stage.height, camera, worldTransform.left, worldTransform.top])
 
-  // 상단 검색: 별 제목 + 복습 내용
   const searchResults = useMemo(() => {
     const q = searchQuery.trim().toLowerCase()
     if (!q) return []
@@ -1135,8 +1176,43 @@ export function SkillConstellation() {
     return results.slice(0, 8)
   }, [searchQuery, nodeList, progress])
 
+  // 경과일 기준 복습 필요 큐 (가장 오래 경과된 항목부터, 마일스톤별 개별 dismiss)
+  const dueReviewQueue = useMemo(() => {
+    const now = new Date()
+
+    const items = nodeList
+      .map((node) => {
+        const status = progress[node.id]
+        if (!status || status.logs.length === 0) return null
+
+        const lastLog = status.logs[status.logs.length - 1]
+        const lastDate = parseYMD(lastLog.date)
+        const elapsedDays = Math.floor(
+          (now.getTime() - lastDate.getTime()) / 86400000,
+        )
+
+        const dismissed = status.reviewDismissed ?? {}
+        const milestone = REVIEW_MILESTONES.find(
+          (m) => elapsedDays >= m.days && !dismissed[m.key],
+        )
+        if (!milestone) return null
+
+        return {
+          id: node.id,
+          name: node.name,
+          elapsedDays,
+          milestone,
+        }
+      })
+      .filter((item): item is NonNullable<typeof item> => item !== null)
+      .sort((a, b) => b.elapsedDays - a.elapsedDays)
+
+    return items
+  }, [nodeList, progress])
+
   let panelClass = ""
   let panelStyle: React.CSSProperties = {}
+  let dueQueuePanelStyle: React.CSSProperties = {}
 
   if (layoutMode === "mobile" || layoutMode === "narrow") {
     panelClass = "fixed rounded-2xl overflow-y-auto skill-panel-scroll"
@@ -1145,6 +1221,13 @@ export function SkillConstellation() {
       left: "2.5%",
       right: "2.5%",
       height: "37.5%",
+      backgroundColor: "rgba(10, 10, 15, 0.3)",
+    }
+    dueQueuePanelStyle = {
+      bottom: "2.5%",
+      left: "2.5%",
+      right: "2.5%",
+      height: "20%",
       backgroundColor: "rgba(10, 10, 15, 0.3)",
     }
   } else {
@@ -1157,6 +1240,14 @@ export function SkillConstellation() {
       maxWidth: "28rem",
       backgroundColor: "rgba(10, 10, 15, 0.3)",
     }
+    dueQueuePanelStyle = {
+      top: `${WIDE_PANEL_TOP_BOTTOM}px`,
+      left: `${WIDE_PANEL_RIGHT}px`,
+      bottom: `${WIDE_PANEL_TOP_BOTTOM}px`,
+      width: "33.33vw",
+      maxWidth: "28rem",
+      backgroundColor: "rgba(10, 10, 15, 0.3)",
+    }
   }
 
   const isCompact = layoutMode === "mobile" || layoutMode === "narrow"
@@ -1164,7 +1255,6 @@ export function SkillConstellation() {
   const compactTitleScale = layoutMode === "mobile" ? "text-lg" : "text-xl"
   const compactPadding = layoutMode === "mobile" ? "p-4" : "p-5"
 
-  // 위키링크/삭제/수정 버튼 클릭 시 이벤트 위임
   function handleLogAreaClick(event: React.MouseEvent<HTMLDivElement>) {
     const target = (event.target as HTMLElement).closest("[data-star-link]")
     const targetId = target?.getAttribute("data-star-link")
@@ -1210,7 +1300,6 @@ export function SkillConstellation() {
         </Link>
       )}
 
-      {/* 상단 검색 바 */}
       <div
         data-overlay-interactive
         className="fixed left-1/2 top-4 z-50 w-[min(90vw,420px)] -translate-x-1/2"
@@ -1347,7 +1436,6 @@ export function SkillConstellation() {
             {edges.map(([from, to]) => {
               const start = positions.get(from)
               const end = positions.get(to)
-
               if (!start || !end) return null
 
               const bothAcquired = Boolean(
@@ -1553,6 +1641,61 @@ export function SkillConstellation() {
         </div>
       </div>
 
+      {dueReviewQueue.length > 0 && (
+        <aside
+          data-overlay-interactive
+          className={`${panelClass} z-50 border border-white/15 p-4 text-sm shadow-2xl backdrop-blur-xl ${
+            isCompact ? compactPadding : "md:p-5"
+          }`}
+          style={dueQueuePanelStyle}
+          onPointerDown={(event) => event.stopPropagation()}
+          onClick={(event) => event.stopPropagation()}
+        >
+          <p className="pr-7 text-[11px] tracking-[0.13em] text-amber-200/80">
+            복습 알림 ({dueReviewQueue.length})
+          </p>
+
+          <h2
+            className={`mt-1 cursor-pointer pr-7 font-bold leading-snug text-white transition-colors ${
+              isCompact ? compactTitleScale : "text-base md:text-lg"
+            }`}
+            onClick={() => selectStar(dueReviewQueue[0].id)}
+          >
+            {dueReviewQueue[0].name}
+          </h2>
+
+          <p className={`mt-1 ${isCompact ? compactTextScale : "text-[13px]"} text-amber-200/85`}>
+            {dueReviewQueue[0].milestone.label} 경과 (D+{dueReviewQueue[0].elapsedDays}) — 복습이 필요합니다
+          </p>
+
+          <div className="mt-5 flex justify-end gap-2">
+            <button
+              type="button"
+              onClick={() => selectStar(dueReviewQueue[0].id)}
+              className="rounded-md border border-white/22 px-3 py-2 text-[11px] text-white/78 transition-colors hover:border-amber-100/80 hover:text-amber-50 md:text-[12px]"
+            >
+              열기
+            </button>
+
+            <button
+              type="button"
+              onClick={() =>
+                dismissDueReview(dueReviewQueue[0].id, dueReviewQueue[0].milestone.key)
+              }
+              className="rounded-md border border-amber-200/40 px-3 py-2 text-[11px] text-amber-200 transition-colors hover:bg-amber-200/10 md:text-[12px]"
+            >
+              복습완료
+            </button>
+          </div>
+
+          {dueReviewQueue.length > 1 && (
+            <p className="mt-4 text-[10px] tracking-wider text-white/35">
+              다음 대기: {dueReviewQueue.length - 1}건
+            </p>
+          )}
+        </aside>
+      )}
+
       {selectedNode && (
         <aside
           data-overlay-interactive
@@ -1592,8 +1735,17 @@ export function SkillConstellation() {
               <textarea
                 ref={reviewInputRef}
                 value={reviewInput}
-                onChange={(event) => setReviewInput(event.target.value)}
+                onChange={(event) => {
+                  setReviewInput(event.target.value)
+                  const el = event.currentTarget
+                  requestAnimationFrame(() => {
+                    el.scrollIntoView({ block: "nearest" })
+                  })
+                }}
                 onKeyDown={handleReviewKeyDown}
+                onKeyUp={(event) => {
+                  event.currentTarget.scrollIntoView({ block: "nearest" })
+                }}
                 rows={isCompact ? 3 : 5}
                 className={`w-full resize-none rounded-md border border-white/18 bg-black/35 px-2.5 py-2 ${
                   isCompact ? compactTextScale : "text-[13px]"
@@ -1648,8 +1800,11 @@ export function SkillConstellation() {
                             const el = event.currentTarget
                             requestAnimationFrame(() => {
                               el.scrollIntoView({ block: "nearest" })
-                              el.scrollTop = el.scrollHeight
                             })
+                          }}
+                          onKeyDown={handleEditKeyDown}
+                          onKeyUp={(event) => {
+                            event.currentTarget.scrollIntoView({ block: "nearest" })
                           }}
                           rows={isCompact ? 3 : 5}
                           className={`w-full resize-none rounded-md border border-white/18 bg-black/35 px-2.5 py-2 ${
