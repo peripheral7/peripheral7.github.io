@@ -498,11 +498,13 @@ type Tier = {
   shadow: string
 }
 
+
 function getTier(
   isRoot: boolean,
   acquired: boolean,
   reinforced: boolean,
-  hasLogs: boolean,
+  logCount: number,
+  reviewCount: number,
 ): Tier {
   if (isRoot) {
     return {
@@ -512,7 +514,27 @@ function getTier(
         "drop-shadow(0 0 3px rgba(255,255,255,0.9)) drop-shadow(0 0 10px rgba(255,255,255,0.6))",
     }
   }
-  if (reinforced) {
+
+  const logs = Math.min(logCount, 3)
+  const reviews = Math.min(reviewCount, 3)
+
+  if (reviews >= 3) {
+    return {
+      rgb: "255,255,255",
+      fillAlpha: 1,
+      shadow:
+        "drop-shadow(0 0 4px rgba(255,255,255,1)) drop-shadow(0 0 12px rgba(255,210,120,0.85)) drop-shadow(0 0 26px rgba(255,190,90,0.6)) drop-shadow(0 0 42px rgba(255,170,60,0.35))",
+    }
+  }
+  if (reviews === 2) {
+    return {
+      rgb: "255,222,150",
+      fillAlpha: 1,
+      shadow:
+        "drop-shadow(0 0 3px rgba(255,222,150,0.95)) drop-shadow(0 0 14px rgba(255,200,110,0.6)) drop-shadow(0 0 24px rgba(255,180,90,0.3))",
+    }
+  }
+  if (reviews === 1 || (reviews === 0 && reinforced)) {
     return {
       rgb: "255,214,140",
       fillAlpha: 1,
@@ -520,18 +542,34 @@ function getTier(
         "drop-shadow(0 0 3px rgba(255,214,140,0.9)) drop-shadow(0 0 10px rgba(255,214,140,0.6))",
     }
   }
-  if (hasLogs) {
+
+  if (logs >= 3) {
     return {
       rgb: "255,224,168",
       fillAlpha: 0.97,
-      shadow: "drop-shadow(0 0 2px rgba(255,224,168,0.6))",
+      shadow:
+        "drop-shadow(0 0 2px rgba(255,224,168,0.65)) drop-shadow(0 0 6px rgba(255,224,168,0.3))",
     }
   }
-  if (acquired) {
+  if (logs === 2) {
+    return {
+      rgb: "240,213,178",
+      fillAlpha: 0.92,
+      shadow: "drop-shadow(0 0 2px rgba(240,213,178,0.5))",
+    }
+  }
+  if (logs === 1) {
     return {
       rgb: "225,205,175",
       fillAlpha: 0.88,
       shadow: "drop-shadow(0 0 2px rgba(225,205,175,0.5))",
+    }
+  }
+  if (acquired) {
+    return {
+      rgb: "205,195,180",
+      fillAlpha: 0.82,
+      shadow: "drop-shadow(0 0 1px rgba(205,195,180,0.35))",
     }
   }
   return {
@@ -541,6 +579,7 @@ function getTier(
   }
 }
 
+
 // 복습 회차(reviewCycle)에 따른 코멘트 카드 테두리/발광 스타일. 0(없음)=기존 그대로, 1→2→3 순으로 노란빛이 점점 밝아짐. 얇게 유지
 function getReviewCardStyle(cycle: ReviewCycle | undefined): {
   borderClass: string
@@ -549,18 +588,20 @@ function getReviewCardStyle(cycle: ReviewCycle | undefined): {
   switch (cycle) {
     case 1:
       return {
-        borderClass: "border-amber-900/45",
-        boxShadow: "0 0 2px rgba(160,125,40,0.2)",
+        borderClass: "border-amber-700/50",
+        boxShadow: "0 0 3px rgba(200,150,60,0.35)",
       }
     case 2:
       return {
-        borderClass: "border-amber-600/55",
-        boxShadow: "0 0 3px rgba(220,165,55,0.3)",
+        borderClass: "border-amber-500/60",
+        boxShadow:
+          "0 0 5px rgba(230,175,70,0.45), 0 0 10px rgba(230,175,70,0.18)",
       }
     case 3:
       return {
-        borderClass: "border-amber-400/65",
-        boxShadow: "0 0 4px rgba(255,200,90,0.4)",
+        borderClass: "border-amber-300/75",
+        boxShadow:
+          "0 0 6px rgba(255,210,110,0.6), 0 0 14px rgba(255,200,100,0.3), 0 0 22px rgba(255,190,90,0.15)",
       }
     default:
       return { borderClass: "border-white/10", boxShadow: "none" }
@@ -702,7 +743,7 @@ function ReviewLogCard({
       {/* 회차별 상시 발광 레이어만 남김 */}
       <div
         aria-hidden
-        className="pointer-events-none absolute inset-0 overflow-hidden rounded-md"
+        className="pointer-events-none absolute inset-0 overflow-hidden rounded-md transition-shadow duration-700 ease-out"
         style={{ boxShadow: cardStyle.boxShadow }}
       />
 
@@ -2058,7 +2099,8 @@ export function SkillConstellation() {
               isRoot,
               Boolean(status?.acquired),
               Boolean(status?.reinforced),
-              hasLogs,
+              status?.logs.length ?? 0,
+              status?.reviewCount ?? 0,
             )
 
             const size = isRoot ? 35 : 26
