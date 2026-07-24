@@ -567,8 +567,9 @@ function getReviewCardStyle(cycle: ReviewCycle | undefined): {
   }
 }
 
-const FLASH_BRIGHT_SHADOW =
-  "0 0 0 2px rgba(255,240,180,0.95), 0 0 16px rgba(255,225,120,0.85)"
+const FLASH_OUTLINE_COLOR = "rgba(255,235,120,1)"
+const FLASH_GLOW_SHADOW =
+  "0 0 10px 3px rgba(255,220,110,0.95), 0 0 26px 6px rgba(255,200,80,0.7)"
 
 function getFocal(
   mode: LayoutMode,
