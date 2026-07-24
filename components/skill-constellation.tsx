@@ -6,19 +6,21 @@ import { MoreVertical, Search } from "lucide-react"
 import { skillTree, sections, layoutTree } from "@/content/appraiser/skilltree"
 import defaultProgress from "@/content/appraiser/progress.default.json"
 
+type ReviewCycle = 1 | 2 | 3
+
 type LogEntry = {
   date: string
   type: "study" | "review"
   text: string
+  reviewCycle?: ReviewCycle
 }
-
-type ReviewMilestone = "d5" | "d10" | "d20"
 
 type StarProgress = {
   acquired: boolean
   logs: LogEntry[]
   reinforced?: boolean
-  reviewDismissed?: Partial<Record<ReviewMilestone, string>>
+  reviewCount?: number
+  reviewCompletedAt?: Partial<Record<ReviewCycle, string>>
 }
 
 type ProgressMap = Record<string, StarProgress>
@@ -66,11 +68,9 @@ const EDGE_ACQUIRED_ALPHA = 0.48 * EDGE_BRIGHTNESS_SCALE
 const OFFSCREEN_CHECK_MARGIN = 48
 const EDGE_LABEL_MARGIN = 16
 
-const REVIEW_MILESTONES: { key: ReviewMilestone; days: number; label: string }[] = [
-  { key: "d20", days: 20, label: "20일" },
-  { key: "d10", days: 10, label: "10일" },
-  { key: "d5", days: 5, label: "5일" },
-]
+// 복습 3회 주기: 1회차=3일, 2회차=10일, 3회차=20일. reviewCount(완료 횟수, 0~3)가 다음 목표를 결정
+const REVIEW_THRESHOLDS = [3, 10, 20]
+const REVIEW_LABELS = ["3일", "10일", "20일"]
 
 let sharedAudioCtx: AudioContext | null = null
 
@@ -171,6 +171,65 @@ function rubberBand(
   if (value < min) return min - (min - value) * resistance
   if (value > max) return max + (value - max) * resistance
   return value
+}
+
+// caret(커서) 위치를 계산해 textarea의 scrollTop을 강제로 맞춰 caret이 항상 보이게 함
+function scrollCaretIntoView(el: HTMLTextAreaElement) {
+  const style = window.getComputedStyle(el)
+  const mirror = document.createElement("div")
+
+  const properties = [
+    "boxSizing",
+    "width",
+    "paddingTop",
+    "paddingRight",
+    "paddingBottom",
+    "paddingLeft",
+    "borderTopWidth",
+    "borderRightWidth",
+    "borderBottomWidth",
+    "borderLeftWidth",
+    "fontFamily",
+    "fontSize",
+    "fontWeight",
+    "lineHeight",
+    "letterSpacing",
+  ] as const
+
+  properties.forEach((prop) => {
+    ;(mirror.style as any)[prop] = style[prop as any]
+  })
+
+  mirror.style.position = "absolute"
+  mirror.style.visibility = "hidden"
+  mirror.style.height = "auto"
+  mirror.style.left = "-9999px"
+  mirror.style.top = "0"
+  mirror.style.whiteSpace = "pre-wrap"
+  mirror.style.wordBreak = "break-word"
+
+  const caretIndex = el.selectionStart
+  const beforeCaret = el.value.slice(0, caretIndex)
+  const marker = document.createElement("span")
+  marker.textContent = "\u200b"
+
+  mirror.textContent = beforeCaret
+  mirror.appendChild(marker)
+  document.body.appendChild(mirror)
+
+  const markerTop = marker.offsetTop
+  const markerHeight = marker.offsetHeight || parseFloat(style.lineHeight || "16")
+
+  document.body.removeChild(mirror)
+
+  const visibleTop = el.scrollTop
+  const visibleBottom = visibleTop + el.clientHeight
+
+  if (markerTop < visibleTop) {
+    el.scrollTop = markerTop
+  } else if (markerTop + markerHeight > visibleBottom) {
+    el.scrollTop = markerTop + markerHeight - el.clientHeight
+  }
 }
 
 function wrapLabel(name: string): [string, string?] {
@@ -441,6 +500,32 @@ function getTier(
   }
 }
 
+// 복습 회차(reviewCycle)에 따른 코멘트 카드 테두리/발광 스타일. 0(없음)=기존 그대로, 1→2→3 순으로 노란빛이 점점 밝아짐. 얇게 유지
+function getReviewCardStyle(cycle: ReviewCycle | undefined): {
+  borderClass: string
+  boxShadow: string
+} {
+  switch (cycle) {
+    case 1:
+      return {
+        borderClass: "border-amber-900/60",
+        boxShadow: "0 0 4px rgba(180,140,40,0.35)",
+      }
+    case 2:
+      return {
+        borderClass: "border-amber-500/70",
+        boxShadow: "0 0 6px rgba(255,190,60,0.55)",
+      }
+    case 3:
+      return {
+        borderClass: "border-amber-300/85",
+        boxShadow: "0 0 8px rgba(255,225,120,0.75)",
+      }
+    default:
+      return { borderClass: "border-white/10", boxShadow: "none" }
+  }
+}
+
 function getFocal(
   mode: LayoutMode,
   hasSelection: boolean,
@@ -464,6 +549,125 @@ function getFocal(
 
 const SELECTED_GLOW_FILTER =
   "drop-shadow(0 0 6px rgba(255,255,255,0.98)) drop-shadow(0 0 20px rgba(255,255,255,0.72)) drop-shadow(0 0 34px rgba(255,255,255,0.34))"
+
+// 복습 코멘트 카드를 하나의 개체(컴포넌트)로 분리
+function ReviewLogCard({
+  log,
+  isCompact,
+  compactTextScale,
+  isEditing,
+  editingText,
+  onEditingTextChange,
+  onEditKeyDown,
+  onStartEdit,
+  onCancelEdit,
+  onSaveEdit,
+  onDelete,
+  onLogAreaClick,
+  nameToId,
+}: {
+  log: LogEntry
+  isCompact: boolean
+  compactTextScale: string
+  isEditing: boolean
+  editingText: string
+  onEditingTextChange: (value: string) => void
+  onEditKeyDown: (event: React.KeyboardEvent<HTMLTextAreaElement>) => void
+  onStartEdit: () => void
+  onCancelEdit: () => void
+  onSaveEdit: () => void
+  onDelete: () => void
+  onLogAreaClick: (event: React.MouseEvent<HTMLDivElement>) => void
+  nameToId: Map<string, string>
+}) {
+  const cardStyle = getReviewCardStyle(log.reviewCycle)
+
+  return (
+    <div
+      className={`relative rounded-md border bg-black/24 p-2.5 transition-colors ${
+        cardStyle.borderClass
+      } ${isEditing ? "" : "pr-14"}`}
+      style={{ boxShadow: cardStyle.boxShadow }}
+    >
+      <p className="mb-1 flex items-center gap-1.5 text-[10px] tracking-wider text-white/40">
+        {log.date}
+        {log.reviewCycle && (
+          <span className="rounded-full border border-amber-200/40 px-1.5 py-0 text-[9px] text-amber-200/80">
+            복습 {log.reviewCycle}회차
+          </span>
+        )}
+      </p>
+
+      {isEditing ? (
+        <div className="flex flex-col gap-2">
+          <textarea
+            value={editingText}
+            onChange={(event) => {
+              onEditingTextChange(event.target.value)
+              const el = event.currentTarget
+              requestAnimationFrame(() => {
+                scrollCaretIntoView(el)
+              })
+            }}
+            onKeyDown={onEditKeyDown}
+            rows={isCompact ? 3 : 5}
+            className={`w-full resize-none rounded-md border border-white/18 bg-black/35 px-2.5 py-2 ${
+              isCompact ? compactTextScale : "text-[13px]"
+            } text-white outline-none focus:border-amber-100/70`}
+          />
+          <div className="flex justify-end gap-2">
+            <button
+              type="button"
+              onClick={onCancelEdit}
+              className="rounded border border-white/20 px-2 py-1 text-[10px] text-white/60"
+            >
+              취소
+            </button>
+            <button
+              type="button"
+              onClick={onSaveEdit}
+              className="rounded border border-amber-200/40 px-2 py-1 text-[10px] text-amber-200"
+            >
+              저장
+            </button>
+          </div>
+        </div>
+      ) : (
+        <div
+          className={`${
+            isCompact ? compactTextScale : "text-[13px]"
+          } leading-relaxed text-white/85`}
+          onClick={onLogAreaClick}
+          dangerouslySetInnerHTML={{
+            __html: renderMarkdown(log.text, nameToId),
+          }}
+        />
+      )}
+
+      {!isEditing && (
+        <>
+          <button
+            type="button"
+            aria-label="수정"
+            onClick={onStartEdit}
+            className="absolute right-7 top-1.5 rounded-full bg-black/40 px-1.5 py-0.5 text-[10px] text-white/45 transition-colors hover:text-amber-200"
+          >
+            ✎
+          </button>
+
+          <button
+            type="button"
+            aria-label="이 복습 기록 삭제"
+            onClick={onDelete}
+            className="absolute right-1.5 top-1.5 rounded-full bg-black/40 px-1.5 py-0.5 text-[10px] text-white/45 transition-colors hover:bg-red-500/30 hover:text-red-100"
+          >
+            ✕
+          </button>
+        </>
+      )}
+    </div>
+  )
+}
 
 export function SkillConstellation() {
   const { positions, edges } = useMemo(
@@ -638,6 +842,15 @@ export function SkillConstellation() {
     setEditingLog(null)
   }
 
+  // 화면 이동(클릭/드래그/스크롤) 시 검색창, 두 토글 패널, 복습입력탭을 모두 닫음
+  function closeAllOverlays() {
+    setSelectedId(null)
+    setToolsOpen(false)
+    setReviewQueueOpen(false)
+    setSearchQuery("")
+    setEditingLog(null)
+  }
+
   function toggleTools() {
     setSelectedId(null)
     setReviewQueueOpen(false)
@@ -687,6 +900,24 @@ export function SkillConstellation() {
     })
   }
 
+  // 별이 현재 복습 대상인지, 그렇다면 몇 회차(1/2/3)인지 계산
+  function getDueCycle(status: StarProgress | undefined): ReviewCycle | null {
+    if (!status || status.logs.length === 0) return null
+    const reviewCount = status.reviewCount ?? 0
+    if (reviewCount >= 3) return null
+
+    const lastLog = status.logs[status.logs.length - 1]
+    const lastDate = parseYMD(lastLog.date)
+    const elapsedDays = Math.floor(
+      (Date.now() - lastDate.getTime()) / 86400000,
+    )
+
+    const threshold = REVIEW_THRESHOLDS[reviewCount]
+    if (elapsedDays < threshold) return null
+
+    return (reviewCount + 1) as ReviewCycle
+  }
+
   function addLog(starId: string, text: string) {
     const trimmed = text.trim()
     if (!trimmed) return
@@ -696,6 +927,7 @@ export function SkillConstellation() {
         acquired: false,
         logs: [],
         reinforced: false,
+        reviewCount: 0,
       }
 
       let reinforced = current.reinforced ?? false
@@ -712,11 +944,23 @@ export function SkillConstellation() {
         }
       }
 
+      // 이 별이 지금 복습 대상이면, 이번 코멘트가 해당 회차 복습을 완료시킴
+      const dueCycle = getDueCycle(current)
+
       const entry: LogEntry = {
         date: formatDateYMD(now),
         type: "review",
         text: trimmed,
+        ...(dueCycle ? { reviewCycle: dueCycle } : {}),
       }
+
+      const nextReviewCount = dueCycle ?? current.reviewCount ?? 0
+      const nextReviewCompletedAt = dueCycle
+        ? {
+            ...current.reviewCompletedAt,
+            [dueCycle]: formatDateYMD(now),
+          }
+        : current.reviewCompletedAt
 
       return {
         ...previous,
@@ -724,7 +968,8 @@ export function SkillConstellation() {
           acquired: true,
           logs: [...current.logs, entry],
           reinforced,
-          reviewDismissed: {},
+          reviewCount: nextReviewCount,
+          reviewCompletedAt: nextReviewCompletedAt,
         },
       }
     })
@@ -767,7 +1012,8 @@ export function SkillConstellation() {
     })
   }
 
-  function dismissDueReview(starId: string, milestoneKey: ReviewMilestone) {
+  // 복습알림 패널의 체크박스: 코멘트 없이 해당 회차 복습을 완료 처리
+  function completeReviewCycle(starId: string, cycle: ReviewCycle) {
     setProgress((previous) => {
       const current = previous[starId]
       if (!current) return previous
@@ -776,9 +1022,10 @@ export function SkillConstellation() {
         ...previous,
         [starId]: {
           ...current,
-          reviewDismissed: {
-            ...current.reviewDismissed,
-            [milestoneKey]: formatDateYMD(new Date()),
+          reviewCount: cycle,
+          reviewCompletedAt: {
+            ...current.reviewCompletedAt,
+            [cycle]: formatDateYMD(new Date()),
           },
         },
       }
@@ -800,6 +1047,7 @@ export function SkillConstellation() {
       setValue(next)
       requestAnimationFrame(() => {
         el.selectionStart = el.selectionEnd = start + 4
+        scrollCaretIntoView(el)
       })
       return
     }
@@ -816,7 +1064,7 @@ export function SkillConstellation() {
       setValue(next)
       requestAnimationFrame(() => {
         el.selectionStart = el.selectionEnd = start + 1
-        el.scrollIntoView({ block: "nearest" })
+        scrollCaretIntoView(el)
       })
       return
     }
@@ -832,7 +1080,7 @@ export function SkillConstellation() {
       setValue(next)
       requestAnimationFrame(() => {
         el.selectionStart = el.selectionEnd = start + 1 + indent.length
-        el.scrollIntoView({ block: "nearest" })
+        scrollCaretIntoView(el)
       })
       return
     }
@@ -864,7 +1112,7 @@ export function SkillConstellation() {
     const isInteractive = target.closest("[data-overlay-interactive]")
 
     if (!isInteractive) {
-      closePanel()
+      closeAllOverlays()
     }
 
     event.currentTarget.setPointerCapture(event.pointerId)
@@ -890,7 +1138,7 @@ export function SkillConstellation() {
 
     if (pointers.current.size === 2) {
       dragRef.current.active = false
-      closePanel()
+      closeAllOverlays()
 
       const [first, second] = [...pointers.current.values()]
       const distance = Math.hypot(first.x - second.x, first.y - second.y) || 1
@@ -934,6 +1182,7 @@ export function SkillConstellation() {
     const dy = event.clientY - dragRef.current.startY
 
     if (Math.abs(dx) > 4 || Math.abs(dy) > 4) {
+      if (!dragRef.current.moved) closeAllOverlays()
       dragRef.current.moved = true
     }
     if (!dragRef.current.moved) return
@@ -979,7 +1228,7 @@ export function SkillConstellation() {
     event.preventDefault()
     setSmooth(false)
 
-    if (selectedId) closePanel()
+    closeAllOverlays()
 
     const rect = event.currentTarget.getBoundingClientRect()
     const pointerX = event.clientX - rect.left
@@ -1175,32 +1424,26 @@ export function SkillConstellation() {
     return results.slice(0, 8)
   }, [searchQuery, nodeList, progress])
 
-  // 5/10/20일 경과 복습 필요 큐 (가장 오래 경과된 순, 마일스톤별 개별 처리)
+  // 복습 필요 큐: reviewCount가 결정하는 회차별 목표(3/10/20일) 도달 여부만 판정, 실제 경과일은 표시용
   const dueReviewQueue = useMemo(() => {
-    const now = new Date()
-
     const items = nodeList
       .map((node) => {
         const status = progress[node.id]
-        if (!status || status.logs.length === 0) return null
+        const cycle = getDueCycle(status)
+        if (!cycle || !status) return null
 
         const lastLog = status.logs[status.logs.length - 1]
         const lastDate = parseYMD(lastLog.date)
         const elapsedDays = Math.floor(
-          (now.getTime() - lastDate.getTime()) / 86400000,
+          (Date.now() - lastDate.getTime()) / 86400000,
         )
-
-        const dismissed = status.reviewDismissed ?? {}
-        const milestone = REVIEW_MILESTONES.find(
-          (m) => elapsedDays >= m.days && !dismissed[m.key],
-        )
-        if (!milestone) return null
 
         return {
           id: node.id,
           name: node.name,
+          cycle,
           elapsedDays,
-          milestone,
+          label: REVIEW_LABELS[cycle - 1],
         }
       })
       .filter((item): item is NonNullable<typeof item> => item !== null)
@@ -1214,21 +1457,21 @@ export function SkillConstellation() {
     const items: {
       id: string
       name: string
-      milestoneKey: ReviewMilestone
-      milestoneLabel: string
+      cycle: ReviewCycle
+      label: string
     }[] = []
 
     for (const node of nodeList) {
-      const dismissed = progress[node.id]?.reviewDismissed
-      if (!dismissed) continue
+      const completedAt = progress[node.id]?.reviewCompletedAt
+      if (!completedAt) continue
 
-      for (const m of REVIEW_MILESTONES) {
-        if (dismissed[m.key] === today) {
+      for (const cycleKey of [1, 2, 3] as ReviewCycle[]) {
+        if (completedAt[cycleKey] === today) {
           items.push({
             id: node.id,
             name: node.name,
-            milestoneKey: m.key,
-            milestoneLabel: m.label,
+            cycle: cycleKey,
+            label: REVIEW_LABELS[cycleKey - 1],
           })
         }
       }
@@ -1708,7 +1951,7 @@ export function SkillConstellation() {
           </button>
 
           <p className="pr-7 text-[11px] tracking-[0.13em] text-amber-200/80">
-            복습 알림
+            복습 알림 (3일 · 10일 · 20일 주기)
           </p>
 
           <h2
@@ -1728,13 +1971,13 @@ export function SkillConstellation() {
 
             {dueReviewQueue.map((item) => (
               <label
-                key={`${item.id}-${item.milestone.key}`}
+                key={`${item.id}-${item.cycle}`}
                 className="flex cursor-pointer items-start gap-2.5 rounded-md border border-white/10 bg-black/24 p-2.5 transition-colors hover:border-amber-100/40"
               >
                 <input
                   type="checkbox"
                   checked={false}
-                  onChange={() => dismissDueReview(item.id, item.milestone.key)}
+                  onChange={() => completeReviewCycle(item.id, item.cycle)}
                   className="mt-0.5 h-4 w-4 shrink-0 accent-amber-300"
                 />
 
@@ -1752,7 +1995,7 @@ export function SkillConstellation() {
                     {item.name}
                   </button>
                   <span className="ml-2 text-[11px] text-white/55">
-                    {item.milestone.label} 경과 (D+{item.elapsedDays})
+                    {item.cycle}회차 · {item.label} 목표 (D+{item.elapsedDays})
                   </span>
                 </span>
               </label>
@@ -1772,7 +2015,7 @@ export function SkillConstellation() {
 
             {completedTodayList.map((item) => (
               <div
-                key={`${item.id}-${item.milestoneKey}`}
+                key={`${item.id}-${item.cycle}`}
                 className="flex items-center gap-2.5 rounded-md border border-white/8 bg-black/15 p-2.5 opacity-60"
               >
                 <input
@@ -1783,7 +2026,9 @@ export function SkillConstellation() {
                 />
                 <span className={`${isCompact ? compactTextScale : "text-[13px]"} text-white/60`}>
                   {item.name}
-                  <span className="ml-2 text-[11px] text-white/35">{item.milestoneLabel} 완료</span>
+                  <span className="ml-2 text-[11px] text-white/35">
+                    {item.cycle}회차 · {item.label} 완료
+                  </span>
                 </span>
               </div>
             ))}
@@ -1834,13 +2079,10 @@ export function SkillConstellation() {
                   setReviewInput(event.target.value)
                   const el = event.currentTarget
                   requestAnimationFrame(() => {
-                    el.scrollIntoView({ block: "nearest" })
+                    scrollCaretIntoView(el)
                   })
                 }}
                 onKeyDown={handleReviewKeyDown}
-                onKeyUp={(event) => {
-                  event.currentTarget.scrollIntoView({ block: "nearest" })
-                }}
                 rows={isCompact ? 3 : 5}
                 className={`w-full resize-none rounded-md border border-white/18 bg-black/35 px-2.5 py-2 ${
                   isCompact ? compactTextScale : "text-[13px]"
@@ -1876,100 +2118,34 @@ export function SkillConstellation() {
                   editingLog?.starId === selectedId && editingLog.index === originalIndex
 
                 return (
-                  <div
+                  <ReviewLogCard
                     key={`${log.date}-${indexFromTop}`}
-                    className={`relative rounded-md border border-white/10 bg-black/24 p-2.5 ${
-                      isEditingThis ? "" : "pr-14"
-                    }`}
-                  >
-                    <p className="mb-1 text-[10px] tracking-wider text-white/40">
-                      {log.date}
-                    </p>
-
-                    {isEditingThis ? (
-                      <div className="flex flex-col gap-2">
-                        <textarea
-                          value={editingLog.text}
-                          onChange={(event) => {
-                            setEditingLog({ ...editingLog, text: event.target.value })
-                            const el = event.currentTarget
-                            requestAnimationFrame(() => {
-                              el.scrollIntoView({ block: "nearest" })
-                            })
-                          }}
-                          onKeyDown={handleEditKeyDown}
-                          onKeyUp={(event) => {
-                            event.currentTarget.scrollIntoView({ block: "nearest" })
-                          }}
-                          rows={isCompact ? 3 : 5}
-                          className={`w-full resize-none rounded-md border border-white/18 bg-black/35 px-2.5 py-2 ${
-                            isCompact ? compactTextScale : "text-[13px]"
-                          } text-white outline-none focus:border-amber-100/70`}
-                        />
-                        <div className="flex justify-end gap-2">
-                          <button
-                            type="button"
-                            onClick={() => setEditingLog(null)}
-                            className="rounded border border-white/20 px-2 py-1 text-[10px] text-white/60"
-                          >
-                            취소
-                          </button>
-                          <button
-                            type="button"
-                            onClick={() =>
-                              selectedId &&
-                              updateLog(selectedId, originalIndex, editingLog.text)
-                            }
-                            className="rounded border border-amber-200/40 px-2 py-1 text-[10px] text-amber-200"
-                          >
-                            저장
-                          </button>
-                        </div>
-                      </div>
-                    ) : (
-                      <div
-                        className={`${
-                          isCompact ? compactTextScale : "text-[13px]"
-                        } leading-relaxed text-white/85`}
-                        onClick={handleLogAreaClick}
-                        dangerouslySetInnerHTML={{
-                          __html: renderMarkdown(log.text, nameToId),
-                        }}
-                      />
-                    )}
-
-                    {!isEditingThis && (
-                      <>
-                        <button
-                          type="button"
-                          aria-label="수정"
-                          onClick={() =>
-                            selectedId &&
-                            setEditingLog({
-                              starId: selectedId,
-                              index: originalIndex,
-                              text: log.text,
-                            })
-                          }
-                          className="absolute right-7 top-1.5 rounded-full bg-black/40 px-1.5 py-0.5 text-[10px] text-white/45 transition-colors hover:text-amber-200"
-                        >
-                          ✎
-                        </button>
-
-                        <button
-                          type="button"
-                          aria-label="이 복습 기록 삭제"
-                          onClick={() => {
-                            if (!selectedId) return
-                            removeLog(selectedId, originalIndex)
-                          }}
-                          className="absolute right-1.5 top-1.5 rounded-full bg-black/40 px-1.5 py-0.5 text-[10px] text-white/45 transition-colors hover:bg-red-500/30 hover:text-red-100"
-                        >
-                          ✕
-                        </button>
-                      </>
-                    )}
-                  </div>
+                    log={log}
+                    isCompact={isCompact}
+                    compactTextScale={compactTextScale}
+                    isEditing={isEditingThis}
+                    editingText={isEditingThis ? editingLog.text : ""}
+                    onEditingTextChange={(text) =>
+                      isEditingThis && setEditingLog({ ...editingLog, text })
+                    }
+                    onEditKeyDown={handleEditKeyDown}
+                    onStartEdit={() =>
+                      selectedId &&
+                      setEditingLog({
+                        starId: selectedId,
+                        index: originalIndex,
+                        text: log.text,
+                      })
+                    }
+                    onCancelEdit={() => setEditingLog(null)}
+                    onSaveEdit={() =>
+                      selectedId &&
+                      updateLog(selectedId, originalIndex, editingLog?.text ?? log.text)
+                    }
+                    onDelete={() => selectedId && removeLog(selectedId, originalIndex)}
+                    onLogAreaClick={handleLogAreaClick}
+                    nameToId={nameToId}
+                  />
                 )
               })}
 
