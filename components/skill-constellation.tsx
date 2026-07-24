@@ -582,31 +582,33 @@ function getTier(
 
 // 복습 회차(reviewCycle)에 따른 코멘트 카드 테두리/발광 스타일. 0(없음)=기존 그대로, 1→2→3 순으로 노란빛이 점점 밝아짐. 얇게 유지
 function getReviewCardStyle(cycle: ReviewCycle | undefined): {
-  borderClass: string
+  borderColor: string
   boxShadow: string
 } {
   switch (cycle) {
     case 1:
       return {
-        borderClass: "border-amber-700/50",
-        boxShadow: "0 0 3px rgba(200,150,60,0.35)",
+        borderColor: "rgba(217,160,60,0.9)",
+        boxShadow:
+          "0 0 4px rgba(217,160,60,0.55), inset 0 0 3px rgba(217,160,60,0.35)",
       }
     case 2:
       return {
-        borderClass: "border-amber-500/60",
+        borderColor: "rgba(240,180,50,0.95)",
         boxShadow:
-          "0 0 5px rgba(230,175,70,0.45), 0 0 10px rgba(230,175,70,0.18)",
+          "0 0 6px rgba(240,180,50,0.7), 0 0 12px rgba(240,180,50,0.3), inset 0 0 4px rgba(240,180,50,0.45)",
       }
     case 3:
       return {
-        borderClass: "border-amber-300/75",
+        borderColor: "#eab308",
         boxShadow:
-          "0 0 6px rgba(255,210,110,0.6), 0 0 14px rgba(255,200,100,0.3), 0 0 22px rgba(255,190,90,0.15)",
+          "0 0 6px rgba(234,179,8,0.9), 0 0 14px rgba(234,179,8,0.55), 0 0 24px rgba(234,179,8,0.3), inset 0 0 5px rgba(255,215,80,0.6)",
       }
     default:
-      return { borderClass: "border-white/10", boxShadow: "none" }
+      return { borderColor: "rgba(255,255,255,0.1)", boxShadow: "none" }
   }
 }
+
 
 const FLASH_OUTLINE_COLOR = "rgba(255,224,170,0.9)"
 const FLASH_GLOW_SHADOW =
@@ -731,15 +733,17 @@ function ReviewLogCard({
       }}
       style={{
         ...dragStyle,
+        borderColor: cardStyle.borderColor,
+        boxShadow: isFlashing ? FLASH_GLOW_SHADOW : cardStyle.boxShadow,
         outline: isFlashing ? `1px solid ${FLASH_OUTLINE_COLOR}` : "1px solid transparent",
         outlineOffset: "0px",
-        boxShadow: isFlashing ? FLASH_GLOW_SHADOW : "none",
         transition: isFlashing
           ? "outline-color 220ms ease-out, box-shadow 220ms ease-out"
-          : `outline-color ${FLASH_FADE_MS}ms ease-out, box-shadow ${FLASH_FADE_MS}ms ease-out`,
+          : `border-color 700ms ease-out, box-shadow 700ms ease-out`,
       }}
-      className={`relative rounded-md border bg-black/24 ${cardStyle.borderClass}`}
+      className="relative rounded-md border bg-black/24"
     >
+
       {/* 회차별 상시 발광 레이어만 남김 */}
       <div
         aria-hidden
@@ -1691,8 +1695,7 @@ export function SkillConstellation() {
   }, [searchQuery, nodeList, progress])
 
   function commentPreview(text: string) {
-    const trimmed = text.trim().replace(/\s+/g, " ")
-    return trimmed.length > 42 ? `${trimmed.slice(0, 42)}…` : trimmed
+    return text.trim()
   }
 
   // 복습 필요 큐: reviewCount가 결정하는 회차별 목표(3/10/20일) 도달 여부만 판정. 코멘트 단위로 표시
@@ -2233,7 +2236,7 @@ export function SkillConstellation() {
           </button>
 
           <p className="pr-7 text-[11px] tracking-[0.13em] text-amber-200/80">
-            복습 알림 (3일 · 10일 · 20일 주기)
+            복습 리마인더 (3일 · 10일 · 20일 주기)
           </p>
 
           <h2
@@ -2241,7 +2244,7 @@ export function SkillConstellation() {
               isCompact ? compactTitleScale : "text-base md:text-lg"
             }`}
           >
-            복습 필요 ({dueReviewQueue.length})
+            Review List ({dueReviewQueue.length})
           </h2>
 
           <section className="mt-4 flex flex-col gap-2">
@@ -2281,7 +2284,7 @@ export function SkillConstellation() {
                   <span className="ml-2 text-[11px] text-white/55">
                     {item.cycle}회차 · {item.label} 목표 (D+{item.elapsedDays})
                   </span>
-                  <p className="mt-0.5 text-[11px] text-white/50">{item.preview}</p>
+                  <p className="mt-0.5 whitespace-pre-wrap text-[11px] text-white/50">{item.preview}</p>
                 </button>
               </label>
             ))}
