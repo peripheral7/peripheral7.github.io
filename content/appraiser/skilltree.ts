@@ -50,7 +50,7 @@ export const skillTree: TreeNode = {
           children: [
             {
               id: "a2a",
-              name: "건물의 감정평가",
+              name: "건물의 원가법",
               section: "approaches",
               children: [
                 { id: "a2a1", name: "분해법", section: "approaches" },

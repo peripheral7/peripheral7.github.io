@@ -69,7 +69,7 @@ const TITLE_WRAP_LEN = 8
 const FOCUS_DELAY_MS = 260
 const SCROLL_TO_COMMENT_DELAY_MS = 340
 const FLASH_FADE_MS = 1000
-const FLASH_TRIGGER_DELAY_MS = 150
+const FLASH_TRIGGER_DELAY_MS = 100
 
 const BG_OVERSCAN = 100
 const BG_PARALLAX = 0.025
@@ -569,7 +569,7 @@ function getReviewCardStyle(cycle: ReviewCycle | undefined): {
 
 const FLASH_OUTLINE_COLOR = "rgba(255,235,120,1)"
 const FLASH_GLOW_SHADOW =
-  "0 0 10px 3px rgba(255,220,110,0.95), 0 0 26px 6px rgba(255,200,80,0.7)"
+  "0 0 10px 3px rgba(255,220,110,0.95), 0 0 10px 6px rgba(255,200,80,0.7)"
 
 function getFocal(
   mode: LayoutMode,
