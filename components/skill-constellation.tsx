@@ -68,7 +68,7 @@ const TITLE_WRAP_LEN = 8
 
 const FOCUS_DELAY_MS = 260
 const SCROLL_TO_COMMENT_DELAY_MS = 340
-const FLASH_FADE_MS = 1200
+const FLASH_FADE_MS = 1000
 const FLASH_TRIGGER_DELAY_MS = 150
 
 const BG_OVERSCAN = 100
@@ -688,25 +688,22 @@ function ReviewLogCard({
         setNodeRef(el)
         setCardRef(el)
       }}
-      style={dragStyle}
-      className={`relative overflow-hidden rounded-md border bg-black/24 ${cardStyle.borderClass}`}
+      style={{
+        ...dragStyle,
+        outline: isFlashing ? `2px solid ${FLASH_OUTLINE_COLOR}` : "2px solid transparent",
+        outlineOffset: isFlashing ? "1px" : "0px",
+        boxShadow: isFlashing ? FLASH_GLOW_SHADOW : "none",
+        transition: isFlashing
+          ? "none"
+          : `outline-color ${FLASH_FADE_MS}ms ease-out, box-shadow ${FLASH_FADE_MS}ms ease-out, outline-offset ${FLASH_FADE_MS}ms ease-out`,
+      }}
+      className={`relative rounded-md border bg-black/24 ${cardStyle.borderClass}`}
     >
-      {/* 회차별 상시 발광 레이어 (reviewCycle에 따른 기본 밝기) */}
+      {/* 회차별 상시 발광 레이어만 남김 */}
       <div
         aria-hidden
-        className="pointer-events-none absolute inset-0 rounded-md"
+        className="pointer-events-none absolute inset-0 overflow-hidden rounded-md"
         style={{ boxShadow: cardStyle.boxShadow }}
-      />
-
-      {/* 일회성 반짝임 레이어: 켤 때 즉시 밝아지고, 끌 때만 1.5초 페이드. box-shadow가 아닌 opacity로 전환하여 안정적으로 애니메이션됨 */}
-      <div
-        aria-hidden
-        className="pointer-events-none absolute inset-0 rounded-md"
-        style={{
-          boxShadow: FLASH_BRIGHT_SHADOW,
-          opacity: isFlashing ? 1 : 0,
-          transition: isFlashing ? "none" : `opacity ${FLASH_FADE_MS}ms ease-out`,
-        }}
       />
 
       <div className="relative flex items-center gap-1.5 border-b border-white/10 bg-black/20 px-2 py-1.5">
@@ -792,7 +789,7 @@ function ReviewLogCard({
               rows={isCompact ? 3 : 5}
               className={`w-full resize-none rounded-md border border-white/18 bg-black/35 px-2.5 py-2 ${
                 isCompact ? compactTextScale : "text-[13px]"
-              } text-white outline-none focus:border-amber-100/70`}
+              } text-white shadow-none outline-none ring-0 focus:border-amber-100/50 focus:shadow-none focus:outline-none focus:ring-0`}
             />
             <div className="flex justify-end gap-2">
               <button
@@ -2351,7 +2348,7 @@ export function SkillConstellation() {
                 rows={isCompact ? 3 : 5}
                 className={`w-full resize-none rounded-md border border-white/18 bg-black/35 px-2.5 py-2 ${
                   isCompact ? compactTextScale : "text-[13px]"
-                } text-white outline-none focus:border-amber-100/70`}
+                } text-white shadow-none outline-none ring-0 focus:border-amber-100/50 focus:shadow-none focus:outline-none focus:ring-0`}
               />
 
               <div className="flex justify-end">
