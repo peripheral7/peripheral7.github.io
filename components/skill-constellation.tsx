@@ -69,7 +69,7 @@ const TITLE_WRAP_LEN = 8
 const FOCUS_DELAY_MS = 260
 const SCROLL_TO_COMMENT_DELAY_MS = 340
 const FLASH_FADE_MS = 1200
-const FLASH_TRIGGER_DELAY_MS = 60
+const FLASH_TRIGGER_DELAY_MS = 150
 
 const BG_OVERSCAN = 100
 const BG_PARALLAX = 0.025
@@ -620,10 +620,12 @@ const SELECTED_GLOW_FILTER =
   "drop-shadow(0 0 6px rgba(255,255,255,0.98)) drop-shadow(0 0 20px rgba(255,255,255,0.72)) drop-shadow(0 0 34px rgba(255,255,255,0.34))"
 
 // 복습 코멘트 카드를 하나의 개체(컴포넌트)로 분리. dnd-kit useSortable로 드래그 정렬 지원
+
 function ReviewLogCard({
   log,
   isLatest,
   isDue,
+  canCancel, // 추가: isLatest && !isDue && (해당 별의 reviewCount > 0)
   isCompact,
   compactTextScale,
   isEditing,
@@ -636,13 +638,14 @@ function ReviewLogCard({
   onSaveEdit,
   onDelete,
   onLogAreaClick,
-  onCompleteReview,
+  onToggleReview, // 기존 onCompleteReview를 대체: 완료/취소 통합 처리
   nameToId,
   setCardRef,
 }: {
   log: LogEntry
   isLatest: boolean
   isDue: boolean
+  canCancel: boolean
   isCompact: boolean
   compactTextScale: string
   isEditing: boolean
@@ -650,12 +653,12 @@ function ReviewLogCard({
   editingText: string
   onEditingTextChange: (value: string) => void
   onEditKeyDown: (event: React.KeyboardEvent<HTMLTextAreaElement>) => void
-  onCompleteReview: () => void // 
   onStartEdit: () => void
   onCancelEdit: () => void
   onSaveEdit: () => void
   onDelete: () => void
   onLogAreaClick: (event: React.MouseEvent<HTMLDivElement>) => void
+  onToggleReview: () => void
   nameToId: Map<string, string>
   setCardRef: (el: HTMLDivElement | null) => void
 }) {
@@ -676,12 +679,7 @@ function ReviewLogCard({
     opacity: isDragging ? 0.5 : 1,
   }
 
-  const boxShadow = isFlashing ? FLASH_BRIGHT_SHADOW : cardStyle.boxShadow
-  const shadowTransition = isFlashing ? "none" : `box-shadow ${FLASH_FADE_MS}ms ease-out`
-
-  const flashShadow = isFlashing
-    ? "0 0 0 2px rgba(255,235,150,0.95), 0 0 18px rgba(255,225,120,0.9)"
-    : cardStyle.boxShadow
+  const dotInteractive = isDue || canCancel
 
   return (
     <div
@@ -689,15 +687,28 @@ function ReviewLogCard({
         setNodeRef(el)
         setCardRef(el)
       }}
-      style={{
-        ...dragStyle,
-        boxShadow,
-        transitionProperty: isDragging ? "transform" : `transform, box-shadow`,
-        transition: isDragging ? dragStyle.transition : `${dragStyle.transition ? dragStyle.transition + ", " : ""}${shadowTransition}`,
-      }}
-      className={`overflow-hidden rounded-md border bg-black/24 ${cardStyle.borderClass}`}
+      style={dragStyle}
+      className={`relative overflow-hidden rounded-md border bg-black/24 ${cardStyle.borderClass}`}
     >
-      <div className="flex items-center gap-1.5 border-b border-white/10 bg-black/20 px-2 py-1.5">
+      {/* 회차별 상시 발광 레이어 (reviewCycle에 따른 기본 밝기) */}
+      <div
+        aria-hidden
+        className="pointer-events-none absolute inset-0 rounded-md"
+        style={{ boxShadow: cardStyle.boxShadow }}
+      />
+
+      {/* 일회성 반짝임 레이어: 켤 때 즉시 밝아지고, 끌 때만 1.5초 페이드. box-shadow가 아닌 opacity로 전환하여 안정적으로 애니메이션됨 */}
+      <div
+        aria-hidden
+        className="pointer-events-none absolute inset-0 rounded-md"
+        style={{
+          boxShadow: FLASH_BRIGHT_SHADOW,
+          opacity: isFlashing ? 1 : 0,
+          transition: isFlashing ? "none" : `opacity ${FLASH_FADE_MS}ms ease-out`,
+        }}
+      />
+
+      <div className="relative flex items-center gap-1.5 border-b border-white/10 bg-black/20 px-2 py-1.5">
         <button
           type="button"
           aria-label="드래그하여 순서 변경"
@@ -719,15 +730,19 @@ function ReviewLogCard({
         <span className="flex-1" />
 
         {isLatest && (
-          isDue ? (
+          dotInteractive ? (
             <button
               type="button"
-              aria-label="복습 완료 처리"
+              aria-label={isDue ? "복습 완료 처리" : "복습 완료 취소"}
               onClick={(event) => {
                 event.stopPropagation()
-                onCompleteReview()
+                onToggleReview()
               }}
-              className="h-2.5 w-2.5 shrink-0 rounded-full bg-red-500 transition-transform hover:scale-125 active:scale-95"
+              className={`h-2.5 w-2.5 shrink-0 rounded-full transition-colors ${
+                isDue
+                  ? "bg-red-500 hover:bg-red-700"
+                  : "border border-white/40 bg-transparent hover:border-white/70"
+              }`}
             />
           ) : (
             <span
@@ -760,7 +775,7 @@ function ReviewLogCard({
         )}
       </div>
 
-      <div className="px-2.5 py-2">
+      <div className="relative px-2.5 py-2">
         {isEditing ? (
           <div className="flex flex-col gap-2">
             <textarea
@@ -1208,6 +1223,21 @@ export function SkillConstellation() {
         },
       }
     })
+  }
+
+  function toggleReviewForStar(starId: string) {
+    const status = progress[starId]
+    const dueCycle = getDueCycle(status)
+
+    if (dueCycle) {
+      completeReviewCycle(starId, dueCycle)
+      return
+    }
+
+    const currentCount = status?.reviewCount ?? 0
+    if (currentCount > 0) {
+      cancelReviewCycle(starId, currentCount as ReviewCycle)
+    }
   }
 
   function handleDragEndLogs(event: DragEndEvent) {
@@ -2351,51 +2381,50 @@ export function SkillConstellation() {
                 items={(selectedProgress?.logs ?? []).map((log) => log.id)}
                 strategy={verticalListSortingStrategy}
               >
-                {(selectedProgress?.logs ?? []).map((log) => {
-                  const isEditingThis =
-                    editingLog?.starId === selectedId && editingLog.logId === log.id
-                  const isLatest = selectedLatestLog?.id === log.id
+              {(selectedProgress?.logs ?? []).map((log) => {
+                const isEditingThis =
+                  editingLog?.starId === selectedId && editingLog.logId === log.id
+                const isLatest = selectedLatestLog?.id === log.id
+                const isDue = isLatest && Boolean(selectedDueCycle)
+                const canCancel = isLatest && !isDue && (selectedProgress?.reviewCount ?? 0) > 0
 
-                  return (
-                    <ReviewLogCard
-                      key={log.id}
-                      log={log}
-                      isLatest={isLatest}
-                      isDue={isLatest && Boolean(selectedDueCycle)}
-                      isCompact={isCompact}
-                      compactTextScale={compactTextScale}
-                      isEditing={isEditingThis}
-                      isFlashing={flashLogId === log.id}
-                      editingText={isEditingThis ? editingLog.text : ""}
-                      onEditingTextChange={(text) =>
-                        isEditingThis && setEditingLog({ ...editingLog, text })
-                      }
-                      onEditKeyDown={handleEditKeyDown}
-                      onStartEdit={() =>
-                        selectedId &&
-                        setEditingLog({ starId: selectedId, logId: log.id, text: log.text })
-                      }
-                      onCancelEdit={() => setEditingLog(null)}
-                      onSaveEdit={() =>
-                        selectedId &&
-                        updateLog(selectedId, log.id, editingLog?.text ?? log.text)
-                      }
-                      onDelete={() => selectedId && removeLog(selectedId, log.id)}
-                      onLogAreaClick={handleLogAreaClick}
-                      onCompleteReview={() => {
-                        // 빨간 점 클릭 → 즉시 복습 완료 처리. 같은 progress state이므로 복습알림 리스트에 자동 반영됨
-                        if (selectedId && selectedDueCycle) {
-                          completeReviewCycle(selectedId, selectedDueCycle)
-                        }
-                      }}
-                      nameToId={nameToId}
-                      setCardRef={(el) => {
-                        if (el) logCardRefs.current.set(log.id, el)
-                        else logCardRefs.current.delete(log.id)
-                      }}
-                    />
-                  )
-                })}
+                return (
+                  <ReviewLogCard
+                    key={log.id}
+                    log={log}
+                    isLatest={isLatest}
+                    isDue={isDue}
+                    canCancel={canCancel}
+                    isCompact={isCompact}
+                    compactTextScale={compactTextScale}
+                    isEditing={isEditingThis}
+                    isFlashing={flashLogId === log.id}
+                    editingText={isEditingThis ? editingLog.text : ""}
+                    onEditingTextChange={(text) =>
+                      isEditingThis && setEditingLog({ ...editingLog, text })
+                    }
+                    onEditKeyDown={handleEditKeyDown}
+                    onStartEdit={() =>
+                      selectedId &&
+                      setEditingLog({ starId: selectedId, logId: log.id, text: log.text })
+                    }
+                    onCancelEdit={() => setEditingLog(null)}
+                    onSaveEdit={() =>
+                      selectedId &&
+                      updateLog(selectedId, log.id, editingLog?.text ?? log.text)
+                    }
+                    onDelete={() => selectedId && removeLog(selectedId, log.id)}
+                    onLogAreaClick={handleLogAreaClick}
+                    onToggleReview={() => selectedId && toggleReviewForStar(selectedId)}
+                    nameToId={nameToId}
+                    setCardRef={(el) => {
+                      if (el) logCardRefs.current.set(log.id, el)
+                      else logCardRefs.current.delete(log.id)
+                    }}
+                  />
+                )
+              })}
+
               </SortableContext>
             </DndContext>
 
