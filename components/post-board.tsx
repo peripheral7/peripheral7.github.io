@@ -142,6 +142,9 @@ function BoardSectionBlock({ section }: { section: BoardSection }) {
 }
 
 export function PostBoard({
+  title,
+  eyebrow,
+  intro,
   backHref = "/",
   sections,
 }: {
@@ -160,7 +163,24 @@ export function PostBoard({
       >
         ← BACK
       </Link>
-      <main className="mx-auto w-full max-w-5xl min-h-screen bg-background px-4 pt-24 pb-32 md:px-12 lg:px-16 shadow-2xl transition-all duration-300">
+
+      <main className="mx-auto w-full max-w-5xl min-h-screen bg-background px-4 pt-24 pb-16 md:px-12 lg:px-16 shadow-2xl transition-all duration-300">
+        <header className="mb-10 border-b border-border pb-8">
+          {eyebrow && (
+            <span className="font-mono text-xs uppercase tracking-[0.3em] text-accent">
+              {eyebrow}
+            </span>
+          )}
+          <h1 className="mt-3 font-sans text-3xl font-extrabold uppercase tracking-tight md:text-4xl">
+            {title}
+          </h1>
+          {intro && (
+            <p className="mt-4 max-w-2xl font-[family-name:var(--font-kr)] text-sm leading-relaxed text-muted-foreground md:text-base">
+              {intro}
+            </p>
+          )}
+        </header>
+
         {sections.map((section) => (
           <BoardSectionBlock key={section.id} section={section} />
         ))}

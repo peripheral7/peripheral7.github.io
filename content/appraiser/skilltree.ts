@@ -90,7 +90,14 @@ export const skillTree: TreeNode = {
           name: "복합부동산 및 집합건물",
           section: "property",
           children: [
-            { id: "t1a", name: "토지건물 일괄평가", section: "property" },
+            {
+              id: "t1a",
+              name: "토지건물 일괄평가",
+              section: "property",
+              children: [
+                { id: "t1a1", name: "창고평가", section: "property" },
+              ],
+            },
             { id: "t1b", name: "구분건물감정평가", section: "property" },
           ],
         },
