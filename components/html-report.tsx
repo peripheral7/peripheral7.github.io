@@ -9,6 +9,11 @@ export function HtmlReport({ src }: { src: string }) {
 
   useEffect(() => {
     let cancelled = false
+    setError(false)
+
+    if (containerRef.current) {
+      containerRef.current.innerHTML = ""
+    }
 
     fetch(src)
       .then((res) => {
@@ -22,13 +27,13 @@ export function HtmlReport({ src }: { src: string }) {
         const bodyContent = doc.body.innerHTML
         containerRef.current.innerHTML = bodyContent
 
-        // dangerouslySetInnerHTML/innerHTML은 <script>를 실행하지 않으므로
-        // 각 script를 새로 만들어 순서대로 다시 실행시켜줍니다.
-        const scripts = Array.from(containerRef.current.querySelectorAll("script"))
+        const scripts = Array.from(
+          containerRef.current.querySelectorAll("script"),
+        )
         scripts.forEach((oldScript) => {
           const newScript = document.createElement("script")
           Array.from(oldScript.attributes).forEach((attr) =>
-            newScript.setAttribute(attr.name, attr.value)
+            newScript.setAttribute(attr.name, attr.value),
           )
           newScript.textContent = oldScript.textContent
           oldScript.replaceWith(newScript)
@@ -36,11 +41,14 @@ export function HtmlReport({ src }: { src: string }) {
       })
       .catch((err) => {
         console.error(err)
-        setError(true)
+        if (!cancelled) setError(true)
       })
 
     return () => {
       cancelled = true
+      if (containerRef.current) {
+        containerRef.current.innerHTML = ""
+      }
     }
   }, [src])
 
@@ -52,5 +60,10 @@ export function HtmlReport({ src }: { src: string }) {
     )
   }
 
-  return <div ref={containerRef} className="report-embed w-full bg-white" />
+  return (
+    <div
+      ref={containerRef}
+      className="report-embed isolate w-full bg-white [&_*]:max-w-full"
+    />
+  )
 }

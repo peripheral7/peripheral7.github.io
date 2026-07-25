@@ -4,6 +4,7 @@ import { PostBoard } from "@/components/post-board"
 import { SimplePostHeader } from "@/components/simple-post-header"
 import { posts } from "@/lib/posts"
 import { boardsByPostId } from "@/content/boards"
+import { customReportsByPostId } from "@/content/custom-reports"
 
 export function generateStaticParams() {
   return posts.map((post) => ({ id: post.id }))
@@ -28,6 +29,11 @@ export default async function GalleryPage({ params }: { params: Promise<{ id: st
         <PostBoard title={post.title} eyebrow={`${post.category} / Filed: ${post.date}`} backHref="/" sections={board} />
       </main>
     )
+  }
+
+  const CustomReport = customReportsByPostId[post.id]
+  if (CustomReport) {
+    return <CustomReport />
   }
 
   if (post.reportPath) {
@@ -59,8 +65,9 @@ export default async function GalleryPage({ params }: { params: Promise<{ id: st
     title: post.title,
     sidebar: post.title,
     eyebrow: `${post.category} / Filed: ${post.date}`,
-    desc: "",
+    desc: post.description ?? "",
     folder: post.imageFolder,
+    tags: post.tags,
   }
 
   return <GalleryClient config={config} />

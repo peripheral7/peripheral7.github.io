@@ -8,6 +8,7 @@ export type Post = {
   variant: "photo" | "note" | "map" | "clipping" | "interactive"
   category: Category
   title: string
+  description: string
   meta: string
   ref: string
   body?: string
@@ -20,6 +21,7 @@ export type Post = {
   date?: string
   tags?: string[]
   imageFolder?: string
+
   // Path under public to a periodically-replaced HTML report file
   // (e.g. "/reports/vcp_dashboard.html"). Used by gallery/[id] to render
   // the report inline via HtmlReport instead of the photo masonry.

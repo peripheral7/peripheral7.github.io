@@ -63,27 +63,29 @@ export function GalleryClient({ config }: { config: any }) {
 
       {/* 메인 콘텐츠 영역 */}
       <main className="flex-1 px-5 py-10 md:px-12 md:py-12 lg:px-20">
-        <div className="mb-12 flex flex-wrap items-center justify-between gap-4 border-b border-border pb-6">
-          <Link href="/" className="text-sm font-bold transition-colors hover:text-accent">
-            ← BACK TO BOARD
-          </Link>
-          <div className="flex gap-3 font-mono text-[0.65rem] uppercase tracking-widest text-muted-foreground">
-            <span className="rounded border border-border px-2 py-1">Research</span>
-            <span className="rounded border border-border px-2 py-1">Photography</span>
-            <span className="rounded border border-border px-2 py-1">Motorcycle</span>
+        
+        <section className="mb-16 max-w-4xl border-b border-border pb-6">
+        <p className="mb-2 font-mono text-[0.7rem] uppercase tracking-widest text-accent">
+          {config.eyebrow}
+        </p>
+        <h2 className="mb-4 text-3xl font-extrabold tracking-tight md:text-4xl">
+          {config.title}
+        </h2>
+        <p className="text-muted-foreground leading-relaxed">
+          {config.desc}
+        </p>
+        {config.tags && config.tags.length > 0 && (
+          <div className="mt-4 flex flex-wrap gap-2">
+            {config.tags.map((tag: string) => (
+              <span
+                key={tag}
+                className="font-mono text-[0.65rem] uppercase tracking-wider text-muted-foreground"
+              >
+                #{tag}
+              </span>
+            ))}
           </div>
-        </div>
-
-        <section className="mb-16 max-w-4xl">
-          <p className="mb-2 font-mono text-[0.7rem] uppercase tracking-widest text-accent">
-            {config.eyebrow}
-          </p>
-          <h2 className="mb-4 text-3xl font-extrabold tracking-tight md:text-4xl">
-            {config.title}
-          </h2>
-          <p className="text-muted-foreground leading-relaxed">
-            {config.desc}
-          </p>
+        )}
         </section>
 
         {/* 에러 또는 이미지 갤러리 렌더링 */}
