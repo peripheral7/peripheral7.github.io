@@ -588,24 +588,27 @@ function getReviewCardStyle(cycle: ReviewCycle | undefined): {
   switch (cycle) {
     case 1:
       return {
-        borderColor: "rgba(217,160,60,0.9)",
-        boxShadow:
-          "0 0 4px rgba(217,160,60,0.55), inset 0 0 3px rgba(217,160,60,0.35)",
+        borderColor: "rgba(180, 125, 35, 0.42)",
+        boxShadow: "inset 0 0 0 1px rgba(180, 125, 35, 0.05)",
       }
+
     case 2:
       return {
-        borderColor: "rgba(240,180,50,0.95)",
-        boxShadow:
-          "0 0 6px rgba(240,180,50,0.7), 0 0 12px rgba(240,180,50,0.3), inset 0 0 4px rgba(240,180,50,0.45)",
+        borderColor: "rgba(235, 175, 55, 0.58)",
+        boxShadow: "inset 0 0 0 1px rgba(235, 175, 55, 0.07)",
       }
+
     case 3:
       return {
-        borderColor: "#eab308",
-        boxShadow:
-          "0 0 6px rgba(234,179,8,0.9), 0 0 14px rgba(234,179,8,0.55), 0 0 24px rgba(234,179,8,0.3), inset 0 0 5px rgba(255,215,80,0.6)",
+        borderColor: "rgba(255, 239, 130, 0.82)",
+        boxShadow: "inset 0 0 0 1px rgba(255, 239, 130, 0.10)",
       }
+
     default:
-      return { borderColor: "rgba(255,255,255,0.1)", boxShadow: "none" }
+      return {
+        borderColor: "rgba(255, 255, 255, 0.10)",
+        boxShadow: "none",
+      }
   }
 }
 
@@ -726,30 +729,30 @@ function ReviewLogCard({
   const dotInteractive = isDue || canCancel
 
   return (
-    <div
-      ref={(el) => {
-        setNodeRef(el)
-        setCardRef(el)
-      }}
-      style={{
-        ...dragStyle,
-        borderColor: cardStyle.borderColor,
-        boxShadow: isFlashing ? FLASH_GLOW_SHADOW : cardStyle.boxShadow,
-        outline: isFlashing ? `1px solid ${FLASH_OUTLINE_COLOR}` : "1px solid transparent",
-        outlineOffset: "0px",
-        transition: isFlashing
-          ? "outline-color 220ms ease-out, box-shadow 220ms ease-out"
-          : `border-color 700ms ease-out, box-shadow 700ms ease-out`,
-      }}
-      className="relative rounded-md border bg-black/24"
-    >
-
-      {/* 회차별 상시 발광 레이어만 남김 */}
       <div
-        aria-hidden
-        className="pointer-events-none absolute inset-0 overflow-hidden rounded-md transition-shadow duration-700 ease-out"
-        style={{ boxShadow: cardStyle.boxShadow }}
-      />
+        ref={(el) => {
+          setNodeRef(el)
+          setCardRef(el)
+        }}
+        style={{
+          ...dragStyle,
+          borderColor: cardStyle.borderColor,
+          boxShadow: isFlashing
+            ? FLASH_GLOW_SHADOW
+            : cardStyle.boxShadow,
+          outline: isFlashing
+            ? `1px solid ${FLASH_OUTLINE_COLOR}`
+            : "1px solid transparent",
+          outlineOffset: "0px",
+          transition: isFlashing
+            ? "outline-color 220ms ease-out, box-shadow 220ms ease-out"
+            : "border-color 700ms ease-out, box-shadow 700ms ease-out",
+        }}
+        className={[
+          "relative rounded-md border bg-black/24",
+          log.reviewCycle ? "review-card-thread" : "",
+        ].join(" ")}
+      >
 
       <div className="relative flex items-center gap-1.5 border-b border-white/10 bg-black/20 px-2 py-1.5">
         <button
@@ -1143,48 +1146,39 @@ export function SkillConstellation() {
 
       let reinforced = current.reinforced ?? false
       const now = new Date()
-
       const latestExisting = getLatestLogByDate(current.logs)
+
       if (latestExisting) {
         const differenceDays = Math.floor(
           (now.getTime() - parseYMD(latestExisting.date).getTime()) / 86400000,
         )
+
         if (differenceDays >= REINFORCE_GAP_DAYS) {
           reinforced = true
         }
       }
 
-      // 이 별이 지금 복습 대상이면, 이번 코멘트가 해당 회차 복습을 완료시킴
-      const dueCycle = getDueCycle(current)
-
       const entry: LogEntry = {
         id: generateLogId(),
         date: formatDateYMD(now),
-        type: "review",
+        type: "study",
         text: trimmed,
-        ...(dueCycle ? { reviewCycle: dueCycle } : {}),
       }
-
-      const nextReviewCount = dueCycle ?? current.reviewCount ?? 0
-      const nextReviewCompletedAt = dueCycle
-        ? {
-            ...current.reviewCompletedAt,
-            [dueCycle]: formatDateYMD(now),
-          }
-        : current.reviewCompletedAt
 
       return {
         ...previous,
         [starId]: {
+          ...current,
           acquired: true,
           logs: [entry, ...current.logs],
           reinforced,
-          reviewCount: nextReviewCount,
-          reviewCompletedAt: nextReviewCompletedAt,
+          reviewCount: current.reviewCount ?? 0,
+          reviewCompletedAt: current.reviewCompletedAt,
         },
       }
     })
   }
+  
 
   function updateLog(starId: string, logId: string, text: string) {
     const trimmed = text.trim()
@@ -1227,10 +1221,20 @@ export function SkillConstellation() {
       const current = previous[starId]
       if (!current) return previous
 
+      const latestLog = getLatestLogByDate(current.logs)
+      const logs = latestLog
+        ? current.logs.map((log) =>
+            log.id === latestLog.id
+              ? { ...log, reviewCycle: cycle }
+              : log,
+          )
+        : current.logs
+
       return {
         ...previous,
         [starId]: {
           ...current,
+          logs,
           reviewCount: cycle,
           reviewCompletedAt: {
             ...current.reviewCompletedAt,
@@ -1240,6 +1244,7 @@ export function SkillConstellation() {
       }
     })
   }
+  
 
   // 복습완료 취소: 완료 표시를 되돌려 다시 "복습 필요" 상태로 복귀
   function cancelReviewCycle(starId: string, cycle: ReviewCycle) {
@@ -1254,6 +1259,11 @@ export function SkillConstellation() {
         ...previous,
         [starId]: {
           ...current,
+          logs: current.logs.map((log) =>
+            log.reviewCycle === cycle
+              ? { ...log, reviewCycle: undefined }
+              : log,
+          ),
           reviewCount: cycle - 1,
           reviewCompletedAt: nextCompletedAt,
         },

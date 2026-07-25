@@ -222,3 +222,46 @@
 .animate-fade-up {
   animation: fade-up 0.6s cubic-bezier(0.22, 1, 0.36, 1) both;
 }
+
+@keyframes review-border-thread {
+  0% {
+    background-position: 0% 50%;
+  }
+
+  100% {
+    background-position: 200% 50%;
+  }
+}
+
+.review-card-thread {
+  position: relative;
+  isolation: isolate;
+}
+
+.review-card-thread::before {
+  content: "";
+  position: absolute;
+  z-index: -1;
+  inset: -1px;
+  border-radius: inherit;
+  padding: 1px;
+  background: linear-gradient(
+    110deg,
+    transparent 0%,
+    transparent 36%,
+    rgba(255, 239, 144, 0.16) 45%,
+    rgba(255, 246, 181, 0.7) 50%,
+    rgba(255, 239, 144, 0.16) 55%,
+    transparent 64%,
+    transparent 100%
+  );
+  background-size: 260% 100%;
+  animation: review-border-thread 7s linear infinite;
+  pointer-events: none;
+
+  -webkit-mask:
+    linear-gradient(#000 0 0) content-box,
+    linear-gradient(#000 0 0);
+  -webkit-mask-composite: xor;
+  mask-composite: exclude;
+}
