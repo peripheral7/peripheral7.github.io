@@ -8,9 +8,12 @@ export function BackToBoardLink({
   className?: string
 }) {
   return (
-    <BackToBoardLink
-      className="pointer-events-auto rounded-full border border-border/70 bg-background/75 px-3 py-2 text-[0.68rem] text-muted-foreground shadow-sm backdrop-blur-md hover:border-accent"
-    />
+    <Link
+      href={href}
+      className={`font-mono text-xs uppercase tracking-[0.15em] transition-colors hover:text-accent ${className}`}
+    >
+      ← BACK TO BOARD
+    </Link>
   )
 }
 
