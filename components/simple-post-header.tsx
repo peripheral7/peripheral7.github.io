@@ -1,5 +1,19 @@
 import Link from "next/link"
 
+export function BackToBoardLink({
+  href = "/",
+  className = "",
+}: {
+  href?: string
+  className?: string
+}) {
+  return (
+    <BackToBoardLink
+      className="pointer-events-auto rounded-full border border-border/70 bg-background/75 px-3 py-2 text-[0.68rem] text-muted-foreground shadow-sm backdrop-blur-md hover:border-accent"
+    />
+  )
+}
+
 export function SimplePostHeader({
   eyebrow,
   title,

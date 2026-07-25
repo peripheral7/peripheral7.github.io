@@ -3,11 +3,15 @@ import type { BoardSection } from "@/components/post-board"
 const FOLDER = "/images/motorcycles/CBR650F/"
 const f = (name: string) => `${FOLDER}${encodeURIComponent(name)}`
 
+export const cbr650fMeta = {
+  title: "CBR650F (2016)",
+  eyebrow: "MOTORCYCLE / Filed: 2026.04.05",
+  intro: "Fast Days",
+}
+
 export const cbr650fBoard: BoardSection[] = [
   {
     id: "touring-log",
-    title: "CBR650F",
-    note: "Fast days",
     columns: 24,
     rows: 236,
     items: [

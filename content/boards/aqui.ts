@@ -1,6 +1,11 @@
 import type { BoardSection } from "@/components/post-board"
 
 const FOLDER = "/images/photography/AQUI/optimized/"
+export const aquiMeta = {
+  title: "Clockwork",
+  eyebrow: "PHOTOGRAPHY / Filed: 2026.07.08",
+  intro: "@aquicoffee",
+}
 
 // rowStart는 실제 aspectRatio × colSpan으로 계산한 점유 높이 기준 자동 배치입니다.
 // 원래 같은 높이에서 나란히 짝지어졌던 5개 그룹(02/03, 04/05/06, 10/11, 16/17, 18/19)은
@@ -9,8 +14,6 @@ const FOLDER = "/images/photography/AQUI/optimized/"
 export const aquiBoard: BoardSection[] = [
   {
     id: "clockwork-collage",
-    title: "AQUI",
-    note: "@aquicoffee",
     columns: 24,
     rows: 151,
     items: [

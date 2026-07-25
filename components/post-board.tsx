@@ -1,5 +1,6 @@
 import Image from "next/image"
 import Link from "next/link"
+import { BackToBoardLink } from "@/components/simple-post-header"
 
 export type PinStyle = "pin" | "tape" | "clip" | "none"
 export type CaptionPlacement = "below" | "above" | "left" | "right" | "overlay-bottom" | "overlay-top" | "none"
@@ -157,12 +158,10 @@ export function PostBoard({
 }) {
   return (
     <div className="relative min-h-screen bg-black text-foreground overflow-x-hidden">
-      <Link
+      <BackToBoardLink
         href={backHref}
-        className="fixed left-4 top-4 z-50 flex h-10 items-center justify-center rounded-full border border-neutral-800 bg-neutral-900/90 px-4 font-mono text-sm font-semibold text-white shadow-lg backdrop-blur-md transition-colors hover:border-accent hover:text-accent md:left-8 md:top-8"
-      >
-        ← BACK
-      </Link>
+        className="fixed left-4 top-4 z-50 flex h-10 items-center justify-center rounded-full border border-neutral-800 bg-neutral-900/90 px-4 text-sm font-semibold text-white shadow-lg backdrop-blur-md hover:border-accent md:left-8 md:top-8"
+      />
 
       <main className="mx-auto w-full max-w-5xl min-h-screen bg-background px-4 pt-24 pb-16 md:px-12 lg:px-16 shadow-2xl transition-all duration-300">
         <header className="mb-10 border-b border-border pb-8">
