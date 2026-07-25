@@ -1,19 +1,52 @@
-import Link from "next/link"
+"use client"
 
-export function BackToBoardLink({
+import Link from "next/link"
+import { useEffect, useRef, useState } from "react"
+
+export function FloatingBackButton({
   href = "/",
-  className = "",
 }: {
   href?: string
-  className?: string
 }) {
+  const [visible, setVisible] = useState(true)
+  const lastY = useRef(0)
+
+  useEffect(() => {
+    lastY.current = window.scrollY
+
+    function onScroll() {
+      const currentY = window.scrollY
+      const goingDown = currentY > lastY.current
+      const pastThreshold = currentY > 80
+
+      if (goingDown && pastThreshold) {
+        setVisible(false)
+      } else {
+        setVisible(true)
+      }
+
+      lastY.current = currentY
+    }
+
+    window.addEventListener("scroll", onScroll, { passive: true })
+    return () => window.removeEventListener("scroll", onScroll)
+  }, [])
+
   return (
-    <Link
-      href={href}
-      className={`font-mono text-xs uppercase tracking-[0.15em] transition-colors hover:text-accent ${className}`}
+    <div
+      className={`fixed left-4 top-4 z-50 transition-all duration-300 md:left-8 md:top-8 ${
+        visible
+          ? "translate-y-0 opacity-100"
+          : "-translate-y-4 opacity-0 pointer-events-none"
+      }`}
     >
-      ← BACK TO BOARD
-    </Link>
+      <Link
+        href={href}
+        className="flex h-10 items-center justify-center rounded-full border border-neutral-800 bg-neutral-900/90 px-4 font-mono text-sm font-semibold text-white shadow-lg backdrop-blur-md transition-colors hover:border-accent hover:text-accent"
+      >
+        ← BACK TO BOARD
+      </Link>
+    </div>
   )
 }
 
@@ -22,26 +55,19 @@ export function SimplePostHeader({
   title,
   subtitle,
   tags,
+  backHref = "/",
 }: {
   eyebrow: string
   title: string
   subtitle?: string
   tags?: string[]
+  backHref?: string
 }) {
   return (
     <>
-      <div className="fixed top-0 left-0 z-50 w-full bg-background/70 backdrop-blur-md">
-        <div className="mx-auto max-w-4xl px-4 py-3">
-          <Link
-            href="/"
-            className="inline-block font-mono text-xs uppercase tracking-[0.15em] text-muted-foreground transition-colors hover:text-accent"
-          >
-            ← BACK TO BOARD
-          </Link>
-        </div>
-      </div>
+      <FloatingBackButton href={backHref} />
 
-      <div className="mx-auto max-w-4xl pt-16">
+      <div className="mx-auto max-w-4xl px-4 pt-24">
         <div className="mt-6 flex flex-col gap-2">
           <span className="font-mono text-xs uppercase tracking-[0.3em] text-accent">
             {eyebrow}

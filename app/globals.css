@@ -242,21 +242,21 @@
   content: "";
   position: absolute;
   z-index: -1;
-  inset: -1px;
+  inset: 0;
   border-radius: inherit;
   padding: 1px;
   background: linear-gradient(
     110deg,
     transparent 0%,
-    transparent 36%,
-    rgba(255, 239, 144, 0.16) 45%,
-    rgba(255, 246, 181, 0.7) 50%,
-    rgba(255, 239, 144, 0.16) 55%,
-    transparent 64%,
+    transparent 40%,
+    rgba(255, 239, 144, 0.10) 47%,
+    rgba(255, 246, 181, 0.32) 50%,
+    rgba(255, 239, 144, 0.10) 53%,
+    transparent 60%,
     transparent 100%
   );
   background-size: 260% 100%;
-  animation: review-border-thread 7s linear infinite;
+  animation: review-border-thread 9s linear infinite;
   pointer-events: none;
 
   -webkit-mask:
