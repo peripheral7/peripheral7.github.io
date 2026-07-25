@@ -109,7 +109,7 @@ export function ScrapbookBoard({ initialPosts }: { initialPosts: Post[] }) {
 
       {/* colophon */}
       <footer className="mx-auto mt-20 flex max-w-7xl flex-col gap-2 border-t border-border pt-8 font-mono text-[0.7rem] uppercase tracking-[0.2em] text-muted-foreground md:flex-row md:items-center md:justify-between">
-        <span>The Field File — No. 037</span>
+        <span>The Field File — No. 027</span>
         <span>Land · Light · Machines</span>
         <span>Filed {new Date().getFullYear()}</span>
       </footer>

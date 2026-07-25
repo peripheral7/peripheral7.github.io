@@ -1,12 +1,11 @@
 {
-  "variant": "interactive",
+  "variant": "photo",
   "category": "RESEARCH",
   "title": "도시경제학적 접근을 통한 신도시 아파트 가격 결정요인 분석",
-  "meta": "광교 · 동탄 · 운정 비교연구 · 클러스터 지도 3종 + 종합 결과",
+  "meta": "광교·동탄·운정 클러스터 지도 및 통계분석 결과",
   "ref": "02_02_03 / 06",
   "image": "/images/02_02_03_map_integrated_Gwanggyo_200_cluster.png",
   "imageAlt": "동탄 200m 공원 및 상권 클러스터 지도",
-  "href": "/reports/research-index.html",
   "linkLabel": "Open research",
   "date": "2026.07.08",
   "tags": ["Urban Economics", "GIS", "Hedonic Regression"]
