@@ -2,7 +2,7 @@
 
 import { useEffect, useMemo, useRef, useState } from "react"
 import Link from "next/link"
-import { MoreVertical, Search, GripVertical } from "lucide-react"
+import { MoreVertical, Search, GripVertical, Pencil, X } from "lucide-react"
 import {
   DndContext,
   closestCenter,
@@ -792,17 +792,17 @@ function ReviewLogCard({
               type="button"
               aria-label="수정"
               onClick={onStartEdit}
-              className="rounded-full px-1 py-0.5 text-[10px] text-white/45 transition-colors hover:text-amber-200"
+              className="rounded-full p-1 text-white/45 transition-colors hover:bg-white/10 hover:text-white/85"
             >
-              수정
+              <Pencil size={12} />
             </button>
             <button
               type="button"
               aria-label="삭제"
               onClick={onDelete}
-              className="rounded-full px-1 py-0.5 text-[10px] text-white/45 transition-colors hover:bg-red-500/30 hover:text-red-100"
+              className="rounded-full p-1 text-white/45 transition-colors hover:bg-white/10 hover:text-white/85"
             >
-              삭제
+              <X size={13} />
             </button>
           </>
         )}
