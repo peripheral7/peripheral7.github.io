@@ -944,11 +944,18 @@ export function SkillConstellation() {
   const reviewInputRef = useRef<HTMLTextAreaElement>(null)
   const searchInputRef = useRef<HTMLInputElement>(null)
   const logCardRefs = useRef(new Map<string, HTMLDivElement>())
+  const [activeSearchIndex, setActiveSearchIndex] = useState(0)
 
   const dndSensors = useSensors(
     useSensor(PointerSensor, { activationConstraint: { distance: 4 } }),
     useSensor(KeyboardSensor, { coordinateGetter: sortableKeyboardCoordinates }),
   )
+
+  
+  useEffect(() => {
+    setActiveSearchIndex(0)
+  }, [searchQuery])
+
 
   useEffect(() => {
     function updateStage() {
@@ -1297,29 +1304,117 @@ export function SkillConstellation() {
     })
   }
 
+  function wrapSelection(
+    el: HTMLTextAreaElement,
+    value: string,
+    setValue: (next: string) => void,
+    marker: string,
+  ) {
+    const start = el.selectionStart
+    const end = el.selectionEnd
+    const selected = value.slice(start, end)
+
+    // 이미 같은 마커로 감싸져 있으면 토글 해제
+    const before = value.slice(Math.max(0, start - marker.length), start)
+    const after = value.slice(end, end + marker.length)
+    if (selected && before === marker && after === marker) {
+      const next =
+        value.slice(0, start - marker.length) + selected + value.slice(end + marker.length)
+      setValue(next)
+      requestAnimationFrame(() => {
+        el.selectionStart = start - marker.length
+        el.selectionEnd = end - marker.length
+        scrollCaretIntoView(el)
+      })
+      return
+    }
+
+    const next = value.slice(0, start) + marker + selected + marker + value.slice(end)
+    setValue(next)
+    requestAnimationFrame(() => {
+      if (selected) {
+        el.selectionStart = start + marker.length
+        el.selectionEnd = end + marker.length
+      } else {
+        el.selectionStart = el.selectionEnd = start + marker.length
+      }
+      scrollCaretIntoView(el)
+    })
+  }
+
+  // 한글(IME) 조합 중에 발생하는 Enter는 실제 제출 의도가 아니라
+  // 조합 확정용 키 이벤트이므로 완전히 무시합니다. 이걸 무시하지 않으면
+  // 조합이 끝나기 전에 preventDefault+onSubmit이 끼어들어 마지막 글자가
+  // 잘리거나 Enter가 "안 먹히는" 것처럼 보이는 문제가 생깁니다.
   function handleStructuredKeyDown(
     event: React.KeyboardEvent<HTMLTextAreaElement>,
     value: string,
     setValue: (next: string) => void,
     onSubmit: () => void,
   ) {
-    if (event.key === "Tab") {
+
+    if (event.nativeEvent.isComposing || event.keyCode === 229) return
+
+    const el = event.currentTarget
+    const isMod = event.metaKey || event.ctrlKey
+
+    // Ctrl/Cmd+B — 굵게: **선택텍스트**
+    if (isMod && !event.shiftKey && event.key.toLowerCase() === "b") {
       event.preventDefault()
-      const el = event.currentTarget
+      wrapSelection(el, value, setValue, "**")
+      return
+    }
+
+    // Ctrl/Cmd+I — 기울임: *선택텍스트*
+    if (isMod && !event.shiftKey && event.key.toLowerCase() === "i") {
+      event.preventDefault()
+      wrapSelection(el, value, setValue, "*")
+      return
+    }
+
+    // Shift+Tab — 내어쓰기 (커서가 있는 줄 맨 앞의 공백 2칸 제거)
+    if (event.key === "Tab" && event.shiftKey) {
+      event.preventDefault()
       const start = el.selectionStart
       const end = el.selectionEnd
-      const next = value.slice(0, start) + "    " + value.slice(end)
+      const lineStart = value.lastIndexOf("\n", start - 1) + 1
+      const line = value.slice(lineStart, value.indexOf("\n", start) === -1 ? value.length : value.indexOf("\n", start))
+      const leadingSpaces = line.match(/^ {1,2}/)?.[0].length ?? 0
+
+      if (leadingSpaces > 0) {
+        const next = value.slice(0, lineStart) + value.slice(lineStart + leadingSpaces)
+        setValue(next)
+        requestAnimationFrame(() => {
+          el.selectionStart = Math.max(lineStart, start - leadingSpaces)
+          el.selectionEnd = Math.max(lineStart, end - leadingSpaces)
+          scrollCaretIntoView(el)
+        })
+      }
+      return
+    }
+
+    // Tab — 들여쓰기 (기존 동작 유지)
+    if (event.key === "Tab") {
+      event.preventDefault()
+      const start = el.selectionStart
+      const end = el.selectionEnd
+      const next = value.slice(0, start) + "  " + value.slice(end)
       setValue(next)
       requestAnimationFrame(() => {
-        el.selectionStart = el.selectionEnd = start + 4
+        el.selectionStart = el.selectionEnd = start + 2
         scrollCaretIntoView(el)
       })
       return
     }
 
+    // Ctrl+Z / Ctrl+Y / Ctrl+Shift+Z — 브라우저 기본 실행취소·재실행을 그대로 통과시킴
+    // (여기서 아무것도 하지 않고 return하면 preventDefault가 걸리지 않아 네이티브 동작이 살아남음)
+    if (isMod && (event.key.toLowerCase() === "z" || event.key.toLowerCase() === "y")) {
+      return
+    }
+
     if (event.key !== "Enter") return
 
-    const el = event.currentTarget
     const start = el.selectionStart
     const end = el.selectionEnd
 
@@ -1336,7 +1431,7 @@ export function SkillConstellation() {
 
     const lineStart = value.lastIndexOf("\n", start - 1) + 1
     const currentLine = value.slice(lineStart, start)
-    const indentMatch = currentLine.match(/^ +/)
+    const indentMatch = currentLine.match(/^(\s*-\s+)/)
 
     if (indentMatch) {
       event.preventDefault()
@@ -1353,6 +1448,7 @@ export function SkillConstellation() {
     event.preventDefault()
     onSubmit()
   }
+
 
   function handleReviewKeyDown(event: React.KeyboardEvent<HTMLTextAreaElement>) {
     handleStructuredKeyDown(event, reviewInput, setReviewInput, () => {
@@ -1867,29 +1963,56 @@ export function SkillConstellation() {
             ref={searchInputRef}
             value={searchQuery}
             onChange={(event) => setSearchQuery(event.target.value)}
-            placeholder="제목 또는 복습 내용 검색 (Ctrl+F)"
-            className="w-full rounded-full border border-white/20 bg-black/50 py-2 pl-8 pr-4 text-sm text-white placeholder:text-white/35 backdrop-blur-md outline-none focus:border-amber-100/60"
-          />
-        </div>
+            onKeyDown={(event) => {
+              if (searchResults.length === 0) return
 
-        {searchResults.length > 0 && (
-          <div className="skill-panel-scroll mt-2 max-h-[50vh] overflow-y-auto rounded-xl border border-white/15 bg-black/60 backdrop-blur-md">
-            {searchResults.map((result) => (
-              <button
-                key={result.id}
-                type="button"
-                onClick={() => {
+              if (event.key === "ArrowDown") {
+                event.preventDefault()
+                setActiveSearchIndex((prev) => (prev + 1) % searchResults.length)
+                return
+              }
+
+              if (event.key === "ArrowUp") {
+                event.preventDefault()
+                setActiveSearchIndex((prev) => (prev - 1 + searchResults.length) % searchResults.length)
+                return
+              }
+
+              if (event.key === "Enter") {
+                event.preventDefault()
+                const result = searchResults[activeSearchIndex]
+                if (result) {
                   selectStar(result.id)
                   setSearchQuery("")
-                }}
-                className="block w-full border-b border-white/10 px-4 py-2 text-left text-sm text-white/85 last:border-b-0 hover:bg-white/10"
-              >
-                <span className="font-semibold text-amber-200">{result.name}</span>
-                <span className="ml-2 text-white/55">{result.snippet}</span>
-              </button>
-            ))}
+                }
+              }
+            }}
+            placeholder="검색 (Ctrl+F)"
+            className="w-full rounded-full border border-white/20 bg-black/50 py-2 pl-8 pr-4 text-sm text-white placeholder:text-white/35 backdrop-blur-md outline-none focus:border-amber-100/60"
+          />
+
+          {searchResults.length > 0 && (
+            <div className="skill-panel-scroll mt-2 max-h-[50vh] overflow-y-auto rounded-xl border border-white/15 bg-black/60 backdrop-blur-md">
+              {searchResults.map((result, index) => (
+                <button
+                  key={result.id}
+                  type="button"
+                  onClick={() => {
+                    selectStar(result.id)
+                    setSearchQuery("")
+                  }}
+                  onMouseEnter={() => setActiveSearchIndex(index)}
+                  className={`block w-full border-b border-white/10 px-4 py-2 text-left text-sm last:border-b-0 ${
+                    index === activeSearchIndex ? "bg-white/15" : "hover:bg-white/10"
+                  }`}
+                >
+                  <span className="font-semibold text-amber-200">{result.name}</span>
+                  <span className="ml-2 text-white/55">{result.snippet}</span>
+                </button>
+              ))}
+            </div>
+          )}
           </div>
-        )}
       </div>
 
       <div
