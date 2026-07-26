@@ -84,6 +84,7 @@ export const skillTree: TreeNode = {
                     { id: "a3c", name: "타당성분석(환원이율·IRR)", section: "approaches" },
                   ],
                 },
+                { id: "a3g", name: "토지잔여법", section: "approaches" },
               ],
             },
             { id: "a3b", name: "임대사례비교법", section: "approaches" },
