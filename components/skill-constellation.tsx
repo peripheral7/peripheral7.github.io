@@ -668,11 +668,13 @@ const SELECTED_GLOW_FILTER =
 
 // 복습 코멘트 카드를 하나의 개체(컴포넌트)로 분리. dnd-kit useSortable로 드래그 정렬 지원
 
+
+
 function ReviewLogCard({
   log,
   isLatest,
   isDue,
-  canCancel, // 추가: isLatest && !isDue && (해당 별의 reviewCount > 0)
+  fullyReviewed,
   isCompact,
   compactTextScale,
   isEditing,
@@ -685,14 +687,14 @@ function ReviewLogCard({
   onSaveEdit,
   onDelete,
   onLogAreaClick,
-  onToggleReview, // 기존 onCompleteReview를 대체: 완료/취소 통합 처리
+  onToggleReview,
   nameToId,
   setCardRef,
 }: {
   log: LogEntry
   isLatest: boolean
   isDue: boolean
-  canCancel: boolean
+  fullyReviewed: boolean
   isCompact: boolean
   compactTextScale: string
   isEditing: boolean
@@ -710,15 +712,9 @@ function ReviewLogCard({
   setCardRef: (el: HTMLDivElement | null) => void
 }) {
   const cardStyle = getReviewCardStyle(log.reviewCycle)
-
-  const {
-    attributes,
-    listeners,
-    setNodeRef,
-    transform,
-    transition,
-    isDragging,
-  } = useSortable({ id: log.id })
+  const { attributes, listeners, setNodeRef, transform, transition, isDragging } = useSortable({
+    id: log.id,
+  })
 
   const dragStyle: React.CSSProperties = {
     transform: CSS.Transform.toString(transform),
@@ -726,33 +722,35 @@ function ReviewLogCard({
     opacity: isDragging ? 0.5 : 1,
   }
 
-  const dotInteractive = isDue || canCancel
+  // 복습 배지("복습n회차")는 완전히 제거하고,
+  // 대신 카드 테두리 색(cardStyle.borderClass)만으로 회차를 구분합니다.
+  // 실처럼 흐르는 효과(.review-card-thread)는 이 별의 3회차 복습이
+  // 모두 끝났을 때(fullyReviewed)만, 그리고 복습 로그(reviewCycle 존재)에만 붙습니다.
+  const showThread = fullyReviewed && Boolean(log.reviewCycle)
 
   return (
+    <div
+      ref={(el) => {
+        setNodeRef(el)
+        setCardRef(el)
+      }}
+      style={{
+        ...dragStyle,
+        borderColor: cardStyle.borderColor,
+        outline: isFlashing ? `1px solid ${FLASH_OUTLINE_COLOR}` : "1px solid transparent",
+        outlineOffset: "0px",
+        boxShadow: isFlashing ? FLASH_GLOW_SHADOW : "none",
+        transition: isFlashing
+          ? "outline-color 220ms ease-out, box-shadow 220ms ease-out"
+          : `outline-color ${FLASH_FADE_MS}ms ease-out, box-shadow ${FLASH_FADE_MS}ms ease-out`,
+      }}
+      className={`relative rounded-md border bg-black/24 ${showThread ? "review-card-thread" : ""}`}
+    >
       <div
-        ref={(el) => {
-          setNodeRef(el)
-          setCardRef(el)
-        }}
-        style={{
-          ...dragStyle,
-          borderColor: cardStyle.borderColor,
-          boxShadow: isFlashing
-            ? FLASH_GLOW_SHADOW
-            : cardStyle.boxShadow,
-          outline: isFlashing
-            ? `1px solid ${FLASH_OUTLINE_COLOR}`
-            : "1px solid transparent",
-          outlineOffset: "0px",
-          transition: isFlashing
-            ? "outline-color 220ms ease-out, box-shadow 220ms ease-out"
-            : "border-color 700ms ease-out, box-shadow 700ms ease-out",
-        }}
-        className={[
-          "relative rounded-md border bg-black/24",
-          log.reviewCycle ? "review-card-thread" : "",
-        ].join(" ")}
-      >
+        aria-hidden
+        className="pointer-events-none absolute inset-0 overflow-hidden rounded-md"
+        style={{ boxShadow: cardStyle.boxShadow }}
+      />
 
       <div className="relative flex items-center gap-1.5 border-b border-white/10 bg-black/20 px-2 py-1.5">
         <button
@@ -767,27 +765,24 @@ function ReviewLogCard({
 
         <span className="text-[10px] tracking-wider text-white/40">{log.date}</span>
 
-        {log.reviewCycle && (
-          <span className="rounded-full border border-amber-200/40 px-1.5 py-0 text-[9px] text-amber-200/80">
-            복습 {log.reviewCycle}회차
-          </span>
-        )}
-
         <span className="flex-1" />
 
-        {isLatest && dotInteractive && (
+        {/*
+          핵심 수정: isLatest만으로는 렌더링하지 않고,
+          isLatest && isDue일 때만 동그라미를 그립니다.
+          -> 복습 시점이 아니면 아예 안 보이고,
+          -> 최상단 코멘트를 삭제하면 다음 코멘트를 기준으로
+            isLatest/isDue가 매번 새로 계산되므로 잔상이 남지 않습니다.
+        */}
+        {isLatest && isDue && (
           <button
             type="button"
-            aria-label={isDue ? "복습 완료 처리" : "복습 완료 취소"}
+            aria-label="복습 완료 처리"
             onClick={(event) => {
               event.stopPropagation()
               onToggleReview()
             }}
-            className={`h-2.5 w-2.5 shrink-0 rounded-full transition-colors ${
-              isDue
-                ? "bg-red-500 hover:bg-red-700"
-                : "border border-white/40 bg-transparent hover:border-white/70"
-            }`}
+            className="h-2.5 w-2.5 shrink-0 rounded-full bg-red-500 transition-colors hover:bg-red-700"
           />
         )}
 
@@ -799,16 +794,15 @@ function ReviewLogCard({
               onClick={onStartEdit}
               className="rounded-full px-1 py-0.5 text-[10px] text-white/45 transition-colors hover:text-amber-200"
             >
-              ✎
+              수정
             </button>
-
             <button
               type="button"
-              aria-label="이 복습 기록 삭제"
+              aria-label="삭제"
               onClick={onDelete}
               className="rounded-full px-1 py-0.5 text-[10px] text-white/45 transition-colors hover:bg-red-500/30 hover:text-red-100"
             >
-              ✕
+              삭제
             </button>
           </>
         )}
@@ -822,9 +816,7 @@ function ReviewLogCard({
               onChange={(event) => {
                 onEditingTextChange(event.target.value)
                 const el = event.currentTarget
-                requestAnimationFrame(() => {
-                  scrollCaretIntoView(el)
-                })
+                requestAnimationFrame(() => scrollCaretIntoView(el))
               }}
               onKeyDown={onEditKeyDown}
               rows={isCompact ? 3 : 5}
@@ -851,19 +843,16 @@ function ReviewLogCard({
           </div>
         ) : (
           <div
-            className={`${
-              isCompact ? compactTextScale : "text-[13px]"
-            } leading-relaxed text-white/85`}
+            className={isCompact ? compactTextScale : "text-[13px] leading-relaxed text-white/85"}
             onClick={onLogAreaClick}
-            dangerouslySetInnerHTML={{
-              __html: renderMarkdown(log.text, nameToId),
-            }}
+            dangerouslySetInnerHTML={{ __html: renderMarkdown(log.text, nameToId) }}
           />
         )}
       </div>
     </div>
   )
 }
+
 
 export function SkillConstellation() {
   const { positions, edges } = useMemo(
@@ -2022,15 +2011,12 @@ export function SkillConstellation() {
               const end = positions.get(to)
               if (!start || !end) return null
 
-              const bothAcquired = Boolean(
-                progress[from]?.acquired && progress[to]?.acquired,
-              )
+              const bothAcquired = Boolean(progress[from]?.acquired && progress[to]?.acquired)
               const baseColor = bothAcquired
                 ? `rgba(255,213,142,${EDGE_ACQUIRED_ALPHA})`
                 : `rgba(220,230,255,${EDGE_DEFAULT_ALPHA})`
 
-              const isConnected =
-                Boolean(selectedId) && (from === selectedId || to === selectedId)
+              const isConnected = Boolean(selectedId && (from === selectedId || to === selectedId))
 
               if (!isConnected) {
                 return (
@@ -2041,16 +2027,13 @@ export function SkillConstellation() {
                     x2={end.x}
                     y2={end.y}
                     stroke={baseColor}
-                    strokeWidth="1.2"
+                    strokeWidth={1.2}
                   />
                 )
               }
 
               const isToChild = from === selectedId
-              const highlightAlpha = isToChild
-                ? EDGE_TO_CHILD_ALPHA
-                : EDGE_TO_PARENT_ALPHA
-
+              const highlightAlpha = isToChild ? EDGE_TO_CHILD_ALPHA : EDGE_TO_PARENT_ALPHA
               const selNode = positions.get(selectedId!)!
               const otherId = isToChild ? to : from
               const otherNode = positions.get(otherId)!
@@ -2072,13 +2055,14 @@ export function SkillConstellation() {
                     <stop offset="100%" stopColor={baseColor} />
                   </linearGradient>
 
+                  {/* 두께는 비선택 라인과 동일하게 1.2로 고정 — 색상/glow만 하이라이트 */}
                   <line
                     x1={start.x}
                     y1={start.y}
                     x2={end.x}
                     y2={end.y}
                     stroke={`url(#${gradientId})`}
-                    strokeWidth="2.2"
+                    strokeWidth={1.2}
                     style={{ filter: SELECTED_GLOW_FILTER }}
                   />
 
@@ -2427,12 +2411,12 @@ export function SkillConstellation() {
                 items={(selectedProgress?.logs ?? []).map((log) => log.id)}
                 strategy={verticalListSortingStrategy}
               >
+
               {(selectedProgress?.logs ?? []).map((log) => {
-                const isEditingThis =
-                  editingLog?.starId === selectedId && editingLog.logId === log.id
+                const isEditingThis = editingLog?.starId === selectedId && editingLog.logId === log.id
                 const isLatest = selectedLatestLog?.id === log.id
                 const isDue = isLatest && Boolean(selectedDueCycle)
-                const canCancel = isLatest && !isDue && (selectedProgress?.reviewCount ?? 0) > 0
+                const fullyReviewed = (selectedProgress?.reviewCount ?? 0) >= 3
 
                 return (
                   <ReviewLogCard
@@ -2440,24 +2424,22 @@ export function SkillConstellation() {
                     log={log}
                     isLatest={isLatest}
                     isDue={isDue}
-                    canCancel={canCancel}
+                    fullyReviewed={fullyReviewed}
                     isCompact={isCompact}
                     compactTextScale={compactTextScale}
                     isEditing={isEditingThis}
                     isFlashing={flashLogId === log.id}
-                    editingText={isEditingThis ? editingLog.text : ""}
-                    onEditingTextChange={(text) =>
-                      isEditingThis && setEditingLog({ ...editingLog, text })
-                    }
+                    editingText={isEditingThis ? editingLog.text : log.text}
+                    onEditingTextChange={(text) => {
+                      if (isEditingThis) setEditingLog({ ...editingLog, text })
+                    }}
                     onEditKeyDown={handleEditKeyDown}
                     onStartEdit={() =>
-                      selectedId &&
-                      setEditingLog({ starId: selectedId, logId: log.id, text: log.text })
+                      selectedId && setEditingLog({ starId: selectedId, logId: log.id, text: log.text })
                     }
                     onCancelEdit={() => setEditingLog(null)}
                     onSaveEdit={() =>
-                      selectedId &&
-                      updateLog(selectedId, log.id, editingLog?.text ?? log.text)
+                      selectedId && updateLog(selectedId, log.id, editingLog?.text ?? log.text)
                     }
                     onDelete={() => selectedId && removeLog(selectedId, log.id)}
                     onLogAreaClick={handleLogAreaClick}
