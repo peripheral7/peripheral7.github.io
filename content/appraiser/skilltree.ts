@@ -71,9 +71,22 @@ export const skillTree: TreeNode = {
           name: "수익방식 및 임대료 평가",
           section: "approaches",
           children: [
-            { id: "a3a", name: "수익환원법", section: "approaches" },
+            {
+              id: "a3a",
+              name: "수익환원법",
+              section: "approaches",
+              children: [
+                {
+                  id: "a3f",
+                  name: "할인현금수지분석법",
+                  section: "approaches",
+                  children: [
+                    { id: "a3c", name: "타당성분석(환원이율·IRR)", section: "approaches" },
+                  ],
+                },
+              ],
+            },
             { id: "a3b", name: "임대사례비교법", section: "approaches" },
-            { id: "a3c", name: "타당성분석(환원이율·IRR)", section: "approaches" },
             { id: "a3d", name: "적산법(임대료, 원가방식)", section: "approaches" },
             { id: "a3e", name: "임대차평가", section: "approaches" },
           ],
