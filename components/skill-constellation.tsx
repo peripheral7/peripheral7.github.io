@@ -464,11 +464,17 @@ function labelTransformForSide(side: EdgeSide) {
   }
 }
 
-const STAR_SPOKE_COUNT = 30
-const STAR_CROSS_ANGLES = new Set([0, 90, 180, 270])
-const STAR_CROSS_LENGTH = 18
-const STAR_IRREGULAR_BASE = 5
-const STAR_IRREGULAR_RANGE = 3.8 // base + range < CROSS_LENGTH 를 항상 유지 → 십자가 상대적으로 항상 길다
+
+const STAR_SPOKE_COUNT = 24
+const STAR_CROSS_ANGLES = [0, 90, 180, 270]
+const STAR_CROSS_TOLERANCE = 0.01
+const STAR_CROSS_LENGTH = 15
+const STAR_IRREGULAR_BASE = 5.5
+const STAR_IRREGULAR_RANGE = 4 // base + range < CROSS_LENGTH 를 항상 유지 → 십자가 상대적으로 항상 길다
+
+function isCrossAngle(angleDeg: number) {
+  return STAR_CROSS_ANGLES.some((a) => Math.abs(angleDeg - a) < STAR_CROSS_TOLERANCE)
+}
 
 function StarGlyph({
   size,
@@ -486,7 +492,7 @@ function StarGlyph({
 
   const spokes = Array.from({ length: STAR_SPOKE_COUNT }, (_, index) => {
     const angleDeg = (360 / STAR_SPOKE_COUNT) * index
-    const isCross = STAR_CROSS_ANGLES.has(angleDeg)
+    const isCross = isCrossAngle(angleDeg)
 
     const irregular =
       STAR_IRREGULAR_BASE + Math.abs(Math.sin(index * 2.7) * STAR_IRREGULAR_RANGE)
@@ -538,7 +544,7 @@ function StarGlyph({
         ))}
       </defs>
 
-      <circle cx={center} cy={center} r="9.5" fill={`url(#${gradId}-glow)`} />
+      <circle cx={center} cy={center} r="11" fill={`url(#${gradId}-glow)`} />
 
       {spokes.map((spoke) => (
         <line
@@ -548,15 +554,16 @@ function StarGlyph({
           x2={spoke.x2}
           y2={spoke.y2}
           stroke={`url(#${spoke.gradientId})`}
-          strokeWidth={spoke.isCross ? 0.6 : 0.32}
+          strokeWidth={spoke.isCross ? 0.62 : 0.32}
           strokeLinecap="round"
         />
       ))}
 
-      <circle cx={center} cy={center} r="1.5" fill={fill} />
+      <circle cx={center} cy={center} r="1.7" fill={fill} />
     </svg>
   )
 }
+
 
 
 type Tier = {
