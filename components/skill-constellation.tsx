@@ -2355,7 +2355,7 @@ export function SkillConstellation() {
                     x2={end.x}
                     y2={end.y}
                     stroke={baseColor}
-                    strokeWidth={1.2}
+                    strokeWidth={0.6}
                   />
                 )
               }
@@ -2383,14 +2383,14 @@ export function SkillConstellation() {
                     <stop offset="100%" stopColor={baseColor} />
                   </linearGradient>
 
-                  {/* 두께는 비선택 라인과 동일하게 1.2로 고정 — 색상/glow만 하이라이트 */}
+                  {/* 두께는 비선택 라인과 동일하게 0.6 고정 — 색상/glow만 하이라이트 */}
                   <line
                     x1={start.x}
                     y1={start.y}
                     x2={end.x}
                     y2={end.y}
                     stroke={`url(#${gradientId})`}
-                    strokeWidth={1.2}
+                    strokeWidth={0.6}
                     style={{ filter: SELECTED_GLOW_FILTER }}
                   />
 
@@ -2428,7 +2428,7 @@ export function SkillConstellation() {
               status?.reviewCount ?? 0,
             )
 
-            const size = isRoot ? 56 : 42
+            const size = isRoot ? 56 : 36
             const hitSize = size + 22
             const [line1, line2] = wrapLabel(node.name)
 
@@ -2480,7 +2480,7 @@ export function SkillConstellation() {
                   }`}
                   style={{
                     left: 0,
-                    top: size + 10,
+                    top: size,
                     width: 164,
                     marginLeft: -82,
                     lineHeight: 1.3,
