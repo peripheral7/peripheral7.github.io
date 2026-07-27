@@ -1153,6 +1153,18 @@ export function SkillConstellation() {
     playStarMoveSound()
   }
 
+    // 검색으로 별을 선택했을 때, 그 별의 가장 최근 코멘트가 있으면
+  // 복습 패널 클릭과 동일하게 goToComment로 이동시켜 카드 반짝임 효과를 준다.
+  // 코멘트가 없는 별이면 기존처럼 selectStar만 호출.
+  function selectStarFromSearch(starId: string) {
+    const latestLog = getLatestLogByDate(progress[starId]?.logs ?? [])
+    if (latestLog) {
+      goToComment(starId, latestLog.id)
+    } else {
+      selectStar(starId)
+    }
+  }
+
   function closePanel() {
     setSelectedId(null)
     setToolsOpen(false)
@@ -2092,7 +2104,7 @@ export function SkillConstellation() {
                 event.preventDefault()
                 const result = searchResults[activeSearchIndex]
                 if (result) {
-                  selectStar(result.id)
+                  selectStarFromSearch(result.id)
                   setSearchQuery("")
                 }
               }
@@ -2108,7 +2120,7 @@ export function SkillConstellation() {
                   key={result.id}
                   type="button"
                   onClick={() => {
-                    selectStar(result.id)
+                    selectStarFromSearch(result.id)
                     setSearchQuery("")
                   }}
                   onMouseEnter={() => setActiveSearchIndex(index)}
