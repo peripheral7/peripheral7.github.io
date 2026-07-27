@@ -2480,7 +2480,7 @@ export function SkillConstellation() {
                   }`}
                   style={{
                     left: 0,
-                    top: size,
+                    top: size/3,
                     width: 164,
                     marginLeft: -82,
                     lineHeight: 1.3,
