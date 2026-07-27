@@ -2,7 +2,7 @@
 
 import { useEffect, useMemo, useRef, useState } from "react"
 import Link from "next/link"
-import { MoreVertical, Search, GripVertical, Pencil, X } from "lucide-react"
+import { MoreVertical, Search, GripVertical, Pencil, X, Calendar } from "lucide-react"
 import {
   DndContext,
   closestCenter,
@@ -912,6 +912,10 @@ export function SkillConstellation() {
   const [reviewDrafts, setReviewDrafts] = useState<Record<string, string>>({})
   const reviewInput = selectedId ? reviewDrafts[selectedId] ?? "" : ""
 
+  const [calendarOpen, setCalendarOpen] = useState(false)
+  const [calendarMonth, setCalendarMonth] = useState(() => new Date())
+  const [selectedCalendarDate, setSelectedCalendarDate] = useState<string | null>(null)
+
   function setReviewInput(value: string) {
     if (!selectedId) return
     setReviewDrafts((previous) => ({ ...previous, [selectedId]: value }))
@@ -950,6 +954,43 @@ export function SkillConstellation() {
     useSensor(PointerSensor, { activationConstraint: { distance: 4 } }),
     useSensor(KeyboardSensor, { coordinateGetter: sortableKeyboardCoordinates }),
   )
+
+
+  
+  const studiedDatesSet = useMemo(() => {
+    const set = new Set<string>()
+    for (const node of nodeList) {
+      for (const log of progress[node.id]?.logs ?? []) set.add(log.date)
+    }
+    return set
+  }, [nodeList, progress])
+
+  const calendarCells = useMemo(() => {
+    const year = calendarMonth.getFullYear()
+    const month = calendarMonth.getMonth()
+    const firstWeekday = new Date(year, month, 1).getDay()
+    const daysInMonth = new Date(year, month + 1, 0).getDate()
+
+    const cells: ({ day: number; ymd: string } | null)[] = []
+    for (let i = 0; i < firstWeekday; i++) cells.push(null)
+    for (let day = 1; day <= daysInMonth; day++) {
+      cells.push({ day, ymd: formatDateYMD(new Date(year, month, day)) })
+    }
+    return cells
+  }, [calendarMonth])
+
+    const dateLogsList = useMemo(() => {
+    if (!selectedCalendarDate) return []
+    const items: { id: string; starId: string; name: string; log: LogEntry }[] = []
+    for (const node of nodeList) {
+      for (const log of progress[node.id]?.logs ?? []) {
+        if (log.date === selectedCalendarDate) {
+          items.push({ id: log.id, starId: node.id, name: node.name, log })
+        }
+      }
+    }
+    return items
+  }, [selectedCalendarDate, nodeList, progress])
 
   
   useEffect(() => {
@@ -1050,27 +1091,42 @@ export function SkillConstellation() {
     setToolsOpen(false)
     setReviewQueueOpen(false)
     setEditingLog(null)
+    setCalendarOpen(false)
+    setSelectedCalendarDate(null)
   }
 
-  // 화면 이동(클릭/드래그/스크롤) 시 검색창, 두 토글 패널, 복습입력탭을 모두 닫음
   function closeAllOverlays() {
     setSelectedId(null)
     setToolsOpen(false)
     setReviewQueueOpen(false)
     setSearchQuery("")
     setEditingLog(null)
+    setCalendarOpen(false)
+    setSelectedCalendarDate(null)
   }
 
   function toggleTools() {
     setSelectedId(null)
     setReviewQueueOpen(false)
+    setCalendarOpen(false)
+    setSelectedCalendarDate(null)
     setToolsOpen((open) => !open)
   }
 
   function toggleReviewQueue() {
     setSelectedId(null)
     setToolsOpen(false)
+    setCalendarOpen(false)
+    setSelectedCalendarDate(null)
     setReviewQueueOpen((open) => !open)
+  }
+
+  function toggleCalendar() {
+    setSelectedId(null)
+    setToolsOpen(false)
+    setReviewQueueOpen(false)
+    setSelectedCalendarDate(null)
+    setCalendarOpen((open) => !open)
   }
 
   useEffect(() => {
@@ -1377,6 +1433,7 @@ export function SkillConstellation() {
       event.preventDefault()
       const start = el.selectionStart
       const end = el.selectionEnd
+    
       const lineStart = value.lastIndexOf("\n", start - 1) + 1
       const line = value.slice(lineStart, value.indexOf("\n", start) === -1 ? value.length : value.indexOf("\n", start))
       const leadingSpaces = line.match(/^ {1,2}/)?.[0].length ?? 0
@@ -1428,23 +1485,6 @@ export function SkillConstellation() {
       })
       return
     }
-
-    const lineStart = value.lastIndexOf("\n", start - 1) + 1
-    const currentLine = value.slice(lineStart, start)
-    const indentMatch = currentLine.match(/^(\s*-\s+)/)
-
-    if (indentMatch) {
-      event.preventDefault()
-      const indent = indentMatch[0]
-      const next = value.slice(0, start) + "\n" + indent + value.slice(end)
-      setValue(next)
-      requestAnimationFrame(() => {
-        el.selectionStart = el.selectionEnd = start + 1 + indent.length
-        scrollCaretIntoView(el)
-      })
-      return
-    }
-
     event.preventDefault()
     onSubmit()
   }
@@ -1835,6 +1875,9 @@ export function SkillConstellation() {
       preview: string
     }[] = []
 
+
+
+
     for (const node of nodeList) {
       const status = progress[node.id]
       const completedAt = status?.reviewCompletedAt
@@ -2020,6 +2063,76 @@ export function SkillConstellation() {
         className="fixed right-5 top-5 z-50 flex items-center gap-2"
         onClick={(event) => event.stopPropagation()}
       >
+        <div className="relative">
+          <button
+            type="button"
+            aria-label="달력 열기"
+            onClick={toggleCalendar}
+            className="flex h-10 w-10 items-center justify-center rounded-full border border-white/20 bg-black/40 text-white/80 backdrop-blur-md transition-colors hover:border-white/60 hover:text-white"
+          >
+            <Calendar size={17} />
+          </button>
+
+          {calendarOpen && (
+            <div className="absolute right-0 top-12 w-72 rounded-2xl border border-white/15 bg-neutral-950/90 p-4 shadow-2xl backdrop-blur-xl">
+              <div className="flex items-center justify-between">
+                <button
+                  type="button"
+                  onClick={() =>
+                    setCalendarMonth((d) => new Date(d.getFullYear(), d.getMonth() - 1, 1))
+                  }
+                  className="rounded p-1 text-white/50 transition-colors hover:text-white"
+                >
+                  ‹
+                </button>
+                <span className="text-sm font-semibold text-white/85">
+                  {calendarMonth.getFullYear()}년 {calendarMonth.getMonth() + 1}월
+                </span>
+                <button
+                  type="button"
+                  onClick={() =>
+                    setCalendarMonth((d) => new Date(d.getFullYear(), d.getMonth() + 1, 1))
+                  }
+                  className="rounded p-1 text-white/50 transition-colors hover:text-white"
+                >
+                  ›
+                </button>
+              </div>
+
+              <div className="mt-3 grid grid-cols-7 gap-1 text-center text-[10px] text-white/40">
+                {["일", "월", "화", "수", "목", "금", "토"].map((d) => (
+                  <span key={d}>{d}</span>
+                ))}
+              </div>
+
+              <div className="mt-1 grid grid-cols-7 gap-1">
+                {calendarCells.map((cell, idx) => {
+                  if (!cell) return <span key={`empty-${idx}`} />
+                  const isToday = cell.ymd === formatDateYMD(new Date())
+                  const studied = studiedDatesSet.has(cell.ymd)
+                  return (
+                    <button
+                      key={cell.ymd}
+                      type="button"
+                      onClick={() => {
+                        setSelectedCalendarDate(cell.ymd)
+                        setCalendarOpen(false)
+                      }}
+                      className={`aspect-square rounded-md text-[11px] transition-colors ${
+                        studied
+                          ? "bg-amber-400/30 text-amber-100 hover:bg-amber-400/50"
+                          : "text-white/55 hover:bg-white/10"
+                      } ${isToday ? "ring-1 ring-white/50" : ""}`}
+                    >
+                      {cell.day}
+                    </button>
+                  )
+                })}
+              </div>
+            </div>
+          )}
+        </div>
+
         <button
           type="button"
           aria-label="복습 알림"
@@ -2586,6 +2699,65 @@ export function SkillConstellation() {
                 아직 기록이 없습니다.
               </p>
             )}
+          </section>
+        </aside>
+      )}
+
+      {selectedCalendarDate && (
+        <aside
+          data-overlay-interactive
+          className={`${panelClass} z-50 border border-white/15 p-4 text-sm shadow-2xl backdrop-blur-xl ${
+            isCompact ? compactPadding : "md:p-5"
+          }`}
+          style={dueQueuePanelStyle}
+          onPointerDown={(event) => event.stopPropagation()}
+          onClick={(event) => event.stopPropagation()}
+        >
+          <button
+            type="button"
+            aria-label="닫기"
+            onClick={() => setSelectedCalendarDate(null)}
+            className="absolute right-4 top-4 text-white/45 transition-colors hover:text-white"
+          >
+            ✕
+          </button>
+
+          <p className="pr-7 text-[11px] tracking-[0.13em] text-amber-200/80">일별 기록</p>
+
+          <h2
+            className={`mt-1 pr-7 font-bold leading-snug text-white ${
+              isCompact ? compactTitleScale : "text-base md:text-lg"
+            }`}
+          >
+            {selectedCalendarDate} ({dateLogsList.length})
+          </h2>
+
+          <section className="mt-4 flex flex-col gap-2">
+            {dateLogsList.length === 0 && (
+              <p className={`${isCompact ? compactTextScale : "text-[13px]"} text-white/35`}>
+                이 날짜에 작성된 기록이 없습니다.
+              </p>
+            )}
+
+            {dateLogsList.map((item) => (
+              <button
+                key={item.id}
+                type="button"
+                onClick={() => goToComment(item.starId, item.log.id)}
+                className="flex flex-col items-start gap-1 rounded-md border border-white/10 bg-black/24 p-2.5 text-left transition-colors hover:border-amber-100/40"
+              >
+                <span
+                  className={`${
+                    isCompact ? compactTextScale : "text-[13px]"
+                  } font-semibold text-amber-200 hover:underline`}
+                >
+                  {item.name}
+                </span>
+                <p className="mt-0.5 whitespace-pre-wrap text-[11px] text-white/50">
+                  {commentPreview(item.log.text)}
+                </p>
+              </button>
+            ))}
           </section>
         </aside>
       )}
