@@ -466,6 +466,9 @@ function labelTransformForSide(side: EdgeSide) {
 
 const STAR_SPOKE_COUNT = 30
 const STAR_CROSS_ANGLES = new Set([0, 90, 180, 270])
+const STAR_CROSS_LENGTH = 18
+const STAR_IRREGULAR_BASE = 5
+const STAR_IRREGULAR_RANGE = 3.8 // base + range < CROSS_LENGTH 를 항상 유지 → 십자가 상대적으로 항상 길다
 
 function StarGlyph({
   size,
@@ -485,10 +488,9 @@ function StarGlyph({
     const angleDeg = (360 / STAR_SPOKE_COUNT) * index
     const isCross = STAR_CROSS_ANGLES.has(angleDeg)
 
-    // 십자 방향은 길게(14), 나머지는 각도별로 고정된 불규칙 패턴을 줘서
-    // 매번 렌더링해도 흔들리지 않으면서 자연스럽게 들쭉날쭉하게 만듦
-    const irregular = 4.2 + Math.abs(Math.sin(index * 2.7) * 3.6)
-    const length = isCross ? 14 : irregular
+    const irregular =
+      STAR_IRREGULAR_BASE + Math.abs(Math.sin(index * 2.7) * STAR_IRREGULAR_RANGE)
+    const length = isCross ? STAR_CROSS_LENGTH : irregular
 
     const rad = (angleDeg * Math.PI) / 180
     const x2 = center + Math.cos(rad) * length
@@ -511,6 +513,7 @@ function StarGlyph({
       className={className}
       style={style}
       aria-hidden
+      overflow="visible"
     >
       <defs>
         <radialGradient id={`${gradId}-glow`} cx="50%" cy="50%" r="50%">
@@ -535,7 +538,7 @@ function StarGlyph({
         ))}
       </defs>
 
-      <circle cx={center} cy={center} r="7.5" fill={`url(#${gradId}-glow)`} />
+      <circle cx={center} cy={center} r="9.5" fill={`url(#${gradId}-glow)`} />
 
       {spokes.map((spoke) => (
         <line
@@ -545,12 +548,12 @@ function StarGlyph({
           x2={spoke.x2}
           y2={spoke.y2}
           stroke={`url(#${spoke.gradientId})`}
-          strokeWidth={spoke.isCross ? 0.55 : 0.32}
+          strokeWidth={spoke.isCross ? 0.6 : 0.32}
           strokeLinecap="round"
         />
       ))}
 
-      <circle cx={center} cy={center} r="1.3" fill={fill} />
+      <circle cx={center} cy={center} r="1.5" fill={fill} />
     </svg>
   )
 }
