@@ -1445,11 +1445,17 @@ export function SkillConstellation() {
     setValue: (next: string) => void,
     marker: string,
   ) {
-    const start = el.selectionStart
-    const end = el.selectionEnd
+    let start = el.selectionStart
+    let end = el.selectionEnd
+
+    // 드래그로 여러 줄을 선택할 때 마지막 줄바꿈 문자까지 선택 범위에 포함되어
+    // 다음 줄 맨 앞칸까지 선택된 것으로 처리되는 경우가 있음.
+    // 이때 마커가 다음 줄 첫 칸에 붙어버리므로, 앞뒤의 줄바꿈은 선택 범위에서 제외한다.
+    while (end > start && value[end - 1] === "\n") end -= 1
+    while (start < end && value[start] === "\n") start += 1
+
     const selected = value.slice(start, end)
 
-    // 이미 같은 마커로 감싸져 있으면 토글 해제
     const before = value.slice(Math.max(0, start - marker.length), start)
     const after = value.slice(end, end + marker.length)
     if (selected && before === marker && after === marker) {
