@@ -465,10 +465,10 @@ function labelTransformForSide(side: EdgeSide) {
 }
 
 
-const STAR_SPOKE_COUNT = 24
+const STAR_SPOKE_COUNT = 36
 const STAR_CROSS_ANGLES = [0, 90, 180, 270]
 const STAR_CROSS_TOLERANCE = 0.01
-const STAR_CROSS_LENGTH = 15
+const STAR_CROSS_LENGTH = 12
 const STAR_IRREGULAR_BASE = 5.5
 const STAR_IRREGULAR_RANGE = 4 // base + range < CROSS_LENGTH 를 항상 유지 → 십자가 상대적으로 항상 길다
 
