@@ -464,7 +464,7 @@ function labelTransformForSide(side: EdgeSide) {
   }
 }
 
-const STAR_SPOKE_COUNT = 15
+const STAR_SPOKE_COUNT = 30
 const STAR_CROSS_ANGLES = new Set([0, 90, 180, 270])
 
 function StarGlyph({
@@ -484,7 +484,12 @@ function StarGlyph({
   const spokes = Array.from({ length: STAR_SPOKE_COUNT }, (_, index) => {
     const angleDeg = (360 / STAR_SPOKE_COUNT) * index
     const isCross = STAR_CROSS_ANGLES.has(angleDeg)
-    const length = isCross ? 11.2 : 5.6
+
+    // 십자 방향은 길게(14), 나머지는 각도별로 고정된 불규칙 패턴을 줘서
+    // 매번 렌더링해도 흔들리지 않으면서 자연스럽게 들쭉날쭉하게 만듦
+    const irregular = 4.2 + Math.abs(Math.sin(index * 2.7) * 3.6)
+    const length = isCross ? 14 : irregular
+
     const rad = (angleDeg * Math.PI) / 180
     const x2 = center + Math.cos(rad) * length
     const y2 = center + Math.sin(rad) * length
@@ -530,10 +535,8 @@ function StarGlyph({
         ))}
       </defs>
 
-      {/* 은은한 코어 글로우 */}
-      <circle cx={center} cy={center} r="6.5" fill={`url(#${gradId}-glow)`} />
+      <circle cx={center} cy={center} r="7.5" fill={`url(#${gradId}-glow)`} />
 
-      {/* 15개 방사형 스포크: 끝으로 갈수록 투명해짐, 십자 4방향만 길게 */}
       {spokes.map((spoke) => (
         <line
           key={spoke.key}
@@ -542,13 +545,12 @@ function StarGlyph({
           x2={spoke.x2}
           y2={spoke.y2}
           stroke={`url(#${spoke.gradientId})`}
-          strokeWidth={spoke.isCross ? 0.55 : 0.35}
+          strokeWidth={spoke.isCross ? 0.55 : 0.32}
           strokeLinecap="round"
         />
       ))}
 
-      {/* 중심 코어(가장 밝은 점) */}
-      <circle cx={center} cy={center} r="1.15" fill={fill} />
+      <circle cx={center} cy={center} r="1.3" fill={fill} />
     </svg>
   )
 }
