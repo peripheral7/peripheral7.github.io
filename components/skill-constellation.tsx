@@ -464,6 +464,9 @@ function labelTransformForSide(side: EdgeSide) {
   }
 }
 
+const STAR_SPOKE_COUNT = 15
+const STAR_CROSS_ANGLES = new Set([0, 90, 180, 270])
+
 function StarGlyph({
   size,
   fill,
@@ -476,6 +479,24 @@ function StarGlyph({
   style?: React.CSSProperties
 }) {
   const gradId = useId()
+  const center = 12
+
+  const spokes = Array.from({ length: STAR_SPOKE_COUNT }, (_, index) => {
+    const angleDeg = (360 / STAR_SPOKE_COUNT) * index
+    const isCross = STAR_CROSS_ANGLES.has(angleDeg)
+    const length = isCross ? 11.2 : 5.6
+    const rad = (angleDeg * Math.PI) / 180
+    const x2 = center + Math.cos(rad) * length
+    const y2 = center + Math.sin(rad) * length
+
+    return {
+      key: `spoke-${index}`,
+      x2,
+      y2,
+      isCross,
+      gradientId: `${gradId}-spoke-${index}`,
+    }
+  })
 
   return (
     <svg
@@ -488,39 +509,46 @@ function StarGlyph({
     >
       <defs>
         <radialGradient id={`${gradId}-glow`} cx="50%" cy="50%" r="50%">
-          <stop offset="0%" stopColor={fill} stopOpacity="0.42" />
-          <stop offset="35%" stopColor={fill} stopOpacity="0.1" />
+          <stop offset="0%" stopColor={fill} stopOpacity="0.5" />
+          <stop offset="40%" stopColor={fill} stopOpacity="0.14" />
           <stop offset="100%" stopColor={fill} stopOpacity="0" />
         </radialGradient>
+
+        {spokes.map((spoke) => (
+          <linearGradient
+            key={spoke.gradientId}
+            id={spoke.gradientId}
+            gradientUnits="userSpaceOnUse"
+            x1={center}
+            y1={center}
+            x2={spoke.x2}
+            y2={spoke.y2}
+          >
+            <stop offset="0%" stopColor={fill} stopOpacity="0.95" />
+            <stop offset="100%" stopColor={fill} stopOpacity="0" />
+          </linearGradient>
+        ))}
       </defs>
 
-      {/* 작고 은은한 코어 글로우 (뭉근한 동그라미 느낌 최소화) */}
-      <circle cx="12" cy="12" r="8" fill={`url(#${gradId}-glow)`} />
+      {/* 은은한 코어 글로우 */}
+      <circle cx={center} cy={center} r="6.5" fill={`url(#${gradId}-glow)`} />
 
-      {/* 얇은 십자 광선 */}
-      <path
-        d="M12 0.6 L12.55 11.4 L12 23.4 L11.45 11.4 Z M0.6 12 L11.4 12.55 L23.4 12 L11.4 11.45 Z"
-        fill={fill}
-        opacity="0.28"
-      />
+      {/* 15개 방사형 스포크: 끝으로 갈수록 투명해짐, 십자 4방향만 길게 */}
+      {spokes.map((spoke) => (
+        <line
+          key={spoke.key}
+          x1={center}
+          y1={center}
+          x2={spoke.x2}
+          y2={spoke.y2}
+          stroke={`url(#${spoke.gradientId})`}
+          strokeWidth={spoke.isCross ? 0.55 : 0.35}
+          strokeLinecap="round"
+        />
+      ))}
 
-      {/* 날렵한 4꼭지 스파클 본체: 위/아래/좌/우가 완전히 대칭(span 18), 중심부는 뾰족하게 좁힘 */}
-      <path
-        d="M12 3
-           L13.1 10.4
-           A1.6 1.6 0 0 0 14.6 11.9
-           L21 12
-           L14.6 12.1
-           A1.6 1.6 0 0 0 13.1 13.6
-           L12 21
-           L10.9 13.6
-           A1.6 1.6 0 0 0 9.4 12.1
-           L3 12
-           L9.4 11.9
-           A1.6 1.6 0 0 0 10.9 10.4
-           Z"
-        fill={fill}
-      />
+      {/* 중심 코어(가장 밝은 점) */}
+      <circle cx={center} cy={center} r="1.15" fill={fill} />
     </svg>
   )
 }
