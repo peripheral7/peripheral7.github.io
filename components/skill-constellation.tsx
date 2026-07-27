@@ -488,30 +488,43 @@ function StarGlyph({
     >
       <defs>
         <radialGradient id={`${gradId}-glow`} cx="50%" cy="50%" r="50%">
-          <stop offset="0%" stopColor={fill} stopOpacity="0.5" />
-          <stop offset="45%" stopColor={fill} stopOpacity="0.15" />
+          <stop offset="0%" stopColor={fill} stopOpacity="0.42" />
+          <stop offset="35%" stopColor={fill} stopOpacity="0.1" />
           <stop offset="100%" stopColor={fill} stopOpacity="0" />
         </radialGradient>
       </defs>
 
-      {/* 은은한 방사형 글로우 */}
-      <circle cx="12" cy="12" r="12" fill={`url(#${gradId}-glow)`} />
+      {/* 작고 은은한 코어 글로우 (뭉근한 동그라미 느낌 최소화) */}
+      <circle cx="12" cy="12" r="8" fill={`url(#${gradId}-glow)`} />
 
       {/* 얇은 십자 광선 */}
       <path
-        d="M12 0.8 L12.7 11.3 L12 23.2 L11.3 11.3 Z M0.8 12 L11.3 12.7 L23.2 12 L11.3 11.3 Z"
+        d="M12 0.6 L12.55 11.4 L12 23.4 L11.45 11.4 Z M0.6 12 L11.4 12.55 L23.4 12 L11.4 11.45 Z"
         fill={fill}
-        opacity="0.3"
+        opacity="0.28"
       />
 
-      {/* 단일 4꼭지 별 본체 */}
+      {/* 날렵한 4꼭지 스파클 본체: 위/아래/좌/우가 완전히 대칭(span 18), 중심부는 뾰족하게 좁힘 */}
       <path
-        d="M12 3 C12.35 8.1 13.85 10.6 19 12 C13.85 13.4 12.35 15.9 12 21 C11.65 15.9 10.15 13.4 5 12 C10.15 10.6 11.65 8.1 12 3 Z"
+        d="M12 3
+           L13.1 10.4
+           A1.6 1.6 0 0 0 14.6 11.9
+           L21 12
+           L14.6 12.1
+           A1.6 1.6 0 0 0 13.1 13.6
+           L12 21
+           L10.9 13.6
+           A1.6 1.6 0 0 0 9.4 12.1
+           L3 12
+           L9.4 11.9
+           A1.6 1.6 0 0 0 10.9 10.4
+           Z"
         fill={fill}
       />
     </svg>
   )
 }
+
 
 type Tier = {
   rgb: string
