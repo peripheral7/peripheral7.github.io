@@ -1,6 +1,6 @@
 "use client"
 
-import { useEffect, useMemo, useRef, useState } from "react"
+import { useEffect, useId, useMemo, useRef, useState } from "react"
 import Link from "next/link"
 import { MoreVertical, Search, GripVertical, Pencil, X, Calendar } from "lucide-react"
 import {
@@ -475,6 +475,8 @@ function StarGlyph({
   className?: string
   style?: React.CSSProperties
 }) {
+  const gradId = useId()
+
   return (
     <svg
       viewBox="0 0 24 24"
@@ -484,9 +486,35 @@ function StarGlyph({
       style={style}
       aria-hidden
     >
+      <defs>
+        <radialGradient id={`${gradId}-glow`} cx="50%" cy="50%" r="50%">
+          <stop offset="0%" stopColor={fill} stopOpacity="0.55" />
+          <stop offset="45%" stopColor={fill} stopOpacity="0.18" />
+          <stop offset="100%" stopColor={fill} stopOpacity="0" />
+        </radialGradient>
+      </defs>
+
+      {/* 부드러운 방사형 글로우 */}
+      <circle cx="12" cy="12" r="12" fill={`url(#${gradId}-glow)`} />
+
+      {/* 십자 광선 (긴 세로/가로 빛줄기) */}
       <path
-        d="M12 0 L13.65 10.35 L24 12 L13.65 13.65 L12 24 L10.35 13.65 L0 12 L10.35 10.35 Z"
+        d="M12 1.2 L12.9 11.1 L12 22.8 L11.1 11.1 Z M1.2 12 L11.1 12.9 L22.8 12 L11.1 11.1 Z"
         fill={fill}
+        opacity="0.35"
+      />
+
+      {/* 4꼭지 스파클 별 본체 */}
+      <path
+        d="M12 3 C12.35 8.1 13.85 10.6 19 12 C13.85 13.4 12.35 15.9 12 21 C11.65 15.9 10.15 13.4 5 12 C10.15 10.6 11.65 8.1 12 3 Z"
+        fill={fill}
+      />
+
+      {/* 작은 보조 스파클(대각선) */}
+      <path
+        d="M18.5 4.5 C18.65 6.3 19.3 7.4 21 7.8 C19.3 8.2 18.65 9.3 18.5 11.1 C18.35 9.3 17.7 8.2 16 7.8 C17.7 7.4 18.35 6.3 18.5 4.5 Z"
+        fill={fill}
+        opacity="0.75"
       />
     </svg>
   )
