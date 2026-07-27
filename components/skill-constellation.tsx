@@ -2428,7 +2428,7 @@ export function SkillConstellation() {
               status?.reviewCount ?? 0,
             )
 
-            const size = isRoot ? 35 : 26
+            const size = isRoot ? 56 : 42
             const hitSize = size + 22
             const [line1, line2] = wrapLabel(node.name)
 
@@ -2480,7 +2480,7 @@ export function SkillConstellation() {
                   }`}
                   style={{
                     left: 0,
-                    top: size + 13,
+                    top: size + 10,
                     width: 164,
                     marginLeft: -82,
                     lineHeight: 1.3,
