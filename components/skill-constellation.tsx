@@ -847,7 +847,7 @@ function ReviewLogCard({
           -> 최상단 코멘트를 삭제하면 다음 코멘트를 기준으로
             isLatest/isDue가 매번 새로 계산되므로 잔상이 남지 않습니다.
         */}
-        {isLatest && isDue && (
+        {isDue && (
           <button
             type="button"
             aria-label="복습 완료 처리"
