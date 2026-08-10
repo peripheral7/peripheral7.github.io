@@ -223,7 +223,22 @@ export const skillTree: TreeNode = {
               section: "compensation",
               children: [
                 { id: "c1b1", name: "미지급용지 평가", section: "compensation" },
-                { id: "c1b2", name: "잔여지 보상평가", section: "compensation" },
+                { id: "c1b2", name: "무허가건축물 평가", section: "compensation" },
+                { id: "c1b3", name: "불법형질변경토지 평가", section: "compensation" },
+                { id: "c1b5", name: "도로부지, 도수로부지와 구거부지 등", section: "compensation" },
+                { id: "c1b6", name: "소유권 외의 권리의 목적이 되고 있는 토지 등", section: "compensation" },
+              ],
+            },
+            {
+              id: "c1c",
+              name: "그 밖의 토지에 관한 평가",
+              section: "compensation",
+              children: [
+                { id: "c1c1", name: "토지사용료(및 지하사용료)", section: "compensation" },
+                { id: "c1c2", name: "송전선로부지 등의 보상", section: "compensation" },
+                { id: "c1c3", name: "개간비", section: "compensation" },
+                { id: "c1c4", name: "잔여지", section: "compensation" },
+                { id: "c1c5", name: "환매토지", section: "compensation" },
               ],
             },
           ],
