@@ -6,6 +6,7 @@ export type TreeNode = {
   spacingScale?: number
 }
 
+
 export const sections: Record<string, { title: string; tier: number }> = {
   root: { title: "감정평가 실무", tier: 0 },
   fundamentals: { title: "기초 및 기본 원리", tier: 1 },
@@ -14,6 +15,7 @@ export const sections: Record<string, { title: string; tier: number }> = {
   property: { title: "물건별 감정평가", tier: 1 },
   compensation: { title: "보상 감정평가", tier: 1 },
 }
+
 
 export const skillTree: TreeNode = {
   id: "root0",
@@ -121,7 +123,6 @@ export const skillTree: TreeNode = {
           section: "property",
           spacingScale: 1.3,
           children: [
-            // 구분지상권 설정토지를 지상권(t2a)의 자식으로 이동
             {
               id: "t2a",
               name: "지상권",
@@ -194,6 +195,16 @@ export const skillTree: TreeNode = {
             { id: "p2b", name: "관리처분계획", section: "purpose" },
           ],
         },
+        {
+          id: "c1a",
+          name: "사업유형별 토지보상평가",
+          section: "compensation",
+          children: [
+            { id: "c1a1", name: "재개발사업", section: "compensation" },
+            { id: "c1a2", name: "재건축사업", section: "compensation" },
+            { id: "c1a3", name: "도시개발사업", section: "compensation" },
+          ],
+        },
       ],
     },
     {
@@ -207,23 +218,12 @@ export const skillTree: TreeNode = {
           section: "compensation",
           children: [
             {
-              id: "c1a",
-              name: "사업유형별 토지보상평가",
-              section: "compensation",
-              children: [
-                { id: "c1a1", name: "재개발사업", section: "compensation" },
-                { id: "c1a2", name: "재건축사업", section: "compensation" },
-                { id: "c1a3", name: "도시개발사업", section: "compensation" },
-              ],
-            },
-            {
               id: "c1b",
               name: "특수토지 보상평가",
               section: "compensation",
               children: [
                 { id: "c1b1", name: "미지급용지 평가", section: "compensation" },
                 { id: "c1b2", name: "잔여지 보상평가", section: "compensation" },
-                { id: "c1b3", name: "택지비 평가", section: "compensation" },
               ],
             },
           ],
@@ -238,7 +238,6 @@ export const skillTree: TreeNode = {
               id: "c2b",
               name: "영업손실보상",
               section: "compensation",
-              // 신규: 영업손실보상 하위에 "어업권" 추가
               children: [
                 { id: "c2b1", name: "어업권", section: "compensation" },
               ],
@@ -250,6 +249,7 @@ export const skillTree: TreeNode = {
   ],
 }
 
+
 type Metrics = {
   leafCount: number
   maxDepth: number
@@ -258,15 +258,18 @@ type Metrics = {
   spanDemand: number
 }
 
+
 type PlacementResult = {
   angle: number
   minAngle: number
   maxAngle: number
 }
 
+
 function clamp(value: number, min: number, max: number) {
   return Math.min(Math.max(value, min), max)
 }
+
 
 function computeMetrics(
   node: TreeNode,
@@ -275,6 +278,7 @@ function computeMetrics(
 ): Metrics {
   const scale = node.spacingScale ?? inheritedScale
   const children = node.children ?? []
+
 
   if (children.length === 0) {
     const metrics: Metrics = {
@@ -288,18 +292,22 @@ function computeMetrics(
     return metrics
   }
 
+
   const childMetrics = children.map((child) =>
     computeMetrics(child, map, scale),
   )
+
 
   const leafCount = childMetrics.reduce((sum, child) => sum + child.leafCount, 0)
   const maxDepth = 1 + Math.max(...childMetrics.map((child) => child.maxDepth))
   const childCount = children.length
 
+
   const rawDemand =
     leafCount * 1 +
     childCount * 0.55 +
     maxDepth * 0.95
+
 
   const metrics: Metrics = {
     leafCount,
@@ -309,9 +317,11 @@ function computeMetrics(
     spanDemand: Math.max(1.2, rawDemand) * scale,
   }
 
+
   map.set(node.id, metrics)
   return metrics
 }
+
 
 function gapFor(depth: number, childCount: number) {
   const baseDeg =
@@ -320,9 +330,11 @@ function gapFor(depth: number, childCount: number) {
     depth === 3 ? 6 :
     5
 
+
   const compactAdjust = childCount >= 6 ? -1 : 0
   return ((baseDeg + compactAdjust) * Math.PI) / 180
 }
+
 
 function occupancyFor(childCount: number, maxDepth: number) {
   if (childCount <= 1) return 0.18
@@ -333,7 +345,7 @@ function occupancyFor(childCount: number, maxDepth: number) {
   )
 }
 
-// 수정 — 자식 1개(체인) 구간을 더 짧게
+
 const EDGE_MULTIPLIER_BY_CHILD_COUNT: Record<number, number> = {
   0: 0.45,
   1: 0.45,
@@ -344,12 +356,14 @@ const EDGE_MULTIPLIER_BY_CHILD_COUNT: Record<number, number> = {
 }
 const MANY_CHILDREN_MULTIPLIER = 1.6
 
+
 function edgeLengthMultiplier(childCount: number): number {
   if (childCount in EDGE_MULTIPLIER_BY_CHILD_COUNT) {
     return EDGE_MULTIPLIER_BY_CHILD_COUNT[childCount]
   }
   return MANY_CHILDREN_MULTIPLIER
 }
+
 
 function edgeLengthFor(
   node: TreeNode,
@@ -360,16 +374,18 @@ function edgeLengthFor(
   const childCount = node.children?.length ?? 0
   const multiplier = edgeLengthMultiplier(childCount)
 
+
   const complexityBoost =
     Math.min(metrics.maxDepth, 4) * 0.035 +
     Math.min(metrics.childCount, 6) * 0.015
 
+
   return step * (1 + complexityBoost) * multiplier * scale
 }
 
-// 단일 자식 노드의 방향 유지용 지그재그 각도.
-// 요구사항: 직전 엣지와의 각도차가 3도 "미만"이어야 하므로 2.5도로 설정.
+
 const CHAIN_JITTER_RAD = (2 * Math.PI) / 180
+
 
 export function layoutTree(
   root: TreeNode,
@@ -384,7 +400,9 @@ export function layoutTree(
   const radialStep = (opts.xSpacing + opts.ySpacing) / 2
   const originY = opts.rootY ?? 0
 
+
   computeMetrics(root, metricsById, 1)
+
 
   function setPosition(
     node: TreeNode,
@@ -399,6 +417,7 @@ export function layoutTree(
     })
   }
 
+
   function placeNode(
     node: TreeNode,
     depth: number,
@@ -412,10 +431,12 @@ export function layoutTree(
     const children = node.children ?? []
     const metrics = metricsById.get(node.id)!
 
+
     const radius =
       depth === 1
         ? parentRadius + radialStep
         : parentRadius + edgeLengthFor(node, metrics, radialStep, scale)
+
 
     if (children.length === 0) {
       const angle = (sectorStart + sectorEnd) / 2
@@ -423,16 +444,20 @@ export function layoutTree(
       return { angle, minAngle: angle, maxAngle: angle }
     }
 
+
     if (children.length === 1) {
     const onlyChild = children[0]
     edges.push([node.id, onlyChild.id])
 
+
     const ownAngle = (sectorStart + sectorEnd) / 2
     setPosition(node, ownAngle, radius)
+
 
     const jitter = CHAIN_JITTER_RAD * chainSign
     const rotatedStart = sectorStart + jitter
     const rotatedEnd = sectorEnd + jitter
+
 
     const childPlacement = placeNode(
       onlyChild,
@@ -444,12 +469,14 @@ export function layoutTree(
       -chainSign,
     )
 
+
     return {
       angle: ownAngle,
       minAngle: Math.min(ownAngle, childPlacement.minAngle),
       maxAngle: Math.max(ownAngle, childPlacement.maxAngle),
     }
   }
+
 
     const gap = gapFor(depth, children.length)
     const totalGap = gap * (children.length - 1)
@@ -460,13 +487,16 @@ export function layoutTree(
     const innerEnd = sectorEnd - (fullWidth - usableWidth) / 2
     const distributableWidth = Math.max(innerEnd - innerStart - totalGap, fullWidth * 0.18)
 
+
     const weights = children.map(
       (child) => metricsById.get(child.id)?.spanDemand ?? 1,
     )
     const weightSum = weights.reduce((sum, value) => sum + value, 0)
 
+
     let cursor = innerStart
     const childPlacements: PlacementResult[] = []
+
 
     children.forEach((child, index) => {
       const width =
@@ -474,10 +504,13 @@ export function layoutTree(
           ? innerEnd - cursor
           : distributableWidth * (weights[index] / weightSum)
 
+
       const childStart = cursor
       const childEnd = index === children.length - 1 ? innerEnd : childStart + width
 
+
       edges.push([node.id, child.id])
+
 
       const placed = placeNode(
         child,
@@ -489,18 +522,23 @@ export function layoutTree(
         1,
       )
 
+
       childPlacements.push(placed)
       cursor = childEnd + gap
     })
+
 
     const minAngle = Math.min(...childPlacements.map((child) => child.minAngle))
     const maxAngle = Math.max(...childPlacements.map((child) => child.maxAngle))
     const angle = (minAngle + maxAngle) / 2
 
+
     setPosition(node, angle, radius)
+
 
     return { angle, minAngle, maxAngle }
   }
+
 
   positions.set(root.id, {
     x: 0,
@@ -509,19 +547,23 @@ export function layoutTree(
     section: root.section,
   })
 
+
   const rootChildren = root.children ?? []
   const fullTurn = Math.PI * 2
   const rootSlice = rootChildren.length > 0 ? fullTurn / rootChildren.length : fullTurn
   const firstCenterAngle = -Math.PI / 2
+
 
   rootChildren.forEach((child, index) => {
     const sectorStart =
       firstCenterAngle - rootSlice / 2 + index * rootSlice
     const sectorEnd = sectorStart + rootSlice
 
+
     edges.push([root.id, child.id])
     placeNode(child, 1, sectorStart, sectorEnd, 1, 0, 1)
   })
+
 
   return { positions, edges }
 }
