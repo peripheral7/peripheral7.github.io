@@ -31,14 +31,16 @@ type LogEntry = {
   type: "study" | "review"
   text: string
   reviewCycle?: ReviewCycle
+  reviewCount?: number                                  // 신규: 로그별 카운터
+  reviewCompletedAt?: Partial<Record<ReviewCycle, string>> // 신규: 로그별 완료일
+  flaggedForReview?: boolean
 }
 
 type StarProgress = {
   acquired: boolean
   logs: LogEntry[]
   reinforced?: boolean
-  reviewCount?: number
-  reviewCompletedAt?: Partial<Record<ReviewCycle, string>>
+  // reviewCount, reviewCompletedAt는 더 이상 별 단위로 쓰지 않음 (하위호환 위해 타입엔 남겨도 되지만 신규 로직에서 미사용)
 }
 
 type ProgressMap = Record<string, StarProgress>
@@ -173,17 +175,22 @@ function generateLogId() {
 
 function migrateProgress(raw: ProgressMap): ProgressMap {
   const migrated: ProgressMap = {}
-
   for (const [starId, status] of Object.entries(raw)) {
     if (!status) continue
+    const migratedLogs = (status.logs ?? []).map((log) => (log.id ? log : { ...log, id: generateLogId() }))
 
-    const migratedLogs = (status.logs ?? []).map((log) =>
-      log.id ? log : { ...log, id: generateLogId() },
-    )
+    const legacyCount = (status as any).reviewCount as number | undefined
+    const legacyCompletedAt = (status as any).reviewCompletedAt as Partial<Record<ReviewCycle, string>> | undefined
+    if (legacyCount && migratedLogs.length > 0) {
+      const latest = getLatestLogByDate(migratedLogs)
+      if (latest && latest.reviewCount === undefined) {
+        latest.reviewCount = legacyCount
+        latest.reviewCompletedAt = legacyCompletedAt
+      }
+    }
 
     migrated[starId] = { ...status, logs: migratedLogs }
   }
-
   return migrated
 }
 
@@ -720,20 +727,12 @@ function getLatestLogByDate(logs: LogEntry[]): LogEntry | null {
   )
 }
 
-function getDueCycle(status: StarProgress | undefined): ReviewCycle | null {
-  if (!status || status.logs.length === 0) return null
-  const reviewCount = status.reviewCount ?? 0
+function getDueCycleForLog(log: LogEntry): ReviewCycle | null {
+  const reviewCount = log.reviewCount ?? 0
   if (reviewCount >= 3) return null
-
-  const latest = getLatestLogByDate(status.logs)
-  if (!latest) return null
-
-  const elapsedDays = Math.floor(
-    (Date.now() - parseYMD(latest.date).getTime()) / 86400000,
-  )
+  const elapsedDays = Math.floor((Date.now() - parseYMD(log.date).getTime()) / 86400000)
   const threshold = REVIEW_THRESHOLDS[reviewCount]
   if (elapsedDays < threshold) return null
-
   return (reviewCount + 1) as ReviewCycle
 }
 
@@ -1353,74 +1352,66 @@ export function SkillConstellation() {
     })
   }
 
-  // 복습알림 패널 체크박스: 코멘트 없이 해당 회차 복습을 완료 처리
-  function completeReviewCycle(starId: string, cycle: ReviewCycle) {
+  function completeReviewCycle(starId: string, logId: string, cycle: ReviewCycle) {
     setProgress((previous) => {
       const current = previous[starId]
       if (!current) return previous
-
-      const latestLog = getLatestLogByDate(current.logs)
-      const logs = latestLog
-        ? current.logs.map((log) =>
-            log.id === latestLog.id
-              ? { ...log, reviewCycle: cycle }
-              : log,
-          )
-        : current.logs
-
+      const nextLogs = current.logs.map((log) =>
+        log.id === logId
+          ? {
+              ...log,
+              reviewCycle: cycle,
+              reviewCount: cycle,
+              reviewCompletedAt: {
+                ...log.reviewCompletedAt,
+                [cycle]: formatDateYMD(new Date()),
+              },
+            }
+          : log,
+      )
       return {
         ...previous,
-        [starId]: {
-          ...current,
-          logs,
-          reviewCount: cycle,
-          reviewCompletedAt: {
-            ...current.reviewCompletedAt,
-            [cycle]: formatDateYMD(new Date()),
-          },
-        },
+        [starId]: { ...current, logs: nextLogs },
       }
     })
   }
-  
 
-  // 복습완료 취소: 완료 표시를 되돌려 다시 "복습 필요" 상태로 복귀
-  function cancelReviewCycle(starId: string, cycle: ReviewCycle) {
+  function cancelReviewCycle(starId: string, logId: string, cycle: ReviewCycle) {
     setProgress((previous) => {
       const current = previous[starId]
-      if (!current || (current.reviewCount ?? 0) !== cycle) return previous
-
-      const nextCompletedAt = { ...current.reviewCompletedAt }
-      delete nextCompletedAt[cycle]
-
-      return {
-        ...previous,
-        [starId]: {
-          ...current,
-          logs: current.logs.map((log) =>
-            log.reviewCycle === cycle
-              ? { ...log, reviewCycle: undefined }
-              : log,
-          ),
+      if (!current) return previous
+      const nextLogs = current.logs.map((log) => {
+        if (log.id !== logId || (log.reviewCount ?? 0) !== cycle) return log
+        const nextCompletedAt = { ...log.reviewCompletedAt }
+        delete nextCompletedAt[cycle]
+        return {
+          ...log,
+          reviewCycle: undefined,
           reviewCount: cycle - 1,
           reviewCompletedAt: nextCompletedAt,
-        },
+        }
+      })
+      return {
+        ...previous,
+        [starId]: { ...current, logs: nextLogs },
       }
     })
   }
 
-  function toggleReviewForStar(starId: string) {
+  function toggleReviewForLog(starId: string, logId: string) {
     const status = progress[starId]
-    const dueCycle = getDueCycle(status)
+    const log = status?.logs.find((entry) => entry.id === logId)
+    if (!log) return
 
+    const dueCycle = getDueCycleForLog(log)
     if (dueCycle) {
-      completeReviewCycle(starId, dueCycle)
+      completeReviewCycle(starId, logId, dueCycle)
       return
     }
 
-    const currentCount = status?.reviewCount ?? 0
+    const currentCount = log.reviewCount ?? 0
     if (currentCount > 0) {
-      cancelReviewCycle(starId, currentCount as ReviewCycle)
+      cancelReviewCycle(starId, logId, currentCount as ReviewCycle)
     }
   }
 
@@ -1927,33 +1918,28 @@ export function SkillConstellation() {
 
   // 복습 필요 큐: reviewCount가 결정하는 회차별 목표(3/10/20일) 도달 여부만 판정. 코멘트 단위로 표시
   const dueReviewQueue = useMemo(() => {
-    const items = nodeList
-      .map((node) => {
+    return nodeList
+      .flatMap((node) => {
         const status = progress[node.id]
-        const cycle = getDueCycle(status)
-        if (!cycle || !status) return null
-
-        const latest = getLatestLogByDate(status.logs)
-        if (!latest) return null
-
-        const elapsedDays = Math.floor(
-          (Date.now() - parseYMD(latest.date).getTime()) / 86400000,
-        )
-
-        return {
-          id: node.id,
-          name: node.name,
-          cycle,
-          elapsedDays,
-          label: REVIEW_LABELS[cycle - 1],
-          logId: latest.id,
-          preview: commentPreview(latest.text),
-        }
+        if (!status) return []
+        return status.logs
+          .map((log) => {
+            const cycle = getDueCycleForLog(log)
+            if (!cycle) return null
+            const elapsedDays = Math.floor((Date.now() - parseYMD(log.date).getTime()) / 86400000)
+            return {
+              id: node.id,
+              name: node.name,
+              cycle,
+              elapsedDays,
+              label: REVIEW_LABELS[cycle - 1],
+              logId: log.id,
+              preview: commentPreview(log.text),
+            }
+          })
+          .filter((item): item is NonNullable<typeof item> => item !== null)
       })
-      .filter((item): item is NonNullable<typeof item> => item !== null)
       .sort((a, b) => b.elapsedDays - a.elapsedDays)
-
-    return items
   }, [nodeList, progress])
 
   const completedTodayList = useMemo(() => {
@@ -2584,7 +2570,7 @@ export function SkillConstellation() {
                 <input
                   type="checkbox"
                   checked={false}
-                  onChange={() => completeReviewCycle(item.id, item.cycle)}
+                  onChange={() => completeReviewCycle(item.id, item.logId, item.cycle)}
                   className="mt-0.5 h-4 w-4 shrink-0 accent-amber-300"
                 />
 
@@ -2631,7 +2617,7 @@ export function SkillConstellation() {
                 <input
                   type="checkbox"
                   checked
-                  onChange={() => cancelReviewCycle(item.id, item.cycle)}
+                  onChange={() => cancelReviewCycle(item.id, item.logId, item.cycle)}
                   className="mt-0.5 h-4 w-4 shrink-0 accent-amber-300"
                 />
                 <button
@@ -2771,7 +2757,7 @@ export function SkillConstellation() {
                     }
                     onDelete={() => selectedId && removeLog(selectedId, log.id)}
                     onLogAreaClick={handleLogAreaClick}
-                    onToggleReview={() => selectedId && toggleReviewForStar(selectedId)}
+                    onToggleReview={() => toggleReviewForLog(selectedId!, log.id)}
                     nameToId={nameToId}
                     setCardRef={(el) => {
                       if (el) logCardRefs.current.set(log.id, el)
