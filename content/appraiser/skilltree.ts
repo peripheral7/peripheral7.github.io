@@ -223,6 +223,7 @@ export const skillTree: TreeNode = {
               children: [
                 { id: "c1b1", name: "미지급용지 평가", section: "compensation" },
                 { id: "c1b2", name: "잔여지 보상평가", section: "compensation" },
+                { id: "c1b3", name: "택지비 평가", section: "compensation" },
               ],
             },
           ],
