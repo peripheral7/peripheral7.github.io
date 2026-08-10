@@ -892,7 +892,7 @@ function ReviewLogCard({
                 requestAnimationFrame(() => scrollCaretIntoView(el))
               }}
               onKeyDown={onEditKeyDown}
-              rows={isCompact ? 3 : 5}
+              rows={isCompact ? 6 : 10}
               className={`w-full resize-none rounded-md border border-white/18 bg-black/35 px-2.5 py-2 ${
                 isCompact ? compactTextScale : "text-[13px]"
               } text-white shadow-none outline-none ring-0 focus:border-amber-100/50 focus:shadow-none focus:outline-none focus:ring-0`}
@@ -2694,7 +2694,7 @@ export function SkillConstellation() {
                   })
                 }}
                 onKeyDown={handleReviewKeyDown}
-                rows={isCompact ? 3 : 5}
+                rows={isCompact ? 6 : 10}
                 className={`w-full resize-none rounded-md border border-white/18 bg-black/35 px-2.5 py-2 ${
                   isCompact ? compactTextScale : "text-[13px]"
                 } text-white shadow-none outline-none ring-0 focus:border-amber-100/50 focus:shadow-none focus:outline-none focus:ring-0`}
