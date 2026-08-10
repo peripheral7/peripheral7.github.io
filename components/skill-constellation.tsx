@@ -1309,8 +1309,6 @@ export function SkillConstellation() {
           acquired: true,
           logs: [entry, ...current.logs],
           reinforced,
-          reviewCount: current.reviewCount ?? 0,
-          reviewCompletedAt: current.reviewCompletedAt,
         },
       }
     })
@@ -1810,7 +1808,6 @@ export function SkillConstellation() {
   const selectedLatestLog = selectedProgress
     ? getLatestLogByDate(selectedProgress.logs)
     : null
-  const selectedDueCycle = getDueCycle(selectedProgress)
 
   const acquiredCount = Object.values(progress).filter(
     (item) => item?.acquired,
@@ -1956,12 +1953,13 @@ export function SkillConstellation() {
 
 
 
-    for (const node of nodeList) {
-      const status = progress[node.id]
-      const completedAt = status?.reviewCompletedAt
-      if (!completedAt || !status) continue
+  for (const node of nodeList) {
+    const status = progress[node.id]
+    if (!status) continue
 
-      const latest = getLatestLogByDate(status.logs)
+    for (const log of status.logs) {
+      const completedAt = log.reviewCompletedAt
+      if (!completedAt) continue
 
       for (const cycleKey of [1, 2, 3] as ReviewCycle[]) {
         if (completedAt[cycleKey] === today) {
@@ -1970,12 +1968,13 @@ export function SkillConstellation() {
             name: node.name,
             cycle: cycleKey,
             label: REVIEW_LABELS[cycleKey - 1],
-            logId: latest?.id ?? "",
-            preview: latest ? commentPreview(latest.text) : "",
+            logId: log.id,
+            preview: commentPreview(log.text),
           })
         }
       }
     }
+  }
 
     return items
   }, [nodeList, progress])
@@ -2733,8 +2732,8 @@ export function SkillConstellation() {
               {(selectedProgress?.logs ?? []).map((log) => {
                 const isEditingThis = editingLog?.starId === selectedId && editingLog.logId === log.id
                 const isLatest = selectedLatestLog?.id === log.id
-                const isDue = isLatest && Boolean(selectedDueCycle)
-                const fullyReviewed = (selectedProgress?.reviewCount ?? 0) >= 3
+                const isDue = Boolean(getDueCycleForLog(log))
+                const fullyReviewed = (log.reviewCount ?? 0) >= 3
 
                 return (
                   <ReviewLogCard
