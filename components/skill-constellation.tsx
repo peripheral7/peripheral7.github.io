@@ -2406,12 +2406,16 @@ export function SkillConstellation() {
             const isSelected = selectedId === node.id
             const hasLogs = (status?.logs.length ?? 0) > 0
 
+            const maxLogReviewCount = status?.logs.length
+              ? Math.max(0, ...status.logs.map((log) => log.reviewCount ?? 0))
+              : 0
+
             const tier = getTier(
               isRoot,
               Boolean(status?.acquired),
               Boolean(status?.reinforced),
               status?.logs.length ?? 0,
-              status?.reviewCount ?? 0,
+              maxLogReviewCount,
             )
 
             const size = isRoot ? 56 : 36
