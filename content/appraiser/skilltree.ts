@@ -234,8 +234,7 @@ export const skillTree: TreeNode = {
               name: "그 밖의 토지에 관한 평가",
               section: "compensation",
               children: [
-                { id: "c1c1", name: "토지사용료(및 지하사용료)", section: "compensation" },
-                { id: "c1c2", name: "송전선로부지 등의 보상", section: "compensation" },
+                { id: "c1c1", name: "토지사용료(지하사용료, 송전선로부지 등)", section: "compensation" },
                 { id: "c1c3", name: "개간비", section: "compensation" },
                 { id: "c1c4", name: "잔여지", section: "compensation" },
                 { id: "c1c5", name: "환매토지", section: "compensation" },
