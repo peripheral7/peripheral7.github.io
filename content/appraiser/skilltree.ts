@@ -234,7 +234,8 @@ export const skillTree: TreeNode = {
               name: "그 밖의 토지에 관한 평가",
               section: "compensation",
               children: [
-                { id: "c1c1", name: "토지사용료(지하사용료, 송전선로부지 등)", section: "compensation" },
+                { id: "c1c1", name: "토지사용료(및 지하사용료)", section: "compensation" },
+                { id: "c1c2", name: "송전선로부지 등의 보상", section: "compensation" },
                 { id: "c1c3", name: "개간비", section: "compensation" },
                 { id: "c1c4", name: "잔여지", section: "compensation" },
                 { id: "c1c5", name: "환매토지", section: "compensation" },
@@ -350,12 +351,30 @@ function gapFor(depth: number, childCount: number) {
 }
 
 
+// 신규 — 인접한 두 형제가 각각 다시 여러 자식으로 뻗어나가는(branching) 경우
+// 경계면에서 겹칠 위험이 커지므로, 양쪽의 자식 수에 비례해 추가 여유각을 더한다.
+function siblingGapFor(depth: number, left: TreeNode, right: TreeNode): number {
+  const base = gapFor(depth, 2)
+
+  const leftBranch = left.children?.length ?? 0
+  const rightBranch = right.children?.length ?? 0
+
+  const branchPenaltyDeg =
+    Math.min(leftBranch, 4) * 0.8 + Math.min(rightBranch, 4) * 0.8
+
+  return base + (branchPenaltyDeg * Math.PI) / 180
+}
+
+
 function occupancyFor(childCount: number, maxDepth: number) {
   if (childCount <= 1) return 0.18
+  // 수정 — 자식이 많은(5개 이상) 노드는 자기 섹터 가장자리까지 채우지 않도록
+  // 상한을 낮춰, 인접 형제와의 경계에 여유를 남긴다.
+  const cap = childCount >= 5 ? 0.88 : 0.96
   return clamp(
     0.66 + Math.min(childCount, 6) * 0.05 + Math.min(maxDepth, 4) * 0.04,
     0.72,
-    0.96,
+    cap,
   )
 }
 
@@ -492,8 +511,14 @@ export function layoutTree(
   }
 
 
-    const gap = gapFor(depth, children.length)
-    const totalGap = gap * (children.length - 1)
+    // 수정 — 형제 쌍마다 branching penalty를 반영한 개별 간격을 계산
+    const gaps: number[] = []
+    for (let i = 0; i < children.length - 1; i++) {
+      gaps.push(siblingGapFor(depth, children[i], children[i + 1]))
+    }
+    const totalGap = gaps.reduce((sum, g) => sum + g, 0)
+
+
     const fullWidth = sectorEnd - sectorStart
     const occupancy = occupancyFor(children.length, metrics.maxDepth)
     const usableWidth = Math.max(fullWidth * occupancy, totalGap + fullWidth * 0.34)
@@ -538,7 +563,7 @@ export function layoutTree(
 
 
       childPlacements.push(placed)
-      cursor = childEnd + gap
+      cursor = childEnd + (gaps[index] ?? 0)
     })
 
 
