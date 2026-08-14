@@ -107,75 +107,102 @@ function playStarMoveSound() {
   if (ctx.state === "suspended") ctx.resume()
 
   const now = ctx.currentTime
-  const DURATION = 0.28 // 짧고 산뜻하게
+  const DURATION = 0.9
 
   const compressor = ctx.createDynamicsCompressor()
-  compressor.threshold.setValueAtTime(-20, now)
-  compressor.knee.setValueAtTime(16, now)
-  compressor.ratio.setValueAtTime(8, now)
-  compressor.attack.setValueAtTime(0.001, now)
-  compressor.release.setValueAtTime(0.15, now)
+  compressor.threshold.setValueAtTime(-22, now)
+  compressor.knee.setValueAtTime(20, now)
+  compressor.ratio.setValueAtTime(7, now)
+  compressor.attack.setValueAtTime(0.008, now)
+  compressor.release.setValueAtTime(0.45, now)
   compressor.connect(ctx.destination)
 
-  // 광선검처럼 높은 톤에서 빠르게 하강하는 스윕 — 밝고 또렷한 "슉" 소리의 핵심
-  const sweep = ctx.createOscillator()
-  sweep.type = "sawtooth"
-  sweep.frequency.setValueAtTime(2200, now)
-  sweep.frequency.exponentialRampToValueAtTime(420, now + DURATION)
+  // 깊은 우주선 엔진 같은 저음 중심층
+  const core = ctx.createOscillator()
+  core.type = "sine"
+  core.frequency.setValueAtTime(68, now)
+  core.frequency.exponentialRampToValueAtTime(96, now + 0.55)
+  core.frequency.exponentialRampToValueAtTime(62, now + DURATION)
 
-  const sweepFilter = ctx.createBiquadFilter()
-  sweepFilter.type = "bandpass"
-  sweepFilter.frequency.setValueAtTime(2400, now)
-  sweepFilter.frequency.exponentialRampToValueAtTime(500, now + DURATION)
-  sweepFilter.Q.value = 6
+  const coreGain = ctx.createGain()
+  coreGain.gain.setValueAtTime(0.0001, now)
+  coreGain.gain.exponentialRampToValueAtTime(0.62, now + 0.08)
+  coreGain.gain.exponentialRampToValueAtTime(0.38, now + 0.45)
+  coreGain.gain.exponentialRampToValueAtTime(0.0001, now + DURATION)
 
-  const sweepGain = ctx.createGain()
-  sweepGain.gain.setValueAtTime(0.0001, now)
-  sweepGain.gain.exponentialRampToValueAtTime(0.5, now + 0.02)
-  sweepGain.gain.exponentialRampToValueAtTime(0.0001, now + DURATION)
+  // 우주적인 전자 배음층: 느리게 위로 올라갔다가 사라지는 신스 질감
+  const harmonic = ctx.createOscillator()
+  harmonic.type = "triangle"
+  harmonic.frequency.setValueAtTime(180, now)
+  harmonic.frequency.exponentialRampToValueAtTime(520, now + 0.48)
+  harmonic.frequency.exponentialRampToValueAtTime(240, now + DURATION)
 
-  // 얇은 금속성 배음 — 칼날이 지나가는 듯한 반짝이는 하모닉스
-  const shimmer = ctx.createOscillator()
-  shimmer.type = "sine"
-  shimmer.frequency.setValueAtTime(3600, now)
-  shimmer.frequency.exponentialRampToValueAtTime(1200, now + DURATION * 0.8)
+  const harmonicFilter = ctx.createBiquadFilter()
+  harmonicFilter.type = "lowpass"
+  harmonicFilter.frequency.setValueAtTime(700, now)
+  harmonicFilter.frequency.exponentialRampToValueAtTime(1500, now + 0.4)
+  harmonicFilter.frequency.exponentialRampToValueAtTime(420, now + DURATION)
+  harmonicFilter.Q.value = 1.8
 
-  const shimmerGain = ctx.createGain()
-  shimmerGain.gain.setValueAtTime(0.0001, now)
-  shimmerGain.gain.exponentialRampToValueAtTime(0.12, now + 0.015)
-  shimmerGain.gain.exponentialRampToValueAtTime(0.0001, now + DURATION * 0.8)
+  const harmonicGain = ctx.createGain()
+  harmonicGain.gain.setValueAtTime(0.0001, now)
+  harmonicGain.gain.exponentialRampToValueAtTime(0.22, now + 0.1)
+  harmonicGain.gain.exponentialRampToValueAtTime(0.16, now + 0.52)
+  harmonicGain.gain.exponentialRampToValueAtTime(0.0001, now + DURATION)
 
-  // 바람이 스치는 듯한 화이트노이즈 텍스처 — 스윕에 공기감을 더함
+  // 넓은 공간을 지나가는 성운/추진기 같은 공기 텍스처
   const bufferSize = Math.floor(ctx.sampleRate * DURATION)
   const noiseBuffer = ctx.createBuffer(1, bufferSize, ctx.sampleRate)
   const data = noiseBuffer.getChannelData(0)
-  for (let i = 0; i < bufferSize; i++) data[i] = Math.random() * 2 - 1
+  for (let i = 0; i < bufferSize; i++) {
+    const fade = 1 - i / bufferSize
+    data[i] = (Math.random() * 2 - 1) * fade
+  }
 
   const noise = ctx.createBufferSource()
   noise.buffer = noiseBuffer
 
   const noiseFilter = ctx.createBiquadFilter()
   noiseFilter.type = "bandpass"
-  noiseFilter.frequency.setValueAtTime(1800, now)
-  noiseFilter.frequency.exponentialRampToValueAtTime(600, now + DURATION)
-  noiseFilter.Q.value = 1.2
+  noiseFilter.frequency.setValueAtTime(520, now)
+  noiseFilter.frequency.exponentialRampToValueAtTime(1450, now + 0.35)
+  noiseFilter.frequency.exponentialRampToValueAtTime(280, now + DURATION)
+  noiseFilter.Q.value = 0.9
 
   const noiseGain = ctx.createGain()
   noiseGain.gain.setValueAtTime(0.0001, now)
-  noiseGain.gain.exponentialRampToValueAtTime(0.22, now + 0.02)
+  noiseGain.gain.exponentialRampToValueAtTime(0.13, now + 0.12)
+  noiseGain.gain.exponentialRampToValueAtTime(0.07, now + 0.5)
   noiseGain.gain.exponentialRampToValueAtTime(0.0001, now + DURATION)
 
-  sweep.connect(sweepFilter).connect(sweepGain).connect(compressor)
-  shimmer.connect(shimmerGain).connect(compressor)
+  // 미세한 펄스 모듈레이션: 정지된 드론보다 살아 있는 우주 장치처럼 들리게 함
+  const lfo = ctx.createOscillator()
+  lfo.type = "sine"
+  lfo.frequency.setValueAtTime(4.2, now)
+
+  const lfoGain = ctx.createGain()
+  lfoGain.gain.setValueAtTime(0.055, now)
+
+  lfo.connect(lfoGain)
+  lfoGain.connect(coreGain.gain)
+
+  core.connect(coreGain).connect(compressor)
+  harmonic.connect(harmonicFilter).connect(harmonicGain).connect(compressor)
   noise.connect(noiseFilter).connect(noiseGain).connect(compressor)
 
-  sweep.start(now)
-  sweep.stop(now + DURATION)
-  shimmer.start(now)
-  shimmer.stop(now + DURATION * 0.8)
+  core.start(now)
+  core.stop(now + DURATION)
+
+  harmonic.start(now)
+  harmonic.stop(now + DURATION)
+
   noise.start(now)
   noise.stop(now + DURATION)
+
+  lfo.start(now)
+  lfo.stop(now + DURATION)
 }
+
 
 function generateLogId() {
   return `log_${Date.now()}_${Math.random().toString(36).slice(2, 9)}`
