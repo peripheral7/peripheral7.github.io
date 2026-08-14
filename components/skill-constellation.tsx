@@ -30,17 +30,17 @@ type LogEntry = {
   date: string
   type: "study" | "review"
   text: string
+  backText?: string // 복습 카드 뒷면(이론) 내용. 값이 있으면 카드가 flippable 상태가 됨
   reviewCycle?: ReviewCycle
-  reviewCount?: number                                  // 신규: 로그별 카운터
-  reviewCompletedAt?: Partial<Record<ReviewCycle, string>> // 신규: 로그별 완료일
-  flaggedForReview?: boolean
+  reviewCount?: number // 로그(코멘트) 단위 복습 완료 횟수 (0~3)
+  reviewCompletedAt?: Partial<Record<ReviewCycle, string>> // 로그 단위 완료일
+  flaggedForReview?: boolean // 사용자가 직접 체크한 "복습요망" 플래그. 주기적 복습과 독립적으로 동작
 }
 
 type StarProgress = {
   acquired: boolean
   logs: LogEntry[]
-  reinforced?: boolean
-  // reviewCount, reviewCompletedAt는 더 이상 별 단위로 쓰지 않음 (하위호환 위해 타입엔 남겨도 되지만 신규 로직에서 미사용)
+  reinforced?: boolean // 하위호환을 위해 타입에는 남겨두지만, 밝기 계산에는 더 이상 이 저장값을 쓰지 않음 (computeReinforced로 매번 재계산)
 }
 
 type ProgressMap = Record<string, StarProgress>
@@ -179,6 +179,8 @@ function migrateProgress(raw: ProgressMap): ProgressMap {
     if (!status) continue
     const migratedLogs = (status.logs ?? []).map((log) => (log.id ? log : { ...log, id: generateLogId() }))
 
+    // 과거 버전에서 별 단위로 저장했던 reviewCount/reviewCompletedAt을
+    // 그 별의 최신 로그로 1회 이관 (하위호환)
     const legacyCount = (status as any).reviewCount as number | undefined
     const legacyCompletedAt = (status as any).reviewCompletedAt as Partial<Record<ReviewCycle, string>> | undefined
     if (legacyCount && migratedLogs.length > 0) {
@@ -471,7 +473,6 @@ function labelTransformForSide(side: EdgeSide) {
   }
 }
 
-
 const STAR_SPOKE_COUNT = 36
 const STAR_CROSS_ANGLES = [0, 90, 180, 270]
 const STAR_CROSS_TOLERANCE = 0.01
@@ -571,14 +572,11 @@ function StarGlyph({
   )
 }
 
-
-
 type Tier = {
   rgb: string
   fillAlpha: number
   shadow: string
 }
-
 
 function getTier(
   isRoot: boolean,
@@ -660,7 +658,6 @@ function getTier(
   }
 }
 
-
 // 복습 회차(reviewCycle)에 따른 코멘트 카드 테두리/발광 스타일. 0(없음)=기존 그대로, 1→2→3 순으로 노란빛이 점점 밝아짐. 얇게 유지
 function getReviewCardStyle(cycle: ReviewCycle | undefined): {
   borderColor: string
@@ -692,7 +689,6 @@ function getReviewCardStyle(cycle: ReviewCycle | undefined): {
       }
   }
 }
-
 
 const FLASH_OUTLINE_COLOR = "rgba(255,224,170,0.9)"
 const FLASH_GLOW_SHADOW =
@@ -727,22 +723,47 @@ function getLatestLogByDate(logs: LogEntry[]): LogEntry | null {
   )
 }
 
+// 기준일 산정: 이전에 완료한 복습이 있으면 그중 가장 최근 완료일, 없으면 코멘트 최초 작성일
+function getReviewBaseDate(log: LogEntry): string {
+  const completedDates = Object.values(log.reviewCompletedAt ?? {}) as string[]
+  if (completedDates.length === 0) return log.date
+  return completedDates.reduce((latest, current) =>
+    parseYMD(current).getTime() > parseYMD(latest).getTime() ? current : latest,
+  )
+}
+
 function getDueCycleForLog(log: LogEntry): ReviewCycle | null {
   const reviewCount = log.reviewCount ?? 0
   if (reviewCount >= 3) return null
-  const elapsedDays = Math.floor((Date.now() - parseYMD(log.date).getTime()) / 86400000)
+  const baseDate = getReviewBaseDate(log)
+  const elapsedDays = Math.floor((Date.now() - parseYMD(baseDate).getTime()) / 86400000)
   const threshold = REVIEW_THRESHOLDS[reviewCount]
   if (elapsedDays < threshold) return null
   return (reviewCount + 1) as ReviewCycle
 }
 
+
+// 저장된 reinforced 플래그를 신뢰하지 않고, 현재 남아있는 로그만으로 "복습 간격을 채운 적 있는지"를 매번 재계산.
+// 코멘트가 삭제되면 그 코멘트가 만든 간격도 함께 사라지므로, 별 밝기가 항상 현재 상태를 반영한다.
+function computeReinforced(logs: LogEntry[]): boolean {
+  if (logs.length < 2) return false
+  const sorted = [...logs].sort(
+    (a, b) => parseYMD(a.date).getTime() - parseYMD(b.date).getTime(),
+  )
+  for (let i = 1; i < sorted.length; i++) {
+    const gapDays = Math.floor(
+      (parseYMD(sorted[i].date).getTime() - parseYMD(sorted[i - 1].date).getTime()) / 86400000,
+    )
+    if (gapDays >= REINFORCE_GAP_DAYS) return true
+  }
+  return false
+}
+
 const SELECTED_GLOW_FILTER =
   "drop-shadow(0 0 6px rgba(255,255,255,0.98)) drop-shadow(0 0 20px rgba(255,255,255,0.72)) drop-shadow(0 0 34px rgba(255,255,255,0.34))"
 
-// 복습 코멘트 카드를 하나의 개체(컴포넌트)로 분리. dnd-kit useSortable로 드래그 정렬 지원
-
-
-
+// 복습 코멘트 카드를 하나의 개체(컴포넌트)로 분리. dnd-kit useSortable로 드래그 정렬 지원.
+// log.backText가 있으면 flippable 카드가 되어, 카드 상단(헤더) 영역 클릭으로 앞/뒷면을 전환할 수 있다.
 function ReviewLogCard({
   log,
   isLatest,
@@ -789,6 +810,9 @@ function ReviewLogCard({
     id: log.id,
   })
 
+  const [isFlipped, setIsFlipped] = useState(false)
+  const isFlippable = Boolean(log.backText)
+
   const dragStyle: React.CSSProperties = {
     transform: CSS.Transform.toString(transform),
     transition,
@@ -796,10 +820,15 @@ function ReviewLogCard({
   }
 
   // 복습 배지("복습n회차")는 완전히 제거하고,
-  // 대신 카드 테두리 색(cardStyle.borderClass)만으로 회차를 구분합니다.
+  // 대신 카드 테두리 색(cardStyle.borderColor)만으로 회차를 구분합니다.
   // 실처럼 흐르는 효과(.review-card-thread)는 이 별의 3회차 복습이
   // 모두 끝났을 때(fullyReviewed)만, 그리고 복습 로그(reviewCycle 존재)에만 붙습니다.
   const showThread = fullyReviewed && Boolean(log.reviewCycle)
+
+  function handleHeaderClick() {
+    if (!isFlippable) return
+    setIsFlipped((flipped) => !flipped)
+  }
 
   return (
     <div
@@ -825,12 +854,17 @@ function ReviewLogCard({
         style={{ boxShadow: cardStyle.boxShadow }}
       />
 
-      <div className="relative flex items-center gap-1.5 border-b border-white/10 bg-black/20 px-2 py-1.5">
+      <div
+        className="relative flex items-center gap-1.5 border-b border-white/10 bg-black/20 px-2 py-1.5"
+        onClick={handleHeaderClick}
+        style={{ cursor: isFlippable ? "pointer" : "default" }}
+      >
         <button
           type="button"
           aria-label="드래그하여 순서 변경"
           {...attributes}
           {...listeners}
+          onClick={(event) => event.stopPropagation()}
           className="cursor-grab touch-none rounded p-0.5 text-white/30 active:cursor-grabbing hover:text-white/60"
         >
           <GripVertical size={13} />
@@ -838,14 +872,18 @@ function ReviewLogCard({
 
         <span className="text-[10px] tracking-wider text-white/40">{log.date}</span>
 
+        {isFlippable && (
+          <span className="rounded-full border border-lime-300/40 px-1.5 py-0 text-[9px] text-lime-300/85">
+            {isFlipped ? "뒷면" : "앞면"}
+          </span>
+        )}
+
         <span className="flex-1" />
 
         {/*
-          핵심 수정: isLatest만으로는 렌더링하지 않고,
-          isLatest && isDue일 때만 동그라미를 그립니다.
-          -> 복습 시점이 아니면 아예 안 보이고,
-          -> 최상단 코멘트를 삭제하면 다음 코멘트를 기준으로
-            isLatest/isDue가 매번 새로 계산되므로 잔상이 남지 않습니다.
+          isDue(해당 로그 자신의 복습 주기 도달 여부)일 때만 빨간 점을 그립니다.
+          로그별로 독립 계산되므로, 여러 코멘트가 동시에 복습 대상이면 각각 표시됩니다.
+          isLatest 여부와는 무관합니다.
         */}
         {isDue && (
           <button
@@ -864,7 +902,10 @@ function ReviewLogCard({
             <button
               type="button"
               aria-label="수정"
-              onClick={onStartEdit}
+              onClick={(event) => {
+                event.stopPropagation()
+                onStartEdit()
+              }}
               className="rounded-full p-1 text-white/45 transition-colors hover:bg-white/10 hover:text-white/85"
             >
               <Pencil size={12} />
@@ -872,7 +913,10 @@ function ReviewLogCard({
             <button
               type="button"
               aria-label="삭제"
-              onClick={onDelete}
+              onClick={(event) => {
+                event.stopPropagation()
+                onDelete()
+              }}
               className="rounded-full p-1 text-white/45 transition-colors hover:bg-white/10 hover:text-white/85"
             >
               <X size={13} />
@@ -918,14 +962,18 @@ function ReviewLogCard({
           <div
             className={isCompact ? compactTextScale : "text-[13px] leading-relaxed text-white/85"}
             onClick={onLogAreaClick}
-            dangerouslySetInnerHTML={{ __html: renderMarkdown(log.text, nameToId) }}
+            dangerouslySetInnerHTML={{
+              __html: renderMarkdown(
+                isFlipped && log.backText ? log.backText : log.text,
+                nameToId,
+              ),
+            }}
           />
         )}
       </div>
     </div>
   )
 }
-
 
 export function SkillConstellation() {
   const { positions, edges } = useMemo(
@@ -985,6 +1033,11 @@ export function SkillConstellation() {
   const [reviewDrafts, setReviewDrafts] = useState<Record<string, string>>({})
   const reviewInput = selectedId ? reviewDrafts[selectedId] ?? "" : ""
 
+  // 복습 카드 뒷면(이론) 작성용 draft. 별(starId)마다 독립적으로 보관.
+  const [reviewBackDrafts, setReviewBackDrafts] = useState<Record<string, string>>({})
+  const reviewBackText = selectedId ? reviewBackDrafts[selectedId] ?? "" : ""
+  const [backComposerOpen, setBackComposerOpen] = useState(false)
+
   const [calendarOpen, setCalendarOpen] = useState(false)
   const [calendarMonth, setCalendarMonth] = useState(() => new Date())
   const [selectedCalendarDate, setSelectedCalendarDate] = useState<string | null>(null)
@@ -992,6 +1045,11 @@ export function SkillConstellation() {
   function setReviewInput(value: string) {
     if (!selectedId) return
     setReviewDrafts((previous) => ({ ...previous, [selectedId]: value }))
+  }
+
+  function setReviewBackText(value: string) {
+    if (!selectedId) return
+    setReviewBackDrafts((previous) => ({ ...previous, [selectedId]: value }))
   }
 
   const [editingLog, setEditingLog] = useState<{
@@ -1028,8 +1086,6 @@ export function SkillConstellation() {
     useSensor(KeyboardSensor, { coordinateGetter: sortableKeyboardCoordinates }),
   )
 
-
-  
   const studiedDatesSet = useMemo(() => {
     const set = new Set<string>()
     for (const node of nodeList) {
@@ -1052,7 +1108,7 @@ export function SkillConstellation() {
     return cells
   }, [calendarMonth])
 
-    const dateLogsList = useMemo(() => {
+  const dateLogsList = useMemo(() => {
     if (!selectedCalendarDate) return []
     const items: { id: string; starId: string; name: string; log: LogEntry }[] = []
     for (const node of nodeList) {
@@ -1065,11 +1121,9 @@ export function SkillConstellation() {
     return items
   }, [selectedCalendarDate, nodeList, progress])
 
-  
   useEffect(() => {
     setActiveSearchIndex(0)
   }, [searchQuery])
-
 
   useEffect(() => {
     function updateStage() {
@@ -1159,7 +1213,7 @@ export function SkillConstellation() {
     playStarMoveSound()
   }
 
-    // 검색으로 별을 선택했을 때, 그 별의 가장 최근 코멘트가 있으면
+  // 검색으로 별을 선택했을 때, 그 별의 가장 최근 코멘트가 있으면
   // 복습 패널 클릭과 동일하게 goToComment로 이동시켜 카드 반짝임 효과를 준다.
   // 코멘트가 없는 별이면 기존처럼 selectStar만 호출.
   function selectStarFromSearch(starId: string) {
@@ -1178,6 +1232,7 @@ export function SkillConstellation() {
     setEditingLog(null)
     setCalendarOpen(false)
     setSelectedCalendarDate(null)
+    setBackComposerOpen(false)
   }
 
   function closeAllOverlays() {
@@ -1188,6 +1243,7 @@ export function SkillConstellation() {
     setEditingLog(null)
     setCalendarOpen(false)
     setSelectedCalendarDate(null)
+    setBackComposerOpen(false)
   }
 
   function toggleTools() {
@@ -1251,8 +1307,6 @@ export function SkillConstellation() {
     return () => window.clearTimeout(timer)
   }, [selectedId, pendingScrollLogId])
 
-  
-
   function toggleAcquired(starId: string) {
     setProgress((previous) => {
       const current = previous[starId] ?? {
@@ -1269,7 +1323,7 @@ export function SkillConstellation() {
     })
   }
 
-  function addLog(starId: string, text: string) {
+  function addLog(starId: string, text: string, backText?: string) {
     const trimmed = text.trim()
     if (!trimmed) return
 
@@ -1277,29 +1331,16 @@ export function SkillConstellation() {
       const current = previous[starId] ?? {
         acquired: false,
         logs: [],
-        reinforced: false,
-        reviewCount: 0,
       }
 
-      let reinforced = current.reinforced ?? false
       const now = new Date()
-      const latestExisting = getLatestLogByDate(current.logs)
-
-      if (latestExisting) {
-        const differenceDays = Math.floor(
-          (now.getTime() - parseYMD(latestExisting.date).getTime()) / 86400000,
-        )
-
-        if (differenceDays >= REINFORCE_GAP_DAYS) {
-          reinforced = true
-        }
-      }
 
       const entry: LogEntry = {
         id: generateLogId(),
         date: formatDateYMD(now),
         type: "study",
         text: trimmed,
+        backText: backText?.trim() ? backText.trim() : undefined,
       }
 
       return {
@@ -1308,12 +1349,10 @@ export function SkillConstellation() {
           ...current,
           acquired: true,
           logs: [entry, ...current.logs],
-          reinforced,
         },
       }
     })
   }
-  
 
   function updateLog(starId: string, logId: string, text: string) {
     const trimmed = text.trim()
@@ -1489,7 +1528,6 @@ export function SkillConstellation() {
     setValue: (next: string) => void,
     onSubmit: () => void,
   ) {
-
     if (event.nativeEvent.isComposing || event.keyCode === 229) return
 
     const el = event.currentTarget
@@ -1514,7 +1552,7 @@ export function SkillConstellation() {
       event.preventDefault()
       const start = el.selectionStart
       const end = el.selectionEnd
-    
+
       const lineStart = value.lastIndexOf("\n", start - 1) + 1
       const line = value.slice(lineStart, value.indexOf("\n", start) === -1 ? value.length : value.indexOf("\n", start))
       const leadingSpaces = line.match(/^ {1,2}/)?.[0].length ?? 0
@@ -1570,12 +1608,13 @@ export function SkillConstellation() {
     onSubmit()
   }
 
-
   function handleReviewKeyDown(event: React.KeyboardEvent<HTMLTextAreaElement>) {
     handleStructuredKeyDown(event, reviewInput, setReviewInput, () => {
       if (!selectedId) return
-      addLog(selectedId, reviewInput)
+      addLog(selectedId, reviewInput, reviewBackText)
       setReviewDrafts((previous) => ({ ...previous, [selectedId]: "" }))
+      setReviewBackDrafts((previous) => ({ ...previous, [selectedId]: "" }))
+      setBackComposerOpen(false)
     })
   }
 
@@ -1913,7 +1952,7 @@ export function SkillConstellation() {
     return text.trim()
   }
 
-  // 복습 필요 큐: reviewCount가 결정하는 회차별 목표(3/10/20일) 도달 여부만 판정. 코멘트 단위로 표시
+  // 복습 필요 큐: reviewCount가 결정하는 회차별 목표(3/10/20일) 도달 여부만 판정. 코멘트(로그) 단위로 독립 표시
   const dueReviewQueue = useMemo(() => {
     return nodeList
       .flatMap((node) => {
@@ -1923,7 +1962,7 @@ export function SkillConstellation() {
           .map((log) => {
             const cycle = getDueCycleForLog(log)
             if (!cycle) return null
-            const elapsedDays = Math.floor((Date.now() - parseYMD(log.date).getTime()) / 86400000)
+            const elapsedDays = Math.floor((Date.now() - parseYMD(getReviewBaseDate(log)).getTime()) / 86400000)
             return {
               id: node.id,
               name: node.name,
@@ -1950,31 +1989,28 @@ export function SkillConstellation() {
       preview: string
     }[] = []
 
+    for (const node of nodeList) {
+      const status = progress[node.id]
+      if (!status) continue
 
+      for (const log of status.logs) {
+        const completedAt = log.reviewCompletedAt
+        if (!completedAt) continue
 
-
-  for (const node of nodeList) {
-    const status = progress[node.id]
-    if (!status) continue
-
-    for (const log of status.logs) {
-      const completedAt = log.reviewCompletedAt
-      if (!completedAt) continue
-
-      for (const cycleKey of [1, 2, 3] as ReviewCycle[]) {
-        if (completedAt[cycleKey] === today) {
-          items.push({
-            id: node.id,
-            name: node.name,
-            cycle: cycleKey,
-            label: REVIEW_LABELS[cycleKey - 1],
-            logId: log.id,
-            preview: commentPreview(log.text),
-          })
+        for (const cycleKey of [1, 2, 3] as ReviewCycle[]) {
+          if (completedAt[cycleKey] === today) {
+            items.push({
+              id: node.id,
+              name: node.name,
+              cycle: cycleKey,
+              label: REVIEW_LABELS[cycleKey - 1],
+              logId: log.id,
+              preview: commentPreview(log.text),
+            })
+          }
         }
       }
     }
-  }
 
     return items
   }, [nodeList, progress])
@@ -2132,7 +2168,7 @@ export function SkillConstellation() {
               ))}
             </div>
           )}
-          </div>
+        </div>
       </div>
 
       <div
@@ -2403,17 +2439,20 @@ export function SkillConstellation() {
             const status = progress[node.id]
             const isRoot = node.id === "root0"
             const isSelected = selectedId === node.id
-            const hasLogs = (status?.logs.length ?? 0) > 0
 
-            const maxLogReviewCount = status?.logs.length
-              ? Math.max(0, ...status.logs.map((log) => log.reviewCount ?? 0))
+            const currentLogs = status?.logs ?? []
+
+            const maxLogReviewCount = currentLogs.length
+              ? Math.max(0, ...currentLogs.map((log) => log.reviewCount ?? 0))
               : 0
 
+            // 밝기는 저장된 플래그가 아니라 "지금 남아있는 로그" 기준으로만 계산한다.
+            // 코멘트를 지우면 그 즉시 밝기도 현재 상태에 맞게 다시 계산된다.
             const tier = getTier(
               isRoot,
-              Boolean(status?.acquired),
-              Boolean(status?.reinforced),
-              status?.logs.length ?? 0,
+              currentLogs.length > 0 && Boolean(status?.acquired),
+              computeReinforced(currentLogs),
+              currentLogs.length,
               maxLogReviewCount,
             )
 
@@ -2469,7 +2508,7 @@ export function SkillConstellation() {
                   }`}
                   style={{
                     left: 0,
-                    top: size*1/2,
+                    top: size * (1 / 2),
                     width: 164,
                     marginLeft: -82,
                     lineHeight: 1.3,
@@ -2567,7 +2606,7 @@ export function SkillConstellation() {
 
             {dueReviewQueue.map((item) => (
               <label
-                key={`${item.id}-${item.cycle}`}
+                key={`${item.id}-${item.logId}-${item.cycle}`}
                 className="flex cursor-pointer items-start gap-2.5 rounded-md border border-white/10 bg-black/24 p-2.5 transition-colors hover:border-amber-100/40"
               >
                 <input
@@ -2614,7 +2653,7 @@ export function SkillConstellation() {
 
             {completedTodayList.map((item) => (
               <label
-                key={`${item.id}-${item.cycle}`}
+                key={`${item.id}-${item.logId}-${item.cycle}`}
                 className="flex cursor-pointer items-start gap-2.5 rounded-md border border-white/8 bg-black/15 p-2.5 opacity-75 transition-opacity hover:opacity-100"
               >
                 <input
@@ -2700,13 +2739,37 @@ export function SkillConstellation() {
                 } text-white shadow-none outline-none ring-0 focus:border-amber-100/50 focus:shadow-none focus:outline-none focus:ring-0`}
               />
 
-              <div className="flex justify-end">
+              {backComposerOpen && (
+                <textarea
+                  value={reviewBackText}
+                  onChange={(event) => setReviewBackText(event.target.value)}
+                  placeholder="뒷면(이론) 내용을 입력하세요"
+                  rows={isCompact ? 4 : 6}
+                  className="w-full resize-none rounded-md border border-lime-300/30 bg-black/35 px-2.5 py-2 text-[13px] text-white outline-none focus:border-lime-300/60"
+                />
+              )}
+
+              <div className="flex justify-end gap-2">
+                <button
+                  type="button"
+                  onClick={() => setBackComposerOpen((open) => !open)}
+                  className={`rounded-md border px-3 py-2 text-[11px] transition-colors md:text-[12px] ${
+                    reviewBackText.trim()
+                      ? "border-lime-400/60 bg-lime-400/15 text-lime-300"
+                      : "border-white/22 text-white/78 hover:border-amber-100/80 hover:text-amber-50"
+                  }`}
+                >
+                  {reviewBackText.trim() ? "복습 입력" : "복습 카드"}
+                </button>
+
                 <button
                   type="button"
                   onClick={() => {
                     if (!selectedId) return
-                    addLog(selectedId, reviewInput)
+                    addLog(selectedId, reviewInput, reviewBackText)
                     setReviewDrafts((previous) => ({ ...previous, [selectedId]: "" }))
+                    setReviewBackDrafts((previous) => ({ ...previous, [selectedId]: "" }))
+                    setBackComposerOpen(false)
                   }}
                   className="rounded-md border border-white/22 px-3 py-2 text-[11px] text-white/78 transition-colors hover:border-amber-100/80 hover:text-amber-50 md:text-[12px]"
                 >
