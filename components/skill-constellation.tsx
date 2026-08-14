@@ -107,40 +107,46 @@ function playStarMoveSound() {
   if (ctx.state === "suspended") ctx.resume()
 
   const now = ctx.currentTime
+  const DURATION = 0.28 // 짧고 산뜻하게
 
   const compressor = ctx.createDynamicsCompressor()
-  compressor.threshold.setValueAtTime(-24, now)
-  compressor.knee.setValueAtTime(20, now)
-  compressor.ratio.setValueAtTime(10, now)
-  compressor.attack.setValueAtTime(0.003, now)
-  compressor.release.setValueAtTime(0.25, now)
+  compressor.threshold.setValueAtTime(-20, now)
+  compressor.knee.setValueAtTime(16, now)
+  compressor.ratio.setValueAtTime(8, now)
+  compressor.attack.setValueAtTime(0.001, now)
+  compressor.release.setValueAtTime(0.15, now)
   compressor.connect(ctx.destination)
 
-  const osc = ctx.createOscillator()
-  osc.type = "sine"
-  osc.frequency.setValueAtTime(95, now)
-  osc.frequency.linearRampToValueAtTime(55, now + 0.55)
+  // 광선검처럼 높은 톤에서 빠르게 하강하는 스윕 — 밝고 또렷한 "슉" 소리의 핵심
+  const sweep = ctx.createOscillator()
+  sweep.type = "sawtooth"
+  sweep.frequency.setValueAtTime(2200, now)
+  sweep.frequency.exponentialRampToValueAtTime(420, now + DURATION)
 
-  const oscFilter = ctx.createBiquadFilter()
-  oscFilter.type = "lowpass"
-  oscFilter.frequency.value = 220
+  const sweepFilter = ctx.createBiquadFilter()
+  sweepFilter.type = "bandpass"
+  sweepFilter.frequency.setValueAtTime(2400, now)
+  sweepFilter.frequency.exponentialRampToValueAtTime(500, now + DURATION)
+  sweepFilter.Q.value = 6
 
-  const oscGain = ctx.createGain()
-  oscGain.gain.setValueAtTime(0.0001, now)
-  oscGain.gain.exponentialRampToValueAtTime(0.95, now + 0.06)
-  oscGain.gain.exponentialRampToValueAtTime(0.0001, now + 0.55)
+  const sweepGain = ctx.createGain()
+  sweepGain.gain.setValueAtTime(0.0001, now)
+  sweepGain.gain.exponentialRampToValueAtTime(0.5, now + 0.02)
+  sweepGain.gain.exponentialRampToValueAtTime(0.0001, now + DURATION)
 
-  const subOsc = ctx.createOscillator()
-  subOsc.type = "sine"
-  subOsc.frequency.setValueAtTime(48, now)
-  subOsc.frequency.linearRampToValueAtTime(30, now + 0.55)
+  // 얇은 금속성 배음 — 칼날이 지나가는 듯한 반짝이는 하모닉스
+  const shimmer = ctx.createOscillator()
+  shimmer.type = "sine"
+  shimmer.frequency.setValueAtTime(3600, now)
+  shimmer.frequency.exponentialRampToValueAtTime(1200, now + DURATION * 0.8)
 
-  const subGain = ctx.createGain()
-  subGain.gain.setValueAtTime(0.0001, now)
-  subGain.gain.exponentialRampToValueAtTime(0.6, now + 0.08)
-  subGain.gain.exponentialRampToValueAtTime(0.0001, now + 0.55)
+  const shimmerGain = ctx.createGain()
+  shimmerGain.gain.setValueAtTime(0.0001, now)
+  shimmerGain.gain.exponentialRampToValueAtTime(0.12, now + 0.015)
+  shimmerGain.gain.exponentialRampToValueAtTime(0.0001, now + DURATION * 0.8)
 
-  const bufferSize = ctx.sampleRate * 0.5
+  // 바람이 스치는 듯한 화이트노이즈 텍스처 — 스윕에 공기감을 더함
+  const bufferSize = Math.floor(ctx.sampleRate * DURATION)
   const noiseBuffer = ctx.createBuffer(1, bufferSize, ctx.sampleRate)
   const data = noiseBuffer.getChannelData(0)
   for (let i = 0; i < bufferSize; i++) data[i] = Math.random() * 2 - 1
@@ -149,24 +155,26 @@ function playStarMoveSound() {
   noise.buffer = noiseBuffer
 
   const noiseFilter = ctx.createBiquadFilter()
-  noiseFilter.type = "lowpass"
-  noiseFilter.frequency.value = 350
+  noiseFilter.type = "bandpass"
+  noiseFilter.frequency.setValueAtTime(1800, now)
+  noiseFilter.frequency.exponentialRampToValueAtTime(600, now + DURATION)
+  noiseFilter.Q.value = 1.2
 
   const noiseGain = ctx.createGain()
   noiseGain.gain.setValueAtTime(0.0001, now)
-  noiseGain.gain.exponentialRampToValueAtTime(0.15, now + 0.05)
-  noiseGain.gain.exponentialRampToValueAtTime(0.0001, now + 0.45)
+  noiseGain.gain.exponentialRampToValueAtTime(0.22, now + 0.02)
+  noiseGain.gain.exponentialRampToValueAtTime(0.0001, now + DURATION)
 
-  osc.connect(oscFilter).connect(oscGain).connect(compressor)
-  subOsc.connect(subGain).connect(compressor)
+  sweep.connect(sweepFilter).connect(sweepGain).connect(compressor)
+  shimmer.connect(shimmerGain).connect(compressor)
   noise.connect(noiseFilter).connect(noiseGain).connect(compressor)
 
-  osc.start(now)
-  osc.stop(now + 0.55)
-  subOsc.start(now)
-  subOsc.stop(now + 0.55)
+  sweep.start(now)
+  sweep.stop(now + DURATION)
+  shimmer.start(now)
+  shimmer.stop(now + DURATION * 0.8)
   noise.start(now)
-  noise.stop(now + 0.5)
+  noise.stop(now + DURATION)
 }
 
 function generateLogId() {
