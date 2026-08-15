@@ -107,98 +107,90 @@ function playStarMoveSound() {
   if (ctx.state === "suspended") ctx.resume()
 
   const now = ctx.currentTime
-  const DURATION = 0.9
+  const DURATION = 3.8
+
+  const master = ctx.createGain()
+  master.gain.setValueAtTime(0.72, now)
+  master.connect(ctx.destination)
 
   const compressor = ctx.createDynamicsCompressor()
-  compressor.threshold.setValueAtTime(-22, now)
-  compressor.knee.setValueAtTime(20, now)
+  compressor.threshold.setValueAtTime(-18, now)
+  compressor.knee.setValueAtTime(18, now)
   compressor.ratio.setValueAtTime(7, now)
-  compressor.attack.setValueAtTime(0.008, now)
-  compressor.release.setValueAtTime(0.45, now)
-  compressor.connect(ctx.destination)
+  compressor.attack.setValueAtTime(0.006, now)
+  compressor.release.setValueAtTime(0.7, now)
+  compressor.connect(master)
 
-  // 깊은 우주선 엔진 같은 저음 중심층
-  const core = ctx.createOscillator()
-  core.type = "sine"
-  core.frequency.setValueAtTime(68, now)
-  core.frequency.exponentialRampToValueAtTime(96, now + 0.55)
-  core.frequency.exponentialRampToValueAtTime(62, now + DURATION)
+  // 공명음의 가장자리를 둥글게 만들어 묵직한 금속 울림만 남긴다.
+  const toneFilter = ctx.createBiquadFilter()
+  toneFilter.type = "lowpass"
+  toneFilter.frequency.setValueAtTime(2600, now)
+  toneFilter.Q.value = 0.7
+  toneFilter.connect(compressor)
 
-  const coreGain = ctx.createGain()
-  coreGain.gain.setValueAtTime(0.0001, now)
-  coreGain.gain.exponentialRampToValueAtTime(0.62, now + 0.08)
-  coreGain.gain.exponentialRampToValueAtTime(0.38, now + 0.45)
-  coreGain.gain.exponentialRampToValueAtTime(0.0001, now + DURATION)
+  // 싱잉볼 특유의 배음비 + 약간의 디튜닝.
+  // 아주 작은 디튜닝 차이로 천천히 맥놀이(숨 쉬는 듯한 울림)가 생긴다.
+  const partials = [
+    { frequency: 108, gain: 0.72, decay: 3.8, detune: 0 },
+    { frequency: 216.7, gain: 0.28, decay: 3.1, detune: -7 },
+    { frequency: 326.4, gain: 0.22, decay: 2.8, detune: 9 },
+    { frequency: 438.1, gain: 0.16, decay: 2.5, detune: -5 },
+    { frequency: 654.8, gain: 0.11, decay: 2.1, detune: 6 },
+    { frequency: 872.5, gain: 0.07, decay: 1.7, detune: -8 },
+  ]
 
-  // 우주적인 전자 배음층: 느리게 위로 올라갔다가 사라지는 신스 질감
-  const harmonic = ctx.createOscillator()
-  harmonic.type = "triangle"
-  harmonic.frequency.setValueAtTime(180, now)
-  harmonic.frequency.exponentialRampToValueAtTime(520, now + 0.48)
-  harmonic.frequency.exponentialRampToValueAtTime(240, now + DURATION)
+  partials.forEach(({ frequency, gain, decay, detune }) => {
+    const oscillator = ctx.createOscillator()
+    oscillator.type = "sine"
+    oscillator.frequency.setValueAtTime(frequency, now)
+    oscillator.detune.setValueAtTime(detune, now)
 
-  const harmonicFilter = ctx.createBiquadFilter()
-  harmonicFilter.type = "lowpass"
-  harmonicFilter.frequency.setValueAtTime(700, now)
-  harmonicFilter.frequency.exponentialRampToValueAtTime(1500, now + 0.4)
-  harmonicFilter.frequency.exponentialRampToValueAtTime(420, now + DURATION)
-  harmonicFilter.Q.value = 1.8
+    const partialGain = ctx.createGain()
+    partialGain.gain.setValueAtTime(0.0001, now)
+    partialGain.gain.exponentialRampToValueAtTime(gain, now + 0.018)
+    partialGain.gain.exponentialRampToValueAtTime(0.0001, now + decay)
 
-  const harmonicGain = ctx.createGain()
-  harmonicGain.gain.setValueAtTime(0.0001, now)
-  harmonicGain.gain.exponentialRampToValueAtTime(0.22, now + 0.1)
-  harmonicGain.gain.exponentialRampToValueAtTime(0.16, now + 0.52)
-  harmonicGain.gain.exponentialRampToValueAtTime(0.0001, now + DURATION)
+    oscillator.connect(partialGain).connect(toneFilter)
+    oscillator.start(now)
+    oscillator.stop(now + decay + 0.03)
+  })
 
-  // 넓은 공간을 지나가는 성운/추진기 같은 공기 텍스처
-  const bufferSize = Math.floor(ctx.sampleRate * DURATION)
+  // 타격 첫 순간의 둔탁한 금속 어택. 매우 짧고 낮게 유지해 '딱' 하는 클릭은 피한다.
+  const bufferSize = Math.floor(ctx.sampleRate * 0.16)
   const noiseBuffer = ctx.createBuffer(1, bufferSize, ctx.sampleRate)
-  const data = noiseBuffer.getChannelData(0)
+  const noiseData = noiseBuffer.getChannelData(0)
+
   for (let i = 0; i < bufferSize; i++) {
-    const fade = 1 - i / bufferSize
-    data[i] = (Math.random() * 2 - 1) * fade
+    const envelope = Math.pow(1 - i / bufferSize, 3.5)
+    noiseData[i] = (Math.random() * 2 - 1) * envelope
   }
 
-  const noise = ctx.createBufferSource()
-  noise.buffer = noiseBuffer
+  const strike = ctx.createBufferSource()
+  strike.buffer = noiseBuffer
 
-  const noiseFilter = ctx.createBiquadFilter()
-  noiseFilter.type = "bandpass"
-  noiseFilter.frequency.setValueAtTime(520, now)
-  noiseFilter.frequency.exponentialRampToValueAtTime(1450, now + 0.35)
-  noiseFilter.frequency.exponentialRampToValueAtTime(280, now + DURATION)
-  noiseFilter.Q.value = 0.9
+  const strikeFilter = ctx.createBiquadFilter()
+  strikeFilter.type = "bandpass"
+  strikeFilter.frequency.setValueAtTime(720, now)
+  strikeFilter.Q.value = 0.8
 
-  const noiseGain = ctx.createGain()
-  noiseGain.gain.setValueAtTime(0.0001, now)
-  noiseGain.gain.exponentialRampToValueAtTime(0.13, now + 0.12)
-  noiseGain.gain.exponentialRampToValueAtTime(0.07, now + 0.5)
-  noiseGain.gain.exponentialRampToValueAtTime(0.0001, now + DURATION)
+  const strikeGain = ctx.createGain()
+  strikeGain.gain.setValueAtTime(0.17, now)
+  strikeGain.gain.exponentialRampToValueAtTime(0.0001, now + 0.16)
 
-  // 미세한 펄스 모듈레이션: 정지된 드론보다 살아 있는 우주 장치처럼 들리게 함
+  strike.connect(strikeFilter).connect(strikeGain).connect(toneFilter)
+  strike.start(now)
+  strike.stop(now + 0.17)
+
+  // 저역의 아주 느린 숨결: 공명을 고정된 전자음이 아니라 살아 있는 울림으로 만든다.
   const lfo = ctx.createOscillator()
   lfo.type = "sine"
-  lfo.frequency.setValueAtTime(4.2, now)
+  lfo.frequency.setValueAtTime(0.42, now)
 
   const lfoGain = ctx.createGain()
-  lfoGain.gain.setValueAtTime(0.055, now)
+  lfoGain.gain.setValueAtTime(0.035, now)
 
   lfo.connect(lfoGain)
-  lfoGain.connect(coreGain.gain)
-
-  core.connect(coreGain).connect(compressor)
-  harmonic.connect(harmonicFilter).connect(harmonicGain).connect(compressor)
-  noise.connect(noiseFilter).connect(noiseGain).connect(compressor)
-
-  core.start(now)
-  core.stop(now + DURATION)
-
-  harmonic.start(now)
-  harmonic.stop(now + DURATION)
-
-  noise.start(now)
-  noise.stop(now + DURATION)
-
+  lfoGain.connect(master.gain)
   lfo.start(now)
   lfo.stop(now + DURATION)
 }
