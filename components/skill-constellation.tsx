@@ -20,7 +20,12 @@ import {
   useSortable,
 } from "@dnd-kit/sortable"
 import { CSS } from "@dnd-kit/utilities"
-import { skillTree, sections, layoutTree } from "@/content/appraiser/skilltree"
+
+// 레이아웃 로직은 기존 skilltree.ts 에서 불러옵니다.
+import { layoutTree } from "@/content/appraiser/skilltree"
+// 분리된 정적 데이터는 skilltree.data.ts 에서 불러옵니다.
+import { skillTree, sections } from "@/content/appraiser/skilltree.data"
+
 import defaultProgress from "@/content/appraiser/progress.default.json"
 
 type ReviewCycle = 1 | 2 | 3
