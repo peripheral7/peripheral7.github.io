@@ -178,15 +178,7 @@ export const skillTree: TreeNode = {
             },
           ],
         },
-        {
-          id: "p2",
-          name: "도시정비평가",
-          section: "purpose",
-          children: [
-            { id: "p2a", name: "종전자산평가", section: "purpose" },
-            { id: "p2b", name: "관리처분계획", section: "purpose" },
-          ],
-        },
+        // 기존 "도시정비평가(p2)" 노드 제거됨
         {
           id: "c1a",
           name: "사업유형별 토지보상평가",
@@ -195,6 +187,9 @@ export const skillTree: TreeNode = {
             { id: "c1a1", name: "재개발사업", section: "compensation" },
             { id: "c1a2", name: "재건축사업", section: "compensation" },
             { id: "c1a3", name: "도시개발사업", section: "compensation" },
+            // 아래 두 개의 노드가 새롭게 추가됨
+            { id: "c1a4", name: "가로주택사업", section: "compensation" },
+            { id: "c1a5", name: "국공유지처분목적감정평가", section: "compensation" },
           ],
         },
       ],
