@@ -5,7 +5,7 @@ export const sections: Record<string, { title: string; tier: number }> = {
   fundamentals: { title: "기초 및 기본 원리", tier: 1 },
   approaches: { title: "감정평가 3방식", tier: 1 },
   purpose: { title: "목적별 감정평가", tier: 1 },
-  property: { title: "물건별 감정평가", tier: 1 },
+  standard: { title: "표준지 및 표준주택", tier: 1 }, // 새로 추가된 섹션
   compensation: { title: "보상 감정평가", tier: 1 },
 }
 
@@ -178,7 +178,6 @@ export const skillTree: TreeNode = {
             },
           ],
         },
-        // 기존 "도시정비평가(p2)" 노드 제거됨
         {
           id: "c1a",
           name: "사업유형별 토지보상평가",
@@ -186,13 +185,24 @@ export const skillTree: TreeNode = {
           children: [
             { id: "c1a1", name: "재개발사업", section: "compensation" },
             { id: "c1a2", name: "재건축사업", section: "compensation" },
-            { id: "c1a3", name: "도시개발사업", section: "compensation" },
-            // 아래 두 개의 노드가 새롭게 추가됨
-            { id: "c1a4", name: "가로주택사업", section: "compensation" },
-            { id: "c1a5", name: "국공유지처분목적감정평가", section: "compensation" },
+            { 
+              id: "c1a3", 
+              name: "도시개발사업", 
+              section: "compensation",
+              children: [
+                { id: "c1a4", name: "가로주택사업", section: "compensation" },
+                { id: "c1a5", name: "국공유지처분목적감정평가", section: "compensation" },
+              ]
+            },
           ],
         },
       ],
+    },
+    // 새로 추가된 '표준지공시지가 및 표준주택' 노드
+    {
+      id: "s0",
+      name: "표준지공시지가 및 표준주택",
+      section: "standard",
     },
     {
       id: "c0",
