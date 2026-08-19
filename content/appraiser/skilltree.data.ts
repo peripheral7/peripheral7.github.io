@@ -5,7 +5,7 @@ export const sections: Record<string, { title: string; tier: number }> = {
   fundamentals: { title: "기초 및 기본 원리", tier: 1 },
   approaches: { title: "감정평가 3방식", tier: 1 },
   purpose: { title: "목적별 감정평가", tier: 1 },
-  standard: { title: "표준지 및 표준주택", tier: 1 }, // 새로 추가된 섹션
+  property: { title: "물건별 감정평가", tier: 1 },
   compensation: { title: "보상 감정평가", tier: 1 },
 }
 
@@ -198,17 +198,20 @@ export const skillTree: TreeNode = {
         },
       ],
     },
-    // 새로 추가된 '표준지공시지가 및 표준주택' 노드
-    {
-      id: "s0",
-      name: "표준지공시지가 및 표준주택",
-      section: "standard",
-    },
     {
       id: "c0",
       name: "보상 감정평가",
       section: "compensation",
       children: [
+        {
+          id: "s0",
+          name: "표준지공시지가 및 표준주택",
+          section: "compensation",
+          children: [
+            { id: "s1", name: "표준지공시지가", section: "compensation" },
+            { id: "s2", name: "표준주택", section: "compensation" },
+          ],
+        },
         {
           id: "c1",
           name: "토지 보상",
