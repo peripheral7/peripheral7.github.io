@@ -13,3 +13,10 @@ __v0_jsx-dev-runtime.ts
 node_modules
 .next/
 .DS_Store
+
+# 03_stock_trading — VCP 파이프라인: 시크릿/캐시/로컬 중복 산출물 제외
+# (공개 결과물은 public/reports/vcp_dashboard.html, public/reports/data.json 로만 커밋됨)
+03_stock_trading/.env
+03_stock_trading/__pycache__/
+03_stock_trading/vcp_dashboard*.html
+03_stock_trading/*.log
