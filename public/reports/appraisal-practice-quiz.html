@@ -1,0 +1,1061 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>감정평가실무 종합문제집</title>
+<style>
+  :root {
+    --primary: #3b82f6;
+    --primary-hover: #2563eb;
+    --primary-bg: #eff6ff;
+    --bg: #f8fafc;
+    --card: #ffffff;
+    --border: #e2e8f0;
+    --border-focus: #cbd5e1;
+    --text-dark: #0f172a;
+    --text-main: #334155;
+    --text-muted: #94a3b8;
+    --success-bg: #f0fdf4;
+    --success-border: #bbf7d0;
+    --success-text: #166534;
+    --warn-bg: #fffdf5;
+    --warn-border: #fef08a;
+    --warn-text: #854d0e;
+  }
+  
+  * { box-sizing: border-box; margin: 0; padding: 0; font-family: -apple-system, BlinkMacSystemFont, "Pretendard", "Segoe UI", sans-serif; }
+  body { background: var(--bg); color: var(--text-main); padding: 60px 16px 80px; line-height: 1.6; }
+  .container { max-width: 920px; margin: 0 auto; }
+  
+  /* Header */
+  .header { margin-bottom: 28px; text-align: center; }
+  h1 { font-size: 40px; font-weight: 900; color: var(--text-dark); letter-spacing: -1px; margin-bottom: 8px; }
+  
+  /* Tabs Navigation (2 Levels) */
+  .nav-container { background: var(--card); border: 1px solid var(--border); border-radius: 12px; padding: 20px; margin-bottom: 24px; box-shadow: 0 2px 10px rgba(0,0,0,0.02); }
+  
+  .main-tabs { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 16px; border-bottom: 2px solid var(--border); padding-bottom: 16px; }
+  .main-tab-btn { padding: 8px 14px; font-size: 15px; font-weight: 700; border: none; background: transparent; cursor: pointer; color: var(--text-muted); transition: all 0.2s; border-radius: 6px; }
+  .main-tab-btn:hover { background: #f1f5f9; color: var(--text-dark); }
+  .main-tab-btn.active { background: var(--text-dark); color: #fff; }
+  
+  .sub-tabs { display: flex; flex-wrap: wrap; gap: 8px; }
+  .sub-tab-btn { padding: 9px 14px; font-size: 13.5px; font-weight: 600; border: 1px solid var(--border); background: var(--card); border-radius: 8px; cursor: pointer; color: var(--text-main); transition: all 0.2s ease; }
+  .sub-tab-btn:hover:not(.disabled) { background: var(--primary-bg); border-color: #bfdbfe; color: var(--primary-hover); }
+  .sub-tab-btn.active { background: var(--primary-bg); color: var(--primary-hover); border-color: var(--primary); }
+  .sub-tab-btn.disabled { background: #f8fafc; color: #cbd5e1; border-color: #f1f5f9; cursor: not-allowed; box-shadow: none; }
+  
+  /* Action Bar */
+  .action-bar { position: sticky; top: 16px; z-index: 50; background: rgba(255,255,255,0.92); backdrop-filter: blur(10px); border: 1px solid var(--border); border-radius: 10px; padding: 12px 20px; margin-bottom: 24px; display: flex; justify-content: space-between; align-items: center; box-shadow: 0 4px 16px rgba(0,0,0,0.04); }
+  .score-display { font-size: 14.5px; font-weight: 600; color: var(--text-main); }
+  .score-highlight { color: var(--primary-hover); font-size: 16px; font-weight: 700; margin-left: 4px; }
+  .btn { cursor: pointer; border: none; outline: none; border-radius: 6px; font-weight: 600; font-size: 14px; padding: 8px 18px; transition: all 0.2s ease; }
+  .btn-primary { background: var(--primary); color: #fff; box-shadow: 0 2px 4px rgba(59, 130, 246, 0.2); }
+  .btn-primary:hover { background: var(--primary-hover); box-shadow: 0 4px 6px rgba(59, 130, 246, 0.3); }
+  .btn-secondary { background: #f1f5f9; color: var(--text-main); margin-left: 8px; border: 1px solid transparent; }
+  .btn-secondary:hover { background: #e2e8f0; }
+
+  /* Subtitle */
+  .tab-subtitle { font-size: 15.5px; font-weight: 600; color: var(--text-dark); margin-bottom: 18px; padding-left: 12px; border-left: 3px solid var(--primary); display: flex; justify-content: space-between; align-items: center; }
+  .ref-tag { font-size: 12.5px; font-weight: 600; color: #475569; background: #e2e8f0; padding: 3px 9px; border-radius: 4px; }
+
+  /* Question Card */
+  .q-card { background: var(--card); border: 1px solid var(--border); border-radius: 12px; padding: 22px 24px; margin-bottom: 20px; box-shadow: 0 2px 8px rgba(0,0,0,0.02); }
+  
+  /* Header Row */
+  .q-header-row { display: flex; justify-content: space-between; align-items: flex-start; gap: 16px; margin-bottom: 14px; }
+  .q-prompt { font-size: 15.5px; font-weight: 600; color: var(--text-dark); display: flex; align-items: flex-start; gap: 12px; line-height: 1.5; letter-spacing: -0.2px; flex: 1; }
+  .q-num { flex-shrink: 0; background: var(--primary-bg); color: var(--primary-hover); width: 26px; height: 26px; border-radius: 6px; display: inline-flex; align-items: center; justify-content: center; font-size: 13px; font-weight: 700; margin-top: 1px; }
+  .q-prompt-text { flex: 1; }
+  .q-context { margin-top: 8px; font-size: 14px; font-weight: 500; color: #475569; background: #f8fafc; padding: 12px; border-radius: 6px; border: 1px solid #e2e8f0; }
+  
+  /* 확인 버튼 */
+  .btn-check { flex-shrink: 0; background: #ffffff; color: #475569; border: 1px solid #cbd5e1; font-size: 13px; font-weight: 600; padding: 6px 14px; border-radius: 6px; box-shadow: 0 1px 2px rgba(0,0,0,0.03); transition: box-shadow 0.2s ease, border-color 0.2s ease; cursor: pointer; }
+  .btn-check:hover { background: #ffffff; color: #475569; border-color: #94a3b8; box-shadow: 0 4px 12px rgba(0,0,0,0.06); }
+  .btn-check:active { box-shadow: 0 1px 3px rgba(0,0,0,0.04); }
+  
+  /* Input Box */
+  .input-box { width: 100%; min-height: 90px; padding: 14px; border: 1px solid var(--border-focus); border-radius: 8px; font-size: 14px; color: var(--text-dark); resize: vertical; outline: none; transition: all 0.2s ease; line-height: 1.6; background: #fcfcfc; }
+  .input-box.tall { min-height: 180px; }
+  .input-box.very-tall { min-height: 380px; }
+  .input-box.short { min-height: 44px; padding: 10px 14px; resize: none; overflow: hidden; white-space: nowrap; }
+  .input-box:focus { border-color: var(--primary); background: #fff; box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1); }
+  
+  /* Result Panel */
+  .result-panel { display: none; margin-top: 16px; padding: 18px; border-radius: 8px; font-size: 14.5px; }
+  .result-good { background: var(--success-bg); border: 1px solid var(--success-border); color: var(--success-text); }
+  .result-warn { background: var(--warn-bg); border: 1px solid var(--warn-border); color: var(--warn-text); }
+  
+  /* 메타 정보 행 (숨김 처리) */
+  .result-meta-row { display: none; }
+  .keywords-match { display: flex; flex-wrap: wrap; gap: 6px; align-items: center; }
+  .kw-tag { font-size: 12.5px; padding: 4px 10px; border-radius: 20px; font-weight: 500; display: inline-flex; align-items: center; gap: 4px; }
+  .kw-found { background: #dcfce7; color: #15803d; border: 1px solid #bbf7d0; }
+  .kw-missing { background: #fee2e2; color: #b91c1c; border: 1px solid #fecaca; }
+  
+  .full-model { color: var(--text-main); line-height: 1.6; }
+  .full-model strong { color: var(--text-dark); font-weight: 600; }
+  .formula-box { background: rgba(255,255,255,0.6); padding: 10px 14px; border-radius: 6px; border: 1px solid rgba(0,0,0,0.05); font-family: "Courier New", monospace; font-weight: 600; margin: 8px 0; color: var(--primary-hover); font-size: 13px; }
+  
+  .sub-box { margin-left: 20px; border-left: 2px solid var(--border); padding-left: 16px; margin-top: 12px; margin-bottom: 12px; }
+  
+  /* Inline Short Answer Styles */
+  .inline-card { background: var(--card); border: 1px solid var(--border); border-radius: 12px; padding: 24px; margin-bottom: 20px; box-shadow: 0 2px 8px rgba(0,0,0,0.02); }
+  .section-divider { margin: 0 0 16px; padding-bottom: 12px; border-bottom: 2px solid var(--text-dark); font-size: 20px; font-weight: 800; color: var(--text-dark); }
+  
+  .inline-question { display: flex; align-items: center; flex-wrap: wrap; gap: 8px; padding: 14px 0; border-bottom: 1px dashed var(--border); }
+  .inline-question:last-child { border-bottom: none; padding-bottom: 0; }
+  .inline-prompt { font-size: 15.5px; font-weight: 600; color: var(--text-dark); letter-spacing: -0.3px; }
+  
+  .inline-input { width: 260px; padding: 8px 12px; border: 1px solid var(--border-focus); border-radius: 6px; font-size: 14.5px; font-weight: 600; color: var(--primary-hover); outline: none; transition: all 0.2s; background: #fcfcfc; text-align: center; }
+  .inline-input:focus { border-color: var(--primary); background: #fff; box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1); }
+  
+  .inline-feedback { font-size: 14.5px; font-weight: 600; margin-left: 8px; padding: 6px 12px; border-radius: 6px; display: none; color: var(--text-dark); background: transparent; border: none; }
+
+  .imp-tag { color: #94a3b8; font-weight: normal; font-size: 13px; margin-left: 8px; }
+  .empty-state { text-align: center; padding: 60px 20px; color: var(--text-muted); background: var(--card); border: 1px solid var(--border); border-radius: 12px; font-size: 15px; }
+</style>
+</head>
+<body>
+
+<div class="container">
+  <div class="header">
+    <h1>감정평가실무 종합문제집</h1>
+  </div>
+
+  <div class="nav-container">
+    <div class="main-tabs" id="main-tabs"></div>
+    <div class="sub-tabs" id="sub-tabs"></div>
+  </div>
+
+  <div class="action-bar" id="action-bar">
+    <div class="score-display">
+      진행 <span id="progress-text" class="score-highlight">0 / 0</span> 
+    </div>
+    <div>
+      <button class="btn btn-primary" onclick="gradeAll()">채점</button>
+      <button class="btn btn-secondary" onclick="resetCurrentTab()">초기화</button>
+    </div>
+  </div>
+
+  <div id="tab-subtitle" class="tab-subtitle"></div>
+  <div id="quiz-container"></div>
+</div>
+
+<script>
+const structure = [
+  {
+    id: 'c1', name: '1. 기초/TVM',
+    subs: [{id: 'tvm', name: 'TVM', active: false}]
+  },
+  {
+    id: 'c2', name: '2. 3방식',
+    subs: [
+      {id: 'cmp', name: '비교방식', active: false},
+      {id: 'cost', name: '원가방식', active: false},
+      {id: 'inc', name: '수익방식', active: false},
+      {id: 'mix', name: '3방식 병용', active: false}
+    ]
+  },
+  {
+    id: 'c3', name: '3. 임대료/임대차',
+    subs: [
+      {id: 'rent', name: '임대료 감정평가', active: false},
+      {id: 'lease', name: '임대차 감정평가', active: false}
+    ]
+  },
+  {
+    id: 'c4', name: '4. 구분소유/지상권',
+    subs: [
+      {id: 'sec_own', name: '구분소유권', active: false},
+      {id: 'sec_gnd', name: '구분지상권', active: false}
+    ]
+  },
+  {
+    id: 'c5', name: '5. 유형별 평가',
+    subs: [
+      {id: 't_land', name: '토지 / 건물', active: false},
+      {id: 't_mach', name: '기계기구 등', active: false},
+      {id: 't_fac', name: '공장 / 사업체', active: false},
+      {id: 't_int', name: '무형 / 기업가치', active: false},
+      {id: 't_sec', name: '유가증권', active: false},
+      {id: 't_pol', name: '오염부동산 등', active: false}
+    ]
+  },
+  {
+    id: 'c6', name: '6. 타당성/최유효',
+    subs: [
+      {id: 'feasibility', name: '타당성분석', active: false},
+      {id: 'hbu', name: '최유효분석', active: false}
+    ]
+  },
+  {
+    id: 'c7', name: '7. 목적별 평가',
+    subs: [
+      {id: 'p_col', name: '담보 / 경매평가', active: false},
+      {id: 'p_urb', name: '도시정비 등 평가', active: true}
+    ]
+  },
+  {
+    id: 'c8', name: '8. 표준지/주택',
+    subs: [
+      {id: 's_land', name: '표준지', active: false},
+      {id: 's_house', name: '표준주택', active: false}
+    ]
+  },
+  {
+    id: 'c9', name: '9. 보상감정평가',
+    subs: [
+      {id: 'general', name: '토지보상평가', active: true},
+      {id: 'gb', name: '개발제한구역 보상', active: true},
+      {id: 'repurchase', name: '환매', active: true},
+      {id: 'obstacles', name: '지장물 보상평가', active: true},
+      {id: 'comp_biz', name: '영업손실 보상평가', active: true},
+      {id: 'comp_fish', name: '어업손실 보상평가', active: true},
+      {id: 'comp_mine', name: '광업권 보상평가', active: true},
+      {id: 'comp_life', name: '생활보상', active: true}
+    ]
+  }
+];
+
+let currentMain = 'c9';
+let currentSub = 'general';
+
+const state = {
+  general: { inputs: {}, graded: {}, individuallyGraded: {}, globalGraded: false },
+  gb: { inputs: {}, graded: {}, individuallyGraded: {}, globalGraded: false },
+  repurchase: { inputs: {}, graded: {}, individuallyGraded: {}, globalGraded: false },
+  obstacles: { inputs: {}, graded: {}, individuallyGraded: {}, globalGraded: false },
+  comp_biz: { inputs: {}, graded: {}, individuallyGraded: {}, globalGraded: false },
+  comp_fish: { inputs: {}, graded: {}, individuallyGraded: {}, globalGraded: false },
+  comp_mine: { inputs: {}, graded: {}, individuallyGraded: {}, globalGraded: false },
+  comp_life: { inputs: {}, graded: {}, individuallyGraded: {}, globalGraded: false },
+  p_urb: { inputs: {}, graded: {}, individuallyGraded: {}, globalGraded: false }
+};
+
+const tabMeta = {
+  general: { badge: "보상 일반", title: "보상감정평가 절차 및 가치형성요인 검토" },
+  gb: { badge: "종합 121번", title: "개발제한구역 내 토지 및 특수토지의 보상평가" },
+  repurchase: { badge: "종합 122번 · 123번 · 124번", title: "환매대상 요건검토 및 환매금액 산정 감정평가" },
+  obstacles: { badge: "종합 126번 · 127번 · 127-1번", title: "건축물·과수목·일부편입·농작물 등 지장물 보상평가" },
+  comp_biz: { badge: "종합 133번 · 134번 · 135번", title: "영업손실 보상평가" },
+  comp_fish: { badge: "종합 136번 · 137번 · 138번", title: "어업손실 보상평가" },
+  comp_mine: { badge: "종합 139번", title: "광업권 보상평가 (광산평가액 및 소멸보상)" },
+  comp_life: { badge: "종합 140번 · 141번 · 142번", title: "생활보상 (농업손실보상대상 및 보상액 산정)" },
+  p_urb: { badge: "종합 95번 ~ 105번", title: "정비사업 자산평가 및 현금청산·환지 평가" }
+};
+
+const dataset = {
+  general: [
+    {
+      id: 1,
+      very_tall: true,
+      prompt: "적용공시지가 선택",
+      context: "• 검토 없는 경우<br>• 검토 (도로등사업이 아니며 사업면적 20만㎡ 이상)",
+      keywords: [
+        { word: "개발이익 배제", alt: ["개발이익을 배제"] },
+        { word: "토지보상법 70조 4항", alt: ["토지보상법 제70조 제4항", "70조 4항"] },
+        { word: "해당 시와 사업지구 내 표준지공시지가의 평균변동률을 비교", alt: ["평균변동률 비교", "평균변동률을 비교"] },
+        { word: "약술", alt: [] },
+        { word: "평균변동률을 기준으로 30%", alt: ["30% 이상격차율", "30% 이상 격차"] },
+        { word: "차이가 3%", alt: ["3% 이상인지", "3% 차이"] },
+        { word: "공공주택특별법", alt: ["공특법"] },
+        { word: "감정평가의 기준이 되는 표준지", alt: ["기준이 되는 표준지"] },
+        { word: "시군구표준지 30%", alt: ["시군구표준지 30"] },
+        { word: "70조 5항", alt: ["제70조 5항"] },
+        { word: "27조", alt: ["제27조"] }
+      ],
+      modelAnswer: "• 검토 없는 경우: <strong>개발이익 배제</strong>를 위하여 사업인정일 이전 최근 공시지가 선정한다(<strong>토지보상법 70조 4항</strong>)<br>• 검토: 도로등사업이 아니며 사업면적 20만㎡ 이상으로, 공익사업을 위한 토지 등의 취득 및 보상에 관한 법률(이하 <strong>토지보상법</strong>) 제70조5항에 따라 해당 공익사업의 계획이 공고 또는 고시됨으로서 취득하여야 할 토지의 가격이 변동되었다고 인정되는 경우에는 해당 공고일 또는 고시일 전의 시점을 공시기준일로 하는 공시지가로서 해당 공익사업의 공고일 또는 고시일에 가장 가까운 시점에 공시된 공시지가를 적용하는 바, 사업단지지정•고시일 해당 연도 초부터 사업인정고시의제일인 토지세목고시일 이전 공시지가까지의 <strong>해당 시와 사업지구 내 표준지공시지가의 평균변동률을 비교</strong>하여 토지가격이 변동되었는지를 검토하여 적용공시지가를 선택한다.<br><div class='sub-box'>- <strong>약술</strong>: 도로등 사업이 아니며 사업면적 20만제곱미터 이상으로 주민의견청취 공고로 인하여 취득하여야 할 토지가 변동되었는지 여부 검토한다. (비교대상, 검토기간 명시)<br>- 토지보상법: <strong>평균변동률을 기준으로 30%</strong> 이상격차율을 보이는지 여부, 변동률의 <strong>차이가 3%</strong> 이상인지 여부<br>- <strong>공공주택특별법</strong>: <strong>감정평가의 기준이 되는 표준지</strong> 공시지가 평균변동률 vs <strong>시군구표준지 30%</strong> 차이<br>- 변동 여부 검토 및 적용공시지가 선택: 토지보상법 <strong>70조 5항</strong>에 따라 공고공람일 / <strong>70조 4항</strong>에 따라 사업인정고시일 기준한다.</div>• 관련법령: 토지보상법 <strong>70조 5항</strong>, 38조의2 / 공공주택특별법 <strong>27조</strong>, 동법 시행령 20조"
+    },
+    {
+      id: 2,
+      prompt: "비교표준지 선정 기준 (일반 원칙)",
+      keywords: [
+        { word: "용도지역 변경은 반영하지 않는다", alt: ["용도지역 변경은 고려하지", "용도지역 변경 배제", "용도지역 변경 반영 X"] },
+        { word: "사업지구 내 표준지를 우선", alt: ["사업지구 내 표준지 우선", "사업지구 내 우선"] }
+      ],
+      modelAnswer: "「토지보상법 시행규칙」 23조에 의하여 해당 공익사업에 의한 <strong>용도지역 변경은 반영하지 않는다</strong>. 변경 전 용도지역 기준으로 공법상 제한, 실제 이용상황, 주변환경이 유사하고 지리적으로 가까운 표준지를 선정하되, 원칙적으로 <strong>사업지구 내 표준지를 우선</strong>한다."
+    },
+    {
+      id: 3,
+      very_tall: true,
+      prompt: "비교표준지 선정 등 (143번)",
+      context: "1. 미지급용지<br>2. 분할전 토지특성<br>3. 개발제한구역 및 군사보호시설<br>4. 산림형질변경허가 여부는 확인할 수 없으나 농지원부에 과수원 등재, 30년 이상 경작<br>5. 무단관사 신축<br>6. 1989.1.24 이전 무허가건축물<br>7. 용도지역 변경 및 자연환경보전지역",
+      keywords: [
+        { word: "일반적 제한", alt: ["일반적제한"] },
+        { word: "판단되는", alt: ["판단되는 임야", "종전 이용상황이라 판단되는"] },
+        { word: "사업지구 내", alt: ["사업지구내", "사업지구내 표준지"] },
+        { word: "가장 열세한 용도지역", alt: ["가장 열세한"] }
+      ],
+      modelAnswer: "1. 미지급용지인 바, 종전 이용상황이라 판단되는 전을 기준한다.<br>2. 분할전 토지특성을 기준하여 <strong>사업지구 내</strong> 표준지를 선정한다.<br>3. 개발제한구역 및 군사보호시설은 <strong>일반적 제한</strong>이므로 제한받는 표준지를 선정하여야 하는 바, 군사시설보호구역은 개별요인 비교한다.<br>4. 산림형질변경허가 여부는 확인할 수 없으나 농지원부에 과수원 등재, 30년 이상 경작 등은 1995년 1월 7일 이전의 불법형질변경 등에 해당할 수 있으므로, 종전 이용상황이라 <strong>판단되는</strong> 임야를 기준하여 선정한다.<br>5. 무단 관사 신축 미지급용지이나 거래가격 상승된 경우 대법원 판례 근거하여 현황 기준 선정한다.<br>6. 1989.1.24 이전 무허가건축물부지인 바, 사업시행자 요청에 따라 건축물 건축면적만을 대로 평가하고 기타 토지는 과수원 기준으로 각각 선정한다.<br>7. 해당 사업에 의한 용도지역 변경 고려하지 않으며, <strong>가장 열세한 용도지역</strong>(자연환경보전지역)을 기준하여 동일한 표준지를 선정한다."
+    },
+    {
+      id: 4,
+      tall: true,
+      prompt: "비교표준지 선정 등 (종합 145번)",
+      context: "1. 예정공도<br>2. 군사보호구역<br>3. 불법형질변경여부(농지원부 기재)<br>4. 지목변경 안된 건부지(버섯재배사)<br>5. 적법 주거용 건축물",
+      keywords: [
+        { word: "공도부지 평가 준용", alt: ["공도부지 평가를 준용"] },
+        { word: "일반적 제한", alt: ["일반적제한"] },
+        { word: "판단되는 임야", alt: ["판단되는"] },
+        { word: "버섯재배사 있는 전", alt: ["버섯재배사가 있는 전"] }
+      ],
+      modelAnswer: "1. 예정공도로서 <strong>공도부지 평가 준용</strong><br>2. 군사보호구역은 <strong>일반적 제한</strong><br>3. 불법형질변경 판단이 문제되며, 농지원부 전 기재만으로 적법성 인정 불가하여 종전 이용상황이라 <strong>판단되는 임야</strong> 기준 선정.<br>4. 지목 변경되지 않은 건부지는 <strong>버섯재배사 있는 전</strong>으로 현황평가(기타 기준)<br>5. 적법한 주거용 건축물로서 현황평가"
+    },
+    {
+      id: 5,
+      tall: true,
+      prompt: "비교표준지 선정 등 (종합 111, 112번)",
+      context: "1. 예정공도<br>2. 일시적 이용<br>3. 도시계획시설도로 이전 개설된 도로(사실상의 사도)<br>4. 도시계획시설 공원<br>5. 1989.1.24 이전 무허가건축물 부지",
+      keywords: [
+        { word: "1/3 이내", alt: ["3분의 1 이내", "1/3"] },
+        { word: "공원저촉이 없는", alt: ["공원저촉 없는"] },
+        { word: "면적 사정하지 아니하는", alt: ["별도 면적 사정하지 아니하는", "면적 사정 안함"] }
+      ],
+      modelAnswer: "1. 예정공도로서 공도부지 평가를 준용(표준적 이용상황(전) 주안점).<br>2. 현황은 일시적 이용으로 판단되어 배제.<br>3. 도시계획도로 개설 허가 제외지(사실상 사도)로서 인접 단독주택부지 평가액의 <strong>1/3 이내</strong> 평가.<br>4. 도시계획시설공원: 해당 공익사업으로서 배제한다 (유사지역 내 <strong>공원저촉이 없는</strong> 표준지 선정).<br>5. 1989.1.24 이전 무허가건축물부지로서 현황평가하며 별도 <strong>면적 사정하지 아니하는</strong> 바..."
+    },
+    {
+      id: 6,
+      tall: true,
+      prompt: "시점수정",
+      keywords: [
+        { word: "공익사업의 계획 또는 시행이 공고 또는 고시됨으로 인해 지가가 변동된 경우", alt: ["지가가 변동된 경우", "공익사업의 계획이 공고"] },
+        { word: "인접 시•군•구의 평균지가변동률", alt: ["인접 시군구 변동률", "인접 시군구 평균지가변동률", "인접 시•군•구 평균지가변동률"] },
+        { word: "공시지가기준일", alt: ["공시기준일"] }
+      ],
+      modelAnswer: "• 20만㎡ 이상의 도로 등 사업이 아니며, 「토지보상법 시행령」 제37조 제2항에 의해 검토한다.<br>• 지가변동률: 해당 국가산업단지로 인해 A시 지가가 전반적으로 영향을 받아 주민공고.공람일로부터 가격시점까지 5% 이상(사업인정일로부터 가격시점까지 3% 이상), A시가 속한 도와 비교 30% 이상(지정고시일부터 가격시점까지) 변동되었는 바, 해당 <strong>공익사업의 계획 또는 시행이 공고 또는 고시됨으로 인해 지가가 변동된 경우</strong>에 해당된다 판단되어 지가영향이 없는 <strong>인접 시•군•구의 평균지가변동률</strong>을 적용한다.<br>• 생산자물가지수: <strong>공시지가기준일</strong> ~ 가격시점 적용.<br>• 기타: 비교표준지가 속한 지역의 가격시점 당시 표준적인 획지가격과 대상토지가 속한 지역의 기준시점 당시의 표준적인 획지가격의 격차율로서 산출한다 (개발법 등). 해당 공익사업과 무관한 택지개발사업 가격상승분 반영 산정."
+    },
+    {
+      id: 7,
+      prompt: "그 밖의 요인 비교치 및 보상선례 적용요건",
+      keywords: [
+        { word: "공법상 제한", alt: ["용도지역"] },
+        { word: "이용상황", alt: ["실제이용상황"] },
+        { word: "주위환경", alt: ["주위 환경"] }
+      ],
+      modelAnswer: "• <strong>공법상 제한</strong>(용도지역·지구·구역 등), 실제 <strong>이용상황</strong>, <strong>주위환경</strong>이 동일하여 비교가능성이 높은 토지와 비교하되 본건 공익사업으로 인한 개발이익이 반영되지 않았다고 사료되는 해당산업단지 지정고시일 이전 보상선례를 선정한다. (해당 사업구간 포함되는 바 배제)<br>• 산정: 정당보상을 위해 보상선례를 참작하여 그 밖의 요인 보정치를 결정한다."
+    },
+    {
+      id: 8,
+      prompt: "잔여지 보상평가",
+      keywords: [
+        { word: "일단지", alt: ["일단지 - 편입토지 가격"] },
+        { word: "편입후 개별요인", alt: ["편입 후 개별요인", "개별요인 기준"] },
+        { word: "공사비", alt: ["가치하락 및 공사비 보상액"] },
+        { word: "편입전 잔여지의 토지가치", alt: ["편입 전 잔여지의 토지가치", "잔여지 토지가치"] }
+      ],
+      modelAnswer: "• 편입전 잔여지: <strong>일단지</strong> - 편입토지 가격<br>• 편입후 잔여지: <strong>편입후 개별요인</strong> 기준<br>• 보상평가액: 편입전 - 편입후 + <strong>공사비</strong> (가치하락 및 공사비 보상액)<br>• 사업시행자의 매수 가부: 보상평가액 vs <strong>편입전 잔여지의 토지가치</strong>"
+    },
+    {
+      id: 9,
+      prompt: "보상평가 거래사례",
+      keywords: [{ word: "공익사업과 무관", alt: ["무관한 선례"] }],
+      modelAnswer: "<strong>공익사업과 무관</strong>한 선례를 선택한다."
+    },
+    // 단답형 (인라인)
+    { id: 10, isInlineShort: true, prompt: "도시·군계획시설사업 (「국토계획법」) 사업인정의제일은", keywords: [{ word: "실시계획 고시일", alt: ["실시계획고시일"] }], modelAnswer: "실시계획 고시일" },
+    { id: 11, isInlineShort: true, prompt: "도시개발사업 (「도시개발법」) 사업인정의제일은", keywords: [{ word: "세목고시일", alt: ["세부목록 고시일"] }], modelAnswer: "세목고시일" },
+    { id: 12, isInlineShort: true, prompt: "정비사업 (「도시정비법」) 사업인정의제일은", keywords: [{ word: "사업시행계획인가 고시일", alt: ["사업시행인가고시일"] }], modelAnswer: "사업시행계획인가 고시일" },
+    { id: 13, isInlineShort: true, prompt: "택지개발사업 (「택지개발촉진법」) 사업인정의제일은", keywords: [{ word: "택지개발지구 지정·고시일", alt: ["지정·고시일"] }], modelAnswer: "택지개발지구 지정·고시일" },
+    { id: 14, isInlineShort: true, prompt: "공공주택사업 (「공공주택특별법」) 사업인정의제일은", keywords: [{ word: "주택지구 지정고시일", alt: ["주택지구 지정·고시일", "지정고시일"] }], modelAnswer: "주택지구 지정고시일" },
+    { id: 15, isInlineShort: true, prompt: "도로사업 (「도로법」) 사업인정의제일은", keywords: [{ word: "도로구역 결정 또는 변경 고시일", alt: ["도로구역 결정고시일"] }], modelAnswer: "도로구역 결정 또는 변경 고시일" },
+    { id: 16, isInlineShort: true, prompt: "산업단지 조성사업 (「산업입지법」) 사업인정의제일은", keywords: [{ word: "산업단지 지정·고시일", alt: ["지정·고시일"] }], modelAnswer: "산업단지 지정·고시일" },
+    { id: 17, isInlineShort: true, prompt: "혁신도시개발사업 (「혁신도시법」) 사업인정의제일은", keywords: [{ word: "혁신도시개발예정지구 지정·고시일", alt: ["예정지구 지정·고시일"] }], modelAnswer: "혁신도시개발예정지구 지정·고시일" },
+    { id: 18, isInlineShort: true, prompt: "하천공사 (「하천법」) 사업인정의제일은", keywords: [{ word: "하천공사실시계획 수립·고시일", alt: ["수립·고시일"] }], modelAnswer: "하천공사실시계획 수립·고시일" },
+    { id: 19, isInlineShort: true, prompt: "전원개발사업 (「전원개발촉진법」) 사업인정의제일은", keywords: [{ word: "실시계획 승인·변경승인 고시일", alt: ["승인·변경승인 고시일"] }], modelAnswer: "실시계획 승인·변경승인 고시일" },
+    { id: 20, isInlineShort: true, prompt: "학교시설사업 (「학교시설사업 촉진법」) 사업인정의제일은", keywords: [{ word: "시행계획 승인고시일", alt: ["승인고시일"] }], modelAnswer: "시행계획 승인고시일" }
+  ],
+  gb: [
+    {
+      id: 1,
+      tall: true,
+      prompt: "조정가능구역 처리방침",
+      keywords: [
+        { word: "조정가능구역 표준지", alt: ["조정가능 표준지"] },
+        { word: "정상적인 지가상승분", alt: ["지가상승분 고려"] },
+        { word: "직접 목적 미반영", alt: ["직접 목적으로 지정", "미반영"] }
+      ],
+      modelAnswer: "원칙적으로 <strong>개발제한구역 조정가능구역 표준지를 선정하되, 해제가능성에 따른 정상적인 지가상승분을 고려</strong>하여 평가함. (단, 당해 공익사업을 직접 목적으로 지정•해제된 토지는 지가상승분을 미반영함)"
+    },
+    {
+      id: 2,
+      prompt: "국가정책사업 및 지역 현안사업을 위한 개발제한구역의 조정가능구역(기호 3, 4)",
+      keywords: [
+        { word: "직접 목적", alt: ["해당 사업을 직접 목적", "직접 목적으로 해제", "당해 사업"] },
+        { word: "해제가능성 미반영", alt: ["고려하지 아니한다", "해제가능성을 고려하지", "미반영"] }
+      ],
+      modelAnswer: "해당 사업을 <strong>직접 목적으로 해제된 것으로 판단하여 해제가능성을 고려하지 아니한다.</strong> (종전 이용상황에 따른 표준지 적용)"
+    },
+    {
+      id: 3,
+      prompt: "기호1의 개발제한구역 해제 예상에 따른 정상지가상승분",
+      keywords: [
+        { word: "개별요인 동일 사례", alt: ["해제된 지역과 보존"] },
+        { word: "복리할인", alt: ["토지할인율"] },
+        { word: "비교하여 결정", alt: ["표준지공시지가기준"] }
+      ],
+      modelAnswer: "해제된 지역과 보존하는 지역 중 <strong>개별요인 동일한 사례를 선정</strong>하며, 일반적인 <strong>토지할인율을 개발해제까지 걸리는 기간만큼 복리할인하여 격차율을 산정</strong>한다. <strong>표준지공시지가기준 및 거래사례 기준으로 비교하여 결정</strong>한다."
+    },
+    {
+      id: 4,
+      prompt: "동시조치사항으로 지구단위계획이 수립되며 용도지역이 변경된 경우 처리방침",
+      keywords: [
+        { word: "동시조치사항", alt: ["지구단위계획"] },
+        { word: "가격격차율", alt: ["지가상승분"] }
+      ],
+      modelAnswer: "우선해제절차와 동시조치사항으로 지구단위계획이 수립되어 용도지역이 변경된 토지는 <strong>동시조치사항에 따른 가격격차율(지가상승분)을 산출하여 평가액에 반영</strong>함."
+    },
+    {
+      id: 5,
+      prompt: "불법형질변경 및 제3자가 무단으로 폐기물을 매립하여 토양이 오염된 토지(기호 4)의 처리방침",
+      keywords: [
+        { word: "현황평가 예외", alt: ["현황평가의 예외", "예외로서"] },
+        { word: "종전 이용상황", alt: ["종전 이용상황을 기준", "전"] },
+        { word: "비고란 병기", alt: ["비고란에 병기", "필요조치 소요비용", "필요조치사항", "쓰레기 매립"] }
+      ],
+      modelAnswer: "기호 4는 불법형질변경토지로서 <strong>현황평가의 예외로서 종전 이용상황(전)을 기준하여 표준지를 선정</strong>하되, <strong>쓰레기 매립으로 인한 필요조치사항(필요조치 소요비용)을 비고란에 병기</strong>함."
+    },
+    {
+      id: 6,
+      prompt: "건물거래사례 시점수정",
+      keywords: [{ word: "건축비지수", alt: ["건축비 지수"] }],
+      modelAnswer: "<strong>건축비지수</strong> (거래사례의 건물가액 산정 및 시점수정 시 건축비지수를 적용함)"
+    }
+  ],
+  repurchase: [
+    {
+      id: 1,
+      prompt: "가격시점 및 환매당시 토지가격",
+      keywords: [
+        { word: "환매권행사일", alt: ["환매의 의사표시"] },
+        { word: "개발이익 반영", alt: ["구체화"] },
+        { word: "사업구역 내", alt: ["사업구역 내 표준지"] }
+      ],
+      modelAnswer: "① <strong>가격시점:</strong> 환매권자가 환매의 의사표시를 한 날인 <strong>'환매권행사일'</strong> 기준.<br>② <strong>환매당시 토지가격:</strong> 당해 공익사업의 시행으로 인하여 <strong>현실화•구체화된 개발이익을 완전히 반영</strong>하여 평가하며, <strong>사업구역 내 표준지</strong>를 선정하여 평가함."
+    },
+    {
+      id: 2,
+      prompt: "인근 유사토지 지가변동률 비교표준지 선정",
+      keywords: [
+        { word: "사업과 무관", alt: ["사업구역 밖"] },
+        { word: "취득 당시", alt: ["취득당시의"] }
+      ],
+      modelAnswer: "당해 <strong>공익사업과 무관한 표준지</strong>로서, 대상토지의 <strong>'취득 당시'의 용도지역 및 이용상황과 유사한 표준지(표본지)</strong>를 선정함."
+    },
+    {
+      id: 3,
+      prompt: "환매금액 결정",
+      keywords: [
+        { word: "보상금 + 초과상승분", alt: ["보상금에 가산"] },
+        { word: "초과상승분", alt: ["개발이익"] }
+      ],
+      modelAnswer: "① <strong>환매금액 산정공식 (「토지보상법」 제91조 제4항):</strong><br><div class='formula-box'>환매금액 = 당초 보상금 + [환매당시 토지가격 - (당초 보상금 × 인근 유사토지 지가변동률)]</div>② <strong>결정 원리:</strong> 사업시행자가 지급했던 '당초 보상금'에 더하여, <strong>'초과 지가상승분(개발이익)'을 환매권자가 추가로 납부</strong>하여야 토지를 환매할 수 있도록 정산함."
+    },
+    {
+      id: 4,
+      prompt: "협의취득 적용공시지가 및 비교표준지 선정(자연공원 등 계획제한 처리방침)",
+      keywords: [
+        { word: "최근공시지가", alt: ["제70조 3항"] },
+        { word: "관리지역", alt: ["용도지역 변경 배제"] },
+        { word: "자연공원", alt: ["일반적 계획제한"] },
+        { word: "시설지구", alt: ["개별적 계획제한"] }
+      ],
+      modelAnswer: "① <strong>적용공시지가:</strong> 「토지보상법」 제70조 제3항에 의거 가격시점 이전 최근공시지가를 선정함.<br>② <strong>비교표준지 선정:</strong> 해당 공익사업으로 인한 용도지역 변경은 고려하지 아니하여 '관리지역'을 적용하며, 일반적 계획제한인 '자연공원'은 반영하되 개별적 계획제한인 공고•공시된 '시설지구'는 고려하지 아니함."
+    },
+    {
+      id: 5,
+      prompt: "해당 공익사업과 직접 관계없이 용도지역 변경된 경우 표본지 선정",
+      keywords: [{ word: "변경과정 유사", alt: ["변경과정이 유사한"] }],
+      modelAnswer: "<strong>해당 공익사업과 관계없이 용도지역 등 변경과정이 유사한 표본지를 선정</strong>한다."
+    },
+    {
+      id: 6,
+      prompt: "본건 토지가 환매대상 토지에 해당하는지 검토하시오. (폐기물 처리장 조성사업은 도시개발사업 구역 내 편입되면서 구역이 대폭 축소됨)",
+      keywords: [
+        { word: "기간요건", alt: ["10년 이내", "원 공익사업의 축소", "변경고시일"] },
+        { word: "공익사업 변환", alt: ["제91조 6항", "제4조 제1호 내지 제5호", "도시개발사업은", "변환 특칙"] }
+      ],
+      modelAnswer: "1. <strong>기간요건 (「토지보상법」 제91조):</strong> 사업의 변경고시일로부터 10년 이내에 원 공익사업의 축소에 따른 변경고시가 있는 바, 환매권 행사가 가능하다.<br>2. <strong>공익사업 변환 특칙여부 (「토지보상법」 제91조 제6항):</strong> 변경된 도시개발사업은 「토지보상법」 제4조 제1호 내지 제5호 사업이 아니므로 공익사업 변환이 인정되지 않아 환매권 행사가 가능하다."
+    }
+  ],
+  obstacles: [
+    {
+      id: 1,
+      tall: true,
+      prompt: "지장물 처리방침 및 평가방법 (건축물)",
+      keywords: [
+        { word: "행위제한일", alt: ["예정지구공고 및 공람", "예정지구공고", "이전에 신축", "보상대상"] },
+        { word: "이전비/물건가격", alt: ["이전비를 기준", "물건의 가격을 이전비가 초과", "물건의 가격으로 보상"] },
+        { word: "이전 불가", alt: ["이전이 불가", "이전불가", "해당 물건의 가격"] }
+      ],
+      modelAnswer: "<strong>[핵심 답안]</strong><br>① 「택지개발촉진법」상 <strong>행위제한일인 '예정지구공고 및 공람' 이전에 신축</strong>되어 보상대상에 해당함.<br>② 「토지보상법」상 <strong>이전비를 기준하되 물건의 가격을 이전비가 초과하면 물건의 가격으로 보상</strong>함.<br>③ 사실상 <strong>이전이 불가한 바 해당 물건의 가격으로 보상</strong>함.<br><br><strong>[기타 답안]</strong><br>- 평가목적을 고려하여 실측사항을 기준으로 평가함.<br>- 무허가건축물이나 사업인정일 이전의 무허가건축물로서 보상대상에 해당함.<br>- 정화조 설치비는 주택의 필수적인 설비로서 주택가액에 포함하여 평가함.<br>- 주거용 건축물로서 원가법에 의하되 거래사례비교법에 의한 시산가액을 비교함.<br>- 집합건축물로서 거래사례비교법에 의함."
+    },
+    {
+      id: 2,
+      prompt: "비준가액 사례선택 및 시점수정",
+      keywords: [
+        { word: "건물만의 거래", alt: ["건물의 가격수준", "건물만"] },
+        { word: "개발이익이 반영되지 않은", alt: ["개발이익 미반영", "개발이익 배제", "택지개발지구지정 이전"] },
+        { word: "건축비지수", alt: ["건축비 지수", "건축비지수 기준"] }
+      ],
+      modelAnswer: "건물만의 거래로서 건물의 가격수준으로 판단되며, <strong>개발이익이 반영되지 않은 거래사례(택지개발지구지정 이전 사례)를 선정</strong>한다. 시점수정은 <strong>건축비지수를 기준</strong>한다."
+    },
+    {
+      id: 3,
+      prompt: "과수목 평가방법",
+      keywords: [
+        { word: "고손액", alt: ["고손액", "부적기", "이식적기의 2배", "이식적기 2배"] },
+        { word: "감수액", alt: ["감수액", "220%"] }
+      ],
+      modelAnswer: "① 이식비: 굴취비, 운반비 및 상하차비, 식재비, 재료비, 이식비<br>② <strong>고손액: 부적기인 바 이식적기의 2배</strong><br>③ <strong>감수액: 220%</strong><br>④ 이전비 보상액 (물건가격 이하)"
+    },
+    {
+      id: 4,
+      tall: true,
+      prompt: "일부편입건물 (처리방침, 보수비 등)",
+      keywords: [
+        { word: "일부 편입부분 가격 + 보수비", alt: ["일부 편입부분", "보수비 등", "이전이 불가", "편입부분의 가격과 보수비"] },
+        { word: "높은 가격", alt: ["높은 가격", "높은 가격을 기준", "높은 금액"] },
+        { word: "보수비 및 가치하락액", alt: ["시설개선항목", "보수면적", "가치하락액", "잔여건축물 가격 이내"] }
+      ],
+      modelAnswer: "① <strong>처리방침:</strong> 일부가 편입된 건물로서 이전이 불가한 바, <strong>일부 편입부분의 가격과 보수비 등을 평가</strong>함.<br>② <strong>편입부분 가격결정:</strong> 적산가액과 비준가액 중 <strong>높은 가격을 기준</strong>함.<br>③ <strong>보수비 등 (잔여건축물 가격 이내):</strong><br>&nbsp;&nbsp;- <strong>보수비: 시설개선항목(리모델링, 바닥난방)을 제외.</strong> [보수면적(잘린 너비 × 높이) × 면적당 가격(미관개선 제외) + 기타보수비]<br>&nbsp;&nbsp;- <strong>가치하락액:</strong> (바닥면적 ÷ 2) × 면적당 하락액"
+    },
+    {
+      id: 5,
+      tall: true,
+      prompt: "농작물 수확전 협의 보상평가 (평가개요 및 처리방침)",
+      keywords: [
+        { word: "장래수익의 현가 - 비용의 현가", alt: ["장래수익의 현가", "예상 총수익 현가", "투하비용의 현가", "비용의 현가를 차감", "수익의 현가"] },
+        { word: "소요된 비용의 현재가치", alt: ["소요된 비용의 현재가치", "소요된 비용의 현가", "시행규칙 41조", "제41조"] },
+        { word: "지장물 보상대상 제외", alt: ["지장물 보상대상은 제외", "농업손실보상 여부와 무관", "비닐하우스 제외", "보상대상 제외"] }
+      ],
+      modelAnswer: "<strong>[핵심 답안]</strong><br>① 농업손실보상 여부와는 무관한 감정평가임.<br>② (5년 수확 가능 3년생 취나물) 「토지보상법 시행규칙」 제41조에 의하여 <strong>예상 총수익 현가에서 투하비용의 현가를 차감</strong>하여 평가함.<br><br><strong>[기타 답안]</strong><br>- (가격시점 이전 수확 예정 시) 3년치 수입은 보상 당시 상품화가 가능한 바, 2년치 수입의 현가를 기준함.<br>- (식재 1년차 이후 결실되는 6개월전 식재 방울토마토) 「토지보상법 시행규칙」 제41조에 의하여 <strong>가격시점까지 소요된 비용의 현재가치 합</strong>으로 평가함.<br>- 투하된 비용의 현가 시 <strong>지장물 보상대상(비닐하우스 및 해당 자가노력비 등)은 제외</strong>하고, 묘목 및 지지대 설치비(6개월전)를 현가화함."
+    }
+  ],
+  comp_biz: [
+    {
+      id: 1,
+      tall: true,
+      prompt: "영업손실의 보상대상인 영업 약술",
+      keywords: [
+        { word: "적법한 장소", alt: ["무허가건축물, 불법형질변경토지 등이 아닌", "적법한"] },
+        { word: "인적•물적시설", alt: ["인적.물적시설", "인적물적시설", "인적 및 물적시설"] },
+        { word: "계속적으로 행하고", alt: ["계속적으로 영위", "계속성"] },
+        { word: "사업자등록", alt: ["「부가가치세법」 제8조", "사업자등록증"] },
+        { word: "허가", alt: ["관계 법령에 의한 허가", "그 내용대로 하고 있는"] }
+      ],
+      modelAnswer: "(1) 사업인정고시일 등 전부터 <strong>적법한 장소</strong>(무허가건축물, 불법형질변경토지, 그 밖에 다른 장소에서 물건을 쌓아놓는 행위가 금지되는 장소가 아닌 곳)에서 <strong>인적•물적시설을 갖추고 계속적으로 행하고 있는 영업</strong>. 다만 무허가건축물 등에서 임차인이 영업하는 경우에는 그 임차인이 사업인정고시일 등 1년 이전부터 「부가가치세법」 제8조에 따른 <strong>사업자등록</strong>을 하고 행하고 있는 영업을 말한다.<br>(2) 영업을 행함에 있어 관계 법령에 의한 허가 등을 필요로 하는 경우에는 사업인정고시일 등 전에 <strong>허가</strong>를 받아 그 내용대로 하고 있는 영업."
+    },
+    {
+      id: 2,
+      prompt: "적법건축물 의제 대상 처리방침",
+      keywords: [
+        { word: "4개월", alt: ["휴업기간 4개월", "4개월 기준"] },
+        { word: "1989년 1월 24일 이전", alt: ["89년 1월 24일 이전", "1989•1•24 이전"] },
+        { word: "자유업", alt: ["자유업으로서", "허가 불필요"] },
+        { word: "최근 3년", alt: ["최근 3년간의 영업이익", "3년간 평균"] }
+      ],
+      modelAnswer: "휴업에 따른 영업손실보상으로서 사업시행자가 휴업기간을 제시하지 않은 바 <strong>4개월을 기준</strong>하며, <strong>1989년 1월 24일 이전</strong> 건축된 무허가건축물로서 적법한 장소 내 <strong>자유업</strong>으로서 보상대상이 된다. 영업이익은 <strong>최근 3년간의 영업이익을 기준</strong>한다."
+    },
+    {
+      id: 3,
+      prompt: "무허가건축물 처리방침",
+      keywords: [
+        { word: "영업보상 대상 아님", alt: ["영업보상 대상이 아니며", "보상대상 제외", "영업보상 제외"] },
+        { word: "이전비만 지급", alt: ["이전비만", "이전비 지급"] }
+      ],
+      modelAnswer: "자가사업장으로서 무허가건축물 등인 경우 <strong>영업보상 대상이 아니며, 이전비만 지급</strong>한다."
+    },
+    {
+      id: 4,
+      prompt: "무허가영업 처리방침",
+      keywords: [
+        { word: "특례 적용", alt: ["무허가 영업에 대한 특례", "시행규칙 제52조"] },
+        { word: "3인가구 가계지출비 3개월분", alt: ["3인가구", "가계지출비 3개월분"] },
+        { word: "이전비 별도", alt: ["이전비 등 별도 지급", "이전비 별도지급"] }
+      ],
+      modelAnswer: "허가대상 영업을 무허가로 영위하는 바 <strong>무허가 영업에 대한 특례를 적용</strong>한다 (「토지보상법 시행규칙」 제52조). <strong>3인가구 가계지출비 3개월분</strong>에 <strong>이전비 등을 별도로 지급</strong>한다 (제시된 조서와 보상할 금액에 차이 발생)."
+    },
+    {
+      id: 5,
+      prompt: "무허가장소 임차인 영업 처리방침",
+      keywords: [
+        { word: "보상의 대상", alt: ["영업손실보상의 대상이다", "보상대상에 해당"] },
+        { word: "10,000,000원", alt: ["10,000,000원으로 결정", "천만원 초과", "1천만원"] }
+      ],
+      modelAnswer: "자유업을 불법용도변경한 장소(무허가장소)에서 영위하는 임차인 영업으로서 사업인정고시일 등 1년 이전에 사업자등록을 하고 영업하는 바, <strong>영업손실보상의 대상이다</strong>. 이전비 등을 제외한 평가액이 10,000,000원을 초과하는 바, <strong>10,000,000원으로 결정</strong>한다."
+    },
+    {
+      id: 6,
+      prompt: "휴업기간 중 영업이익의 결정 및 법인의 최저영업이익 검토",
+      keywords: [
+        { word: "해당 사업의 영향", alt: ["공익사업의 영향", "사업의 영향 배제"] },
+        { word: "최저영업이익 검토대상 아님", alt: ["법인이므로 최저영업이익", "하한 검토 제외"] }
+      ],
+      modelAnswer: "2025년 매출은 <strong>해당 사업의 영향을 받은 바</strong> 배제하고 기준한다 (자가노력비 제외). 법인의 영업이익 산정 시 대손상각비, 감가상각비 등은 장부를 기준하며, <strong>법인이므로 최저영업이익 검토대상이 아니다</strong>."
+    },
+    {
+      id: 7,
+      prompt: "고정적 비용, 이전비 등 평가",
+      keywords: [
+        { word: "공조공과, 보험료", alt: ["공조공과 및 보험료", "고정적 비용으로 판단"] },
+        { word: "건축물 제외", alt: ["건축물은 가격보상 대상", "건물 감가상각 제외"] }
+      ],
+      modelAnswer: "이전비 등은 인테리어비, 이전비, 감손액 등을 포함하며 (진열대 증설비는 시설개선비로 제외). 휴업기간 중의 <strong>공조공과, 보험료를 고정적 비용으로 판단</strong>한다 (<strong>건축물은 가격보상 대상으로서 제외</strong>하고 이전대상인 기계기구의 감가상각비를 고려한다)."
+    },
+    {
+      id: 8,
+      tall: true,
+      prompt: "영업폐지보상액 처리방침 (134번)",
+      keywords: [
+        { word: "영업이익 × 2년", alt: ["영업이익 2년분", "2년치 영업이익", "영업이익 x 2"] },
+        { word: "매각손실액", alt: ["고정자산매각손실액", "재고자산매각손실액", "매각손실"] },
+        { word: "현재가액의 60% 이내", alt: ["현재가치의 60%", "60% 이내 산정"] },
+        { word: "손익계산서", alt: ["손익계산서상 영업이익", "유사성 인정"] }
+      ],
+      modelAnswer: "혐오감을 주는 영업시설로 이전이 곤란한 바 <strong>영업이익 × 2년 + 고정자산매각손실액 + 재고자산매각손실액</strong>으로 보상한다.<br>- <strong>손익계산서</strong>상 영업이익이 인근 유사 업종 수준과 유사성이 인정되는 바 이를 기준으로 결정한다.<br>- 매각가액을 알 수 없으므로 <strong>현재가액의 60% 이내</strong>로 산정한다 (고기정제시설은 별도평가되어 제외)."
+    },
+    {
+      id: 9,
+      prompt: "임시영업소 설치보상 처리방침 (134번, 135번)",
+      keywords: [
+        { word: "휴업보상액을 초과하지 못하므로", alt: ["휴업보상액 한도", "이전보상액 한도"] },
+        { word: "설치비", alt: ["가설비", "설치비용", "설치•해체비용", "설치.해체비용"] },
+        { word: "토지임차료", alt: ["지대상당액"] }
+      ],
+      modelAnswer: "임시영업소 설치보상은 <strong>휴업보상액을 초과하지 못하므로</strong> 영업의 이전(휴업)보상액과 비교하여 결정한다.<br>비용 포함 항목: <strong>설치비(또는 가설•해체비용)</strong>, <strong>토지임차료(또는 지대상당액)</strong>, 이전비 등."
+    }
+  ],
+  comp_fish: [
+    {
+      id: 1,
+      tall: true,
+      prompt: "어업손실평가 시 조사할 사항 약술",
+      keywords: [
+        { word: "공부자료 수집", alt: ["공부자료의 수집", "공부 열람"] },
+        { word: "어업실태조사", alt: ["설문 면담", "실태조사"] },
+        { word: "어업활동 추정", alt: ["출입항신고실적", "면세유구입실적"] },
+        { word: "어업생산량 산정", alt: ["수산자원량조사", "판매실적자료"] },
+        { word: "평균연간판매단가", alt: ["계통출하판매단가", "도매시장경락가격"] },
+        { word: "평년어업경비", alt: ["어업경영실태조사"] },
+        { word: "잔존가액", alt: ["어선•어구 등 시설물", "시설물 조사"] },
+        { word: "어업피해조사자료", alt: ["전문용역기관"] }
+      ],
+      modelAnswer: "- 어업별 각종 공부자료의 수집, 분류<br>- 설문 면담 등을 통한 해당 지역 어업실태조사<br>- 출입항신고실적, 면세유구입실적자료 등을 통한 어업활동 추정<br>- 수산자원량조사, 판매실적자료 수집을 통한 어업생산량 산정<br>- 계통출하판매단가, 도매시장경락가격 등의 조사와 평균연간판매단가 산정<br>- 어업경영실태조사를 통한 평년어업경비 산정<br>- 어선•어구 등 시설물 조사와 잔존가액 산정<br>- 전문용역기관의 어업피해조사자료를 검토•분석<br>- 기타 어업손실액 평가를 위한 조사"
+    },
+    {
+      id: 2,
+      prompt: "면허어업과 허가어업 처리방침",
+      keywords: [
+        { word: "평년수익액 / 환원이율", alt: ["평년수익액 환원", "면허어업 환원이율"] },
+        { word: "평년수익액 × 3", alt: ["평년수익액의 3년분", "허가어업 3년", "평년수익액 x 3"] },
+        { word: "잔존가액", alt: ["시설물의 잔존가액", "시설잔존가액"] }
+      ],
+      modelAnswer: "- 면허어업은 <strong>평년수익액 / 환원이율 + 시설물의 잔존가액</strong>으로 산정한다.<br>- 허가어업(원양어업 등)은 <strong>평년수익액 × 3 + 시설물의 잔존가액</strong>으로 산정한다."
+    },
+    {
+      id: 3,
+      prompt: "평년수익액 (일반) 산정 기준 (136번)",
+      keywords: [
+        { word: "3년치 평균", alt: ["소급기산한 3년치", "3년간 평균"] },
+        { word: "재소급 1년간", alt: ["전년대비 1.5배 이상", "재소급 1년"] },
+        { word: "어선•어구 유지관리비 포함", alt: ["유지관리비에 포함", "감가상각비, 자가노력비 포함", "어선어구 유지관리비"] }
+      ],
+      modelAnswer: "- 평균 연간어획량: 전년도 기준 소급기산한 <strong>3년치 평균어획량</strong>에 의하되, 2023년 어획량이 전년대비 1.5배 이상인 바 2021년치를 적용한다.<br>- 평균 판매단가: 적조피해로 전년대비 1.5배 이상인 바, <strong>재소급 1년간</strong> 평균판매단가 × 변동률에 의한다.<br>- 평년영업경비: 통상 고정비용은 <strong>어선•어구 유지관리비 포함</strong>되는 것으로 본다."
+    },
+    {
+      id: 4,
+      prompt: "평년수익액 (어획량 3년 미달) 산정 (137번)",
+      keywords: [
+        { word: "인근 동종어장", alt: ["인근 동종어장을 기준", "유사어장"] },
+        { word: "1년간 가중평균", alt: ["소급기산한 1년간 가중평균", "가중평균"] },
+        { word: "감가상각", alt: ["어선, 어구 잔존가액", "잔존가액"] },
+        { word: "투자당시 가액 시점수정", alt: ["기타시설 투자당시 가액", "투자당시 시점수정"] }
+      ],
+      modelAnswer: "- 평균연간어획량: 어획량이 3년에 미달하는 바, <strong>인근 동종어장</strong>을 기준하여 산정한다.<br>- 평균연간판매단가: 소급기산한 <strong>1년간 가중평균</strong>하여 산출한다.<br>- 시설물: 어선 및 어구는 <strong>감가상각</strong>, 기타시설은 <strong>투자당시 가액 시점수정</strong>하여 평가한다."
+    },
+    {
+      id: 5,
+      prompt: "정지처분손실평가 처리방침 (138번)",
+      keywords: [
+        { word: "취소보상 범위 내", alt: ["취소보상 범위", "취소보상의 범위", "취소보상 범위내"] },
+        { word: "평년수익", alt: ["평년수익액"] },
+        { word: "2", alt: ["2년", "x 2", "× 2"] },
+        { word: "감가상각비", alt: ["감가상각"] }
+      ],
+      modelAnswer: "허가어업의 <strong>취소보상 범위 내</strong>에서 보상평가한다 (조사 미고려 시에도 정답 인정).<br>- 정지처분손실(<strong>2</strong>년): <strong>평년수익 × 2 + 고정경비</strong>(<strong>감가상각비</strong> 등)"
+    }
+  ],
+  comp_mine: [
+    {
+      id: 1,
+      tall: true,
+      prompt: "광업권 소멸에 따른 보상액 산정",
+      keywords: [
+        { word: "이전•전용시설 판단", alt: ["이전 전용시설 판단", "이전.전용시설 판단"] },
+        { word: "미래연수법", alt: [] },
+        { word: "이전 및 전용 불가", alt: ["이전 및 전용이 불가", "이전 및 전용이 불가능", "이전.전용 불가", "이전.전용 불가능"] },
+        { word: "잔존가치", alt: ["잔존가치가", "잔존가치액"] },
+        { word: "이전비 반영", alt: ["이전비를 반영", "이전비 보상", "이전비를 보상"] }
+      ],
+      modelAnswer: "① <strong>이전•전용가능 시설 잔존가치:</strong> 건축물(<strong>미래연수법</strong>: 전용불가하여 가행연수 범위로 장래보존연수 조정), 구축물 등<br>② <strong>이전•전용시설 판단:</strong> 건축물 등은 <strong>잔존가치</strong>가 이전비보다 크므로 <strong>이전비 반영</strong>하나, 기계기구는 이전비가 물건의 가격보다 커서 <strong>이전 및 전용 불가</strong>하다고 판단하여 반영하지 아니함.<br>③ 보상액: 광산평가액 - 이전•전용시설 잔존가치 + 이전비"
+    }
+  ],
+  comp_life: [
+    {
+      id: 1,
+      tall: true,
+      prompt: "농업손실보상대상 및 보상제외대상",
+      keywords: [
+        { word: "농지법", alt: ["「농지법」"] },
+        { word: "제2조 제1호 가목", alt: ["2조 1호 가목", "2조1호가목", "제2조제1호가목"] },
+        { word: "시행령 제2조 제3항 제2호 가목", alt: ["시행령 2조 3항 2호 가목", "시행령제2조제3항제2호가목"] },
+        { word: "미성과수목", alt: ["미성과수목과 관련 없이"] },
+        { word: "사업인정고시일", alt: ["사업인정고시일 등", "사업인정고시일등"] },
+        { word: "일시적", alt: ["일시적으로"] },
+        { word: "불법 점유", alt: ["무단 점유", "불법으로 점유"] },
+        { word: "농민", alt: ["농민이 아닌 자", "농민이 아닌"] },
+        { word: "사업시행자", alt: ["사업시행자가"] }
+      ],
+      modelAnswer: "① <strong>보상대상:</strong> 공익사업지구에 편입되는 <strong>「농지법」 제2조 제1호 가목</strong> 및 동법 <strong>시행령 제2조 제3항 제2호 가목</strong>에 해당하는 농지.<br>※ 농업손실보상은 농지에 해당하면 <strong>미성과수목</strong>과 관련 없이 보상대상인 바, 본건 토지 중 과수원에 해당하는 540㎡만 농업손실보상대상이다. (미성과수목은 감수액 2.2 고려 안함)<br>② <strong>보상제외대상:</strong><br>- <strong>사업인정고시일</strong> 등 이후부터 농지로 이용하는 경우<br>- <strong>일시적</strong>으로 농지로 이용하는 경우<br>- 타인 소유 토지를 <strong>불법 점유</strong>한 경우<br>- <strong>농민</strong>이 아닌 자가 경작하는 경우<br>- <strong>사업시행자</strong>가 2년 이상 계속 경작하도록 하는 경우"
+    },
+    {
+      id: 2,
+      tall: true,
+      prompt: "타인농지 적법 점유인정을 위한 자료",
+      keywords: [
+        { word: "토지보상법 48조 7항", alt: ["토지보상법 시행규칙 제48조 제7항", "시행규칙 48조 7항", "제48조 제7항"] },
+        { word: "임대차계약서", alt: ["농지의 임대차계약서"] },
+        { word: "경작사실확인서", alt: ["농지소유자가 확인하는 경작사실확인서", "이장•통장", "이장.통장"] },
+        { word: "직접지불금", alt: ["「농업•농촌 공익기능 증진 직접지불제도 운영에 관한 법률」", "직접지불제도"] },
+        { word: "농어업경영체", alt: ["농어업경영체 등록 확인서"] },
+        { word: "30일", alt: ["30일 이내", "30"] }
+      ],
+      modelAnswer: "실제 경작자는 다음 각 호의 자료에 따라 사업인정고시일 등 당시 타인소유의 농지를 임대차 등 적법한 원인으로 점유하고 자기소유의 농작물을 경작하는 것으로 인정된 자를 말함 (제5호만 제출 시 사업시행자가 농지소유자에게 서면 통지 후 <strong>30일</strong> 이내에 이의를 제기하지 않으면 제2호 자료가 제출된 것으로 봄).<br>1) <strong>농지의 임대차계약서</strong><br>2) <strong>농지소유자가 확인하는 경작사실확인서</strong><br>3) <strong>직접지불금</strong>의 수령 확인 자료<br>4) <strong>농어업경영체 등록 확인서</strong><br>5) <strong>이장•통장이 확인하는 경작사실확인서</strong><br>6) 그 밖에 실제 경작자임을 증명하는 객관적인 자료"
+    },
+    {
+      id: 3,
+      prompt: "농업손실보상액 산정 기준",
+      keywords: [
+        { word: "도별 연간농가평균", alt: [] },
+        { word: "단위경작면적당", alt: ["단위경작면적당 농작물 총수입"] },
+        { word: "2년", alt: ["2년분", "2", "2년치"] },
+        { word: "실제소득", alt: ["실제소득을 입증", "실제소득을 인정"] }
+      ],
+      modelAnswer: "<strong>보상기준:</strong> 농지면적에 대하여 <strong>도별 연간농가평균 단위경작면적당 농작물 총수입(3년치 평균)의 2년분</strong>을 보상한다 (단, <strong>실제소득</strong>을 입증하여 인정받는 경우 예외 적용)."
+    }
+  ],
+  p_urb: [
+    {
+      id: 1,
+      tall: true,
+      prompt: "정비사업 종전자산 및 종후자산 감정평가의 기준시점 및 주요 원칙",
+      keywords: [
+        { word: "사업시행계획인가고시일", alt: ["사업시행인가고시일"] },
+        { word: "나지상정", alt: ["나지상정평가"] },
+        { word: "개발이익 배제", alt: ["사업시행에 따른 지가상승 배제"] },
+        { word: "조건부평가", alt: ["조건부 평가", "조건부"] },
+        { word: "아파트 배분원가", alt: ["배분원가 도출", "배분원가"] }
+      ],
+      modelAnswer: "① 종전자산: <strong>사업시행계획인가고시일</strong> 기준. 토지는 <strong>나지상정</strong> 및 <strong>개발이익 배제</strong> 원칙 적용.<br>② 종후자산: 준공 전제 <strong>조건부평가</strong>. 거래사례비교법 원칙이며 원가법(<strong>아파트 배분원가</strong> 도출)으로 비교•조정함."
+    },
+    {
+      id: 2,
+      tall: true,
+      prompt: "현금청산평가와 재건축 매도청구 소송평가의 기준시점 및 개발이익 반영 여부",
+      keywords: [
+        { word: "협의예정일", alt: ["협의성립 당시", "협의 예정일"] },
+        { word: "수용재결일", alt: ["수용재결예정일"] },
+        { word: "분양신청기간 만료일", alt: ["분양신청 만료일"] },
+        { word: "개발이익 반영", alt: ["개발이익을 시가에 반영", "개발이익 포함"] }
+      ],
+      modelAnswer: "① 현금청산평가: 기준시점은 <strong>협의예정일</strong>(또는 <strong>수용재결일</strong>). 정당보상 목적.<br>② 매도청구 소송평가: 기준시점은 <strong>분양신청기간 만료일</strong> 다음날. 구체화된 <strong>개발이익 반영</strong>하여 시가 평가 (비례율 배제)."
+    },
+    {
+      id: 3,
+      tall: true,
+      prompt: "도시개발사업 환지평가(정리 전•후) 및 개발제한구역 매수청구 평가 기준시점",
+      keywords: [
+        { word: "실시계획인가고시일", alt: ["실시계획인가일", "실시계획고시일"] },
+        { word: "환지처분예정일", alt: ["환지예정일", "환지처분일"] },
+        { word: "계약체결 시점", alt: ["계약 체결일", "매매계약 체결"] },
+        { word: "종전 이용상황", alt: ["나대지 기준", "나대지"] }
+      ],
+      modelAnswer: "① 환지평가: 정리 전은 <strong>실시계획인가고시일</strong>, 정리 후는 <strong>환지처분예정일</strong> 기준.<br>② 개발제한구역 매수청구: <strong>계약체결 시점</strong>을 기준으로 <strong>종전 이용상황</strong>(나대지) 평가."
+    }
+  ]
+};
+
+function renderMainTabs() {
+  const container = document.getElementById("main-tabs");
+  container.innerHTML = structure.map(c => `
+    <button class="main-tab-btn ${c.id === currentMain ? 'active' : ''}" onclick="switchMain('${c.id}')">${c.name}</button>
+  `).join('');
+}
+
+function renderSubTabs() {
+  const container = document.getElementById("sub-tabs");
+  const cat = structure.find(c => c.id === currentMain);
+  container.innerHTML = cat.subs.map(s => `
+    <button class="sub-tab-btn ${s.id === currentSub ? 'active' : ''} ${!s.active ? 'disabled' : ''}"
+            onclick="${s.active ? `switchSub('${s.id}')` : ''}">${s.name}</button>
+  `).join('');
+}
+
+function updateNavigation() {
+  renderMainTabs();
+  renderSubTabs();
+  
+  if (currentSub && tabMeta[currentSub]) {
+    document.getElementById("tab-subtitle").innerHTML = `
+      <span>${tabMeta[currentSub].title}</span>
+      <span class="ref-tag">${tabMeta[currentSub].badge}</span>
+    `;
+    document.getElementById("quiz-container").style.display = 'block';
+    document.getElementById("action-bar").style.display = 'flex';
+    renderQuiz();
+    updateOverall();
+  } else {
+    document.getElementById("tab-subtitle").innerHTML = `<span>해당 주제</span>`;
+    document.getElementById("quiz-container").style.display = 'block';
+    document.getElementById("quiz-container").innerHTML = `<div class="empty-state">해당 주제의 문제는 준비 중입니다.</div>`;
+    document.getElementById("action-bar").style.display = 'none';
+  }
+}
+
+function switchMain(mainId) {
+  currentMain = mainId;
+  const cat = structure.find(c => c.id === mainId);
+  const firstActive = cat.subs.find(s => s.active);
+  currentSub = firstActive ? firstActive.id : null;
+  updateNavigation();
+}
+
+function switchSub(subId) {
+  if (!subId) return;
+  currentSub = subId;
+  updateNavigation();
+}
+
+function handleInputChange(id, value) {
+  if (currentSub && state[currentSub]) {
+    state[currentSub].inputs[id] = value;
+  }
+}
+
+function renderQuiz() {
+  if (!currentSub || !dataset[currentSub]) return;
+  
+  const container = document.getElementById("quiz-container");
+  const list = dataset[currentSub];
+  
+  let normalHtml = '';
+  let shortHtml = '';
+  
+  list.forEach((q, index) => {
+    const savedVal = state[currentSub].inputs[q.id] || "";
+    let cardHtml = '';
+    
+    if (q.isInlineShort) {
+      cardHtml = `
+        <div class="inline-question">
+          <span class="inline-prompt">${q.prompt}</span>
+          <input type="text" class="inline-input blank-input" id="input-${q.id}" value="${savedVal}" placeholder="" oninput="handleInputChange(${q.id}, this.value)" onkeydown="handleKey(event, ${q.id})">
+          <span class="inline-feedback" id="result-${q.id}"></span>
+        </div>
+      `;
+      shortHtml += cardHtml;
+    } else {
+      let promptHtml = `<div class="q-prompt-text">${q.prompt}</div>`;
+      if (q.context) {
+        promptHtml += `<div class="q-context">${q.context}</div>`;
+      }
+      
+      cardHtml = `
+        <div class="q-card" id="card-${q.id}">
+          <div class="q-header-row">
+            <div class="q-prompt">
+              <span class="q-num">${q.id}</span>
+              <div style="flex:1;">${promptHtml}</div>
+            </div>
+            <button class="btn btn-check" onclick="gradeSingle(${q.id}, false, true)">채점</button>
+          </div>
+          <textarea 
+            class="input-box blank-input ${q.tall ? 'tall' : ''} ${q.very_tall ? 'very-tall' : ''} ${q.short ? 'short' : ''}" 
+            id="input-${q.id}"
+            oninput="handleInputChange(${q.id}, this.value)"
+            onkeydown="handleKey(event, ${q.id})">${savedVal}</textarea>
+          <div class="result-panel" id="result-${q.id}"></div>
+        </div>
+      `;
+      normalHtml += cardHtml;
+    }
+  });
+
+  if (currentSub === 'general' && shortHtml) {
+    container.innerHTML = normalHtml + `
+      <div class="inline-card">
+        <div class="section-divider" style="margin-top:0;">공익사업별 법정 사업인정의제일</div>
+        ${shortHtml}
+      </div>`;
+  } else {
+    container.innerHTML = normalHtml;
+  }
+
+  list.forEach(q => {
+    if (state[currentSub].graded[q.id]) {
+      renderGradedResult(q.id);
+    }
+  });
+}
+
+function handleKey(e, id) {
+  if (e.key === 'Tab') return;
+
+  if (e.key === 'Enter' && !e.shiftKey) {
+    e.preventDefault();
+    gradeSingle(id, true, false); // 엔터입력시: isIndividual=true, buttonClick=false
+  }
+}
+
+function renderGradedResult(id) {
+  if (!currentSub || !dataset[currentSub]) return;
+  const list = dataset[currentSub];
+  const q = list.find(item => item.id === id);
+  const resPanel = document.getElementById(`result-${id}`);
+  
+  if (q.isInlineShort) {
+    const inputEl = document.getElementById(`input-${id}`);
+    resPanel.style.display = "inline-block";
+    resPanel.innerHTML = `${q.modelAnswer}`;
+    resPanel.className = 'inline-feedback good';
+    inputEl.style.borderColor = '#10b981';
+    inputEl.style.backgroundColor = '#ecfdf5';
+  } else {
+    resPanel.className = "result-panel result-good";
+    resPanel.style.display = "block";
+    
+    resPanel.innerHTML = `
+      <div class="full-model">
+        ${q.modelAnswer}
+      </div>
+    `;
+  }
+}
+
+function gradeSingle(id, isIndividual = false, buttonClick = false) {
+  if (!currentSub || !dataset[currentSub]) return;
+  const inputEl = document.getElementById(`input-${id}`);
+  const resPanel = document.getElementById(`result-${id}`);
+  
+  const isCurrentlyVisible = (resPanel.style.display === "block" || resPanel.style.display === "inline-block");
+
+  if (buttonClick) {
+    if (isCurrentlyVisible) {
+      resPanel.style.display = "none";
+      state[currentSub].graded[id] = false;
+      state[currentSub].individuallyGraded[id] = false;
+      if (inputEl && inputEl.classList.contains('inline-input')) {
+        inputEl.style.borderColor = 'var(--border-focus)';
+        inputEl.style.backgroundColor = '#fcfcfc';
+      }
+    } else {
+      if(inputEl) state[currentSub].inputs[id] = inputEl.value;
+      state[currentSub].graded[id] = true;
+      state[currentSub].individuallyGraded[id] = true;
+      renderGradedResult(id);
+    }
+  } else {
+    // Enter key
+    if (isCurrentlyVisible) {
+      resPanel.style.display = "none";
+      state[currentSub].graded[id] = false;
+      state[currentSub].individuallyGraded[id] = false;
+      if (inputEl && inputEl.classList.contains('inline-input')) {
+        inputEl.style.borderColor = 'var(--border-focus)';
+        inputEl.style.backgroundColor = '#fcfcfc';
+      }
+    } else {
+      if(inputEl) state[currentSub].inputs[id] = inputEl.value;
+      state[currentSub].graded[id] = true;
+      state[currentSub].individuallyGraded[id] = true;
+      renderGradedResult(id);
+    }
+  }
+  updateOverall();
+}
+
+function gradeAll() {
+  if (!currentSub || !dataset[currentSub]) return;
+  const list = dataset[currentSub];
+  
+  state[currentSub].globalGraded = !state[currentSub].globalGraded;
+  const turnOn = state[currentSub].globalGraded;
+
+  list.forEach(q => {
+    const inputEl = document.getElementById(`input-${q.id}`);
+    if (inputEl) {
+      state[currentSub].inputs[q.id] = inputEl.value;
+    }
+    
+    if (turnOn) {
+      state[currentSub].graded[q.id] = true;
+      renderGradedResult(q.id);
+    } else {
+      if (!state[currentSub].individuallyGraded[q.id]) {
+        state[currentSub].graded[q.id] = false;
+        const resPanel = document.getElementById(`result-${q.id}`);
+        if(resPanel) resPanel.style.display = "none";
+        if (inputEl && inputEl.classList.contains('inline-input')) {
+          inputEl.style.borderColor = 'var(--border-focus)';
+          inputEl.style.backgroundColor = '#fcfcfc';
+        }
+      }
+    }
+  });
+  updateOverall();
+}
+
+function updateOverall() {
+  if (!currentSub || !dataset[currentSub]) return;
+  const list = dataset[currentSub];
+  let gradedCount = 0;
+  let totalScore = 0;
+  const maxPoints = 100 / list.length;
+
+  list.forEach(q => {
+    if (state[currentSub].graded[q.id]) {
+      gradedCount++;
+      let matched = 0;
+      const input = (state[currentSub].inputs[q.id] || "").trim();
+      q.keywords.forEach(kw => {
+        const valForCheck = input.replace(/\s+/g, '');
+        const checkArr = [kw.word, ...(kw.alt || [])].map(k => k.replace(/\s+/g, ''));
+        if (checkArr.some(k => valForCheck.includes(k))) matched++;
+      });
+      totalScore += (matched / q.keywords.length) * maxPoints;
+    }
+  });
+
+  document.getElementById("progress-text").innerText = `${gradedCount} / ${list.length}`;
+  const scoreElem = document.getElementById("total-score");
+  if(scoreElem) {
+    scoreElem.innerText = Math.round(totalScore);
+  }
+}
+
+function resetCurrentTab() {
+  if (!currentSub || !dataset[currentSub]) return;
+  state[currentSub].inputs = {};
+  state[currentSub].graded = {};
+  state[currentSub].individuallyGraded = {};
+  state[currentSub].globalGraded = false;
+  renderQuiz();
+  updateOverall();
+}
+
+updateNavigation();
+</script>
+</body>
+</html>

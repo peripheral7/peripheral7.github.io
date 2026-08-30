@@ -1,0 +1,1968 @@
+<!DOCTYPE html>
+<html lang="ko" data-theme="light">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>감정평가 행정법 빈칸 퀴즈 (1~41 완성본)</title>
+  <style>
+    /* ==========================================================================
+       디자인 시스템: 무채색(Monochrome) + 채점(녹/적) 기반
+       ========================================================================== */
+    :root {
+      --bg: #f8fafc;
+      --card-bg: #ffffff;
+      --text: #111827;
+      --text-muted: #6b7280;
+      --border: #cbd5e1;
+      --input-bg: #f1f5f9;
+      --toc-active: #000000;
+      
+      --correct: #16a34a;
+      --incorrect: #dc2626;
+      
+      --badge-a: #4b5563;
+      --badge-b: #6b7280;
+      --badge-c: #9ca3af;
+      --badge-d: #cbd5e1;
+    }
+    [data-theme="dark"] {
+      --bg: #111827;
+      --card-bg: #1f2937;
+      --text: #f9fafb;
+      --text-muted: #9ca3af;
+      --border: #374151;
+      --input-bg: #111827;
+      --toc-active: #ffffff;
+      
+      --correct: #22c55e;
+      --incorrect: #ef4444;
+      
+      --badge-a: #d1d5db;
+      --badge-b: #9ca3af;
+      --badge-c: #6b7280;
+      --badge-d: #4b5563;
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Pretendard", sans-serif;
+      background-color: var(--bg);
+      color: var(--text);
+      line-height: 1.85;
+      padding: 80px 20px 60vh 20px;
+      transition: 0.2s ease background-color, 0.2s ease color;
+    }
+    
+    h1 { 
+      font-size: 2.6rem; 
+      font-weight: 900;
+      color: var(--toc-active);
+      text-align: center;
+      margin-bottom: 50px;
+      letter-spacing: -1px;
+    }
+
+    /* 3단 레이아웃: 목차(좌) - 본문(중앙) - 서술형(우) */
+    .layout {
+      display: flex;
+      justify-content: center;
+      gap: 30px;
+      max-width: 1520px;
+      margin: 0 auto;
+      align-items: flex-start;
+    }
+
+    /* 좌우 사이드바 플로팅 효과 (스크롤 연동) */
+    .toc-sidebar, .essay-sidebar {
+      position: sticky;
+      top: 20px;
+      background: var(--card-bg);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 20px;
+      height: fit-content; /* 내부 컨텐츠 높이만큼만 차지하게 하여 sticky 효과 극대화 */
+      max-height: calc(100vh - 40px);
+      overflow-y: auto;
+      box-shadow: 0 4px 6px -1px rgba(0,0,0,0.05);
+      flex-shrink: 0;
+    }
+    
+    .toc-sidebar { width: 260px; }
+    .essay-sidebar {
+      width: 320px;
+      display: flex;
+      flex-direction: column;
+    }
+
+    .toc-sidebar h3, .essay-sidebar h3 {
+      font-size: 1.1rem;
+      margin-bottom: 16px;
+      color: var(--text);
+      border-bottom: 2px solid var(--border);
+      padding-bottom: 8px;
+    }
+
+    .toc-chapter { margin-bottom: 12px; }
+    .toc-chapter-title {
+      font-weight: 700;
+      font-size: 0.95rem;
+      color: var(--text);
+      cursor: pointer;
+      margin-bottom: 6px;
+      transition: color 0.2s;
+    }
+    
+    .toc-list {
+      list-style: none;
+      padding-left: 6px;
+      display: none; 
+      border-left: 2px solid var(--border);
+      margin-left: 6px;
+    }
+    .toc-chapter.active .toc-list { display: block; }
+    
+    .toc-item {
+      cursor: pointer;
+      transition: 0.2s;
+      margin: 6px 0;
+    }
+    .toc-item:hover { color: var(--text); }
+    
+    .toc-main-item {
+      font-size: 0.85rem;
+      font-weight: 700;
+      color: var(--text);
+      margin-top: 10px;
+    }
+    .toc-sub-item {
+      font-size: 0.8rem;
+      font-weight: 400;
+      color: var(--text-muted);
+      padding-left: 10px;
+    }
+    .toc-item.active {
+      color: var(--toc-active);
+      font-weight: 800; 
+      text-decoration: underline;
+      text-underline-offset: 3px;
+    }
+
+    .content { width: 100%; max-width: 860px; flex-shrink: 1; }
+
+    @media (max-width: 1200px) {
+      .layout { flex-direction: column; align-items: stretch; }
+      .toc-sidebar, .essay-sidebar { width: 100%; position: static; max-height: 300px; margin-bottom: 20px; }
+      .content { max-width: 100%; }
+    }
+
+    .filter-container {
+      background: var(--card-bg);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 14px 16px;
+      margin-bottom: 16px;
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+    }
+    .filter-row { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
+    .filter-title { font-size: 0.9rem; font-weight: bold; color: var(--text); min-width: 60px; }
+    
+    button.filter-btn, .sticky-bar button {
+      padding: 6px 14px;
+      border-radius: 6px;
+      border: 1px solid var(--border);
+      background: var(--card-bg);
+      color: var(--text);
+      cursor: pointer;
+      font-size: 0.85rem;
+      font-weight: 600;
+      transition: 0.15s;
+    }
+    button.filter-btn:hover, .sticky-bar button:hover {
+      background: var(--input-bg);
+      box-shadow: inset 0 1px 2px rgba(0,0,0,0.05);
+    }
+    
+    .filter-btn.active, .active-btn { 
+      background: var(--input-bg); 
+      color: var(--toc-active); 
+      border-color: var(--border);
+      box-shadow: inset 0 1px 2px rgba(0,0,0,0.1);
+    }
+
+    .sticky-bar {
+      position: sticky;
+      top: 20px;
+      z-index: 100;
+      background: var(--card-bg);
+      padding: 12px 16px;
+      border-radius: 8px;
+      border: 1px solid var(--border);
+      box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 24px;
+    }
+
+    .card p strong, .card p b {
+      font-weight: 700;
+      text-decoration: underline;
+      text-underline-offset: 3px;
+    }
+    .structural-bold {
+      font-weight: 800;
+      color: var(--toc-active);
+    }
+
+    .card {
+      background: var(--card-bg);
+      border-radius: 8px;
+      border: 1px solid var(--border);
+      padding: 24px;
+      margin-bottom: 24px;
+      transition: 0.2s;
+    }
+    .card.hidden { display: none !important; }
+    .sub-card { margin-left: 30px; border-left: 4px solid var(--border); padding-left: 20px;}
+
+    @media (max-width: 860px) {
+      .sub-card { margin-left: 0px; }
+    }
+
+    .card-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 14px;
+      border-bottom: 1.5px solid var(--border);
+      padding-bottom: 8px;
+    }
+    .card-title { font-size: 1.15rem; font-weight: 700; color: var(--text); }
+    
+    .badge {
+      font-size: 0.75rem;
+      font-weight: 800;
+      padding: 3px 8px;
+      border-radius: 4px;
+      color: #ffffff;
+      text-transform: uppercase;
+    }
+    .badge-a { background: var(--badge-a); }
+    .badge-b { background: var(--badge-b); color: #fff; }
+    .badge-c { background: var(--badge-c); }
+    .badge-d { background: var(--badge-d); color: #fff; }
+
+    h4 { font-size: 1.05rem; margin: 16px 0 8px 0; color: var(--text); font-weight: bold; }
+    p { margin-bottom: 10px; word-break: keep-all; }
+    
+    .blank-input {
+      display: inline-block;
+      width: 14ch; /* 기본 너비를 줄이고 인라인 스타일로 오버라이드 */
+      min-width: 120px;
+      max-width: 100%;
+      padding: 3px 8px;
+      margin: 2px 4px;
+      border: 1.5px solid var(--border);
+      border-radius: 4px;
+      background: var(--input-bg);
+      color: var(--text);
+      font-size: 0.95rem;
+      font-weight: 700;
+      text-align: center;
+      outline: none;
+      transition: 0.15s;
+    }
+    .blank-input:focus {
+      border-color: var(--text-muted);
+      box-shadow: 0 0 0 2px rgba(0,0,0,0.1);
+    }
+    [data-theme="dark"] .blank-input:focus {
+      box-shadow: 0 0 0 2px rgba(255,255,255,0.2);
+    }
+
+    .blank-input.correct {
+      border-color: var(--correct) !important;
+      background: rgba(34, 197, 94, 0.15) !important;
+      color: var(--correct) !important;
+    }
+    .blank-input.incorrect {
+      border-color: var(--incorrect) !important;
+      background: rgba(239, 68, 68, 0.15) !important;
+      color: var(--incorrect) !important;
+    }
+
+    .hint {
+      display: none;
+      font-size: 0.85rem;
+      font-weight: bold;
+      margin-left: 4px;
+      padding: 2px 8px;
+      border-radius: 4px;
+      background: rgba(34, 197, 94, 0.1);
+      color: var(--correct);
+      border: 1px solid var(--correct);
+    }
+    
+    .long-answer {
+      display: none;
+      margin-top: 12px;
+      padding: 14px;
+      border-radius: 6px;
+      background: rgba(34, 197, 94, 0.05);
+      border: 1px dashed var(--correct);
+      color: var(--text);
+      font-size: 0.9rem;
+      line-height: 1.7;
+    }
+    
+    .hint.visible,
+    .long-answer.visible,
+    .show-all-hints .hint,
+    .show-all-hints .long-answer { 
+      display: inline-block !important; 
+    }
+    .long-answer.visible,
+    .show-all-hints .long-answer { display: block !important; }
+
+    /* 플로팅 서술형 입력창 스타일 */
+    #current-essay-target {
+      font-size: 0.85rem;
+      font-weight: 700;
+      margin-bottom: 10px;
+      color: var(--text-muted);
+      word-break: keep-all;
+    }
+    .essay-input {
+      flex: 1;
+      width: 100%;
+      min-height: 400px; /* 기존보다 훨씬 긴 서술형 창 */
+      resize: vertical;
+      border: 1px solid var(--border);
+      border-radius: 6px;
+      padding: 10px;
+      font-family: inherit;
+      font-size: 0.9rem;
+      background: var(--bg);
+      color: var(--text);
+      outline: none;
+      margin-bottom: 10px;
+      line-height: 1.6;
+    }
+    .essay-input:focus {
+      border-color: var(--text-muted);
+      box-shadow: 0 0 0 2px rgba(0,0,0,0.05);
+    }
+    .essay-feedback {
+      font-size: 0.85rem;
+      background: var(--bg);
+      padding: 12px;
+      border-radius: 6px;
+      border: 1px solid var(--border);
+      display: none;
+      line-height: 1.6;
+    }
+    .essay-feedback.visible { display: block; }
+    .kw-match { color: var(--correct); font-weight: bold; }
+    .kw-miss { color: var(--incorrect); text-decoration: line-through; opacity: 0.7;}
+    .essay-score { font-size: 1rem; font-weight: 800; margin-bottom: 8px; display: block; border-bottom: 1px dashed var(--border); padding-bottom: 4px;}
+
+    .sr-only { display: none !important; }
+    .review-mode-badge { color: var(--incorrect); font-weight: bold; margin-left: 10px; display: none; }
+    .is-review .review-mode-badge { display: inline-block; }
+    
+    .text-muted { color: var(--text-muted); font-size: 0.9em; font-weight: normal; }
+
+    #themeToggleBtn {
+      position: fixed;
+      bottom: 30px;
+      right: 30px;
+      width: 50px;
+      height: 50px;
+      border-radius: 50%;
+      background: var(--card-bg);
+      border: 1px solid var(--border);
+      font-size: 0.9rem;
+      font-weight: 700;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      box-shadow: 0 4px 10px rgba(0,0,0,0.15);
+      z-index: 1000;
+      cursor: pointer;
+      transition: 0.2s;
+    }
+    #themeToggleBtn:hover { transform: scale(1.05); }
+  </style>
+</head>
+<body>
+  <h1>감정평가 행정법 (1~41)</h1>
+
+  <div class="layout">
+    <aside class="toc-sidebar">
+      <h3>목차</h3>
+      <div id="toc-container"></div>
+    </aside>
+
+    <main class="content">
+      <div class="filter-container">
+        <div class="filter-row" id="gradeFilters">
+          <span class="filter-title">중요도:</span>
+          <button class="filter-btn active" data-grade="all">전체</button>
+          <button class="filter-btn" data-grade="A">A급</button>
+          <button class="filter-btn" data-grade="B">B급</button>
+          <button class="filter-btn" data-grade="C">C급</button>
+          <button class="filter-btn" data-grade="D">D급</button>
+        </div>
+        <div class="filter-row" id="chapterFilters">
+          <span class="filter-title">챕터:</span>
+          <button class="filter-btn active" data-chapter="all">전체</button>
+          <button class="filter-btn" data-chapter="ch1">제1편 행정법서론</button>
+          <button class="filter-btn" data-chapter="ch2">제2편 행정작용법</button>
+        </div>
+      </div>
+
+      <div class="sticky-bar">
+        <div>
+          <strong>현재 진행도: </strong>
+          <span id="scoreText">0 / 0 (0%)</span>
+          <span class="review-mode-badge" id="reviewBadge">[오답노트 모드]</span>
+        </div>
+        <div style="display:flex; gap:6px; flex-wrap:wrap; justify-content: flex-end;">
+          <button onclick="startReviewMode()">오답노트</button>
+          <button onclick="toggleCheckAndHints()">채점</button>
+          <button onclick="resetAll()">리셋</button>
+        </div>
+      </div>
+
+      <!-- =======================================================================
+           문항 데이터 영역 (1 ~ 41)
+           ======================================================================= -->
+
+      <!-- 기존 논점 001~022 (유지) -->
+      <div class="card" id="card-001" data-level="main" data-grade="C" data-chapter="ch1" data-title="논점 001. 법치행정의 원칙">
+        <div class="card-header">
+          <div class="card-title">논점 001. 법치행정의 원칙</div>
+          <span class="badge badge-c">C급</span>
+        </div>
+        <h4>1. 의의</h4>
+        <p>법치행정의 원칙이란 행정권도 법에 따라서 행하여져야 하며, 만일 행정권에 의하여 국민의 권익이 침해된 경우에는 이의 구제를 위한 제도가 보장되어야 한다는 것을 의미한다.</p>
+        <h4>2. 내용</h4>
+        <p><span class="structural-bold">(1)</span> <strong>법률의 법규창조력</strong><br>국가작용 중 법규(국민의 권리·의무에 관한 새로운 규율)를 정립하는 입법은 모두 의회가 행하여야 한다는 원칙을 말한다.</p>
+        <p><span class="structural-bold">(2)</span> <input type="text" class="blank-input" data-ans="법률우위의 원칙,법우위의 원칙,법률우위"><span class="hint">[법률우위의 원칙]</span>이란 행정이 법률에 위반되는 행위를 해서는 아니 된다는 원칙을 말한다. 여기서 법률은 <input type="text" class="blank-input" data-ans="모든 법규범,모든법규범"><span class="hint">[모든 법규범]</span>을 말한다.</p>
+        <p><span class="structural-bold">(3)</span> <input type="text" class="blank-input" data-ans="법률유보의 원칙,법률유보"><span class="hint">[법률유보의 원칙]</span>은 행정권의 발동에는 법적 근거가 있어야 한다는 원칙이다. 여기서 법률은 <input type="text" class="blank-input" data-ans="형식적 의미의 법률,형식적 법률" style="width: 16ch;"><span class="hint">[형식적 의미의 법률]</span>을 말한다.</p>
+      </div>
+
+      <div class="card" id="card-002" data-level="main" data-grade="C" data-chapter="ch1" data-title="논점 002. 평등의 원칙">
+        <div class="card-header">
+          <div class="card-title">논점 002. 평등의 원칙</div>
+          <span class="badge badge-c">C급</span>
+        </div>
+        <h4>1. 의의 및 근거</h4>
+        <p>① 평등의 원칙이란 행정청은 <input type="text" class="blank-input" data-ans="합리적 이유 없이,합리적이유없이,합리적 사유 없이,합리적 사유없이" style="width: 14ch;"><span class="hint">[합리적 이유 없이]</span> 국민을 차별하여서는 아니 된다는 원칙이다.</p>
+        <p>② <input type="text" class="blank-input" data-ans="헌법상 법치국가원리,법치국가원리,정의의 원칙" style="width: 16ch;"><span class="hint">[헌법상 법치국가원리]</span>로부터 도출되는 불문법 원칙으로 보는 것이 타당하다.</p>
+        <p>③ <input type="text" class="blank-input" data-ans="행정기본법 제9조,행정기본법 9조,제9조,9조" style="width: 16ch;"><span class="hint">[행정기본법 제9조]</span> 평등의 원칙은 헌법 제11조가 규정하는 평등의 원칙이 행정의 영역에서 구체화 된 것이다.</p>
+        <h4>2. 요건</h4>
+        <p>행정주체의 행정작용이 평등원칙에 위반되었다고 보기 위해선 ① <input type="text" class="blank-input" data-ans="동일한 사안,동일안 사안"><span class="hint">[동일한 사안]</span>일 것, ② 행정작용이 <input type="text" class="blank-input" data-ans="차별대우,차별"><span class="hint">[차별대우]</span>에 해당할 것, ③ 차별에 <input type="text" class="blank-input" data-ans="합리적 이유,합리적 사유,정당한 이유,정당한 사유"><span class="hint">[합리적 사유]</span>가 없을 것 등의 요건을 갖추어야 한다.</p>
+        <h4>3. 한계</h4>
+        <p>불법 앞의 평등 요구는 인정되지 않는다.</p>
+      </div>
+
+      <div class="card" id="card-003" data-level="main" data-grade="A" data-chapter="ch1" data-title="논점 003. 행정의 자기구속의 원칙">
+        <div class="card-header">
+          <div class="card-title">논점 003. 행정의 자기구속의 원칙</div>
+          <span class="badge badge-a">A급</span>
+        </div>
+        <h4>1. 의의 및 근거</h4>
+        <p>① 자기구속의 원칙이란 행정관행이 성립된 경우, 행정청은 특별한 사정이 없는 한 <input type="text" class="blank-input" data-ans="동종 사안,동일한 사안,동종사안,같은 사안"><span class="hint">[동종 사안]</span>에서 행정관행과 <input type="text" class="blank-input" data-ans="동일한 결정,동일한 처분,같은 결정,행정관행과 같은 결정" style="width: 16ch;"><span class="hint">[동일한 결정 / 행정관행]</span>을 하여야 한다는 원칙이다.</p>
+        <p>② 신뢰보호의 원칙에서 구하는 견해도 있으나, 상대방의 신뢰와 무관하게 성립한다는 점에서 평등원칙에서 구하는 견해가 통설이다. 판례는 평등원칙 및 신뢰보호원칙에서 구하는 입장이다.</p>
+        <h4>2. 요건</h4>
+        <p>① <input type="text" class="blank-input" data-ans="재량행위 영역,재량영역,재량행위,재량권 행사 영역" style="width: 16ch;"><span class="hint">[재량행위 영역]</span>, ② <input type="text" class="blank-input" data-ans="행정선례,선행 행정관행,행정관행,선례" style="width: 18ch;"><span class="hint">[행정선례 / 선행 행정관행]</span>가 있을 것, ③ <input type="text" class="blank-input" data-ans="동종의 사안,동종 사안,동일 사안"><span class="hint">[동종의 사안]</span>일 것을 요한다.</p>
+        <p>선례에 대하여 재량준칙 존재시 선례가 불필요하다는 <input type="text" class="blank-input" data-ans="선례불요설"><span class="hint">[선례불요설]</span>이 있다. 그러나 비교대상이 되는 1회이상 선례가 존재하여야 한다는 <input type="text" class="blank-input" data-ans="1회 선례 충분설,선례필요설,1회선례충분설" style="width: 18ch;"><span class="hint">[1회 선례 충분설]</span>과 선례가 관행화 될 정도의 계속적인 선례가 필요하다는 <input type="text" class="blank-input" data-ans="행정관행설,계속적 선례 필요설,계속적선례필요설" style="width: 16ch;"><span class="hint">[행정관행설]</span>이 대립된다. 판례는 재량준칙이 공표된 것만으로 자기구속원칙이 적용될 수 없고, 되풀이 시행되어 행정관행이 성립한 경우 자기구속원칙이 적용될 수 있다고 한 것으로 보아 행정관행설의 입장이다.</p>
+        <h4>3. 한계</h4>
+        <p>① 위법한 관행의 경우와 ② 사정변경이 있는 경우에 자기구속법리의 적용이 배제될 수 있다.</p>
+      </div>
+
+      <div class="card" id="card-004" data-level="main" data-grade="A" data-chapter="ch1" data-title="논점 004. 비례의 원칙">
+        <div class="card-header">
+          <div class="card-title">논점 004. 비례의 원칙</div>
+          <span class="badge badge-a">A급</span>
+        </div>
+        <h4>1. 의의 및 근거(효력)</h4>
+        <p>① 비례의 원칙이란 행정작용에 있어 <input type="text" class="blank-input" data-ans="행정목적,목적"><span class="hint">[행정목적]</span>과 <input type="text" class="blank-input" data-ans="행정수단,수단,목적 달성 수단"><span class="hint">[행정수단]</span> 사이에는 <input type="text" class="blank-input" data-ans="합리적인 비례관계,비례관계,상당한 비례관계" style="width: 16ch;"><span class="hint">[합리적인 비례관계]</span>가 있어야 한다는 원칙이다.</p>
+        <p>② 실정법적 근거로 <input type="text" class="blank-input" data-ans="행정기본법 제10조,행정법 제10조,행정기본법 10조,제10조,10조" style="width: 18ch;"><span class="hint">[행정기본법 제10조]</span>에 근거한다.</p>
+        <h4>2. 요건 (적·필·상·단)</h4>
+        <p>① <input type="text" class="blank-input" data-ans="적합성의 원칙,적합성,적절성의 원칙" style="width: 16ch;"><span class="hint">[적합성의 원칙]</span>: 행정목적을 달성하는데 유효하고 적절할 것<br>
+        ② <input type="text" class="blank-input" data-ans="필요성의 원칙,필요성,최소침해의 원칙" style="width: 16ch;"><span class="hint">[필요성의 원칙]</span>: 행정목적을 달성하는 데 필요한 최소한도에 그칠 것<br>
+        ③ <input type="text" class="blank-input" data-ans="상당성의 원칙,상당성,협의의 비례원칙" style="width: 16ch;"><span class="hint">[상당성의 원칙]</span>: 국민의 이익 침해가 그 행정작용이 의도하는 공익보다 크지 아니할 것 (단계적 심사)</p>
+      </div>
+
+      <div class="card" id="card-005" data-level="main" data-grade="A" data-chapter="ch1" data-title="논점 005. 신뢰보호의 원칙">
+        <div class="card-header">
+          <div class="card-title">논점 005. 신뢰보호의 원칙</div>
+          <span class="badge badge-a">A급</span>
+        </div>
+        <h4>1. 의의 및 근거</h4>
+        <p>① 신뢰보호원칙이란 행정청은 공익 또는 제3자의 이익을 현저히 해칠 우려가 있는 경우를 제외하고는 행정에 대한 국민의 정당하고 합리적인 신뢰를 보호하여야 한다는 원칙이다.</p>
+        <p>② 이론적 근거로서 신의칙설과 법적 안정성설이 주장되나 당사자의 법적 생활 안정의 필요성을 근거로 하여 도출하려는 법적 안정성설이 타당하다. 행정기본법 <input type="text" class="blank-input" data-ans="행정기본법 제12조 제1항,행정기본법 제12조,행정기본법 12조,제12조 제1항,제12조,12조" style="width: 18ch;"><span class="hint">[행정기본법 제12조]</span>는 불문법인 신뢰보호의 원칙을 행정법의 일반원칙의 하나로 선언하고 있다.</p>
+        <h4>2. 요건</h4>
+        <p>① 행정기관의 일정한 <input type="text" class="blank-input" data-ans="선행조치,선행행위,공적인 견해표명" style="width: 18ch;"><span class="hint">[선행조치 / 선행행위]</span>가 존재할 것<br>
+        ② 신뢰가 <input type="text" class="blank-input" data-ans="보호가치,보호가치가 있을 것,보호가치성"><span class="hint">[보호가치]</span> 있을 것<br>
+        ③ 국민이 신뢰에 입각하여 어떠한 <input type="text" class="blank-input" data-ans="조치,처리"><span class="hint">[조치]</span>를 취할 것<br>
+        ④ 선행행위에 대한 신뢰와 상대방 조치사이에 <input type="text" class="blank-input" data-ans="인과관계"><span class="hint">[인과관계]</span>가 있을 것<br>
+        ⑤ 선행조치에 <input type="text" class="blank-input" data-ans="반하는,저촉되는"><span class="hint">[반하는]</span> 행정작용이 존재할 것을 요한다.</p>
+        <h4>3. 한계</h4>
+        <p>선행행위에 반하는 처분을 함으로써 달성되는 공익(법률적합성)이 신뢰이익 및 법적 안정성보다 큰 경우 신뢰보호원칙을 이유로 처분이 위법하다고 할 수 없다.</p>
+      </div>
+
+      <div class="card" id="card-006" data-level="main" data-grade="C" data-chapter="ch1" data-title="논점 006. 실권의 법리">
+        <div class="card-header">
+          <div class="card-title">논점 006. 실권의 법리</div>
+          <span class="badge badge-c">C급</span>
+        </div>
+        <h4>1. 개념 및 근거</h4>
+        <p>행정청은 권한 행사의 기회가 있음에도 불구하고 장기간 권한을 행사하지 아니하여 국민이 그 권한이 행사되지 아니할 것으로 믿을 만한 정당한 사유가 있는 경우에는 그 권한을 행사해서는 아니 된다. 다만, 공익 또는 제3자의 이익을 현저히 해칠 우려가 있는 경우는 예외로 한다.</p>
+        <p>실권의 법리의 이론적 근거로는 신뢰보호의 원칙의 파생원칙이라 보며, 대법원은 신의성실의 원칙에 바탕을 둔 파생원칙으로 보았다. <input type="text" class="blank-input" data-ans="행정기본법 제12조 제2항,행정기본법 12조 2항,제12조 제2항,12조 2항" style="width: 22ch;"><span class="hint">[행정기본법 제12조 제2항]</span>은 실권의 법리를 명문화 하였다.</p>
+        <h4>2. 요건</h4>
+        <p>① 행정청이 취소사유, 철회사유 등 권리행사 <input type="text" class="blank-input" data-ans="가능성,원인,사유"><span class="hint">[가능성]</span>을 알고<br>
+        ② 그 행사가 가능함에도 불구하고 <input type="text" class="blank-input" data-ans="장기간 행사,장기간,장기 불행사,행사"><span class="hint">[장기간 행사]</span>하지 않으며,<br>
+        ③ 국민의 <input type="text" class="blank-input" data-ans="신뢰,불행사에 대한 신뢰"><span class="hint">[신뢰]</span>에 정당한 사유가 있어야 한다.</p>
+        <h4>3. 유의사항</h4>
+        <p>실권의 법리의 요건에 해당하는 경우 행정청이 갖고 있는 취소권, 철회권 등은 소멸되고, 실권의 법리에 위반한 제재처분은 위법하다. 실권의 법리는 신뢰보호의 원칙의 파생법리인 특별법리이다. 따라서 실권의 법리가 신뢰보호의 원칙보다 우선 적용된다.</p>
+      </div>
+
+      <div class="card" id="card-007" data-level="main" data-grade="C" data-chapter="ch1" data-title="논점 007. 기타 일반원칙">
+        <div class="card-header">
+          <div class="card-title">논점 007. 기타 행정법의 일반원칙</div>
+          <span class="badge badge-c">C급</span>
+        </div>
+        <h4>1. 성실의무의 원칙</h4>
+        <p>행정청은 법령등에 따른 의무를 성실히 수행하여야 한다. 행정기본법은 사법상 대원칙인 '신의성실의 원칙'을 행정법상 행정청의 성실의무의 원칙으로 수정하여 규정하였다. 이 원칙은 행정기본법 <input type="text" class="blank-input" data-ans="행정기본법 제11조 제1항,행정기본법 11조 1항,제11조 제1항,제11조제1항,11조 1항" style="width: 22ch;"><span class="hint">[제11조 제1항]</span>에 근거한다.</p>
+        <h4>2. 권한남용금지의 원칙</h4>
+        <p>행정기본법 <input type="text" class="blank-input" data-ans="행정기본법 제11조 제2항,행정기본법 11조 2항,제11조 제2항,제11조제2항,11조 2항" style="width: 22ch;"><span class="hint">[제11조 제2항]</span>은 "행정청은 행정권한을 남용하거나 그 권한의 범위를 넘어서는 아니 된다"고 규정하고 있다. 행정기본법은 행정청의 권한남용금지의 원칙을 명문화하여 행정법 영역 전반에 공통적으로 적용되는 일반적 법 원칙임을 선언하였다.</p>
+      </div>
+
+      <div class="card" id="card-008" data-level="main" data-grade="A" data-chapter="ch1" data-title="논점 008. 부당결부금지의 원칙">
+        <div class="card-header">
+          <div class="card-title">논점 008. 부당결부금지의 원칙</div>
+          <span class="badge badge-a">A급</span>
+        </div>
+        <h4>1. 의의 및 근거</h4>
+        <p>① 부당결부금지의 원칙이란 행정청은 행정작용을 할 때 상대방에게 해당 행정작용과 실질적인 관련이 없는 의무를 부과해서는 아니 된다는 원칙을 말하며, ② 이는 법치국가의 원리와 자의금지원칙에서 나오는 헌법상 원칙으로서, <input type="text" class="blank-input" data-ans="행정기본법 제13조,행정기본법 13조,제13조,13조" style="width: 16ch;"><span class="hint">[행정기본법 제13조]</span>에 근거한다.</p>
+        <h4>2. 요건</h4>
+        <p>① 행정청의 <input type="text" class="blank-input" data-ans="공행정작용,공권력 행사,행정작용,공권력행사" style="width: 14ch;"><span class="hint">[공행정작용]</span>일 것<br>
+        ② 그 작용은 상대방에게 부과되는 <input type="text" class="blank-input" data-ans="반대급부,의무 부과,반대 급부"><span class="hint">[반대급부]</span>와 결부일 것<br>
+        ③ 행정작용과 반대급부가 <input type="text" class="blank-input" data-ans="실질적 관련성,실질적인 관련성,실질적관련성" style="width: 16ch;"><span class="hint">[실질적 관련성]</span>이 없는 경우를 말한다.<br>
+        원인적 관련성은 행정작용과 사인의 급부사이에 인과관계가 있어야 하며, 목적적 관련성은 주된 행정행위의 근거 법률, 당해 행정분야가 추구하는 목적에 의해서만 부과되어야 한다는 것을 의미한다.</p>
+      </div>
+
+      <div class="card" id="card-009" data-level="main" data-grade="D" data-chapter="ch1" data-title="논점 009. 공·사법관계의 구별">
+        <div class="card-header">
+          <div class="card-title">논점 009. 공법관계와 사법관계의 구별</div>
+          <span class="badge badge-d">D급</span>
+        </div>
+        <h4>1. 구별실익</h4>
+        <p>공법관계와 사법관계인지 여부에 따라 적용될 법규나 법원칙, 분쟁 해결을 위한 쟁송수단의 결정 등이 다르므로 구별이 요구된다.</p>
+        <h4>2. 구별기준</h4>
+        <p><span class="structural-bold">(1) 학설:</span> 주체설, 신주체설, 이익설, 성질설 등이 대립되며,<br> <span class="structural-bold">(2) 판례:</span> 종합적으로 검토한다.<br> <span class="structural-bold">(3) 검토:</span> 어느 한 기준에 의해서 법률관계의 완전한 구별이 어려운바, 각 학설을 상호보완적으로 적용하여 합리적으로 판단해야 한다는 복수성질설이 타당하다고 본다.</p>
+      </div>
+
+      <div class="card" id="card-010" data-level="main" data-grade="B" data-chapter="ch1" data-title="논점 010. 공법관계 사법규정 준용">
+        <div class="card-header">
+          <div class="card-title">논점 010. 공법관계의 사법규정 준용</div>
+          <span class="badge badge-b">B급</span>
+        </div>
+        <h4>1. 문제점</h4>
+        <p>공법관계의 경우, 유추적용 할 공법규정조차 없는 경우에 사법규정이 유추적용 가능한지 문제된다.</p>
+        <h4>2. 학설</h4>
+        <p><span class="structural-bold">(1) 부정설:</span> 공사법은 목적을 달리하는 <input type="text" class="blank-input" data-ans="분리된 별개의 법체계,이질적인 법체계,다른 법체계" style="width: 22ch;"><span class="hint">[분리된 별개의 법체계]</span>로 보아 유추적용을 부정한다.</p>
+        <p><span class="structural-bold">(2) 직접적용설:</span> <input type="text" class="blank-input" data-ans="공법규정 흠결보완,법의 일반원리,법의 일반원칙" style="width: 18ch;"><span class="hint">[공법규정 흠결보완]</span>을 위해 특별한 규정 없는 한 당연히 적용 가능하며,</p>
+        <p><span class="structural-bold">(3) 유추적용설(통설):</span> 공사법관계 차이를 인정하되, <input type="text" class="blank-input" data-ans="내용이 유사한 경우,일반법원리적 규정,성질에 반하지 않는 한도 내,성질이 상반되지 않는 한도 내,일반법적 규정" style="width: 18ch;"><span class="hint">[내용이 유사한 경우]</span>에 한하여 제한적으로 유추적용한다는 견해이다.</p>
+        <h4>3. 판례 및 검토</h4>
+        <p><span class="structural-bold">(1) 판례:</span> 대법원은 사법규정인 실권 또는 실효의 법리를 권력관계에 적용한바 있다 (제한적 유추적용설). <br><span class="structural-bold">(2) 검토:</span> 생각건대 공법관계 특수성 무시할 수 없는 점, 유추적용의 지나친 확장을 제한한다는 점에서 판례가 타당하다고 본다.</p>
+      </div>
+
+      <div class="card" id="card-011" data-level="main" data-grade="C" data-chapter="ch1" data-title="논점 011. 개인적 공권">
+        <div class="card-header">
+          <div class="card-title">논점 011. 개인적 공권</div>
+          <span class="badge badge-c">C급</span>
+        </div>
+        <h4>1. 의의</h4>
+        <p>개인적 공권이란 개인이 직접 <input type="text" class="blank-input" data-ans="자기의 이익,자신의 이익,사익"><span class="hint">[자기의 이익]</span>을 위하여 행정주체에게 일정한 행위를 할 것을 요구할 수 있는 공법에 주어진 힘이다.</p>
+        <h4>2. 성립요건</h4>
+        <p><span class="structural-bold">(1)</span> <input type="text" class="blank-input" data-ans="강행법규의 존재,강행법규성,강행법규" style="width: 16ch;"><span class="hint">[강행법규의 존재]</span>: 개인적 공권이 성립하기 위하여는 먼저 행정법상의 강행법규에 의하여 국가 기타의 행정주체에게 일정한 의무(작위, 부작위, 급부, 수인의무)가 부과되어 있어야 한다.</p>
+        <p><span class="structural-bold">(2)</span> <input type="text" class="blank-input" data-ans="사익보호성,사익보호의 취지,사익보호"><span class="hint">[사익보호성]</span>: 강행법규에 의하여 행정주체에게 일정한 법적 행위의무가 부과되어 있고, 그러한 법규의 목적·취지가 적어도 특정된 범위의 사인의 이익도 보호하고자 하는 경우에만 당해 이익은 공권으로 인정된다. 이에 반하여 법규의 목적·취지가 전적으로 공익추구에 있는 때에는 그로부터 개인이 일정한 이익을 받더라도 그것은 법규가 공익목적을 위하여 행정주체에게 의무를 부과한 반사적 효과로서 받는 이른바 반사적 이익에 불과하다.</p>
+        <h4>3. 특수한 개인적 공권</h4>
+        <p>무하자재량행사청구권, 행정개입청구권</p>
+      </div>
+
+      <div class="card sub-card" id="card-012" data-level="sub" data-grade="C" data-chapter="ch1" data-title="논점 012. 무하자재량청구권">
+        <div class="card-header">
+          <div class="card-title">논점 012. 무하자재량행사청구권</div>
+          <span class="badge badge-c">C급</span>
+        </div>
+        <h4>1. 의의</h4>
+        <p><input type="text" class="blank-input" data-ans="무하자재량행사청구권" style="width: 22ch;"><span class="hint">[무하자재량행사청구권]</span>이란 행정기관에 대해 재량을 행사함에 있어 하자 없는 재량행사를 청구할 수 있는 권리를 말한다.</p>
+        <h4>2. 인정여부(독자성 인정여부)</h4>
+        <p><span class="structural-bold">(1) 학설:</span> 부정설은 원고적격을 부당하게 넓혀 <input type="text" class="blank-input" data-ans="민중소송화를 우려,민중소송화 우려,민중소송화할 위험" style="width: 18ch;"><span class="hint">[민중소송화를 우려]</span>할 수 있다는 점을 논거로 부정하나, 긍정설은 <input type="text" class="blank-input" data-ans="사익보호규정이 인정되는 권리,사익보호규정 인정" style="width: 26ch;"><span class="hint">[사익보호규정이 인정되는 권리]</span>인바, 민중소송화 할 위험이 존재하지 않는다고 하여 긍정한다. 절충설은 원고적격을 위하여는 독자성을 인정하기 어려우나, 본안판결을 위해서는 독자성 인정이 타당하다고 한다.</p>
+        <p><span class="structural-bold">(2) 판례:</span> 대법원이 <input type="text" class="blank-input" data-ans="검사임용거부처분 사건,검사임용거부처분" style="width: 22ch;"><span class="hint">[검사임용거부처분 사건]</span>에서 임용권자에게 적법 처분을 요구할 권리가 있다고 판시한 것을 무하자재량행사청구권으로 인정하였다고 평가하였다.</p>
+        <p><span class="structural-bold">(3) 검토:</span> 상기 논의는 의무와 사익보호성이 충족되는 경우에만 인정하는바, 민중소송의 우려가 없다고 보이며, 따라서 인정함이 타당하다고 본다.</p>
+        <h4>3. 성립요건</h4>
+        <p>① 강행법규성(하자없는 재량행사를 발동할 의무)과 ② 해당 법규가 사익보호성이 있어야 한다.</p>
+        <h4>4. 행사의 내용</h4>
+        <p>행정행위발급청구권이나 행정개입청구권과 달리 특정처분을 요구할 수는 없고, 행정청이 재량의 일탈, 남용, 불행사 없이 어떤 처분을 할 것을 요구할 수 있을 따름이다.</p>
+      </div>
+
+      <div class="card sub-card" id="card-013" data-level="sub" data-grade="C" data-chapter="ch1" data-title="논점 013. 행정개입청구권">
+        <div class="card-header">
+          <div class="card-title">논점 013. 행정개입청구권</div>
+          <span class="badge badge-c">C급</span>
+        </div>
+        <h4>1. 의의</h4>
+        <p><input type="text" class="blank-input" data-ans="행정개입청구권" style="width: 16ch;"><span class="hint">[행정개입청구권]</span>이란 개인이 자기의 이익을 위하여 자기에 대하여 일정한 내용의 행정권을 발동하여 줄 것을 청구할 수 있는 권리를 말한다.</p>
+        <h4>2. 인정여부</h4>
+        <p><span class="structural-bold">(1) 학설:</span> <input type="text" class="blank-input" data-ans="부정설"><span class="hint">[부정설]</span>은 행정개입청구권과 제3자와의 관계는 사인과의 관계로 행정청의 불개입으로 인한 손해는 <input type="text" class="blank-input" data-ans="반사적 손해,반사적손해"><span class="hint">[반사적 손해]</span>에 불과하며 공권은 성립하지 않는다고 본다. 또한 행정권의 발동은 행정청의 재량이라는 점 및 쟁송수단미비 등을 이유로 부정한다. <input type="text" class="blank-input" data-ans="긍정설"><span class="hint">[긍정설]</span>은 <input type="text" class="blank-input" data-ans="생명, 신체, 재산에 대한 급박한 위험,생명신체재산에대한급박한위험" style="width: 32ch;"><span class="hint">[생명, 신체, 재산에 대한 급박한 위험]</span>이 존재한다면 사인에게 이러한 권리를 인정하여 실효적인 권리구제가 가능하다는 점을 논거로 인정한다.</p>
+        <p><span class="structural-bold">(2) 판례:</span> 판례는 명시적으로 인정하고 있지 않지만, 환경영향평가대상 지역 안에 거주하는 주민에게는 <input type="text" class="blank-input" data-ans="공유수면매립면허취소,공유수면매립면허 취소" style="width: 22ch;"><span class="hint">[공유수면매립면허취소]</span>의 변경을 요구할 <input type="text" class="blank-input" data-ans="조리상 신청권,조리상신청권" style="width: 16ch;"><span class="hint">[조리상 신청권]</span>이 있다고 하여 <input type="text" class="blank-input" data-ans="긍정,긍정하는"><span class="hint">[긍정]</span>하는 입장으로 보인다.</p>
+        <p><span class="structural-bold">(3) 검토:</span> 행정청의 행정권발동의 부재로 사인이 생명, 신체, 재산에 대한 중대한 침해를 받을 수 도 있는 바, 사인에게 제3자 또는 본인에 대한 행정권 발동을 요구할 권리를 인정함이 타당하다고 본다.</p>
+        <h4>3. 성립요건</h4>
+        <p>(1) 강행법규 존재: 이 공권이 성립하기 위하여는 행정기관에게 특정한 행정행위를 해야 할 법적의무가 존재하여야 전다. 이러한 의무는 기속행위인 경우에는 당해 성문법규에 의해서 인정되나, 재량행위인 경우에는 행정기관의 객관적인 개입의무의 존재, 즉 행정기관의 재량이 <input type="text" class="blank-input" data-ans="0으로 수축되는 경우,영으로 수축되는 경우,0으로 수축,재량수축" style="width: 20ch;"><span class="hint">[0으로 수축되는 경우]</span>로 나타나게 된다.</p>
+        <p>(2) 당해 법규가 공익뿐만 아니라 사익보호도 의도할 것을 요한다.</p>
+      </div>
+
+      <!-- [제2편 행정작용법] -->
+      <div class="card" id="card-013b" data-level="main" data-grade="C" data-chapter="ch2" data-title="추가 논점. 신고의 개념">
+        <div class="card-header">
+          <div class="card-title">추가 논점. 신고의 개념 및 구별</div>
+          <span class="badge badge-c">C급</span>
+        </div>
+        <h4>I. 개설</h4>
+        <p>현행법상 300여개의 신고는 수리를 요하지 않는 신고와 수리를 요하는 신고로 나뉘어져 있어 국민이나 일선공무원이 이를 명확하게 구별하는 것은 쉽지 않아 혼란이 발생하고 있다. 이에 따라 <input type="text" class="blank-input" data-ans="행정기본법 제34조,행정기본법 34조,제34조,34조" style="width: 18ch;"><span class="hint">[행정기본법 제34조]</span>는 법률에 신고의 수리가 필요하다고 명시되어 있는 경우 그 신고의 효력에 관한 사항을 밝힘으로써 수리가 필요한 신고의 효력에 대한 혼란을 해소하고자 하였다. 결국 수리를 요하지 않는 신고는 <input type="text" class="blank-input" data-ans="행정절차법 제40조,행정절차법 40조,제40조,40조" style="width: 18ch;"><span class="hint">[행정절차법 제40조]</span>, 수리를 요하는 신고는 <input type="text" class="blank-input" data-ans="행정기본법 제34조,행정기본법 34조,제34조,34조" style="width: 18ch;"><span class="hint">[행정기본법 제34조]</span>가 규율하게 되었다.</p>
+        
+        <h4>II. 신고의 개념 및 구별</h4>
+        <p>① <input type="text" class="blank-input" data-ans="신고"><span class="hint">[신고]</span>란 사인이 행정기관에게 일정한 사항을 알려야 할 의무가 있는 경우에 알리는 행위를 말한다. ② 신청이라 함은 사인이 행정청에 대하여 일정한 조치를 취하여줄 것을 요구하는 의사표시를 말한다. 신청은 공법상 의사표시이다. ③ 등록(전형적 등록)은 등록사항을 공적 장부인 등록부에 등재하여 공시하는 행정행위(공증 행위)의 성질을 갖는다. 전형적 등록은 신청을 전제로 하는 점에서 신고와 구별된다.</p>
+      </div>
+
+      <div class="card sub-card" id="card-013c" data-level="sub" data-grade="C" data-chapter="ch2" data-title="III. 신고의 종류">
+        <div class="card-header">
+          <div class="card-title">III. 신고의 종류</div>
+          <span class="badge badge-c">C급</span>
+        </div>
+        <h4>1. 자기완결적 신고(수리를 요하지 않는 신고)</h4>
+        <p><span class="structural-bold">(1) 의의:</span> 자기완결적 신고란 행정청에게 일정한 사실을 알리고, 요건을 갖춘 신고서가 도달하기만 하면 바로 <input type="text" class="blank-input" data-ans="공법상 효과,효력,신고의 효력" style="width: 14ch;"><span class="hint">[공법상 효과]</span>가 발생하는 신고를 말한다. 적법한 신고만 있으면 행정청의 수리가 없더라도 신고의 대상이 되는 행위를 적법하게 할 수 있고, 과태료나 벌금의 부과 등 어떠한 불이익도 받지 않는다.</p>
+        <p><span class="structural-bold">(2) 성질과 권리구제:</span> 자기완결적 신고의 수리는 단순한 접수행위로서 법적 효과를 발생시키지 않는 사실행위이다. 따라서, 자기완결적 신고의 수리행위나 수리거부행위는 원칙상 항고소송의 대상이 되는 <input type="text" class="blank-input" data-ans="처분,행정처분"><span class="hint">[처분]</span>이 아니다. 다만, 자기완결적 신고 중 건축신고와 같은 금지해제적 신고의 경우에 신고가 반려될 경우 당해 신고의 대상이 되는 행위를 하면 시정명령, 이행강제금, 벌금의 대상이 되는 등 신고인이 법적 불이익을 받을 위험이 있는 경우에는 그 위험을 제거할 수 있도록 하기 위하여 신고거부(반려)행위의 처분성을 인정할 필요가 있다. 판례도 이러한 입장을 취하고 있다.</p>
+
+        <h4>2. 수리를 요하는 신고</h4>
+        <p><span class="structural-bold">(1) 의의:</span> 수리를 요하는 신고란 사인이 행정청에게 일정한 사항을 알리고, 신고가 수리되어야 <input type="text" class="blank-input" data-ans="공법상 효과,효력,신고의 효력" style="width: 14ch;"><span class="hint">[공법상 효과]</span>가 발생하는 신고를 말한다. <input type="text" class="blank-input" data-ans="행정기본법 제34조,행정기본법 34조,제34조,34조" style="width: 18ch;"><span class="hint">[행정기본법 제34조]</span>는 "법률에 신고의 수리가 필요하다고 명시되어 있는 경우에는 행정청이 수리하여야 효력이 발생한다"고 규정하고 있다.</p>
+        <p><span class="structural-bold">(2) 성질과 권리구제:</span> 신고의 요건을 갖춘 신고가 있었다 하더라도 수리되지 않으면, 신고가 되지 않은 것으로 보는 것이 다수설 및 판례의 입장이다. 수리를 요하는 신고의 경우에 수리는 행정행위인 수리행위이고, 수리거부는 거부처분에 해당하며 항고소송의 대상이 될 수 있다는 것이 일반적 견해이다.</p>
+
+        <h4>3. 양자의 구별기준</h4>
+        <p><span class="structural-bold">(1) 법령기준:</span> 자기완결적 신고와 수리를 요하는 신고의 구별기준은 일차적으로 관련법령에 의해 추론되는 입법자의 객관적 의사이다. '법률에서 신고를 수리해야 한다고 명시하고 있는 경우'에는 그 신고는 수리를 요하는 신고라는 것이 행정기본법의 입장이다.</p>
+        <p><span class="structural-bold">(2) 법령상 명확하지 않은 경우:</span> ①법령상 자기완결적 신고와 수리를 요하는 신고의 구별이 명확하지 않은 경우에 양자의 구별기준에 대하여는 견해가 대립하고 있으나, 통설인 신고요건기준설은 입법자의 의사가 분명하지 않는 한 신고요건을 기준으로 신고요건이 형식적 요건만인 경우에는 <input type="text" class="blank-input" data-ans="자기완결적 신고,수리를 요하지 않는 신고" style="width: 16ch;"><span class="hint">[자기완결적 신고]</span>이고, 신고의 요건이 형식적 요건 외에 실질적 요건(실체적 요건)을 포함하고 있으면 원칙상 수리를 요하는 신고로 보는 견해이다. ②판례도 관련법규정에 따르되 기본적으로 <input type="text" class="blank-input" data-ans="신고요건"><span class="hint">[신고요건]</span> 및 심사방식을 기준으로 자기완결적 신고와 수리를 요하는 신고를 구별하고 있다고 보는 것이 타당하다. ③ 생각건대 일차적으로 법령의 규정 등을 기준으로 하되, 명확하지 않은 경우에는 신고요건에 <input type="text" class="blank-input" data-ans="실질적 요건,실질적요건,실체적 요건" style="width: 14ch;"><span class="hint">[실질적 요건]</span> 포함여부 등을 판단기준으로 삼는 것이 타당하다.</p>
+      </div>
+
+      <div class="card sub-card" id="card-013d" data-level="sub" data-grade="C" data-chapter="ch2" data-title="IV. 정보제공·금지해제적 신고">
+        <div class="card-header">
+          <div class="card-title">IV. 정보제공적 신고와 금지해제적 신고</div>
+          <span class="badge badge-c">C급</span>
+        </div>
+        <p>① 정보제공적 신고(사실파악형 신고)는 행정청에게 행정의 대상이 되는 사실에 관한 <input type="text" class="blank-input" data-ans="정보를 제공하는 기능,정보제공 기능,정보제공" style="width: 20ch;"><span class="hint">[정보를 제공하는 기능]</span>을 갖는 신고를 말한다. 이 경우에는 신고 없이 행위를 하여도 과태료의 처벌을 받지만, 신고 없이 한 행위 자체는 위법하지 않다. 사실파악형 신고는 항상 자기완결적 신고이다.</p>
+        <p>② 금지해제적 신고(규제적 신고)는 정보제공적 기능 이외에 영업활동 또는 건축활동 등 사적 활동을 <input type="text" class="blank-input" data-ans="규제하는 기능,규제적 기능,규제 기능" style="width: 16ch;"><span class="hint">[규제하는 기능]</span>을 갖는 신고를 말한다. 이 경우에는 신고 없이 한 행위는 법상 금지된 행위로서 위법한 행위가 되며 행정벌의 대상이 될 뿐만 아니라 시정조치의 대상이 된다. <input type="text" class="blank-input" data-ans="건축법상의 신고,건축법상 신고" style="width: 16ch;"><span class="hint">[건축법상의 신고]</span>가 이에 해당한다. 금지해제적 신고는 자기완결적 신고인 경우도 있고 수리를 요하는 신고인 경우도 있다.</p>
+
+        <h4>*심화학습: 개별법과 연계 감정평가법에 따른 사무직원등의 신고</h4>
+        <p><strong>1. 자기완결적신고로 보는 견해</strong><br>
+        감정평가법령의 사무직원등의 신고는 동법 시행규칙 제18조의 2 별지 서식에 따라 형식적으로 신고하는 것이며, 동법 제2항에서 정한 결격사유는 단순한 확인에 불과하다. 또한 추후에 신고의무 위반시 벌금이나 시정명령 등 행정형벌 규정이 없으므로, 자기완결적 신고이다.</p>
+        <p><strong>2. 수리를 요하는 신고로 보는 견해</strong><br>
+        감정평가법령의 사무직원등의 신고는 동법 시행규칙 제18조의2 제2항에서 국토교통부장관이 결격사유에 해당하는지 인적요건을 중심으로 실질적으로 심사하므로 수리를 요하는 신고로 볼 수 있다.</p>
+      </div>
+
+      <!-- 논점 014 -->
+      <div class="card" id="card-014" data-level="main" data-grade="B" data-chapter="ch2" data-title="논점 014. 법규명령">
+        <div class="card-header">
+          <div class="card-title">논점 014. 법규명령</div>
+          <span class="badge badge-b">B급</span>
+        </div>
+        <h4>I. 법규명령의 의의 및 근거</h4>
+        <p>법규명령이란 법률의 위임에 의하여 또는 법률을 집행하기 위하여 행정권에 의하여 제정된 일반적, 추상적 규율을 말한다. 법규명령은 헌법상 근거(헌법 제75조, 제95조 등)가 있다.</p>
+        <h4>II. 법규명령의 종류 (중략)</h4>
+      </div>
+
+      <div class="card sub-card" id="card-014b" data-level="sub" data-grade="B" data-chapter="ch2" data-title="III. 법규명령의 한계">
+        <div class="card-header">
+          <div class="card-title">III. 법규명령의 한계 ★</div>
+          <span class="badge badge-b">B급</span>
+        </div>
+        <h4>1. 위임명령의 근거와 한계</h4>
+        <p><span class="structural-bold">(1) 위임명령의 근거:</span> 헌법 제75조 및 헌법 제95조에 따라 법률이나 상위명령에 개별적인 위임규정이 있는 경우에만 제정할 수 있다.</p>
+        <p><span class="structural-bold">(2) 위임명령의 한계</span><br>
+        1) 수권의 한계: ①법률의 명령에 대한 수권은 일반적이고 <input type="text" class="blank-input" data-ans="포괄적인 수권,포괄적 수권,포괄적 수권은" style="width: 14ch;"><span class="hint">[포괄적인 수권]</span>은 안 되며 구체적인 위임이어야 한다(헌법 제75조). ②헌법에서 <input type="text" class="blank-input" data-ans="구체적"><span class="hint">[구체적]</span>이고 <input type="text" class="blank-input" data-ans="명시적"><span class="hint">[명시적]</span>으로 법률로 정하도록 한 사항과 본질적인 사항은 법률로 정하여야 하며 명령에 위임하여서는 안 된다. 본질적인 사항은 명령에 대한 구체적 위임도 안 되며 법률로 정하여야 한다. ③수권의 한계를 넘는 법률은 위헌인 법률이 된다.</p>
+        <p>2) 제정상 한계: ①위임명령은 <input type="text" class="blank-input" data-ans="수권의 범위 내,위임의 범위 내" style="width: 16ch;"><span class="hint">[수권의 범위 내]</span>에서 제정되어야 한다. 수권의 범위를 일탈한 명령은 위법한 명령이 된다. ②위임명령은 상위법령(예:헌법, 법률, 상위의 명령)에 위반하여서는 안 된다. ③또한 전면적 재위임도 금지된다. 이는 위임된 입법 권한의 전면적 재위임은 입법권을 위임한 법률 그 자체의 내용을 임의로 변경하는 결과를 가져오므로 허용되지 않는다. 단, 세부사항을 보충하는 정도의 재위임은 가능하다.</p>
+        <p>3) 형벌규정의 규율금지: 헌법상 죄형법정주의 원칙으로 행정기관이 범죄와 형벌을 규정할 수 없다. 그러나 근거법이 범죄구성요건의 구체적 기준이 설정되면 그 범위 내 가능하다.</p>
+
+        <h4>2. 집행명령의 근거와 한계</h4>
+        <p>①집행명령은 위임명령과 달리 상위법령 수권 없이도 직권으로 발령될 수 있다. ② 법령의 집행에 필요한 세칙을 정하는 범위 내에서만 가능하며 새로운 국민의 권리·의무를 정할 수 없다.</p>
+        <br>
+        <h4>IV. 법규명령의 적법요건과 위법한 명령의 효력 (중략)</h4>
+      </div>
+
+      <div class="card sub-card" id="card-014d" data-level="sub" data-grade="B" data-chapter="ch2" data-title="V. 법규명령의 통제">
+        <div class="card-header">
+          <div class="card-title">V. 법규명령의 통제 ★★★</div>
+          <span class="badge badge-b">B급</span>
+        </div>
+        <h4>1. <input type="text" class="blank-input" data-ans="행정내부적 통제,행정 내부적 통제" style="width: 18ch;"><span class="hint">[행정내부적 통제]</span></h4>
+        <p><span class="structural-bold">(1) 절차상 통제:</span> 행정절차법상 법령 등을 제정·개정·폐지하고자 하는 경우에 입법예고제가 도입되어 있다(행정절차법 제41조 제1항). 그 외에 국무회의 심의(헌법 제89조 제3호), 법제처에 의한 심사 등의 절차상 통제장치가 있다.<br>
+        <span class="structural-bold">(2) 감독권에 의한 통제:</span><br>
+        1) 감독청의 개폐명령: 상급행정청의 감독권의 대상에는 하급행정청의 행정입법권 행사도 포함된다. 상급행정청은 하급행정청의 행정입법권의 행사의 기준과 방향을 지시할 수 있고, 위법한 법규명령의 폐지를 명할 수 있다.<br>
+        2) 행정심판위원회에 의한 통제(행정심판법 제59조): 중앙행정심판위원회는 심판청구를 심리, 재결할 때에 처분 또는 부작위의 근거가 되는 명령 등이 법령에 근거가 없거나 상위법령에 위배되거나 국민에게 과도한 부담을 주는 등 크게 불합리하면 관계 행정기관에 그 명령 등의 개정·폐지 등 적정한 시정조치를 요청할 수 있다.</p>
+        
+        <h4>2. <input type="text" class="blank-input" data-ans="의회에 의한 통제,국회에 의한 통제" style="width: 18ch;"><span class="hint">[의회에 의한 통제]</span></h4>
+        <p>의회에 의한 행정입법의 통제방법으로는 의회에의 제출절차와 의회의 동의 또는 승인권의 유보가 있다.</p>
+        
+        <h4>3. <input type="text" class="blank-input" data-ans="법원에 의한 통제,사법적 통제" style="width: 16ch;"><span class="hint">[법원에 의한 통제]</span> <span class="text-muted">(답안지)</span></h4>
+        <p><span class="structural-bold">(1) 구체적 규범통제</span><br>
+        1) 의의 및 내용: ① 구체적 규범통제란 다른 <input type="text" class="blank-input" data-ans="구체적 사건,구체적인 사건"><span class="hint">[구체적 사건]</span>에 대하여 소송을 제기하였을 때 그 사안의 근거가 된 법규명령이 <input type="text" class="blank-input" data-ans="재판의 전제,재판의 전제성" style="width: 14ch;"><span class="hint">[재판의 전제]</span>가 된 경우에 법규명령의 위법성을 심사하는 제도를 말한다. ② 우리나라는 <input type="text" class="blank-input" data-ans="헌법 제107조 제1항,헌법 제107조 1항,제107조 제1항,제107조 1항,헌법 제107조 1항" style="width: 20ch;"><span class="hint">[헌법 제107조 1항]</span>에서 헌법재판소의 위헌법률심판, <input type="text" class="blank-input" data-ans="헌법 제107조 제2항,헌법 제107조 2항,제107조 제2항,제107조 2항,제107조 2항" style="width: 20ch;"><span class="hint">[제107조 2항]</span>에서 법원의 명령·규칙심사권을 규정하고 있어 구체적 규범통제 제도를 취한다. ③ 통제의 주체로서 <input type="text" class="blank-input" data-ans="각급 법원,각급법원"><span class="hint">[각급 법원]</span>이 통제하고, 대법원이 최종적인 심사권을 갖는다. ④ 대상은 <input type="text" class="blank-input" data-ans="명령 규칙,명령, 규칙,명령·규칙,명령과 규칙"><span class="hint">[명령, 규칙]</span>이 통제 대상이 된다.<br>
+        2) 재판의 전제성: 재판의 전제성이란 <input type="text" class="blank-input" data-ans="처분의 위법성" style="width: 14ch;"><span class="hint">[처분의 위법성]</span>이 법규명령 등에 기한 것일 때, 처분의 위법성 판단에 앞서 처분의 근거 법령인 법규명령의 위헌 위법성을 먼저 결정하는 것을 말한다.<br>
+        3) 효력: ① <input type="text" class="blank-input" data-ans="개별적 효력설" style="width: 14ch;"><span class="hint">[개별적 효력설]</span>은 위법한 명령은 당해 사건에 한하여 적용되지 않는 것으로 보며, ② <input type="text" class="blank-input" data-ans="일반적 효력설" style="width: 14ch;"><span class="hint">[일반적 효력설]</span>은 위법한 명령의 경우 당해 명령은 효력이 상실하는 것으로 본다. ③판례는 "명령이 위법하다"라는 판결이 난 경우 <input type="text" class="blank-input" data-ans="당해 사건,해당 사건"><span class="hint">[당해 사건]</span>에서만 적용이 배제되는 것으로 보고 있다. ④ 생각건대, 법의 공백상태의 초래를 막기 위하여 개별적 효력설 및 판례 입장이 타당하다.<br>
+        <span class="structural-bold">(2) 처분적 법규명령에 대한 항고소송(직접적 통제, 법규명령 자체에 대한 항고소송):</span> 법규명령(법령보충적 행정규칙 포함) 중 처분적 성질을 갖는 명령(처분적 명령)은 항고소송의 대상이 된다는 것이 판례 및 일반적 견해이다.</p>
+        
+        <h4>4. 헌법재판소에 의한 통제(권리구제형 헌법소원) ★</h4>
+        <p><span class="structural-bold">(1) 법규명령에 대한 헌법소원 인정 여부</span><br>
+        1) 문제점: 현행 헌법상 법규명령에 대한 헌법소원(헌법재판소법 제68조 제1항의 헌법소원)이 가능한지에 관하여 견해가 대립한다.<br>
+        <span class="structural-bold">2) 학설:</span> ①부정설은 헌법상의 <input type="text" class="blank-input" data-ans="관할권의 배분의 관점,관할권의 배분" style="width: 22ch;"><span class="hint">[관할권의 배분의 관점]</span> 등을 고려할 때 법규명령의 헌법소원을 부정한다. ②긍정설은 헌법소원은 기존의 구제제도에 대한 <input type="text" class="blank-input" data-ans="보충적인 구제제도,보충적 구제제도,보충적 권리구제수단" style="width: 20ch;"><span class="hint">[보충적인 구제제도]</span>이므로 법규명령이 국민의 기본권을 직접 침해한 경우 헌법소원을 통하여 다툴 수 있다고 본다.<br>
+        <span class="structural-bold">3) 판례:</span> 헌법재판소는 긍정설을 취하고 있다. 헌법소원제도의 기본권보장 제도로서의 기능을 보장하기 위하여 명령·규칙에 대한 헌법소원을 인정하는 것이 타당하다.</p>
+        <p><span class="structural-bold">(2) 헌법소원의 요건</span><br>
+        법규명령이 국민의 <input type="text" class="blank-input" data-ans="기본권을 직접 침해하는 경우,기본권 직접 침해" style="width: 28ch;"><span class="hint">[기본권을 직접 침해하는 경우]</span> 헌법소원을 통하여 다툴 수 있는 것이 원칙이다. 다만, 예외적으로 법규명령의 처분성이 인정되어 항고소송을 통해 법규명령의 효력을 직접 다툴 수 있는 경우에는 헌법소원의 <input type="text" class="blank-input" data-ans="보충성의 원칙,보충성 원칙" style="width: 16ch;"><span class="hint">[보충성의 원칙]</span>에 의해 헌법소원을 제기할 수 없다.</p>
+      </div>
+
+      <!-- 논점 015 -->
+      <div class="card" id="card-015" data-level="main" data-grade="C" data-chapter="ch2" data-title="논점 015. 행정규칙">
+        <div class="card-header">
+          <div class="card-title">논점 015. 행정규칙</div>
+          <span class="badge badge-c">C급</span>
+        </div>
+        <h4>I. 행정규칙의 의의</h4>
+        <p>행정규칙이라 함은 행정조직 내부에서의 행정의 <input type="text" class="blank-input" data-ans="사무처리기준,사무처리 기준" style="width: 14ch;"><span class="hint">[사무처리기준]</span>으로서 제정된 일반적·추상적 규범을 말한다. 실무에서의 훈령·통첩·예규 등이 행정규칙에 해당한다.</p>
+        
+        <h4>II. 행정규칙의 종류</h4>
+        <p>(생략)</p>
+        
+        <h4>III. 행정규칙의 법적 성질 및 구속력</h4>
+        <p>(나중)</p>
+
+        <h4>IV. 행정규칙의 통제</h4>
+        <p>1. 행정적 통제: 법제처의 사전심사나 법제처의 사후평가제가 실시되고 있다.</p>
+        <p>2. 사법적 통제<br>
+        <span class="structural-bold">(1) 법원에 의한 통제</span><br>
+        1) 항고소송의 대상: 행정규칙에는 원칙상 <input type="text" class="blank-input" data-ans="대외적 효력,대외적효력"><span class="hint">[대외적 효력]</span>이 인정되지 않으며 간접적·대외적 효력이 인정되는 경우에도 행정의 기준이 될 뿐 국민의 권리·의무에 직접 구체적인 효과를 미치지 않기 때문에 행정규칙은 원칙상 행정소송법상의 <input type="text" class="blank-input" data-ans="처분,행정처분"><span class="hint">[처분]</span>에 해당하지 않고 따라서 <strong><input type="text" class="blank-input" data-ans="항고소송의 대상,항고소송대상" style="width: 18ch;"><span class="hint">[항고소송의 대상]</span>이 되지 않는다.</strong><br>
+        2) 구체적 규범통제(간접적 규범통제): 행정규칙이 대외적 구속력을 갖지 않는 경우에는 행정처분의 위법 여부를 판단함에 있어서 행정규칙의 위법 여부가 <input type="text" class="blank-input" data-ans="전제 문제,전제문제"><span class="hint">[전제 문제]</span>가 되지 않으므로 법원에 의한 <strong>심판대상이 될 수 없을 것이다.</strong> 그러나, 반대견해도 있지만, 행정규칙이 대외적 구속력을 갖고 행정처분의 취소소송에서 행정규칙의 위법 여부가 <input type="text" class="blank-input" data-ans="전제 문제,전제문제"><span class="hint">[전제 문제]</span>가 되었을 때에는 법원에 의한 심판대상이 된다고 볼 수 있다.</p>
+        <p><span class="structural-bold">(2) 헌법재판소에 의한 통제</span><br>
+        행정규칙은 대외적인 행위가 아니라 행정조직 내부에서의 행위이므로 원칙상 헌법소원의 대상이 되는 <strong><input type="text" class="blank-input" data-ans="공권력 행사,공권력행사" style="width: 14ch;"><span class="hint">[공권력 행사]</span>가 아니다.</strong> 그러나, 행정규칙이 사실상 구속력을 갖고 있어 국민의 기본권을 현실적으로 침해하는 경우에는 헌법소원의 대상이 된다. 그리고, 법규성 또는 대외적 구속력이 인정되는 행정규칙은 헌법소원의 대상이 되는 <input type="text" class="blank-input" data-ans="공권력 행사,공권력행사" style="width: 14ch;"><span class="hint">[공권력 행사]</span>에 해당한다.</p>
+      </div>
+
+      <!-- 논점 016 -->
+      <div class="card" id="card-016" data-level="main" data-grade="A" data-chapter="ch2" data-title="논점 016. 법규명령형식 행정규칙">
+        <div class="card-header">
+          <div class="card-title">논점 016. 법규명령형식의 행정규칙</div>
+          <span class="badge badge-a">A급</span>
+        </div>
+        <h4>1. 의의</h4>
+        <p>법규명령의 형식을 취하고 있지만, 그 내용이 행정규칙의 실질을 가지는 것을 법규명령형식의 행정규칙이라 한다. 법규명령형식의 행정규칙은 재량권 행사의 기준(재량준칙, 특히 제재적 처분의 기준)을 법규명령의 형식 정한 경우가 보통이다.</p>
+
+        <h4>2. 법적성질</h4>
+        <p><span class="structural-bold">(1) 학설:</span> ①형식설(법규명령설)은 <input type="text" class="blank-input" data-ans="규범, 형식, 법적 안정성,규범 형식 법적 안정성,규범,형식,법적안정성" style="width: 24ch;"><span class="hint">[규범, 형식, 법적 안정성]</span>을 중시하여 구속력이 있다고 보는 견해로 법규명령에 위반한 처분인 경우 위법하다고 판단되어 국민의 권리구제에 유리하다는 점을 논거로 든다. ② 실질설(행정규칙설)은 실질을 중시하여 구속력은 없으나 <input type="text" class="blank-input" data-ans="구체적으로 타당한 행정작용,구체적으로 타당한 행정" style="width: 28ch;"><span class="hint">[구체적으로 타당한 행정작용]</span>이 가능하다는 점을 논거로 한다. ③ <input type="text" class="blank-input" data-ans="수권여부기준설,절충설" style="width: 16ch;"><span class="hint">[수권여부기준설]</span>은 상위법령의 수권이 있는 경우 구속력 인정되나 수권이 없는 경우 구속력이 인정되지 않는다고 보는 견해이다.</p>
+        <p><span class="structural-bold">(2) 판례:</span> ①대법원은 부령 형식의 행정규칙에 대해서는 일관되게 행정규칙으로 보고 있으나(<input type="text" class="blank-input" data-ans="도로교통법"><span class="hint">[도로교통법]</span> 시행규칙(부령)으로 정한 운전면허행정처분기준), ② 대통령령 형식의 행정규칙에 대해서는 법규성을 인정하여 형식에 따라 상이한 입장을 보이고 있다(<input type="text" class="blank-input" data-ans="(구)주택건설촉진법,구주택건설촉진법,주택건설촉진법" style="width: 22ch;"><span class="hint">[(구)주택건설촉진법]</span> 시행령(대통령령)으로 정한 영업정지처분기준). ③한편 <input type="text" class="blank-input" data-ans="(구)청소년보호법시행령,구청소년보호법시행령,청소년보호법 시행령" style="width: 26ch;"><span class="hint">[(구)청소년보호법시행령]</span>으로 정한 과징금 처분 기준(별표)의 법적 성질을 법규명령으로 보면서도 과징금 금액을 정액이 아니라 최고 한도액으로 봄으로써 구체적 사정에 적용할 수 있는 재량이 행정청에 있다고 판시한 바 있다.</p>
+        <p><span class="structural-bold">(3) 검토(판례에 대한 비판 및 소결):</span> 상기 판례에서 모두 법규명령이라는 점에서 차이가 없음에도 법적 성질을 달리 보고 있다는 문제점이 있다. 생각건대, 국민의 예측 가능성 등의 관점에서 법규성을 인정함이 타당하다.</p>
+      </div>
+
+      <!-- 논점 017 -->
+      <div class="card" id="card-017" data-level="main" data-grade="A" data-chapter="ch2" data-title="논점 017. 법령보충적 행정규칙">
+        <div class="card-header">
+          <div class="card-title">논점 017. 법령보충적 행정규칙 (행정규칙형식의 법규명령)</div>
+          <span class="badge badge-a">A급</span>
+        </div>
+        <h4>1. 의의</h4>
+        <p>법령보충적 행정규칙이란 행정규칙의 형식으로 제정되었지만 그 내용이 실질에 있어서 법규적 성질을 갖는 경우를 말한다.</p>
+
+        <h4>2. 인정 여부</h4>
+        <p>행정규칙형식의 법규명령에 대해 <span class="structural-bold">① 부정설</span>은 헌법 제75조 및 제95조의 형식규정 외의 형식은 헌법에 반하며 위헌·무효라고 한다. <span class="structural-bold">②긍정설</span>은 매우 전문적이거나 기술적인 사항 또는 빈번하게 개정되어야 하는 구체적인 사항에 대하여는 법규명령보다 탄력성이 있는 행정규칙의 형식으로 제정할 현실적인 필요가 있다고 한다. <span class="structural-bold">③ 대법원 및 헌법재판소</span>는 모두 법령보충적 행정규칙을 인정하고 있다. <span class="structural-bold">④생각건대,</span> 헌법상 법규명령형식은 예시적이며, 현실적 필요성 등 종합 고려할 때 긍정함이 타당하다고 본다.</p>
+
+        <h4>3. 법적 성질</h4>
+        <p><span class="structural-bold">(1) 학설 <span class="text-muted">+α</span>:</span> <input type="text" class="blank-input" style="width:100%; max-width:400px;" data-ans="형식설, 규범구체화 행정규칙설, 법규명령 성질을 갖는 행정규칙설(통설), 실질설,형식설 규범구체화 행정규칙설 법규명령 성질을 갖는 행정규칙설 실질설"><span class="hint">[형식설, 규범구체화 행정규칙설, 법규명령 성질을 갖는 행정규칙설(통설), 실질설]</span>이 대립한다.</p>
+        <p><strong>&lt;차별화 전략&gt;</strong><br>
+        ① 형식설(행정규칙설)은 <input type="text" class="blank-input" data-ans="형식을 중시"><span class="hint">[형식을 중시]</span>하여 행정규칙으로 보며, 법규명령은 엄격한 절차·형식으로 제정한다고 보는 견해이다.<br>
+        ② 규범구체화 행정규칙설은 <input type="text" class="blank-input" data-ans="전문기술영역,전문기술 영역" style="width: 16ch;"><span class="hint">[전문기술영역]</span>에서 시원적 입법권을 가진다는 논거로 통상 행정규칙과 달리 상위규범을 구체화하는 규범구체화 행정규칙으로 보자는 견해이다.<br>
+        ③ 법규명령 성질을 갖는 행정규칙설은 <input type="text" class="blank-input" data-ans="상위법령과 결합" style="width: 16ch;"><span class="hint">[상위법령과 결합]</span>하여 대외적 구속력을 인정하며,<br>
+        ④ 실질설(법규명령설)은 <input type="text" class="blank-input" data-ans="실질을 중시"><span class="hint">[실질을 중시]</span>하여 법규명령으로 보며, 법령의 구체적 개별적 위임이 있고 그 내용도 법규적 사항이라는 점을 근거로 한다.</p>
+        
+        <p><span class="structural-bold">(2) 판례:</span> 대법원은 <input type="text" class="blank-input" data-ans="토지가격비준표" style="width: 16ch;"><span class="hint">[토지가격비준표]</span>는 집행명령인 개별토지가격 합동조사지침과 더불어 법령보충적인 구실을 하는 법규적 성질을 가지고 있는 것으로 보아야 한다고 판시하여 법규성이 있다고 본다. (국세청장 훈령인 재산제세사무처리기준도 법규성 인정, 헌법재판소도 대법원과 동일한 입장)</p>
+        
+        <p><span class="structural-bold">(3) 검토:</span> 생각건대, 상위법령과 결합하여 대외적 구속력이 인정되는 점, 행정 현실상 필요가 있다는 점에서 법규명령성질을 갖는 행정규칙설이 타당하다.</p>
+      </div>
+
+      <!-- 논점 018 -->
+      <div class="card" id="card-018" data-level="main" data-grade="B" data-chapter="ch2" data-title="논점 018. 행정행위와 처분">
+        <div class="card-header">
+          <div class="card-title">논점 018. 강학상 행정행위와 행정소송법상 처분과의 관계</div>
+          <span class="badge badge-b">B급</span>
+        </div>
+        <h4>1. 문제점</h4>
+        <p><input type="text" class="blank-input" data-ans="행정소송법 제2조 제1항 제1호,행정소송법 제2조 1항 1호" style="width: 30ch;"><span class="hint">[행정소송법 제2조 제1항 제1호]</span>는 취소소송의 대상인 처분을 행정청이 행하는 구체적 사실에 관한 법집행으로서 공권력의 행사 또는 그 거부와 그 밖에 이에 준하는 행정작용 및 행정심판에 대한 재결이라고 정의하고 있다. 행정소송법은 처분개념을 광의로 정의하고 있어 행정소송법상 처분개념이 학문상 개념인 행정행위와 동일한 것인지에 대해 학설이 대립된다.</p>
+        
+        <h4>2. 학설</h4>
+        <p><span class="structural-bold">①</span> <input type="text" class="blank-input" data-ans="실체법상 처분개념설,실체법적 처분개념설" style="width: 22ch;"><span class="hint">[실체법상 처분개념설]</span>은 쟁송법적 처분개념설이 처분개념에 포함시키고 있는 비권력적 행정작용에 대한 권리구제 수단은 항고소송이 아니라 당사자소송이나 법정외소송으로 해결해야 한다고 한다. 즉, 이질적 행정행위를 함께 소송의 대상으로 하면 체계적 혼란이 있다고 본다.<br>
+        <span class="structural-bold">②</span> <input type="text" class="blank-input" data-ans="쟁송법상 처분개념설,쟁송법적 처분개념설" style="width: 22ch;"><span class="hint">[쟁송법상 처분개념설]</span>은 다양한 행정작용에 대해 항고소송을 인정하여 실효적인 권리구제가 가능하다는 점을 논거로 한다.</p>
+        
+        <h4>3. 판례 및 검토</h4>
+        <p><span class="structural-bold">(1) 판례 및 검토:</span> 판례는 비권력적 사실행위에 대해 처분성을 부정하고 있어 기본적으로 실체법상 처분개념설의 입장으로 보인다. 다만, <input type="text" class="blank-input" style="width:34ch;" data-ans="교도소 수감자 재이송 조치, 시정조치 권고 판결,교도소 수감자 재이송 조치 시정조치 권고 판결"><span class="hint">[교도소 수감자 재이송 조치, 시정조치 권고 판결]</span> 등에서 처분개념이 확대될 여지를 인정한 바 있다. 생각건대, 국민의 권리구제를 위하여 쟁송법상 처분개념설이 타당하다고 보인다.</p>
+      </div>
+
+      <!-- 논점 019 -->
+      <div class="card" id="card-019" data-level="main" data-grade="B" data-chapter="ch2" data-title="논점 019. 행정행위의 종류">
+        <div class="card-header">
+          <div class="card-title">논점 019. 행정행위의 종류</div>
+          <span class="badge badge-b">B급</span>
+        </div>
+        <h4>1. 명령적 행위</h4>
+        <p><span class="structural-bold">(1)</span> <input type="text" class="blank-input" data-ans="하명"><span class="hint">[하명]</span><br>
+        <input type="text" class="blank-input" data-ans="하명"><span class="hint">[하명]</span>이란 행정청이 국민에게 작위, 부작위, 급부 또는 수인의무를 명하는 행위를 말한다. 이 중 부작위의무를 명하는 행위를 금지라 한다.</p>
+        <p><span class="structural-bold">(2) 허가</span><br>
+        1) 허가의 개념: 허가라 함은 법령에 의한 <input type="text" class="blank-input" data-ans="자연적 자유" style="width: 14ch;"><span class="hint">[자연적 자유]</span>에 대한 일반적인 상대적 금지(허가조건부 금지)를 일정한 요건을 갖춘 경우에 해제하여 일정한 행위를 적법하게 할 수 있게 하는 행정행위를 말한다. 허가는 학문상의 개념이다. 허가라는 개념은 실정법상으로도 사용되나 허가 이외에 면허, 인가, 승인 등의 용어가 실무상 사용되고 있다. 또한 실정법상 사용되는 허가라는 용어 중에는 학문상의 특허(예:광업허가) 또는 인가(예:토지거래허가)에 해당하는 것도 있다.<br>
+        2) 구별 개념: <input type="text" class="blank-input" data-ans="예외적 승인,예외적 허가" style="width: 16ch;"><span class="hint">[예외적 승인]</span>이란 사회적으로 바람직하지 않은 일정행위를 법령상 원칙적으로 금지하고, 예외적인 경우에 이러한 금지를 해제하여 당해 행위를 적법하게 할 수 있게 하여 주는 행위를 말한다.</p>
+        <p><span class="structural-bold">(3) 면제</span><br>
+        면제라 함은 법령에 의해 정해진 작위의무, 급부의무 또는 수인의무를 해제해 주는 행정행위를 말한다.</p>
+        
+        <h4>2. 형성적 행위</h4>
+        <p><span class="structural-bold">(1)</span> <input type="text" class="blank-input" data-ans="특허,설권행위"><span class="hint">[특허]</span><br>
+        <input type="text" class="blank-input" data-ans="특허,설권행위"><span class="hint">[특허]</span>라 함은 상대방에게 직접 권리, 능력, 법적 지위, 포괄적 법률관계를 설정하는 행위를 말한다. 이 중에서 권리를 설정하는 행위를 협의의 특허라 한다. 특허란 학문상의 개념이다. 실정법에서는 허가(예:광업허가) 또는 면허(예:어업면허)라는 용어를 사용한다.</p>
+        <p><span class="structural-bold">(2) 인가</span><br>
+        인가라 함은 타인의 법률적 행위를 보충하여 그 법률적 효력을 완성시켜 주는 행정행위를 말한다. 이론상 인가는 법률적 행위의 효력을 인가라는 행정청의 결정에 의해 발생시킬 공익상 필요가 있는 경우에 인정된다. 인가도 허가나 특허처럼 학문상의 개념이다. 실무상 인가라는 개념이 사용되기도 하나 승인, 허가나 인허라는 개념도 사용된다.</p>
+        <p><span class="structural-bold">(3) 공법상 대리행위</span><br>
+        공법상 대리라 함은 제3자가 하여야 할 행위를 행정기관이 대신하여 행함으로써 제3자가 스스로 행한 것과 같은 효과를 발생시키는 행정행위를 말한다.</p>
+        
+        <h4>3. 준법률행위적 행정행위</h4>
+        <p>1. 공증행위<br>
+        공증행위라 함은 특정의 사실 또는 법률관계의 존재를 <input type="text" class="blank-input" data-ans="공적으로 증명" style="width: 16ch;"><span class="hint">[공적으로 증명]</span>하는 행정행위를 말한다.</p>
+        <p>2. 통지행위<br>
+        통지행위라 함은 특정인 또는 불특정 다수인에게 특정한 사실을 알리는 행정행위를 말한다. 통지행위는 그 자체가 일정한 법률효과를 발생시키는 행정행위이다. 통지행위는 행정행위의 효력발생요건인 통지 또는 고지와 구별되어야 단다. 단순한 사실의 통지도 통지행위가 아니다.</p>
+        <p>3. 수리행위<br>
+        수리행위라 함은 법상 행정청에게 수리의무가 있는 경우에 신고 신청 등 타인의 행위를 행정청이 적법한 행위로서 받아들이는 행위를 말한다.</p>
+        <p>4. 확인행위<br>
+        확인행위라 함은 특정한 사실 또는 법률관계의 존부 또는 정부에 관하여 <input type="text" class="blank-input" data-ans="의문이나 다툼이 있는 경우,의문이나 다툼,의문, 다툼이 있는 경우" style="width: 24ch;"><span class="hint">[의문이나 다툼이 있는 경우]</span>에 행정청이 이를 공권적으로 확인하는 행위를 말한다.</p>
+      </div>
+
+      <!-- =======================================================================
+           문항 데이터 영역 (논점 020 ~ 022)
+           ======================================================================= -->
+
+      <!-- 논점 020 -->
+      <div class="card" id="card-020" data-level="main" data-grade="A" data-chapter="ch2" data-title="논점 020. 기속행위와 재량행위">
+        <div class="card-header">
+          <div class="card-title">논점 020. 기속행위와 재량행위</div>
+          <span class="badge badge-a">A급</span>
+        </div>
+        <h4>I. 개념</h4>
+        <p>기속행위란 법령상 요건이 충족되면 행정기관이 반드시 어떠한 행정행위를 하여야 하는(또는 하지 말아야 하는) 행정행위를 말한다. 재량행위란 법령상 요건이 충족되더라도 행정기관이 효과를 선택할 수 있는 행정행위를 말한다.</p>
+      </div>
+
+      <div class="card sub-card" id="card-020-2" data-level="sub" data-grade="A" data-chapter="ch2" data-title="II. 구별실익">
+        <div class="card-header">
+          <div class="card-title">II. 구별실익</div>
+          <span class="badge badge-a">A급</span>
+        </div>
+        <p><span class="structural-bold">1. 개설</span><br>
+        ① 행정소송에 있어서 기속행위의 경우 전면적 심사가 가능하나, 재량행위의 경우 일탈·남용이 아닌 한 법원이 판단할 수 없다. 
+        ② 또한 가속행위의 경우 법령의 근거가 없는 한 효과를 제한하는 부관의 부착이 불가하다. 그러나 재량행위의 경우는 재량권 범위 내 부관의 부착이 가능하다. 그 외에 법원의 통제 등에서 구별의 실익이 있다.</p>
+        <p><span class="structural-bold">2. 요건충족에 따른 효과의 부여</span><br>
+        <span class="structural-bold">(1) 개설:</span> 행정청은 기속행위에 있어서는 요건이 충족되면 반드시 법에 정해진 효과를 부여하여야 하지만, 재량행위에 있어서는 요건이 충족되어도 공익과의 이익형량을 통하여 법에 정해진 효과를 부여하지 않을 수도 있다.<br>
+        <span class="structural-bold">(2) 판례 및 검토:</span> <input type="text" class="blank-input" data-ans="건축허가와 같은 기속행위,건축허가" style="width: 24ch;"><span class="hint">[건축허가와 같은 기속행위]</span>인 거부인 경우 법령 외의 사유인 주민의 동의가 없다는 이유로 거부할 수 없다고 하였으나, <input type="text" class="blank-input" data-ans="주택사업계획승인과 같은 재량행위,주택사업계획승인" style="width: 26ch;"><span class="hint">[주택사업계획승인과 같은 재량행위]</span> 거부는 자연환경보전 등 중대한 공익은 재량권 행사로서 법령에 근거 없어도 거부가 가능하다고 판시하였다. 생각건대. 재량행위 경우 법령 외의 사유로 거부가 가능하나, 그러한 경우에도 재량행위의 일탈·남용해태가 없어야 한다.</p>
+      </div>
+
+      <div class="card sub-card" id="card-020-3" data-level="sub" data-grade="A" data-chapter="ch2" data-title="III. 기속행위와 재량행위 구별기준">
+        <div class="card-header">
+          <div class="card-title">III. 기속행위와 재량행위 구별기준</div>
+          <span class="badge badge-a">A급</span>
+        </div>
+        <p><span class="structural-bold">1. 개설</span><br>
+        재량행위와 가속행위의 구별에 있어 법률규정이 일차적 기준이 된다. 왜냐하면 재량권은 입법권에 의해 행정기관에 부여되는 것이기 때문이다. 다만 법률규정의 문리적 표현뿐만 아니라 관련 규정, 입법취지 및 입법목적을 아울러 고려하여야 한다. 법령의 규정이 명확하지 않은 경우 당해 법령의 규정과 함께 문제가 되는 행위의 성질, 기본권 관련성 및 공익관련성을 종합적으로 고려하여야 한다.</p>
+        <p><span class="structural-bold">2. 구별기준</span><br>
+        <span class="structural-bold">(1) 학설:</span> ① 요건재량설은 재량이 요건사실의 존부의 인정에 있어서만 인정한다고 보며, ② 효과재량설은 재량이 효과선택에 있어서 인정된다고 한다. ③ 기본권기준설은 상기 학설이 재량이 인정되는 영역 중 일면만을 강조한 것으로 타당하지 않으며, 양자 구별을 위해 기본권의 최대한 보장과 공익성 등을 고려해야 한다고 본다. ④ 종합설은 1차적으로 법문표현 관련규정·입법취지 고려, 법문표현이 불분명한 경우 종합적 고려해야 한다고 한다.<br>
+        <span class="structural-bold">(2) 판례 및 검토:</span> 판례는 관련 법령에 대한 종합적인 판단을 전제로 하면서 효과재량설을 기준으로 활용하거나 공익성을 구별기준으로 들기도 한다. 생각건대. 상기 구별에 대해 단일기준보다는 법령 검토를 일차적으로 하되, 기본권 및 공익성 등 모두 종합적으로 고려하여 검토함이 타당하다고 본다.</p>
+      </div>
+
+      <div class="card sub-card" id="card-020-4" data-level="sub" data-grade="A" data-chapter="ch2" data-title="IV. 재량권의 한계">
+        <div class="card-header">
+          <div class="card-title">IV. 재량권의 한계</div>
+          <span class="badge badge-a">A급</span>
+        </div>
+        <p>행정청은 재량이 있는 처분을 할 때에는 관련 이익을 정당하게 형량하여야 하며, 그 재량권의 범위를 넘어서는 아니 된다(<input type="text" class="blank-input" data-ans="행정기본법 제21조,행정기본법 21조" style="width: 18ch;"><span class="hint">[행정기본법 제21조]</span>). 행정청에 재량권이 부여된 경우에도 재량권은 무한정한 것은 아니며 일정한 법적 한계가 있다. 재량권이 이 법적 한계를 넘은 경우에는 그 재량권의 행사는 위법한 것이 된다. 재량권의 한계는 재량권의 일탈 또는 남용을 말한다. 재량권의 한계를 넘은 재량권 행사에는 일의적으로 명확한 법규정의 위반, 사실오인, 평등원칙 위반, 자가구속의 원칙 위반, 비례원칙 위반, 절차 위반, 재량권의 불행사 또는 해태, 목적 위반 등이 있다.</p>
+      </div>
+
+      <!-- 논점 021 -->
+      <div class="card" id="card-021" data-level="main" data-grade="B" data-chapter="ch2" data-title="논점 021. 판단여지">
+        <div class="card-header">
+          <div class="card-title">논점 021. 판단여지</div>
+          <span class="badge badge-b">B급</span>
+        </div>
+        <h4>1. 의의</h4>
+        <p>판단여지란 법률요건에 <input type="text" class="blank-input" data-ans="불확정개념" style="width: 14ch;"><span class="hint">[불확정개념]</span>의 해석에 있어 사법심사가 배제되는 행정청의 전문적인 판단영역을 말한다.</p>
+        
+        <h4>2. 인정여부(재량과의 구분)</h4>
+        <p><span class="structural-bold">(1) 학설:</span> ① 긍정설은 "판단여지는 법원에 의한 법률요건 인식문제, 재량은 입법자에 의한 법률효과 선택문제"로 구분된다고 한다. ② 부정설은 재량과 판단여지 모두 사법심사 배제가 가능하며, 구별실익이 없다고 한다.<br>
+        <span class="structural-bold">(2) 판례:</span> ① 판례는 <input type="text" class="blank-input" data-ans="감정평가시험의 합격기준,감정평가시험 합격기준" style="width: 24ch;"><span class="hint">[감정평가시험의 합격기준]</span>, 공무원임용면접전형, 사법시험출제, 교과서 검정처분 등을 재량의 문제로 보고 있어 구별하지 않는 것으로 보인다. ② 감정평가시험을 실시함에 있어 어떠한 합격기준을 선택할 것인가는 시험실시기관인 행정청의 고유한 정책적 판단에 맡겨진 것으로서 자유재량에 속한다.<br>
+        <span class="structural-bold">(3) 검토:</span> 재량과 판단여지는 그 개념, 필요성, 인정 근거, 내용, 인정기준 및 범위 등에서 차이가 있으므로 양자를 구별하는 것이 타당하다.</p>
+        
+        <h4>3. 인정영역</h4>
+        <p>비대체적 결정의 영역, 구속적 가치평가 영역, 고도의 예측 결정, 정책적 결정 등이 있다.</p>
+        
+        <h4>4. 판단여지의 한계</h4>
+        <p>판단여지는 판단기관의 적법 구성, 절차규정 준수, 정당한 사실관계 판단 여부, 일반원칙 위반 여부 등에 있어서 한계를 지닌다.</p>
+      </div>
+
+      <!-- 논점 022 -->
+      <div class="card" id="card-022" data-level="main" data-grade="A" data-chapter="ch2" data-title="논점 022. 부관">
+        <div class="card-header">
+          <div class="card-title">논점 022. 부관</div>
+          <span class="badge badge-a">A급</span>
+        </div>
+        <h4>1. 부관의 개념</h4>
+        <p>① 부관이란 행정기관에 의하여 <input type="text" class="blank-input" data-ans="주된 행정행위에 부과되는 종된 규율,종된 규율" style="width: 32ch;"><span class="hint">[주된 행정행위에 부과되는 종된 규율]</span>로서, ② 이는 행정의 유연성, 탄력성 보장 등에 기능이 있다.</p>
+      </div>
+
+      <div class="card sub-card" id="card-022-2" data-level="sub" data-grade="A" data-chapter="ch2" data-title="2. 부관의 종류">
+        <div class="card-header">
+          <div class="card-title">2. 부관의 종류</div>
+          <span class="badge badge-a">A급</span>
+        </div>
+        <p><strong>부관의 종류 4가지(조건, 기한, 부담, 철회권의 유보)에 대하여 우측 서술형 창에 작성하시오.</strong></p>
+        <div class="long-answer hint">
+          <span class="structural-bold">(1) 조건</span>은 행정행위의 효력의 발생 또는 소멸을 장래의 불확실한 사실에 의존시키는 부관을 말한다. 조건이 성취되어야 행정행위가 비로소 효력을 발생하는 조건을 정지조건이라 하고, 행정행위가 일단 효력을 발생하고 조건이 성취되면 행정행위가 효력을 상실하는 조건을 해제조건이라 한다.<br>
+          <span class="structural-bold">(2) 기한</span>이란 행정행위의 효력발생.소멸여부를 장래의 확실한 사실에 의존시키는 부관을 말하며 시기와 종기가 있다.<br>
+          <span class="structural-bold">(3) 부담</span>이란 행정행위의 주된 내용에 부가하여 그 행정행위의 상대방에게 작위, 부작위, 급부, 수인 등의 의무를 부과하는 부관을 말한다.<br>
+          <span class="structural-bold">(4) 철회권(변경권)의 유보</span>라 함은 행정행위를 행함에 있어 일정한 경우에는 행정행위를 철회(변경)할 수 있음을 정한 부관을 말한다.
+        </div>
+      </div>
+
+      <div class="card sub-card" id="card-022-3" data-level="sub" data-grade="A" data-chapter="ch2" data-title="3. 부관의 한계">
+        <div class="card-header">
+          <div class="card-title">3. 부관의 한계</div>
+          <span class="badge badge-a">A급</span>
+        </div>
+        <p><strong>부관의 한계 (부관의 위법 여부 판단 기준)에 대하여 우측 서술형 창에 작성하시오.</strong></p>
+        <div class="long-answer hint">
+          <span class="structural-bold">(1) 부관의 가능성:</span> 행정기본법 제17조 제1항에서 "행정청은 처분에 재량이 있는 경우에는 부관을 붙일 수 있다"고 규정하여, 재량행위의 경우 부관 부착이 가능하다. 종래에 기속행위는 부관의 부착이 불가하다고 보았으나, 최근 판례는 기속행위여도 요건충족적 부관에는 부착이 가능하다고 판시한 바 있다. 또한 동법 제17조 제2항에서는 "행정청은 처분에 재량이 없는 경우에는 법률에 근거가 있는 경우에 부관을 붙일 수 있다"고 규정하여 기속행위의 경우에도 근거가 있다면 부관을 붙일 수 있다.<br>
+          <span class="structural-bold">(2) 부관의 내용상 한계:</span> 부관은 행정기본법 제17조 제4항에 따라 ①해당 처분의 목적에 위배되지 아니할 것, ②해당 처분과 실질적인 관련이 있을 것, ③해당 처분의 목적을 달성하기 위하여 필요한 최소한의 범위일 것이라는 요건에 적합하여야 한다.<br>
+          <span class="structural-bold">(3) 시적한계:</span> 행정기본법 제17조 제3항에 따라 법률에 근거가 있는 경우, 당사자의 동의가 있는 경우, 사정이 변경되어 부관을 새로 붙이거나 종전의 부관을 변경하지 아니하면 해당 처분의 목적을 달성할 수 없다고 인정되는 경우에는 사후부관 부착이 가능하다고 봄이 타당하다.
+        </div>
+      </div>
+
+      <div class="card sub-card" id="card-022-4" data-level="sub" data-grade="A" data-chapter="ch2" data-title="4. 독립쟁송가능성">
+        <div class="card-header">
+          <div class="card-title">4. 독립쟁송가능성과 쟁송형식</div>
+          <span class="badge badge-a">A급</span>
+        </div>
+        <p><span class="structural-bold">(1) 문제점:</span> 부관이 위법한 경우 주된 행정행위와 분리하여 위법한 부관만을 행정쟁송의 대상으로 할 수 있는지와 소송유형의 형태가 어떠한지 문제된다.</p>
+        <p><span class="structural-bold">(2) 학설:</span> ① <input type="text" class="blank-input" data-ans="부담만 가능설,부담만가능설" style="width: 16ch;"><span class="hint">[부담만 가능설]</span>의 경우에는 부담만은 독립하여 행정쟁송의 대상이 될 수 있지만(<input type="text" class="blank-input" data-ans="진정일부취소소송 또는 부진정일부취소소송,진정일부취소소송,부진정일부취소소송" style="width: 32ch;"><span class="hint">[진정일부취소소송 또는 부진정일부취소소송]</span>), 나머지 부관은 부관부 행정행위 전체를 다투는 소송으로 해결해야 한다고 본다.<br>
+        ② <input type="text" class="blank-input" data-ans="분리가능성 기준설" style="width: 18ch;"><span class="hint">[분리가능성 기준설]</span>은 부관이 주된 행정행위로부터 분리 가능한 경우 독립쟁송이 가능하다고 보며, 분리 가능한 부담의 경우에는 진정일부취소소송과 부진정일부취소소송이 가능하고, 부담 이외의 부관에 대하여는 부진정일부취소소송만이 가능하다고 본다.<br>
+        ③ <input type="text" class="blank-input" data-ans="전면 긍정설,전면긍정설" style="width: 14ch;"><span class="hint">[전면 긍정설]</span>은 소의 이익이 있는 한 모든 부관에 대하여 독립쟁송이 가능하고, 부담의 경우에는 진정일부취소소송과 부진정일부취소소송이 가능하고, 부담 이외의 부관에 대하여는 부진정일부취소소송만이 가능하다고 본다.</p>
+        <p><span class="structural-bold">(3) 판례:</span> 대법원은 <input type="text" class="blank-input" data-ans="부담" style="width: 10ch;"><span class="hint">[부담]</span>만이 독립하여 행정소송의 대상이 될 수 있다고 하였으며, 기타 부관의 경우 전체의 취소를 구하는 것만 인정하고 있다.<br>
+        <input type="text" class="blank-input" style="width:36ch;" data-ans="어업면허시 부속선 사용을 금지하는 부관 사건,어업면허시 부속선 사용 금지"><span class="hint">[어업면허시 부속선 사용을 금지하는 부관 사건]</span>에서 위법한 부관을 삭제하여 달라는 내용의 변경신청을 거부한 처분에 대한 취소소송을 인정하여 권리구제의 길을 열어 놓고 있다. 즉, 부관이 위법한 경우 신청인이 부관부행정행위의 변경을 청구하고, 행정청이 이를 거부한 경우 동 거부처분의 취소를 구하는 소송을 제기할 수 있는 것으로 본다.</p>
+        <p><span class="structural-bold">(4) 검토:</span> 위법한 행정작용의 통제를 위하여 가능한 한 쟁송가능성을 넓혀야 하는 바, 전면긍정설이 타당하다고 여겨진다.</p>
+      </div>
+
+      <div class="card sub-card" id="card-022-5" data-level="sub" data-grade="A" data-chapter="ch2" data-title="5. 독립취소가능성">
+        <div class="card-header">
+          <div class="card-title">5. 독립취소가능성</div>
+          <span class="badge badge-a">A급</span>
+        </div>
+        <p><span class="structural-bold">(1) 문제점:</span> 부관만 독립하여 쟁송이 가능하다면, 부관만이 위법한 경우에 독립하여 취소판결이 가능한지 견해가 대립한다.</p>
+        <p><span class="structural-bold">(2) 학설:</span> ① <input type="text" class="blank-input" data-ans="기속행위의 경우,기속행위" style="width: 16ch;"><span class="hint">[기속행위의 경우]</span> 법률이 허용하는 경우가 아니면 원칙적으로 부관을 붙일 수 없는바, 기속행위에 부가된 부관은 당연히 취소가 가능하다.<br>
+        &lt;재량행위의 경우&gt; ② 모든 부관에 있어 부관이 위법한 경우에는 부관만의 취소가 가능하다고 보는 견해(긍정설), ③ 행정청의 <input type="text" class="blank-input" data-ans="재량권행사를 제한,재량권 행사 제한" style="width: 18ch;"><span class="hint">[재량권행사를 제한]</span>하게 되는 바 독립취소가 불가하다는 견해(부정설), ④ 부관이 주된 행정행위의 <input type="text" class="blank-input" data-ans="본질적인 부분,본질적 부분" style="width: 16ch;"><span class="hint">[본질적인 부분]</span>인지 여부에 따라 판단하는 견해가 대립된다(제한적 긍정설).</p>
+        <p><span class="structural-bold">(3) 판례:</span> 판례는 부관이 본질적인 부분인 경우 독립쟁송가능성 자체를 인정하지 않으므로 독립취소가능성의 문제 되지 않는다. 판례에 의하면 독립쟁송가능성이 인정되는 경우(부담의 경우) 항상 독립취소가 가능하다.</p>
+        <p><span class="structural-bold">(4) 검토:</span> 생각건대 국민의 권익구제와 행정목적의 실현을 적절히 조절하는 제한적 긍정설이 타당하다.</p>
+      </div>
+
+      <!-- =======================================================================
+           문항 데이터 영역 (논점 023 ~ 041)
+           ======================================================================= -->
+
+      <!-- 논점 023 -->
+      <div class="card" id="card-023" data-level="main" data-grade="A" data-chapter="ch2" data-title="논점 023. 행정행위의 효력">
+        <div class="card-header">
+          <div class="card-title">논점 023. 행정행위의 효력</div>
+          <span class="badge badge-a">A급</span>
+        </div>
+        <h4>I. 공정력과 구성요건적 효력</h4>
+        <p><span class="structural-bold">1. 공정력과 구성요건적 효력의 의의</span><br>
+        공정력이란 행정행위에 하자가 있다고 하더라도 권한을 가진 기관에 의해 취소될 때까지 그 효력을 부정할 수 없는 구속력을 말한다. 구성요건적 효력이란 유효한 행정행위의 존재가 다른 행정청이나 법원의 결정에 영향을 미치는 효력을 말한다.</p>
+        
+        <p><span class="structural-bold">2. 공정력과 구성요건적 효력과의 구별여부</span><br>
+        ①비구별설은 공정력을 행정행위의 상대방 및 이해관계인 뿐만 아니라 타 국가기관에도 미치는 효력이라고 이해하는 견해로서 종래의 통설의 입장이다. ②구별설은 공정력은 상대방 또는 이해관계인에 대한 구속력이나(행정의 안정성과 실효성을 확보), 구성요건적 효력은 제3의 국가기관에 대한 구속력으로 구분한다(국가기관 상호간의 권한존중). ③ 생각건대, 양자는 근거와 내용을 달리하므로 구별하는 것이 타당하다.</p>
+
+        <p><span class="structural-bold">3. 공정력의 근거</span><br>
+        <span class="structural-bold">(1) 이론적 근거:</span> 이론적 근거에 관해 견해의 대립이 있으나, 그 행위의 신뢰에 모든 사람이 법적 안정성의 이익을 갖는다는 점으로 법적안정설이 타당하다(통설). 공정력은 행정의 원활한 수행, 행정법관계의 안정성(행정의 안정성과 행정행위의 상대방이나 제3자의 신뢰보호)을 보장하기 위하여 필요하다.<br>
+        <span class="structural-bold">(2) 실정법적 근거:</span> <input type="text" class="blank-input" data-ans="행정기본법 15조,행정기본법 제15조" style="width: 16ch;"><span class="hint">[행정기본법 15조]</span>에서 "처분은 권한이 있는 기관이 취소 또는 철회하거나 기간의 경과 등으로 소멸되기 전까지는 유효한 것으로 통용된다. 다만, 무효인 처분은 처음부터 그 효력이 발생하지 아니한다."고 규정하고 있다.</p>
+
+        <p><span class="structural-bold">4. 구성요건적 효력의 근거</span><br>
+        구성요건적 효력을 직접 인정하는 법규정은 없다. 그러나 국가기관 상호간의 권한분배에서 그 근거를 찾을 수 있다.</p>
+
+        <h4>II. 존속력</h4>
+        <p>①형식적 존속력(불가쟁력)이란 행정행위에 대한 쟁송제기기간이 경과한 경우에는 더 이상 그에 대하여 다툴 수 없게 하는 행정행위의 효력을 말한다. ② 실질적 존속력(불가변력)은 행정행위를 한 행정청이 당해 행정행위를 직권으로 취소 또는 변경할 수 없게 하는 힘을 말한다.</p>
+
+        <h4>III. 집행력</h4>
+        <p>집행력이란 행정행위에 의하여 부과된 행정상 의무를 상대방이 이행하지 않은 경우에 행정청이 스스로의 강제력을 발동하여 그 의무를 실현시키는 힘을 말한다.</p>
+      </div>
+
+      <!-- 논점 024 -->
+      <div class="card" id="card-024" data-level="main" data-grade="A" data-chapter="ch2" data-title="논점 024. 선결문제">
+        <div class="card-header">
+          <div class="card-title">논점 024. 선결문제</div>
+          <span class="badge badge-a">A급</span>
+        </div>
+        <h4>1. 문제점</h4>
+        <p>구성요건적 효력이란 유효한 행정행위의 존재가 다른 행정청이나 법원의 결정에 영향을 미치는 효력을 말한다. 구성요건적 효력이 민사소송이나 형사소송에서의 선결문제에 미치는지 여부가 문제된다. 즉, 행정행위의 위법 여부나 효력 유무 또는 효력 부인이 민사소송이나 형사소송에서 선결문제로 되는 경우에 구성요건적 효력 때문에 민사소송이나 형사소송의 수소법원이 당해 선결문제를 심리 판단할 수 없게 되는가 하는 문제이다.</p>
+
+        <h4>2. 선결문제의 의의</h4>
+        <p>선결문제란 행정행위의 위법 여부 또는 효력 유무를 다른 특정 사건의 재판에 있어서( <input type="text" class="blank-input" data-ans="먼저 해결해야 하는 경우" style="width: 24ch;"><span class="hint">[먼저 해결해야 하는 경우]</span> )를 말한다. 그리고 '효력 유무'란 유효·무효·실효를 말하고, '존재 여부'란 존재·부존재를 말한다. 그런데, 선결문제를 규정하는 행정소송법 제11조 제1항은 선결문제의 일부에 관해서만 규정하고 있는 바 나머지 사항은 학설과 판례에서 해결하여야 한다.</p>
+
+        <h4>3. 민사소송과 선결문제</h4>
+        <p><span class="structural-bold">(1) 행정행위의 위법 여부가 쟁점인 경우</span><br>
+        <span class="structural-bold">1) 문제점:</span> 행정행위의 효력을 상실시키는 것이 아니라 행정행위의 위법성을 확인하는 것이 민사소송에서 선결문제가 된 경우에 민사법원은 행정행위의 위법을 확인할 수 있는지에 관하여 견해가 대립되고 있다.<br>
+        <span class="structural-bold">2) 학설:</span> ①부정설은 구성요건적 효력이 적법성의 추정이므로 행정행위가 취소되지 않는 한 구성요건적 효력으로 인해 다른 국가기관은 위법성을 판단하지 못한다고 보며( <input type="text" class="blank-input" data-ans="행정기본법 11조 제1항,행정소송법 제11조 제1항" style="width: 22ch;"><span class="hint">[행정기본법 11조 제1항]</span> )을 제한적으로 해석한다. ②긍정설은 구성요건적 효력이 행정행위의 적법성을 추정하는 효력은 아니며, 행정행위의 적법 또는 위법을 묻지 않고 잠정적으로 행정행위를 유효한 것으로 보는 힘이므로 행정행위의 효력 자체를 상실시키는 것이 아니라 행정행위의 위법성을 확인하는데 그치는 것은 구성요건적 효력에 반하는 것이 아니라고 한다. 또한 행정소송법 제11조 제1항을( <input type="text" class="blank-input" data-ans="예시적으로 해석한다" style="width: 20ch;"><span class="hint">[예시적으로 해석한다]</span> ).<br>
+        <span class="structural-bold">3) 판례:</span> 판례는 위법한 대집행처분에 의한 국가배상청구소송에서 “( <input type="text" class="blank-input" data-ans="계고처분" style="width: 12ch;"><span class="hint">[계고처분]</span> )이 위법임을 이유로 손해배상을 청구한 사안에서 미리 행정처분의 취소판결이 있어야만 손해배상청구를 할 수 있는 것은 아니다." 라고 하여 긍정설의 입장이다.<br>
+        <span class="structural-bold">4) 검토:</span> 생각건대, 구성요건효력의 본질은 적법성 추정이 아니라 절차적·잠정적 통용력에 불과한 것으로 봄이 타당한바, 위법성을 판단할 수 있다는 긍정설이 타당하다고 본다.</p>
+
+        <p><span class="structural-bold">(2) 행정행위의 효력 유무가 쟁점인 경우</span><br>
+        ①부정설(통설 및 판례)은 구성요건적 효력이 미치므로 민사법원이 행정행위의 효력을 부인할 수 없다고 하며, 이러한 입장이 타당하다. ②대법원은 위법한 조세처분에 의한 과오납조세( <input type="text" class="blank-input" data-ans="부당이득반환청구소송" style="width: 22ch;"><span class="hint">[부당이득반환청구소송]</span> )에서 "과세처분의 하자가 취소할 수 있는 정도에 불과할 때에는 과세관청이 이를 스스로 취소하거나 항고소송 절차에 의하여 취소되지 않는 한 그로 인한 조세의 납부가 부당이득이 된다고 할 수 없다(대판 70다 1439)"고 하여 부정설의 입장을 취하였다.</p>
+
+        <h4>4. 형사사건과 선결문제</h4>
+        <p><span class="structural-bold">(1) 행정행위의 위법 여부가 쟁점인 경우</span><br>
+        <span class="structural-bold">1) 학설:</span> ①부정설은 적법성의 추정설의 입장으로, 행정행위가 취소되지 않는 한 구성요건적 효력으로 인해 다른 국가기관은 구속되며, 행정소송법 제11조 제1항을 제한적으로 해석하여 형사법원은 행정행위의 위법성에 대한 판단권이 없다고 본다. ②긍정설은 행정소송법 제11조 제1항 예시적 해석하며, 쟁송기간을 놓쳐 취소소송의 기회를 상실한 국민에게도 형사소송 단계에서 다시 이를 다툴 수 있는 기회를 부여함으로써 방어권 보장에 만전을 기할 수 있음을 논거로 한다.<br>
+        <span class="structural-bold">2) 판례:</span> 대법원은 &lt;토지의 형질변경한 자도 아닌자에 대한( <input type="text" class="blank-input" data-ans="원상복구" style="width: 12ch;"><span class="hint">[원상복구]</span> )의 시정명령에 관한 사건&gt;에서 그 시정명령이 위법하다고 할 것이고, 그 처분이 당연무효가 아니라 하더라도 그것이 위법한 처분으로 인정되는 한 구도시계획법상 위반죄가 성립될 수 없다고 판시한 바 있다.<br>
+        <span class="structural-bold">3) 검토:</span> 생각건대, 국민의 권리구제 측면에서 행정행위의 위법성을 확인하는 것은 행정행위의 효력을 부인하는 것은 아니므로, 구성요건적 효력에 반하지 않는다고 보는 것이 타당하다고 본다.</p>
+
+        <p><span class="structural-bold">(2) 행정행위의 효력 유무가 쟁점인 경우</span><br>
+        <span class="structural-bold">1) 학설:</span> ①형사법원에도 구성요건적 효력이 미치므로 형사법원은 행정행위의 효력을 부인할 수 없다는 부정설과 ②인권보장을 위하여 형사법원은 행정행위의 효력을 부인할 수 있어야 한다는 긍정설이 대립한다.<br>
+        <span class="structural-bold">2) 판례:</span> 판례는 ( <input type="text" class="blank-input" data-ans="미성년자" style="width: 12ch;"><span class="hint">[미성년자]</span> )에 대한 운전면허 처분에 대한 무면허 운전죄사건에서 형사법원이 행정행위의 효력을 부인할 수 없다고 하여 부정설 입장이다.<br>
+        <span class="structural-bold">3) 검토:</span> 긍정설을 취하는 경우 생각건대, 인권보장을 위하여 형사법원이 위법한 행정행위의 효력을 부인하고 범죄의 성립을 부인할 수 있는 것으로 보는 것이 타당하므로 긍정설이 타당시 된다. 부정설을 취하는 경우 형사법원이 처분의 효력을 부인할 수 있으므로 특별한 법적 근거가 필요하므로, 그런 법적 근거가 없는 현행법의 해석상으로는 부정설을 취할 수 밖에 없다.</p>
+      </div>
+
+      <!-- 논점 025 -->
+      <div class="card" id="card-025" data-level="main" data-grade="C" data-chapter="ch2" data-title="논점 025. 행정행위의 성립·효력·적법요건">
+        <div class="card-header">
+          <div class="card-title">논점 025. 행정행위의 성립요건·효력요건·적법요건</div>
+          <span class="badge badge-c">C급</span>
+        </div>
+        <h4>I. 개설</h4>
+        <p>행정행위의 요건을 성립요건, 효력발생요건, 적법요건 및 유효요건으로 구분할 수 있다. 이러한 요건을 불비한 행정행위를 ( <input type="text" class="blank-input" data-ans="흠 있는 행정행위" style="width: 18ch;"><span class="hint">[흠 있는 행정행위]</span> )라고 한다. 행정행위에 흠이 있는 경우에 행정행위는 완전한 법적 효력을 발생할 수 없게 된다.</p>
+
+        <h4>II. 행정행위의 성립요건</h4>
+        <p>행정행위의 성립요건이라 함은 행정행위가 성립하여 존재하기 위한 최소한의 요건을 말한다. 행정행위가 성립하기 위하여는 어떤 행정기관에 의해 행정의사가 내부적으로 결정되고(내부적 성립), 외부적으로 표시되어야 한다(외부적 성립). 이러한 행정행위의 성립요건을 결여하면 행정행위는 부존재하는 것이 되며 부존재확인청구소송의 대상이 된다.</p>
+
+        <h4>III. 행정행위의 효력발생요건</h4>
+        <p>행정행위의 효력발생요건이라 함은 행정행위가 상대방에 대하여 효력을 발생하기 위한 요건을 말한다. 행정행위는 상대방에게 통지되어 도달되어야 효력을 발생한다. 제3자에 대한 통지는 효력발생요건은 아니다. 통지의 방식으로는 송달과 공고 또는 고시가 있다. 도달이라 함은 상대방이 알 수 있는 상태에 주어진 것을 말하고, 상대방이 현실적으로 수령하여 알았을 것을 의미하지 않는다. 효력발생요건이 충족되지 않으면, 해당 행정행위는 상대방에 대하여 효력을 발생하지 못한다.</p>
+
+        <h4>IV. 적법요건</h4>
+        <p><span class="structural-bold">1. 의의:</span> 행정행위가 행해짐에 있어 법에 의해 요구되는 요건을 적법요건이라 한다.<br>
+        <span class="structural-bold">2. 요건</span><br>
+        <span class="structural-bold">(1) 주체에 의한 요건:</span> 행정행위는 당해 행정행위를 발할 수 있는 권한을 가진 자에 의해 행해져야 한다. ①( <input type="text" class="blank-input" data-ans="정당한 권한" style="width: 14ch;"><span class="hint">[정당한 권한]</span> )을 가진 자가 ②권한의 범위안에서 ③정상적인 의사에 기하여 행한 행위여야 한다.<br>
+        <span class="structural-bold">(2) 내용에 관한 요건:</span> 행정행위는 그 내용에 있어 ( <input type="text" class="blank-input" data-ans="적법" style="width: 10ch;"><span class="hint">[적법]</span> )하고, 공익에 적합(타당)하여야 한다. 또한 법률상이나 사실상으로 실현가능하고 관계인이 인식할 수 있을 정도로 명확하여야 한다.<br>
+        <span class="structural-bold">(3) 절차에 관한 요건:</span> 행정행위를 행함에 있어 일정한 절차가 요구되는 경우에는 그 절차를 거쳐야 한다. 절차상 하자의 유형으로는 법령상 요구되는 상대방의 협력이나 관계 행정청의 협력의 결여, 필요적인 처분의 사전통지나, 의견청취 절차의 결여, 이유제시의 결여, 송달방법 등의 하자 등을 볼 수 있다. 말하자면 개별법률 또는 행정절차법에서 행정절차상 요구되는 각종 절차의 결여가 ( <input type="text" class="blank-input" data-ans="절차상 하자" style="width: 14ch;"><span class="hint">[절차상 하자]</span> )에 해당한다.<br>
+        <span class="structural-bold">(4) 형식에 관한 요건:</span> 행정청이 처분을 하는 때에는 다른 법령 등에 특별한 규정이 있는 경우를 제외하고는 ( <input type="text" class="blank-input" data-ans="문서" style="width: 10ch;"><span class="hint">[문서]</span> )로 하여야 단다, 전자문서로 하는 경우에는 당사자 등의 동의가 있어야 한다. 다만 신속을 요하거나 사안이 경미한 경우에는 구술 기타 방법으로 할 수 있으며 이 경우 당사자의 요청이 있는 때에는 지체없이 처분에 관한 문서를 주어야 한다(행정절차법 제24조 제1항).</p>
+
+        <p><span class="structural-bold">3. 적법요건을 결여한 행정행위의 효력:</span> 행정행위가 적법요건을 충족시키지 못한 경우에는 위법하다. 적법요건을 충족하지 못한 행정행위는 흠 있는 행정행위가 되며 흠 있는 행정행위의 효력은 후술하는 바와 같이 부존재, 무효 및 취소할 수 있지만 취소되기 전까지는 유효한 것으로 나누어진다.</p>
+
+        <h4>V. 유효요건</h4>
+        <p>유효요건이라 함은 위법한 행정행위가 무효가 되지 않고 효력을 갖기 위한 요건을 말한다. 행정행위의 유효요건은 행정행위의 무효요건에 대립되는 것으로 행정행위의 위법이 중대하고 명백하지 않을 것이다. 행정행위는 위법하더라도 그 위법이 중대하고 명백하여 무효가 되지 않는 한 공정력에 의해 권한 있는 기관에 의해 취소되지 않는 한 유효하다.</p>
+      </div>
+
+      <!-- 논점 026 -->
+      <div class="card" id="card-026" data-level="main" data-grade="C" data-chapter="ch2" data-title="논점 026. 행정행위 하자의 예">
+        <div class="card-header">
+          <div class="card-title">논점 026. 행정행위 하자의 예</div>
+          <span class="badge badge-c">C급</span>
+        </div>
+        <h4>1. 주체의 하자</h4>
+        <p><span class="structural-bold">1. 정당한 권한을 가진 행정기관이 아닌자의 행위</span><br>
+        ①대리권이 없는 자가 대리자로서 행한 행위는 원칙상 무효이며, ②( <input type="text" class="blank-input" data-ans="합의제기관" style="width: 14ch;"><span class="hint">[합의제기관]</span> )의 행위에 적법한 소집이 없거나, 의사 또는 의결정족수가 미달되었거나, 결격자가 참가한 경우 등 구성에 중대한 흠이 있는 합의제기관의 행위는 원칙상 무효가 된다. ③ 법령상 다른 기관의 협력이 필요한 경우에 다른 기관의 협력을 결한 행위는 어떠한 효력을 갖는지 문제된다. 다른 기관의 협력에는 다른 기관의 의결 승인 동의, 협의, 심의, 자문 등이 있다. 다른 기관의 협력 중 다른 기관의 의결이나 승인 또는 동의 등과 같이 행정청의 행정결정이 다른 기관의 의사결정에 기속되는 경우와 그렇지 않은 경우를 구별하여 하자의 효과를 논하여야 할 것이다. 전자의 경우에 있어서는 주체의 하자에 해당하며 원칙상 무효원인이 되지만, 후자의 경우에는 절차의 하자로 보아야 하고 법률에 의해 관계인의 권리 이익을 보호하기 위하여 인정되는 때에 그 협력의 결여는 무효원인이 되지만, 이 경우를 제외하고는 원칙상 취소원인에 불과하다고 보아야 할 것이다.</p>
+        <p><span class="structural-bold">2. 행정기관의 권한 외의 행위: 내부위임과 연결</span></p>
+
+        <h4>II. 내용의 하자</h4>
+        <p><span class="structural-bold">1. 행정행위의 내용의 법 위반</span><br>
+        행정행위의 내용은 법의 일반원칙 및 헌법을 포함하여 모든 법에 위반하여서는 안되며, 법에 위반하면 위법한 행정행위가 된다. 법에 위반한 행정행위는 무효와 취소의 구별기준에 따라 무효 또는 취소할 수 있는 행정행위가 된다. ( <input type="text" class="blank-input" data-ans="법률유보의 원칙,법률유보" style="width: 18ch;"><span class="hint">[법률유보의 원칙]</span> )에 따라 행정행위에는 법적 근거가 있어야 한다. 법적 근거 없이 행해진 행정행위는 원칙상 무효이다. 또한 ( <input type="text" class="blank-input" data-ans="법률우위의 원칙,법률우위" style="width: 18ch;"><span class="hint">[법률우위의 원칙]</span> )에 따라 헌법, 법률, 법규명령, 불문법인 일반원칙 등에 반하여서는 안 된다. 그리고 기속행위와 재량행위로 구분할 경우 재량행위는 일탈 남용, 해태가 없어야 할 것이다.</p>
+        <p><span class="structural-bold">2. 위헌인 법령에 근거한 처분(이하 후술)</span><br>
+        <span class="structural-bold">3. 행정행위의 내용의 공익 위반</span><br>
+        <span class="structural-bold">4. 행정행위 내용의 사실상 또는 법률상 실현 불가능, 내용의 불명확 등</span></p>
+
+        <h4>III. 절차의 하자</h4>
+        <p>일반적 기준으로서, 절차에 정한 취지목적이 상호 대립하는 당사자 사이의 이해를 조정함을 목적으로 하는 경우 또는 이해관계인의 권리·이익의 보호를 목적으로 하는 경우, 그 절차를 결하는 때에는 그 절차에 중대 명백한 하자가 있는 것이 되어 무효의 원인이 되며, 절차의 취지 목적이 단순히 행정의 적정·원활한 운영을 위하는 경우 등 행정상의 편의에 있을 때에는 그 절차를 결하는 행위는 반드시 무효가 되지 않는다고 보는 것이 일반적 추세라 할 수 있다.</p>
+        <p><span class="structural-bold">1. 상대방의 신청 또는 동의를 결한 행위:</span> 법령에 일정한 행정행위에 대하여 상대방의 신청 또는 동의를 필요적 절차로 규정하고 있는 경우에 상대방의 신청 또는 동의를 결하는 행위는 무효라고 볼 것이다.</p>
+        <p><span class="structural-bold">2. 필요한 공고 또는 통지를 결하는 행위:</span> 공고 없이 행한 행정행위, 수용할 토지세목의 공고 또는 통지없이 행한 토지수용재결 등 자기이익의 보호를 위한 의견제출의 기회를 주지 않고 행한 행정행위는 무효이다. 다만 공고 또는 통지 그 자체를 결여한 것이 아니라 그 내용에 단순한 하자가 있을뿐인 때에는 당연무효는 아니다.</p>
+        <p><span class="structural-bold">3. 필요한 이해관계인의 입회 또는 협의를 결한 행위:</span> 이해관계인의 이익의 보호 또는 조정을 목적으로 한 이해관계인의 입회 또는 협의 등을 결한 행정행위는 원칙적으로 무효라고 보아야 할 것이다. 예컨대, 사전에 토지소유자 또는 관계인과 협의를 거치지 않고 행한 토지수용위원회의 재결이 그에 해당한다.</p>
+        <p><span class="structural-bold">4. 필요한 청문 또는 의견진술의 기회를 주지 아니한 행위:</span> 행정절차법은 권리를 제한하거나 의무를 부과하는 처분을 행함에 있어서는 상대방의 의견진술을 듣도록 하고 있고 그 이외에 개별법에서 행정처분을 행하기 전에 청문 또는 의견진술의 기회를 주도록 하고 있는 경우가 있다. 법에 의해 요구되는 청문 또는 의견진술의 기회를 주지 않고 한 행정행위는 원칙적으로 무효라고 보는 것이 일반적인 견해이다. 이에 대하여 일부 견해는 행정절차는 실체법상의 목적을 합리적으로 달성하고자 하는 수단에 지나지 않으므로 취소할 수 있는데 불과하다고 하고, 또 다른 견해는 청문절차의 결여는 무효 또는 취소원인이 될 수 있다고 본다. 청문절차의 하자가 행정행위의 취소사유인지 무효사유인지 여부는 중대명백설에 따라 청문절차 하자의 정도, 행정행위의 성질 내용 등에 따라 개별적 구체적으로 판단하여야 할 것이다. 즉, 그 하자가 당사자등의 방어권행사의 기회를 부당하게 박탈하고 충분한 권리행사를 방해한 경우 그 정도가 중대하고 명백한 경우에는 행정행위의 하자의 일반론에 따라 당해 행정행위는 무효로 될 것이나, 그 정도에 이르지 않은 경우는 취소할 수 있다고 할 것이다.</p>
+        <p><span class="structural-bold">5. 판례의 입장:</span> 판례는 원칙상 절차의 하자를 중요한 하자로 보지 않으면서 취소 할 수 있는 하자로 보지만, 환경영향평가절차나 과세전적부심사절차를 거치지 않은 하자는 원칙상 중대명백한 하자로 보고 당연무효로 본다.</p>
+
+        <h4>IV. 형식에 관한 하자</h4>
+        <p>원칙적으로 무효</p>
+      </div>
+
+      <!-- 논점 027 -->
+      <div class="card" id="card-027" data-level="main" data-grade="C" data-chapter="ch2" data-title="논점 027. 행정행위의 하자">
+        <div class="card-header">
+          <div class="card-title">논점 027. 행정행위의 하자(무효와 취소의 구별)</div>
+          <span class="badge badge-c">C급</span>
+        </div>
+        <h4>1. 개설</h4>
+        <p>행정행위가 적법하게 성립하고 효력을 발생하기 위해서는 주체, 절차, 형식, 내용 등에 관한 요건을 갖추어야 한다. 행정행위가 그들 법적 요건을 충족하지 못할 때 그 행정행위는 위법한 것이 된다. 그리고 그러한 위법한 행위를 하자 있는 행위로 부를 수 있다. 위법 또는 부당과 같이 행정행위의 효력의 발생을 방해하는 사정을 행정행위의 하자(흠)라 한다. 위법이라 함은 법의 위반을 의미한다. 부당이라 함은 법을 위반함이 없이 공익 또는 합목적성의 판단을 잘못한 것을 말한다. 행정기관이 재량권의 한계를 넘지 않는 한도 내에서 재량권의 행사를 그르친 행정행위가 부당한 행정행위가 된다(행정기관이 재량을 그르치게 행사하였으나 법이 정한 한계를 벗어나지 않은 경우).</p>
+
+        <h4>II. 행정행위의 부존재</h4>
+        <p>행정행위라고 볼 수 있는 외관이 존재하지 않는 경우를 말한다. 행정행위가 성립요건을 충족하지 못한 경우 등에 있어서 행정행위의 부존재를 인정할 수 있다.</p>
+
+        <h4>III. 행정행위의 무효와 취소</h4>
+        <p><span class="structural-bold">1. 무효 및 취소의 의의</span><br>
+        행정행위의 무효라 함은 행정행위가 외관상 성립은 하였으나 그 하자의 흠으로 인하여, 행정행위가 애초부터 아무런 효력을 발생하지 않는 경우를 말한다. 즉, 무효란 외관상 행정행위로서 존재하나 하자가 중대하고 명백하여 처음부터 전혀 법적 효과를 발생하지 않는 것을 말한다. 행정행위가 무효인 경우에는 누구든지 그 효력을 부인할 수 있다. 취소란 행정행위의 성립상의 하자가 있음에도 불구하고, 권한 있는 행정기관이 취소하기 전까지 유효한 행정행위로 통용되는 행위이다.</p>
+
+        <p><span class="structural-bold">2. 무효와 취소의 구별</span><br>
+        <span class="structural-bold">(1) 구별 실익:</span> 무효와 취소는 쟁송의 형태, 효력, 제소기간 등에 있어서 구별 실익이 있다.<br>
+        <span class="structural-bold">(2) 구별기준</span><br>
+        <span class="structural-bold">1) 학설:</span> ①중대한 하자만 있으면 무효라는 중대설, ②하자의 중대성은 항상 무효의 요소로 하되 하자의 명백성은 구체적인 사안에 있어서 이익형량에 따라 보충적으로 적용하자는 명백성 보충성설(명백성 보충요건설), ③하자가 내용상 중대하고 ( <input type="text" class="blank-input" data-ans="일반인" style="width: 10ch;"><span class="hint">[일반인]</span> )을 기준으로 외관상 일견 명백한 경우에만 무효라는 ( <input type="text" class="blank-input" data-ans="중대명백설" style="width: 14ch;"><span class="hint">[중대명백설]</span> ), ④중대명백설 중 명백성의 요건을 완화하여 공무원의 조사에 의해 명백성을 판단하는 조사의무설, ⑤ 행정행위의 성질과 법적 안정성 및 제3자의 이해관계 등을 고려하여 구체적인 사안마다 판단하여야 한다는 구체적가치형량설이 대립한다.<br>
+        <span class="structural-bold">2) 판례:</span> &lt;대법원&gt;은 행정처분이 당연무효이기 위해서는 그 하자가 ( <input type="text" class="blank-input" data-ans="적법요건의 중요한 부분을 위반한 중대한 것" style="width: 26ch;"><span class="hint">[적법요건의 중요한 부분을 위반한 중대한 것]</span> )이고 ( <input type="text" class="blank-input" data-ans="일반인의 관점에서 외관상 명백한 것" style="width: 22ch;"><span class="hint">[일반인의 관점에서 외관상 명백한 것]</span> )이라 판시한 바 있다.<br>
+        <span class="structural-bold">3) 검토:</span> 생각건대, 무효와 취소의 구별은 행정 목적의 실현 내지 행정법 관계의 안정 요청과 개인의 권리구제요청을 어떻게 조화할 것인가의 문제라고 볼 때 양자를 조화하는 중대명백설이 타당하다. 결국 법적 안정성과 개인의 권리구제 측면에서 중대명백설이 타당하다고 본다.</p>
+      </div>
+
+      <!-- 논점 028 -->
+      <div class="card" id="card-028" data-level="main" data-grade="C" data-chapter="ch2" data-title="논점 028. 위헌인 법령에 근거한 처분">
+        <div class="card-header">
+          <div class="card-title">논점 028. 위헌인 법령에 근거한 처분의 효력 및 집행</div>
+          <span class="badge badge-c">C급</span>
+        </div>
+        <h4>1. 위헌·위법인 법령에 근거한 처분의 효력</h4>
+        <p>대법원은 무효와 취소의 구별에 관한 학설 중 중대명백설에 입각하여 위헌·위법이 있기 전에 위헌·위법인 법령에 근거하여 발하여진 행정처분은 특별한 사정이 없는 한 ( <input type="text" class="blank-input" data-ans="취소" style="width: 10ch;"><span class="hint">[취소]</span> )할 수 있는 행위에 불과하다고 보고 있다.</p>
+      </div>
+
+      <!-- 논점 029 -->
+      <div class="card" id="card-029" data-level="main" data-grade="A" data-chapter="ch2" data-title="논점 029. 하자승계">
+        <div class="card-header">
+          <div class="card-title">논점 029. 하자승계</div>
+          <span class="badge badge-a">A급</span>
+        </div>
+        <h4>1. 의의 및 인정 필요성</h4>
+        <p>하자승계는 행정이 여러 단계의 행정행위를 거쳐 행해지는 경우에 선행 행정행위의 위법을 이유로 적법한 후행 행정행위의 위법을 주장할 수 있는 것을 말한다. 행정관계의 안정성과 행정의 실효성을 위하여 선행행위의 위법을 후행행위에서 다툴 수 없음이 원칙이나 국민의 재판을 받을 권리를 보장하기 위하여 하자승계를 인정할 필요가 있다.</p>
+
+        <h4>2. 전제 요건</h4>
+        <p>하자승계가 논의되기 위해서는 ①( <input type="text" class="blank-input" data-ans="선행행위와 후행행위 모두 처분일 것,선생행위와 후행행위 모두 처분일 것" style="width: 24ch;"><span class="hint">[선행행위와 후행행위 모두 처분일 것]</span> ) ②선행행위는 취소사유에 해당하는 하자가 존재할 것(취소사유의 위법성), ③( <input type="text" class="blank-input" data-ans="후행행위는 고유한 하자가 없을 것" style="width: 22ch;"><span class="hint">[후행행위는 고유한 하자가 없을 것]</span> )(적법성), ④선행행위는 ( <input type="text" class="blank-input" data-ans="불가쟁력" style="width: 14ch;"><span class="hint">[불가쟁력]</span> )이 발생하여야 한다.</p>
+
+        <h4>3. 하자승계 해결논의</h4>
+        <p><span class="structural-bold">(1) 학설:</span> ① 전통적 견해(하자승계론)는 일련의 절차에서 ( <input type="text" class="blank-input" data-ans="하나의 법률효과" style="width: 18ch;"><span class="hint">[하나의 법률효과]</span> )를 목적으로 하는 경우에 하자승계를 긍정하나, ②새로운 견해(구속력론)는 구속력이 미치는 범위를 대인적(동일한 수범자), 사물적(동일한 목적), 시간적 한계(동일한 사실 상태, 법적 상태)와 추가적으로 예측 가능성 및 수인 가능성을 고려하고 있다.<br>
+        <span class="structural-bold">(2) 판례:</span> 판례는 기본적으로 선·후 행정행위가 결합하여 하나의 법적효과를 달성 시키는지 여부를 기준으로 결정한다. 다만, 예외적으로 예측 가능성 및 수인 가능성 등을 고려하여 판시한 경우도 있다.<br>
+        <span class="structural-bold">(3) 검토:</span> 생각건대, 행정법 관계 안정성, 행정의 실효성 보장과 국민의 재판청구권의 갈등관계를 어떻게 조화시킬 것인가에 대한 논의이니만큼 구체적 사안에서 양자 요청을 적절히 조화시킬 수 있는지에 따라 결정하는 것이 타당하다. 단순히 선·후행 행위의 법률효과의 목적으로만 판단하면 개별사안에서 구체적 타당성을 기하기 어려운바, 추가적으로 예측 가능성과 수인 가능성 등을 고려하여야 한다.</p>
+      </div>
+
+      <!-- 논점 030 -->
+      <div class="card" id="card-030" data-level="main" data-grade="A" data-chapter="ch2" data-title="논점 030. 하자의 치유">
+        <div class="card-header">
+          <div class="card-title">논점 030. 하자의 치유</div>
+          <span class="badge badge-a">A급</span>
+        </div>
+        <h4>1. 의의 및 취지</h4>
+        <p>하자의 치유란 행정행위가 행하여진 후 일정한 사유로 그 처분시 흠결이 되었던 요건이 사후에 보완된 경우 적법한 행위로 취급되는 것을 의미하며, 이는 행정경제를 도모할 수 있다는 점에 취지가 인정된다.</p>
+
+        <h4>2. 인정 여부</h4>
+        <p><span class="structural-bold">(1) 학설:</span> ①긍정설은 ( <input type="text" class="blank-input" data-ans="행정 능률성 관점" style="width: 18ch;"><span class="hint">[행정 능률성 관점]</span> )에서 하자의 치유를 인정하나. ②부정설은 사인의 신뢰보호를 논거로 하자의 치유를 부정한다. ③제한적 긍정설은 원고의 공격 방어권을 침해하지 않는 범위 내 하자의 치유를 인정한다.<br>
+        <span class="structural-bold">(2) 판례:</span> 판례는 원칙적으로 하자의 치유를 인정하지 않으나, 예외적으로 ( <input type="text" class="blank-input" data-ans="국민의 권익을 침해하지 않는 범위 내" style="width: 24ch;"><span class="hint">[국민의 권익을 침해하지 않는 범위 내]</span> ) 구체적 사정에 따라 합목적적으로 인정하고 있다.<br>
+        <span class="structural-bold">(3) 검토:</span> 생각건대, 행정의 능률성을 고려할 때 긍정설이 타당하다고 본다.</p>
+
+        <h4>3. ( <input type="text" class="blank-input" data-ans="인정시기" style="width: 12ch;"><span class="hint">[인정시기]</span> )</h4>
+        <p><span class="structural-bold">(1) 학설:</span> ①( <input type="text" class="blank-input" data-ans="쟁송제기이전설" style="width: 16ch;"><span class="hint">[쟁송제기이전설]</span> )은 행정절차의 중요성과 국민권리구제 고려하여 쟁송제기 전 까지는 하자 치유가 가능하다고 본다. ②( <input type="text" class="blank-input" data-ans="행정소송제기전설,소송제기전설" style="width: 18ch;"><span class="hint">[행정소송제기전설]</span> )은 심판단계에서는 아직 행정청(행정심판 내부통제)인바, 행정심판에 대한 불복 시까지 하자 치유가 가능하다는 견해이다. ③( <input type="text" class="blank-input" data-ans="소송종결시설,소송종결시전설" style="width: 18ch;"><span class="hint">[소송종결시설]</span> )은 분쟁의 일회적 해결이라는 소송경제적 관점에서 소송절차종결 전 까지 하자의 치유가 가능하다는 견해이다.<br>
+        <span class="structural-bold">(2) 판례:</span> 판례는 "하자 치유를 허용하려면 과세처분에 대한 불복여부 결정 및 불복신청의 편의를 줄 수 있는 상당한 기간 내에 하여야 할 것"이라고 판시하여 행정쟁송제기전설의 입장으로 보인다(대판 1984.4.10. 83 393).<br>
+        <span class="structural-bold">(3) 검토:</span> 생각건대, 하자의 치유 시기를 쟁송이후까지 연장한다면 상대방의 권리보호에 문제가 되는 바, 권익보호를 위해 쟁송제기이전설이 타당하고 본다.</p>
+
+        <h4>4. ( <input type="text" class="blank-input" data-ans="인정범위" style="width: 12ch;"><span class="hint">[인정범위]</span> )</h4>
+        <p><span class="structural-bold">(1) 무효사유인 경우에도 하자의 치유가 인정되는지 여부:</span> 무효와 취소의 구별이 상대적이라는 것을 논거로 무효인 행정행위에도 하자의 치유를 인정하는 견해도 있지만, 통설 및 판례는 취소할 수 있는 행정행위에 대해서만 하자의 치유를 인정한다.<br>
+        <span class="structural-bold">(2) 내용상 하자 치유 여부:</span> 치유의 대상이 되는 하자와 관련하여 절차와 형식상 하자에만 한정하는 견해와 내용상 하자까지 포함하는 견해가 대립하나, 판례는 내용에 관한 하자는 치유가 인정되지 않는다고 본다. 내용상의 하자까지 포함하는 견해는 법률적합성과의 조화를 깨뜨린다는 점에서 문제가 있다. 따라서 절차상의 하자만 하자의 치유를 인정하는 것이 타당하다(다수설 및 판례).</p>
+
+        <h4>5. 하자의 치유 효과</h4>
+        <p>행정행위의 하자가 치유되면 당해 행정행위는 처분시부터 하자가 없는 적법한 행정행위로 효력을 발생하게 된다.</p>
+      </div>
+
+      <!-- 논점 030 누적복습 -->
+      <div class="card sub-card" id="card-030-review" data-level="sub" data-grade="A" data-chapter="ch2" data-title="논점 030. 하자의 치유 (누적복습)">
+        <div class="card-header">
+          <div class="card-title">논점 030. 하자의 치유 (누적 복습)</div>
+          <span class="badge badge-a">A급</span>
+        </div>
+        <p><strong>[문제1]</strong> 서대문구청장은 미성년자에게 상습적으로 술을 팔아온 단란주점영업자 甲에게 단란주점영업 허가를 취소하는 처분을 하였다. 단란주점영업허가 취소통보서에는 甲이 저지른 식품위생법위반사실에 대한 기재가 없었다. 행정절차법 제 23조는 처분의 이유를 제시하도록 규정하고 있으므로, 식품위생법위반사실을 기재하지 아니한 서대문구청장의 처분은 위법하다. 따라서 甲이 취소소송을 제기하면 승소하게 된다. 만약 甲이 취소심판이나 취소소송을 제기하기 전에 서대문구청장이 甲에게 단란주점영업허가를 취소한 이유를 기재한 서면을 보낸 후 甲이 취소소송을 제기하면 甲은 승소 할 수 있는가? (10점)<br>
+        <span class="text-muted">*간단하게 우측 창에 대목차만 작성해보세요.</span></p>
+
+        <hr style="margin: 16px 0; border: 0; border-top: 1px solid var(--border);">
+
+        <p><strong>[문제2]</strong> 서대문구청장은 미성년자에게 상습적으로 술을 팔아온 단란주점영업자 甲에게 단란주점영업 허가를 취소하는 처분을 하였다. 단란주점영업허가 취소통보서에는 甲이 저지른 식품위생법위반사실에 대한 기재가 없었다. 행정절차법 제 23조는 처분의 이유를 제시하도록 규정하고 있으므로, 식품위생법위반사실을 기재하지 아니한 서대문구청장의 처분은 위법하다. 아래 사실관계에 대하여 <strong>승소</strong> 또는 <strong>패소</strong>로만 간단하게 답하세요.</p>
+
+        <p><span class="structural-bold">(1)</span> 만약 甲이 취소심판을 거치고, 취소소송 전에 서대문구청장이 甲에게 단란주점영업허가를 취소한 이유를 기재한 서면을 보낸 후, 갑이 취소소송을 제기하면 甲은 승소 할 수 있는가?<br>
+        - 소송제기전설에 따르면, 甲은 ( <input type="text" class="blank-input" data-ans="패소한다.,패소한다,패소" style="width: 14ch;"><span class="hint">[패소한다.]</span> ).<br>
+        - 쟁송제기이전설에 따르면, 甲은 ( <input type="text" class="blank-input" data-ans="승소한다.,승소한다,승소" style="width: 14ch;"><span class="hint">[승소한다.]</span> ).<br>
+        - 소송종결시전설에 따르면, 甲은 ( <input type="text" class="blank-input" data-ans="패소한다.,패소한다,패소" style="width: 14ch;"><span class="hint">[패소한다.]</span> ).</p>
+
+        <p><span class="structural-bold">(2)</span> 만약 甲이 취소소송을 제기하고, 소송 중 서대문구청장이 甲에게 단란주점영업허가를 취소한 이유를 기재한 서면을 보낸 후, 甲은 승소 할 수 있는가? (10점)<br>
+        - 소송제기전설에 따르면, 甲은 ( <input type="text" class="blank-input" data-ans="승소한다.,승소한다,승소" style="width: 14ch;"><span class="hint">[승소한다.]</span> ).<br>
+        - 쟁송제기이전설에 따르면, 甲은 ( <input type="text" class="blank-input" data-ans="승소한다.,승소한다,승소" style="width: 14ch;"><span class="hint">[승소한다.]</span> ).<br>
+        - 소송종결시전설에 따르면, 甲은 ( <input type="text" class="blank-input" data-ans="패소한다.,패소한다,패소" style="width: 14ch;"><span class="hint">[패소한다.]</span> ).</p>
+      </div>
+
+      <!-- 논점 031 -->
+      <div class="card" id="card-031" data-level="main" data-grade="B" data-chapter="ch2" data-title="논점 031. 행정행위의 직권취소">
+        <div class="card-header">
+          <div class="card-title">논점 031. 행정행위의 직권취소</div>
+          <span class="badge badge-b">B급</span>
+        </div>
+        <h4>1. 개설 (의의 등)</h4>
+        <p>현재까지 위법 또는 부당한 처분의 직권취소에 관한 명문의 규정이 없었기 때문에 직권취소의 가능성에 대해 실무상 혼란이 있었다. 이에 따라 행정기본법」 에서 직권취소의 가능성을 명확하게 규정하였다. 행정행위의 직권취소란 일단 유효하게 성립한 행정행위에 대해서 성립상의 하자가 있음을 이유로 권한 있는 행정기관이 소급하여 효력을 상실시키는 행위를 말한다.</p>
+
+        <h4>2. 취소권자</h4>
+        <p><span class="structural-bold">(1) ( <input type="text" class="blank-input" data-ans="처분청" style="width: 12ch;"><span class="hint">[처분청]</span> )</span><br>
+        행정처분을 취소할 수 있는 권한은 당해 행정처분을 한 ( <input type="text" class="blank-input" data-ans="처분청" style="width: 12ch;"><span class="hint">[처분청]</span> )에게 속한다.<br>
+        <span class="structural-bold">(2) 감독청의 취소권 인정 여부:</span> 견해의 대립은 있으나, 감독청은 당해 처분에 대한 대외적인 권한이 없는 행정청이므로, 기관 내부에서의 취소명령은 가능하나, 국민의 권리·의무 변동에 직접적인 영향을 미치는 취소처분은 할 수 없다고 보는 것이 타당하다.</p>
+
+        <h4>3. 법적 근거</h4>
+        <p>행정기본법 ( <input type="text" class="blank-input" data-ans="제18조 제1항,18조 1항" style="width: 16ch;"><span class="hint">[제18조 제1항]</span> )은 행정청은 위법 또는 부당한 처분의 전부나 일부를 취소할 수 있는 것으로 규정하고 있다.</p>
+
+        <h4>4. 취소원인(사유)</h4>
+        <p>행정행위의 흠, 즉 ( <input type="text" class="blank-input" data-ans="위법 또는 부당" style="width: 18ch;"><span class="hint">[위법 또는 부당]</span> )이 취소사유가 된다.</p>
+
+        <h4>5. 행정행위의 취소제한의 법리(취소의 제한)</h4>
+        <p><span class="structural-bold">(1) 부담적 행정행위(침익적 행정행위):</span> 부담적 행정행위의 직권취소는 상대방에게 수익적이기 때문에 원칙적으로 행정청이 자유롭게 할 수 있다고 본다. 단, 제3자효적 행정행위에 있어서는 처분의 상대방뿐만 아니라 제3자의 이익도 형량하여야 한다.</p>
+        <p><span class="structural-bold">(2) 수익적 행정행위</span><br>
+        <span class="structural-bold">1) 직권취소가 제한되는 경우:</span> 행정기본법 ( <input type="text" class="blank-input" data-ans="제18조 제2항,18조 2항" style="width: 16ch;"><span class="hint">[제18조 제2항]</span> )은 "행정청은 당사자에게 권리나 이익을 부여하는 처분을 취소하려는 경우에는 취소로 인하여 당사자가 입게 될 불이익을 취소로 달성되는 공익과 비교·형량(衡量)하여야 한다"고 규정하고 있다. 또한 수익적 행정행위의 직권취소에 있어서는 적법상태의 실현에 대한 공익과 개인의 기득권에 대한 신뢰보호를 비교형량하여 취소여부를 결정하여야 한다는 것이 판례의 확립된 견해이다. 즉, 수익적 행정행위는 상대방에게나 권리나 이익을 부여하는 행정행위여서, 하자 있는 행정행위라도 취소되기 전까지는 일단 유효하여 이를 기초로 법률관계가 형성되므로 수익적 행정행위의 취소는 일정한 제한을 받는다. 이러한 제한의 판단 기준으로 ( <input type="text" class="blank-input" data-ans="실권의 법리, 신뢰보호의 원칙, 비례의 원칙" style="width: 28ch;"><span class="hint">[실권의 법리, 신뢰보호의 원칙, 비례의 원칙]</span> )이 적용된다.<br>
+        <span class="structural-bold">2) 직권취소가 제한되지 않는 경우:</span> 행정기본법 제18조 제2항 단서에 따라 ( <input type="text" class="blank-input" data-ans="그 밖의 부정한 방법으로 처분을 받은 경우" style="width: 26ch;"><span class="hint">[그 밖의 부정한 방법으로 처분을 받은 경우]</span> ), 당사자가 처분의 위법성을 알고 있었거나 중대한 과실로 알지 못한 경우에는 수익자의 귀책사유이므로 취소가 제한되지 않는다.</p>
+
+        <h4>6. 취소절차(절차)</h4>
+        <p>직권취소는 법령에 규정이 없는 한 특별한 절차를 요하지 않으며, 행정절차법의 적용을 받는다. 수익적 행정행위의 취소는 권리를 제한하는 처분이므로 취소의 상대방에 대하여 사전에 통지하고(행정절차법 제21조), 의견제출의 기회 등을 주어야 한다. 다만, 개별법에서 청문이나 공청회를 개최하도록 하고 있는 경우에는 청문이나 공청회의 개최만 하면 된다(행정절차법 제22조 제3항).</p>
+      </div>
+
+      <!-- 논점 032 -->
+      <div class="card" id="card-032" data-level="main" data-grade="B" data-chapter="ch2" data-title="논점 032. 취소의 취소(재취소)">
+        <div class="card-header">
+          <div class="card-title">논점 032. 취소의 취소(재취소)</div>
+          <span class="badge badge-b">B급</span>
+        </div>
+        <h4>1. 문제점</h4>
+        <p>행정행위를 취소하면 취소의 대상이 된 행정행위는 효력을 상실하게 되는데, 취소처분이 위법할 경우에 당해 취소처분을 취소함으로써 본래의 행정행위를 원상회복시킬 수 있는가 하는 것이 문제된다.</p>
+
+        <h4>2. 학설</h4>
+        <p>① 긍정설은 ( <input type="text" class="blank-input" data-ans="일반 이론에 따라" style="width: 16ch;"><span class="hint">[일반 이론에 따라]</span> ) 재취소가 가능하며, 원행정행위의 원상회복을 긍정하나, ② 부정설은 이미 한번 취소한 경우, 원행정행위는 확정적으로 효력 상실한다고 본다. ③ 절충설은 수익적 행정행위의 취소의 취소는 가능하나 부담적 행정행위는 부정하는 입장이다.</p>
+
+        <h4>3. 판례(절충설)</h4>
+        <p>판례는 수익적 행정행위의 경우 새로운 이해관계인이 생기기 전까지 재취소를 인정했으나, 부담적 행정행위의 취소는 상대방의 신뢰보호를 위해 재취소를 부정한 바 있다.</p>
+
+        <h4>4. 검토</h4>
+        <p>생각건대 직권취소 역시 하나의 행정행위라는 점에서 하자가 있다면 이를 다시 직권취소하는 것도 가능하다고 본다.</p>
+      </div>
+
+      <!-- 논점 033 -->
+      <div class="card" id="card-033" data-level="main" data-grade="B" data-chapter="ch2" data-title="논점 033. 행정행위의 직권철회">
+        <div class="card-header">
+          <div class="card-title">논점 033. 행정행위의 직권철회</div>
+          <span class="badge badge-b">B급</span>
+        </div>
+        <h4>1. 개설(의의 등)</h4>
+        <p>적법하게 성립된 처분이라도 법령 등 또는 사정변경이 있거나 중대한 공익을 위하여 필요한 경우 등에는 철회할 수 있다는 것이 확립된 이론과 판례의 입장이므로 이를 명확하게 규정하여 행정실무상의 혼란을 해소하고 공법관계의 안정성을 제고하고자 행정기본법에서 철회에 관한 규정을 두었다. 철회란 적법하게 성립한 행정행위를 행정청이 후발적인 사유에 기해 장래를 향하여 그 효력을 상실시키는 독립적인 행정행위를 말한다. 원시적 사유에 의한 개별적 효과 결정의 직권취소와 차이가 있다.</p>
+
+        <h4>2. 철회권자(주체)</h4>
+        <p>철회는 그의 성질상 원래의 행정행위처럼 새로운 처분을 하는 것과 같기 때문에 처분청만이 이를 행할 수 있다고 보아야 한다. 상급청이라도 감독권에 의해 하급청의 권한을 대신 행사하는 것은 인정될 수 없다.</p>
+
+        <h4>3. 법적 근거</h4>
+        <p>행정기본법은 철회의 일반적 근거규정을 두고 있다. 따라서, 철회는 개별법률의 근거가 없어도 가능하다(행정 기본법 제19조).</p>
+
+        <h4>4. 철회원인(사유)</h4>
+        <p>철회는 행정행위의 효력을 더 이상 존속시킬 수 없는 새로운 사유가 발생한 경우에 가능하다. 행정기본법 제19조 제1항에서는 ①법률에서 정한 ( <input type="text" class="blank-input" data-ans="철회 사유" style="width: 14ch;"><span class="hint">[철회 사유]</span> )에 해당하게 된 경우, ②법령등의 변경이나 ( <input type="text" class="blank-input" data-ans="사정변경" style="width: 14ch;"><span class="hint">[사정변경]</span> )으로 처분을 더 이상 존속시킬 필요가 없게 된 경우, ③( <input type="text" class="blank-input" data-ans="중대한 공익" style="width: 16ch;"><span class="hint">[중대한 공익]</span> )을 위하여 필요한 경우로 규정하고 있다. 이는 학설과 판례에서 인정된 철회사유를 명문화한 것이다. 이외에도 상대방의 동의, 상대방의 의무위반, 철회권 유보 등도 철회 사유에 해당할 것이다.</p>
+
+        <h4>5. 행정행위의 철회제한 법리(제한)</h4>
+        <p><span class="structural-bold">(1) 부담적 행정행위(침익적 행정행위):</span> 부담적 행정행위의 철회는 상대방에게 수익적이기 때문에 원칙적으로 행정청이 자유롭게 할 수 있다고 본다.<br>
+        <span class="structural-bold">(2) 수익적 행정행위:</span> 행정기본법 제19조 제2항은 "행정청은 제1항에 따라 처분을 철회하려는 경우에는 철회로 인하여 당사자가 입게 될 불이익을 철회로 달성되는 공익과 비교 형량하여야 한다"고 규정하고 있다. 수익적 행정행위의 직권 철회에 있어서는 적법 상태의 실현에 대한 공익과 개인의 기득권에 대한 신뢰보호를 비교형량하여 철회여부를 결정하여야 한다는 것이 판례의 확립된 견해이다. 즉, 수익적 행정행위는 상대방에게나 권리나 이익을 부여하는 행정행위여서, 하자 있는 행정행위라도 철회되기 전까지는 ( <input type="text" class="blank-input" data-ans="일단 유효" style="width: 14ch;"><span class="hint">[일단 유효]</span> )하여 이를 기초로 법률관계가 형성되므로 수익적 행정행위의 철회는 일정한 제한을 받는다. 이러한 제한의 판단 기준으로 실권의 법리, 신뢰보호의 원칙, 비례의 원칙(이익형량의 원칙) 등이 적용된다.</p>
+
+        <h4>6. 철회 절차 (절차)</h4>
+        <p>철회는 특별한 규정이 없는 한 일반행정행위와 같은 절차에 따른다. 수익적 행정행위의 철회는 '권리를 제한하는 처분'이므로 사전통지절차, 의견제출절차 등 행정절차법상의 절차에 따라 행해져야한다. 개별법에 다른 절차가 있는 경우 그에 따른다.</p>
+      </div>
+
+      <!-- 논점 034 -->
+      <div class="card" id="card-034" data-level="main" data-grade="B" data-chapter="ch2" data-title="논점 034. 철회의 취소">
+        <div class="card-header">
+          <div class="card-title">논점 034. 철회의 취소</div>
+          <span class="badge badge-b">B급</span>
+        </div>
+        <h4>1. 견해의 대립</h4>
+        <p>①긍정설은 행정행위의 철회의 취소가 가능하며, 원행정행위가 원상회복된다고 본다. ② 부정설은 확정적으로 효력을 상실하므로, 법률이 명문으로 인정하지 않는 한 행정행위의 철회의 취소는 인정될 수 없다는 견해이다. ③ 절충설은 부담적 행정행위는 부정하나, 수익적 행정행위의 철회의 경우에는 위법한 철회처분을 취소하여 원상을 회복할 필요가 있으므로 철회의 취소를 인정하여야 한다고 본다.</p>
+
+        <h4>2. 판례 및 검토</h4>
+        <p>&lt;판례&gt;는 절충설을 취하고 있다. 즉, 판례는 침익적 행정행위의 철회의 취소는 인정하지 않지만, 수익적 행정행위의 철회에 대하여는 취소가 가능한 것으로 본다. 생각건대, 철회는 그 자체가 독립된 행정행위이고, 철회의 취소를 부정할 이유가 없으므로 철회의 취소가 가능하다는 적극설이 타당하다.</p>
+      </div>
+
+      <!-- 논점 035 -->
+      <div class="card" id="card-035" data-level="main" data-grade="C" data-chapter="ch2" data-title="논점 035. 단계적 행정결정">
+        <div class="card-header">
+          <div class="card-title">논점 035. 단계적 행정결정</div>
+          <span class="badge badge-c">C급</span>
+        </div>
+        <h4>1. 개설</h4>
+        <p>단계적 행정결정이란 행정청의 결정이 여러 단계의 행정결정을 통하여 연계적으로 이루어지는 것을 말한다. 단계적 행정결정의 예로는 확약, 가행정행위, 사전결정 및 부분허가가 있다.</p>
+
+        <h4>II. 확약</h4>
+        <p><span class="structural-bold">1. 의의 및 근거(행정절차법 제40조의 2):</span> 확약은 장래 일정한 행정행위를 하거나 하지 아니할 것을 ( <input type="text" class="blank-input" data-ans="약속하는 의사표시" style="width: 20ch;"><span class="hint">[약속하는 의사표시]</span> )를 말한다. 즉, 확약이란 권한있는 행정기관이 국민에 대한 관계에 있어 자기구속을 할 의도로써 장래에 향하여 일정한 행정행위를 하거나 하지 않을 것을 약속하는 ( <input type="text" class="blank-input" data-ans="단독적 의사표시" style="width: 18ch;"><span class="hint">[단독적 의사표시]</span> )를 말한다.<br>
+        <span class="structural-bold">2. 법적 성질(처분성 여부):</span> ①긍정설은 확약이 장래 이행·불이행 의무를 발생시키는 효력이 있다는 점에서 처분성을 긍정한다. ② 부정설은 확약은 사정변경에 의해 변경될 수 있는 바, 종국적인 규율성을 가지지 못하는 점을 논거로 부정한다. ③ 판례는 어업면허에 선행하는 어업권 우선순위 결정은 강학상 확약에 불과하고 행정처분은 아니라고 보아 처분성을 부정하였다. ④ 생각건대, 확약으로 행정청에게 확약을 준수할 의무가 발생하는 점, 조기의 권리구제 도모 할 수 있다는 점을 고려하여 확약의 처분성을 인정하는 것이 타당하다.</p>
+
+        <h4>III. 가행정행위(잠정적 행정행위)</h4>
+        <p>가행정행위는 사실관계와 법률관계의 계속적인 심사를 유보한 상태에서 당해 행정법관계의 권리와 의무의 전부 또는 일부에 대해 잠정적으로 확정하는 행위를 의미한다. 즉, 사실관계와 법률관계의 심사를 유보한 상태에서 당해 행정법관계의 권리와 의무의 전부 또는 일부에 대해 잠정적으로 확정하는 행위를 의미한다.</p>
+
+        <h4>IV. 사전결정 (예비결정)</h4>
+        <p>사전결정이란 최종적 행정 결정을 내리기 전 사전단계에서 최종의 행정결정의 요건 중 ( <input type="text" class="blank-input" data-ans="일부 요건" style="width: 14ch;"><span class="hint">[일부 요건]</span> )을 사전에 내리는 결정을 말한다.</p>
+
+        <h4>V. 부분허가(부분승인)</h4>
+        <p>부분허가란 원자력발전소와 같이 그 건설에 비교적 장기간의 시간을 요하고 영향력이 큰 시설물의 건설에 있어서 단계적으로 시설의 일부분에 대하여 부여하는 허가를 의미한다.</p>
+      </div>
+
+      <!-- 논점 036 -->
+      <div class="card" id="card-036" data-level="main" data-grade="D" data-chapter="ch2" data-title="논점 036. 공법상 계약">
+        <div class="card-header">
+          <div class="card-title">논점 036. 공법상 계약</div>
+          <span class="badge badge-d">D급</span>
+        </div>
+        <h4>1. 의의</h4>
+        <p>공법상 계약이란 ( <input type="text" class="blank-input" data-ans="공법적 효과" style="width: 16ch;"><span class="hint">[공법적 효과]</span> )를 발생시키는 대등한 복수당사자의 반대방향의 의사의 합치를 말한다. 공법상 계약은 비권력적 행정분야에서뿐만 아니라 권력적 행정분야에서도 인정된다.</p>
+      </div>
+
+      <!-- 논점 037 -->
+      <div class="card" id="card-037" data-level="main" data-grade="D" data-chapter="ch2" data-title="논점 037. 행정상의 사실행위">
+        <div class="card-header">
+          <div class="card-title">논점 037. 행정상의 사실행위</div>
+          <span class="badge badge-d">D급</span>
+        </div>
+        <h4>1. 의의</h4>
+        <p>행정상 사실행위라 함은 행정목적을 달성하기 위하여 행해지는 물리력의 행사를 말한다. 행정기관의 행위는 직접적인 법적 효과를 발생시키는가를 기준으로 하여 법적 행위와 사실행위로 구분되고 있다. 사실행위는 직접적으로는 법적 효과를 발생시키지 않는 행위이다. 달리 말하면 법질서에 직접적인 변경을 가져오지 않는 행위이다. 그러나, 사실행위도 간접적으로는 법적 효과를 발생시키는 경우가 있다.</p>
+
+        <h4>2. 종류</h4>
+        <p><span class="structural-bold">(1) ( <input type="text" class="blank-input" data-ans="권력적 사실행위" style="width: 18ch;"><span class="hint">[권력적 사실행위]</span> )</span><br>
+        이는 일정한 법령 또는 행정행위를 집행하기 위한 공권력의 행사로서 하는 사실행위를 말하며, 무허가건물의 철거, 대집행의 실행 등 행정법상의 의무이행을 확보하기 위한 강제적 집행행위(대집행실행, 직접강제)등이 있다.<br>
+        <span class="structural-bold">(2) ( <input type="text" class="blank-input" data-ans="비권력적 사실행위" style="width: 20ch;"><span class="hint">[비권력적 사실행위]</span> )</span><br>
+        이는 공권력의 행사와 관계없는 사실행위인데, 이에는 금전출납, 쓰레기 수거 등 비권력적 집행행위와 고지, 행정지도 등 지식표시행위 등이 이에 속한다.</p>
+      </div>
+
+      <!-- 논점 038 -->
+      <div class="card" id="card-038" data-level="main" data-grade="D" data-chapter="ch2" data-title="논점 038. 행정지도">
+        <div class="card-header">
+          <div class="card-title">논점 038. 행정지도</div>
+          <span class="badge badge-d">D급</span>
+        </div>
+        <h4>1. 개설</h4>
+        <p><span class="structural-bold">1. 의의 및 필요성:</span> 행정지도는 행정기관이 일정한 행정목적을 달성하기 위해 상대방에게 ( <input type="text" class="blank-input" data-ans="임의적 협력" style="width: 16ch;"><span class="hint">[임의적 협력]</span> )을 요청하는 비권력적 사실행위를 말한다. 법령의 불비를 보완하거나 최신의 정보 등을 제공함에 필요성이 인정된다.</p>
+        <p><span class="structural-bold">2. 법적 성질:</span> 행정지도는 행정청이 행정목적의 달성을 위하여 직접 활동을 하는 것이 아니라 상대방인 국민의 임의적인 협력을 구하는데 그 개념적 특징이 있다. 법상으로 행정지도의 상대방은 행정지도에 따르지 않을 수 있다. 따라서 비권력적 행위이다. 행정지도는 그 자체만으로는 직접 법적 효과를 가져오지 않는다. 그리하여 행정지도를 사실행위로 본다.</p>
+      </div>
+
+      <!-- 논점 039 -->
+      <div class="card" id="card-039" data-level="main" data-grade="C" data-chapter="ch2" data-title="논점 039. 행정조사">
+        <div class="card-header">
+          <div class="card-title">논점 039. 행정조사</div>
+          <span class="badge badge-c">C급</span>
+        </div>
+        <h4>1. 행정조사의 의의</h4>
+        <p>행정조사란 행정기관이 행정작용을 수행하기 위해 ( <input type="text" class="blank-input" data-ans="정보수집" style="width: 14ch;"><span class="hint">[정보수집]</span> )등을 위해 행하는 행정작용을 말한다. (이하생략)</p>
+      </div>
+
+      <!-- 논점 040 -->
+      <div class="card" id="card-040" data-level="main" data-grade="B" data-chapter="ch2" data-title="논점 040. 행정계획의 개관">
+        <div class="card-header">
+          <div class="card-title">논점 040. 행정계획의 개관</div>
+          <span class="badge badge-b">B급</span>
+        </div>
+        <h4>I. 행정계획의 의의</h4>
+        <p>행정계획이란 행정활동을 행함에 있어 일정한 목표를 설정하고 그 ( <input type="text" class="blank-input" data-ans="목표" style="width: 12ch;"><span class="hint">[목표]</span> )를 달성하기 위해 필요한 ( <input type="text" class="blank-input" data-ans="수단" style="width: 12ch;"><span class="hint">[수단]</span> )을 종합조정하는 것을 말한다.</p>
+
+        <h4>II. 법적성질</h4>
+        <p><span class="structural-bold">1. 학설:</span> ①( <input type="text" class="blank-input" data-ans="입법행위설" style="width: 14ch;"><span class="hint">[입법행위설]</span> )은 행정계획을 일반적·추상적 규율로 보며, ②( <input type="text" class="blank-input" data-ans="행정행위설" style="width: 14ch;"><span class="hint">[행정행위설]</span> )은 권리행사가 직접적·개별적·구체적으로 영향을 미치는 행정행위라는 견해이다. ③( <input type="text" class="blank-input" data-ans="독자성설" style="width: 14ch;"><span class="hint">[독자성설]</span> )은 행정계획은 독자적 행위형식으로 구속력을 갖는다고 보며 ④( <input type="text" class="blank-input" data-ans="복수성질설" style="width: 14ch;"><span class="hint">[복수성질설]</span> )은 행정계획의 성질을 여러 측면에서 파악하려는 견해이다.<br>
+        <span class="structural-bold">2. 판례:</span> ①도시관리계획이 결정 고시되면 토지형질변경, 건축물의 신축 등 권리행사가 제한받게 되어 개인의 권리 내지 법률상 이익을 개별적·구체적으로 규제하는 행정처분으로 봤으나, ②도시기본계획은 처분성을 부정하였다. ③도시 및 주거환경정비법에 따라 수립하는 관리처분계획은 처분성을 긍정한 바 있다.<br>
+        <span class="structural-bold">3. 검토:</span> 행정계획은 종류, 내용이 매우 다양하고 상이한바 일률적으로 법적 성질을 부여하는 것은 타당치 않으며 개별적으로 검토되어야 할 것이다.</p>
+      </div>
+
+      <!-- 논점 041 -->
+      <div class="card" id="card-041" data-level="main" data-grade="B" data-chapter="ch2" data-title="논점 041. 행정계획의 통제">
+        <div class="card-header">
+          <div class="card-title">논점 041. 행정계획의 통제</div>
+          <span class="badge badge-b">B급</span>
+        </div>
+        <h4>1. 행정 내부적 통제</h4>
+        <p>행정 내부적으로 절차상 통제, 감독권에 의한 통제 등이 있다.</p>
+
+        <h4>II. 국회에 의한 통제</h4>
+        <p>국회가 행정부에 대하여 가지는 국정감시권의 발동 등으로 행정계획에 통제를 가할 수 있다.</p>
+
+        <h4>III. 법원에 의한 통제</h4>
+        <p><span class="structural-bold">1. 사법심사 가능성 (처분성):</span> 모든 행정계획이 사법심사의 대상일 수는 없지만, 처분성을 갖는 행정계획은 개인의 법률상 이익을 침해하는 경우에 사법심사의 대상이 될 수 있다. 행정계획이 공권력 행사이지만 처분이 아닌 경우 헌법소원의 대상이 된다.</p>
+
+        <p><span class="structural-bold">2. 형성의 자유 (계획재량과 형량명령)</span><br>
+        <span class="structural-bold">(1) 계획재량의 개념:</span> 계획재량이란 행정계획을 수립, 변경 과정에서의 광범위한 형성의 자유를 말한다.<br>
+        <span class="structural-bold">(2) 계획재량과 일반 행정재량의 구별여부(재량행위의 독자성 인정여부):</span><br>
+        <span class="structural-bold">1) 견해의 대립:</span> ①( <input type="text" class="blank-input" data-ans="질적차이부정설" style="width: 18ch;"><span class="hint">[질적차이부정설]</span> )은 양자 모두 질적 차이를 인정하지 않으며, 계획재량에 있어 재량권이 폭넓게 인정된다는 양적 차이만 있을 뿐, 형량명령이론은 협의의 비례원칙을 계획재량에 구체화 시킨 것이라 한다. ②( <input type="text" class="blank-input" data-ans="질적차이긍정설" style="width: 18ch;"><span class="hint">[질적차이긍정설]</span> )은 일반행정재량은 조건프로그램으로 보며, 계획재량의 수권규범은 목표설정과 달성수단을 규정하는 목적프로그램, 형량명령이라는 특유한 하자이론이 존재한다고 본다.<br>
+        <span class="structural-bold">2) 판례 및 검토:</span> 판례는 행정계획에 있어 계획재량이라는 광범위한 형성의 자유가 인정된다고 하고 이러한 형성의 자유에 관한 한계로서 형량명령원칙을 반영하여 형량하자가 있으면 당해 행정계획결정은 위법하다고 판시하고 있다. 생각건대, 양자는 통제수단 등 질적으로 다른 바 질적차이긍정설이 타당하다.</p>
+
+        <p><span class="structural-bold">(3) 계획재량의 사법적 통제 : 형량명령위반 여부</span><br>
+        <span class="structural-bold">1) 개설:</span> 계획재량도 성문법과 형량명령원칙에 합치되어야 하며, 위반 시 위법이 인정된다. 형량명령의 원칙이란 형성의 자유는 무제한이 아니며, 행정계획 관련자들의 이익을 이익형량을 하는 것을 말한다.<br>
+        <span class="structural-bold">2) 형량명령원칙의 내용:</span> ①행정계획결정에 있어서는 관련된 이익의 형량을 하여야 한다. ②계획청은 이익형량에 관련된 이익을 모두 포함시켜야 한다. 공익과 사익이 모두 포함되어야 한다. 이익형량은 공익 상호간, 공익과 사익상호간, 사익상호간에 행하여진다. ③관련된 공익 및 사익의 가치를 제대로 파악하여야 한다. ④관련되는 이익의 조정은 개개의 이익의 객관적인 가치에 비례하여 행하여져야 한다.<br>
+        <span class="structural-bold">3) 형량의 하자:</span> ①( <input type="text" class="blank-input" data-ans="형량의 해태" style="width: 14ch;"><span class="hint">[형량의 해태]</span> )란 이익형량을 전혀 하지 않은 것을, ②( <input type="text" class="blank-input" data-ans="형량의 흠결" style="width: 14ch;"><span class="hint">[형량의 흠결]</span> )은 이익형량을 누락한 것을, ③( <input type="text" class="blank-input" data-ans="형량의 과오" style="width: 14ch;"><span class="hint">[형량의 과오]</span> )는 형량에 있어 공익과 사익의 가치를 잘못 평가한 경우를 말한다. ④( <input type="text" class="blank-input" data-ans="오형량" style="width: 10ch;"><span class="hint">[오형량]</span> )은 형량을 했으나 공익과 사익의 조정이 객관적으로 보아 비례원칙을 위반한 것으로 판단되는 경우를 말한다.<br>
+        <span class="structural-bold">4) 관련 판례:</span> 대법원은 행정주체가 행정계획을 입안 결정함에 있어서 이익형량을 전혀 행하지 아니하거나 이익형량의 고려대상에 마땅히 포함시켜야 할 사항을 누락한 경우 등에는 그 행정계획 결정은 형량에 하자가 있어 위법하다고 판시하였다. cf. 대법원은 &lt;원지동추모공원사건&gt;에서 행정주체가 행정계획을 입안 결정함에 있어서 이익형량을 전혀 행하지 아니하거나 이익형량의 고려대상에 마땅히 포함시켜야 할 사항을 누락한 경우 등에는 그 행정계획 결정은 형량에 하자가 있다고 하여, 형량명령원칙의 내용으로 판시하였다.</p>
+
+        <p><span class="structural-bold">3. 손실보상 (적법한 행정계획과 손실보상 등 권리구제)</span><br>
+        적법한 행정계획의 수립·변경 또는 폐지로 인하여 손실을 받은 경우에는 손실보상의 요건을 갖춘 경우에 손실보상을 청구할 수 있다.</p>
+
+        <p><span class="structural-bold">4. 위법한 행정계획과 국가배상</span><br>
+        이론상 위법한 행정계획의 수립·변경 또는 폐지로 인하여 손해를 받은 자는 국가배상을 청구 할 수 있다.</p>
+      </div>
+
+    </main>
+    
+    <!-- 우측 서술형 입력 플로팅 영역 -->
+    <aside class="essay-sidebar">
+      <h3>서술형 작성</h3>
+      <div id="current-essay-target">스크롤하여 논점을 선택하세요.</div>
+      <textarea id="global-essay-input" class="essay-input" placeholder="여기에 작성하세요. 엔터를 누르면 채점됩니다. (Shift+Enter로 줄바꿈)"></textarea>
+      <div id="global-essay-feedback" class="essay-feedback"></div>
+    </aside>
+  </div>
+
+  <button id="themeToggleBtn" onclick="toggleTheme()" title="테마 전환">Dark</button>
+
+  <script>
+    let isReviewMode = false;
+    let isAllHintsShown = false;
+    let currentGrade = 'all';
+    let currentChapter = 'all';
+    let observer; 
+    let currentEssayCardId = null;
+
+    // 카드별 서술형 작성 임시 저장용 객체
+    const essayDrafts = {};
+    const essayFeedbacks = {};
+
+    const chapters = {
+      'ch1': '제1편 행정법서론',
+      'ch2': '제2편 행정작용법'
+    };
+
+    // 각 카드 논점별 핵심 키워드 데이터 (001~041 전체 반영)
+    const essayKeywords = {
+      'card-001': ['법규창조력', '법률우위', '모든 법규범', '법률유보', '형식적'],
+      'card-002': ['합리적 이유', '차별대우', '동일한 사안', '법치국가원리'],
+      'card-003': ['동종 사안', '동일한 결정', '행정관행', '재량행위', '사정변경'],
+      'card-004': ['행정목적', '행정수단', '비례관계', '적합성', '필요성', '상당성', '최소침해'],
+      'card-005': ['선행조치', '보호가치', '인과관계', '공익', '법적 안정성'],
+      'card-006': ['장기간', '불행사', '정당한 사유', '신뢰보호', '우선 적용'],
+      'card-007': ['성실의무', '권한남용금지', '신의성실'],
+      'card-008': ['실질적 관련성', '반대급부', '공행정작용', '원인적', '목적적'],
+      'card-009': ['주체설', '복수성질설', '이익설', '종합적', '구별기준'],
+      'card-010': ['별개의 법체계', '일반법원리', '제한적 유추적용', '성질에 반하지 않는', '공법관계'],
+      'card-011': ['강행법규', '사익보호성', '의무 부과'],
+      'card-012': ['하자없는 재량행사', '사익보호성', '특정처분', '검사임용거부', '독자성'],
+      'card-013': ['행정개입청구권', '재량수축', '급박한 위험', '생명 신체 재산', '조리상 신청권'],
+      'card-013b': ['신고', '신청', '등록', '행정기본법'],
+      'card-013c': ['자기완결적', '수리를 요하는', '형식적 요건', '실질적 요건', '처분성'],
+      'card-013d': ['정보제공', '금지해제', '과태료', '건축신고'],
+      'card-014': ['법률의 위임', '일반적', '추상적', '포괄적 위임 금지'],
+      'card-014b': ['포괄적 수권', '수권의 범위', '전면적 재위임', '집행명령', '구체적 위임'],
+      'card-014d': ['구체적 규범통제', '재판의 전제성', '당해 사건', '처분적 명령', '보충성의 원칙'],
+      'card-015': ['사무처리기준', '대외적 효력', '항고소송의 대상', '전제 문제', '공권력 행사'],
+      'card-016': ['법규명령형식', '규범', '형식설', '실질설', '수권여부', '도로교통법', '주택건설촉진법'],
+      'card-017': ['법령보충적', '전문기술영역', '상위법령과 결합', '토지가격비준표', '행정규칙형식'],
+      'card-018': ['실체법상 처분개념', '쟁송법상 처분개념', '권리구제', '교도소 수감자'],
+      'card-019': ['하명', '자연적 자유', '설권행위', '공적으로 증명', '의문이나 다툼'],
+      'card-020-2': ['주민의 동의', '자연환경보전', '중대한 공익'],
+      'card-020-3': ['요건재량설', '효과재량설', '기본권기준설', '종합설'],
+      'card-020-4': ['행정기본법 제21조', '일탈', '남용'],
+      'card-021': ['불확정개념', '감정평가시험', '비대체적', '구속적 가치평가'],
+      'card-022': ['종된 규율'],
+      'card-022-2': ['조건', '정지조건', '해제조건', '기한', '시기', '종기', '부담', '작위', '부작위', '철회권의 유보'],
+      'card-022-3': ['재량', '요건충족적', '법률에 근거', '목적에 위배', '실질적인 관련', '최소한의 범위', '당사자의 동의', '사정변경'],
+      'card-022-4': ['부담만 가능설', '진정일부취소소송', '분리가능성 기준설', '전면 긍정설', '어업면허'],
+      'card-022-5': ['기속행위', '재량권행사를 제한', '본질적인 부분'],
+      'card-023': ['행정기본법 15조'],
+      'card-024': ['먼저 해결해야 하는 경우', '행정기본법 11조 제1항', '예시적으로 해석한다', '계고처분', '부당이득반환청구소송', '원상복구', '미성년자'],
+      'card-025': ['흠 있는 행정행위', '정당한 권한', '적법', '절차상 하자', '문서'],
+      'card-026': ['합의제기관', '법률유보의 원칙', '법률우위의 원칙'],
+      'card-027': ['일반인', '중대명백설', '적법요건의 중요한 부분을 위반한 중대한 것', '일반인의 관점에서 외관상 명백한 것'],
+      'card-028': ['취소'],
+      'card-029': ['선행행위와 후행행위 모두 처분일 것', '후행행위는 고유한 하자가 없을 것', '불가쟁력', '하나의 법률효과'],
+      'card-030': ['행정 능률성 관점', '국민의 권익을 침해하지 않는 범위 내', '인정시기', '쟁송제기이전설', '행정소송제기전설', '소송종결시설', '인정범위'],
+      'card-030-review': ['패소한다.', '승소한다.', '패소한다.', '승소한다.', '승소한다.', '패소한다.'],
+      'card-031': ['처분청', '제18조 제1항', '위법 또는 부당', '제18조 제2항', '실권의 법리', '신뢰보호의 원칙', '비례의 원칙', '그 밖의 부정한 방법으로 처분을 받은 경우'],
+      'card-032': ['일반 이론에 따라'],
+      'card-033': ['철회 사유', '사정변경', '중대한 공익', '일단 유효'],
+      'card-035': ['약속하는 의사표시', '단독적 의사표시', '일부 요건'],
+      'card-036': ['공법적 효과'],
+      'card-037': ['권력적 사실행위', '비권력적 사실행위'],
+      'card-038': ['임의적 협력'],
+      'card-039': ['정보수집'],
+      'card-040': ['목표', '수단', '입법행위설', '행정행위설', '독자성설', '복수성질설'],
+      'card-041': ['질적차이부정설', '질적차이긍정설', '형량의 해태', '형량의 흠결', '형량의 과오', '오형량']
+    };
+
+    function clean(str) {
+      return str.replace(/[\s\.\,\·\(\)\-\_\/\[\]]/g, '').toLowerCase();
+    }
+
+    function extractNumbers(str) {
+      const matches = str.match(/\d+/g);
+      return matches ? matches.map(Number) : [];
+    }
+
+    function validateInput(userVal, targetAns) {
+      if (!targetAns) return false; 
+      const userClean = clean(userVal);
+      const targetClean = clean(targetAns);
+      const targetNums = extractNumbers(targetAns);
+      const userNums = extractNumbers(userVal);
+
+      if (targetNums.length > 0) {
+        if (userNums.length !== targetNums.length) return false;
+        for (let i = 0; i < targetNums.length; i++) {
+          if (userNums[i] !== targetNums[i]) return false;
+        }
+        if (targetClean.includes('헌법') && !userClean.includes('헌법')) return false;
+        if (targetClean.includes('행정기본법') && userClean.includes('헌법')) return false;
+        if (targetClean.includes('행정절차법') && userClean.includes('기본법')) return false;
+        return true;
+      }
+      if (userNums.length > 0) return false;
+
+      const len = targetClean.length;
+      if (len <= 3) {
+        return userClean === targetClean || targetClean.includes(userClean) || userClean.includes(targetClean);
+      }
+      if (len <= 6) {
+        if (userClean.length < 3) return false;
+        for (let i = 0; i <= userClean.length - 3; i++) {
+          const sub = userClean.substr(i, 3);
+          if (targetClean.includes(sub)) return true;
+        }
+        return false;
+      }
+      if (userClean.length < 4) return false;
+      for (let i = 0; i <= userClean.length - 4; i++) {
+        const sub = userClean.substr(i, 4);
+        if (targetClean.includes(sub)) return true;
+      }
+      return false;
+    }
+
+    function gradeInput(input, revealHint = true) {
+      const val = input.value.trim();
+      const hint = input.nextElementSibling;
+      
+      if (!val && !revealHint) {
+        input.classList.remove('correct', 'incorrect');
+        if (hint && hint.classList.contains('hint') && !document.body.classList.contains('show-all-hints')) {
+          hint.classList.remove('visible');
+        }
+        return false;
+      }
+
+      const validAnswers = input.getAttribute('data-ans') ? input.getAttribute('data-ans').split(',') : [];
+      const isMatch = validAnswers.length > 0 ? validAnswers.some(ans => validateInput(val, ans)) : false;
+
+      if (isMatch && val) {
+        input.classList.remove('incorrect');
+        input.classList.add('correct');
+      } else {
+        input.classList.remove('correct');
+        input.classList.add('incorrect');
+      }
+
+      if (revealHint && hint && hint.classList.contains('hint')) {
+        hint.classList.add('visible');
+      }
+      return isMatch;
+    }
+
+    function gradeEssay() {
+      if (!currentEssayCardId) return;
+      const textarea = document.getElementById('global-essay-input');
+      const text = textarea.value.replace(/\s+/g, '');
+      const feedbackDiv = document.getElementById('global-essay-feedback');
+      
+      const keywords = essayKeywords[currentEssayCardId] || [];
+      if (keywords.length === 0) {
+        feedbackDiv.innerHTML = '<span class="text-muted">제공된 키워드 정답안이 없습니다.</span>';
+        feedbackDiv.classList.add('visible');
+        essayFeedbacks[currentEssayCardId] = feedbackDiv.innerHTML;
+        return;
+      }
+
+      let matchCount = 0;
+      let feedbackHtml = '';
+      
+      keywords.forEach(kw => {
+        const cleanKw = kw.replace(/\s+/g, '');
+        if (text.includes(cleanKw)) {
+          matchCount++;
+          feedbackHtml += `<span class="kw-match">[O] ${kw}</span><br>`;
+        } else {
+          feedbackHtml += `<span class="kw-miss">[X] ${kw}</span><br>`;
+        }
+      });
+      
+      const score = Math.round((matchCount / keywords.length) * 100);
+      feedbackHtml = `<div class="essay-score">점수: ${score}점</div>` + feedbackHtml;
+      
+      feedbackDiv.innerHTML = feedbackHtml;
+      feedbackDiv.classList.add('visible');
+      essayFeedbacks[currentEssayCardId] = feedbackHtml;
+
+      const currentCard = document.getElementById(currentEssayCardId);
+      if (currentCard) {
+        const longAnswer = currentCard.querySelector('.long-answer');
+        if (longAnswer) longAnswer.classList.add('visible');
+      }
+    }
+
+    function scrollToCenter(element) {
+      const rect = element.getBoundingClientRect();
+      const absoluteTop = rect.top + window.pageYOffset;
+      const middle = absoluteTop - (window.innerHeight / 2);
+      window.scrollTo({
+        top: middle,
+        behavior: 'smooth'
+      });
+    }
+
+    function updateEssayTarget(card) {
+      if (!card) return;
+      const input = document.getElementById('global-essay-input');
+      const feedback = document.getElementById('global-essay-feedback');
+      
+      if (currentEssayCardId) {
+        essayDrafts[currentEssayCardId] = input.value;
+      }
+
+      const title = card.getAttribute('data-title');
+      document.getElementById('current-essay-target').innerText = title;
+      currentEssayCardId = card.id;
+
+      input.value = essayDrafts[card.id] || '';
+      feedback.innerHTML = essayFeedbacks[card.id] || '';
+      
+      if(essayFeedbacks[card.id]) {
+        feedback.classList.add('visible');
+      } else {
+        feedback.classList.remove('visible');
+      }
+    }
+
+    function attachKeyEvents() {
+      const visibleInputs = Array.from(document.querySelectorAll('.card:not(.hidden) .blank-input'));
+      visibleInputs.forEach((input) => {
+        input.dataset.checked = "false";
+        
+        input.oninput = () => {
+          input.dataset.checked = "false";
+        };
+
+        input.onkeydown = (e) => {
+          if (e.key === 'Enter') {
+            e.preventDefault();
+            
+            if (input.dataset.checked !== "true") {
+              gradeInput(input, true);
+              updateScore();
+              input.dataset.checked = "true";
+              updateTocHighlightFromCard(input.closest('.card'));
+              updateEssayTarget(input.closest('.card'));
+            } else {
+              input.value = '';
+              input.dataset.checked = "false";
+              input.classList.remove('correct', 'incorrect');
+              const hint = input.nextElementSibling;
+              if (hint && hint.classList.contains('hint') && !document.body.classList.contains('show-all-hints')) {
+                hint.classList.remove('visible');
+              }
+              updateScore();
+            }
+          }
+        };
+        
+        input.onfocus = () => {
+          updateTocHighlightFromCard(input.closest('.card'));
+          updateEssayTarget(input.closest('.card'));
+        };
+      });
+
+      const essayInput = document.getElementById('global-essay-input');
+      essayInput.onkeydown = (e) => {
+        if (e.key === 'Enter' && !e.shiftKey) {
+          e.preventDefault();
+          gradeEssay();
+        }
+      };
+      essayInput.oninput = (e) => {
+        if (currentEssayCardId) {
+          essayDrafts[currentEssayCardId] = e.target.value;
+        }
+      };
+    }
+
+    function updateScore() {
+      const visibleInputs = document.querySelectorAll('.card:not(.hidden) .blank-input');
+      const correctCount = document.querySelectorAll('.card:not(.hidden) .blank-input.correct').length;
+      const total = visibleInputs.length;
+      const pct = total > 0 ? Math.round((correctCount / total) * 100) : 0;
+      document.getElementById('scoreText').innerText = `${correctCount} / ${total} (${pct}%)`;
+    }
+
+    function renderToc() {
+      const tocContainer = document.getElementById('toc-container');
+      tocContainer.innerHTML = '';
+
+      const visibleCards = Array.from(document.querySelectorAll('.card:not(.hidden)'));
+      const chapterMap = {};
+      
+      visibleCards.forEach(card => {
+        const ch = card.getAttribute('data-chapter');
+        if(!chapterMap[ch]) chapterMap[ch] = [];
+        chapterMap[ch].push(card);
+      });
+
+      let activeChapterId = visibleCards.length > 0 ? visibleCards[0].getAttribute('data-chapter') : null;
+
+      for (const [chId, cards] of Object.entries(chapterMap)) {
+        const chapterDiv = document.createElement('div');
+        chapterDiv.className = 'toc-chapter';
+        chapterDiv.id = `toc-${chId}`;
+        
+        if (chId === activeChapterId) chapterDiv.classList.add('active');
+
+        const chapterTitle = document.createElement('div');
+        chapterTitle.className = 'toc-chapter-title';
+        chapterTitle.innerText = chapters[chId] || chId;
+        chapterTitle.onclick = () => {
+          if(cards.length > 0) {
+            scrollToCenter(cards[0]);
+            updateTocHighlightFromCard(cards[0]);
+            updateEssayTarget(cards[0]);
+          }
+        };
+        chapterDiv.appendChild(chapterTitle);
+
+        const cardList = document.createElement('ul');
+        cardList.className = 'toc-list';
+
+        cards.forEach(card => {
+          const isSub = card.getAttribute('data-level') === 'sub';
+
+          const li = document.createElement('li');
+          li.className = 'toc-item ' + (isSub ? 'toc-sub-item' : 'toc-main-item');
+          li.innerText = card.getAttribute('data-title');
+          li.onclick = () => {
+            scrollToCenter(card);
+            const firstInput = card.querySelector('.blank-input');
+            if (firstInput) firstInput.focus();
+            updateTocHighlightFromCard(card);
+            updateEssayTarget(card);
+          };
+          li.setAttribute('data-target', card.id);
+          cardList.appendChild(li);
+        });
+
+        chapterDiv.appendChild(cardList);
+        tocContainer.appendChild(chapterDiv);
+      }
+    }
+
+    function initScrollSpy() {
+      if (observer) observer.disconnect();
+      
+      const cards = document.querySelectorAll('.card:not(.hidden)');
+      if (cards.length === 0) return;
+
+      const options = {
+        root: null,
+        rootMargin: '-20% 0px -60% 0px', 
+        threshold: 0
+      };
+
+      observer = new IntersectionObserver((entries) => {
+        entries.forEach(entry => {
+          if (entry.isIntersecting) {
+            updateTocHighlightFromCard(entry.target);
+            updateEssayTarget(entry.target);
+          }
+        });
+      }, options);
+
+      cards.forEach(card => observer.observe(card));
+    }
+
+    function updateTocHighlightFromCard(card) {
+      if (!card) return;
+      const currentCh = card.getAttribute('data-chapter');
+      const cardId = card.id;
+
+      document.querySelectorAll('.toc-chapter').forEach(ch => {
+        if (ch.id === `toc-${currentCh}`) {
+          ch.classList.add('active');
+        } else {
+          ch.classList.remove('active');
+        }
+      });
+
+      document.querySelectorAll('.toc-item').forEach(item => {
+        if (item.getAttribute('data-target') === cardId) {
+          item.classList.add('active');
+        } else {
+          item.classList.remove('active');
+        }
+      });
+    }
+
+    function applyFilters() {
+      isReviewMode = false;
+      document.body.classList.remove('is-review');
+      const cards = document.querySelectorAll('.card');
+      cards.forEach(card => {
+        const gradeMatch = (currentGrade === 'all' || card.getAttribute('data-grade') === currentGrade);
+        const chapterMatch = (currentChapter === 'all' || card.getAttribute('data-chapter') === currentChapter);
+
+        if (gradeMatch && chapterMatch) {
+          card.classList.remove('hidden');
+        } else {
+          card.classList.add('hidden');
+        }
+      });
+      attachKeyEvents();
+      updateScore();
+      renderToc();
+      initScrollSpy(); 
+    }
+
+    function startReviewMode() {
+      const visibleCards = document.querySelectorAll('.card:not(.hidden)');
+      let hasIncorrect = false;
+
+      visibleCards.forEach(card => {
+        const inputs = Array.from(card.querySelectorAll('.blank-input'));
+        const allCorrect = inputs.length > 0 ? inputs.every(i => i.classList.contains('correct') && i.value.trim() !== '') : true;
+
+        if (allCorrect && inputs.length > 0) {
+          card.classList.add('hidden');
+        } else if (inputs.length > 0) {
+          inputs.forEach(i => {
+            if (!i.classList.contains('correct') || i.value.trim() === '') {
+              i.value = '';
+              i.dataset.checked = "false";
+              i.classList.remove('incorrect');
+              const hint = i.nextElementSibling;
+              if (hint && hint.classList.contains('hint')) {
+                hint.classList.remove('visible');
+              }
+            }
+          });
+          hasIncorrect = true;
+        } else {
+          card.classList.add('hidden'); 
+        }
+      });
+
+      if (!hasIncorrect) {
+        alert("현재 보이는 빈칸 문제를 모두 맞췄습니다!");
+        return;
+      }
+
+      isReviewMode = true;
+      document.body.classList.add('is-review');
+      attachKeyEvents();
+      updateScore();
+      renderToc(); 
+      initScrollSpy();
+      
+      const firstInput = document.querySelector('.card:not(.hidden) .blank-input:not(.correct)');
+      if(firstInput) {
+        firstInput.focus();
+        scrollToCenter(firstInput);
+      }
+    }
+
+    document.querySelectorAll('#gradeFilters .filter-btn').forEach(btn => {
+      btn.addEventListener('click', () => {
+        document.querySelectorAll('#gradeFilters .filter-btn').forEach(b => b.classList.remove('active'));
+        btn.classList.add('active');
+        currentGrade = btn.getAttribute('data-grade');
+        applyFilters();
+      });
+    });
+
+    document.querySelectorAll('#chapterFilters .filter-btn').forEach(btn => {
+      btn.addEventListener('click', () => {
+        document.querySelectorAll('#chapterFilters .filter-btn').forEach(b => b.classList.remove('active'));
+        btn.classList.add('active');
+        currentChapter = btn.getAttribute('data-chapter');
+        applyFilters();
+      });
+    });
+
+    function toggleCheckAndHints() {
+      isAllHintsShown = !isAllHintsShown;
+      document.querySelectorAll('.card:not(.hidden) .blank-input').forEach(input => {
+        gradeInput(input, false);
+      });
+      updateScore();
+
+      if (isAllHintsShown) {
+        document.body.classList.add('show-all-hints');
+      } else {
+        document.body.classList.remove('show-all-hints');
+      }
+    }
+
+    function resetAll() {
+      if (confirm('현재 보이는 모든 문제의 답안을 초기화하시겠습니까?')) {
+        document.querySelectorAll('.card:not(.hidden) .blank-input').forEach(i => {
+          i.value = '';
+          i.dataset.checked = "false";
+          i.classList.remove('correct', 'incorrect');
+        });
+        document.querySelectorAll('.card:not(.hidden) .hint, .card:not(.hidden) .long-answer').forEach(h => h.classList.remove('visible'));
+        
+        for (let key in essayDrafts) delete essayDrafts[key];
+        for (let key in essayFeedbacks) delete essayFeedbacks[key];
+        document.getElementById('global-essay-input').value = '';
+        document.getElementById('global-essay-feedback').innerHTML = '';
+        document.getElementById('global-essay-feedback').classList.remove('visible');
+
+        isAllHintsShown = false;
+        document.body.classList.remove('show-all-hints');
+        
+        if (isReviewMode) {
+          applyFilters();
+        } else {
+          updateScore();
+        }
+      }
+    }
+
+    function toggleTheme() {
+      const cur = document.documentElement.getAttribute('data-theme');
+      const btn = document.getElementById('themeToggleBtn');
+      if (cur === 'dark') {
+        document.documentElement.setAttribute('data-theme', 'light');
+        btn.innerText = 'Dark';
+      } else {
+        document.documentElement.setAttribute('data-theme', 'dark');
+        btn.innerText = 'Light';
+      }
+    }
+
+    window.addEventListener('keydown', (e) => {
+      if (e.altKey && (e.key === 'a' || e.key === 'A' || e.code === 'KeyA')) {
+        e.preventDefault();
+        toggleCheckAndHints();
+      }
+    });
+
+    applyFilters();
+  </script>
+</body>
+</html>
