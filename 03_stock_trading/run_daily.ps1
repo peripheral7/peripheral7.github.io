@@ -1,6 +1,10 @@
-# 매일 아침 8시, Windows 작업 스케줄러가 이 스크립트를 실행한다.
+﻿# 매일 아침 8시, Windows 작업 스케줄러가 이 스크립트를 실행한다.
 # main.py 실행 -> public/reports/vcp_dashboard.html, data.json 갱신 -> 변경 시에만 커밋 & push.
 # 로그: 이 파일과 같은 폴더의 run_daily.log (실행마다 append)
+#
+# 주의: 이 파일은 반드시 UTF-8 BOM으로 저장되어야 한다. Windows PowerShell 5.1은 BOM이 없으면
+# 스크립트 소스를 시스템 ANSI 코드페이지(예: CP949)로 읽어, 아래 한글 리터럴이 깨지고
+# 그 깨진 문자열이 그대로 git 커밋 메시지 등으로 들어가 버린다(직접 겪은 버그).
 
 $ErrorActionPreference = "Stop"
 
