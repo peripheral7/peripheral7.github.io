@@ -4,6 +4,9 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>감정평가 행정법 빈칸 퀴즈 (1~41 완성본)</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Archivo:wght@400;500;600;700;800;900&family=Noto+Sans+KR:wght@400;500;700;900&display=swap" rel="stylesheet">
   <style>
     /* ==========================================================================
        디자인 시스템: 무채색(Monochrome) + 채점(녹/적) 기반
@@ -45,7 +48,7 @@
 
     * { box-sizing: border-box; margin: 0; padding: 0; }
     body {
-      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Pretendard", sans-serif;
+      font-family: 'Archivo', 'Noto Sans KR', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
       background-color: var(--bg);
       color: var(--text);
       line-height: 1.85;
@@ -80,13 +83,12 @@
       border: 1px solid var(--border);
       border-radius: 12px;
       padding: 20px;
-      height: fit-content; /* 내부 컨텐츠 높이만큼만 차지하게 하여 sticky 효과 극대화 */
-      max-height: calc(100vh - 40px);
+      height: calc(100vh - 40px); /* 좌우 동일한 고정 높이 — 내용이 길어져도 늘어나지 않음 */
       overflow-y: auto;
       box-shadow: 0 4px 6px -1px rgba(0,0,0,0.05);
       flex-shrink: 0;
     }
-    
+
     .toc-sidebar { width: 260px; }
     .essay-sidebar {
       width: 320px;
@@ -151,7 +153,7 @@
 
     @media (max-width: 1200px) {
       .layout { flex-direction: column; align-items: stretch; }
-      .toc-sidebar, .essay-sidebar { width: 100%; position: static; max-height: 300px; margin-bottom: 20px; }
+      .toc-sidebar, .essay-sidebar { width: 100%; position: static; height: 300px; margin-bottom: 20px; }
       .content { max-width: 100%; }
     }
 
@@ -337,8 +339,8 @@
     .essay-input {
       flex: 1;
       width: 100%;
-      min-height: 400px; /* 기존보다 훨씬 긴 서술형 창 */
-      resize: vertical;
+      min-height: 120px; /* 좌측 목차 사이드바와 동일한 고정 높이를 flex로 채움 */
+      resize: none;
       border: 1px solid var(--border);
       border-radius: 6px;
       padding: 10px;
@@ -1422,7 +1424,7 @@
     <aside class="essay-sidebar">
       <h3>서술형 작성</h3>
       <div id="current-essay-target">스크롤하여 논점을 선택하세요.</div>
-      <textarea id="global-essay-input" class="essay-input" placeholder="여기에 작성하세요. 엔터를 누르면 채점됩니다. (Shift+Enter로 줄바꿈)"></textarea>
+      <textarea id="global-essay-input" class="essay-input" placeholder="엔터를 누르면 채점됩니다. (Shift+Enter로 줄바꿈)"></textarea>
       <div id="global-essay-feedback" class="essay-feedback"></div>
     </aside>
   </div>
