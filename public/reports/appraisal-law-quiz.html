@@ -75,18 +75,19 @@
       align-items: flex-start;
     }
 
-    /* 좌우 사이드바 플로팅 효과 (스크롤 연동) */
+    /* 좌우 사이드바 플로팅 효과 (스크롤 연동) — 화면 높이의 2/3, 항상 수직 중앙 */
     .toc-sidebar, .essay-sidebar {
       position: sticky;
-      top: 20px;
+      top: calc(100vh / 6);
       background: var(--card-bg);
       border: 1px solid var(--border);
       border-radius: 12px;
       padding: 20px;
-      height: calc(100vh - 40px); /* 좌우 동일한 고정 높이 — 내용이 길어져도 늘어나지 않음 */
+      height: calc(100vh * 2 / 3); /* 좌우 동일한 고정 높이(전체 높이의 2/3) — 내용이 길어져도 늘어나지 않음 */
       overflow-y: auto;
       box-shadow: 0 4px 6px -1px rgba(0,0,0,0.05);
       flex-shrink: 0;
+      will-change: transform;
     }
 
     .toc-sidebar { width: 260px; }
@@ -1424,7 +1425,7 @@
     <aside class="essay-sidebar">
       <h3>서술형 작성</h3>
       <div id="current-essay-target">스크롤하여 논점을 선택하세요.</div>
-      <textarea id="global-essay-input" class="essay-input" placeholder="엔터를 누르면 채점됩니다. (Shift+Enter로 줄바꿈)"></textarea>
+      <textarea id="global-essay-input" class="essay-input"></textarea>
       <div id="global-essay-feedback" class="essay-feedback"></div>
     </aside>
   </div>
@@ -1965,6 +1966,43 @@
     });
 
     applyFilters();
+
+    // 좌우 플로팅 사이드바 — 스크롤 시 살짝 유격을 주어 함께 스크롤되는 느낌을 연출
+    (function () {
+      const floaters = [
+        document.querySelector('.toc-sidebar'),
+        document.querySelector('.essay-sidebar'),
+      ].filter(Boolean);
+      if (!floaters.length) return;
+
+      let lastScrollY = window.scrollY;
+      let give = 0;
+      let raf = null;
+
+      function tick() {
+        give *= 0.85; // 유격이 스크롤 정지 후 서서히 원위치로 수렴
+        floaters.forEach((el) => {
+          el.style.transform = Math.abs(give) > 0.05 ? `translateY(${give.toFixed(2)}px)` : '';
+        });
+        if (Math.abs(give) > 0.05) {
+          raf = requestAnimationFrame(tick);
+        } else {
+          raf = null;
+        }
+      }
+
+      window.addEventListener(
+        'scroll',
+        () => {
+          const currentY = window.scrollY;
+          const delta = currentY - lastScrollY;
+          lastScrollY = currentY;
+          give = Math.max(-14, Math.min(14, give + delta * 0.4));
+          if (!raf) raf = requestAnimationFrame(tick);
+        },
+        { passive: true },
+      );
+    })();
   </script>
 </body>
 </html>
