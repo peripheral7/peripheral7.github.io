@@ -20,3 +20,5 @@ node_modules
 03_stock_trading/__pycache__/
 03_stock_trading/vcp_dashboard*.html
 03_stock_trading/*.log
+# 로컬 정적 빌드 산출물 (배포는 GitHub Actions가 수행)
+/out
