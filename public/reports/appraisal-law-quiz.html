@@ -65,45 +65,53 @@
       letter-spacing: -1px;
     }
 
-    /* 3단 레이아웃: 목차(좌) - 본문(중앙) - 서술형(우) */
+    /* 2단 레이아웃: 목차(좌, 고정 부착) - 본문(카드 + 카드별 서술형·메모 패널) */
     .layout {
       display: flex;
       justify-content: center;
       gap: 30px;
-      max-width: 1520px;
+      max-width: 1500px;
       margin: 0 auto;
       align-items: flex-start;
     }
 
-    /* 좌우 사이드바 플로팅 효과 (스크롤 연동) — 화면 높이의 2/3, 항상 수직 중앙 */
-    .toc-sidebar, .essay-sidebar {
+    /* 좌측 목차 — 화면에 붙어 스크롤을 따라가는 일반적인 sticky 사이드바 */
+    .toc-sidebar {
       position: sticky;
-      top: calc(100vh / 6);
+      top: 20px;
       background: var(--card-bg);
       border: 1px solid var(--border);
       border-radius: 12px;
       padding: 20px;
-      height: calc(100vh * 2 / 3); /* 좌우 동일한 고정 높이(전체 높이의 2/3) — 내용이 길어져도 늘어나지 않음 */
+      max-height: calc(100vh - 40px);
       overflow-y: auto;
       box-shadow: 0 4px 6px -1px rgba(0,0,0,0.05);
       flex-shrink: 0;
-      will-change: transform;
-    }
-
-    .toc-sidebar { width: 260px; }
-    .essay-sidebar {
-      width: 320px;
+      width: 280px;
       display: flex;
       flex-direction: column;
     }
 
-    .toc-sidebar h3, .essay-sidebar h3 {
+    .toc-sidebar h3 {
       font-size: 1.1rem;
       margin-bottom: 16px;
       color: var(--text);
       border-bottom: 2px solid var(--border);
       padding-bottom: 8px;
     }
+
+    /* 목차 상단 고정 진행도 바 */
+    .toc-progress { position: sticky; top: 0; background: var(--card-bg); z-index: 2; padding-bottom: 10px; margin-bottom: 10px; }
+    .toc-progress-label {
+      display: flex;
+      justify-content: space-between;
+      font-size: 0.72rem;
+      font-weight: 700;
+      color: var(--text-muted);
+      margin-bottom: 6px;
+    }
+    .toc-progress-track { height: 6px; border-radius: 3px; background: var(--input-bg); overflow: hidden; }
+    .toc-progress-fill { height: 100%; background: var(--correct); border-radius: 3px; transition: width 0.25s ease; width: 0%; }
 
     /* 목차: 정답입력 페이지와 같은 형식 — 그룹 라벨 + 플랫 리스트(펼침 고정) + 우측 등급 표시 */
     .toc-chapter { margin-bottom: 18px; }
@@ -179,12 +187,93 @@
       text-underline-offset: 3px;
     }
 
-    .content { width: 100%; max-width: 860px; flex-shrink: 1; }
+    .content { width: 100%; max-width: 1180px; flex-shrink: 1; }
+
+    /* 카드 + 카드별 서술형·메모 패널 페어 (JS가 런타임에 각 .card를 이 구조로 감쌈) */
+    .card-row { display: flex; align-items: stretch; gap: 16px; margin-bottom: 24px; }
+    .card-row .card { margin-bottom: 0; flex: 1; min-width: 0; }
+
+    .side-panel {
+      width: 300px;
+      flex-shrink: 0;
+      display: flex;
+      flex-direction: column;
+      background: var(--card-bg);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      overflow: hidden;
+    }
+    .side-tabs { display: flex; border-bottom: 1px solid var(--border); flex-shrink: 0; }
+    .side-tab {
+      flex: 1;
+      padding: 8px 6px;
+      font-size: 0.8rem;
+      font-weight: 700;
+      text-align: center;
+      background: var(--input-bg);
+      color: var(--text-muted);
+      border: none;
+      border-right: 1px solid var(--border);
+      cursor: pointer;
+      transition: 0.15s;
+    }
+    .side-tab:last-child { border-right: none; }
+    .side-tab:hover { color: var(--text); }
+    .side-tab.active { background: var(--card-bg); color: var(--toc-active); }
+    .side-pane { flex: 1; min-height: 0; display: flex; flex-direction: column; padding: 10px; }
+    .side-pane[hidden] { display: none; }
+    .side-actions { display: flex; justify-content: flex-end; gap: 6px; margin-top: 6px; }
+    button.mini-btn {
+      font-size: 0.72rem;
+      font-weight: 700;
+      padding: 4px 9px;
+      border-radius: 5px;
+      border: 1px solid var(--border);
+      background: var(--input-bg);
+      color: var(--text-muted);
+      cursor: pointer;
+      transition: 0.15s;
+    }
+    button.mini-btn:hover { color: var(--text); background: var(--card-bg); }
+
+    .memo-input {
+      flex: 1;
+      width: 100%;
+      resize: none;
+      border: 1px solid var(--border);
+      border-radius: 6px;
+      padding: 8px;
+      font-family: inherit;
+      font-size: 0.85rem;
+      background: var(--bg);
+      color: var(--text);
+      outline: none;
+      line-height: 1.6;
+    }
+    .memo-input:focus { border-color: var(--text-muted); }
+
+    /* 카드헤더 메모 버튼 (등급 배지 왼쪽) */
+    button.memo-toggle-btn {
+      font-size: 0.7rem;
+      font-weight: 700;
+      padding: 3px 9px;
+      border-radius: 4px;
+      border: 1px solid var(--border);
+      background: var(--input-bg);
+      color: var(--text-muted);
+      cursor: pointer;
+      margin-right: 8px;
+      transition: 0.15s;
+    }
+    button.memo-toggle-btn:hover { color: var(--text); }
+    button.memo-toggle-btn.has-memo { color: var(--toc-active); border-color: var(--toc-active); }
 
     @media (max-width: 1200px) {
       .layout { flex-direction: column; align-items: stretch; }
-      .toc-sidebar, .essay-sidebar { width: 100%; position: static; height: 300px; margin-bottom: 20px; }
+      .toc-sidebar { width: 100%; position: static; max-height: 300px; margin-bottom: 20px; }
       .content { max-width: 100%; }
+      .card-row { flex-direction: column; }
+      .side-panel { width: 100%; min-height: 220px; }
     }
 
     .filter-container {
@@ -257,6 +346,7 @@
       transition: 0.2s;
     }
     .card.hidden { display: none !important; }
+    .card-row:has(> .card.hidden) { display: none !important; }
     .sub-card { margin-left: 30px; border-left: 4px solid var(--border); padding-left: 20px;}
 
     @media (max-width: 860px) {
@@ -271,6 +361,7 @@
       border-bottom: 1.5px solid var(--border);
       padding-bottom: 8px;
     }
+    .card-header-right { display: flex; align-items: center; gap: 8px; }
     .card-title { font-size: 1.15rem; font-weight: 700; color: var(--text); }
     
     .badge {
@@ -358,28 +449,21 @@
     .long-answer.visible,
     .show-all-hints .long-answer { display: block !important; }
 
-    /* 플로팅 서술형 입력창 스타일 */
-    #current-essay-target {
-      font-size: 0.85rem;
-      font-weight: 700;
-      margin-bottom: 10px;
-      color: var(--text-muted);
-      word-break: keep-all;
-    }
+    /* 카드별 서술형 입력 패널 */
     .essay-input {
       flex: 1;
       width: 100%;
-      min-height: 120px; /* 좌측 목차 사이드바와 동일한 고정 높이를 flex로 채움 */
+      min-height: 100px;
       resize: none;
       border: 1px solid var(--border);
       border-radius: 6px;
       padding: 10px;
       font-family: inherit;
-      font-size: 0.9rem;
+      font-size: 0.85rem;
       background: var(--bg);
       color: var(--text);
       outline: none;
-      margin-bottom: 10px;
+      margin-bottom: 8px;
       line-height: 1.6;
     }
     .essay-input:focus {
@@ -387,18 +471,20 @@
       box-shadow: 0 0 0 2px rgba(0,0,0,0.05);
     }
     .essay-feedback {
-      font-size: 0.85rem;
+      font-size: 0.8rem;
       background: var(--bg);
-      padding: 12px;
+      padding: 10px;
       border-radius: 6px;
       border: 1px solid var(--border);
       display: none;
       line-height: 1.6;
+      overflow-y: auto;
+      max-height: 160px;
     }
     .essay-feedback.visible { display: block; }
     .kw-match { color: var(--correct); font-weight: bold; }
     .kw-miss { color: var(--incorrect); text-decoration: line-through; opacity: 0.7;}
-    .essay-score { font-size: 1rem; font-weight: 800; margin-bottom: 8px; display: block; border-bottom: 1px dashed var(--border); padding-bottom: 4px;}
+    .essay-empty-note { color: var(--text-muted); font-size: 0.8rem; }
 
     .sr-only { display: none !important; }
     .review-mode-badge { color: var(--incorrect); font-weight: bold; margin-left: 10px; display: none; }
@@ -434,6 +520,10 @@
   <div class="layout">
     <aside class="toc-sidebar">
       <h3>목차</h3>
+      <div class="toc-progress">
+        <div class="toc-progress-label"><span>전체 진행도</span><span id="tocProgressText">0 / 0</span></div>
+        <div class="toc-progress-track"><div class="toc-progress-fill" id="tocProgressFill"></div></div>
+      </div>
       <div id="toc-container"></div>
     </aside>
 
@@ -1698,45 +1788,94 @@
         ① <input type="text" class="blank-input" data-ans="흡수설" style="width: 12ch;"><span class="hint">[흡수설]</span>은 당초 처분은 경정처분에 흡수되어 소멸하고 경정처분이 소송의 대상 및 기산점이 된다는 견해이며, ② <input type="text" class="blank-input" data-ans="역흡수설" style="width: 14ch;"><span class="hint">[역흡수설]</span>은 경정처분이 당초 처분에 흡수되어 수정된 당초의 처분이 소송의 대상이 되며 당초 처분이 기산점이 된다는 견해이다. ③ <input type="text" class="blank-input" data-ans="병존설" style="width: 12ch;"><span class="hint">[병존설]</span>은 당초 처분과 경정처분은 독립된 처분으로 별개의 소송의 대상 및 기산점이 된다는 견해이다. 판례는 증액경정처분은 흡수설을, 감액경정처분은 역흡수설을 취한다.</p>
       </div>
 
-      <div class="card" id="card-062" data-level="main" data-grade="B" data-chapter="ch5" data-title="논점 062. (자료 준비중)">
-        <div class="card-header"><div class="card-title">논점 062</div><span class="badge badge-b">B급</span></div>
-        <p class="text-muted">※ 아직 정리된 빈칸 문제가 없는 챕터입니다. 강의자료가 추가되면 채워질 예정.</p>
+      <div class="card" id="card-062" data-level="main" data-grade="B" data-chapter="ch5" data-title="논점 062. 원처분주의와 재결주의">
+        <div class="card-header">
+          <div class="card-title">논점 062. 원처분주의와 재결주의</div>
+          <span class="badge badge-b">B급</span>
+        </div>
+        <p>행정심판의 재결에 불복하여 취소소송을 제기하는 경우 원처분과 재결은 모두 항고소송의 대상이 될 수 있으나, 판결의 모순저촉 방지와 소송경제상 소송의 대상을 제한할 필요가 있다.</p>
+        <p>행정소송법 <input type="text" class="blank-input" data-ans="제19조" style="width: 12ch;"><span class="hint">[제19조]</span>에서는 취소소송의 대상을 원칙적으로 원처분으로 하고, 재결취소소송의 경우에는 재결 자체에 고유한 위법이 있음을 이유로 하는 경우에 한하여 제소를 허용하고 있어 원처분주의를 채택하고 있다.</p>
+        <p><span class="structural-bold">제3자효 행정행위에 대한 인용재결의 고유한 위법 여부</span><br>
+        ① <input type="text" class="blank-input" data-ans="제19조 본문설" style="width: 16ch;"><span class="hint">[제19조 본문설]</span>은 당해 인용재결이 원처분의 상대방에게는 최초의 처분으로서 성질을 갖는다는 점을 논거로 행정소송법 제19조 본문에 의해 처분이 소의 대상이 된다고 한다. ② <input type="text" class="blank-input" data-ans="제19조 단서설" style="width: 16ch;"><span class="hint">[제19조 단서설]</span>은 재결 자체에 고유한 위법이 있는 것으로 보아 동법 제19조 단서에 의해 재결이 소의 대상이 되는 것으로 본다. 판례 및 검토도 제19조 단서설의 입장이다.</p>
       </div>
       <div class="card" id="card-063" data-level="main" data-grade="D" data-chapter="ch5" data-title="논점 063. (자료 준비중)">
         <div class="card-header"><div class="card-title">논점 063</div><span class="badge badge-d">D급</span></div>
         <p class="text-muted">※ 아직 정리된 빈칸 문제가 없는 챕터입니다. 강의자료가 추가되면 채워질 예정.</p>
       </div>
-      <div class="card" id="card-064" data-level="main" data-grade="A" data-chapter="ch5" data-title="논점 064. (자료 준비중)">
-        <div class="card-header"><div class="card-title">논점 064</div><span class="badge badge-a">A급</span></div>
-        <p class="text-muted">※ 아직 정리된 빈칸 문제가 없는 챕터입니다. 강의자료가 추가되면 채워질 예정.</p>
+      <div class="card" id="card-064" data-level="main" data-grade="A" data-chapter="ch5" data-title="논점 064. 재결의 고유한 하자가 없는 경우">
+        <div class="card-header">
+          <div class="card-title">논점 064. 재결의 고유한 하자가 없는 경우</div>
+          <span class="badge badge-a">A급</span>
+        </div>
+        <p>재결의 고유한 하자가 없는 경우에도 그 재결과 그에 따른 처분이 모두 존재하게 되어, 원고는 재결을 다투어야할지 변경된 원처분을 다투어야할지가 문제된다.</p>
+        <p><span class="structural-bold">1. 형성재결(일부인용재결·변경재결·수정재결)의 경우</span><br>
+        ① <input type="text" class="blank-input" data-ans="변경재결설" style="width: 16ch;"><span class="hint">[변경재결설]</span>은 변경재결은 원처분을 대체하고 원처분은 취소되기 때문에 위원회를 피고로 하여 재결을 다투어야 한다는 견해이다. ② <input type="text" class="blank-input" data-ans="변경된 원처분설" style="width: 18ch;"><span class="hint">[변경된 원처분설]</span>은 원처분주의 하에서는 재결내용에 고유한 위법이 있는 것이라고 할 수 없기 때문에 원처분청을 피고로 하여 수정된 원처분이 소의 대상이 된다는 견해이며, 판례의 입장이다(③ 절충설도 대립).</p>
+        <p><span class="structural-bold">2. 명령재결(변경명령재결에 따른 변경처분)의 경우</span><br>
+        ① <input type="text" class="blank-input" data-ans="변경처분설" style="width: 16ch;"><span class="hint">[변경처분설]</span>은 원처분은 변경처분에 흡수되어 결국 변경처분이 대상이므로, 변경처분이 원처분을 대체하는 새로운 처분이라고 한다. ② <input type="text" class="blank-input" data-ans="변경된 원처분설" style="width: 18ch;"><span class="hint">[변경된 원처분설]</span>은 원처분이 당초부터 변경된 내용의 처분으로 존재하는 것으로 보며, 판례의 입장이다(변경처분에 의해 당초 처분은 소멸하지 않고 변경된 내용으로 존재). ③ 독립설도 대립하며, ④ <input type="text" class="blank-input" data-ans="변경명령재결설" style="width: 18ch;"><span class="hint">[변경명령재결설]</span>은 변경처분은 변경명령재결의 기속력에 의한 부차적 행위에 불과하므로 변경명령재결을 대상으로 해야 한다고 본다.</p>
       </div>
-      <div class="card" id="card-065" data-level="main" data-grade="A" data-chapter="ch5" data-title="논점 065. (자료 준비중)">
-        <div class="card-header"><div class="card-title">논점 065</div><span class="badge badge-a">A급</span></div>
-        <p class="text-muted">※ 아직 정리된 빈칸 문제가 없는 챕터입니다. 강의자료가 추가되면 채워질 예정.</p>
+      <div class="card" id="card-065" data-level="main" data-grade="A" data-chapter="ch5" data-title="논점 065. 원고적격">
+        <div class="card-header">
+          <div class="card-title">논점 065. 원고적격</div>
+          <span class="badge badge-a">A급</span>
+        </div>
+        <p><span class="structural-bold">1. 의의 및 규정</span><br>
+        원고적격이란 구체적인 소송에서 원고로서 소송을 수행하여 본안판결을 받을 수 있는 자격을 의미한다. 행정소송법 <input type="text" class="blank-input" data-ans="제12조 제1문" style="width: 16ch;"><span class="hint">[제12조 제1문]</span>은 "취소소송은 처분등의 취소를 구할 법률상 이익이 있는자"가 제기할 수 있다고 규정한다.</p>
+        <p><span class="structural-bold">2. 법률상 이익의 의미(학설)</span><br>
+        ① <input type="text" class="blank-input" data-ans="권리구제설" style="width: 14ch;"><span class="hint">[권리구제설]</span>은 위법한 처분등으로 인하여 권리를 침해당한 자만이 취소소송을 제기할 수 있다는 견해이며, ② <input type="text" class="blank-input" data-ans="법률상이익구제설" style="width: 18ch;"><span class="hint">[법률상이익구제설]</span>은 전통적 의미의 권리뿐만 아니라 법률에 의해 보호되고 있는 개인의 사익 침해를 구제 대상으로 보는 견해로 판례의 입장이다. ③ <input type="text" class="blank-input" data-ans="보호가치이익구제설" style="width: 20ch;"><span class="hint">[보호가치이익구제설]</span>은 법질서 전체의 관점에서 소송법상 보호할 가치가 있는 이익이면 원고적격을 인정해야 한다는 견해이다. ④ <input type="text" class="blank-input" data-ans="적법성 보장설" style="width: 16ch;"><span class="hint">[적법성 보장설]</span>은 처분의 적법성 확보에 가장 밀접한 이해관계를 가진 자가 원고적격을 가진다는 견해이다.</p>
+        <p><span class="structural-bold">4. 제3자의 원고적격</span></p>
+        <p>(1) <input type="text" class="blank-input" data-ans="경업자소송" style="width: 14ch;"><span class="hint">[경업자소송]</span> — <input type="text" class="blank-input" data-ans="경업자소송" style="width: 14ch;"><span class="hint">[경업자소송]</span>이란 여러 영업자가 <input type="text" class="blank-input" data-ans="경쟁관계" style="width: 12ch;"><span class="hint">[경쟁관계]</span>에 있는 경우, 경쟁관계에 있는 영업자에 대한 처분·부작위를 다른 영업자가 다투는 소송을 말한다. 판례·통설은 특허업의 경우 특허업자의 원고적격을 인정하나, 허가업의 경우 원칙적으로 부정한다.</p>
+        <p>(2) <input type="text" class="blank-input" data-ans="경원자소송" style="width: 14ch;"><span class="hint">[경원자소송]</span> — <input type="text" class="blank-input" data-ans="경원자소송" style="width: 14ch;"><span class="hint">[경원자소송]</span>이란 <input type="text" class="blank-input" data-ans="일방의 인허가" style="width: 16ch;"><span class="hint">[일방의 인허가]</span>가 <input type="text" class="blank-input" data-ans="타방의 불허가" style="width: 16ch;"><span class="hint">[타방의 불허가]</span>로 귀결될 수 밖에 없는 경우에, 불허가 등으로 자기의 법률상 이익을 침해당한 자가 허가 등을 받은 자의 처분을 다투는 소송을 말한다. 경원관계는 배타적 관계이므로 원고적격이 인정된다.</p>
+        <p>(3) 인인소송 — 행정청이 <input type="text" class="blank-input" data-ans="시설의 설치" style="width: 14ch;"><span class="hint">[시설의 설치]</span>를 허가하는 처분등에 대해서 당해 시설의 인근 주민이 다투는 소송을 말한다. 근거 법규·관계 법규가 인근 주민의 개인적 이익도 보호하고 있다고 해석되는 경우 원고적격이 인정된다.</p>
       </div>
-      <div class="card" id="card-066" data-level="main" data-grade="B" data-chapter="ch5" data-title="논점 066. (자료 준비중)">
-        <div class="card-header"><div class="card-title">논점 066</div><span class="badge badge-b">B급</span></div>
-        <p class="text-muted">※ 아직 정리된 빈칸 문제가 없는 챕터입니다. 강의자료가 추가되면 채워질 예정.</p>
+      <div class="card" id="card-066" data-level="main" data-grade="B" data-chapter="ch5" data-title="논점 066. 협의의 소익(권리보호의 필요)">
+        <div class="card-header">
+          <div class="card-title">논점 066. 협의의 소익(권리보호의 필요)</div>
+          <span class="badge badge-b">B급</span>
+        </div>
+        <p>협의의 소의 이익이란 원고에게 소송을 통하여 당해 분쟁을 해결할 현실적 필요성이 인정되는 것을 말하며, 소송제도의 남용 금지에 취지가 있다.</p>
+        <p>취소소송에서 협의의 소익은 대상적격·원고적격이 인정되는 한 충족되는 것으로 추정되고, 특단의 사정이 있는 경우에만 부정된다. 특단의 사정이란 ① <input type="text" class="blank-input" data-ans="처분의 효력이 소멸한 경우" style="width: 24ch;"><span class="hint">[처분의 효력이 소멸한 경우]</span>, ② 처분 후 사정에 의해 이익침해가 해소된 경우, ③ <input type="text" class="blank-input" data-ans="원상회복이 불가능한 경우" style="width: 24ch;"><span class="hint">[원상회복이 불가능한 경우]</span>, ④ 보다 간이한 방법이 있는 경우 등을 말한다.</p>
       </div>
-      <div class="card" id="card-067" data-level="main" data-grade="C" data-chapter="ch5" data-title="논점 067. (자료 준비중)">
-        <div class="card-header"><div class="card-title">논점 067</div><span class="badge badge-c">C급</span></div>
-        <p class="text-muted">※ 아직 정리된 빈칸 문제가 없는 챕터입니다. 강의자료가 추가되면 채워질 예정.</p>
+      <div class="card" id="card-067" data-level="main" data-grade="C" data-chapter="ch5" data-title="논점 067. 피고적격">
+        <div class="card-header">
+          <div class="card-title">논점 067. 피고적격</div>
+          <span class="badge badge-c">C급</span>
+        </div>
+        <p>항고소송의 피고 — 다른 법률에 특별한 규정이 없는 한 <input type="text" class="blank-input" data-ans="그 처분등을 행한 행정청" style="width: 22ch;"><span class="hint">[그 처분등을 행한 행정청]</span>이 피고가 된다. <input type="text" class="blank-input" data-ans="그 처분등을 행한 행정청" style="width: 22ch;"><span class="hint">[그 처분등을 행한 행정청]</span>이란 처분등을 외부에 자신의 명의로 행한 행정청이다. 처분청과 통지한 자가 다른 경우에는 처분청이 피고가 된다.</p>
       </div>
       <div class="card" id="card-068" data-level="main" data-grade="C" data-chapter="ch5" data-title="논점 068. (자료 준비중)">
         <div class="card-header"><div class="card-title">논점 068</div><span class="badge badge-c">C급</span></div>
         <p class="text-muted">※ 아직 정리된 빈칸 문제가 없는 챕터입니다. 강의자료가 추가되면 채워질 예정.</p>
       </div>
-      <div class="card" id="card-069" data-level="main" data-grade="B" data-chapter="ch5" data-title="논점 069. (자료 준비중)">
-        <div class="card-header"><div class="card-title">논점 069</div><span class="badge badge-b">B급</span></div>
-        <p class="text-muted">※ 아직 정리된 빈칸 문제가 없는 챕터입니다. 강의자료가 추가되면 채워질 예정.</p>
+      <div class="card" id="card-069" data-level="main" data-grade="B" data-chapter="ch5" data-title="논점 069. 제소기간">
+        <div class="card-header">
+          <div class="card-title">논점 069. 제소기간</div>
+          <span class="badge badge-b">B급</span>
+        </div>
+        <p>행정소송법 <input type="text" class="blank-input" data-ans="제20조" style="width: 12ch;"><span class="hint">[제20조]</span>는 취소소송의 경우 처분등이 있음을 안 날로부터 <input type="text" class="blank-input" data-ans="90일" style="width: 10ch;"><span class="hint">[90일]</span>, 처분등이 있는 날로부터 <input type="text" class="blank-input" data-ans="1년" style="width: 10ch;"><span class="hint">[1년]</span> 이내에 이를 제기하도록 규정하고 있다.</p>
+        <p>행정심판을 거치지 않은 경우, 처분등이 있음을 안 날이란 통지·공고 등 기타 방법으로 <input type="text" class="blank-input" data-ans="현실적으로 안 날" style="width: 18ch;"><span class="hint">[현실적으로 안 날]</span>을 의미한다. 처분이 있음을 안 날과 있은 날 중 어느 하나의 기간만이라도 경과하면 제소할 수 없다.</p>
       </div>
-      <div class="card" id="card-070" data-level="main" data-grade="A" data-chapter="ch5" data-title="논점 070. (자료 준비중)">
-        <div class="card-header"><div class="card-title">논점 070</div><span class="badge badge-a">A급</span></div>
-        <p class="text-muted">※ 아직 정리된 빈칸 문제가 없는 챕터입니다. 강의자료가 추가되면 채워질 예정.</p>
+      <div class="card" id="card-070" data-level="main" data-grade="A" data-chapter="ch5" data-title="논점 070. 집행정지">
+        <div class="card-header">
+          <div class="card-title">논점 070. 집행정지</div>
+          <span class="badge badge-a">A급</span>
+        </div>
+        <p>집행정지란 행정소송 제기에 수반하여 원고의 권리보전을 위해 본안판결까지 행정처분의 일시정지를 명하는 결정이다(행정소송법 제23조). 집행부정지가 원칙이며, 예외적으로 집행정지가 가능하다.</p>
+        <p><span class="structural-bold">신청요건</span><br>
+        1) <input type="text" class="blank-input" data-ans="정지대상인 처분등이 존재할 것" style="width: 26ch;"><span class="hint">[정지대상인 처분등이 존재할 것]</span> — 부작위나 소멸된 처분은 제외된다.<br>
+        2) <input type="text" class="blank-input" data-ans="적법한 본안소송이 계속 중일 것" style="width: 26ch;"><span class="hint">[적법한 본안소송이 계속 중일 것]</span></p>
+        <p><span class="structural-bold">본안요건</span><br>
+        1) <input type="text" class="blank-input" data-ans="회복하기 어려운 손해" style="width: 20ch;"><span class="hint">[회복하기 어려운 손해]</span> — <input type="text" class="blank-input" data-ans="회복하기 어려운 손해" style="width: 20ch;"><span class="hint">[회복하기 어려운 손해]</span>란 사회통념상 금전배상·원상회복이 불가능하거나 참고 견디기 현저히 곤란한 유형·무형의 손해를 말한다(판례).<br>
+        2) <input type="text" class="blank-input" data-ans="긴급한 필요의 존재" style="width: 22ch;"><span class="hint">[긴급한 필요의 존재]</span> — 손해 회피를 위해 본안판결을 기다릴 여유가 없는 것.<br>
+        3) <input type="text" class="blank-input" data-ans="공공복리에 중대한 영향이 없을 것" style="width: 28ch;"><span class="hint">[공공복리에 중대한 영향이 없을 것]</span> — 신청인이 입을 손해와 공공복리를 비교·형량한다.<br>
+        4) <input type="text" class="blank-input" data-ans="본안청구가 이유 없음이 명백하지 아니할 것" style="width: 34ch;"><span class="hint">[본안청구가 이유 없음이 명백하지 아니할 것]</span> — 명문 규정은 없으나 신청 남용방지를 위해 요구된다.</p>
       </div>
-      <div class="card" id="card-071" data-level="main" data-grade="B" data-chapter="ch5" data-title="논점 071. (자료 준비중)">
-        <div class="card-header"><div class="card-title">논점 071</div><span class="badge badge-b">B급</span></div>
-        <p class="text-muted">※ 아직 정리된 빈칸 문제가 없는 챕터입니다. 강의자료가 추가되면 채워질 예정.</p>
+      <div class="card" id="card-071" data-level="main" data-grade="B" data-chapter="ch5" data-title="논점 071. 가처분">
+        <div class="card-header">
+          <div class="card-title">논점 071. 가처분</div>
+          <span class="badge badge-b">B급</span>
+        </div>
+        <p>가처분이란 다툼 있는 법률관계에 관하여 잠정적으로 임시지위를 보전하는 가구제 제도이다. 행정소송법 제8조 제2항에 따라 민사집행법상 가처분을 준용할 수 있는지 문제된다.</p>
+        <p>① 긍정설은 행정소송법에는 <input type="text" class="blank-input" data-ans="가처분 배제규정이 없다는 점" style="width: 28ch;"><span class="hint">[가처분 배제규정이 없다는 점]</span>을 논거로 가처분을 인정하나, ② 부정설은 집행정지제도는 가처분 배제의 <input type="text" class="blank-input" data-ans="특별규정" style="width: 14ch;"><span class="hint">[특별규정]</span>으로 보아 가처분을 부정한다. 판례는 항고소송에 민사집행법상 가처분 규정이 적용된다고 인정할 수 없다고 하여 부정설 입장이다.</p>
       </div>
       <div class="card" id="card-072" data-level="main" data-grade="C" data-chapter="ch5" data-title="논점 072. (자료 준비중)">
         <div class="card-header"><div class="card-title">논점 072</div><span class="badge badge-c">C급</span></div>
@@ -1839,14 +1978,6 @@
       </div>
 
     </main>
-    
-    <!-- 우측 서술형 입력 플로팅 영역 -->
-    <aside class="essay-sidebar">
-      <h3>서술형 작성</h3>
-      <div id="current-essay-target">스크롤하여 논점을 선택하세요.</div>
-      <textarea id="global-essay-input" class="essay-input"></textarea>
-      <div id="global-essay-feedback" class="essay-feedback"></div>
-    </aside>
   </div>
 
   <button id="themeToggleBtn" onclick="toggleTheme()" title="테마 전환">Dark</button>
@@ -1856,12 +1987,41 @@
     let isAllHintsShown = false;
     let currentGrade = 'all';
     let currentChapter = 'all';
-    let observer; 
-    let currentEssayCardId = null;
+    let observer;
 
-    // 카드별 서술형 작성 임시 저장용 객체
-    const essayDrafts = {};
-    const essayFeedbacks = {};
+    // ---- 로컬 저장(빈칸 정답 / 서술형 / 메모) ----
+    const STORAGE_KEY = 'admin-law-quiz-progress-v1';
+    const SUMMARY_KEY = 'admin-law-quiz-summary-v1'; // 블로그 카드에서 복습 여부를 읽어가는 요약 키
+    let quizState = { blanks: {}, essays: {}, memos: {} };
+
+    function loadStateFromStorage() {
+      try {
+        const raw = localStorage.getItem(STORAGE_KEY);
+        if (raw) {
+          const parsed = JSON.parse(raw);
+          quizState = {
+            blanks: parsed.blanks || {},
+            essays: parsed.essays || {},
+            memos: parsed.memos || {},
+          };
+        }
+      } catch (e) { /* 저장소 접근 불가 시 무시 */ }
+    }
+
+    let saveTimer = null;
+    function persistState() {
+      clearTimeout(saveTimer);
+      saveTimer = setTimeout(() => {
+        try { localStorage.setItem(STORAGE_KEY, JSON.stringify(quizState)); } catch (e) {}
+      }, 200);
+    }
+
+    function blankKey(input) {
+      const card = input.closest('.card');
+      if (!card) return null;
+      const idx = Array.from(card.querySelectorAll('.blank-input')).indexOf(input);
+      return card.id + '__' + idx;
+    }
 
     const chapters = {
       'ch1': '제1편 행정법서론',
@@ -1975,10 +2135,24 @@
       return false;
     }
 
+    function applyGradeVisual(input, val, isMatch, revealHint) {
+      if (isMatch && val) {
+        input.classList.remove('incorrect');
+        input.classList.add('correct');
+      } else {
+        input.classList.remove('correct');
+        input.classList.add('incorrect');
+      }
+      const hint = input.nextElementSibling;
+      if (revealHint && hint && hint.classList.contains('hint')) {
+        hint.classList.add('visible');
+      }
+    }
+
     function gradeInput(input, revealHint = true) {
       const val = input.value.trim();
       const hint = input.nextElementSibling;
-      
+
       if (!val && !revealHint) {
         input.classList.remove('correct', 'incorrect');
         if (hint && hint.classList.contains('hint') && !document.body.classList.contains('show-all-hints')) {
@@ -1990,59 +2164,72 @@
       const validAnswers = input.getAttribute('data-ans') ? input.getAttribute('data-ans').split(',') : [];
       const isMatch = validAnswers.length > 0 ? validAnswers.some(ans => validateInput(val, ans)) : false;
 
-      if (isMatch && val) {
-        input.classList.remove('incorrect');
-        input.classList.add('correct');
-      } else {
-        input.classList.remove('correct');
-        input.classList.add('incorrect');
+      applyGradeVisual(input, val, isMatch, revealHint);
+
+      // 같은 카드 안에서 정답(data-ans)이 동일한 다른 빈칸은 함께 채점·토글된다
+      const card = input.closest('.card');
+      const ansAttr = input.getAttribute('data-ans');
+      if (card && ansAttr) {
+        card.querySelectorAll('.blank-input').forEach((sibling) => {
+          if (sibling === input || sibling.getAttribute('data-ans') !== ansAttr) return;
+          sibling.value = input.value;
+          if (revealHint) sibling.dataset.checked = 'true';
+          applyGradeVisual(sibling, val, isMatch, revealHint);
+          const k = blankKey(sibling);
+          if (k) quizState.blanks[k] = sibling.value;
+        });
       }
 
-      if (revealHint && hint && hint.classList.contains('hint')) {
-        hint.classList.add('visible');
-      }
+      const key = blankKey(input);
+      if (key) quizState.blanks[key] = input.value;
+      persistState();
+
       return isMatch;
     }
 
-    function gradeEssay() {
-      if (!currentEssayCardId) return;
-      const textarea = document.getElementById('global-essay-input');
-      const text = textarea.value.replace(/\s+/g, '');
-      const feedbackDiv = document.getElementById('global-essay-feedback');
-      
-      const keywords = essayKeywords[currentEssayCardId] || [];
-      if (keywords.length === 0) {
-        feedbackDiv.innerHTML = '<span class="text-muted">제공된 키워드 정답안이 없습니다.</span>';
-        feedbackDiv.classList.add('visible');
-        essayFeedbacks[currentEssayCardId] = feedbackDiv.innerHTML;
+    function focusNextBlank(current) {
+      const all = Array.from(document.querySelectorAll('.card:not(.hidden) .blank-input'));
+      const idx = all.indexOf(current);
+      if (idx === -1) return;
+      for (let i = idx + 1; i < all.length; i++) {
+        if (all[i].dataset.checked !== 'true') { all[i].focus(); all[i].select(); return; }
+      }
+      for (let i = 0; i < idx; i++) {
+        if (all[i].dataset.checked !== 'true') { all[i].focus(); all[i].select(); return; }
+      }
+    }
+
+    // 키워드 히트 여부만 표시(점수 미표시) — 행정작용법 표준답안의 주요 목차·키워드 기준
+    function gradeEssayFor(cardId, inputEl, feedbackEl) {
+      const text = inputEl.value.replace(/\s+/g, '');
+      const keywords = essayKeywords[cardId] || [];
+
+      if (!text.trim()) {
+        feedbackEl.innerHTML = '';
+        feedbackEl.classList.remove('visible');
         return;
       }
 
-      let matchCount = 0;
-      let feedbackHtml = '';
-      
-      keywords.forEach(kw => {
-        const cleanKw = kw.replace(/\s+/g, '');
-        if (text.includes(cleanKw)) {
-          matchCount++;
-          feedbackHtml += `<span class="kw-match">[O] ${kw}</span><br>`;
-        } else {
-          feedbackHtml += `<span class="kw-miss">[X] ${kw}</span><br>`;
-        }
-      });
-      
-      const score = Math.round((matchCount / keywords.length) * 100);
-      feedbackHtml = `<div class="essay-score">점수: ${score}점</div>` + feedbackHtml;
-      
-      feedbackDiv.innerHTML = feedbackHtml;
-      feedbackDiv.classList.add('visible');
-      essayFeedbacks[currentEssayCardId] = feedbackHtml;
-
-      const currentCard = document.getElementById(currentEssayCardId);
-      if (currentCard) {
-        const longAnswer = currentCard.querySelector('.long-answer');
-        if (longAnswer) longAnswer.classList.add('visible');
+      if (keywords.length === 0) {
+        feedbackEl.innerHTML = '<span class="essay-empty-note">제공된 키워드 정답안이 없습니다.</span>';
+        feedbackEl.classList.add('visible');
+        return;
       }
+
+      let feedbackHtml = '';
+      keywords.forEach((kw) => {
+        const cleanKw = kw.replace(/\s+/g, '');
+        feedbackHtml += text.includes(cleanKw)
+          ? `<span class="kw-match">[O] ${kw}</span><br>`
+          : `<span class="kw-miss">[X] ${kw}</span><br>`;
+      });
+
+      feedbackEl.innerHTML = feedbackHtml;
+      feedbackEl.classList.add('visible');
+
+      const card = document.getElementById(cardId);
+      const longAnswer = card ? card.querySelector('.long-answer') : null;
+      if (longAnswer) longAnswer.classList.add('visible');
     }
 
     function scrollToCenter(element) {
@@ -2055,79 +2242,35 @@
       });
     }
 
-    function updateEssayTarget(card) {
-      if (!card) return;
-      const input = document.getElementById('global-essay-input');
-      const feedback = document.getElementById('global-essay-feedback');
-      
-      if (currentEssayCardId) {
-        essayDrafts[currentEssayCardId] = input.value;
-      }
-
-      const title = card.getAttribute('data-title');
-      document.getElementById('current-essay-target').innerText = title;
-      currentEssayCardId = card.id;
-
-      input.value = essayDrafts[card.id] || '';
-      feedback.innerHTML = essayFeedbacks[card.id] || '';
-      
-      if(essayFeedbacks[card.id]) {
-        feedback.classList.add('visible');
-      } else {
-        feedback.classList.remove('visible');
-      }
-    }
-
     function attachKeyEvents() {
       const visibleInputs = Array.from(document.querySelectorAll('.card:not(.hidden) .blank-input'));
       visibleInputs.forEach((input) => {
-        input.dataset.checked = "false";
-        
+        if (input.dataset.checked === undefined) input.dataset.checked = "false";
+
         input.oninput = () => {
           input.dataset.checked = "false";
         };
 
+        // 엔터 1번: 채점 / 엔터 2번(이미 채점된 상태에서): 다음 빈칸으로 이동
         input.onkeydown = (e) => {
           if (e.key === 'Enter') {
             e.preventDefault();
-            
+
             if (input.dataset.checked !== "true") {
               gradeInput(input, true);
               updateScore();
               input.dataset.checked = "true";
               updateTocHighlightFromCard(input.closest('.card'));
-              updateEssayTarget(input.closest('.card'));
             } else {
-              input.value = '';
-              input.dataset.checked = "false";
-              input.classList.remove('correct', 'incorrect');
-              const hint = input.nextElementSibling;
-              if (hint && hint.classList.contains('hint') && !document.body.classList.contains('show-all-hints')) {
-                hint.classList.remove('visible');
-              }
-              updateScore();
+              focusNextBlank(input);
             }
           }
         };
-        
+
         input.onfocus = () => {
           updateTocHighlightFromCard(input.closest('.card'));
-          updateEssayTarget(input.closest('.card'));
         };
       });
-
-      const essayInput = document.getElementById('global-essay-input');
-      essayInput.onkeydown = (e) => {
-        if (e.key === 'Enter' && !e.shiftKey) {
-          e.preventDefault();
-          gradeEssay();
-        }
-      };
-      essayInput.oninput = (e) => {
-        if (currentEssayCardId) {
-          essayDrafts[currentEssayCardId] = e.target.value;
-        }
-      };
     }
 
     function updateScore() {
@@ -2136,6 +2279,19 @@
       const total = visibleInputs.length;
       const pct = total > 0 ? Math.round((correctCount / total) * 100) : 0;
       document.getElementById('scoreText').innerText = `${correctCount} / ${total} (${pct}%)`;
+
+      // 목차 진행도 바는 필터와 무관하게 전체 기준(복습 상태를 그대로 보여주기 위함)
+      const allTotal = document.querySelectorAll('.blank-input').length;
+      const allCorrect = document.querySelectorAll('.blank-input.correct').length;
+      const tocText = document.getElementById('tocProgressText');
+      const tocFill = document.getElementById('tocProgressFill');
+      if (tocText) tocText.innerText = `${allCorrect} / ${allTotal}`;
+      if (tocFill) tocFill.style.width = (allTotal > 0 ? (allCorrect / allTotal) * 100 : 0) + '%';
+
+      // 블로그 카드에서 복습 여부를 읽어갈 수 있도록 요약값 저장
+      try {
+        localStorage.setItem(SUMMARY_KEY, JSON.stringify({ correct: allCorrect, total: allTotal, updatedAt: Date.now() }));
+      } catch (e) {}
     }
 
     function renderToc() {
@@ -2167,7 +2323,6 @@
           if(cards.length > 0) {
             scrollToCenter(cards[0]);
             updateTocHighlightFromCard(cards[0]);
-            updateEssayTarget(cards[0]);
           }
         };
         chapterDiv.appendChild(chapterTitle);
@@ -2199,7 +2354,6 @@
             const firstInput = card.querySelector('.blank-input');
             if (firstInput) firstInput.focus();
             updateTocHighlightFromCard(card);
-            updateEssayTarget(card);
           };
           li.setAttribute('data-target', card.id);
           cardList.appendChild(li);
@@ -2226,7 +2380,6 @@
         entries.forEach(entry => {
           if (entry.isIntersecting) {
             updateTocHighlightFromCard(entry.target);
-            updateEssayTarget(entry.target);
           }
         });
       }, options);
@@ -2296,8 +2449,11 @@
               if (hint && hint.classList.contains('hint')) {
                 hint.classList.remove('visible');
               }
+              const key = blankKey(i);
+              if (key) delete quizState.blanks[key];
             }
           });
+          persistState();
           hasIncorrect = true;
         } else {
           card.classList.add('hidden'); 
@@ -2355,30 +2511,146 @@
       }
     }
 
+    // 상단 "리셋"은 빈칸 답안만 초기화한다(서술형·메모는 각 카드의 초기화 버튼으로 별도 관리)
     function resetAll() {
       if (confirm('현재 보이는 모든 문제의 답안을 초기화하시겠습니까?')) {
         document.querySelectorAll('.card:not(.hidden) .blank-input').forEach(i => {
           i.value = '';
           i.dataset.checked = "false";
           i.classList.remove('correct', 'incorrect');
+          const key = blankKey(i);
+          if (key) delete quizState.blanks[key];
         });
         document.querySelectorAll('.card:not(.hidden) .hint, .card:not(.hidden) .long-answer').forEach(h => h.classList.remove('visible'));
-        
-        for (let key in essayDrafts) delete essayDrafts[key];
-        for (let key in essayFeedbacks) delete essayFeedbacks[key];
-        document.getElementById('global-essay-input').value = '';
-        document.getElementById('global-essay-feedback').innerHTML = '';
-        document.getElementById('global-essay-feedback').classList.remove('visible');
+        persistState();
 
         isAllHintsShown = false;
         document.body.classList.remove('show-all-hints');
-        
+
         if (isReviewMode) {
           applyFilters();
         } else {
           updateScore();
         }
       }
+    }
+
+    function ensureCardHeaderRight(card) {
+      const header = card.querySelector('.card-header');
+      if (!header) return null;
+      let right = header.querySelector('.card-header-right');
+      if (!right) {
+        right = document.createElement('div');
+        right.className = 'card-header-right';
+        const badge = header.querySelector('.badge');
+        if (badge) {
+          header.insertBefore(right, badge);
+          right.appendChild(badge);
+        } else {
+          header.appendChild(right);
+        }
+      }
+      return right;
+    }
+
+    // 각 카드에 서술형/메모 패널을 붙이고(카드 높이만큼 늘어남), 카드헤더에 메모 버튼을 추가한다
+    function buildSidePanels() {
+      const cards = Array.from(document.querySelectorAll('main.content > .card'));
+      cards.forEach((card) => {
+        const row = document.createElement('div');
+        row.className = 'card-row';
+        card.parentNode.insertBefore(row, card);
+        row.appendChild(card);
+
+        const panel = document.createElement('aside');
+        panel.className = 'side-panel';
+        panel.innerHTML =
+          '<div class="side-tabs">' +
+            '<button type="button" class="side-tab active" data-tab="essay">서술형</button>' +
+            '<button type="button" class="side-tab" data-tab="memo">메모</button>' +
+          '</div>' +
+          '<div class="side-pane essay-pane" data-pane="essay">' +
+            '<textarea class="essay-input" placeholder="서술형 답안을 쓰고 Enter로 채점"></textarea>' +
+            '<div class="essay-feedback"></div>' +
+            '<div class="side-actions"><button type="button" class="mini-btn essay-reset-btn">초기화</button></div>' +
+          '</div>' +
+          '<div class="side-pane memo-pane" data-pane="memo" hidden>' +
+            '<textarea class="memo-input" placeholder="이 논점에 대한 메모를 남겨보세요"></textarea>' +
+          '</div>';
+        row.appendChild(panel);
+
+        panel.querySelectorAll('.side-tab').forEach((tab) => {
+          tab.onclick = () => {
+            panel.querySelectorAll('.side-tab').forEach((t) => t.classList.remove('active'));
+            tab.classList.add('active');
+            panel.querySelectorAll('.side-pane').forEach((p) => { p.hidden = (p.dataset.pane !== tab.dataset.tab); });
+          };
+        });
+
+        const right = ensureCardHeaderRight(card);
+        const memoBtn = document.createElement('button');
+        memoBtn.type = 'button';
+        memoBtn.className = 'memo-toggle-btn';
+        memoBtn.textContent = '메모';
+        memoBtn.title = '이 논점에 메모 남기기';
+        memoBtn.onclick = () => {
+          const memoTab = panel.querySelector('.side-tab[data-tab="memo"]');
+          memoTab.click();
+          panel.querySelector('.memo-input').focus();
+        };
+        if (right) right.insertBefore(memoBtn, right.firstChild);
+
+        const essayInput = panel.querySelector('.essay-input');
+        const essayFeedback = panel.querySelector('.essay-feedback');
+        const savedEssay = quizState.essays[card.id];
+        if (savedEssay) {
+          essayInput.value = savedEssay;
+          gradeEssayFor(card.id, essayInput, essayFeedback);
+        }
+        essayInput.oninput = () => {
+          quizState.essays[card.id] = essayInput.value;
+          persistState();
+        };
+        essayInput.onkeydown = (e) => {
+          if (e.key === 'Enter' && !e.shiftKey) {
+            e.preventDefault();
+            gradeEssayFor(card.id, essayInput, essayFeedback);
+          }
+        };
+        panel.querySelector('.essay-reset-btn').onclick = () => {
+          essayInput.value = '';
+          essayFeedback.innerHTML = '';
+          essayFeedback.classList.remove('visible');
+          delete quizState.essays[card.id];
+          persistState();
+          essayInput.focus();
+        };
+
+        const memoInput = panel.querySelector('.memo-input');
+        const savedMemo = quizState.memos[card.id];
+        if (savedMemo) {
+          memoInput.value = savedMemo;
+          memoBtn.classList.add('has-memo');
+        }
+        memoInput.oninput = () => {
+          quizState.memos[card.id] = memoInput.value;
+          memoBtn.classList.toggle('has-memo', !!memoInput.value.trim());
+          persistState();
+        };
+      });
+    }
+
+    // 저장된 빈칸 답안을 복원(새로고침해도 진행상황 유지)
+    function restoreBlanks() {
+      document.querySelectorAll('.blank-input').forEach((input) => {
+        const key = blankKey(input);
+        const saved = key ? quizState.blanks[key] : null;
+        if (saved) {
+          input.value = saved;
+          input.dataset.checked = 'true';
+          gradeInput(input, true);
+        }
+      });
     }
 
     function toggleTheme() {
@@ -2400,44 +2672,11 @@
       }
     });
 
+    // 초기화: 저장된 진행상황 로드 → 카드별 서술형/메모 패널 부착 → 빈칸 답안 복원 → 필터/목차 렌더
+    loadStateFromStorage();
+    buildSidePanels();
+    restoreBlanks();
     applyFilters();
-
-    // 좌우 플로팅 사이드바 — 스크롤 시 살짝 유격을 주어 함께 스크롤되는 느낌을 연출
-    (function () {
-      const floaters = [
-        document.querySelector('.toc-sidebar'),
-        document.querySelector('.essay-sidebar'),
-      ].filter(Boolean);
-      if (!floaters.length) return;
-
-      let lastScrollY = window.scrollY;
-      let give = 0;
-      let raf = null;
-
-      function tick() {
-        give *= 0.85; // 유격이 스크롤 정지 후 서서히 원위치로 수렴
-        floaters.forEach((el) => {
-          el.style.transform = Math.abs(give) > 0.05 ? `translateY(${give.toFixed(2)}px)` : '';
-        });
-        if (Math.abs(give) > 0.05) {
-          raf = requestAnimationFrame(tick);
-        } else {
-          raf = null;
-        }
-      }
-
-      window.addEventListener(
-        'scroll',
-        () => {
-          const currentY = window.scrollY;
-          const delta = currentY - lastScrollY;
-          lastScrollY = currentY;
-          give = Math.max(-14, Math.min(14, give + delta * 0.4));
-          if (!raf) raf = requestAnimationFrame(tick);
-        },
-        { passive: true },
-      );
-    })();
   </script>
 </body>
 </html>

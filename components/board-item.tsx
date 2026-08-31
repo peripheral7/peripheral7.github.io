@@ -1,5 +1,6 @@
 import Image from "next/image"
 import type { Post } from "@/lib/posts"
+import { ReviewProgressBadge } from "@/components/review-progress-badge"
 
 function Tape() {
   // A strip of masking tape holding the card to the board.
@@ -52,6 +53,7 @@ function CardBody({ post }: { post: Post }) {
 
       <div className="flex items-center justify-between gap-2 px-0.5 pt-2">
         <div className="flex flex-wrap items-center gap-1">
+          {post.progressStorageKey && <ReviewProgressBadge storageKey={post.progressStorageKey} />}
           {post.tags?.map((tag) => (
             <span
               key={tag}

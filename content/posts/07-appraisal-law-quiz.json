@@ -8,5 +8,6 @@
   "href": "/reports/appraisal-law-quiz.html",
   "linkLabel": "퀴즈 풀기",
   "date": "2026.08.30",
-  "tags": ["Appraiser", "행정법", "Quiz", "StudyLog"]
+  "tags": ["Appraiser", "행정법", "Quiz", "StudyLog"],
+  "progressStorageKey": "admin-law-quiz-summary-v1"
 }

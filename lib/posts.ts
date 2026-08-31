@@ -26,6 +26,12 @@ export type Post = {
   // (e.g. "/reports/vcp_dashboard.html"). Used by gallery/[id] to render
   // the report inline via HtmlReport instead of the photo masonry.
   reportPath?: string
+
+  // localStorage key (written by the linked interactive page itself, e.g. a
+  // quiz's own progress tracker) holding a same-origin JSON summary of shape
+  // {correct, total}. When set, BoardItem shows a small "복습 N%" pill read
+  // client-side from that key — purely per-browser, no server data involved.
+  progressStorageKey?: string
 }
 
 
