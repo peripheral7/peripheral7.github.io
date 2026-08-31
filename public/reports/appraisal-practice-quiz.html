@@ -118,6 +118,42 @@
 
   .imp-tag { color: #94a3b8; font-weight: normal; font-size: 13px; margin-left: 8px; }
   .empty-state { text-align: center; padding: 60px 20px; color: var(--text-muted); background: var(--card); border: 1px solid var(--border); border-radius: 12px; font-size: 15px; }
+
+  /* Search */
+  .search-row { position: relative; margin-bottom: 18px; }
+  .search-input { width: 100%; padding: 13px 16px; border: 1.5px solid var(--border-focus); border-radius: 10px; font-size: 15px; outline: none; background: var(--card); color: var(--text-dark); transition: all 0.2s ease; }
+  .search-input:focus { border-color: var(--primary); box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1); }
+  .search-results { position: absolute; top: calc(100% + 6px); left: 0; right: 0; max-height: 420px; overflow-y: auto; background: var(--card); border: 1px solid var(--border); border-radius: 10px; box-shadow: 0 12px 32px rgba(0,0,0,0.14); z-index: 60; display: none; }
+  .search-results.open { display: block; }
+  .search-result-item { display: block; width: 100%; text-align: left; padding: 12px 16px; border: none; border-bottom: 1px solid var(--border); background: none; cursor: pointer; }
+  .search-result-item:last-child { border-bottom: none; }
+  .search-result-item:hover { background: var(--primary-bg); }
+  .sr-badge { font-size: 11px; font-weight: 700; color: var(--primary-hover); background: var(--primary-bg); padding: 2px 8px; border-radius: 4px; margin-right: 8px; display: inline-block; }
+  .sr-prompt { font-size: 14px; font-weight: 600; color: var(--text-dark); margin-top: 4px; }
+  .search-empty { padding: 18px 16px; text-align: center; color: var(--text-muted); font-size: 13.5px; }
+
+  @keyframes searchFlash {
+    0%, 100% { box-shadow: 0 0 0 0 rgba(59, 130, 246, 0); }
+    25% { box-shadow: 0 0 0 4px rgba(59, 130, 246, 0.35); }
+  }
+  .search-highlight { animation: searchFlash 1.6s ease; }
+
+  /* 복습횟수 배지 — 채점 버튼 옆, 브라우저에 저장되어 초기화해도 유지됨 */
+  .review-badge {
+    display: none;
+    align-items: center;
+    justify-content: center;
+    min-width: 22px;
+    height: 22px;
+    padding: 0 6px;
+    border-radius: 6px;
+    background: #16a34a;
+    color: #fff;
+    font-size: 12px;
+    font-weight: 800;
+    font-variant-numeric: tabular-nums;
+    flex-shrink: 0;
+  }
 </style>
 </head>
 <body>
@@ -125,6 +161,11 @@
 <div class="container">
   <div class="header">
     <h1>감정평가실무 종합문제집</h1>
+  </div>
+
+  <div class="search-row">
+    <input type="text" id="global-search" class="search-input" placeholder="문제·키워드로 검색 (예: 잔여지, 환매금액, 고손액)" oninput="handleSearchInput(this.value)" onkeydown="handleSearchKey(event)" autocomplete="off">
+    <div id="search-results" class="search-results"></div>
   </div>
 
   <div class="nav-container">
@@ -862,9 +903,10 @@ function renderQuiz() {
     
     if (q.isInlineShort) {
       cardHtml = `
-        <div class="inline-question">
+        <div class="inline-question" id="card-${q.id}">
           <span class="inline-prompt">${q.prompt}</span>
           <input type="text" class="inline-input blank-input" id="input-${q.id}" value="${savedVal}" placeholder="" oninput="handleInputChange(${q.id}, this.value)" onkeydown="handleKey(event, ${q.id})">
+          <span class="review-badge" id="review-${q.id}" title="복습 횟수"></span>
           <span class="inline-feedback" id="result-${q.id}"></span>
         </div>
       `;
@@ -874,7 +916,7 @@ function renderQuiz() {
       if (q.context) {
         promptHtml += `<div class="q-context">${q.context}</div>`;
       }
-      
+
       cardHtml = `
         <div class="q-card" id="card-${q.id}">
           <div class="q-header-row">
@@ -882,7 +924,10 @@ function renderQuiz() {
               <span class="q-num">${q.id}</span>
               <div style="flex:1;">${promptHtml}</div>
             </div>
-            <button class="btn btn-check" onclick="gradeSingle(${q.id}, false, true)">채점</button>
+            <div style="display:flex; align-items:center; gap:6px;">
+              <span class="review-badge" id="review-${q.id}" title="복습 횟수"></span>
+              <button class="btn btn-check" onclick="gradeSingle(${q.id}, false, true)">채점</button>
+            </div>
           </div>
           <textarea 
             class="input-box blank-input ${q.tall ? 'tall' : ''} ${q.very_tall ? 'very-tall' : ''} ${q.short ? 'short' : ''}" 
@@ -910,6 +955,7 @@ function renderQuiz() {
     if (state[currentSub].graded[q.id]) {
       renderGradedResult(q.id);
     }
+    updateReviewBadge(q.id);
   });
 }
 
@@ -951,40 +997,23 @@ function gradeSingle(id, isIndividual = false, buttonClick = false) {
   if (!currentSub || !dataset[currentSub]) return;
   const inputEl = document.getElementById(`input-${id}`);
   const resPanel = document.getElementById(`result-${id}`);
-  
+
   const isCurrentlyVisible = (resPanel.style.display === "block" || resPanel.style.display === "inline-block");
 
-  if (buttonClick) {
-    if (isCurrentlyVisible) {
-      resPanel.style.display = "none";
-      state[currentSub].graded[id] = false;
-      state[currentSub].individuallyGraded[id] = false;
-      if (inputEl && inputEl.classList.contains('inline-input')) {
-        inputEl.style.borderColor = 'var(--border-focus)';
-        inputEl.style.backgroundColor = '#fcfcfc';
-      }
-    } else {
-      if(inputEl) state[currentSub].inputs[id] = inputEl.value;
-      state[currentSub].graded[id] = true;
-      state[currentSub].individuallyGraded[id] = true;
-      renderGradedResult(id);
+  if (isCurrentlyVisible) {
+    resPanel.style.display = "none";
+    state[currentSub].graded[id] = false;
+    state[currentSub].individuallyGraded[id] = false;
+    if (inputEl && inputEl.classList.contains('inline-input')) {
+      inputEl.style.borderColor = 'var(--border-focus)';
+      inputEl.style.backgroundColor = '#fcfcfc';
     }
   } else {
-    // Enter key
-    if (isCurrentlyVisible) {
-      resPanel.style.display = "none";
-      state[currentSub].graded[id] = false;
-      state[currentSub].individuallyGraded[id] = false;
-      if (inputEl && inputEl.classList.contains('inline-input')) {
-        inputEl.style.borderColor = 'var(--border-focus)';
-        inputEl.style.backgroundColor = '#fcfcfc';
-      }
-    } else {
-      if(inputEl) state[currentSub].inputs[id] = inputEl.value;
-      state[currentSub].graded[id] = true;
-      state[currentSub].individuallyGraded[id] = true;
-      renderGradedResult(id);
-    }
+    if (inputEl) state[currentSub].inputs[id] = inputEl.value;
+    state[currentSub].graded[id] = true;
+    state[currentSub].individuallyGraded[id] = true;
+    renderGradedResult(id);
+    bumpReviewCount(currentSub, id);
   }
   updateOverall();
 }
@@ -1003,8 +1032,10 @@ function gradeAll() {
     }
     
     if (turnOn) {
+      const wasGraded = state[currentSub].graded[q.id];
       state[currentSub].graded[q.id] = true;
       renderGradedResult(q.id);
+      if (!wasGraded) bumpReviewCount(currentSub, q.id);
     } else {
       if (!state[currentSub].individuallyGraded[q.id]) {
         state[currentSub].graded[q.id] = false;
@@ -1054,10 +1085,146 @@ function resetCurrentTab() {
   state[currentSub].graded = {};
   state[currentSub].individuallyGraded = {};
   state[currentSub].globalGraded = false;
-  renderQuiz();
+  renderQuiz(); // 복습횟수(reviewCounts)는 별도 저장소라 여기서 건드리지 않음 — 초기화해도 유지됨
   updateOverall();
 }
 
+// ===================== 복습횟수 (브라우저 저장, 채점 초기화와 무관하게 누적) =====================
+const REVIEW_KEY = 'appraisal-practice-review-counts-v1';
+let reviewCounts = {};
+
+function loadReviewCounts() {
+  try {
+    const raw = localStorage.getItem(REVIEW_KEY);
+    if (raw) reviewCounts = JSON.parse(raw);
+  } catch (e) { /* 저장소 접근 불가 시 무시 */ }
+}
+
+function saveReviewCounts() {
+  try { localStorage.setItem(REVIEW_KEY, JSON.stringify(reviewCounts)); } catch (e) {}
+}
+
+function getReviewCount(subId, qid) {
+  return (reviewCounts[subId] && reviewCounts[subId][qid]) || 0;
+}
+
+// 문제를 "채점"해 답을 확인할 때마다(개별/전체 모두) 1회 누적된다. resetCurrentTab()과는 완전히 분리된 저장소.
+function bumpReviewCount(subId, qid) {
+  if (!reviewCounts[subId]) reviewCounts[subId] = {};
+  reviewCounts[subId][qid] = (reviewCounts[subId][qid] || 0) + 1;
+  saveReviewCounts();
+  updateReviewBadge(qid);
+}
+
+function updateReviewBadge(qid) {
+  const el = document.getElementById(`review-${qid}`);
+  if (!el) return;
+  const count = getReviewCount(currentSub, qid);
+  if (count > 0) {
+    el.textContent = count;
+    el.style.display = 'inline-flex';
+  } else {
+    el.style.display = 'none';
+  }
+}
+
+// ===================== 검색 (전체 주제의 문제를 카드 단위로 검색) =====================
+let searchIndex = null;
+
+function buildSearchIndex() {
+  const stripHtml = (s) => (s || '').replace(/<[^>]+>/g, ' ');
+  const idx = [];
+  structure.forEach((main) => {
+    main.subs.forEach((sub) => {
+      if (!sub.active || !dataset[sub.id]) return;
+      dataset[sub.id].forEach((q) => {
+        const kwText = (q.keywords || []).map((k) => [k.word, ...(k.alt || [])].join(' ')).join(' ');
+        const haystack = [q.prompt, stripHtml(q.context), stripHtml(q.modelAnswer), kwText]
+          .join(' ')
+          .toLowerCase();
+        idx.push({
+          mainId: main.id,
+          subId: sub.id,
+          qid: q.id,
+          subLabel: (tabMeta[sub.id] && tabMeta[sub.id].badge) || sub.name,
+          prompt: q.prompt,
+          haystack,
+        });
+      });
+    });
+  });
+  return idx;
+}
+
+function escapeHtml(s) {
+  return (s || '').replace(/[&<>"']/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
+}
+
+function handleSearchInput(rawQuery) {
+  const query = rawQuery.trim().toLowerCase();
+  const resultsBox = document.getElementById('search-results');
+  if (!query) {
+    resultsBox.classList.remove('open');
+    resultsBox.innerHTML = '';
+    return;
+  }
+  if (!searchIndex) searchIndex = buildSearchIndex();
+  const matches = searchIndex.filter((item) => item.haystack.includes(query)).slice(0, 30);
+
+  resultsBox.innerHTML = matches.length === 0
+    ? `<div class="search-empty">"${escapeHtml(rawQuery)}"에 대한 결과가 없습니다.</div>`
+    : matches
+        .map(
+          (m) => `
+        <button type="button" class="search-result-item" onclick="goToSearchResult('${m.mainId}','${m.subId}',${m.qid})">
+          <span class="sr-badge">${escapeHtml(m.subLabel)}</span>
+          <div class="sr-prompt">${escapeHtml(m.prompt)}</div>
+        </button>
+      `
+        )
+        .join('');
+  resultsBox.classList.add('open');
+}
+
+function handleSearchKey(e) {
+  const resultsBox = document.getElementById('search-results');
+  if (e.key === 'Escape') {
+    resultsBox.classList.remove('open');
+    e.target.blur();
+  } else if (e.key === 'Enter') {
+    const first = resultsBox.querySelector('.search-result-item');
+    if (first) first.click();
+  }
+}
+
+function goToSearchResult(mainId, subId, qid) {
+  currentMain = mainId;
+  currentSub = subId;
+  updateNavigation();
+
+  const resultsBox = document.getElementById('search-results');
+  resultsBox.classList.remove('open');
+  document.getElementById('global-search').value = '';
+
+  requestAnimationFrame(() => {
+    const el = document.getElementById(`card-${qid}`);
+    if (el) {
+      el.scrollIntoView({ behavior: 'smooth', block: 'center' });
+      el.classList.add('search-highlight');
+      setTimeout(() => el.classList.remove('search-highlight'), 1600);
+    }
+  });
+}
+
+document.addEventListener('click', (e) => {
+  const box = document.getElementById('search-results');
+  const input = document.getElementById('global-search');
+  if (box && input && !box.contains(e.target) && e.target !== input) {
+    box.classList.remove('open');
+  }
+});
+
+loadReviewCounts();
 updateNavigation();
 </script>
 </body>
