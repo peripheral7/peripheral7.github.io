@@ -153,7 +153,10 @@
       color: #fff;
       background: var(--text-muted);
     }
-    .toc-progress-badge.p-none { background: var(--border); color: var(--text-muted); }
+    /* 0/0(빈칸 자체가 없는 주제) — 뚜렷하게 회색/비활성 느낌 */
+    .toc-progress-badge.p-empty { background: var(--border); color: var(--text-muted); opacity: 0.7; }
+    /* 빈칸은 있지만 아직 하나도 안 푼 경우 — 회색과는 구분되는 대기 상태 */
+    .toc-progress-badge.p-none { background: transparent; color: var(--text-muted); border: 1px solid var(--border); padding: 0 5px; }
     .toc-progress-badge.p-partial { background: #d97706; }
     [data-theme="dark"] .toc-progress-badge.p-partial { background: #f59e0b; }
     .toc-progress-badge.p-done { background: var(--correct); }
@@ -173,8 +176,6 @@
     .toc-item.active {
       color: var(--toc-active);
       font-weight: 800;
-      text-decoration: underline;
-      text-underline-offset: 3px;
     }
 
     .content { width: 100%; max-width: 1180px; flex-shrink: 1; }
@@ -365,7 +366,8 @@
       padding-bottom: 8px;
     }
     .card-title { font-size: 1.15rem; font-weight: 700; color: var(--text); }
-    
+    .card-header-right { display: flex; align-items: center; gap: 6px; }
+
     .badge {
       font-size: 0.75rem;
       font-weight: 800;
@@ -378,6 +380,21 @@
     .badge-b { background: var(--badge-b); color: #fff; }
     .badge-c { background: var(--badge-c); }
     .badge-d { background: var(--badge-d); color: #fff; }
+
+    /* 카드별 채점 버튼 — 등급 배지와 같은 크기, 배지 왼쪽에 위치 */
+    button.card-grade-btn {
+      font-size: 0.75rem;
+      font-weight: 800;
+      padding: 3px 8px;
+      border-radius: 4px;
+      border: 1px solid var(--border);
+      background: var(--input-bg);
+      color: var(--text-muted);
+      text-transform: uppercase;
+      cursor: pointer;
+      transition: 0.15s;
+    }
+    button.card-grade-btn:hover { color: var(--text); background: var(--card-bg); }
 
     h4 { font-size: 1.05rem; margin: 16px 0 8px 0; color: var(--text); font-weight: bold; }
     p { margin-bottom: 10px; word-break: keep-all; }
@@ -1066,13 +1083,11 @@
           <div class="card-title">2. 부관의 종류</div>
           <span class="badge badge-a">A급</span>
         </div>
-        <p><strong>부관의 종류 4가지(조건, 기한, 부담, 철회권의 유보)에 대하여 우측 서술형 창에 작성하시오.</strong></p>
-        <div class="long-answer hint">
-          <span class="structural-bold">(1) 조건</span>은 행정행위의 효력의 발생 또는 소멸을 장래의 불확실한 사실에 의존시키는 부관을 말한다. 조건이 성취되어야 행정행위가 비로소 효력을 발생하는 조건을 정지조건이라 하고, 행정행위가 일단 효력을 발생하고 조건이 성취되면 행정행위가 효력을 상실하는 조건을 해제조건이라 한다.<br>
-          <span class="structural-bold">(2) 기한</span>이란 행정행위의 효력발생.소멸여부를 장래의 확실한 사실에 의존시키는 부관을 말하며 시기와 종기가 있다.<br>
-          <span class="structural-bold">(3) 부담</span>이란 행정행위의 주된 내용에 부가하여 그 행정행위의 상대방에게 작위, 부작위, 급부, 수인 등의 의무를 부과하는 부관을 말한다.<br>
-          <span class="structural-bold">(4) 철회권(변경권)의 유보</span>라 함은 행정행위를 행함에 있어 일정한 경우에는 행정행위를 철회(변경)할 수 있음을 정한 부관을 말한다.
-        </div>
+        <p>부관의 종류 4가지 — 아래 빈칸을 채워보시오.</p>
+        <p><span class="structural-bold">(1)</span> <input type="text" class="blank-input" data-ans="조건" style="width: 10ch;"><span class="hint">[조건]</span>은 행정행위의 효력의 발생 또는 소멸을 장래의 불확실한 사실에 의존시키는 부관을 말한다. 조건이 성취되어야 행정행위가 비로소 효력을 발생하는 조건을 <input type="text" class="blank-input" data-ans="정지조건" style="width: 12ch;"><span class="hint">[정지조건]</span>이라 하고, 행정행위가 일단 효력을 발생하고 조건이 성취되면 행정행위가 효력을 상실하는 조건을 <input type="text" class="blank-input" data-ans="해제조건" style="width: 12ch;"><span class="hint">[해제조건]</span>이라 한다.</p>
+        <p><span class="structural-bold">(2)</span> <input type="text" class="blank-input" data-ans="기한" style="width: 10ch;"><span class="hint">[기한]</span>이란 행정행위의 효력발생·소멸여부를 장래의 확실한 사실에 의존시키는 부관을 말하며 <input type="text" class="blank-input" data-ans="시기" style="width: 10ch;"><span class="hint">[시기]</span>와 <input type="text" class="blank-input" data-ans="종기" style="width: 10ch;"><span class="hint">[종기]</span>가 있다.</p>
+        <p><span class="structural-bold">(3)</span> <input type="text" class="blank-input" data-ans="부담" style="width: 10ch;"><span class="hint">[부담]</span>이란 행정행위의 주된 내용에 부가하여 그 행정행위의 상대방에게 <input type="text" class="blank-input" data-ans="작위" style="width: 10ch;"><span class="hint">[작위]</span>, <input type="text" class="blank-input" data-ans="부작위" style="width: 10ch;"><span class="hint">[부작위]</span>, 급부, 수인 등의 의무를 부과하는 부관을 말한다.</p>
+        <p><span class="structural-bold">(4)</span> <input type="text" class="blank-input" data-ans="철회권의 유보,철회권(변경권)의 유보" style="width: 20ch;"><span class="hint">[철회권(변경권)의 유보]</span>라 함은 행정행위를 행함에 있어 일정한 경우에는 행정행위를 철회(변경)할 수 있음을 정한 부관을 말한다.</p>
       </div>
 
       <div class="card sub-card" id="card-022-3" data-level="sub" data-grade="A" data-chapter="ch2" data-title="3. 부관의 한계">
@@ -1080,12 +1095,10 @@
           <div class="card-title">3. 부관의 한계</div>
           <span class="badge badge-a">A급</span>
         </div>
-        <p><strong>부관의 한계 (부관의 위법 여부 판단 기준)에 대하여 우측 서술형 창에 작성하시오.</strong></p>
-        <div class="long-answer hint">
-          <span class="structural-bold">(1) 부관의 가능성:</span> 행정기본법 제17조 제1항에서 "행정청은 처분에 재량이 있는 경우에는 부관을 붙일 수 있다"고 규정하여, 재량행위의 경우 부관 부착이 가능하다. 종래에 기속행위는 부관의 부착이 불가하다고 보았으나, 최근 판례는 기속행위여도 요건충족적 부관에는 부착이 가능하다고 판시한 바 있다. 또한 동법 제17조 제2항에서는 "행정청은 처분에 재량이 없는 경우에는 법률에 근거가 있는 경우에 부관을 붙일 수 있다"고 규정하여 기속행위의 경우에도 근거가 있다면 부관을 붙일 수 있다.<br>
-          <span class="structural-bold">(2) 부관의 내용상 한계:</span> 부관은 행정기본법 제17조 제4항에 따라 ①해당 처분의 목적에 위배되지 아니할 것, ②해당 처분과 실질적인 관련이 있을 것, ③해당 처분의 목적을 달성하기 위하여 필요한 최소한의 범위일 것이라는 요건에 적합하여야 한다.<br>
-          <span class="structural-bold">(3) 시적한계:</span> 행정기본법 제17조 제3항에 따라 법률에 근거가 있는 경우, 당사자의 동의가 있는 경우, 사정이 변경되어 부관을 새로 붙이거나 종전의 부관을 변경하지 아니하면 해당 처분의 목적을 달성할 수 없다고 인정되는 경우에는 사후부관 부착이 가능하다고 봄이 타당하다.
-        </div>
+        <p>부관의 한계(부관의 위법 여부 판단 기준) — 아래 빈칸을 채워보시오.</p>
+        <p><span class="structural-bold">(1) 부관의 <input type="text" class="blank-input" data-ans="가능성" style="width: 12ch;"></span><span class="hint">[가능성]</span>: 행정기본법 제17조 제<input type="text" class="blank-input" data-ans="1" style="width: 6ch;"><span class="hint">[1]</span>항에서 "행정청은 처분에 <input type="text" class="blank-input" data-ans="재량" style="width: 10ch;"><span class="hint">[재량]</span>이 있는 경우에는 부관을 붙일 수 있다"고 규정하여, 재량행위의 경우 부관 부착이 가능하다. 종래에 기속행위는 부관의 부착이 불가하다고 보았으나, 최근 판례는 기속행위여도 <input type="text" class="blank-input" data-ans="요건충족적" style="width: 16ch;"><span class="hint">[요건충족적]</span> 부관에는 부착이 가능하다고 판시한 바 있다. 또한 동법 제17조 제2항에서는 "행정청은 처분에 재량이 없는 경우에는 <input type="text" class="blank-input" data-ans="법률에 근거" style="width: 16ch;"><span class="hint">[법률에 근거]</span>가 있는 경우에 부관을 붙일 수 있다"고 규정하여 기속행위의 경우에도 근거가 있다면 부관을 붙일 수 있다.</p>
+        <p><span class="structural-bold">(2) 부관의 <input type="text" class="blank-input" data-ans="내용상 한계,내용상한계" style="width: 16ch;"></span><span class="hint">[내용상 한계]</span>: 부관은 행정기본법 제17조 제<input type="text" class="blank-input" data-ans="4" style="width: 6ch;"><span class="hint">[4]</span>항에 따라 ①해당 처분의 <input type="text" class="blank-input" data-ans="목적에 위배" style="width: 16ch;"><span class="hint">[목적에 위배]</span>되지 아니할 것, ②해당 처분과 <input type="text" class="blank-input" data-ans="실질적인 관련" style="width: 16ch;"><span class="hint">[실질적인 관련]</span>이 있을 것, ③해당 처분의 목적을 달성하기 위하여 필요한 <input type="text" class="blank-input" data-ans="최소한의 범위" style="width: 16ch;"><span class="hint">[최소한의 범위]</span>일 것이라는 요건에 적합하여야 한다.</p>
+        <p><span class="structural-bold">(3) <input type="text" class="blank-input" data-ans="시적한계" style="width: 12ch;"></span><span class="hint">[시적한계]</span>: 행정기본법 제17조 제<input type="text" class="blank-input" data-ans="3" style="width: 6ch;"><span class="hint">[3]</span>항에 따라 법률에 근거가 있는 경우, <input type="text" class="blank-input" data-ans="당사자의 동의" style="width: 16ch;"><span class="hint">[당사자의 동의]</span>가 있는 경우, <input type="text" class="blank-input" data-ans="사정변경,사정이 변경되어" style="width: 16ch;"><span class="hint">[사정변경]</span>되어 부관을 새로 붙이거나 종전의 부관을 변경하지 아니하면 해당 처분의 목적을 달성할 수 없다고 인정되는 경우에는 사후부관 부착이 가능하다고 봄이 타당하다.</p>
       </div>
 
       <div class="card sub-card" id="card-022-4" data-level="sub" data-grade="A" data-chapter="ch2" data-title="4. 독립쟁송가능성">
@@ -2065,8 +2078,8 @@
       'card-018': ['실체법상 처분개념', '쟁송법상 처분개념', '권리구제', '교도소 수감자'],
       'card-019': ['하명', '자연적 자유', '설권행위', '공적으로 증명', '의문이나 다툼'],
       'card-020-2': ['주민의 동의', '자연환경보전', '중대한 공익'],
-      'card-020-3': ['요건재량설', '효과재량설', '기본권기준설', '종합설'],
-      'card-020-4': ['행정기본법 제21조', '일탈', '남용'],
+      'card-020-3': ['법률규정', '일차적 기준', '행위의 성질', '기본권 관련성', '공익관련성', '종합적으로 고려'],
+      'card-020-4': ['관련 이익', '정당하게 형량', '재량의 범위', '넘어서는 아니 된다'],
       'card-021': ['불확정개념', '감정평가시험', '비대체적', '구속적 가치평가'],
       'card-022': ['종된 규율'],
       'card-022-2': ['조건', '정지조건', '해제조건', '기한', '시기', '종기', '부담', '작위', '부작위', '철회권의 유보'],
@@ -2103,8 +2116,25 @@
       return matches ? matches.map(Number) : [];
     }
 
+    // 조사 등 어미를 대략적으로 떼어낸다(완벽한 형태소 분석이 아니라, 채점을 관대하게 하기 위한 근사치)
+    const KOREAN_PARTICLES = [
+      '으로서는', '으로써는', '이라고는', '이라는', '에서의', '에게는', '에서는', '으로는',
+      '로서는', '로써는', '이라도', '이었다', '이라야', '이라면', '와의', '과의',
+      '이며', '이고', '이나', '이란', '이다', '에도', '에만', '부터', '까지', '마저', '조차',
+      '에게', '에는', '에서', '으로', '이라', '로는', '로써', '로서',
+      '도', '은', '는', '이', '가', '을', '를', '의', '에', '와', '과', '만', '로'
+    ];
+    function stripParticle(token) {
+      for (const p of KOREAN_PARTICLES) {
+        if (token.length > p.length + 1 && token.endsWith(p)) {
+          return token.slice(0, token.length - p.length);
+        }
+      }
+      return token;
+    }
+
     function validateInput(userVal, targetAns) {
-      if (!targetAns) return false; 
+      if (!targetAns) return false;
       const userClean = clean(userVal);
       const targetClean = clean(targetAns);
       const targetNums = extractNumbers(targetAns);
@@ -2121,6 +2151,20 @@
         return true;
       }
       if (userNums.length > 0) return false;
+
+      // 정답이 여러 단어(구·문장)로 이루어진 경우 — 띄어쓰기·조사·중간에 낀 다른 단어에 관대하게 채점.
+      // (한 단어짜리 정답은 아래의 기존 엄격한 로직으로 그대로 채점 — 과도한 관대화로 인한 오채점 방지)
+      const targetWords = targetAns.trim().split(/\s+/).filter(Boolean);
+      if (targetWords.length >= 2) {
+        const coreWords = targetWords
+          .map((w) => clean(stripParticle(w)))
+          .filter((w) => w.length >= 2); // 조사만 남는 등 너무 짧은 토큰은 핵심어에서 제외
+        if (coreWords.length > 0) {
+          const hitCount = coreWords.filter((w) => userClean.includes(w)).length;
+          const requiredRatio = coreWords.length <= 2 ? 1 : 0.75;
+          return hitCount / coreWords.length >= requiredRatio;
+        }
+      }
 
       const len = targetClean.length;
       if (len <= 3) {
@@ -2329,11 +2373,11 @@
         const total = inputs.length;
         const correct = card.querySelectorAll('.blank-input.correct').length;
         badge.textContent = `${correct}/${total}`;
-        badge.classList.remove('p-none', 'p-partial', 'p-done');
-        if (total === 0) badge.classList.add('p-none');
+        badge.classList.remove('p-empty', 'p-none', 'p-partial', 'p-done');
+        if (total === 0) badge.classList.add('p-empty'); // 0/0: 빈칸 자체가 없는 주제 — 회색
         else if (correct === total) badge.classList.add('p-done');
         else if (correct > 0) badge.classList.add('p-partial');
-        else badge.classList.add('p-none');
+        else badge.classList.add('p-none'); // 0/N: 아직 시작 안 함
       });
     }
 
@@ -2575,7 +2619,35 @@
     }
 
 
-    // 각 카드에 서술형/메모 패널을 붙이고(카드 높이만큼 늘어남), 카드헤더에 메모 버튼을 추가한다
+    // 카드헤더 우측에 배지와 나란히 컨트롤을 붙일 자리를 만든다(없으면 생성)
+    function ensureCardHeaderRight(card) {
+      const header = card.querySelector('.card-header');
+      if (!header) return null;
+      let right = header.querySelector('.card-header-right');
+      if (!right) {
+        right = document.createElement('div');
+        right.className = 'card-header-right';
+        const badge = header.querySelector('.badge');
+        if (badge) {
+          header.insertBefore(right, badge);
+          right.appendChild(badge);
+        } else {
+          header.appendChild(right);
+        }
+      }
+      return right;
+    }
+
+    // 이 카드의 빈칸을 전부 채점한다(등급 배지 왼쪽의 "채점" 버튼에서 호출)
+    function gradeCard(card) {
+      card.querySelectorAll('.blank-input').forEach((input) => {
+        gradeInput(input, true);
+        input.dataset.checked = 'true';
+      });
+      updateScore();
+    }
+
+    // 각 카드에 서술형/메모 패널을 붙이고(카드 높이만큼 늘어남), 카드헤더 배지 왼쪽에 채점 버튼을 추가한다
     function buildSidePanels() {
       const cards = Array.from(document.querySelectorAll('main.content > .card'));
       cards.forEach((card) => {
@@ -2600,6 +2672,17 @@
             '<textarea class="memo-input" placeholder="이 논점에 대한 메모를 남겨보세요"></textarea>' +
           '</div>';
         row.appendChild(panel);
+
+        const headerRight = ensureCardHeaderRight(card);
+        if (headerRight && card.querySelectorAll('.blank-input').length > 0) {
+          const gradeBtn = document.createElement('button');
+          gradeBtn.type = 'button';
+          gradeBtn.className = 'card-grade-btn';
+          gradeBtn.textContent = '채점';
+          gradeBtn.title = '이 카드의 빈칸을 한번에 채점';
+          gradeBtn.onclick = () => gradeCard(card);
+          headerRight.insertBefore(gradeBtn, headerRight.firstChild);
+        }
 
         panel.querySelectorAll('.side-tab').forEach((tab) => {
           tab.onclick = () => {
