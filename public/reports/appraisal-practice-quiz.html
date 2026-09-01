@@ -230,7 +230,7 @@ const structure = [
   {
     id: 'c6', name: '6. 타당성/최유효',
     subs: [
-      {id: 'feasibility', name: '타당성분석', active: false},
+      {id: 'feasibility', name: '타당성분석', active: true},
       {id: 'hbu', name: '최유효분석', active: false}
     ]
   },
@@ -275,7 +275,8 @@ const state = {
   comp_fish: { inputs: {}, graded: {}, individuallyGraded: {}, globalGraded: false },
   comp_mine: { inputs: {}, graded: {}, individuallyGraded: {}, globalGraded: false },
   comp_life: { inputs: {}, graded: {}, individuallyGraded: {}, globalGraded: false },
-  p_urb: { inputs: {}, graded: {}, individuallyGraded: {}, globalGraded: false }
+  p_urb: { inputs: {}, graded: {}, individuallyGraded: {}, globalGraded: false },
+  feasibility: { inputs: {}, graded: {}, individuallyGraded: {}, globalGraded: false }
 };
 
 const tabMeta = {
@@ -287,7 +288,8 @@ const tabMeta = {
   comp_fish: { badge: "종합 136번 · 137번 · 138번", title: "어업손실 보상평가" },
   comp_mine: { badge: "종합 139번", title: "광업권 보상평가 (광산평가액 및 소멸보상)" },
   comp_life: { badge: "종합 140번 · 141번 · 142번", title: "생활보상 (농업손실보상대상 및 보상액 산정)" },
-  p_urb: { badge: "종합 95번 ~ 105번", title: "정비사업 자산평가 및 현금청산·환지 평가" }
+  p_urb: { badge: "종합 95번 ~ 105번", title: "정비사업 자산평가 및 현금청산·환지 평가" },
+  feasibility: { badge: "종합 70~76·82·84·85·88·89", title: "타당성분석(환원이율·IRR) — NPV·IRR·MIRR 등 투자타당성 지표" }
 };
 
 const dataset = {
@@ -827,6 +829,143 @@ const dataset = {
         { word: "종전 이용상황", alt: ["나대지 기준", "나대지"] }
       ],
       modelAnswer: "① 환지평가: 정리 전은 <strong>실시계획인가고시일</strong>, 정리 후는 <strong>환지처분예정일</strong> 기준.<br>② 개발제한구역 매수청구: <strong>계약체결 시점</strong>을 기준으로 <strong>종전 이용상황</strong>(나대지) 평가."
+    }
+  ],
+  feasibility: [
+    {
+      id: 1,
+      tall: true,
+      prompt: "지구단위계획 관련 처리방침 (종합89)",
+      keywords: [
+        { word: "합법적, 물리적, 합리적이며 경제적인 대안", alt: ["합법적 물리적 합리적 경제적", "법적허용가능성 물리적채택가능성"] },
+        { word: "인근의 표준적인 사용과도 괴리", alt: ["표준적인 사용과 괴리"] }
+      ],
+      modelAnswer: "지상의 개량물은 고려하지 않으며, <strong>합법적, 물리적, 합리적이며 경제적인 대안</strong>을 선택한다.<br>개발대안C는 적법하지 않으며 <strong>인근의 표준적인 사용과도 괴리</strong>되는 바, 배제한다."
+    },
+    {
+      id: 2,
+      prompt: "병원 임대료 부가가치세 처리",
+      keywords: [
+        { word: "순영업소득 미고려", alt: ["순영업소득"] },
+        { word: "면세사업자로서 부가가치세 부담", alt: ["면세사업자", "부가가치세 부담"] }
+      ],
+      modelAnswer: "종합88(토지평가): <strong>순영업소득 산정 시 미고려</strong><br>종합55-1(무형자산평가·영업이익): 임차료 × 1.1(<strong>면세사업자로서 부가가치세 부담</strong>) × 12"
+    },
+    {
+      id: 3,
+      tall: true,
+      prompt: "귀속토지가치 산정 절차 (종합85)",
+      keywords: [
+        { word: "순영업소득", alt: [] },
+        { word: "대상부동산 시장가치", alt: ["시장가치"] },
+        { word: "사용료/환원이율을 시장가치에서 차감", alt: ["사용료 환원이율 시장가치에서 차감", "사용료를 환원이율로 환원"] }
+      ],
+      modelAnswer: "Ⅱ. 대안A 귀속토지가치<br>1. 순영업소득<br>2. 대상부동산 시장가치<br>3. 대상토지가치<br><br>Q. 토지를 임대하여 주차장부지를 확보하는 경우는?<br>A. <strong>(사용료/환원이율)을 시장가치에서 차감</strong>(주차장분 가치)"
+    },
+    {
+      id: 4,
+      prompt: "실물옵션에 대한 가치결정 (종합84)",
+      keywords: [
+        { word: "ROV", alt: ["Real Option Value", "실물옵션"] },
+        { word: "1년 보유기간중 임대료 더한 뒤 현가", alt: ["보유기간중 임대료 더한 뒤 현가"] }
+      ],
+      modelAnswer: "강세장·약세장에 따라 <strong>ROV(Real Option Value)</strong>를 반영해 1년 후 토지가치를 결정한다(1년 후로 연기할 수 있는 옵션).<br>실물옵션 고려 시 토지가치: <strong>1년 보유기간중 임대료 더한 뒤 현가</strong>."
+    },
+    {
+      id: 5,
+      tall: true,
+      prompt: "개발사업 타당성분석 목차 (종합82)",
+      keywords: [
+        { word: "조임대료", alt: ["조임대료 산정"] },
+        { word: "조임대료승수", alt: [] },
+        { word: "타당성 판단", alt: ["타당성분석"] }
+      ],
+      modelAnswer: "Ⅰ. 개발비용과 부동산가치 비교하여 결정<br>Ⅱ. 대상 조임대료(총수익) 산정<br>&nbsp;&nbsp;1. 안정인구 추정, 거래지역 총인구<br>&nbsp;&nbsp;2. 대상 판매액<br>&nbsp;&nbsp;3. 대상 조임대료<br>Ⅲ. 대상 부동산가치<br>&nbsp;&nbsp;1. 대상지역 <strong>조임대료승수</strong><br>&nbsp;&nbsp;2. 부동산가치<br>Ⅳ. <strong>타당성분석</strong><br>&nbsp;&nbsp;1. 개발비용<br>&nbsp;&nbsp;2. 부동산가치<br>&nbsp;&nbsp;3. <strong>타당성 판단</strong>"
+    },
+    {
+      id: 6,
+      very_tall: true,
+      prompt: "IRR 타당성 검토 (종합72) — 세금효과 미고려",
+      keywords: [
+        { word: "지분복귀액", alt: ["기말복귀가치"] },
+        { word: "IRR로 현가", alt: ["IRR로 할인"] },
+        { word: "IRR이 Cap Rate 보다 높게 형성", alt: ["IRR이 Cap Rate보다 높게"] },
+        { word: "레버리지 효과와 펀드의 보수 공제", alt: ["레버리지 효과", "펀드의 보수 공제"] },
+        { word: "건물부분의 자본회수", alt: ["감가상각 고려 여부"] }
+      ],
+      modelAnswer: "(세금효과 고려하지 않는 경우)<br><br>1. 현금수지 분석<br>(1) 현금흐름 기초(PGI, DS)<br>(2) 매기 Cash Flow<br><br>2. <strong>지분복귀액</strong><br>(1) 재매도가치<br>(2) 미상환저당잔금<br>(3) 지분복귀액(재매도가치 - 미상환저당잔금) — <strong>기말복귀가치</strong><br><br>3. <strong>기대수익률(지분수익률)</strong><br>(1) 지분투자액 = 부동산가치 - 저당<br>(2) 기대수익률: 지분투자액 = 매기 현금흐름을 <strong>IRR로 현가</strong><br>(3) 기대수익률 결정<br><br><strong>시장수익률과의 차이</strong>:<br>- IRR: 자본차익이 있는 경우 <strong>IRR이 Cap Rate 보다 높게 형성</strong><br>- 부동산펀드: <strong>레버리지 효과와 펀드의 보수 공제</strong>로 차이 발생<br>- 토지만의 요구수익률: <strong>건물부분의 자본회수(감가상각) 고려 여부</strong>"
+    },
+    {
+      id: 7,
+      tall: true,
+      prompt: "NPV 타당성 검토 (종합71)",
+      keywords: [
+        { word: "기말복귀가치", alt: ["재매도가치 - 미상환 저당잔금 - 양도소득세"] },
+        { word: "투자가치", alt: ["저당가치 + 지분가치"] }
+      ],
+      modelAnswer: "1. 현금유출(부동산매입비)<br>2. 현금유입<br>&nbsp;&nbsp;(1) 저당가치<br>&nbsp;&nbsp;(2) 지분가치<br>&nbsp;&nbsp;&nbsp;&nbsp;- 할인률 결정<br>&nbsp;&nbsp;&nbsp;&nbsp;- ATCF현가합<br>&nbsp;&nbsp;&nbsp;&nbsp;- <strong>기말복귀가치(재매도가치 - 미상환 저당잔금 - 양도소득세)</strong><br>&nbsp;&nbsp;&nbsp;&nbsp;- 지분가치(ATCF + 기말복귀 현가)<br>&nbsp;&nbsp;(3) <strong>투자가치</strong>(저당가치 + 지분가치)<br>3. 타당성 검토<br>&nbsp;&nbsp;(1) NPV"
+    },
+    {
+      id: 8,
+      prompt: "MIRR (종합70)",
+      keywords: [
+        { word: "IRR의 비현실적인 재투자수익률", alt: ["비현실적인 재투자수익률"] },
+        { word: "현실적인 재투자수익률을 가정한 수정된 IRR", alt: ["수정된 IRR", "MIRR"] }
+      ],
+      modelAnswer: "현금흐름이 증가·감소하는 상반되는 투자안의 경우 NPV, IRR의 결과가 상충할 수 있다. 이유는 <strong>IRR의 비현실적인 재투자수익률</strong> 때문이다. <strong>현실적인 재투자수익률을 가정한 수정된 IRR(MIRR)</strong>을 이용하여 해결할 수 있다."
+    },
+    {
+      id: 9,
+      prompt: "ARR (종합71)",
+      keywords: [
+        { word: "연평균 순수익", alt: ["현가 X"] },
+        { word: "연평균 투자액", alt: ["기초+기말 건물가치 평균"] }
+      ],
+      modelAnswer: "<strong>연평균 순수익(현가 X) ÷ 연평균 투자액(기초+기말 건물가치 평균)</strong>"
+    },
+    {
+      id: 10,
+      prompt: "Duration (종합73)",
+      keywords: [{ word: "현금흐름 현가의 비중", alt: [] }],
+      modelAnswer: "1. 현금흐름 현가<br>2. <strong>현금흐름 현가의 비중</strong><br>3. Duration 산정"
+    },
+    {
+      id: 11,
+      prompt: "WAPI (종합74)",
+      keywords: [
+        { word: "투자규모 차이", alt: [] },
+        { word: "투자자금과 유휴자금의 PI를 가중평균", alt: ["PI를 가중평균"] }
+      ],
+      modelAnswer: "PI법: 현금유입 현가합을 현금유출로 나눔<br>NPV와의 결과 상반 원인: <strong>투자규모 차이</strong><br>WAPI: 투자규모 차액을 PI가 1인 투자 또는 기타투자에 재투자하는 것을 각각 가정하여 <strong>투자자금과 유휴자금의 PI를 가중평균</strong>한 개념이다.(PI = 1인 투자안에 유휴자금을 재투자)"
+    },
+    {
+      id: 12,
+      tall: true,
+      prompt: "Mean-Variance 분석 (종합75)",
+      keywords: [
+        { word: "적정한 투자대안 선택", alt: [] },
+        { word: "유리한 차입비용으로 수익률 상승", alt: ["Leverage 효과"] },
+        { word: "현금흐름 변동성 증가함에 따라 위험", alt: ["위험 표준편차 증가"] }
+      ],
+      modelAnswer: "기대수익 및 표준편차<br>목표수익률 및 위험감내도에 따라 <strong>적정한 투자대안 선택</strong><br>Leverage 고려한 수익률 및 표준편차(지분투자금액 고려)<br>&nbsp;&nbsp;- Leverage 효과로 인한 수익률 상승: <strong>유리한 차입비용으로 수익률 상승</strong><br>&nbsp;&nbsp;- Risk 증가: <strong>현금흐름 변동성 증가함에 따라 위험(표준편차) 증가</strong>"
+    },
+    {
+      id: 13,
+      prompt: "Huff 상권분석모형 (종합76)",
+      keywords: [
+        { word: "현시장 총규모", alt: ["인구합 x 인당 소득 x 소비비중"] },
+        { word: "지역별 대상점포 점유율", alt: [] }
+      ],
+      modelAnswer: "1. <strong>현시장 총규모</strong>(인구합 × 인당 소득 × 소비비중)<br>2. 가능판매액<br>&nbsp;&nbsp;(1) <strong>지역별 대상점포 점유율</strong><br>&nbsp;&nbsp;(2) 대상점포 가능판매액"
+    },
+    {
+      id: 14,
+      prompt: "기대수익률(지분수익률); IRR — 리뷰",
+      keywords: [
+        { word: "지분환원율", alt: ["(NOI - DS) / P"] },
+        { word: "BTCF", alt: ["매기 BTCF"] }
+      ],
+      modelAnswer: "지분환원율 : (NOI - DS) / P - 타인자본<br>BTCF 활용: <strong>지분투자액 = 매기 BTCF / (1+r)^n 의 합 (현가 X)</strong>"
     }
   ]
 };
