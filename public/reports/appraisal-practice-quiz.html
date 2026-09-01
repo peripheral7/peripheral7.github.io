@@ -61,7 +61,7 @@
 
   /* Subtitle */
   .tab-subtitle { font-size: 15.5px; font-weight: 600; color: var(--text-dark); margin-bottom: 18px; padding-left: 12px; border-left: 3px solid var(--primary); display: flex; justify-content: space-between; align-items: center; }
-  .ref-tag { font-size: 12.5px; font-weight: 600; color: #475569; background: #e2e8f0; padding: 3px 9px; border-radius: 4px; }
+  .ref-tag { font-size: 12.5px; font-weight: 600; color: #475569; background: #e2e8f0; padding: 3px 9px; border-radius: 4px; display: inline-block; margin-left: 6px; vertical-align: middle; }
 
   /* Question Card */
   .q-card { background: var(--card); border: 1px solid var(--border); border-radius: 12px; padding: 22px 24px; margin-bottom: 20px; box-shadow: 0 2px 8px rgba(0,0,0,0.02); }
@@ -263,16 +263,16 @@ const state = {
 };
 
 const tabMeta = {
-  general: { badge: "보상 일반", title: "보상감정평가 절차 및 가치형성요인 검토" },
-  gb: { badge: "종합 121번", title: "개발제한구역 내 토지 및 특수토지의 보상평가" },
-  repurchase: { badge: "종합 122번 · 123번 · 124번", title: "환매대상 요건검토 및 환매금액 산정 감정평가" },
-  obstacles: { badge: "종합 126번 · 127번 · 127-1번", title: "건축물·과수목·일부편입·농작물 등 지장물 보상평가" },
-  comp_biz: { badge: "종합 133번 · 134번 · 135번", title: "영업손실 보상평가" },
-  comp_fish: { badge: "종합 136번 · 137번 · 138번", title: "어업손실 보상평가" },
-  comp_mine: { badge: "종합 139번", title: "광업권 보상평가 (광산평가액 및 소멸보상)" },
-  comp_life: { badge: "종합 140번 · 141번 · 142번", title: "생활보상 (농업손실보상대상 및 보상액 산정)" },
-  p_urb: { badge: "종합 95번 ~ 105번", title: "정비사업 자산평가 및 현금청산·환지 평가" },
-  feasibility: { badge: "종합 70~76·82·84·85·88·89", title: "타당성분석(환원이율·IRR) — NPV·IRR·MIRR 등 투자타당성 지표" }
+  general: { title: "보상감정평가 절차 및 가치형성요인 검토" },
+  gb: { title: "개발제한구역 내 토지 및 특수토지의 보상평가" },
+  repurchase: { title: "환매대상 요건검토 및 환매금액 산정 감정평가" },
+  obstacles: { title: "건축물·과수목·일부편입·농작물 등 지장물 보상평가" },
+  comp_biz: { title: "영업손실 보상평가" },
+  comp_fish: { title: "어업손실 보상평가" },
+  comp_mine: { title: "광업권 보상평가 (광산평가액 및 소멸보상)" },
+  comp_life: { title: "생활보상 (농업손실보상대상 및 보상액 산정)" },
+  p_urb: { title: "정비사업 자산평가 및 현금청산·환지 평가" },
+  feasibility: { title: "타당성분석(환원이율·IRR) — NPV·IRR·MIRR 등 투자타당성 지표" }
 };
 
 const dataset = {
@@ -309,7 +309,8 @@ const dataset = {
     {
       id: 3,
       very_tall: true,
-      prompt: "비교표준지 선정 등 (143번)",
+      ref: "143번",
+      prompt: "비교표준지 선정 등",
       context: "1. 미지급용지<br>2. 분할전 토지특성<br>3. 개발제한구역 및 군사보호시설<br>4. 산림형질변경허가 여부는 확인할 수 없으나 농지원부에 과수원 등재, 30년 이상 경작<br>5. 무단관사 신축<br>6. 1989.1.24 이전 무허가건축물<br>7. 용도지역 변경 및 자연환경보전지역",
       keywords: [
         { word: "일반적 제한", alt: ["일반적제한"] },
@@ -322,7 +323,8 @@ const dataset = {
     {
       id: 4,
       tall: true,
-      prompt: "비교표준지 선정 등 (종합 145번)",
+      ref: "종합145번",
+      prompt: "비교표준지 선정 등",
       context: "1. 예정공도<br>2. 군사보호구역<br>3. 불법형질변경여부(농지원부 기재)<br>4. 지목변경 안된 건부지(버섯재배사)<br>5. 적법 주거용 건축물",
       keywords: [
         { word: "공도부지 평가 준용", alt: ["공도부지 평가를 준용"] },
@@ -335,7 +337,8 @@ const dataset = {
     {
       id: 5,
       tall: true,
-      prompt: "비교표준지 선정 등 (종합 111, 112번)",
+      ref: "종합111·112번",
+      prompt: "비교표준지 선정 등",
       context: "1. 예정공도<br>2. 일시적 이용<br>3. 도시계획시설도로 이전 개설된 도로(사실상의 사도)<br>4. 도시계획시설 공원<br>5. 1989.1.24 이전 무허가건축물 부지",
       keywords: [
         { word: "1/3 이내", alt: ["3분의 1 이내", "1/3"] },
@@ -385,7 +388,8 @@ const dataset = {
     {
       id: 21,
       tall: true,
-      prompt: "건축허가(농지전용허가) 및 조성 진행상황별 처리방침 (114번)",
+      ref: "114번",
+      prompt: "건축허가(농지전용허가) 및 조성 진행상황별 처리방침",
       context: "(1) 건축허가(농지전용허가)를 득하고 대지로 조성을 완료한 경우(지목변경 해태)<br>(2) 건축허가 득하였으나 형질변경을 하지 않고 있는 경우<br>(3) 건축허가를 득하였고 조성을 하던 중 해당 공익사업과 무관한 이유로 조성을 완료하지 못한 경우(투하된 조성비 면적당 50,000원)<br>* 농지전용부담금은 개별공시지가의 20% 수준이다.",
       keywords: [
         { word: "적법하게 형질변경된 바", alt: ["적법하게 형질변경"] },
@@ -414,6 +418,7 @@ const dataset = {
     {
       id: 1,
       tall: true,
+      ref: "종합121번",
       prompt: "조정가능구역 처리방침",
       keywords: [
         { word: "조정가능구역 표준지", alt: ["조정가능 표준지"] },
@@ -424,6 +429,7 @@ const dataset = {
     },
     {
       id: 2,
+      ref: "종합121번",
       prompt: "국가정책사업 및 지역 현안사업을 위한 개발제한구역의 조정가능구역(기호 3, 4)",
       keywords: [
         { word: "직접 목적", alt: ["해당 사업을 직접 목적", "직접 목적으로 해제", "당해 사업"] },
@@ -433,6 +439,7 @@ const dataset = {
     },
     {
       id: 3,
+      ref: "종합121번",
       prompt: "기호1의 개발제한구역 해제 예상에 따른 정상지가상승분",
       keywords: [
         { word: "개별요인 동일 사례", alt: ["해제된 지역과 보존"] },
@@ -443,6 +450,7 @@ const dataset = {
     },
     {
       id: 4,
+      ref: "종합121번",
       prompt: "동시조치사항으로 지구단위계획이 수립되며 용도지역이 변경된 경우 처리방침",
       keywords: [
         { word: "동시조치사항", alt: ["지구단위계획"] },
@@ -452,6 +460,7 @@ const dataset = {
     },
     {
       id: 5,
+      ref: "종합121번",
       prompt: "불법형질변경 및 제3자가 무단으로 폐기물을 매립하여 토양이 오염된 토지(기호 4)의 처리방침",
       keywords: [
         { word: "현황평가 예외", alt: ["현황평가의 예외", "예외로서"] },
@@ -462,6 +471,7 @@ const dataset = {
     },
     {
       id: 6,
+      ref: "종합121번",
       prompt: "건물거래사례 시점수정",
       keywords: [{ word: "건축비지수", alt: ["건축비 지수"] }],
       modelAnswer: "<strong>건축비지수</strong> (거래사례의 건물가액 산정 및 시점수정 시 건축비지수를 적용함)"
@@ -470,6 +480,7 @@ const dataset = {
   repurchase: [
     {
       id: 1,
+      ref: "종합122번",
       prompt: "가격시점 및 환매당시 토지가격",
       keywords: [
         { word: "환매권행사일", alt: ["환매의 의사표시"] },
@@ -480,6 +491,7 @@ const dataset = {
     },
     {
       id: 2,
+      ref: "종합122번",
       prompt: "인근 유사토지 지가변동률 비교표준지 선정",
       keywords: [
         { word: "사업과 무관", alt: ["사업구역 밖"] },
@@ -489,6 +501,7 @@ const dataset = {
     },
     {
       id: 3,
+      ref: "종합122번",
       prompt: "환매금액 결정",
       keywords: [
         { word: "보상금 + 초과상승분", alt: ["보상금에 가산"] },
@@ -498,6 +511,7 @@ const dataset = {
     },
     {
       id: 4,
+      ref: "종합123번",
       prompt: "협의취득 적용공시지가 및 비교표준지 선정(자연공원 등 계획제한 처리방침)",
       keywords: [
         { word: "최근공시지가", alt: ["제70조 3항"] },
@@ -509,12 +523,14 @@ const dataset = {
     },
     {
       id: 5,
+      ref: "종합123번",
       prompt: "해당 공익사업과 직접 관계없이 용도지역 변경된 경우 표본지 선정",
       keywords: [{ word: "변경과정 유사", alt: ["변경과정이 유사한"] }],
       modelAnswer: "<strong>해당 공익사업과 관계없이 용도지역 등 변경과정이 유사한 표본지를 선정</strong>한다."
     },
     {
       id: 6,
+      ref: "종합124번",
       prompt: "본건 토지가 환매대상 토지에 해당하는지 검토하시오. (폐기물 처리장 조성사업은 도시개발사업 구역 내 편입되면서 구역이 대폭 축소됨)",
       keywords: [
         { word: "기간요건", alt: ["10년 이내", "원 공익사업의 축소", "변경고시일"] },
@@ -527,6 +543,7 @@ const dataset = {
     {
       id: 1,
       tall: true,
+      ref: "종합126번",
       prompt: "지장물 처리방침 및 평가방법 (건축물)",
       keywords: [
         { word: "행위제한일", alt: ["예정지구공고 및 공람", "예정지구공고", "이전에 신축", "보상대상"] },
@@ -537,6 +554,7 @@ const dataset = {
     },
     {
       id: 2,
+      ref: "종합126번",
       prompt: "비준가액 사례선택 및 시점수정",
       keywords: [
         { word: "건물만의 거래", alt: ["건물의 가격수준", "건물만"] },
@@ -547,6 +565,7 @@ const dataset = {
     },
     {
       id: 3,
+      ref: "종합127번",
       prompt: "과수목 평가방법",
       keywords: [
         { word: "고손액", alt: ["고손액", "부적기", "이식적기의 2배", "이식적기 2배"] },
@@ -557,6 +576,7 @@ const dataset = {
     {
       id: 4,
       tall: true,
+      ref: "종합127번",
       prompt: "일부편입건물 (처리방침, 보수비 등)",
       keywords: [
         { word: "일부 편입부분 가격 + 보수비", alt: ["일부 편입부분", "보수비 등", "이전이 불가", "편입부분의 가격과 보수비"] },
@@ -568,6 +588,7 @@ const dataset = {
     {
       id: 5,
       tall: true,
+      ref: "종합127-1번",
       prompt: "농작물 수확전 협의 보상평가 (평가개요 및 처리방침)",
       keywords: [
         { word: "장래수익의 현가 - 비용의 현가", alt: ["장래수익의 현가", "예상 총수익 현가", "투하비용의 현가", "비용의 현가를 차감", "수익의 현가"] },
@@ -581,6 +602,7 @@ const dataset = {
     {
       id: 1,
       tall: true,
+      ref: "종합133번",
       prompt: "영업손실의 보상대상인 영업 약술",
       keywords: [
         { word: "적법한 장소", alt: ["무허가건축물, 불법형질변경토지 등이 아닌", "적법한"] },
@@ -593,6 +615,7 @@ const dataset = {
     },
     {
       id: 2,
+      ref: "종합133번",
       prompt: "적법건축물 의제 대상 처리방침",
       keywords: [
         { word: "4개월", alt: ["휴업기간 4개월", "4개월 기준"] },
@@ -604,6 +627,7 @@ const dataset = {
     },
     {
       id: 3,
+      ref: "종합133번",
       prompt: "무허가건축물 처리방침",
       keywords: [
         { word: "영업보상 대상 아님", alt: ["영업보상 대상이 아니며", "보상대상 제외", "영업보상 제외"] },
@@ -613,6 +637,7 @@ const dataset = {
     },
     {
       id: 4,
+      ref: "종합133번",
       prompt: "무허가영업 처리방침",
       keywords: [
         { word: "특례 적용", alt: ["무허가 영업에 대한 특례", "시행규칙 제52조"] },
@@ -623,6 +648,7 @@ const dataset = {
     },
     {
       id: 5,
+      ref: "종합133번",
       prompt: "무허가장소 임차인 영업 처리방침",
       keywords: [
         { word: "보상의 대상", alt: ["영업손실보상의 대상이다", "보상대상에 해당"] },
@@ -632,6 +658,7 @@ const dataset = {
     },
     {
       id: 6,
+      ref: "종합133번",
       prompt: "휴업기간 중 영업이익의 결정 및 법인의 최저영업이익 검토",
       keywords: [
         { word: "해당 사업의 영향", alt: ["공익사업의 영향", "사업의 영향 배제"] },
@@ -641,6 +668,7 @@ const dataset = {
     },
     {
       id: 7,
+      ref: "종합133번",
       prompt: "고정적 비용, 이전비 등 평가",
       keywords: [
         { word: "공조공과, 보험료", alt: ["공조공과 및 보험료", "고정적 비용으로 판단"] },
@@ -652,7 +680,8 @@ const dataset = {
     {
       id: 8,
       tall: true,
-      prompt: "영업폐지보상액 처리방침 (134번)",
+      ref: "종합134번",
+      prompt: "영업폐지보상액 처리방침",
       keywords: [
         { word: "영업이익 × 2년", alt: ["영업이익 2년분", "2년치 영업이익", "영업이익 x 2"] },
         { word: "매각손실액", alt: ["고정자산매각손실액", "재고자산매각손실액", "매각손실"] },
@@ -663,7 +692,8 @@ const dataset = {
     },
     {
       id: 9,
-      prompt: "임시영업소 설치보상 처리방침 (134번, 135번)",
+      ref: "종합134·135번",
+      prompt: "임시영업소 설치보상 처리방침",
       keywords: [
         { word: "휴업보상액을 초과하지 못하므로", alt: ["휴업보상액 한도", "이전보상액 한도"] },
         { word: "설치비", alt: ["가설비", "설치비용", "설치•해체비용", "설치.해체비용"] },
@@ -701,7 +731,8 @@ const dataset = {
     },
     {
       id: 3,
-      prompt: "평년수익액 (일반) 산정 기준 (136번)",
+      ref: "136번",
+      prompt: "평년수익액 (일반) 산정 기준",
       keywords: [
         { word: "3년치 평균", alt: ["소급기산한 3년치", "3년간 평균"] },
         { word: "재소급 1년간", alt: ["전년대비 1.5배 이상", "재소급 1년"] },
@@ -711,7 +742,8 @@ const dataset = {
     },
     {
       id: 4,
-      prompt: "평년수익액 (어획량 3년 미달) 산정 (137번)",
+      ref: "137번",
+      prompt: "평년수익액 (어획량 3년 미달) 산정",
       keywords: [
         { word: "인근 동종어장", alt: ["인근 동종어장을 기준", "유사어장"] },
         { word: "1년간 가중평균", alt: ["소급기산한 1년간 가중평균", "가중평균"] },
@@ -722,7 +754,8 @@ const dataset = {
     },
     {
       id: 5,
-      prompt: "정지처분손실평가 처리방침 (138번)",
+      ref: "138번",
+      prompt: "정지처분손실평가 처리방침",
       keywords: [
         { word: "취소보상 범위 내", alt: ["취소보상 범위", "취소보상의 범위", "취소보상 범위내"] },
         { word: "평년수익", alt: ["평년수익액"] },
@@ -736,6 +769,7 @@ const dataset = {
     {
       id: 1,
       tall: true,
+      ref: "종합139번",
       prompt: "광업권 소멸에 따른 보상액 산정",
       keywords: [
         { word: "이전•전용시설 판단", alt: ["이전 전용시설 판단", "이전.전용시설 판단"] },
@@ -751,6 +785,7 @@ const dataset = {
     {
       id: 1,
       tall: true,
+      ref: "종합140번",
       prompt: "농업손실보상대상 및 보상제외대상",
       keywords: [
         { word: "농지법", alt: ["「농지법」"] },
@@ -768,6 +803,7 @@ const dataset = {
     {
       id: 2,
       tall: true,
+      ref: "종합141번",
       prompt: "타인농지 적법 점유인정을 위한 자료",
       keywords: [
         { word: "토지보상법 48조 7항", alt: ["토지보상법 시행규칙 제48조 제7항", "시행규칙 48조 7항", "제48조 제7항"] },
@@ -781,6 +817,7 @@ const dataset = {
     },
     {
       id: 3,
+      ref: "종합142번",
       prompt: "농업손실보상액 산정 기준",
       keywords: [
         { word: "도별 연간농가평균", alt: [] },
@@ -834,7 +871,8 @@ const dataset = {
     {
       id: 1,
       tall: true,
-      prompt: "지구단위계획 관련 처리방침 (종합89)",
+      ref: "종합89번",
+      prompt: "지구단위계획 관련 처리방침",
       keywords: [
         { word: "합법적, 물리적, 합리적이며 경제적인 대안", alt: ["합법적 물리적 합리적 경제적", "법적허용가능성 물리적채택가능성"] },
         { word: "인근의 표준적인 사용과도 괴리", alt: ["표준적인 사용과 괴리"] }
@@ -853,7 +891,8 @@ const dataset = {
     {
       id: 3,
       tall: true,
-      prompt: "귀속토지가치 산정 절차 (종합85)",
+      ref: "종합85번",
+      prompt: "귀속토지가치 산정 절차",
       keywords: [
         { word: "순영업소득", alt: [] },
         { word: "대상부동산 시장가치", alt: ["시장가치"] },
@@ -863,7 +902,8 @@ const dataset = {
     },
     {
       id: 4,
-      prompt: "실물옵션에 대한 가치결정 (종합84)",
+      ref: "종합84번",
+      prompt: "실물옵션에 대한 가치결정",
       keywords: [
         { word: "ROV", alt: ["Real Option Value", "실물옵션"] },
         { word: "1년 보유기간중 임대료 더한 뒤 현가", alt: ["보유기간중 임대료 더한 뒤 현가"] }
@@ -873,7 +913,8 @@ const dataset = {
     {
       id: 5,
       tall: true,
-      prompt: "개발사업 타당성분석 목차 (종합82)",
+      ref: "종합82번",
+      prompt: "개발사업 타당성분석 목차",
       keywords: [
         { word: "조임대료", alt: ["조임대료 산정"] },
         { word: "조임대료승수", alt: [] },
@@ -884,7 +925,8 @@ const dataset = {
     {
       id: 6,
       very_tall: true,
-      prompt: "IRR 타당성 검토 (종합72) — 세금효과 미고려",
+      ref: "종합72번",
+      prompt: "IRR 타당성 검토 — 세금효과 미고려",
       keywords: [
         { word: "지분복귀액", alt: ["기말복귀가치"] },
         { word: "IRR로 현가", alt: ["IRR로 할인"] },
@@ -897,7 +939,8 @@ const dataset = {
     {
       id: 7,
       tall: true,
-      prompt: "NPV 타당성 검토 (종합71)",
+      ref: "종합71번",
+      prompt: "NPV 타당성 검토",
       keywords: [
         { word: "기말복귀가치", alt: ["재매도가치 - 미상환 저당잔금 - 양도소득세"] },
         { word: "투자가치", alt: ["저당가치 + 지분가치"] }
@@ -906,7 +949,8 @@ const dataset = {
     },
     {
       id: 8,
-      prompt: "MIRR (종합70)",
+      ref: "종합70번",
+      prompt: "MIRR",
       keywords: [
         { word: "IRR의 비현실적인 재투자수익률", alt: ["비현실적인 재투자수익률"] },
         { word: "현실적인 재투자수익률을 가정한 수정된 IRR", alt: ["수정된 IRR", "MIRR"] }
@@ -915,7 +959,8 @@ const dataset = {
     },
     {
       id: 9,
-      prompt: "ARR (종합71)",
+      ref: "종합71번",
+      prompt: "ARR",
       keywords: [
         { word: "연평균 순수익", alt: ["현가 X"] },
         { word: "연평균 투자액", alt: ["기초+기말 건물가치 평균"] }
@@ -924,13 +969,15 @@ const dataset = {
     },
     {
       id: 10,
-      prompt: "Duration (종합73)",
+      ref: "종합73번",
+      prompt: "Duration",
       keywords: [{ word: "현금흐름 현가의 비중", alt: [] }],
       modelAnswer: "1. 현금흐름 현가<br>2. <strong>현금흐름 현가의 비중</strong><br>3. Duration 산정"
     },
     {
       id: 11,
-      prompt: "WAPI (종합74)",
+      ref: "종합74번",
+      prompt: "WAPI",
       keywords: [
         { word: "투자규모 차이", alt: [] },
         { word: "투자자금과 유휴자금의 PI를 가중평균", alt: ["PI를 가중평균"] }
@@ -940,7 +987,8 @@ const dataset = {
     {
       id: 12,
       tall: true,
-      prompt: "Mean-Variance 분석 (종합75)",
+      ref: "종합75번",
+      prompt: "Mean-Variance 분석",
       keywords: [
         { word: "적정한 투자대안 선택", alt: [] },
         { word: "유리한 차입비용으로 수익률 상승", alt: ["Leverage 효과"] },
@@ -950,7 +998,8 @@ const dataset = {
     },
     {
       id: 13,
-      prompt: "Huff 상권분석모형 (종합76)",
+      ref: "종합76번",
+      prompt: "Huff 상권분석모형",
       keywords: [
         { word: "현시장 총규모", alt: ["인구합 x 인당 소득 x 소비비중"] },
         { word: "지역별 대상점포 점유율", alt: [] }
@@ -990,10 +1039,7 @@ function updateNavigation() {
   renderSubTabs();
   
   if (currentSub && tabMeta[currentSub]) {
-    document.getElementById("tab-subtitle").innerHTML = `
-      <span>${tabMeta[currentSub].title}</span>
-      <span class="ref-tag">${tabMeta[currentSub].badge}</span>
-    `;
+    document.getElementById("tab-subtitle").innerHTML = `<span>${tabMeta[currentSub].title}</span>`;
     document.getElementById("quiz-container").style.display = 'block';
     document.getElementById("action-bar").style.display = 'flex';
     renderQuiz();
@@ -1039,17 +1085,20 @@ function renderQuiz() {
     const savedVal = state[currentSub].inputs[q.id] || "";
     let cardHtml = '';
     
+    const refTag = q.ref ? `<span class="ref-tag" data-ref="${q.ref}">${q.ref}</span>` : '';
+
     if (q.isInlineShort) {
       cardHtml = `
         <div class="inline-question" id="card-${q.id}">
           <span class="inline-prompt">${q.prompt}</span>
+          ${refTag}
           <input type="text" class="inline-input blank-input" id="input-${q.id}" value="${savedVal}" placeholder="" oninput="handleInputChange(${q.id}, this.value)" onkeydown="handleKey(event, ${q.id})">
           <span class="inline-feedback" id="result-${q.id}"></span>
         </div>
       `;
       shortHtml += cardHtml;
     } else {
-      let promptHtml = `<div class="q-prompt-text">${q.prompt}</div>`;
+      let promptHtml = `<div class="q-prompt-text">${q.prompt} ${refTag}</div>`;
       if (q.context) {
         promptHtml += `<div class="q-context">${q.context}</div>`;
       }
@@ -1246,14 +1295,15 @@ function buildSearchIndex() {
       if (!sub.active || !dataset[sub.id]) return;
       dataset[sub.id].forEach((q) => {
         const kwText = (q.keywords || []).map((k) => [k.word, ...(k.alt || [])].join(' ')).join(' ');
-        const haystack = [q.prompt, stripHtml(q.context), stripHtml(q.modelAnswer), kwText]
+        const haystack = [q.prompt, q.ref, stripHtml(q.context), stripHtml(q.modelAnswer), kwText]
           .join(' ')
           .toLowerCase();
         idx.push({
           mainId: main.id,
           subId: sub.id,
           qid: q.id,
-          subLabel: (tabMeta[sub.id] && tabMeta[sub.id].badge) || sub.name,
+          subLabel: sub.name,
+          ref: q.ref || '',
           prompt: q.prompt,
           haystack,
         });
@@ -1284,7 +1334,7 @@ function handleSearchInput(rawQuery) {
         .map(
           (m) => `
         <button type="button" class="search-result-item" onclick="goToSearchResult('${m.mainId}','${m.subId}',${m.qid})">
-          <span class="sr-badge">${escapeHtml(m.subLabel)}</span>
+          <span class="sr-badge">${escapeHtml(m.subLabel)}</span>${m.ref ? `<span class="ref-tag" style="margin-left:4px;">${escapeHtml(m.ref)}</span>` : ''}
           <div class="sr-prompt">${escapeHtml(m.prompt)}</div>
         </button>
       `
