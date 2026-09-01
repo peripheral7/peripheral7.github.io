@@ -137,23 +137,6 @@
     25% { box-shadow: 0 0 0 4px rgba(59, 130, 246, 0.35); }
   }
   .search-highlight { animation: searchFlash 1.6s ease; }
-
-  /* 복습횟수 배지 — 채점 버튼 옆, 브라우저에 저장되어 초기화해도 유지됨 */
-  .review-badge {
-    display: none;
-    align-items: center;
-    justify-content: center;
-    min-width: 22px;
-    height: 22px;
-    padding: 0 6px;
-    border-radius: 6px;
-    background: #16a34a;
-    color: #fff;
-    font-size: 12px;
-    font-weight: 800;
-    font-variant-numeric: tabular-nums;
-    flex-shrink: 0;
-  }
 </style>
 </head>
 <body>
@@ -398,6 +381,21 @@ const dataset = {
       prompt: "보상평가 거래사례",
       keywords: [{ word: "공익사업과 무관", alt: ["무관한 선례"] }],
       modelAnswer: "<strong>공익사업과 무관</strong>한 선례를 선택한다."
+    },
+    {
+      id: 21,
+      tall: true,
+      prompt: "건축허가(농지전용허가) 및 조성 진행상황별 처리방침 (114번)",
+      context: "(1) 건축허가(농지전용허가)를 득하고 대지로 조성을 완료한 경우(지목변경 해태)<br>(2) 건축허가 득하였으나 형질변경을 하지 않고 있는 경우<br>(3) 건축허가를 득하였고 조성을 하던 중 해당 공익사업과 무관한 이유로 조성을 완료하지 못한 경우(투하된 조성비 면적당 50,000원)<br>* 농지전용부담금은 개별공시지가의 20% 수준이다.",
+      keywords: [
+        { word: "적법하게 형질변경된 바", alt: ["적법하게 형질변경"] },
+        { word: "현황을 기준으로 평가", alt: ["현황기준"] },
+        { word: "관리지역 전을 기준으로 선정", alt: ["관리지역 전"] },
+        { word: "농지전용부담금", alt: ["관련 비용"] },
+        { word: "토지보상법 57조", alt: ["제57조"] },
+        { word: "형질변경에 따른 기대이익은 고려하지 않는다", alt: ["기대이익은 고려하지 않는다", "대로 평가하지 않는다"] }
+      ],
+      modelAnswer: "1. 적법하게 형질변경된 바(조성완료), <strong>현황을 기준으로 평가</strong>한다.<br>2. 현황기준인 <strong>관리지역 전을 기준으로 선정</strong>하고 건축허가를 득한 바 관련 비용(<strong>농지전용부담금</strong>)을 보상한다(<strong>토지보상법 57조</strong>). (<strong>형질변경에 따른 기대이익은 고려하지 않는다</strong> → 대로 평가하지 않는다)"
     },
     // 단답형 (인라인)
     { id: 10, isInlineShort: true, prompt: "도시·군계획시설사업 (「국토계획법」) 사업인정의제일은", keywords: [{ word: "실시계획 고시일", alt: ["실시계획고시일"] }], modelAnswer: "실시계획 고시일" },
@@ -646,9 +644,10 @@ const dataset = {
       prompt: "고정적 비용, 이전비 등 평가",
       keywords: [
         { word: "공조공과, 보험료", alt: ["공조공과 및 보험료", "고정적 비용으로 판단"] },
-        { word: "건축물 제외", alt: ["건축물은 가격보상 대상", "건물 감가상각 제외"] }
+        { word: "건축물 제외", alt: ["건축물은 가격보상 대상", "건물 감가상각 제외"] },
+        { word: "건축물에 대한 감가상각비는 고려하지 않는다", alt: ["건축물 감가상각비 미고려", "건물 감가상각비는 고려하지 않는다"] }
       ],
-      modelAnswer: "이전비 등은 인테리어비, 이전비, 감손액 등을 포함하며 (진열대 증설비는 시설개선비로 제외). 휴업기간 중의 <strong>공조공과, 보험료를 고정적 비용으로 판단</strong>한다 (<strong>건축물은 가격보상 대상으로서 제외</strong>하고 이전대상인 기계기구의 감가상각비를 고려한다)."
+      modelAnswer: "이전비 등은 인테리어비, 이전비, 감손액 등을 포함하며 (진열대 증설비는 시설개선비로 제외). 휴업기간 중의 <strong>공조공과, 보험료를 고정적 비용으로 판단</strong>한다 (<strong>건축물은 가격보상 대상으로서 제외</strong>하고 이전대상인 기계기구의 감가상각비를 고려한다).<br>※ 임차인영업의 고정적 비용 산정 시 <strong>건축물에 대한 감가상각비는 고려하지 않는다</strong>."
     },
     {
       id: 8,
@@ -730,7 +729,7 @@ const dataset = {
         { word: "2", alt: ["2년", "x 2", "× 2"] },
         { word: "감가상각비", alt: ["감가상각"] }
       ],
-      modelAnswer: "허가어업의 <strong>취소보상 범위 내</strong>에서 보상평가한다 (조사 미고려 시에도 정답 인정).<br>- 정지처분손실(<strong>2</strong>년): <strong>평년수익 × 2 + 고정경비</strong>(<strong>감가상각비</strong> 등)"
+      modelAnswer: "허가어업의 <strong>취소보상 범위 내</strong>에서 보상평가한다.<br>- 정지처분손실(<strong>2</strong>년): <strong>평년수익 × 2 + 고정경비</strong>(<strong>감가상각비</strong> 등)"
     }
   ],
   comp_mine: [
@@ -1045,7 +1044,6 @@ function renderQuiz() {
         <div class="inline-question" id="card-${q.id}">
           <span class="inline-prompt">${q.prompt}</span>
           <input type="text" class="inline-input blank-input" id="input-${q.id}" value="${savedVal}" placeholder="" oninput="handleInputChange(${q.id}, this.value)" onkeydown="handleKey(event, ${q.id})">
-          <span class="review-badge" id="review-${q.id}" title="복습 횟수"></span>
           <span class="inline-feedback" id="result-${q.id}"></span>
         </div>
       `;
@@ -1063,10 +1061,7 @@ function renderQuiz() {
               <span class="q-num">${q.id}</span>
               <div style="flex:1;">${promptHtml}</div>
             </div>
-            <div style="display:flex; align-items:center; gap:6px;">
-              <span class="review-badge" id="review-${q.id}" title="복습 횟수"></span>
-              <button class="btn btn-check" onclick="gradeSingle(${q.id}, false, true)">채점</button>
-            </div>
+            <button class="btn btn-check" onclick="gradeSingle(${q.id}, false, true)">채점</button>
           </div>
           <textarea 
             class="input-box blank-input ${q.tall ? 'tall' : ''} ${q.very_tall ? 'very-tall' : ''} ${q.short ? 'short' : ''}" 
@@ -1083,7 +1078,10 @@ function renderQuiz() {
   if (currentSub === 'general' && shortHtml) {
     container.innerHTML = normalHtml + `
       <div class="inline-card">
-        <div class="section-divider" style="margin-top:0;">공익사업별 법정 사업인정의제일</div>
+        <div class="section-divider" style="margin-top:0; display:flex; justify-content:space-between; align-items:center;">
+          <span>공익사업별 법정 사업인정의제일</span>
+          <button class="btn btn-primary" style="font-size:12.5px; padding:6px 14px;" onclick="gradeAllInlineShort()">전체 채점</button>
+        </div>
         ${shortHtml}
       </div>`;
   } else {
@@ -1094,7 +1092,6 @@ function renderQuiz() {
     if (state[currentSub].graded[q.id]) {
       renderGradedResult(q.id);
     }
-    updateReviewBadge(q.id);
   });
 }
 
@@ -1152,7 +1149,6 @@ function gradeSingle(id, isIndividual = false, buttonClick = false) {
     state[currentSub].graded[id] = true;
     state[currentSub].individuallyGraded[id] = true;
     renderGradedResult(id);
-    bumpReviewCount(currentSub, id);
   }
   updateOverall();
 }
@@ -1171,10 +1167,8 @@ function gradeAll() {
     }
     
     if (turnOn) {
-      const wasGraded = state[currentSub].graded[q.id];
       state[currentSub].graded[q.id] = true;
       renderGradedResult(q.id);
-      if (!wasGraded) bumpReviewCount(currentSub, q.id);
     } else {
       if (!state[currentSub].individuallyGraded[q.id]) {
         state[currentSub].graded[q.id] = false;
@@ -1186,6 +1180,19 @@ function gradeAll() {
         }
       }
     }
+  });
+  updateOverall();
+}
+
+// "공익사업별 법정 사업인정의제일" 단답형 문제만 모아서 한번에 채점
+function gradeAllInlineShort() {
+  if (!currentSub || !dataset[currentSub]) return;
+  dataset[currentSub].filter(q => q.isInlineShort).forEach(q => {
+    const inputEl = document.getElementById(`input-${q.id}`);
+    if (inputEl) state[currentSub].inputs[q.id] = inputEl.value;
+    state[currentSub].graded[q.id] = true;
+    state[currentSub].individuallyGraded[q.id] = true;
+    renderGradedResult(q.id);
   });
   updateOverall();
 }
@@ -1224,47 +1231,8 @@ function resetCurrentTab() {
   state[currentSub].graded = {};
   state[currentSub].individuallyGraded = {};
   state[currentSub].globalGraded = false;
-  renderQuiz(); // 복습횟수(reviewCounts)는 별도 저장소라 여기서 건드리지 않음 — 초기화해도 유지됨
+  renderQuiz();
   updateOverall();
-}
-
-// ===================== 복습횟수 (브라우저 저장, 채점 초기화와 무관하게 누적) =====================
-const REVIEW_KEY = 'appraisal-practice-review-counts-v1';
-let reviewCounts = {};
-
-function loadReviewCounts() {
-  try {
-    const raw = localStorage.getItem(REVIEW_KEY);
-    if (raw) reviewCounts = JSON.parse(raw);
-  } catch (e) { /* 저장소 접근 불가 시 무시 */ }
-}
-
-function saveReviewCounts() {
-  try { localStorage.setItem(REVIEW_KEY, JSON.stringify(reviewCounts)); } catch (e) {}
-}
-
-function getReviewCount(subId, qid) {
-  return (reviewCounts[subId] && reviewCounts[subId][qid]) || 0;
-}
-
-// 문제를 "채점"해 답을 확인할 때마다(개별/전체 모두) 1회 누적된다. resetCurrentTab()과는 완전히 분리된 저장소.
-function bumpReviewCount(subId, qid) {
-  if (!reviewCounts[subId]) reviewCounts[subId] = {};
-  reviewCounts[subId][qid] = (reviewCounts[subId][qid] || 0) + 1;
-  saveReviewCounts();
-  updateReviewBadge(qid);
-}
-
-function updateReviewBadge(qid) {
-  const el = document.getElementById(`review-${qid}`);
-  if (!el) return;
-  const count = getReviewCount(currentSub, qid);
-  if (count > 0) {
-    el.textContent = count;
-    el.style.display = 'inline-flex';
-  } else {
-    el.style.display = 'none';
-  }
 }
 
 // ===================== 검색 (전체 주제의 문제를 카드 단위로 검색) =====================
@@ -1363,7 +1331,7 @@ document.addEventListener('click', (e) => {
   }
 });
 
-loadReviewCounts();
+try { localStorage.removeItem('appraisal-practice-review-counts-v1'); } catch (e) {} // 복습횟수 기능 제거에 따른 기존 저장값 정리
 updateNavigation();
 </script>
 </body>
