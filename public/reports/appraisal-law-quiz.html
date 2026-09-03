@@ -2310,6 +2310,17 @@
       });
     }
 
+    let lastActiveTocCardId = null;
+    function centerActiveTocItem(item) {
+      const container = document.querySelector('.toc-sidebar');
+      if (!container || !item) return;
+      const targetTop = item.offsetTop - (container.clientHeight / 2) + (item.offsetHeight / 2);
+      container.scrollTo({
+        top: Math.max(0, targetTop),
+        behavior: 'smooth'
+      });
+    }
+
     function attachKeyEvents() {
       const visibleInputs = Array.from(document.querySelectorAll('.card:not(.hidden) .blank-input'));
       visibleInputs.forEach((input) => {
@@ -2489,13 +2500,20 @@
         }
       });
 
+      let activeItem = null;
       document.querySelectorAll('.toc-item').forEach(item => {
         if (item.getAttribute('data-target') === cardId) {
           item.classList.add('active');
+          activeItem = item;
         } else {
           item.classList.remove('active');
         }
       });
+
+      if (cardId !== lastActiveTocCardId) {
+        lastActiveTocCardId = cardId;
+        if (activeItem) centerActiveTocItem(activeItem);
+      }
     }
 
     function applyFilters() {
