@@ -440,7 +440,28 @@ def generate_dashboard_html(div_list_current, div_list_past, div_list_none, stri
             .btn-tf {{ background-color: #ffffff; color: #777777; border: none; padding: 10px 40px; font-family: 'Gothic A1'; font-weight: bold; font-size: 14px; cursor: pointer; margin: 0; outline: none; transition: background 0.2s, color 0.2s; }}
             .btn-tf.active {{ background-color: #111111; color: #ffffff; }}
             .btn-tf:hover:not(.active) {{ background-color: #f0f0f0; color: #111111; }}
-            
+
+            .back-to-board {{
+                position: fixed;
+                bottom: 24px;
+                left: 24px;
+                z-index: 1200;
+                display: inline-flex;
+                align-items: center;
+                gap: 6px;
+                padding: 10px 18px;
+                background-color: #111111;
+                color: #ffffff;
+                border: 1px solid #111111;
+                font-family: 'Gothic A1', sans-serif;
+                font-size: 13px;
+                font-weight: 700;
+                text-decoration: none;
+                box-shadow: 0 4px 10px rgba(0,0,0,0.2);
+                transition: 0.2s;
+            }}
+            .back-to-board:hover {{ background-color: #333333; }}
+
             .grid-container {{ display: grid; grid-template-columns: repeat(3, 1fr); gap: 30px; margin: 0 auto; }}
             
             /* 💡 트랜지션 삭제를 통한 슬라이딩 효과 차단, 우아한 페이드 효과 적용 */
@@ -593,6 +614,7 @@ def generate_dashboard_html(div_list_current, div_list_past, div_list_none, stri
         </script>
     </head>
     <body>
+        <a href="/" class="back-to-board">← BACK TO BOARD</a>
         <div class="wrap-container">
             <div class="title-section">
                 <h1>Mark Minervini 트레이딩 분석</h1>

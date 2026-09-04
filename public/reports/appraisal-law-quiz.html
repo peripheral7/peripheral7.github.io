@@ -540,9 +540,36 @@
       transition: 0.2s;
     }
     #themeToggleBtn:hover { transform: scale(1.05); }
+
+    .back-to-board {
+      position: fixed;
+      top: 20px;
+      left: 20px;
+      z-index: 1000;
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      padding: 8px 16px;
+      background: var(--card-bg);
+      border: 1px solid var(--border);
+      border-radius: 0;
+      color: var(--text-muted);
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 0.75rem;
+      font-weight: 700;
+      letter-spacing: 0.05em;
+      text-decoration: none;
+      box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+      transition: 0.2s;
+    }
+    .back-to-board:hover { color: var(--toc-active); border-color: var(--toc-active); }
+    @media (max-width: 640px) {
+      .back-to-board { top: 12px; left: 12px; padding: 6px 12px; font-size: 0.68rem; }
+    }
   </style>
 </head>
 <body>
+  <a href="/" class="back-to-board">← BACK TO BOARD</a>
   <h1>감정평가 행정법 (1~82)</h1>
 
   <div class="layout">

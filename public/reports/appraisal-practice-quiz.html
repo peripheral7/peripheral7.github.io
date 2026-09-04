@@ -144,9 +144,37 @@
     25% { box-shadow: 0 0 0 4px rgba(58, 79, 66, 0.35); }
   }
   .search-highlight { animation: searchFlash 1.6s ease; }
+
+  .back-to-board {
+    position: fixed;
+    top: 20px;
+    left: 20px;
+    z-index: 1000;
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 8px 16px;
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 0;
+    color: var(--text-muted);
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 0.75rem;
+    font-weight: 700;
+    letter-spacing: 0.05em;
+    text-decoration: none;
+    box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+    transition: 0.2s;
+  }
+  .back-to-board:hover { color: var(--primary); border-color: var(--primary); }
+  @media (max-width: 640px) {
+    .back-to-board { top: 12px; left: 12px; padding: 6px 12px; font-size: 0.68rem; }
+  }
 </style>
 </head>
 <body>
+
+<a href="/" class="back-to-board">← BACK TO BOARD</a>
 
 <div class="container">
   <div class="header">
