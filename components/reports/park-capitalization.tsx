@@ -1,81 +1,44 @@
-import Image from "next/image"
+import { MapLightbox } from "@/components/reports/map-lightbox"
 import {
-  parkCapConclusions,
-  parkCapCoefTable,
-  parkCapDecay,
+  parkCapBaselineTable,
+  parkCapChow,
+  parkCapCircuityTable,
   parkCapFacts,
-  parkCapLimits,
+  parkCapFindings,
+  parkCapFitTable,
+  parkCapFooter,
+  parkCapGravityTable,
+  parkCapMainEffectTable,
   parkCapMaps,
   parkCapMeta,
+  parkCapMethodology,
   parkCapModerationTable,
-  parkCapMoneyTable,
-  parkCapNotes,
-  parkCapR2Table,
-  parkCapSpatialTable,
+  parkCapMoran,
+  parkCapSample,
+  parkCapSemTable,
+  parkCapStructureNotes,
+  parkCapSupplyTable,
+  parkCapTiers,
+  parkCapTypology,
+  parkCapVifTable,
+  type RegionKey,
+  type StatTable,
 } from "@/content/reports/park-capitalization"
 
-type Cell = { v: string; t?: string; muted?: boolean }
-type Row = { label: string; sub?: string; strong?: boolean; cells: Cell[] }
-type TableSpec = { caption: string; head: string[]; rows: Row[] }
+const REGION_DOT: Record<RegionKey, string> = {
+  gg: "#3f9e70",
+  ds: "#b08a3c",
+  dn: "#4f93a8",
+  uj: "#c2703a",
+}
 
-function StatTable({ spec }: { spec: TableSpec }) {
+function Dot({ k }: { k: RegionKey }) {
   return (
-    <figure className="mt-5 overflow-hidden rounded border border-border bg-card">
-      <figcaption className="border-b border-border px-4 py-2.5 font-mono text-[0.62rem] uppercase tracking-[0.14em] text-muted-foreground">
-        {spec.caption}
-      </figcaption>
-      <div className="overflow-x-auto">
-        <table className="w-full min-w-[34rem] border-collapse text-sm">
-          <thead>
-            <tr className="bg-muted/60">
-              {spec.head.map((h, i) => (
-                <th
-                  key={h}
-                  scope="col"
-                  className={`border-b border-border px-4 py-2.5 text-[0.72rem] font-semibold text-muted-foreground ${
-                    i === 0 ? "text-left" : "text-right"
-                  }`}
-                >
-                  {h}
-                </th>
-              ))}
-            </tr>
-          </thead>
-          <tbody>
-            {spec.rows.map((row) => (
-              <tr key={row.label} className="border-b border-border last:border-b-0">
-                <th
-                  scope="row"
-                  className={`px-4 py-2.5 text-left align-top text-[0.82rem] font-normal ${
-                    row.strong ? "font-semibold" : ""
-                  }`}
-                >
-                  {row.label}
-                  {row.sub ? (
-                    <span className="mt-0.5 block font-mono text-[0.65rem] font-normal text-muted-foreground">
-                      {row.sub}
-                    </span>
-                  ) : null}
-                </th>
-                {row.cells.map((cell, i) => (
-                  <td
-                    key={i}
-                    className="whitespace-nowrap px-4 py-2.5 text-right align-top font-mono text-[0.8rem] tabular-nums"
-                  >
-                    <span className={cell.muted ? "text-muted-foreground" : ""}>{cell.v}</span>
-                    {cell.t ? (
-                      <span className="mt-0.5 block text-[0.65rem] text-muted-foreground">
-                        {cell.t}
-                      </span>
-                    ) : null}
-                  </td>
-                ))}
-              </tr>
-            ))}
-          </tbody>
-        </table>
-      </div>
-    </figure>
+    <span
+      aria-hidden
+      className="inline-block h-[7px] w-[7px] shrink-0 rounded-full"
+      style={{ background: REGION_DOT[k] }}
+    />
   )
 }
 
@@ -88,20 +51,89 @@ function SectionTitle({ n, children }: { n: string; children: React.ReactNode })
   )
 }
 
-export function ParkCapitalizationReport() {
-  const decayMax = Math.max(
-    ...parkCapDecay.rows.flatMap((r) => r.values.map((v) => Math.abs(v)))
+function Table({ spec }: { spec: StatTable }) {
+  return (
+    <figure className="mt-5">
+      <div className="overflow-hidden rounded border border-border bg-card">
+        <figcaption className="border-b border-border px-4 py-2.5 font-mono text-[0.62rem] uppercase tracking-[0.12em] text-muted-foreground">
+          {spec.caption}
+        </figcaption>
+        <div className="overflow-x-auto">
+          <table className="w-full min-w-[40rem] border-collapse text-sm">
+            <thead>
+              <tr className="bg-muted/60">
+                {spec.head.map((h, i) => (
+                  <th
+                    key={h}
+                    scope="col"
+                    className={`border-b border-border px-4 py-2.5 text-[0.72rem] font-semibold text-muted-foreground ${
+                      i === 0 ? "text-left" : "text-right"
+                    }`}
+                  >
+                    {h}
+                  </th>
+                ))}
+              </tr>
+            </thead>
+            <tbody>
+              {spec.rows.map((row) => (
+                <tr
+                  key={row.label}
+                  className={`border-b border-border last:border-b-0 ${
+                    row.fit ? "bg-muted/40" : ""
+                  }`}
+                >
+                  <th
+                    scope="row"
+                    className={`px-4 py-2.5 text-left align-top text-[0.82rem] font-normal ${
+                      row.strong || row.fit ? "font-semibold text-foreground" : "text-muted-foreground"
+                    }`}
+                  >
+                    {row.label}
+                  </th>
+                  {row.cells.map((cell, i) => (
+                    <td
+                      key={i}
+                      className="whitespace-nowrap px-4 py-2.5 text-right align-top font-mono text-[0.8rem] tabular-nums"
+                    >
+                      <span
+                        className={
+                          cell.muted
+                            ? "text-muted-foreground"
+                            : row.strong
+                              ? "font-semibold"
+                              : ""
+                        }
+                      >
+                        {cell.v}
+                      </span>
+                      {cell.t ? (
+                        <span className="mt-0.5 block text-[0.65rem] font-normal text-muted-foreground">
+                          {cell.t}
+                        </span>
+                      ) : null}
+                    </td>
+                  ))}
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+      </div>
+      {spec.note ? (
+        <p className="mt-2 text-[0.75rem] leading-relaxed text-muted-foreground">{spec.note}</p>
+      ) : null}
+    </figure>
   )
+}
 
+export function ParkCapitalizationReport() {
   return (
     <section aria-labelledby="park-cap-title">
       <p className="font-mono text-[0.65rem] uppercase tracking-[0.2em] text-accent">
         {parkCapMeta.eyebrow}
       </p>
-      <h2
-        id="park-cap-title"
-        className="mt-2 text-2xl font-extrabold tracking-tight md:text-3xl"
-      >
+      <h2 id="park-cap-title" className="mt-2 text-2xl font-extrabold tracking-tight md:text-3xl">
         {parkCapMeta.title}
       </h2>
       <p className="mt-4 max-w-3xl text-[0.95rem] leading-relaxed text-muted-foreground">
@@ -114,206 +146,267 @@ export function ParkCapitalizationReport() {
             <dt className="font-mono text-[0.6rem] uppercase tracking-[0.12em] text-muted-foreground">
               {f.label}
             </dt>
-            <dd className="mt-0.5 font-mono text-[0.85rem] font-semibold tabular-nums">
-              {f.value}
-            </dd>
+            <dd className="mt-0.5 font-mono text-[0.85rem] font-semibold tabular-nums">{f.value}</dd>
           </div>
         ))}
       </dl>
 
-      {/* 결론 요약 */}
-      <div className="mt-8 rounded border border-border border-l-[3px] border-l-accent bg-card p-5 md:p-6">
-        <h3 className="font-mono text-[0.65rem] uppercase tracking-[0.14em] text-accent">
-          결론 요약
-        </h3>
-        <ol className="mt-4 flex flex-col gap-4">
-          {parkCapConclusions.map((c) => (
-            <li key={c.n} className="grid grid-cols-[1.6rem_1fr] gap-3">
-              <span className="pt-0.5 font-mono text-[0.7rem] font-semibold text-accent">
-                {c.n}
-              </span>
-              <span className="text-[0.92rem] leading-relaxed">{c.text}</span>
-            </li>
-          ))}
-        </ol>
-      </div>
-
-      {/* 3개 신도시 클러스터 지도 — 결론 요약 바로 아래 한 행 */}
-      <div className="mt-6 grid grid-cols-1 gap-4 sm:grid-cols-3">
-        {parkCapMaps.map((m) => (
-          <figure
-            key={m.id}
-            className="overflow-hidden rounded border border-border bg-card"
-          >
-            <div className="relative aspect-square w-full bg-muted">
-              <Image
-                src={m.src}
-                alt={`${m.label} 공원 및 상권 클러스터 지도`}
-                fill
-                sizes="(max-width: 640px) 100vw, 33vw"
-                className="object-cover"
-              />
-            </div>
-            <figcaption className="flex items-baseline justify-between border-t border-border px-3 py-2">
-              <strong className="text-[0.8rem]">{m.label}</strong>
-              <span className="font-mono text-[0.6rem] uppercase tracking-wide text-muted-foreground">
-                {m.sub}
-              </span>
-            </figcaption>
-          </figure>
+      {/* 00 핵심 요약 — 결론을 맨 위에 */}
+      <SectionTitle n="00">핵심 요약</SectionTitle>
+      <div className="mt-4 grid grid-cols-1 gap-px overflow-hidden rounded border border-border bg-border sm:grid-cols-2">
+        {parkCapFindings.map((f) => (
+          <div key={f.label} className="flex flex-col gap-2 bg-card p-5">
+            <span className="text-[0.72rem] text-muted-foreground">{f.label}</span>
+            <span
+              className={`font-mono text-[1.35rem] font-semibold tabular-nums ${
+                f.accent ? "text-accent" : "text-foreground"
+              }`}
+            >
+              {f.value}
+            </span>
+            <span className="text-[0.78rem] leading-relaxed text-muted-foreground">{f.note}</span>
+          </div>
         ))}
       </div>
-      <p className="mt-2 text-[0.75rem] leading-relaxed text-muted-foreground">
-        공식 도시계획시설(공원) 결정경계 기준 도시공원(10ha 이상 진한 녹색 / 미만 연녹색)과
-        생활상권 DBSCAN 클러스터(붉은 원, 반경 ∝ √점포수), 공원 진입로를 함께 표시했다.
-      </p>
 
-      {/* 01 자본화 효과 */}
-      <SectionTitle n="01">공원 자본화 효과는 견고하다</SectionTitle>
+      {/* 지역별 지도 — 2×2, 클릭 확대 */}
+      <SectionTitle n="01">지역별 공원 · 상권 클러스터 지도</SectionTitle>
       <p className="mt-3 max-w-3xl text-[0.92rem] leading-relaxed">
-        로그–로그 설정이므로 계수는 곧 탄력성이다. 기본모형에서 공원까지 직선거리가 10%
-        멀어질 때 단가는 광교 1.7%, 동탄 1.6%, 운정 0.8% 하락하며 세 지역 모두 1% 수준에서
-        유의하다.
+        공식 도시계획시설(공원) 결정경계 기준 도시공원과 생활상권 DBSCAN 클러스터(붉은 원,
+        반경 ∝ √점포수), 공원 진입로를 함께 표시했다. 이미지를 클릭하면 원본 크기로 확대된다.
       </p>
-      <StatTable spec={parkCapCoefTable} />
-      <p className="mt-4 max-w-3xl text-[0.92rem] leading-relaxed">
-        상권지수를 넣었을 때의 반응은 지역마다 다르다. 광교에서는 계수가 −0.17에서 −0.07로
-        절반 이하로 줄어드는데, 광교의 공원 프리미엄 상당 부분이 실은 “공원과 상권이 함께
-        발달한 입지”의 프리미엄이었음을 뜻한다. 반면 운정은 −0.08로 전혀 변하지 않아 공원
-        효과가 상권과 독립적으로 존재한다. 가장 중요한 것은 마지막 행으로, 공간자기상관을
-        통제한 SEM에서도 계수가 살아남으며 동탄은 <strong>−0.16에서 −0.21로 오히려 강해진다</strong>.
-      </p>
+      <MapLightbox maps={parkCapMaps} />
 
-      {/* 02 효과의 크기 */}
-      <SectionTitle n="02">효과의 크기: 얼마나 큰가</SectionTitle>
+      {/* 02 표본 개요 */}
+      <SectionTitle n="02">표본 개요</SectionTitle>
       <p className="mt-3 max-w-3xl text-[0.92rem] leading-relaxed">
-        계수의 유의성과 계수의 크기는 다른 질문이다. 공원 접근성이 실제로 아파트 가격의
-        얼마를 설명하고, 거리 100m가 몇 퍼센트·몇 만원의 가치를 갖는지를 세 각도에서 환산했다.
+        동탄2 남/북 경계를 실측 좌표로 보정한 이후 확정된 지역별 표본이다. 동탄남부·북부는 이제
+        별개 지역으로 완전히 독립 추정된다.
       </p>
-      <StatTable spec={parkCapR2Table} />
-      <p className="mt-4 max-w-3xl text-[0.92rem] leading-relaxed">
-        동탄이 가장 극적이다. 공원거리 변수 하나를 빼면 <strong>R²가 0.66에서 0.39로 무너진다.</strong>{" "}
-        건축연령·세대수·브랜드·층수·면적·지하철거리를 모두 넣고도 설명하지 못하던 가격 변동의
-        44.9%를 공원거리 하나가 잡아낸다. 운정의 18.6%는 공원 효과가 없어서가 아니라 다른
-        변수들이 이미 가격을 거의 다 설명하고 있기 때문이다(공원 제외 R²가 이미 0.895).
-      </p>
-
-      <h4 className="mt-8 text-[0.95rem] font-semibold">거리 100m의 가격 효과 — 상수가 아니다</h4>
-      <p className="mt-2 max-w-3xl text-[0.92rem] leading-relaxed">
-        로그–로그 모형이므로 100m의 가치는 출발 거리에 따라 달라진다. 공원 코앞에서의 100m와
-        1km 밖에서의 100m는 체감이 다르며, 모형이 이를 그대로 반영한다.
-      </p>
-      <div className="mt-5 overflow-x-auto rounded border border-border bg-card p-4">
-        <div className="min-w-[42rem]">
-          <div className="grid grid-cols-[7rem_repeat(5,minmax(0,1fr))] gap-2 border-b border-border pb-2">
-            <span />
-            {parkCapDecay.cols.map((c) => (
-              <span
-                key={c}
-                className="font-mono text-[0.62rem] tabular-nums text-muted-foreground"
-              >
-                {c}
-              </span>
-            ))}
-          </div>
-          {parkCapDecay.rows.map((r) => (
-            <div
-              key={r.label}
-              className="mt-2 grid grid-cols-[7rem_repeat(5,minmax(0,1fr))] items-center gap-2"
-            >
-              <span className="flex flex-col leading-tight">
-                <strong className="text-[0.82rem]">{r.label}</strong>
-                <span className="font-mono text-[0.62rem] text-muted-foreground">{r.beta}</span>
-              </span>
-              {r.values.map((v, i) => (
-                <span
-                  key={i}
-                  className="relative flex h-7 items-center overflow-hidden rounded-sm bg-muted pl-1.5 font-mono text-[0.7rem] tabular-nums"
-                >
-                  <span
-                    aria-hidden
-                    className="absolute inset-y-0 left-0 border-r-2 border-accent bg-accent/20"
-                    style={{ width: `${(Math.abs(v) / decayMax) * 100}%` }}
-                  />
-                  <span className="relative">{v.toFixed(2)}%</span>
-                </span>
-              ))}
+      <div className="mt-5 grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
+        {parkCapSample.map((s) => (
+          <div key={s.key} className="rounded border border-border bg-card p-4">
+            <div className="flex items-center gap-2 pb-2 text-[0.88rem] font-semibold">
+              <Dot k={s.key} />
+              {s.label}
             </div>
-          ))}
+            <dl className="flex flex-col">
+              {s.rows.map(([k, v]) => (
+                <div
+                  key={k}
+                  className="flex items-baseline justify-between border-t border-dashed border-border py-1.5 text-[0.78rem]"
+                >
+                  <dt className="text-muted-foreground">{k}</dt>
+                  <dd className="font-mono font-medium tabular-nums">{v}</dd>
+                </div>
+              ))}
+            </dl>
+          </div>
+        ))}
+      </div>
+
+      {/* 03 기술통계 */}
+      <SectionTitle n="03">기술통계 · VIF</SectionTitle>
+      <Table spec={parkCapVifTable} />
+
+      {/* 04 기본모형 */}
+      <SectionTitle n="04">헤도닉 회귀 — 기본모형 (상권 제외)</SectionTitle>
+      <p className="mt-3 max-w-3xl text-[0.92rem] leading-relaxed">
+        클러스터-로버스트 표준오차(단지 단위) OLS. 공원거리는 직선거리 로그이며 상권지수는 아직
+        투입하지 않은 baseline 모형이다. <strong>동탄북부의 공원거리 계수는 정확히 0.00</strong>
+        (t=0.00)으로 baseline 단계에서는 공원 프리미엄이 검출되지 않는다 — 다만 §08 SEM에서
+        공간자기상관을 통제하면 유의한 음(−0.06***)의 효과가 다시 드러난다.
+      </p>
+      <Table spec={parkCapBaselineTable} />
+
+      {/* 05 중력모형 */}
+      <SectionTitle n="05">헤도닉 회귀 — 중력모형 (상권 포함)</SectionTitle>
+      <p className="mt-3 max-w-3xl text-[0.92rem] leading-relaxed">
+        생활상권 중력지수(3km 버퍼, β=1.0 고정)를 추가 투입한 모형. 상권지수 투입 후 공원거리
+        계수가 얼마나 줄어드는지가 “공원-상권 공발달” 여부를 가늠하는 단서다.
+      </p>
+      <Table spec={parkCapGravityTable} />
+      <div className="mt-4 rounded border border-border border-l-[3px] border-l-accent bg-muted/40 px-4 py-3.5 text-[0.88rem] leading-relaxed">
+        <strong>광교</strong>(−0.20→−0.09, 55.0% 감소)와 <strong>동탄남부</strong>(−0.18→−0.11,
+        38.9% 감소)는 상권지수 투입 시 공원거리 계수가 큰 폭으로 줄어든다 — 공원 프리미엄 상당
+        부분이 “공원과 상권이 함께 발달한 입지” 효과였다는 뜻이다. 반면 <strong>운정</strong>은
+        −0.08→−0.08로 사실상 변화가 없어 공원 효과가 상권과 독립적으로 존재하며,{" "}
+        <strong>동탄북부</strong>는 baseline 단계부터 계수가 0.00이라 애초에 줄어들 효과 자체가 없다.
+      </div>
+
+      {/* 06 거리지표 진단 */}
+      <SectionTitle n="06">공원거리 지표 진단 — 보행 vs 직선</SectionTitle>
+      <p className="mt-3 max-w-3xl text-[0.92rem] leading-relaxed">
+        보행 실측거리와 직선거리의 우회율(Circuity) 및 일치도. 회귀 비교가 아니라 지표 자체의
+        신뢰도 점검용이다.
+      </p>
+      <Table spec={parkCapCircuityTable} />
+
+      {/* 07 풀링·공간자기상관 */}
+      <SectionTitle n="07">풀링 검정 · 공간자기상관</SectionTitle>
+      <div className="mt-5 grid grid-cols-1 gap-4 sm:grid-cols-2">
+        <div className="rounded border border-border bg-card p-4">
+          <div className="pb-2 text-[0.88rem] font-semibold">Chow Test — 4개 지역 풀링 적합성</div>
+          <dl className="flex flex-col">
+            {parkCapChow.map(([k, v]) => (
+              <div
+                key={k}
+                className="flex items-baseline justify-between border-t border-dashed border-border py-1.5 text-[0.78rem]"
+              >
+                <dt className="text-muted-foreground">{k}</dt>
+                <dd
+                  className={`font-mono font-medium tabular-nums ${
+                    k === "판정" ? "text-accent" : ""
+                  }`}
+                >
+                  {v}
+                </dd>
+              </div>
+            ))}
+          </dl>
+        </div>
+        <div className="rounded border border-border bg-card p-4">
+          <div className="pb-2 text-[0.88rem] font-semibold">
+            Moran&apos;s I — 잔차 공간자기상관 (k=3)
+          </div>
+          <dl className="flex flex-col">
+            {parkCapMoran.map((m) => (
+              <div
+                key={m.key}
+                className="flex items-baseline justify-between border-t border-dashed border-border py-1.5 text-[0.78rem]"
+              >
+                <dt className="flex items-center gap-2 text-muted-foreground">
+                  <Dot k={m.key} />
+                  {m.label}
+                </dt>
+                <dd className="font-mono font-medium tabular-nums">{m.v}</dd>
+              </div>
+            ))}
+          </dl>
         </div>
       </div>
       <p className="mt-2 text-[0.75rem] leading-relaxed text-muted-foreground">
-        막대 길이는 하락률의 상대 크기. 동탄에서 공원 200m 거리의 단지가 300m로 밀려나면 단가가
-        8.2% 낮아지지만, 1,000m에서 1,100m로 밀려날 때는 2.0%에 그친다. 공원 프리미엄은
-        근거리에 집중된다.
+        4개 지역 전부 강한 양의 공간자기상관 → OLS 대신 SAR/SEM 공간계량모형으로 재추정.
       </p>
 
-      <h4 className="mt-8 text-[0.95rem] font-semibold">금액 환산 — 실제 거래가로 얼마인가</h4>
-      <StatTable spec={parkCapMoneyTable} />
-      <p className="mt-4 max-w-3xl text-[0.92rem] leading-relaxed">
-        가장 직관적인 요약은 두 번째 행이다. 같은 신도시 안에서 공원과 가까운 단지와 먼 단지
-        사이에는 <strong>광교 1.07억, 동탄 1.28억, 운정 0.29억의 가격 차이</strong>가 존재하며,
-        이는 면적·층·연령·브랜드·지하철 접근성을 모두 동일하게 맞춘 뒤에 남는 순수한 공원
-        프리미엄이다.
+      {/* 08 SEM */}
+      <SectionTitle n="08">공간계량모형 — 최종 채택 (SEM)</SectionTitle>
+      <Table spec={parkCapFitTable} />
+      <Table spec={parkCapSemTable} />
+      <p className="mt-3 max-w-3xl text-[0.88rem] leading-relaxed text-muted-foreground">
+        <strong className="text-foreground">
+          동탄북부는 baseline OLS에서 공원거리 계수가 0.00(비유의)이었으나, 공간오차항으로
+          자기상관을 통제한 SEM에서는 −0.06***으로 유의한 음의 효과가 회복된다
+        </strong>{" "}
+        — OLS 잔차에 섞여 있던 공간적 노이즈가 공원 효과를 가려온 사례로 해석된다.
       </p>
 
-      {/* 03 공간계량 */}
-      <SectionTitle n="03">공간자기상관: OLS만으로는 부족하다</SectionTitle>
+      {/* 09 조절효과 */}
+      <SectionTitle n="09">공원×상권 조절효과 — 상권 성격별 분해</SectionTitle>
       <p className="mt-3 max-w-3xl text-[0.92rem] leading-relaxed">
-        OLS 잔차의 Moran&apos;s I는 세 지역 모두 1% 수준에서 유의하며, 광교·동탄은 0.8을 넘는 극히
-        강한 공간군집을 보인다. 이웃 정의(k=2,3,4)를 바꿔도 값이 안정적이어서 가중행렬 설정에
-        따른 인위적 결과가 아니다.
+        진입로 기준 보행 500m 이내 생활상권 POI를 음식(외식·카페)/소매(생활편의)/보건의료로 나눠
+        (전체 포함 4개 지표, 각각 표준화) 공원거리(중심화)와의 상호작용항을 (단지, 진입로) 2-way
+        클러스터 표준오차로 추정했다.
       </p>
-      <StatTable spec={parkCapSpatialTable} />
-      <p className="mt-4 max-w-3xl text-[0.92rem] leading-relaxed">
-        Robust LM 검정이 결론을 갈라준다. 동탄(p=0.923)과 운정(p=0.799)에서 lag 항은 전혀
-        유의하지 않은 반면 error 항은 강하게 유의하며, AIC도 세 지역 모두 SEM을 지목한다. 즉
-        가격의 공간적 연관은 “이웃 가격이 내 가격을 끌어올리는” 파급(lag) 구조가 아니라,
-        모형에 넣지 못한 입지요인이 공간적으로 뭉쳐 있는 오차(error) 구조다.
-      </p>
+      <Table spec={parkCapModerationTable} />
+      <Table spec={parkCapMainEffectTable} />
+      <div className="mt-4 rounded border border-border border-l-[3px] border-l-muted-foreground/50 bg-muted/40 px-4 py-3.5 text-[0.88rem] leading-relaxed">
+        <strong>16개 조합(4지역×4상권성격) 중 유의한 조절효과는 운정의 “전체”와 “소매” 2건뿐</strong>
+        (둘 다 −0.02**)이며 음식·보건의료는 어느 지역에서도 유의하지 않다. 반면 표 8의 주효과를
+        보면 <strong>광교</strong>는 4개 성격 전부에서 상권 근접성 자체가 강한 프리미엄을
+        갖지만(0.07~0.09***) 공원거리와 상호작용하지는 않는다 — 광교에서 상권은 “공원과 별개로”
+        값을 만들 뿐이다. 전반적으로 “상권이 있으면 공원효과가 커진다”는 단순한 가설은 지지되지
+        않는다.
+      </div>
 
-      {/* 04 상권 조절효과 */}
-      <SectionTitle n="04">상권은 수준을 올리되 기울기를 바꾸지 않는다</SectionTitle>
+      {/* 10 공원 데이터 방법론 */}
+      <SectionTitle n="10">공원 데이터 구축 방법론 · 지역별 구성</SectionTitle>
       <p className="mt-3 max-w-3xl text-[0.92rem] leading-relaxed">
-        통제변수로서의 상권은 강력하다. 생활상권 중력지수는 광교 0.09***, 동탄 0.19***로 유의하며
-        설명력을 크게 끌어올린다(광교 R² 0.86→0.96, 동탄 0.66→0.75). 그러나 조절변수로서는
-        무효하다.
+        앞선 모든 분석이 딛고 선 “공원” 정의 자체를 어떻게 만들었는지 기술한다 — 데이터 출처,
+        공원으로 인정하는 최소 기준, 3단계 효용 티어 분류, 그리고 그 결과로 나온 지역별 공원
+        구성의 차이.
       </p>
-      <StatTable spec={parkCapModerationTable} />
-      <p className="mt-4 max-w-3xl text-[0.92rem] leading-relaxed">
-        기준점(공원 진입로 / 단지)과 측정방식(단순카운트 / 거리조락 중력모형), 버퍼 반경(300m /
-        500m)을 바꿔가며 검정했으나 상호작용항은 모든 사양에서 비유의했다. 반면 같은 회귀식
-        안에서 상권의 주효과는 광교·동탄에서 강하게 유의하다. 상권과 공원은 각각 독립적으로
-        가격에 기여하는 <strong>가산적(additive) 관계</strong>이며, 한쪽이 다른 쪽의 한계효과를
-        증폭하거나 상쇄하는 곱셈적 관계가 아니다.
-      </p>
-
-      {/* 05 유의사항 */}
-      <SectionTitle n="05">해석상 유의사항</SectionTitle>
-      <div className="mt-4 flex flex-col gap-4">
-        {parkCapNotes.map((n) => (
-          <div
-            key={n.title}
-            className="rounded border border-border border-l-[3px] border-l-muted-foreground/40 bg-muted/40 px-4 py-3.5"
-          >
-            <strong className="block text-[0.85rem]">{n.title}</strong>
-            <p className="mt-1.5 text-[0.88rem] leading-relaxed text-muted-foreground">{n.body}</p>
+      <div className="mt-5 flex flex-col gap-4">
+        {parkCapMethodology.map((m) => (
+          <div key={m.title} className="rounded border border-border bg-card px-4 py-3.5">
+            <strong className="block text-[0.88rem]">{m.title}</strong>
+            <p className="mt-1.5 text-[0.86rem] leading-relaxed text-muted-foreground">{m.body}</p>
           </div>
         ))}
       </div>
 
-      {/* 06 한계 */}
-      <SectionTitle n="06">한계</SectionTitle>
-      <ul className="mt-4 flex flex-col gap-3">
-        {parkCapLimits.map((l) => (
-          <li key={l.tag} className="grid grid-cols-[auto_1fr] gap-3">
-            <span className="mt-0.5 shrink-0 rounded-sm bg-muted px-2 py-0.5 font-mono text-[0.62rem] font-semibold uppercase tracking-wide text-muted-foreground">
-              {l.tag}
+      <h4 className="mt-8 text-[0.95rem] font-semibold">지역별 공원 구성 — 티어 면적비</h4>
+      <div className="mt-2 flex flex-wrap gap-4 text-[0.72rem] text-muted-foreground">
+        {[
+          ["#0a5c2b", "Tier1 (고효용 대형)"],
+          ["#3f9142", "Tier2 (저효용 대형)"],
+          ["#8fcf82", "Tier3 (2ha 미만 소형)"],
+        ].map(([c, l]) => (
+          <span key={l} className="inline-flex items-center gap-1.5">
+            <i aria-hidden className="inline-block h-2 w-2 rounded-sm" style={{ background: c }} />
+            {l}
+          </span>
+        ))}
+      </div>
+      <div className="mt-4 flex flex-col gap-4">
+        {parkCapTiers.map((t) => (
+          <div key={t.key}>
+            <div className="flex items-baseline justify-between text-[0.8rem]">
+              <strong className="flex items-center gap-2">
+                <Dot k={t.key} />
+                {t.label}
+              </strong>
+              <span className="font-mono text-[0.72rem] tabular-nums text-muted-foreground">
+                {t.total}
+              </span>
+            </div>
+            <div className="mt-1 flex h-[22px] overflow-hidden rounded-sm">
+              <span style={{ width: `${t.t1}%`, background: "#0a5c2b" }} />
+              <span style={{ width: `${t.t2}%`, background: "#3f9142" }} />
+              <span style={{ width: `${t.t3}%`, background: "#8fcf82" }} />
+            </div>
+            <p className="mt-1 text-[0.72rem] text-muted-foreground">{t.detail}</p>
+          </div>
+        ))}
+      </div>
+
+      <Table spec={parkCapSupplyTable} />
+
+      <div className="mt-5 rounded border border-border border-l-[3px] border-l-accent bg-muted/40 px-4 py-3.5 text-[0.88rem] leading-relaxed">
+        <strong>네 지역은 서로 다른 “공원 구조 유형”에 가깝다.</strong>
+        <ul className="mt-2 flex flex-col gap-1.5">
+          {parkCapTypology.map((t) => (
+            <li key={t.label}>
+              <strong>{t.label}</strong>는 <em className="not-italic text-accent">{t.type}</em>이다 —{" "}
+              {t.body}
+            </li>
+          ))}
+        </ul>
+      </div>
+
+      <h4 className="mt-8 text-[0.95rem] font-semibold">
+        이 구조가 앞선 회귀 결과를 어떻게 설명하는가
+      </h4>
+      <ul className="mt-3 flex flex-col gap-2.5">
+        {parkCapStructureNotes.map((n) => (
+          <li key={n.label} className="grid grid-cols-[auto_1fr] gap-3">
+            <span className="mt-0.5 shrink-0 rounded-sm bg-muted px-2 py-0.5 font-mono text-[0.62rem] font-semibold text-muted-foreground">
+              {n.label}
             </span>
-            <span className="text-[0.88rem] leading-relaxed">{l.text}</span>
+            <span className="text-[0.88rem] leading-relaxed">{n.body}</span>
           </li>
         ))}
       </ul>
+      <p className="mt-3 text-[0.75rem] leading-relaxed text-muted-foreground">
+        공원 크기별 자본화효과 상세 결과는 별도 시험분석 산출물(05_08_park_size_capitalization.xlsx)
+        참고 — n=4 지역·지역당 대형공원 1~4개 수준이라 이 절의 해석은 확정적 결론이 아닌 탐색적
+        신호로 읽어야 한다.
+      </p>
+
+      <footer className="mt-12 flex flex-col gap-3 border-t border-border pt-5 text-[0.72rem] leading-relaxed text-muted-foreground">
+        <p>방법론 노트 · {parkCapFooter.method}</p>
+        <p className="break-all font-mono leading-[1.9]">{parkCapFooter.files}</p>
+      </footer>
     </section>
   )
 }

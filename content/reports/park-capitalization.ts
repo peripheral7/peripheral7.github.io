@@ -1,284 +1,271 @@
-// 신도시 공원 자본화 효과 — 헤도닉 가격모형 + 공간계량 분석 결과
-// 출처: KICA 논문작성 파이프라인 05_hedonic_analysis.py (표본 1,607건 / 75단지)
+// 신도시 4곳 헤도닉모형 종합결과 — 동탄2를 남/북 이질적 지역으로 분리한 이후 재추정
+// 출처: KICA 논문작성 파이프라인 05_* 산출물 (2026-09-04 실행분)
+
+export type StatCell = { v: string; t?: string; muted?: boolean }
+export type StatRow = { label: string; cells: StatCell[]; strong?: boolean; fit?: boolean }
+export type StatTable = { caption: string; head: string[]; rows: StatRow[]; note?: string }
+
+export const REGION_KEYS = ["gg", "ds", "dn", "uj"] as const
+export type RegionKey = (typeof REGION_KEYS)[number]
+
+export const parkCapRegions: { key: RegionKey; label: string; sub: string }[] = [
+  { key: "gg", label: "광교", sub: "Gwanggyo" },
+  { key: "ds", label: "동탄남부", sub: "Dongtan South" },
+  { key: "dn", label: "동탄북부", sub: "Dongtan North" },
+  { key: "uj", label: "운정", sub: "Unjeong" },
+]
 
 export const parkCapMeta = {
-  eyebrow: "Hedonic Price Model · Spatial Econometrics",
-  title: "신도시 공원 자본화 효과",
+  eyebrow: "Hedonic Price Analysis · 2026-09-04",
+  title: "신도시 4곳 헤도닉모형 종합결과",
   summary:
-    "광교 · 동탄2 · 운정 3개 신도시의 아파트 실거래 1,607건을 대상으로, 도시공원 접근성이 전용면적당 가격에 자본화되는 정도와 그 조건을 검증했습니다. 종속변수는 ln(만원/㎡), 계약년월 고정효과와 단지 클러스터-로버스트 표준오차를 적용했으며 최종모형은 세 지역 모두 공간오차모형(SEM)이 채택되었습니다.",
+    "공원 접근성이 아파트 가격에 미치는 자본화 효과 — 동탄2를 남/북 이질적 지역으로 분리한 이후 재추정한 전체 통계분석 결과입니다.",
 }
 
 export const parkCapFacts = [
-  { label: "표본", value: "1,607건 / 75단지" },
-  { label: "대상", value: "전용 50–85㎡" },
+  { label: "표본", value: "2,740건" },
+  { label: "단지", value: "126개" },
+  { label: "지역", value: "4곳" },
   { label: "종속변수", value: "ln(만원/㎡)" },
-  { label: "최종모형", value: "SEM (3개 지역)" },
+  { label: "최종모형", value: "SEM (공간오차)" },
 ]
 
-export const parkCapConclusions = [
+// §00 핵심 요약
+export const parkCapFindings = [
   {
-    n: "01",
-    text: "공원 근접 프리미엄은 3개 신도시 전부에서, OLS와 공간계량모형 양쪽에서 유의하게 확인된다. 공간자기상관을 통제한 뒤에도 탄력성 −0.10 ~ −0.21이 유지되며, 동탄에서는 오히려 강화된다.",
+    label: "풀링 적합성 (Chow Test)",
+    value: "F = 418.1",
+    accent: false,
+    note: "p<0.001 — 4개 지역을 하나로 합쳐 분석하는 것은 통계적으로 부적절. 지역별 개별 모형이 타당함.",
   },
   {
-    n: "02",
-    text: "그러나 그 크기는 지역 간 2배 이상 차이가 나고 Chow 검정(F=463.2, p<0.001)도 풀링을 기각한다. 공원 프리미엄은 보편 상수가 아니라 도시 맥락에 의존하는 값이다.",
+    label: "공원거리 탄력성 (SEM, 4개 지역)",
+    value: "−0.06 ~ −0.15",
+    accent: true,
+    note: "전부 1~5% 수준 유의. OLS(baseline)에서 동탄북부만 비유의했으나 SEM에서는 4개 지역 전부 유의한 공원 프리미엄이 드러남.",
   },
   {
-    n: "03",
-    text: "상권은 가격 수준은 끌어올리지만 공원 프리미엄의 크기는 바꾸지 못한다. 기준점·측정방식·버퍼반경을 바꾼 4개 사양 전부에서 공원×상권 상호작용항이 비유의하여, 두 편익은 곱셈적이 아니라 가산적으로 작동한다.",
+    label: "동탄남부 vs 동탄북부",
+    value: "−0.15 / −0.06",
+    accent: false,
+    note: "같은 동탄2 안에서도 남/북 공원 프리미엄이 2.5배 차이 — 인위적 분할선이 아니라 실제 이질적 지역임을 재확인.",
+  },
+  {
+    label: "공간자기상관 (Moran's I)",
+    value: "0.45 ~ 0.88",
+    accent: false,
+    note: "4개 지역 전부 p<0.001로 유의 — OLS 대신 공간계량모형(SEM) 채택 근거.",
   },
 ]
 
+// 지역별 클러스터 지도 (2×2, 클릭 확대)
 export const parkCapMaps = [
+  { key: "gg" as RegionKey, label: "광교", sub: "Gwanggyo", src: "/images/reports/urban-newtowns/Gwanggyo_cluster.jpg" },
+  { key: "ds" as RegionKey, label: "동탄남부", sub: "Dongtan South", src: "/images/reports/urban-newtowns/Dongtan_South_cluster.jpg" },
+  { key: "dn" as RegionKey, label: "동탄북부", sub: "Dongtan North", src: "/images/reports/urban-newtowns/Dongtan_North_cluster.jpg" },
+  { key: "uj" as RegionKey, label: "운정", sub: "Unjeong", src: "/images/reports/urban-newtowns/Unjeong_cluster.jpg" },
+]
+
+// §01 표본 개요
+export const parkCapSample = [
+  { key: "gg" as RegionKey, label: "광교", rows: [["거래건수", "537"], ["단지 수", "21"], ["R² (Gravity)", "0.97"], ["공원거리 β (SEM)", "−0.13**"]] },
+  { key: "ds" as RegionKey, label: "동탄남부", rows: [["거래건수", "853"], ["단지 수", "34"], ["R² (Gravity)", "0.75"], ["공원거리 β (SEM)", "−0.15***"]] },
+  { key: "dn" as RegionKey, label: "동탄북부", rows: [["거래건수", "901"], ["단지 수", "44"], ["R² (Gravity)", "0.87"], ["공원거리 β (SEM)", "−0.06***"]] },
+  { key: "uj" as RegionKey, label: "운정", rows: [["거래건수", "449"], ["단지 수", "27"], ["R² (Gravity)", "0.92"], ["공원거리 β (SEM)", "−0.09***"]] },
+]
+
+const HEAD4 = ["변수", "광교", "동탄남부", "동탄북부", "운정"]
+
+// §02 기술통계 · VIF
+export const parkCapVifTable: StatTable = {
+  caption: "표 1 · 변수별 평균(표준편차) / VIF",
+  head: HEAD4,
+  rows: [
+    { label: "Building Age (yrs)", cells: [{ v: "12.71 (2.35) / 2.27" }, { v: "8.08 (1.07) / 2.27" }, { v: "9.36 (1.87) / 1.66" }, { v: "16.72 (5.71) / 3.14" }] },
+    { label: "Households (log)", cells: [{ v: "6.91 (0.60) / 1.59" }, { v: "6.95 (0.31) / 1.70" }, { v: "6.67 (0.43) / 1.41" }, { v: "7.00 (0.33) / 1.35" }] },
+    { label: "Major Brand (dummy)", cells: [{ v: "0.31 (0.46) / 2.84" }, { v: "0.23 (0.42) / 2.04" }, { v: "0.15 (0.36) / 1.20" }, { v: "0.26 (0.44) / 1.90" }] },
+    { label: "Parking / Household", cells: [{ v: "1.41 (0.15) / 3.80" }, { v: "1.21 (0.12) / 1.94" }, { v: "1.28 (0.18) / 1.13" }, { v: "1.34 (0.22) / 2.14" }] },
+    { label: "Floor", cells: [{ v: "15.08 (9.36) / 1.18" }, { v: "11.58 (6.18) / 1.01" }, { v: "14.42 (9.30) / 1.27" }, { v: "11.16 (6.65) / 1.09" }] },
+    { label: "Exclusive Area (log, m²)", cells: [{ v: "4.37 (0.14) / 1.45" }, { v: "4.28 (0.17) / 2.23" }, { v: "4.30 (0.16) / 1.12" }, { v: "4.36 (0.14) / 1.12" }] },
+    { label: "Straight Dist. to Park (log)", cells: [{ v: "6.37 (0.51) / 1.81" }, { v: "6.47 (0.63) / 2.95" }, { v: "6.44 (0.73) / 2.77" }, { v: "6.33 (0.46) / 1.33" }] },
+    { label: "Dist. to Subway (log)", cells: [{ v: "6.42 (0.98) / 5.76" }, { v: "8.13 (0.21) / 1.59" }, { v: "7.01 (0.66) / 3.94" }, { v: "6.91 (0.45) / 4.02" }] },
+    { label: "Life-Amenity Gravity", cells: [{ v: "5.05 (1.36) / 1.74" }, { v: "2.09 (0.42) / 2.67" }, { v: "3.94 (1.12) / 2.76" }, { v: "3.41 (0.36) / 3.34" }] },
+  ],
+  note: "셀 표기: 평균 (표준편차) / VIF. 동탄남/북부의 지하철거리 VIF는 동탄역 남/북 공유 처리 이후 값. 전 지역 VIF 10 미만으로 다중공선성 문제 없음(층/층제곱 제거 이후 안정화).",
+}
+
+// §03 Baseline OLS
+export const parkCapBaselineTable: StatTable = {
+  caption: "표 2 · Baseline OLS (상권 제외)",
+  head: HEAD4,
+  rows: [
+    { label: "Building Age (yrs)", cells: [{ v: "−0.06***", t: "(−3.33)" }, { v: "−0.01", t: "(−0.94)", muted: true }, { v: "0.03***", t: "(3.20)" }, { v: "−0.02***", t: "(−6.37)" }] },
+    { label: "Households (log)", cells: [{ v: "0.09", t: "(1.66)", muted: true }, { v: "0.05", t: "(0.93)", muted: true }, { v: "−0.04", t: "(−1.35)", muted: true }, { v: "0.02", t: "(0.50)", muted: true }] },
+    { label: "Major Brand (dummy)", cells: [{ v: "0.01", t: "(0.23)", muted: true }, { v: "0.14***", t: "(4.05)" }, { v: "−0.05", t: "(−1.68)", muted: true }, { v: "0.01", t: "(0.38)", muted: true }] },
+    { label: "Parking / Household", cells: [{ v: "−0.47", t: "(−1.37)", muted: true }, { v: "−0.22", t: "(−1.42)", muted: true }, { v: "0.18", t: "(1.48)", muted: true }, { v: "0.14*", t: "(2.03)" }] },
+    { label: "Floor", cells: [{ v: "0.00***", t: "(3.89)" }, { v: "0.00***", t: "(3.33)" }, { v: "0.00***", t: "(4.80)" }, { v: "0.00***", t: "(6.30)" }] },
+    { label: "Exclusive Area (log, m²)", cells: [{ v: "−0.33**", t: "(−2.45)" }, { v: "−0.44***", t: "(−5.70)" }, { v: "−0.39***", t: "(−4.80)" }, { v: "−0.53***", t: "(−9.57)" }] },
+    { label: "Straight Dist. to Park (log)", strong: true, cells: [{ v: "−0.20**", t: "(−2.70)" }, { v: "−0.18***", t: "(−7.30)" }, { v: "0.00", t: "(0.00)", muted: true }, { v: "−0.08***", t: "(−3.85)" }] },
+    { label: "Dist. to Subway (log)", cells: [{ v: "−0.26***", t: "(−5.17)" }, { v: "−0.28***", t: "(−3.83)" }, { v: "−0.32***", t: "(−10.88)" }, { v: "−0.16***", t: "(−4.71)" }] },
+    { label: "R² (Adj-R²)", fit: true, cells: [{ v: "0.84 (0.83)" }, { v: "0.70 (0.70)" }, { v: "0.86 (0.86)" }, { v: "0.91 (0.91)" }] },
+    { label: "F (Wald, cluster-robust)", fit: true, cells: [{ v: "58.02" }, { v: "29.58" }, { v: "40.91" }, { v: "155.01" }] },
+    { label: "N (건수) / 단지수", fit: true, cells: [{ v: "537 / 21" }, { v: "853 / 34" }, { v: "901 / 44" }, { v: "449 / 27" }] },
+  ],
+  note: "*** p<0.01 · ** p<0.05 · * p<0.10. 계수 아래 회색 줄은 t값. 복합몰 더미(mall_dummy)는 대부분 지역에서 분산이 0에 가까워 다중공선성을 유발하므로 전 지역 공통으로 제외했다.",
+}
+
+// §04 Gravity OLS
+export const parkCapGravityTable: StatTable = {
+  caption: "표 3 · Gravity OLS (상권 포함)",
+  head: HEAD4,
+  rows: [
+    { label: "Building Age (yrs)", cells: [{ v: "−0.03***", t: "(−4.01)" }, { v: "−0.03", t: "(−1.59)", muted: true }, { v: "0.03***", t: "(3.80)" }, { v: "−0.02***", t: "(−6.09)" }] },
+    { label: "Households (log)", cells: [{ v: "0.06***", t: "(3.69)" }, { v: "0.08", t: "(1.49)", muted: true }, { v: "−0.04", t: "(−1.19)", muted: true }, { v: "0.03", t: "(0.75)", muted: true }] },
+    { label: "Major Brand (dummy)", cells: [{ v: "0.09***", t: "(3.69)" }, { v: "0.09**", t: "(2.42)" }, { v: "−0.04", t: "(−1.47)", muted: true }, { v: "0.00", t: "(−0.19)", muted: true }] },
+    { label: "Parking / Household", cells: [{ v: "0.14", t: "(1.30)", muted: true }, { v: "−0.16", t: "(−1.31)", muted: true }, { v: "0.15", t: "(1.31)", muted: true }, { v: "0.15**", t: "(2.44)" }] },
+    { label: "Floor", cells: [{ v: "0.00***", t: "(6.19)" }, { v: "0.00***", t: "(3.90)" }, { v: "0.00***", t: "(4.91)" }, { v: "0.00***", t: "(5.93)" }] },
+    { label: "Exclusive Area (log, m²)", cells: [{ v: "−0.40***", t: "(−5.50)" }, { v: "−0.44***", t: "(−5.89)" }, { v: "−0.36***", t: "(−4.14)" }, { v: "−0.55***", t: "(−10.51)" }] },
+    { label: "Straight Dist. to Park (log)", strong: true, cells: [{ v: "−0.09***", t: "(−3.37)" }, { v: "−0.11***", t: "(−2.76)" }, { v: "0.01", t: "(0.56)", muted: true }, { v: "−0.08***", t: "(−4.60)" }] },
+    { label: "Dist. to Subway (log)", cells: [{ v: "−0.13***", t: "(−6.06)" }, { v: "−0.20***", t: "(−3.21)" }, { v: "−0.28***", t: "(−7.14)" }, { v: "−0.13***", t: "(−3.58)" }] },
+    { label: "Life-Amenity Gravity", cells: [{ v: "0.09***", t: "(9.08)" }, { v: "0.13**", t: "(2.68)" }, { v: "0.04", t: "(1.37)", muted: true }, { v: "0.08", t: "(1.59)", muted: true }] },
+    { label: "R² (Adj-R²)", fit: true, cells: [{ v: "0.97 (0.97)" }, { v: "0.75 (0.74)" }, { v: "0.87 (0.87)" }, { v: "0.92 (0.92)" }] },
+    { label: "F (Wald, cluster-robust)", fit: true, cells: [{ v: "563.65" }, { v: "40.63" }, { v: "52.53" }, { v: "286.55" }] },
+  ],
+}
+
+// §05 보행 vs 직선
+export const parkCapCircuityTable: StatTable = {
+  caption: "표 4 · 직선 vs 보행 거리 일치도",
+  head: ["지역", "N", "Pearson r", "우회율 평균(SD)", "편차 평균(m)"],
+  rows: [
+    { label: "광교", cells: [{ v: "537" }, { v: "0.922" }, { v: "1.426 (0.263)" }, { v: "265.0" }] },
+    { label: "동탄남부", cells: [{ v: "853" }, { v: "0.898" }, { v: "1.472 (0.547)" }, { v: "307.6" }] },
+    { label: "동탄북부", cells: [{ v: "901" }, { v: "0.985" }, { v: "1.229 (0.173)" }, { v: "208.5" }] },
+    { label: "운정", cells: [{ v: "449" }, { v: "0.898" }, { v: "1.472 (0.319)" }, { v: "302.1" }] },
+  ],
+  note: "동탄북부는 우회율(1.23)이 가장 낮고 직선-보행 상관(0.985)이 가장 높음 — 격자형 신규 가로망 특성.",
+}
+
+// §06 Chow / Moran
+export const parkCapChow = [
+  ["F-statistic", "418.11"],
+  ["df1 / df2", "42 / 2,684"],
+  ["p-value", "<0.001"],
+  ["판정", "풀링 부적절"],
+]
+export const parkCapMoran = [
+  { key: "gg" as RegionKey, label: "광교", v: "0.876 (p<.001)" },
+  { key: "ds" as RegionKey, label: "동탄남부", v: "0.760 (p<.001)" },
+  { key: "dn" as RegionKey, label: "동탄북부", v: "0.865 (p<.001)" },
+  { key: "uj" as RegionKey, label: "운정", v: "0.452 (p<.001)" },
+]
+
+// §07 SEM
+export const parkCapFitTable: StatTable = {
+  caption: "표 5 · OLS → SAR → SEM 적합도 비교",
+  head: ["지역", "AIC (OLS)", "AIC (SAR)", "AIC (SEM)", "LR test (SEM)"],
+  rows: [
+    { label: "광교", cells: [{ v: "−831.9" }, { v: "−1701.7" }, { v: "−1883.0", }, { v: "1051.0 (p<.001)" }] },
+    { label: "동탄남부", cells: [{ v: "−1661.9" }, { v: "−2783.4" }, { v: "−2881.1" }, { v: "1219.2 (p<.001)" }] },
+    { label: "동탄북부", cells: [{ v: "−1708.3" }, { v: "−2667.1" }, { v: "−3098.6" }, { v: "1390.3 (p<.001)" }] },
+    { label: "운정", cells: [{ v: "−1100.4" }, { v: "−1206.3" }, { v: "−1278.4" }, { v: "178.0 (p<.001)" }] },
+  ],
+  note: "AIC 기준으로 4개 지역 전부 SAR보다 SEM(공간오차모형)이 우월해 최종 채택. LR test 전부 p<0.001.",
+}
+
+export const parkCapSemTable: StatTable = {
+  caption: "표 6 · SEM 최종모형 계수 (직선거리 기준, 상권 제외)",
+  head: HEAD4,
+  rows: [
+    { label: "Constant", cells: [{ v: "12.99***", t: "(12.86)" }, { v: "10.48***", t: "(13.64)" }, { v: "10.87***", t: "(46.22)" }, { v: "9.96***", t: "(27.85)" }] },
+    { label: "Building Age (yrs)", cells: [{ v: "−0.10***", t: "(−7.29)" }, { v: "−0.00", t: "(−0.02)", muted: true }, { v: "−0.01", t: "(−1.03)", muted: true }, { v: "−0.02***", t: "(−12.09)" }] },
+    { label: "Households (log)", cells: [{ v: "−0.13**", t: "(−2.44)" }, { v: "−0.02", t: "(−0.50)", muted: true }, { v: "0.05*", t: "(1.75)" }, { v: "0.04", t: "(1.58)", muted: true }] },
+    { label: "Major Brand (dummy)", cells: [{ v: "−0.09", t: "(−0.94)", muted: true }, { v: "0.20***", t: "(5.39)" }, { v: "0.07**", t: "(2.21)" }, { v: "−0.01", t: "(−0.26)", muted: true }] },
+    { label: "Parking / Household", cells: [{ v: "−0.05", t: "(−0.17)", muted: true }, { v: "−0.32***", t: "(−3.61)" }, { v: "−0.11**", t: "(−2.12)" }, { v: "0.08*", t: "(1.75)" }] },
+    { label: "Floor", cells: [{ v: "0.00***", t: "(8.20)" }, { v: "0.00***", t: "(9.31)" }, { v: "0.00***", t: "(11.26)" }, { v: "0.00***", t: "(6.75)" }] },
+    { label: "Exclusive Area (log, m²)", cells: [{ v: "−0.30***", t: "(−19.43)" }, { v: "−0.30***", t: "(−23.69)" }, { v: "−0.43***", t: "(−35.39)" }, { v: "−0.52***", t: "(−24.13)" }] },
+    { label: "Straight Dist. to Park (log)", strong: true, cells: [{ v: "−0.13**", t: "(−2.09)" }, { v: "−0.15***", t: "(−8.20)" }, { v: "−0.06***", t: "(−2.79)" }, { v: "−0.09***", t: "(−4.64)" }] },
+    { label: "Dist. to Subway (log)", cells: [{ v: "−0.23***", t: "(−4.65)" }, { v: "−0.13*", t: "(−1.91)" }, { v: "−0.26***", t: "(−9.65)" }, { v: "−0.13***", t: "(−4.73)" }] },
+    { label: "λ (Spatial Error)", fit: true, cells: [{ v: "0.93***", t: "(176.52)" }, { v: "0.90***", t: "(134.19)" }, { v: "0.88***", t: "(118.96)" }, { v: "0.69***", t: "(25.53)" }] },
+  ],
+}
+
+// §08 조절효과
+export const parkCapModerationTable: StatTable = {
+  caption: "표 7 · 공원거리 × 상권 상호작용항 계수 (조절효과)",
+  head: ["지역", "전체", "음식·카페", "소매", "보건의료"],
+  rows: [
+    { label: "광교", cells: [{ v: "−0.03", muted: true }, { v: "−0.03", muted: true }, { v: "−0.02", muted: true }, { v: "−0.02", muted: true }] },
+    { label: "동탄남부", cells: [{ v: "0.03", muted: true }, { v: "0.03", muted: true }, { v: "0.03", muted: true }, { v: "0.03", muted: true }] },
+    { label: "동탄북부", cells: [{ v: "0.01", muted: true }, { v: "−0.00", muted: true }, { v: "0.02", muted: true }, { v: "−0.00", muted: true }] },
+    { label: "운정", cells: [{ v: "−0.02**" }, { v: "−0.01", muted: true }, { v: "−0.02**" }, { v: "−0.02", muted: true }] },
+  ],
+}
+
+export const parkCapMainEffectTable: StatTable = {
+  caption: "표 8 · 상권 근접성(레벨)의 가격 주효과",
+  head: ["지역", "전체", "음식·카페", "소매", "보건의료"],
+  rows: [
+    { label: "광교", cells: [{ v: "0.09***" }, { v: "0.09***" }, { v: "0.08***" }, { v: "0.07**" }] },
+    { label: "동탄남부", cells: [{ v: "0.02", muted: true }, { v: "0.00", muted: true }, { v: "0.03", muted: true }, { v: "0.05*" }] },
+    { label: "동탄북부", cells: [{ v: "0.02", muted: true }, { v: "0.01", muted: true }, { v: "0.03", muted: true }, { v: "−0.00", muted: true }] },
+    { label: "운정", cells: [{ v: "−0.00", muted: true }, { v: "0.00", muted: true }, { v: "−0.00", muted: true }, { v: "−0.01", muted: true }] },
+  ],
+  note: "*** p<0.01 · ** p<0.05 · * p<0.10 (2-way 클러스터 기준, 유효 자유도는 진입로 수−1). 진입로 수: 광교 9, 동탄남부·동탄북부·운정 각 6.",
+}
+
+// §09 공원 티어 구성
+export const parkCapTiers = [
+  { key: "gg" as RegionKey, label: "광교", total: "15개 공원 · 455.7ha", t1: 49.4, t2: 44.3, t3: 6.4, detail: "Tier1 1개(49.4%) · Tier2 7개(44.3%) · Tier3 7개(6.4%)" },
+  { key: "ds" as RegionKey, label: "동탄남부", total: "24개 공원 · 286.5ha", t1: 15.5, t2: 60.9, t3: 23.5, detail: "Tier1 1개(15.5%) · Tier2 10개(60.9%) · Tier3 13개(23.5%)" },
+  { key: "dn" as RegionKey, label: "동탄북부", total: "25개 공원 · 339.3ha", t1: 31.7, t2: 41.6, t3: 26.7, detail: "Tier1 1개(31.7%) · Tier2 6개(41.6%) · Tier3 18개(26.7%)" },
+  { key: "uj" as RegionKey, label: "운정", total: "25개 공원 · 275.9ha", t1: 20.6, t2: 55.1, t3: 24.3, detail: "Tier1 1개(20.6%) · Tier2 9개(55.1%) · Tier3 15개(24.3%)" },
+]
+
+export const parkCapSupplyTable: StatTable = {
+  caption: "표 9 · 규모 대비 공원 공급 지표",
+  head: ["지역", "녹지율", "Tier1 집중도", "공원수/단지", "공원면적ha/단지"],
+  rows: [
+    { label: "광교", cells: [{ v: "17.4%" }, { v: "49.4%" }, { v: "0.43" }, { v: "13.02" }] },
+    { label: "동탄남부", cells: [{ v: "11.3%" }, { v: "15.5%" }, { v: "0.45" }, { v: "5.41" }] },
+    { label: "동탄북부", cells: [{ v: "12.3%" }, { v: "31.7%" }, { v: "0.40" }, { v: "5.47" }] },
+    { label: "운정", cells: [{ v: "14.4%" }, { v: "20.6%" }, { v: "0.68" }, { v: "7.46" }] },
+  ],
+  note: "녹지율 = 전체 공원면적 / 지역 bbox 면적. Tier1 집중도 = Tier1 면적 / 전체 공원면적. 단지수는 K-apt 전수(거래사례 미포함 단지 포함).",
+}
+
+export const parkCapTypology = [
+  { label: "광교", type: "단일 플래그십형", body: "전체 녹지의 절반(49.4%)이 공원 하나(호수공원)이고, 단지당 공원면적(13.02ha)도 다른 지역의 2배 가까이 된다." },
+  { label: "동탄남부", type: "고른 분산형", body: "Tier1 집중도가 4개 지역 중 가장 낮아(15.5%) 어느 한 공원도 압도적이지 않다." },
+  { label: "동탄북부", type: "다수 소형 파편형", body: "공원 개수의 72%(18개)가 Tier3(10ha 미만)인데 면적은 26.7%뿐이라, 자잘한 공원이 흩어져 있는 구조다." },
+  { label: "운정", type: "다품종 균형형", body: "단지당 공원수(0.68개)가 4개 지역 중 가장 많지만 총 면적은 가장 작아(275.9ha), 크지 않은 공원 여러 개를 골고루 나눠 쓰는 구조다." },
+]
+
+export const parkCapStructureNotes = [
+  { label: "광교", body: "단일 플래그십 구조이니 “공원효과”가 사실상 “호수공원 효과”와 같다. 공원 크기별 회귀에서도 Tier1 거리만 유의하고 Tier2/3는 비유의했다." },
+  { label: "동탄남부", body: "Tier1 집중도가 가장 낮은데도 회귀에서는 여전히 Tier1이 지배적으로 유의했고, “공원이 클수록 근접성의 가치가 크다”는 가설을 4개 지역 중 가장 일관되게 지지했다." },
+  { label: "동탄북부", body: "소형공원이 파편화된 구조(개수 72%, 면적 27%)라 “최근접 공원 1개까지 거리”라는 단일 지표로는 신호가 잘 안 잡힌다. 그러나 SEM에서는 효과가 회복된다(−0.06***) — 파편화된 녹지는 개별 거리보다 “동네 전체의 누적 녹지 환경”으로 작동할 가능성을 시사한다." },
+  { label: "운정", body: "단지당 공원수가 가장 많은 다품종 구조라, 주민이 실제 자주 쓰는 공원은 멀리 있는 Tier1(호수공원)보다 가까운 Tier2(중형공원)일 가능성이 높다. 실제로 유일하게 Tier2가 Tier1보다 더 유의했던 지역이 운정이다." },
+]
+
+export const parkCapMethodology = [
   {
-    id: "gwanggyo",
-    label: "광교",
-    sub: "Gwanggyo",
-    src: "/images/reports/urban-newtowns/Gwanggyo_cluster.jpg",
+    title: "① 데이터 출처 — OSM에서 공식 도시계획시설 데이터로",
+    body: "최초에는 OSM의 leisure=park 태그로 공원 폴리곤을 추출했으나 태깅 부정확성으로 실제 공원이 아닌 위치에 점이 찍히는 문제가 확인됐다. 이를 국토교통부 공식 도시계획시설(공원) 결정경계 데이터(“국토계획공간시설(경기)”, LSMD_CONT_UQ162)로 교체했다. 관리번호(MNUM) 대분류 중 UQT2(공원)만 채택해 경기도 전역 7,083건에서 4개 지역과 겹치는 폴리곤을 추출했다(UQT3 녹지·UQT1 광장은 제외).",
   },
   {
-    id: "dongtan",
-    label: "동탄2",
-    sub: "Dongtan",
-    src: "/images/reports/urban-newtowns/Dongtan_cluster.jpg",
+    title: "② 최소면적 기준 — “10분 순환 산책 가능”",
+    body: "법정 공원이라도 소공원·어린이공원처럼 800~2,000㎡대 부지가 다수 섞여 있어 “실제로 산책할 만한 공간”이라는 하한을 별도로 정했다. 프로젝트가 이미 “도보 10분”을 500m로 환산해 쓰고 있어, 같은 길을 되짚지 않는 500m 순환 산책로가 들어갈 최소 면적을 등주부등식으로 구했다 — 둘레 500m 원의 면적 500²/4π ≈ 19,894㎡. 실제 공원은 원보다 비효율적 형태가 대부분이라 이 값 자체가 관대한 하한이며, 반올림해 20,000㎡(2ha)를 채택했다.",
   },
   {
-    id: "unjeong",
-    label: "운정",
-    sub: "Unjeong",
-    src: "/images/reports/urban-newtowns/Unjeong_cluster.jpg",
+    title: "③ 3단계 효용 티어 분류",
+    body: "2ha 이상 공원을 이용 강도에 따라 3단계로 나눴다. Tier1(지역별 면적 최대 1개 — 광교호수공원, 운정호수공원 등)은 이용이 가장 많은 고효용 공원으로 보고, 매개중심성(통행량 근사)·최근접 단지거리(접근성)를 종합한 알고리즘으로 진출입로를 지역당 최대 10개까지 뽑았다. Tier2(그 외 2ha 이상 대형공원)와 Tier3(2ha 미만 소형공원)는 각각 공원 중앙 대표점 1개로 단순화했다.",
   },
 ]
 
-// 표 1 — 공원거리(로그) 계수의 모형별 비교
-export const parkCapCoefTable = {
-  caption: "공원거리(로그) 계수의 모형별 비교",
-  head: ["모형", "광교", "동탄", "운정"],
-  rows: [
-    {
-      label: "기본 OLS (상권 제외)",
-      cells: [
-        { v: "−0.17***", t: "t = −3.81" },
-        { v: "−0.16***", t: "t = −4.36" },
-        { v: "−0.08***", t: "t = −2.88" },
-      ],
-    },
-    {
-      label: "OLS + 상권지수",
-      cells: [
-        { v: "−0.07***", t: "t = −3.88" },
-        { v: "−0.10**", t: "t = −2.58" },
-        { v: "−0.08***", t: "t = −2.85" },
-      ],
-    },
-    {
-      label: "SEM (최종채택)",
-      strong: true,
-      cells: [
-        { v: "−0.13***", t: "z = −3.25" },
-        { v: "−0.21***", t: "z = −7.85" },
-        { v: "−0.10***", t: "z = −4.99" },
-      ],
-    },
-  ],
+export const parkCapFooter = {
+  method:
+    "종속변수 ln(만원/㎡) · 단지 클러스터-로버스트 표준오차(OLS) / (단지,진입로) 2-way 클러스터(조절효과) · 공간가중치 k=3 KNN · 동탄역 남/북 공유 처리 반영 · 공원 진입로는 통행량(매개중심성)·접근성·공원 커버리지 종합기준으로 재선정(동탄북부 7개, 그 외 10개) · 운정 경계는 (37.74381, 126.72266) 우측 하단으로 재지정(호수공원 전체 포함) · 생활상권은 음식/소매/보건의료 3개 성격으로 재분류.",
+  files:
+    "05_02_descriptive_corr.xlsx · 05_03_regression_results.xlsx · 05_04_chow_test.xlsx · 05_05_park_distance_diagnostics.xlsx · 05_06_spatial_analysis.xlsx · 05_07_commercial_moderation.xlsx · 05_08_park_size_capitalization.xlsx · 02_01_parks_by_park.csv",
 }
-
-// 표 2 — 공원거리 변수의 순수 설명력 기여
-export const parkCapR2Table = {
-  caption: "공원거리 변수의 순수 설명력 기여",
-  head: ["지표", "광교", "동탄", "운정"],
-  rows: [
-    { label: "R² (전체 모형)", cells: [{ v: "0.857" }, { v: "0.664" }, { v: "0.915" }] },
-    { label: "R² (공원 변수 제외)", cells: [{ v: "0.739" }, { v: "0.390" }, { v: "0.895" }] },
-    {
-      label: "증분 ΔR²",
-      strong: true,
-      cells: [{ v: "0.119" }, { v: "0.274" }, { v: "0.020" }],
-    },
-    {
-      label: "부분 R² (잔여분 중 설명 비율)",
-      cells: [{ v: "45.4%" }, { v: "44.9%" }, { v: "18.6%" }],
-    },
-    { label: "표준화 β", cells: [{ v: "−0.440" }, { v: "−0.590" }, { v: "−0.158" }] },
-  ],
-}
-
-// 거리 100m의 가격 효과 — 출발거리에 따라 달라짐 (막대는 상대 크기)
-export const parkCapDecay = {
-  cols: ["200 → 300m", "300 → 400m", "500 → 600m", "800 → 900m", "1000 → 1100m"],
-  rows: [
-    {
-      label: "광교",
-      beta: "β = −0.13",
-      values: [-5.13, -3.67, -2.34, -1.52, -1.23],
-    },
-    {
-      label: "동탄",
-      beta: "β = −0.21",
-      values: [-8.16, -5.86, -3.76, -2.44, -1.98],
-    },
-    {
-      label: "운정",
-      beta: "β = −0.10",
-      values: [-3.97, -2.84, -1.81, -1.17, -0.95],
-    },
-  ],
-}
-
-// 표 3 — 거리 차이의 금액 환산
-export const parkCapMoneyTable = {
-  caption: "거리 차이의 금액 환산 (평균 거래총액 기준)",
-  head: ["시나리오", "광교 (평균 11.3억)", "동탄 (평균 6.3억)", "운정 (평균 4.0억)"],
-  rows: [
-    {
-      label: "중위 거리에서 +100m",
-      sub: "광교 668m · 동탄 452m · 운정 583m 기준",
-      cells: [
-        { v: "−1.80%", t: "−2,031만원" },
-        { v: "−4.11%", t: "−2,589만원" },
-        { v: "−1.57%", t: "−630만원" },
-      ],
-    },
-    {
-      label: "공원 가까운 단지 → 먼 단지",
-      sub: "하위 25% → 상위 25% 거리",
-      strong: true,
-      cells: [
-        { v: "−9.45%", t: "−1억 673만원" },
-        { v: "−20.27%", t: "−1억 2,768만원" },
-        { v: "−7.29%", t: "−2,924만원" },
-      ],
-    },
-    {
-      label: "도보 5분(400m) → 12분(1km)",
-      cells: [
-        { v: "−11.23%", t: "−1억 2,689만원" },
-        { v: "−17.50%", t: "−1억 1,026만원" },
-        { v: "−8.76%", t: "−3,512만원" },
-      ],
-    },
-  ],
-}
-
-// 표 4 — 공간자기상관 진단과 모형 선택
-export const parkCapSpatialTable = {
-  caption: "공간자기상관 진단과 모형 선택",
-  head: ["진단", "광교", "동탄", "운정"],
-  rows: [
-    {
-      label: "Moran's I (k=3)",
-      cells: [
-        { v: "0.885", t: "z = 35.70" },
-        { v: "0.816", t: "z = 34.11" },
-        { v: "0.460", t: "z = 16.19" },
-      ],
-    },
-    {
-      label: "Robust LM lag",
-      cells: [
-        { v: "31.01", t: "p = 0.000" },
-        { v: "0.009", t: "p = 0.923", muted: true },
-        { v: "0.065", t: "p = 0.799", muted: true },
-      ],
-    },
-    {
-      label: "Robust LM error",
-      cells: [
-        { v: "393.05", t: "p = 0.000" },
-        { v: "115.71", t: "p = 0.000" },
-        { v: "126.07", t: "p = 0.000" },
-      ],
-    },
-    {
-      label: "AIC · OLS / SAR / SEM",
-      cells: [
-        { v: "−904 / −1,713", t: "SEM −1,933" },
-        { v: "−1,037 / −1,971", t: "SEM −2,074" },
-        { v: "−1,097 / −1,198", t: "SEM −1,281" },
-      ],
-    },
-    {
-      label: "λ (공간오차 계수)",
-      strong: true,
-      cells: [
-        { v: "0.93***", t: "z = 163.05" },
-        { v: "0.93***", t: "z = 182.62" },
-        { v: "0.68***", t: "z = 25.48" },
-      ],
-    },
-  ],
-}
-
-// 표 5 — 공원 × 상권 상호작용항
-export const parkCapModerationTable = {
-  caption: "공원거리 × 상권강도 상호작용항 (평균중심화 · 표준화)",
-  head: ["사양", "광교", "동탄", "운정"],
-  rows: [
-    {
-      label: "분석 1 — 진입로 500m 카운트",
-      sub: "2-way 클러스터 (단지 × 진입로)",
-      cells: [
-        { v: "+0.03", t: "p = 0.40", muted: true },
-        { v: "−0.03", t: "p = 0.47", muted: true },
-        { v: "−0.02", t: "p = 0.33", muted: true },
-      ],
-    },
-    {
-      label: "분석 2 — 단지 300m 중력모형",
-      sub: "단지 클러스터",
-      cells: [
-        { v: "−0.07", t: "p = 0.19", muted: true },
-        { v: "−0.01", t: "p = 0.80", muted: true },
-        { v: "+0.03", t: "p = 0.36", muted: true },
-      ],
-    },
-    {
-      label: "참고 · 분석 1의 상권 주효과",
-      strong: true,
-      cells: [
-        { v: "+0.10***", t: "t = 9.68" },
-        { v: "+0.09***", t: "t = 3.93" },
-        { v: "−0.01", t: "t = −1.17", muted: true },
-      ],
-    },
-  ],
-}
-
-export const parkCapNotes = [
-  {
-    title: "λ가 0.68–0.93으로 매우 높다는 점",
-    body: "학군, 조망, 경사, 단지 평판처럼 측정하지 못한 입지요인이 여전히 상당량 남아 있다는 뜻이다. 헤도닉 모형이 원리상 피할 수 없는 누락변수 문제를 SEM이 흡수해 주고는 있으나 이는 해결이 아니라 통제일 뿐이며, 따라서 개별 계수는 인과효과가 아니라 공간적 교란을 제거한 조건부 연관으로 읽어야 한다.",
-  },
-  {
-    title: "비율과 절대금액은 다른 결론을 낸다",
-    body: "비율로는 동탄(−20.27%)이 광교(−9.45%)의 두 배지만, 절대금액은 1.28억 대 1.07억으로 격차가 크게 줄어든다. 광교의 평균 거래가가 11.3억으로 동탄(6.3억)의 1.8배이기 때문이다. 공원 투자 대비 자산가치 상승률을 본다면 동탄형 중저가 지역이, 절대 편익 총액을 본다면 고가 지역이 유리하다.",
-  },
-  {
-    title: "클러스터 구조를 반영하자 유의성이 사라졌다",
-    body: "초기 사양에서는 운정의 상호작용항이 p=0.0006으로 강하게 유의했다. 그러나 상권강도 변수가 단지가 아니라 진입로 단위에서만 변한다는 구조를 반영해 (단지 × 진입로) 2-way 클러스터-로버스트 표준오차로 교정하자 유의성이 완전히 사라졌다. 진입로가 지역당 7–9개뿐이라 실질 자유도는 6–8 수준이며, 초기의 '유의성'은 이 구조를 무시한 과신이었다.",
-  },
-]
-
-export const parkCapLimits = [
-  {
-    tag: "검정력",
-    text: "단지 내 복합쇼핑몰 더미는 최종 표본에 1개 단지·8건만 남아 사실상 검정력이 없다(계수 +0.17, t=1.56). 부호는 직관과 일치하나 결론에 사용할 수 없다.",
-  },
-  {
-    tag: "자유도",
-    text: "분석 1의 실질 자유도는 진입로 수(지역당 7–9개)에 의해 결정된다. 상호작용항의 비유의 판정은 보수적 추정의 결과이며, 효과의 부재를 적극적으로 입증한 것은 아니다.",
-  },
-  {
-    tag: "외적 타당도",
-    text: "3개 신도시·75개 단지 표본이며, Chow 검정이 보여주듯 지역 간 구조가 다르다. 2기 신도시 전반으로의 일반화에는 추가 사례가 필요하다.",
-  },
-  {
-    tag: "인과 식별",
-    text: "횡단면 자료에 기반하므로 계수는 조건부 연관이다. 공원 조성 전후를 비교하는 준실험 설계가 인과 해석에 더 적합하다.",
-  },
-  {
-    tag: "측정",
-    text: "공원 접근성을 진입로까지의 직선거리로 측정해 공원의 규모·시설수준·유지관리 상태 등 질적 차원은 반영하지 못했다. 지역 간 계수 격차의 상당 부분이 여기에 있을 수 있다.",
-  },
-]
