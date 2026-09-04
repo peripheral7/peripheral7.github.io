@@ -255,7 +255,7 @@ const structure = [
   {
     id: 'c7', name: '7. 목적별 평가',
     subs: [
-      {id: 'p_col', name: '담보 / 경매평가', active: false},
+      {id: 'p_col', name: '담보 / 경매평가', active: true},
       {id: 'p_urb', name: '도시정비 등 평가', active: true}
     ]
   },
@@ -294,6 +294,7 @@ const state = {
   comp_mine: { inputs: {}, graded: {}, individuallyGraded: {}, globalGraded: false },
   comp_life: { inputs: {}, graded: {}, individuallyGraded: {}, globalGraded: false },
   p_urb: { inputs: {}, graded: {}, individuallyGraded: {}, globalGraded: false },
+  p_col: { inputs: {}, graded: {}, individuallyGraded: {}, globalGraded: false },
   feasibility: { inputs: {}, graded: {}, individuallyGraded: {}, globalGraded: false }
 };
 
@@ -307,6 +308,7 @@ const tabMeta = {
   comp_mine: { title: "광업권 보상평가 (광산평가액 및 소멸보상)" },
   comp_life: { title: "생활보상 (농업손실보상대상 및 보상액 산정)" },
   p_urb: { title: "정비사업 자산평가 및 현금청산·환지 평가" },
+  p_col: { title: "담보·경매평가 — 제시외건물·지분·용도지역 등 평가 시 유의사항" },
   feasibility: { title: "타당성분석(환원이율·IRR) — NPV·IRR·MIRR 등 투자타당성 지표" }
 };
 
@@ -861,6 +863,78 @@ const dataset = {
         { word: "실제소득", alt: ["실제소득을 입증", "실제소득을 인정"] }
       ],
       modelAnswer: "<strong>보상기준:</strong> 농지면적에 대하여 <strong>도별 연간농가평균 단위경작면적당 농작물 총수입(3년치 평균)의 2년분</strong>을 보상한다 (단, <strong>실제소득</strong>을 입증하여 인정받는 경우 예외 적용)."
+    }
+  ],
+  p_col: [
+    {
+      id: 1,
+      very_tall: true,
+      ref: "종합90~94번",
+      prompt: "담보평가 시 유의사항 — 제시외건물·용도지역·타인점유·도로 등",
+      keywords: [
+        { word: "이에 구애됨 없이 평가", alt: ["지상권에 구애되지 않고 평가"] },
+        { word: "구조, 용도, 다른 건물과의 관계", alt: [] },
+        { word: "부합물", alt: [] },
+        { word: "일단지", alt: ["일단지로 평가"] },
+        { word: "주된 용도지역 기준", alt: ["주된 용도지역"] },
+        { word: "보존등기 후 담보취득", alt: ["보존등기 후 취득"] },
+        { word: "실거래계약금액과 괴리", alt: ["실거래금액과 괴리"] },
+        { word: "진입도로를 명세표에 표시", alt: ["명세표에 표시"] },
+        { word: "감가됨이 일반적", alt: ["감가"] }
+      ],
+      modelAnswer: "- 지상권은 저당권자가 채권확보를 위해 설정한 것으로 <strong>이에 구애됨 없이 평가</strong>한다.<br>- 지상에 제시외건물이 소재하며 <strong>구조, 용도, 다른 건물과의 관계</strong>를 볼 때 그 정도가 현저한 바 평가목적을 고려하여 평가한다.<br>&nbsp;&nbsp;(요청시) 이로 인한 감가를 반영하여 평가한다<br>- 제시외 물건은 <strong>부합물</strong>로서 본 담보물의 사용·수익·처분에 미치는 영향이 미미/없는 것으로 판단되는 바, 이를 감정평가서에 기재한다.<br>&nbsp;&nbsp;건물은 이동가능성 등 고려하여 구애됨 없이 평가한다.<br>- 용도상 불가분관계로서 <strong>일단지</strong>로 평가한다.<br>- 계획관리지역의 부분이 미미한 바, <strong>주된 용도지역 기준</strong>한다.<br>- 적법한 건축물(건축대장)이나 미등기 상태로서 정상평가하되 <strong>보존등기 후 담보취득</strong>하도록 감정평가서에 기재한다.<br>- 현황도로인 부분은 평가외한다.<br>- 공유지분으로서 위치확인이 되지 않는 바 협약사항에 의거 평가하지 않는다.<br><br>- 타인점유 부분에 대해서는 평가목적을 고려하여 평가외.<br>&nbsp;&nbsp;담보평가시 타인점유부분이 평가외되어 <strong>실거래계약금액과 괴리</strong><br>- 도시계획도로 저촉부분은 ____에 의해 지정되었으며 이에 대한 저촉감가 없이 가치가 형성되어있으므로 이에 구애됨 없이 평가한다.<br><br>- 대지의 진입로가 공도가 아닌 이상 담보평가시 <strong>진입도로를 명세표에 표시</strong>하여 공동으로 담보취득 할 수 있도록 해야한다.<br>- 도로부분에 대한 공유지분을 담보취득하여 향후 물건의 환가성에 문제가 없도록 조치해야 한다.<br>- 건물의 경제적 가치가 희박하더라도 멸실신고가 완료된 경우가 아니라면 명세표에 기재하여 담보로 취득해야 한다.<br>- 현황 법면부분은 향후 건축행위가 불가하여 정상적인 대지에 비해 <strong>감가됨이 일반적</strong>이므로 이에대한 개별요인 비교 필요"
+    },
+    {
+      id: 2,
+      tall: true,
+      ref: "종합90번",
+      prompt: "경매평가 — 제시외건물 영향 및 지분평가",
+      keywords: [
+        { word: "나지상태로 평가", alt: ["나지상정"] },
+        { word: "법정지상권 성립시", alt: [] },
+        { word: "비고란에 병기", alt: ["비고란 기재"] },
+        { word: "부합", alt: [] },
+        { word: "지분비율로서 평가", alt: ["지분비율평가"] }
+      ],
+      modelAnswer: "지상 제시외 건물로 인한 영향을 받는 토지는 <strong>나지상태로 평가</strong>하되, 평가목적상 지상건물의 영향에 구애됨 없이 평가한다. 다만 <strong>법정지상권 성립시</strong>의 가액은 <strong>비고란에 병기</strong>한다.<br>목록 수정을 요청하여 건물도 평가, 제시외물건도 평가한다(<strong>부합</strong>).<br>위치확인이 되지 않은 바 <strong>지분비율로서 평가</strong>한다."
+    },
+    {
+      id: 3,
+      tall: true,
+      ref: "종합93번",
+      prompt: "건축허가 취소된 물건의 경매평가 및 담보평가액과의 차이",
+      keywords: [
+        { word: "현황대로 평가", alt: [] },
+        { word: "건축허가로 인한 조건을 고려하지 않는다", alt: ["조건을 고려하지 않는다"] },
+        { word: "멸실된 창고는 평가외", alt: ["평가외한다"] },
+        { word: "토목공사비로 인한 가치증가분 포함", alt: ["가치증가분 포함"] },
+        { word: "비교표준지/면적사정/개별요인 변경", alt: [] }
+      ],
+      modelAnswer: "건축허가 취소로 현재 공사중이 아닌 바 <strong>현황대로 평가</strong>하며, 건축허가여부가 불분명하여 <strong>건축허가로 인한 조건을 고려하지 않는다</strong>.<br><strong>멸실된 창고는 평가외</strong>한다.<br><strong>토목공사비로 인한 가치증가분 포함</strong>!<br><br><strong>담보평가액과 차이 이유</strong><br>1. 자본적 지출: 토목공사비로 인한 가치증가분 포함<br>2. 시점의 변동: 거시적인 시장변화<br>3. 건축허가 취소: <strong>비교표준지/면적사정/개별요인 변경</strong><br>4. 용도지역의 변경<br>5. 현황의 변경: 창고 철거로 현황 변경"
+    },
+    {
+      id: 4,
+      prompt: "경매평가 — 일괄경매 여부에 따른 제시외건물 처리",
+      keywords: [
+        { word: "일괄경매O", alt: ["일괄경매 대상"] },
+        { word: "영향을 고려하지 않고 평가", alt: [] },
+        { word: "일괄경매X", alt: ["일괄경매 제외"] },
+        { word: "법정지상권으로 인한 감가", alt: ["법정지상권 감가"] },
+        { word: "토지가격을 별도로 기재", alt: ["토지가격 별도 기재"] }
+      ],
+      modelAnswer: "<strong>일괄경매O</strong>: 제시외 건물 모두 일괄경매의 대상이 되는 바, 제시외 건물로 인한 <strong>영향을 고려하지 않고 평가</strong>한다.<br><strong>일괄경매X</strong>: 제시외건물 ㄱ이 경매대상에서 제외되므로 해당부분은 <strong>법정지상권으로 인한 감가</strong>를 고려하여 평가한다.<br><br>평가목적을 고려하여 이에 구애됨 없이 평가하며, 제시외건물이 토지에 미치는 영향을 감안하여 평가할 경우 <strong>토지가격을 별도로 기재</strong>한다."
+    },
+    {
+      id: 5,
+      tall: true,
+      ref: "퀴즈15",
+      prompt: "담보평가 시 제시외건물 평가외 처리 (금융기관 요청)",
+      keywords: [
+        { word: "사용, 수익, 처분에 미치는 영향이 현저", alt: ["영향이 현저"] },
+        { word: "영향이 미미", alt: [] },
+        { word: "면적은 평가외", alt: ["평가외한다"] }
+      ],
+      modelAnswer: "평가외할 것을 요청시:<br>- 제시외건물(ㄱ)은 구조, 면적, 이용상황으로 보아 담보물의 <strong>사용, 수익, 처분에 미치는 영향이 현저</strong>할 것으로 판단하는 바, 평가외하였다.<br>- 본 담보물에 미치는 <strong>영향이 미미</strong>하다고 판단한다.<br>- 금융기관의 요청에 따라 제시외건물로 인하여 영향을 받는 부분의 <strong>면적은 평가외</strong>한다. (100/40% = 250㎡)"
     }
   ],
   p_urb: [
