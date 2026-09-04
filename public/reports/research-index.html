@@ -166,13 +166,13 @@
   }
   #overview p { color: var(--muted); max-width: 720px; }
 
-  /* ---------- map list: always one per row ---------- */
+  /* ---------- map list: 2열(좁은 화면에서는 1열) ---------- */
   .map-grid {
     max-width: 1100px;
     margin: 0 auto 64px;
     display: grid;
-    grid-template-columns: 1fr;
-    gap: 28px;
+    grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+    gap: 24px;
   }
 
   .map-card {
@@ -280,9 +280,9 @@
     <nav id="side-index">
       <a href="#overview" data-scroll="true"><span class="idx">00</span>개요</a>
       <a href="#gwanggyo" data-scroll="true"><span class="idx">01</span>광교 클러스터 지도</a>
-      <a href="#dongtan" data-scroll="true"><span class="idx">02</span>동탄 클러스터 지도</a>
-      <a href="#unjeong" data-scroll="true"><span class="idx">03</span>운정 클러스터 지도</a>
-      <a href="#results" data-scroll="true"><span class="idx">04</span>종합 결과</a>
+      <a href="#dongtan-south" data-scroll="true"><span class="idx">02</span>동탄남부 클러스터 지도</a>
+      <a href="#dongtan-north" data-scroll="true"><span class="idx">03</span>동탄북부 클러스터 지도</a>
+      <a href="#unjeong" data-scroll="true"><span class="idx">04</span>운정 클러스터 지도</a>
     </nav>
   </aside>
 
@@ -300,32 +300,36 @@
 
     <section id="overview">
       <p class="eyebrow">Urban Economics · New Town Comparison</p>
-      <h1>광교 · 동탄 · 운정 신도시 아파트 가격 결정요인 비교연구</h1>
+      <h1>신도시 아파트 가격 결정요인 비교연구</h1>
       <p>
-        OSM 기반 접근성 변수, 상업시설 중력지수(gravity index), DBSCAN 클러스터링을 결합해
-        세 신도시의 공간구조 차이를 지도로 시각화하고, 헤도닉 회귀 및 공간자기상관 분석(Moran's I,
-        SAR/SEM/SDM)을 통해 지역 간 이질성을 검증했습니다. 아래 지도에서 각 도시의 공원 및 상권
-        클러스터 구조를 확인하고, 하단 결과 섹션에서 종합 분석 결과를 확인할 수 있습니다.
+        광교 · 동탄남부 · 동탄북부 · 운정 4개 지역의 실거래 2,740건(126개 단지)을 대상으로,
+        공원 접근성이 아파트 가격에 자본화되는 정도를 헤도닉 회귀와 공간계량모형(Moran's I,
+        SAR/SEM)으로 검증했습니다. 동탄2는 남/북이 서로 이질적인 지역임이 확인되어 별개 지역으로
+        분리 추정했습니다. 아래 지도에서 지역별 공원 · 상권 클러스터 구조를 확인할 수 있습니다.
+      </p>
+      <p>
+        전체 통계분석 결과(기초통계 · 헤도닉 회귀 · 공간계량모형 · 공원 데이터 구축 방법론)는
+        <a href="/gallery/01-urban-newtowns/">연구 페이지 본문</a>에서 확인하세요.
       </p>
     </section>
 
     <!-- ---------- maps: one per row ---------- -->
     <div class="section-head">
-      <p class="eyebrow">01 – 03</p>
-      <h2>공원 및 상권 클러스터(200m) 지도</h2>
+      <p class="eyebrow">01 – 04</p>
+      <h2>지역별 공원 · 상권 클러스터 지도</h2>
     </div>
 
     <div class="map-grid">
 
       <section id="gwanggyo" class="map-card">
         <div class="map-label">
-          <strong>광교 (Gwanggyo)</strong>
-          <span>Cluster 01</span>
+          <strong>광교</strong>
+          <span>Gwanggyo</span>
         </div>
         <a href="../images/reports/urban-newtowns/Gwanggyo_cluster.jpg" target="_blank" rel="noopener noreferrer">
           <img
             src="../images/reports/urban-newtowns/Gwanggyo_cluster.jpg"
-            alt="광교 (Gwanggyo) 공원 및 상권 클러스터 지도"
+            alt="광교 공원 및 상권 클러스터 지도"
             loading="lazy"
             style="display:block;width:100%;height:auto;"
           />
@@ -335,33 +339,51 @@
         </div>
       </section>
 
-      <section id="dongtan" class="map-card">
+      <section id="dongtan-south" class="map-card">
         <div class="map-label">
-          <strong>동탄 (Dongtan)</strong>
-          <span>Cluster 02</span>
+          <strong>동탄남부</strong>
+          <span>Dongtan South</span>
         </div>
-        <a href="../images/reports/urban-newtowns/Dongtan_cluster.jpg" target="_blank" rel="noopener noreferrer">
+        <a href="../images/reports/urban-newtowns/Dongtan_South_cluster.jpg" target="_blank" rel="noopener noreferrer">
           <img
-            src="../images/reports/urban-newtowns/Dongtan_cluster.jpg"
-            alt="동탄 (Dongtan) 공원 및 상권 클러스터 지도"
+            src="../images/reports/urban-newtowns/Dongtan_South_cluster.jpg"
+            alt="동탄남부 공원 및 상권 클러스터 지도"
             loading="lazy"
             style="display:block;width:100%;height:auto;"
           />
         </a>
         <div class="open-full">
-          <a href="../images/reports/urban-newtowns/Dongtan_cluster.jpg" target="_blank" rel="noopener noreferrer">원본 크기로 열기 ↗</a>
+          <a href="../images/reports/urban-newtowns/Dongtan_South_cluster.jpg" target="_blank" rel="noopener noreferrer">원본 크기로 열기 ↗</a>
+        </div>
+      </section>
+
+      <section id="dongtan-north" class="map-card">
+        <div class="map-label">
+          <strong>동탄북부</strong>
+          <span>Dongtan North</span>
+        </div>
+        <a href="../images/reports/urban-newtowns/Dongtan_North_cluster.jpg" target="_blank" rel="noopener noreferrer">
+          <img
+            src="../images/reports/urban-newtowns/Dongtan_North_cluster.jpg"
+            alt="동탄북부 공원 및 상권 클러스터 지도"
+            loading="lazy"
+            style="display:block;width:100%;height:auto;"
+          />
+        </a>
+        <div class="open-full">
+          <a href="../images/reports/urban-newtowns/Dongtan_North_cluster.jpg" target="_blank" rel="noopener noreferrer">원본 크기로 열기 ↗</a>
         </div>
       </section>
 
       <section id="unjeong" class="map-card">
         <div class="map-label">
-          <strong>운정 (Unjeong)</strong>
-          <span>Cluster 03</span>
+          <strong>운정</strong>
+          <span>Unjeong</span>
         </div>
         <a href="../images/reports/urban-newtowns/Unjeong_cluster.jpg" target="_blank" rel="noopener noreferrer">
           <img
             src="../images/reports/urban-newtowns/Unjeong_cluster.jpg"
-            alt="운정 (Unjeong) 공원 및 상권 클러스터 지도"
+            alt="운정 공원 및 상권 클러스터 지도"
             loading="lazy"
             style="display:block;width:100%;height:auto;"
           />
@@ -372,22 +394,6 @@
       </section>
 
     </div>
-
-    <!-- ---------- final results ---------- -->
-    <div class="section-head">
-      <p class="eyebrow">04</p>
-      <h2>종합 결과 (Interactive Report)</h2>
-    </div>
-
-    <section id="results">
-      <div class="report-frame-wrap">
-        <iframe
-          src="06_interactive_report.html"
-          loading="lazy"
-          title="Cross-city interactive results report"
-        ></iframe>
-      </div>
-    </section>
 
   </main>
 </div>

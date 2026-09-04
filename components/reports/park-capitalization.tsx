@@ -2,18 +2,18 @@ import { MapLightbox } from "@/components/reports/map-lightbox"
 import {
   parkCapBaselineTable,
   parkCapChow,
+  parkCapCircuityReading,
   parkCapCircuityTable,
   parkCapFacts,
   parkCapFindings,
   parkCapFitTable,
   parkCapFooter,
   parkCapGravityTable,
-  parkCapMainEffectTable,
   parkCapMaps,
   parkCapMeta,
   parkCapMethodology,
-  parkCapModerationTable,
   parkCapMoran,
+  parkCapPoolingReading,
   parkCapSample,
   parkCapSemTable,
   parkCapStructureNotes,
@@ -242,6 +242,16 @@ export function ParkCapitalizationReport() {
       </p>
       <Table spec={parkCapCircuityTable} />
 
+      <h4 className="mt-7 text-[0.95rem] font-semibold">{parkCapCircuityReading.headline}</h4>
+      {parkCapCircuityReading.paras.map((p) => (
+        <p key={p.slice(0, 24)} className="mt-3 max-w-3xl text-[0.92rem] leading-relaxed">
+          {p}
+        </p>
+      ))}
+      <div className="mt-4 rounded border border-border border-l-[3px] border-l-accent bg-muted/40 px-4 py-3.5 text-[0.88rem] leading-relaxed">
+        {parkCapCircuityReading.keyInsight}
+      </div>
+
       {/* 07 풀링·공간자기상관 */}
       <SectionTitle n="07">풀링 검정 · 공간자기상관</SectionTitle>
       <div className="mt-5 grid grid-cols-1 gap-4 sm:grid-cols-2">
@@ -285,9 +295,22 @@ export function ParkCapitalizationReport() {
           </dl>
         </div>
       </div>
-      <p className="mt-2 text-[0.75rem] leading-relaxed text-muted-foreground">
-        4개 지역 전부 강한 양의 공간자기상관 → OLS 대신 SAR/SEM 공간계량모형으로 재추정.
-      </p>
+      <h4 className="mt-7 text-[0.95rem] font-semibold">{parkCapPoolingReading.chow.title}</h4>
+      {parkCapPoolingReading.chow.paras.map((p) => (
+        <p key={p.slice(0, 24)} className="mt-3 max-w-3xl text-[0.92rem] leading-relaxed">
+          {p}
+        </p>
+      ))}
+
+      <h4 className="mt-7 text-[0.95rem] font-semibold">{parkCapPoolingReading.moran.title}</h4>
+      {parkCapPoolingReading.moran.paras.map((p) => (
+        <p key={p.slice(0, 24)} className="mt-3 max-w-3xl text-[0.92rem] leading-relaxed">
+          {p}
+        </p>
+      ))}
+      <div className="mt-4 rounded border border-border border-l-[3px] border-l-accent bg-muted/40 px-4 py-3.5 text-[0.88rem] leading-relaxed">
+        {parkCapPoolingReading.moran.caution}
+      </div>
 
       {/* 08 SEM */}
       <SectionTitle n="08">공간계량모형 — 최종 채택 (SEM)</SectionTitle>
@@ -301,26 +324,8 @@ export function ParkCapitalizationReport() {
         — OLS 잔차에 섞여 있던 공간적 노이즈가 공원 효과를 가려온 사례로 해석된다.
       </p>
 
-      {/* 09 조절효과 */}
-      <SectionTitle n="09">공원×상권 조절효과 — 상권 성격별 분해</SectionTitle>
-      <p className="mt-3 max-w-3xl text-[0.92rem] leading-relaxed">
-        진입로 기준 보행 500m 이내 생활상권 POI를 음식(외식·카페)/소매(생활편의)/보건의료로 나눠
-        (전체 포함 4개 지표, 각각 표준화) 공원거리(중심화)와의 상호작용항을 (단지, 진입로) 2-way
-        클러스터 표준오차로 추정했다.
-      </p>
-      <Table spec={parkCapModerationTable} />
-      <Table spec={parkCapMainEffectTable} />
-      <div className="mt-4 rounded border border-border border-l-[3px] border-l-muted-foreground/50 bg-muted/40 px-4 py-3.5 text-[0.88rem] leading-relaxed">
-        <strong>16개 조합(4지역×4상권성격) 중 유의한 조절효과는 운정의 “전체”와 “소매” 2건뿐</strong>
-        (둘 다 −0.02**)이며 음식·보건의료는 어느 지역에서도 유의하지 않다. 반면 표 8의 주효과를
-        보면 <strong>광교</strong>는 4개 성격 전부에서 상권 근접성 자체가 강한 프리미엄을
-        갖지만(0.07~0.09***) 공원거리와 상호작용하지는 않는다 — 광교에서 상권은 “공원과 별개로”
-        값을 만들 뿐이다. 전반적으로 “상권이 있으면 공원효과가 커진다”는 단순한 가설은 지지되지
-        않는다.
-      </div>
-
-      {/* 10 공원 데이터 방법론 */}
-      <SectionTitle n="10">공원 데이터 구축 방법론 · 지역별 구성</SectionTitle>
+      {/* 09 공원 데이터 방법론 */}
+      <SectionTitle n="09">공원 데이터 구축 방법론 · 지역별 구성</SectionTitle>
       <p className="mt-3 max-w-3xl text-[0.92rem] leading-relaxed">
         앞선 모든 분석이 딛고 선 “공원” 정의 자체를 어떻게 만들었는지 기술한다 — 데이터 출처,
         공원으로 인정하는 최소 기준, 3단계 효용 티어 분류, 그리고 그 결과로 나온 지역별 공원
