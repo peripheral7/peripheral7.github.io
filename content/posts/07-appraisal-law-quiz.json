@@ -5,6 +5,8 @@
   "meta": "감정평가 및 보상법규 · 행정법 빈칸 퀴즈",
   "ref": "APPRAISER-QUIZ-LAW",
   "body": "감정평가사 2차 감정평가법규(행정법) 빈칸 채우기 퀴즈. 조문·판례 키워드를 직접 입력해 채점하고 목차로 단원을 이동하며 반복 학습할 수 있다.",
+  "image": "/images/study/감정평가법규.png",
+  "imageAlt": "고딕풍 서재에서 책을 읽는 남자 — 감정평가법규 퀴즈 메인 이미지",
   "href": "/reports/appraisal-law-quiz.html",
   "linkLabel": "퀴즈 풀기",
   "date": "2026.08.30",

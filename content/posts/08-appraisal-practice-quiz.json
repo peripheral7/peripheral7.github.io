@@ -5,6 +5,8 @@
   "meta": "감정평가실무 종합문제집",
   "ref": "APPRAISER-QUIZ-PRACTICE",
   "body": "감정평가사 2차 감정평가실무 종합 문제집. 주제별 탭으로 문제를 풀고 점수를 기록하며 취약 단원을 반복 복습할 수 있다.",
+  "image": "/images/study/감정평가실무.png",
+  "imageAlt": "택지개발 현장을 내려다보는 정장 차림의 남자 — 감정평가실무 퀴즈 메인 이미지",
   "href": "/reports/appraisal-practice-quiz.html",
   "linkLabel": "퀴즈 풀기",
   "date": "2026.08.30",
