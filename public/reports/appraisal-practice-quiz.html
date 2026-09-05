@@ -233,8 +233,8 @@ const structure = [
   {
     id: 'c3', name: '3. 임대료/임대차',
     subs: [
-      {id: 'rent', name: '임대료 감정평가', active: false},
-      {id: 'lease', name: '임대차 감정평가', active: false}
+      {id: 'rent', name: '임대료 감정평가', active: true},
+      {id: 'lease', name: '임대차 감정평가', active: true}
     ]
   },
   {
@@ -247,11 +247,11 @@ const structure = [
   {
     id: 'c5', name: '5. 유형별 평가',
     subs: [
-      {id: 't_land', name: '토지 / 건물', active: false},
-      {id: 't_mach', name: '기계기구 등', active: false},
+      {id: 't_land', name: '토지 / 건물', active: true},
+      {id: 't_mach', name: '기계기구 등', active: true},
       {id: 't_fac', name: '공장 / 사업체', active: false},
-      {id: 't_int', name: '무형 / 기업가치', active: false},
-      {id: 't_sec', name: '유가증권', active: false},
+      {id: 't_int', name: '무형 / 기업가치', active: true},
+      {id: 't_sec', name: '유가증권', active: true},
       {id: 't_pol', name: '오염부동산 등', active: false}
     ]
   },
@@ -295,6 +295,12 @@ let currentMain = 'c9';
 let currentSub = 'general';
 
 const state = {
+  t_land: { inputs: {}, graded: {}, individuallyGraded: {}, globalGraded: false },
+  t_mach: { inputs: {}, graded: {}, individuallyGraded: {}, globalGraded: false },
+  t_int: { inputs: {}, graded: {}, individuallyGraded: {}, globalGraded: false },
+  t_sec: { inputs: {}, graded: {}, individuallyGraded: {}, globalGraded: false },
+  rent: { inputs: {}, graded: {}, individuallyGraded: {}, globalGraded: false },
+  lease: { inputs: {}, graded: {}, individuallyGraded: {}, globalGraded: false },
   basics: { inputs: {}, graded: {}, individuallyGraded: {}, globalGraded: false },
   tvm: { inputs: {}, graded: {}, individuallyGraded: {}, globalGraded: false },
   cmp: { inputs: {}, graded: {}, individuallyGraded: {}, globalGraded: false },
@@ -314,6 +320,12 @@ const state = {
 };
 
 const tabMeta = {
+  t_land: { title: "토지/건물(복합부동산) — 일괄평가·구분건물·지상권·지역경계", note: "<div class=\"tab-note-title\">토지/건물(복합부동산) — 참고 정리</div><div class=\"tab-note-item\">\"토지, 건물 가격구성비 구하기\", \"거래대금현가\" 메모는 각각 배분법·TVM(1. 기초/TVM 탭)과 중복되는 상호참조 링크([[거래사례비교법]], [[감정평가기초]])라 별도 문항화하지 않았습니다.</div>" },
+  t_mach: { title: "기계기구 등 — 재조달원가 산정" },
+  t_int: { title: "무형/기업가치 — 기업가치평가·영업권" },
+  t_sec: { title: "유가증권 — 비상장주식 순자산가치법" },
+  rent: { title: "임대료 감정평가 — 임대사례비교법·적산법", note: "<div class=\"tab-note-title\">임대료 감정평가 — 참고 정리</div><div class=\"tab-note-item\">집합상가 투자수익률 관련 <strong>임대료형성요인비교치</strong> 메모는 세부 설명이 남아있지 않아 질문화하지 않았습니다.</div>" },
+  lease: { title: "임대차 감정평가 — 완전소유권·임대권·임차권가치" },
   basics: { title: "감정평가기초 — 획지·필지·합필가치·토지형상", note: "<div class=\"tab-note-title\">감정평가기초 — 참고 정리</div><div class=\"tab-note-item\">개별요인 비교 시 <strong>도로의 폭</strong>은 접면도로 상태(가로조건) 판단의 기본 자료이나, 별도의 산식이나 고정기준이 정리되어 있지 않아 문제화하지 않았습니다.</div>" },
   tvm: { title: "화폐의 시간가치(TVM) — 저당대출·잔금·거래대금 현가 산정" },
   cmp: { title: "비교방식 — 그 밖의 요인·개별요인·배분법·시점수정" },
@@ -333,6 +345,369 @@ const tabMeta = {
 };
 
 const dataset = {
+  t_land: [
+    {
+      id: 1,
+      prompt: "복합부동산 개별평가 원칙 및 예외(대체가능 거래사례 활용)",
+      keywords: [
+        { word: "개별평가액을 기준", alt: [] },
+        { word: "그 합리성이 지지", alt: [] },
+        { word: "단위면적당 시장가치 수준이 존재", alt: [] },
+        { word: "대체가능성이 있는 거래사례", alt: [] }
+      ],
+      modelAnswer: "감칙 7조에 의해 <strong>개별평가액을 기준</strong>으로 하되, 다른 방법에 의한 시산가액에 의하여 <strong>그 합리성이 지지</strong>되는 것으로 판단한다.<br>업무시설(대형오피스), 숙박시설, 상업시설, 물류창고 등 건물의 <strong>단위면적당 시장가치 수준이 존재</strong>하는 경우 활용하며, 이용상황 등이 유사하여 본건과 <strong>대체가능성이 있는 거래사례</strong>를 선택한다."
+    },
+    {
+      id: 2,
+      ref: "1000제 Q48",
+      prompt: "복합부동산 운영경비 산정 — 손해보험료 처리 및 제외항목",
+      keywords: [
+        { word: "500만 x 0.1 x 3%이자 내가 x SFF(5년안분)", alt: [] },
+        { word: "1백xMC - 1백x0.3xSFF", alt: [] },
+        { word: "취득세, 보존등기세, 임차인납부, 감가상각비", alt: [] }
+      ],
+      modelAnswer: "운영경비 중 손해보험료 처리<br>- 연간소멸성: 500만 − 500만 × 0.1 × 3%이자 내가 × SFF(5년안분)<br>- 납입금액 30% 환급형: 1백×MC − 1백×0.3×SFF<br><br>운영경비 <strong>제외항목</strong>: <strong>취득세, 보존등기세, 임차인납부, 감가상각비</strong>"
+    },
+    {
+      id: 3,
+      tall: true,
+      prompt: "선형회귀분석에 의한 토지가격 결정",
+      keywords: [
+        { word: "제외사례: 사정개입, 추정치와 현저한 괴리, 유사지역", alt: [] },
+        { word: "독립변수를 면적, 종속변수를 토지의 단가", alt: [] },
+        { word: "결정계수(R^2)가 70% 이상", alt: [] }
+      ],
+      modelAnswer: "- <strong>제외사례</strong>: 사정개입, 추정치와 현저한 괴리, 유사지역<br>- 변수설정: <strong>독립변수를 면적, 종속변수를 토지의 단가</strong>로 설정<br>- 회귀식의 결정(y=ax+b): 실제 산식(R제곱은 __로 유의함)<br>- 대상토지가격 결정: (x=면적) 산식으로 계산<br>- <strong>결정계수(R^2)가 70% 이상</strong>인 지하철역과의 거리가 토지가치와 유의한 설명력이 있는 것으로 판단한다."
+    },
+    {
+      id: 4,
+      prompt: "토지건물 일괄평가 시 투자수익률·시점수정치·개별요인비교치 자료 활용",
+      keywords: [
+        { word: "소득수익률 -> 환원이율(수익환원법)", alt: [] },
+        { word: "자본수익률 -> 시점수정치(일괄)", alt: [] },
+        { word: "투자수익률 -> 할인율(현가)", alt: [] },
+        { word: "토지: 지가변동률", alt: [] },
+        { word: "건물: 생산자물가지수", alt: [] }
+      ],
+      modelAnswer: "투자수익률 자료 활용<br>- <strong>소득수익률 → 환원이율(수익환원법)</strong><br>- <strong>자본수익률 → 시점수정치(일괄)</strong><br>- <strong>투자수익률 → 할인율(현가)</strong><br><br>토지·건물 각각 비교 시 시점수정치 및 개별요인비교치<br>- <strong>토지: 지가변동률</strong><br>- <strong>건물: 생산자물가지수</strong><br>- 개별요인비교치: 가중치 적용"
+    },
+    {
+      id: 5,
+      ref: "1000제 Q55",
+      prompt: "복합부동산 평가방법 비교 — 개별평가·일체거래사례비교·일체수익환원",
+      keywords: [
+        { word: "개별평가(원가법)", alt: [] },
+        { word: "일체거래사례비교법 (자본수익률)", alt: [] },
+        { word: "일체수익환원법", alt: [] }
+      ],
+      modelAnswer: "I. 개별평가(원가법)<br>II. <strong>일체거래사례비교법(자본수익률)</strong><br>III. <strong>일체수익환원법</strong>"
+    },
+    {
+      id: 6,
+      prompt: "토지건물 일괄거래사례비교법 및 수익환원법 채택 근거",
+      keywords: [
+        { word: "감정평가에 관한 규칙 제7조에 의거 개별평가가 원칙", alt: [] },
+        { word: "일괄거래사례비교법 및 수익환원법에 의하여 합리성이 인정", alt: [] }
+      ],
+      modelAnswer: "<strong>감정평가에 관한 규칙 제7조에 의거 개별평가가 원칙</strong>이며, <strong>일괄거래사례비교법 및 수익환원법에 의하여 합리성이 인정</strong>된다."
+    },
+    {
+      id: 7,
+      tall: true,
+      prompt: "물류창고 거래사례 선정 및 요인비교(택배물동량 시점수정)",
+      keywords: [
+        { word: "창고의 종류, 공법상 제한, 창고 규모, 그 밖의 거래정황", alt: [] },
+        { word: "택배물동량 기준으로 시점수정", alt: [] },
+        { word: "토지요인, 건물요인(잔가율비교), 개별요인", alt: [] }
+      ],
+      modelAnswer: "II. 물류창고로서 가치형성요인을 고려하며 <strong>창고의 종류, 공법상 제한, 창고 규모, 그 밖의 거래정황</strong> 등을 고려하여 사례를 선택한다(규모차이, 사정개입, 창고유형 및 규모차이, 공법상 제한 검토).<br><br>III. 요인비교치<br>- 시점수정: 물류창고 가격변동과 잘 부합하는 <strong>택배물동량 기준으로 시점수정</strong>한다(지가변동률은 토지만의 가격변동, 자본수익률은 위치적 이용상황별 차이가 있음에 유의).<br>- 지역요인: 토지·건물 포함가격으로 제시되어 토지요인과 별도로 비교한다.<br>- <strong>개별요인 비교치</strong>: (1)토지요인 (2)건물요인(잔가율비교) (3)개별요인"
+    },
+    {
+      id: 8,
+      prompt: "구분건물 감정평가 방식(감칙 16조) 및 수익환원법 검토 대상",
+      keywords: [
+        { word: "감칙 16조 거래사례비교법에 의하되", alt: [] },
+        { word: "근린생활시설의 경우 수익환원법에 의한 합리성을 검토", alt: [] },
+        { word: "다세대주택은 합리성 검토를 생략", alt: [] }
+      ],
+      modelAnswer: "구분건물 감정평가는 <strong>감칙 16조 거래사례비교법에 의하되</strong>, <strong>근린생활시설의 경우 수익환원법에 의한 합리성을 검토</strong>하며 <strong>다세대주택은 합리성 검토를 생략</strong>한다."
+    },
+    {
+      id: 9,
+      tall: true,
+      prompt: "구분건물 거래사례 선택기준 및 시점수정치·요인비교치 구조",
+      keywords: [
+        { word: "용도유사, 본건과 같은 타입", alt: [] },
+        { word: "근생으로 층 유사 및 비교가능성 높음", alt: [] },
+        { word: "다세대주택으로 연식 등 요인 유사", alt: [] },
+        { word: "주택: 매매가격지수 (무조건 전달)", alt: [] },
+        { word: "상가: 자본수익률", alt: [] },
+        { word: "단지 외부(토지) x 내부(연식) x (층x호)", alt: [] }
+      ],
+      modelAnswer: "거래사례선택: <strong>용도유사, 본건과 같은 타입</strong> — 근생은 <strong>층 유사 및 비교가능성</strong>이 높고, 다세대주택은 <strong>연식</strong> 등 요인이 유사한 사례를 선택한다.<br><br>시점수정치<br>- <strong>주택: 매매가격지수(무조건 전달)</strong><br>- <strong>상가: 자본수익률</strong><br><br>가치형성요인비교치: <strong>단지 외부(토지) × 내부(연식) × (층×호)</strong>"
+    },
+    {
+      id: 10,
+      tall: true,
+      prompt: "골프장 감정평가 — 3방식 병용 및 감정평가액 결정",
+      keywords: [
+        { word: "조성원가법 - 홀 수만큼 + 건물", alt: [] },
+        { word: "거래사례비교법: ... 홀당 40억", alt: [] },
+        { word: "감칙 7조에 의해 감정평가액 합계로 결정", alt: [] }
+      ],
+      modelAnswer: "본건이 표준지인 골프장 감정평가<br>- <strong>조성원가법</strong>: 홀 수만큼 + 건물<br>- <strong>거래사례비교법</strong>: 본건과 유사한 대중제 골프장으로서 적당한 사례 선정(홀당 40억)<br>- <strong>수익환원법</strong><br>- 감정평가액: <strong>감칙 7조에 의해 각 방식 감정평가액의 합계로 결정</strong>"
+    },
+    {
+      id: 11,
+      prompt: "지상권 설정 감정평가 시 표준지 선정기준",
+      keywords: [
+        { word: "지상건축물로 인한 영향이 없는 사례", alt: [] },
+        { word: "공법상 제한 유사한 표준지 선정", alt: [] }
+      ],
+      modelAnswer: "- <strong>지상건축물로 인한 영향이 없는 사례</strong>를 선정한다.<br>- <strong>공법상 제한이 유사한 표준지</strong>를 선정한다."
+    },
+    {
+      id: 12,
+      tall: true,
+      ref: "Q9-2",
+      prompt: "지상권 설정 시 토지가액 산정구조",
+      keywords: [
+        { word: "건축물 없는 상태 평가", alt: [] },
+        { word: "귀속임대료", alt: [] },
+        { word: "지상권설정시 토지가액 = 토지가격 - 지상권가치", alt: [] }
+      ],
+      modelAnswer: "I. 건축물 없는 상태로 평가<br><br>II. 지상권가액<br>1. <strong>귀속임대료</strong>: (1)시장임대료 (2)계약임대료 (3)귀속임대료<br>2. 지상권가치<br><br>III. <strong>지상권설정시 토지가액 = 토지가격 − 지상권가치</strong>"
+    },
+    {
+      id: 13,
+      tall: true,
+      ref: "종합39번",
+      prompt: "구분지상권 설정평가 시 노후율(입체이용저해율) 고려 여부",
+      keywords: [
+        { word: "건물이 최유효이용과 유사하고 철거타당성이 없는 바, 노후율을 고려", alt: [] },
+        { word: "입체이용저해율(노후율 고려): (건물등+지하) x 경과/내용+ 기타", alt: [] },
+        { word: "경과: 경제적내용연수 - 장래보존연수", alt: [] }
+      ],
+      modelAnswer: "현재 건부지상태이며, <strong>건물이 최유효이용과 유사하고 철거타당성이 없는 바, 노후율을 고려</strong>한다.<br>- <strong>입체이용저해율(노후율 고려)</strong>: (건물등+지하) × 경과/내용 + 기타<br>- <strong>경과 = 경제적내용연수 − 장래보존연수</strong><br>- 이유: 새로 지을 때 그만큼 손해이므로, 내용연수를 다 채우면 저해율을 그대로 반영하고 내용연수 초반이면 저해율에 덜 반영한다."
+    },
+    {
+      id: 14,
+      very_tall: true,
+      prompt: "구분지상권 설정 시 입체이용저해율 산정절차",
+      keywords: [
+        { word: "영구적인 시설물이므로 토지가액x입체이용저해율로 결정", alt: [] },
+        { word: "건물등이용저해율", alt: [] },
+        { word: "지하이용저해율", alt: [] },
+        { word: "그밖의이용저해율", alt: [] }
+      ],
+      modelAnswer: "1. 처리방침: <strong>영구적인 시설물이므로 토지가액×입체이용저해율로 결정</strong><br>2. 토지의 평가액<br>3. 입체이용저해율 산정<br>&nbsp;&nbsp;1) <strong>건물등이용저해율</strong>: 최유효층수 및 저층시가지 해당 여부로 저해층수·건물등이용저해율 결정<br>&nbsp;&nbsp;2) <strong>지하이용저해율</strong>: 토피심도, 저층시가지한계심도, 체감률(p) 적용<br>&nbsp;&nbsp;3) <strong>그밖의이용저해율</strong>: 토피가 일정 기준 이하이면 상하배분 최고치 적용<br>&nbsp;&nbsp;4) 입체이용저해율 결정<br>4. 구분지상권 설정가치(설정대가)"
+    },
+    {
+      id: 15,
+      prompt: "구분지상권 설정 후 토지 감정평가액 산정구조",
+      keywords: [
+        { word: "구분지상권 미설정부분", alt: [] },
+        { word: "구분지상권 설정부분", alt: [] }
+      ],
+      modelAnswer: "III. 구분지상권 설정후 토지 감정평가액<br>1. <strong>구분지상권 미설정부분</strong><br>2. <strong>구분지상권 설정부분</strong><br>3. 소계"
+    },
+    {
+      id: 16,
+      prompt: "도시계획시설 저촉토지 — 저촉·미저촉 부분 평가 및 건물 배분법",
+      keywords: [
+        { word: "미저촉부분 단가 따로 구하기", alt: [] },
+        { word: "미저촉부분은 보수비 고려", alt: [] },
+        { word: "저촉부분은 일부라도 전체 면적 적용", alt: [] }
+      ],
+      modelAnswer: "9-1. <strong>미저촉부분 단가 따로 구하기</strong>(저촉부분 평가액·미저촉부분 평가액 구분 산정)<br><br>10. 건물의 감정평가액(배분법)<br>&nbsp;&nbsp;(1) <strong>미저촉부분은 보수비 고려</strong><br>&nbsp;&nbsp;(2) <strong>저촉부분은 일부라도 전체 면적 적용</strong>"
+    },
+    {
+      id: 17,
+      prompt: "둘 이상의 용도지역에 걸치는 토지평가 원칙",
+      keywords: [
+        { word: "면적비율에 의한 평균가격으로 평가", alt: [] },
+        { word: "용도지역의 비율은 행정적 조건으로 보정", alt: [] },
+        { word: "걸치는 면적이 미미한 바 주된 용도지역을 기준", alt: [] }
+      ],
+      modelAnswer: "- <strong>면적비율에 의한 평균가격으로 평가</strong>한다.<br>- 둘 이상의 용도지역에 걸치는 토지로서 유사한 표준지를 기준하되, <strong>용도지역의 비율은 행정적 조건으로 보정</strong>한다.<br>- 다만 한 용도지역에 <strong>걸치는 면적이 미미한 바 주된 용도지역을 기준</strong>으로 평가하는 경우도 있다."
+    }
+  ],
+  t_mach: [
+    {
+      id: 1,
+      prompt: "기계기구 재조달원가 산정식(수입기계 기준)",
+      keywords: [
+        { word: "CIF x 신고일 환율.도입기계 보정지수 x 기준시점 한국환율 x 세금", alt: [] },
+        { word: "감면 시 농어촌특별세 적용", alt: [] }
+      ],
+      modelAnswer: "재조달원가 = <strong>CIF × 신고일 환율·도입기계 보정지수 × 기준시점 한국환율 × 세금</strong><br>(관세 감면 시 <strong>농어촌특별세</strong>를 적용한다.)"
+    }
+  ],
+  t_int: [
+    {
+      id: 1,
+      tall: true,
+      prompt: "기업가치평가 시 수익환원법을 최종 채택하는 사유",
+      keywords: [
+        { word: "원가법... 무형자산의 반영이 미흡", alt: [] },
+        { word: "거래사례비교법... 통제권 프리미엄 반영여부 및 상장여부가 다른기업의 자료", alt: [] },
+        { word: "감정평가에 관한 규칙 제24조에 의한 주된 평가방법인 수익환원법", alt: [] }
+      ],
+      modelAnswer: "- 원가법에 의한 방식은 계속기업의 전제 및 <strong>무형자산의 반영이 미흡</strong>할 수 있다.<br>- 거래사례비교법에 의한 방식은 사례기업의 <strong>통제권 프리미엄 반영여부 및 상장여부가 다른 기업의 자료를 활용</strong>한 점, 개별적 특성 반영의 한계가 문제된다.<br>- 따라서 <strong>감정평가에 관한 규칙 제24조에 의한 주된 평가방법인 수익환원법</strong>에 의한 가액으로 최종 결정한다."
+    },
+    {
+      id: 2,
+      prompt: "거래사례비교법에 의한 기업가치(PER·PBR) 산정절차",
+      keywords: [
+        { word: "유사기업 사례를 기준으로 PER, PBR 추정", alt: [] },
+        { word: "상장기업의 주가는 유동성 프리미엄을 보정", alt: [] }
+      ],
+      modelAnswer: "(1) 유사기업 사례를 기준으로 <strong>PER, PBR을 추정</strong>하여 대상기업에 적용하되, <strong>상장기업의 주가는 유동성 프리미엄을 보정</strong>하여 활용한다.<br>(2) 유사기업 PER, PBR<br>(3) 해당기업 주식가치<br>(4) 기업가치 평가액"
+    },
+    {
+      id: 3,
+      prompt: "기업가치평가 시 영업이익 추정 원칙(이상치 배제)",
+      keywords: [
+        { word: "일시적인 시장상황의 변동으로 인한 영향이 있으므로 이를 배제하고 추정", alt: [] }
+      ],
+      modelAnswer: "특정 연도 영업자료가 <strong>일시적인 시장상황의 변동으로 인한 영향이 있으므로 이를 배제하고 추정</strong>한다."
+    },
+    {
+      id: 4,
+      tall: true,
+      prompt: "수익환원법(FCFF)에 의한 기업가치 산정구조",
+      keywords: [
+        { word: "제24조 수익환원법", alt: [] },
+        { word: "FCFF결정", alt: [] },
+        { word: "WACC 산정", alt: [] },
+        { word: "고속성장기(x K계수)", alt: [] },
+        { word: "안정성장기(6년차매출액 / WACC-성장률)x현가", alt: [] }
+      ],
+      modelAnswer: "I. 감칙 제24조 수익환원법<br>II. 1차년도 FCFF 산정 — 1.주된가정 2.FCFF결정<br>III. WACC 산정 — 1.자기자본 2.타인자본 3.가중평균<br>IV. 대상기업의 기업가치<br>&nbsp;&nbsp;1. 고속성장기(×K계수)<br>&nbsp;&nbsp;2. 안정성장기(6년차매출액 / (WACC−성장률)) × 현가<br>&nbsp;&nbsp;3. 기업가치결정"
+    },
+    {
+      id: 5,
+      prompt: "부채비율과 부채구성비율의 구분",
+      keywords: [
+        { word: "부채비율 = 부채/자본", alt: [] },
+        { word: "부채구성비율 = 부채/부채+자본", alt: [] }
+      ],
+      modelAnswer: "<strong>부채비율 = 부채 / 자본</strong><br><strong>부채구성비율 = 부채 / (부채+자본)</strong>"
+    },
+    {
+      id: 6,
+      prompt: "베타계수 추정(무부채베타 활용) 산식",
+      keywords: [
+        { word: "무부채베타계수 x [1+ (1-t)x D/E]", alt: [] },
+        { word: "무부채베타계수 = 유사기업 / [1+ (1-t)x D/E]", alt: [] }
+      ],
+      modelAnswer: "베타계수추정 = <strong>무부채베타계수 × [1 + (1−t)×D/E]</strong><br>무부채베타계수 = <strong>유사기업 베타 / [1 + (1−t)×D/E]</strong>"
+    },
+    {
+      id: 7,
+      short: true,
+      prompt: "무형자산 감정평가 근거 규정",
+      keywords: [
+        { word: "감칙23조", alt: [] }
+      ],
+      modelAnswer: "무형자산은 <strong>감정평가에 관한 규칙 제23조</strong>에 근거하여 평가한다."
+    },
+    {
+      id: 8,
+      prompt: "영업권 감정평가 절차(감칙 23조 수익환원법)",
+      keywords: [
+        { word: "영업관련 기업가치 (FCFF, 할인률, 영업관련기업가치)", alt: [] },
+        { word: "투하자본", alt: [] },
+        { word: "영업권가치", alt: [] }
+      ],
+      modelAnswer: "1. 감칙 23조 수익환원법<br>2. <strong>영업관련 기업가치</strong>(FCFF, 할인률, 영업관련기업가치)<br>3. <strong>투하자본</strong><br>4. <strong>영업권가치</strong>"
+    },
+    {
+      id: 9,
+      prompt: "영업권 평가 시 할인율 계산 방법",
+      keywords: [
+        { word: "영업과 무관한 부채로 자기자본 나눔", alt: [] }
+      ],
+      modelAnswer: "할인률 계산 시 <strong>영업과 무관한 부채로 자기자본을 나누어</strong> 산정한다."
+    }
+  ],
+  t_sec: [
+    {
+      id: 1,
+      prompt: "비상장주식 감정평가 — 순자산가치법 절차",
+      keywords: [
+        { word: "감칙 24조 순자산가치법", alt: [] },
+        { word: "수정재무제표; 구분/조정전/조정내역/조정후", alt: [] },
+        { word: "순자산가치산정 (부채가액, 순자산)", alt: [] }
+      ],
+      modelAnswer: "I. 감칙 24조 순자산가치법에 의해 평가<br>1. 총자산가치 산정 — 재평가내역에 대한 감정평가, <strong>수정재무제표(구분/조정전/조정내역/조정후)</strong><br>2. <strong>순자산가치 산정</strong>(부채가액, 순자산)<br>3. 감정평가액"
+    }
+  ],
+  rent: [
+    {
+      id: 1,
+      prompt: "임대료 감정평가 시 실질임대료 산정 기준 및 제외항목은?",
+      keywords: [
+        { word: "시장, 실질, 신규임대료 기준", alt: [] },
+        { word: "부가사용료, 부가가치세, 공익비는 제외", alt: [] }
+      ],
+      modelAnswer: "감칙 22조에 따라 평가하며 <strong>시장, 실질, 신규임대료 기준</strong>으로 하고, 임차인의 사용수익에 따른 <strong>부가사용료, 부가가치세, 공익비는 제외</strong>한다."
+    },
+    {
+      id: 2,
+      prompt: "임대사례비교법에 의한 임대료(비준임대료) 산정절차는?",
+      keywords: [
+        { word: "실질임대료(전유면적당)", alt: [] },
+        { word: "개별요인비교치(층별효용비 -> 내부)", alt: ["층별효용비"] },
+        { word: "비준임대료", alt: [] }
+      ],
+      modelAnswer: "1. 임대사례선택<br>2. 임대사례 실질임대료(전유면적당)<br>3. 시점수정치<br>4. 개별요인비교치(층별효용비 → 내부)<br>5. 비준임대료(임대료결정)"
+    },
+    {
+      id: 3,
+      prompt: "임대사례비교법에서 임대사례를 배제하는 사유는?",
+      keywords: [
+        { word: "개별적 유사성 결여", alt: [] },
+        { word: "표준적 임대차 아님", alt: [] }
+      ],
+      modelAnswer: "<strong>개별적 유사성 결여</strong>, <strong>표준적 임대차가 아닌 경우</strong> 등"
+    },
+    {
+      id: 4,
+      prompt: "보증금이 설정된 경우 월임대료 산정식은?",
+      keywords: [
+        { word: "(임대료 - 보증금월세전환)/12", alt: [] }
+      ],
+      modelAnswer: "월임대료 = <strong>(임대료 − 보증금월세전환) / 12</strong>"
+    },
+    {
+      id: 5,
+      tall: true,
+      prompt: "적산법에 의한 임대료 산정 근거 및 절차는?",
+      keywords: [
+        { word: "감정평가에 관한 규칙 제12조", alt: [] },
+        { word: "토지만의 임대사례 포착이 어려운 바 적산법을 기준", alt: [] },
+        { word: "층별효용비", alt: [] },
+        { word: "필요제경비(감가상각비 포함)", alt: [] }
+      ],
+      modelAnswer: "- <strong>감정평가에 관한 규칙 제12조</strong>에 의하여 적산법을 적용한다.<br>- <strong>토지만의 임대사례 포착이 어려운 바 적산법을 기준</strong>한다.<br><br>1. 기초가액(수익환원법은 순환논리이므로 배제) × 전유면적<br>&nbsp;&nbsp;(1) 토지건물 전체가액<br>&nbsp;&nbsp;(2) 평가대상부분 층별효용비율(집합건물)<br>&nbsp;&nbsp;(3) 기초가액(전체가액 × <strong>층별효용비</strong>) — 층별효용비율 구할 때 면적을 곱해준다.<br>2. 기대이율(중위치 적용)<br>3. <strong>필요제경비(감가상각비 포함)</strong><br>4. 적산임대료"
+    }
+  ],
+  lease: [
+    {
+      id: 1,
+      very_tall: true,
+      prompt: "임대차 감정평가 — 완전소유권·임대권·임차권가치 산정구조",
+      keywords: [
+        { word: "임대료 연금현가 + 거래가격x상승률", alt: [] },
+        { word: "실질임대료 (계약임대료 기준)", alt: [] },
+        { word: "임차권가치 (완전소유권 - 임대권)", alt: [] },
+        { word: "귀속임대료 (연간 임대료 차이)", alt: [] },
+        { word: "임차권가치 = 귀속임대료 5년 연금현가", alt: [] }
+      ],
+      modelAnswer: "I. 완전소유권가치(시장가치)<br>&nbsp;&nbsp;<strong>임대료 연금현가 + 거래가격×상승률</strong>(상승 및 할인)<br><br>II. 임대권가치<br>&nbsp;&nbsp;<strong>실질임대료(계약임대료 기준)</strong><br>&nbsp;&nbsp;임대권가치(임대차계약에 따른 할인률)<br><br>III. 임차권가치 및 임차권수익률<br>&nbsp;&nbsp;<strong>임차권가치(완전소유권 - 임대권)</strong><br>&nbsp;&nbsp;<strong>귀속임대료(연간 임대료 차이)</strong><br>&nbsp;&nbsp;내재된 임차권가치(<strong>임차권가치 = 귀속임대료 5년 연금현가</strong>)"
+    }
+  ],
   basics: [
     {
       id: 1,
