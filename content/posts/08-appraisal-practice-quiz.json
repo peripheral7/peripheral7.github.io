@@ -10,5 +10,6 @@
   "href": "/reports/appraisal-practice-quiz.html",
   "linkLabel": "퀴즈 풀기",
   "date": "2026.08.30",
-  "tags": ["Appraiser", "실무", "Quiz", "StudyLog"]
+  "tags": ["Appraiser", "실무", "Quiz", "StudyLog"],
+  "progressStorageKey": "admin-practice-quiz-summary-v1"
 }

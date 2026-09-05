@@ -2279,6 +2279,98 @@ function updateNavigation() {
 }
 
 const LAST_TAB_KEY = 'appraisal-practice-last-tab-v1';
+const PROGRESS_KEY = 'appraisal-practice-progress-v1';
+const SUMMARY_KEY = 'admin-practice-quiz-summary-v1';
+const REVIEW_THRESHOLD = 0.6; // 키워드 매칭률이 이 미만이면 "복습 필요"로 표시
+
+let dailyLog = { date: '', keys: {} };
+let needsReview = {};
+
+function todayStr() {
+  const d = new Date();
+  return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
+}
+
+// 오늘 채점한 문제를 기록 — "오늘 학습량"의 기준(날짜가 바뀌면 자동으로 새로 셈)
+function touchDaily(sub, id) {
+  if (dailyLog.date !== todayStr()) dailyLog = { date: todayStr(), keys: {} };
+  dailyLog.keys[sub + '__' + id] = true;
+}
+
+// 키워드 매칭률로 이 문제를 "복습 필요" 목록에 넣거나 뺀다
+function markReviewStatus(sub, q) {
+  const input = (state[sub].inputs[q.id] || "").trim();
+  let ratio = 0;
+  if (q.keywords && q.keywords.length > 0 && input) {
+    let matched = 0;
+    const valForCheck = input.replace(/\s+/g, '');
+    q.keywords.forEach((kw) => {
+      const checkArr = [kw.word, ...(kw.alt || [])].map((k) => k.replace(/\s+/g, ''));
+      if (checkArr.some((k) => valForCheck.includes(k))) matched++;
+    });
+    ratio = matched / q.keywords.length;
+  }
+  const key = sub + '__' + q.id;
+  if (ratio < REVIEW_THRESHOLD) needsReview[key] = true;
+  else delete needsReview[key];
+}
+
+let progressSaveTimer = null;
+// 탭 전체(state) 저장 + 블로그 카드/메인페이지용 요약도 함께 갱신 —
+// 전체 진행률보다 "오늘 얼마나 했는지"·"뭘 다시 봐야 하는지"를 우선한다
+function saveProgress() {
+  clearTimeout(progressSaveTimer);
+  progressSaveTimer = setTimeout(() => {
+    try { localStorage.setItem(PROGRESS_KEY, JSON.stringify(state)); } catch (e) {}
+    try { localStorage.setItem('appraisal-practice-daily-v1', JSON.stringify(dailyLog)); } catch (e) {}
+    try { localStorage.setItem('appraisal-practice-needsreview-v1', JSON.stringify(needsReview)); } catch (e) {}
+    try {
+      let attempted = 0, total = 0;
+      Object.keys(dataset).forEach((sub) => {
+        const list = dataset[sub];
+        total += list.length;
+        const gradedMap = (state[sub] && state[sub].graded) || {};
+        list.forEach((q) => { if (gradedMap[q.id]) attempted++; });
+      });
+      const todayCount = dailyLog.date === todayStr() ? Object.keys(dailyLog.keys).length : 0;
+      localStorage.setItem(SUMMARY_KEY, JSON.stringify({
+        correct: attempted, total,
+        needsReview: Object.keys(needsReview).length,
+        todayCount,
+        lastStudyDate: dailyLog.date || null,
+        updatedAt: Date.now(),
+      }));
+    } catch (e) {}
+  }, 200);
+}
+
+// 저장된 진행상황을 state에 병합 — 문항 구성이 바뀐 탭은 저장값이 없으면 기본값 유지
+function loadProgress() {
+  try {
+    const raw = localStorage.getItem(PROGRESS_KEY);
+    if (raw) {
+      const saved = JSON.parse(raw);
+      Object.keys(state).forEach((sub) => {
+        if (saved[sub]) {
+          state[sub] = {
+            inputs: saved[sub].inputs || {},
+            graded: saved[sub].graded || {},
+            individuallyGraded: saved[sub].individuallyGraded || {},
+            globalGraded: saved[sub].globalGraded || false,
+          };
+        }
+      });
+    }
+  } catch (e) {}
+  try {
+    const rawDaily = localStorage.getItem('appraisal-practice-daily-v1');
+    if (rawDaily) dailyLog = JSON.parse(rawDaily);
+  } catch (e) {}
+  try {
+    const rawReview = localStorage.getItem('appraisal-practice-needsreview-v1');
+    if (rawReview) needsReview = JSON.parse(rawReview);
+  } catch (e) {}
+}
 
 function saveLastTab() {
   try { localStorage.setItem(LAST_TAB_KEY, JSON.stringify({ main: currentMain, sub: currentSub })); } catch (e) {}
@@ -2449,8 +2541,11 @@ function gradeSingle(id, isIndividual = false, buttonClick = false) {
     state[currentSub].graded[id] = true;
     state[currentSub].individuallyGraded[id] = true;
     renderGradedResult(id);
+    const q = dataset[currentSub].find((item) => item.id === id);
+    if (q) { touchDaily(currentSub, id); markReviewStatus(currentSub, q); }
   }
   updateOverall();
+  saveProgress();
 }
 
 function gradeAll() {
@@ -2469,6 +2564,8 @@ function gradeAll() {
     if (turnOn) {
       state[currentSub].graded[q.id] = true;
       renderGradedResult(q.id);
+      touchDaily(currentSub, q.id);
+      markReviewStatus(currentSub, q);
     } else {
       if (!state[currentSub].individuallyGraded[q.id]) {
         state[currentSub].graded[q.id] = false;
@@ -2482,6 +2579,7 @@ function gradeAll() {
     }
   });
   updateOverall();
+  saveProgress();
 }
 
 // "공익사업별 법정 사업인정의제일" 단답형 문제만 모아서 한번에 채점
@@ -2493,8 +2591,11 @@ function gradeAllInlineShort() {
     state[currentSub].graded[q.id] = true;
     state[currentSub].individuallyGraded[q.id] = true;
     renderGradedResult(q.id);
+    touchDaily(currentSub, q.id);
+    markReviewStatus(currentSub, q);
   });
   updateOverall();
+  saveProgress();
 }
 
 function updateOverall() {
@@ -2533,6 +2634,7 @@ function resetCurrentTab() {
   state[currentSub].globalGraded = false;
   renderQuiz();
   updateOverall();
+  saveProgress();
 }
 
 // ===================== 검색 (전체 주제의 문제를 카드 단위로 검색) =====================
@@ -2633,6 +2735,7 @@ document.addEventListener('click', (e) => {
 });
 
 try { localStorage.removeItem('appraisal-practice-review-counts-v1'); } catch (e) {} // 복습횟수 기능 제거에 따른 기존 저장값 정리
+loadProgress();
 restoreLastTab();
 updateNavigation();
 </script>
