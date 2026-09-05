@@ -7,102 +7,7 @@
   },
   "t1a": {
     "acquired": true,
-    "logs": [
-      {
-        "date": "2026/07/21",
-        "type": "review",
-        "text": "## 선형회귀분석\n - 제외사례: 사정개입, 추정치와 현저한 괴리, 유사지역\n- 변수설정: 독립변수를 면적, 종속변수를 토지의 단가\n- 회귀식의 결정(y=ax+b): 실제 산식(R제곱은 __로 유의함)\n- 대상토지가격 결정:\n  - (x=면적): 산식으로 계산\n  -  결정계수(R^2)가 70% 이상인 지하철역과의 거리가 토지가치와 유의한 설명력이 있는 것으로 판단한다.",
-        "id": "log_1784906683142_wpuabia",
-        "reviewCycle": 3,
-        "reviewCount": 3,
-        "reviewCompletedAt": {
-          "1": "2026/08/10",
-          "2": "2026/08/10",
-          "3": "2026/08/10"
-        }
-      },
-      {
-        "date": "2026/07/21",
-        "type": "review",
-        "text": "투자수익률 자료 활용:\n- 소득수익률 -> 환원이율(수익환원법)\n-  자본수익률 -> 시점수정치(일괄)\n- 투자수익률 -> 할인율(현가)\n\n토지건물 각각 비교시 시점수정치 및 개별요인비교치\n- 토지: 지가변동률\n- 건물: 생산자물가지수\n- 개별요인비교치: 가중치 적용",
-        "id": "log_1784906683142_8tr2xf1",
-        "reviewCycle": 3,
-        "reviewCount": 3,
-        "reviewCompletedAt": {
-          "1": "2026/08/14",
-          "2": "2026/08/14",
-          "3": "2026/08/14"
-        }
-      },
-      {
-        "id": "log_1785148785008_poqkzri",
-        "date": "2026/07/27",
-        "type": "study",
-        "text": "I.개별평가(원가법)\n**II. 일체거래사례비교법 (자본수익률)**\nIII. 일체수익환원법 \n1000Q55",
-        "reviewCount": 2,
-        "reviewCompletedAt": {
-          "1": "2026/07/25",
-          "2": "2026/08/10"
-        }
-      },
-      {
-        "id": "log_1785046882732_s7mofnv",
-        "date": "2026/07/26",
-        "type": "study",
-        "text": "감정평가에 관한 규칙 제7조에 의거 개별평가가 원칙이며, 일괄거래사례비교법 및 수익환원법에 의하여 합리성이 인정됨.",
-        "reviewCycle": 1,
-        "reviewCount": 1,
-        "reviewCompletedAt": {
-          "1": "2026/08/10"
-        }
-      },
-      {
-        "id": "log_1784961924176_4lnpyt7",
-        "date": "2026/07/25",
-        "type": "review",
-        "text": "토지, 건물 가격구성비 구하기!! [[거래사례비교법]]",
-        "reviewCycle": 1,
-        "reviewCount": 1,
-        "reviewCompletedAt": {
-          "1": "2026/08/14"
-        }
-      },
-      {
-        "date": "2026/07/21",
-        "type": "review",
-        "text": "대상: 창고 등(물류창고로서 유사성이 있는 거래사례 선택)",
-        "id": "log_1784906683142_4qy0ike",
-        "reviewCycle": 3,
-        "reviewCount": 3,
-        "reviewCompletedAt": {
-          "1": "2026/08/10",
-          "2": "2026/08/10",
-          "3": "2026/08/10"
-        }
-      },
-      {
-        "date": "2026/07/21",
-        "type": "review",
-        "text": "거래대금현가 [[감정평가기초]]",
-        "id": "log_1784906683142_xdnqv72",
-        "reviewCycle": 1,
-        "reviewCount": 1,
-        "reviewCompletedAt": {
-          "1": "2026/08/14"
-        }
-      },
-      {
-        "date": "2026/07/21",
-        "type": "review",
-        "text": "개별요인비교치: *잔가율은 포함되지 않았음* -> 잔가율(1-감가상각)",
-        "id": "log_1784906683142_zwscdga",
-        "reviewCycle": 1,
-        "reviewCount": 1,
-        "reviewCompletedAt": {
-          "1": "2026/08/14"
-        }
-      }
-    ],
+    "logs": [],
     "reinforced": false,
     "reviewCount": 2,
     "reviewCompletedAt": {
@@ -121,41 +26,7 @@
   },
   "a2a": {
     "acquired": true,
-    "logs": [
-      {
-        "id": "log_1786945798279_fqnnjsj",
-        "date": "2026/08/17",
-        "type": "study",
-        "text": "완공일과 사용승인일 격차가1년이상 날경우?",
-        "backText": "평가목적으로 고려하여 완공일로 기준하여 잔존내용연수 고려.\n(실제 경제적 효용이 시작된 시기인 완공일 기준)"
-      },
-      {
-        "date": "2026/07/21",
-        "type": "review",
-        "text": "I. 원가법(15조)\n\nII. 재조달원가\n    - (급수별 표준단가 + 부대설비보정단가) / 연면적\n    - 층별로 단가 구함\nII. 재조달원가 산정 \n    1. 직접법 2. 간접법 (시점, 개별) 3. 결정(적용단가)\n    *'간접법에 의한 재조달원가로 결정하되 실제 공사비를 통한 합리성이 안정됨'*\n\nIII. 적산가액 (감가수정-> 적용단가 x 면적)",
-        "id": "log_1784906683142_1jl9cg9",
-        "reviewCycle": 3,
-        "reviewCount": 3,
-        "reviewCompletedAt": {
-          "1": "2026/08/14",
-          "2": "2026/08/14",
-          "3": "2026/08/14"
-        }
-      },
-      {
-        "date": "2026/07/22",
-        "type": "review",
-        "text": "### 감가수정\n- 최종잔가율에 따른 계산\n- 주체/부대부분 나눠진 경우: 비율로 가중함\n- 정률법: 최종잔가율^(경과연수/내용연수)\n- 내용연수 조정: 증축 경과연수/(기존 잔존내용연수+증축경과연수) 만큼 감가됨 \n  - **증축부분 구조 다르더라도 기존부분 기준!!**\n  -  다만 : '기존부분 잔존연수 + 증축부분 경과연수가 해당부분의 경제적 내용연수보다 크므로 해당 부분의 경제적 내용연수를 기준으로 함'\n- 유효연수법(경과연수 초과시 관찰감가)\n- 시장추출법\n- 분해법 (기능적, 경제적, 물리적 감가)",
-        "id": "log_1784906683142_zj95um7",
-        "reviewCycle": 3,
-        "reviewCount": 3,
-        "reviewCompletedAt": {
-          "1": "2026/07/28",
-          "2": "2026/08/14",
-          "3": "2026/08/14"
-        }
-      }
-    ],
+    "logs": [],
     "reinforced": false,
     "reviewDismissed": {},
     "reviewCount": 1,
@@ -165,66 +36,7 @@
   },
   "a3a": {
     "acquired": true,
-    "logs": [
-      {
-        "id": "log_1785067834290_sy7k2vj",
-        "date": "2026/07/26",
-        "type": "study",
-        "text": "## [[복합부동산 및 집합건물]]\n1. NOI\n2. 건물귀속순수익\n    - 상각전R = 상각후R + 1/50(감가율)\n    - 감가상각비 경비포함 → 상각후R\n    - 감가상각비 경비미포함 → 상각전R → 건물귀속상각전순수익\n\n3. (사례)토지귀속순수익(@)\n4. 대상토지 수익가액(@)",
-        "reviewCount": 2,
-        "reviewCompletedAt": {
-          "1": "2026/07/24",
-          "2": "2026/08/14"
-        },
-        "reviewCycle": 2
-      },
-      {
-        "id": "log_1784991755956_bcqm2u8",
-        "date": "2026/07/26",
-        "type": "study",
-        "text": "환원이율 시장추출법에서 거래사례 시장추출률 비교치:\n    환원이율에 역수로 비교!",
-        "reviewCycle": 1,
-        "reviewCount": 1,
-        "reviewCompletedAt": {
-          "1": "2026/08/14"
-        }
-      },
-      {
-        "id": "log_1784990563719_7l6e5d1",
-        "date": "2026/07/25",
-        "type": "study",
-        "text": "### 저당지분환원법 (엘우드법)\n- y - L/v * [y + p*SFF(y) - MC) - SFF*변동분\n    - y:자기자본수익률, p:상환비율\n- 원금만기 일시상환: p=0",
-        "reviewCycle": 1,
-        "reviewCount": 1,
-        "reviewCompletedAt": {
-          "1": "2026/08/14"
-        }
-      },
-      {
-        "date": "2026/07/21",
-        "type": "review",
-        "text": "- 관리비 및 임대비 기준: 전용면적\n- 표준적 임대료 도표 정리(월 기준)\n\n- 임대차 현황 사정개입을 고려하여 인근의 표준적 임대차 현황 기준\n- 본건의 경우 공실 및 사정이 개입된 임대료로 판단되는 바 객관적인 임대사례를 기준으로 수익을 비교하여 결정함\n- 임대사례를 통한 표준적 임대료를 기준\n- 사정 x 시점 x 지역 x 개별 -> 본건임대료 결정\n\n- 감정평가실무기준: 시장추출법으로 결정하되 다른 방법에 의하여 그 적정성이 인정되는 것으로 판단",
-        "id": "log_1784906683142_wga5s6t",
-        "reviewCycle": 1,
-        "reviewCount": 1,
-        "reviewCompletedAt": {
-          "1": "2026/08/14"
-        }
-      },
-      {
-        "date": "2026/07/21",
-        "type": "review",
-        "text": "**환원이율 결정** (보통 소수 한자리)\n1. 시장추출법 : 유형(토지건물, 집합건물)과 이용상황, 잔존연수 유사\n\n2. 물리적 투자결합법 : 토지 건물 나눠서\n\n3. 금융적 투자결합법 : 자기자본환원이율 및 이자율을 각각 자기자본비율, 부채비율로 가중함.\n(Kazdin 방식: 이자율 대신 저당상수)\n\n4. 저당지분환원법 : 자기자본수익률 - L/v * [y + 상환비율p x SFF(y%) - MC) - SFF변동분\n\n5. 부채감당법 :  DCR x LTV x MC\n\n6. 소득수익률기준 :  [소득수익률 1년치 곱 - 1]\n\n7. 요소구성법 (다 합)",
-        "id": "log_1784906683142_57e9cbk",
-        "reviewCycle": 3,
-        "reviewCount": 3,
-        "reviewCompletedAt": {
-          "1": "2026/08/14",
-          "2": "2026/08/14",
-          "3": "2026/08/14"
-        }
-      }
-    ],
+    "logs": [],
     "reinforced": false,
     "reviewCount": 1,
     "reviewCompletedAt": {
@@ -233,54 +45,7 @@
   },
   "t1b": {
     "acquired": true,
-    "logs": [
-      {
-        "date": "2026/07/21",
-        "type": "review",
-        "text": "*구분건물 감정평가: 감칙 16조 거래사례비교법에 의하되, 근린생활시설의 경우 수익환원법에 의한 합리성을 검토하며 다세대주택은 합리성 검토를 생략함. *",
-        "id": "log_1784906683142_u5djv69",
-        "reviewCycle": 3,
-        "reviewCount": 3,
-        "reviewCompletedAt": {
-          "1": "2026/07/26",
-          "2": "2026/08/09",
-          "3": "2026/08/10"
-        }
-      },
-      {
-        "date": "2026/07/21",
-        "type": "review",
-        "text": "- 거래사례선택: 용도유사, 본건과 같은 타입 \n- **근생으로 층** 유사 및 비교가능성 높음\n- 다세대주택으로 **연식** 등 요인 유사",
-        "id": "log_1784906683142_lfq0dyk",
-        "reviewCycle": 1,
-        "reviewCount": 1,
-        "reviewCompletedAt": {
-          "1": "2026/08/14"
-        }
-      },
-      {
-        "date": "2026/07/21",
-        "type": "review",
-        "text": "시점수정치: \n- 주택: 매매가격지수 \n- 상가: 자본수익률",
-        "id": "log_1784906683142_7mjg55j",
-        "reviewCycle": 1,
-        "reviewCount": 1,
-        "reviewCompletedAt": {
-          "1": "2026/08/14"
-        }
-      },
-      {
-        "date": "2026/07/21",
-        "type": "review",
-        "text": "가치형성요인비교치: \n- 단지 외부(토지) x 내부(연식) x (층x호)",
-        "id": "log_1784906683142_uckzrrt",
-        "reviewCycle": 1,
-        "reviewCount": 1,
-        "reviewCompletedAt": {
-          "1": "2026/08/14"
-        }
-      }
-    ],
+    "logs": [],
     "reinforced": true,
     "reviewCount": 3,
     "reviewCompletedAt": {
@@ -291,33 +56,7 @@
   },
   "t1": {
     "acquired": true,
-    "logs": [
-      {
-        "id": "log_1786715708104_7kqgekk",
-        "date": "2026/08/14",
-        "type": "study",
-        "text": "감칙 7조에 의해 개별평가액 기준으로 하되 다른방법에 의한 시산가액에 의하여 그 합리성이 지지되는 것으로 판단한다. (p.190)\n\n\n업무시설(대형오피스), 및 숙박시설, 상업시설, 물류창고 등 건물의 단위며넉당 시장가치 수준이 존재하는 경우 활용. 이용상황 등이 유사하여 본건과 대체가능성이 있는 거래사례 선택.",
-        "reviewCount": 3,
-        "reviewCompletedAt": {
-          "1": "2026/07/25",
-          "2": "2026/08/09",
-          "3": "2026/08/10"
-        }
-      },
-      {
-        "date": "2026/07/21",
-        "type": "review",
-        "text": "### 운영경비 \n- 손해보험료(연간소멸성):\n    - 500만 -  500만 x 0.1 x 3%이자 내가 x SFF(5년안분)\n- 손해보험료(납입금액 30% 환급):\n    - 1백xMC - 1백x0.3xSFF\n    - 1000Q48\n- 제외항목: 취득세, 보존등기세, 임차인납부, 감가상각비",
-        "id": "log_1784906683142_u49tlg7",
-        "reviewCycle": 3,
-        "reviewCount": 3,
-        "reviewCompletedAt": {
-          "1": "2026/07/25",
-          "2": "2026/08/09",
-          "3": "2026/08/10"
-        }
-      }
-    ],
+    "logs": [],
     "reinforced": true,
     "reviewCount": 3,
     "reviewCompletedAt": {
@@ -328,66 +67,7 @@
   },
   "a3b": {
     "acquired": true,
-    "logs": [
-      {
-        "id": "log_1786350284918_0ah4oo4",
-        "date": "2026/08/10",
-        "type": "study",
-        "text": "집합상가 투자수익률: 임대료형성요인비교치",
-        "reviewCount": 3,
-        "reviewCompletedAt": {
-          "1": "2026/07/26",
-          "2": "2026/08/01",
-          "3": "2026/08/10"
-        }
-      },
-      {
-        "date": "2026/07/21",
-        "type": "review",
-        "text": "*감칙 22조에 따라 평가하며 **시장, 실질, 신규임대료 기준 및** 임차인의** 사용수익에 따른 부가사용료, 부가가치세, 공익비**는 제외한다.*",
-        "id": "log_1784906683142_qwhaem4",
-        "reviewCycle": 3,
-        "reviewCount": 3,
-        "reviewCompletedAt": {
-          "1": "2026/07/26",
-          "2": "2026/08/01",
-          "3": "2026/08/10"
-        }
-      },
-      {
-        "date": "2026/07/21",
-        "type": "review",
-        "text": "임대사례비교법\n1. 임대사례선택\n2. 임대사례 실질임대료(전유면적당)\n3. 시점수정치 \n4. 개별요인비교치(층별효용비 -> 내부)\n5. 비준임대료(임대료결정)",
-        "id": "log_1784906683142_yg5z4v7",
-        "reviewCycle": 1,
-        "reviewCount": 1,
-        "reviewCompletedAt": {
-          "1": "2026/08/14"
-        }
-      },
-      {
-        "date": "2026/07/21",
-        "type": "review",
-        "text": "배제사유: 개별적 유사성 결여, 표준적 임대차 아님 등",
-        "id": "log_1784906683142_go2d1so",
-        "reviewCycle": 1,
-        "reviewCount": 1,
-        "reviewCompletedAt": {
-          "1": "2026/08/14"
-        }
-      },
-      {
-        "date": "2026/07/21",
-        "type": "review",
-        "text": "보증금 설정시 월임대료: (임대료 - 보증금월세전환)/12",
-        "id": "log_1784906683142_pz4u2ni",
-        "reviewCycle": 1,
-        "reviewCount": 1,
-        "reviewCompletedAt": {
-          "1": "2026/08/14"
-        }
-      }
-    ],
+    "logs": [],
     "reinforced": true,
     "reviewCount": 3,
     "reviewCompletedAt": {
@@ -398,44 +78,7 @@
   },
   "a3": {
     "acquired": true,
-    "logs": [
-      {
-        "id": "log_1786350198487_n5a4qpu",
-        "date": "2026/08/10",
-        "type": "study",
-        "text": "각 물건의 투자수익률(Q18)\n- 상대적으로 자본수익률이 낮고 소득수익률이 높다는 것은?\n- 오래된 건물에 위치한 B는 상대적으로 자산가치 상승을 기대하기 어려운 것으로 해석된다",
-        "reviewCount": 3,
-        "reviewCompletedAt": {
-          "1": "2026/07/26",
-          "2": "2026/08/01",
-          "3": "2026/08/10"
-        }
-      },
-      {
-        "date": "2026/07/21",
-        "type": "review",
-        "text": "감정평가액결정 등\n1. 임대료등 감정평가액 결정\n2. 보증금 및 월임대료 배분",
-        "id": "log_1784906683142_rgkf5u0",
-        "reviewCycle": 3,
-        "reviewCount": 3,
-        "reviewCompletedAt": {
-          "1": "2026/07/26",
-          "2": "2026/08/01",
-          "3": "2026/08/10"
-        }
-      },
-      {
-        "date": "2026/07/21",
-        "type": "review",
-        "text": "사례: 상업용으로서 본건과 같이 도로 전면 위치",
-        "id": "log_1784906683142_qb4kc77",
-        "reviewCycle": 1,
-        "reviewCount": 1,
-        "reviewCompletedAt": {
-          "1": "2026/08/10"
-        }
-      }
-    ],
+    "logs": [],
     "reinforced": true,
     "reviewCount": 3,
     "reviewCompletedAt": {
@@ -446,42 +89,7 @@
   },
   "t2a": {
     "acquired": true,
-    "logs": [
-      {
-        "id": "log_1785584600156_unv3u91",
-        "date": "2026/08/01",
-        "type": "study",
-        "text": "지상건축물로 인한 영향이 없는 사례",
-        "reviewCount": 2,
-        "reviewCompletedAt": {
-          "1": "2026/07/27",
-          "2": "2026/08/14"
-        },
-        "reviewCycle": 2
-      },
-      {
-        "id": "log_1785584521581_kygxzw6",
-        "date": "2026/08/01",
-        "type": "study",
-        "text": "공법상 제한 유사한 표준지 선정",
-        "reviewCycle": 1,
-        "reviewCount": 1,
-        "reviewCompletedAt": {
-          "1": "2026/08/14"
-        }
-      },
-      {
-        "date": "2026/07/21",
-        "type": "review",
-        "text": "## Q9-2\nI. 건축물 없는 상태 평가 \n\nII. 지상권가액 \n  1. 귀속임대료\n    1)시장임대료\n    2)계약임대료\n    3)귀속임대료\n  2. 지상권가치\n\nIII. 지상권설정시 토지가액 = 토지가격 - 지상권가치",
-        "id": "log_1784906683142_5mblygz",
-        "reviewCycle": 1,
-        "reviewCount": 1,
-        "reviewCompletedAt": {
-          "1": "2026/08/14"
-        }
-      }
-    ],
+    "logs": [],
     "reinforced": true,
     "reviewCount": 1,
     "reviewCompletedAt": {
@@ -490,31 +98,7 @@
   },
   "t2b": {
     "acquired": true,
-    "logs": [
-      {
-        "date": "2026/07/21",
-        "type": "review",
-        "text": "9-1. 미저촉부분 단가 따로 구하기 \n(도표: 저촉부분 평가액, 미저촉부분 평가액)",
-        "id": "log_1784906683142_064nozg",
-        "reviewCycle": 2,
-        "reviewCount": 2,
-        "reviewCompletedAt": {
-          "1": "2026/07/27",
-          "2": "2026/08/09"
-        }
-      },
-      {
-        "date": "2026/07/21",
-        "type": "review",
-        "text": "10. 건물의 감정평가액(배분법)\n(1) 미저촉부분은 보수비 고려 \n(2) 저촉부분은 일부라도 전체 면적 적용",
-        "id": "log_1784906683142_te9zzpw",
-        "reviewCycle": 1,
-        "reviewCount": 1,
-        "reviewCompletedAt": {
-          "1": "2026/08/15"
-        }
-      }
-    ],
+    "logs": [],
     "reinforced": false,
     "reviewCount": 2,
     "reviewCompletedAt": {
@@ -524,21 +108,7 @@
   },
   "t2": {
     "acquired": true,
-    "logs": [
-      {
-        "date": "2026/07/21",
-        "type": "review",
-        "text": "골프장 평가 - '본건이 표준지로서'\n- 조성원가법 - 홀 수만큼 + 건물\n- 거래사례비교법: 본건과 유사한 대중제 골프장으로서 적당한 (홀당 40억)\n- 수익환원법\n- 감정평가액: 감칙 7조에 의해 감정평가액 합계로 결정",
-        "id": "log_1784906683142_iihc4lq",
-        "reviewCycle": 3,
-        "reviewCount": 3,
-        "reviewCompletedAt": {
-          "1": "2026/07/25",
-          "2": "2026/08/01",
-          "3": "2026/08/10"
-        }
-      }
-    ],
+    "logs": [],
     "reinforced": false,
     "reviewCount": 3,
     "reviewCompletedAt": {
@@ -549,76 +119,7 @@
   },
   "t3a": {
     "acquired": true,
-    "logs": [
-      {
-        "id": "log_1786459088016_tii08n6",
-        "date": "2026/08/11",
-        "type": "study",
-        "text": "### 기업가치결정\n- 원가법에 의한 방식은 계속기업의 전제 및 무형자산의 반영이 미흡할 수 있으며\n- 거래사례비교법에 의한 방식은 사례기업의 통제권 프리미엄 반영야부 및 상장여부가 다른기업의 자료를 활용한 점, 개별적인 특성 반영의 한계가 있는 점이 문제된다. \n- 따라서 감정평가에 관한 규칙 제24조에 의한 주된 평가방법인 수익환원법에 의한 가액으로 최종 결정한다.",
-        "reviewCount": 2,
-        "reviewCompletedAt": {
-          "1": "2026/07/26",
-          "2": "2026/08/01"
-        }
-      },
-      {
-        "id": "log_1786458979479_w9gmzdg",
-        "date": "2026/08/11",
-        "type": "study",
-        "text": "거래사례비교법에 의한 평가액:\n(1) 유사기업 사례를 기준으로 PER, PBR 추정하여 대상기업에 적용하되, 상장기업의 주가는 유동성 프리미엄을 보정하여 활용한다. \n(2) 유사기업 PER, PBR\n(3) 해당기업 주식가치\n(4) 기업가치 평가액",
-        "reviewCycle": 1,
-        "reviewCount": 1,
-        "reviewCompletedAt": {
-          "1": "2026/08/16"
-        }
-      },
-      {
-        "id": "log_1786458886272_n576lpa",
-        "date": "2026/08/11",
-        "type": "study",
-        "text": "영업이익의 추정\n- 2024년 영업자료는 일시적인 시장상황의 변동으로 인한 영향이 있으므로 이를 배제하고 추정한다.",
-        "reviewCycle": 1,
-        "reviewCount": 1,
-        "reviewCompletedAt": {
-          "1": "2026/08/16"
-        }
-      },
-      {
-        "date": "2026/07/21",
-        "type": "review",
-        "text": "I. 제24조 수익환원법\nII. 1차년도 FCFF 산정 1. 주된가정 2. FCFF결정\nIII. WACC 산정 1. 자기자본 2. 타인자본 3. 가중평균\nIV. 주(A)의 기업가치 \n1. 고속성장기(x K계수)\n2. 안정성장기(6년차매출액 / WACC-성장률)x현가\n3. 기업가치결정",
-        "id": "log_1784906683142_avo7m3m",
-        "reviewCycle": 2,
-        "reviewCount": 2,
-        "reviewCompletedAt": {
-          "1": "2026/07/26",
-          "2": "2026/08/01"
-        }
-      },
-      {
-        "date": "2026/07/21",
-        "type": "review",
-        "text": "부채비율 = 부채/자본 \n부채구성비율 = 부채/부채+자본",
-        "id": "log_1784906683142_cnt365i",
-        "reviewCycle": 1,
-        "reviewCount": 1,
-        "reviewCompletedAt": {
-          "1": "2026/08/11"
-        }
-      },
-      {
-        "date": "2026/07/21",
-        "type": "review",
-        "text": "베타계수추정 = 무부채베타계수 x [1+ (1-t)x D/E]\n무부채베타계수 = 유사기업 / [1+ (1-t)x D/E]",
-        "id": "log_1784906683142_la2f0ym",
-        "reviewCycle": 2,
-        "reviewCount": 2,
-        "reviewCompletedAt": {
-          "1": "2026/08/11",
-          "2": "2026/08/11"
-        }
-      }
-    ],
+    "logs": [],
     "reinforced": true,
     "reviewCount": 2,
     "reviewCompletedAt": {
@@ -804,30 +305,7 @@
   },
   "t2c": {
     "acquired": true,
-    "logs": [
-      {
-        "date": "2026/07/21",
-        "type": "review",
-        "text": "1. 처리방침 : 영구적인 시설물이므로 토지가액x입체이용저해율로 결정\n2. 토지의 평가액\n\n3. 입체이용저해율 산정\n  1)건물등이용저해율; 최유효층수__ 저층시가지 해당\n  -저해층수, 건물 등 이용저해율 결정\n\n  2)지하이용저해율\n  토피심도:\n  저층시가지한계심도 __,, 체감률 p는 __\n\n  3)그밖의이용저해율\n  토피 ___이하이므로 상하배분 최고치 적용\n\n  4) 입체이용저해율 결정\n\n4. 구분지상권 설정가치(설정대가)",
-        "id": "log_1784906683142_1ydzgnq",
-        "reviewCycle": 1,
-        "reviewCount": 1,
-        "reviewCompletedAt": {
-          "1": "2026/08/14"
-        }
-      },
-      {
-        "date": "2026/07/21",
-        "type": "review",
-        "text": "III. 구분지상권 설정후 토지 감정평가액\n1. 구분지상권 미설정부분\n2. 구분지상권 설정부분\n3. 소계",
-        "id": "log_1784906683142_rty84fl",
-        "reviewCycle": 1,
-        "reviewCount": 1,
-        "reviewCompletedAt": {
-          "1": "2026/08/14"
-        }
-      }
-    ],
+    "logs": [],
     "reinforced": false,
     "reviewCount": 3,
     "reviewCompletedAt": {
@@ -838,21 +316,7 @@
   },
   "t3": {
     "acquired": true,
-    "logs": [
-      {
-        "date": "2026/07/21",
-        "type": "review",
-        "text": "비상장주식 감정평가\nI. 감칙 24조 순자산가치법에 의해 평가\n1.총자산가치산정\n  - 재평가내역에 대한 감정평가\n  - 수정재무제표; 구분/조정전/조정내역/조정후\n2. 순자산가치산정 (부채가액, 순자산)\n3. 감정평가액",
-        "id": "log_1784906683142_65cxgkd",
-        "reviewCycle": 3,
-        "reviewCount": 3,
-        "reviewCompletedAt": {
-          "1": "2026/08/09",
-          "2": "2026/08/09",
-          "3": "2026/08/11"
-        }
-      }
-    ],
+    "logs": [],
     "reinforced": false,
     "reviewCount": 2,
     "reviewCompletedAt": {
@@ -862,31 +326,7 @@
   },
   "t3d": {
     "acquired": true,
-    "logs": [
-      {
-        "date": "2026/07/21",
-        "type": "review",
-        "text": "1. 감칙23조 수익환원법\n2. 영업관련 기업가치 (FCFF, 할인률, 영업관련기업가치)\n3. 투하자본\n4. 영업권가치",
-        "id": "log_1784906683142_v9m1is1",
-        "reviewCycle": 2,
-        "reviewCount": 2,
-        "reviewCompletedAt": {
-          "1": "2026/08/09",
-          "2": "2026/08/09"
-        }
-      },
-      {
-        "date": "2026/07/21",
-        "type": "review",
-        "text": "할인률 계산시 영업과 무관한 부채로 자기자본 나눔.",
-        "id": "log_1784906683142_h4my4at",
-        "reviewCycle": 1,
-        "reviewCount": 1,
-        "reviewCompletedAt": {
-          "1": "2026/08/16"
-        }
-      }
-    ],
+    "logs": [],
     "reinforced": false,
     "reviewCount": 2,
     "reviewCompletedAt": {
@@ -896,42 +336,7 @@
   },
   "p1a2": {
     "acquired": true,
-    "logs": [
-      {
-        "date": "2026/07/21",
-        "type": "review",
-        "text": "대안선정: 불허용도의 대안, 허용적률 이상으로 선정할 수 없다.",
-        "id": "log_1784906683142_pjs27do",
-        "reviewCycle": 2,
-        "reviewCount": 2,
-        "reviewCompletedAt": {
-          "1": "2026/08/09",
-          "2": "2026/08/09"
-        }
-      },
-      {
-        "date": "2026/07/21",
-        "type": "review",
-        "text": "*대상의 적정매도가격은 대상토지의 최유효이용을 상정한 가격인 나지가격에서 건부감가인 대상건물의 철거비를 공제한 가격이며,...*",
-        "id": "log_1784906683142_wzcl2ma",
-        "reviewCycle": 1,
-        "reviewCount": 1,
-        "reviewCompletedAt": {
-          "1": "2026/08/15"
-        }
-      },
-      {
-        "date": "2026/07/21",
-        "type": "review",
-        "text": "개발대안: (가격 - 관리비)/환원이율? - 건물공사비용",
-        "id": "log_1784906683142_e4wtheh",
-        "reviewCycle": 1,
-        "reviewCount": 1,
-        "reviewCompletedAt": {
-          "1": "2026/08/15"
-        }
-      }
-    ],
+    "logs": [],
     "reinforced": false,
     "reviewCount": 2,
     "reviewCompletedAt": {
@@ -951,19 +356,7 @@
   },
   "a2": {
     "acquired": true,
-    "logs": [
-      {
-        "date": "2026/07/23",
-        "type": "review",
-        "text": "감정평가에 관한 규칙 15조에 의하여 원가법에 의하되",
-        "id": "log_1784906683142_87mpaxq",
-        "reviewCycle": 1,
-        "reviewCount": 1,
-        "reviewCompletedAt": {
-          "1": "2026/08/15"
-        }
-      }
-    ],
+    "logs": [],
     "reinforced": false,
     "reviewCount": 1,
     "reviewCompletedAt": {
@@ -972,42 +365,7 @@
   },
   "a1b": {
     "acquired": true,
-    "logs": [
-      {
-        "date": "2026/07/24",
-        "type": "review",
-        "text": "- 본건과 같은 이행단계에 있는 제시된 거래사례를 선정함\n- 지상건물은 노후화되어 가치가 미미한바 배분법을 적용하지 않는다\n- 품등조건(건물 가격 구성비), 사용승인일 등 가치형성요인이 비슷한 사례 선정 [[토지건물 일괄평가]]",
-        "id": "log_1784906683142_ofb9224",
-        "reviewCycle": 2,
-        "reviewCount": 2,
-        "reviewCompletedAt": {
-          "1": "2026/07/27",
-          "2": "2026/08/10"
-        }
-      },
-      {
-        "date": "2026/07/23",
-        "type": "review",
-        "text": "- 생산자물가지수(재조달원가): 15일 전이면 전달, 15일 후면 해당달\n- 건설비공사지수/건축비지수: 기준시점이 속하는 월의 건설비지수로 비교하되, 해당월의 지수가 발표되지 않은 경우에는 전월(또는 전전월)",
-        "id": "log_1784906683142_udfl8vx",
-        "reviewCycle": 1,
-        "reviewCount": 1,
-        "reviewCompletedAt": {
-          "1": "2026/08/15"
-        }
-      },
-      {
-        "date": "2026/07/23",
-        "type": "review",
-        "text": "**배분법**\n거래사례토지단가(=토지배분단가)\n1. 현금등가(금융보정)\n2. 거래사례토지단가",
-        "id": "log_1784906683142_r4ebs71",
-        "reviewCycle": 1,
-        "reviewCount": 1,
-        "reviewCompletedAt": {
-          "1": "2026/08/15"
-        }
-      }
-    ],
+    "logs": [],
     "reinforced": false,
     "reviewCount": 1,
     "reviewCompletedAt": {
@@ -1016,53 +374,7 @@
   },
   "f1": {
     "acquired": true,
-    "logs": [
-      {
-        "date": "2026/07/24",
-        "type": "review",
-        "text": "**획지**: 법률적인 개념으로 소유권 범위를 나타내는 등록 단위\n**필지**: 가격수준이 비슷한 일단의 토지를 구분하는 평가상 단위",
-        "id": "log_1784906683142_ll1nunq",
-        "reviewCycle": 2,
-        "reviewCount": 2,
-        "reviewCompletedAt": {
-          "1": "2026/07/27",
-          "2": "2026/08/14"
-        }
-      },
-      {
-        "date": "2026/07/22",
-        "type": "review",
-        "text": "도로의 폭 기준",
-        "id": "log_1784906683142_nz4u9ix",
-        "reviewCycle": 1,
-        "reviewCount": 1,
-        "reviewCompletedAt": {
-          "1": "2026/08/14"
-        }
-      },
-      {
-        "date": "2026/07/22",
-        "type": "review",
-        "text": "토지의 형상: 가각 정리부분 고려 X",
-        "id": "log_1784906683142_owsh77p",
-        "reviewCycle": 1,
-        "reviewCount": 1,
-        "reviewCompletedAt": {
-          "1": "2026/08/14"
-        }
-      },
-      {
-        "date": "2026/07/23",
-        "type": "review",
-        "text": "합필가치 사정보정치\n1) 증분가치\n2) A토지 200번지 배분되는 증분가치\n3) 사정보정치",
-        "id": "log_1784906683142_14fsub8",
-        "reviewCycle": 1,
-        "reviewCount": 1,
-        "reviewCompletedAt": {
-          "1": "2026/08/14"
-        }
-      }
-    ],
+    "logs": [],
     "reinforced": false,
     "reviewDismissed": {},
     "reviewCount": 1,
@@ -1072,42 +384,7 @@
   },
   "a1a": {
     "acquired": true,
-    "logs": [
-      {
-        "id": "log_1785158900647_kqm3xg7",
-        "date": "2026/07/27",
-        "type": "study",
-        "text": "- 그밖의요인비교치: 상기와 같이 산출된 바 인근지가수준을 참작하여 40% 증액보정함(1.40)",
-        "reviewCount": 2,
-        "reviewCompletedAt": {
-          "1": "2026/07/27",
-          "2": "2026/08/15"
-        },
-        "reviewCycle": 2
-      },
-      {
-        "date": "2026/07/24",
-        "type": "review",
-        "text": "- 허가 후 토목공사 완료되어 **현황 기준하여** 공장용지를 기준함. \n- **용도상 불가분**으로 판단, 일단지로 평가함.\n- 본건의 최유효이용은 상업 및 업무용이며, 준공업지역으로서 노성상가지대로 지리적으로 인접한 표준지 A를 선정함",
-        "id": "log_1784906683142_r5t055t",
-        "reviewCycle": 1,
-        "reviewCount": 1,
-        "reviewCompletedAt": {
-          "1": "2026/08/15"
-        }
-      },
-      {
-        "date": "2026/07/23",
-        "type": "review",
-        "text": "개별요인비교치:\n1)가로조건(도로상태 - 각지 포함)\n2)접근조건(시가지와의거리)\n3)환경조건\n4)획지조건(형상, 지세)\n5)행정조건(도로저촉)\n6)기타조건",
-        "id": "log_1784906683142_f23rxle",
-        "reviewCycle": 1,
-        "reviewCount": 1,
-        "reviewCompletedAt": {
-          "1": "2026/08/15"
-        }
-      }
-    ],
+    "logs": [],
     "reinforced": false,
     "reviewCount": 1,
     "reviewCompletedAt": {
@@ -1116,104 +393,13 @@
   },
   "a2b": {
     "acquired": true,
-    "logs": [
-      {
-        "id": "log_1785117795367_i48cg74",
-        "date": "2026/07/27",
-        "type": "study",
-        "text": "### 1000Q52\nI. 현재 공장으로서의 전용이 진행중인 토지로서 공장용지** 조성을 완료하고 건축허가를 득한 상황**으로서 **공부상 지목에도 불구하고 현황**인 공장용지를 기준으로 평가함. \n\n1. 준공시점 토지가격\n소지매입가 적정성 검토\n준공시점 소지가격(투하자본수익률)\n2. 조성비용 등\n3. 준공시점 토지가액\n4. 적산가액(기준시점)\n\nV. 수익가읙의 경우 공장이 **완료된 이후의 수익을 기준**으로 산출했다는 점, 지상의 건물이 있는 점을 고려한** 가설적 평가**라는 점 등으로 인하여 공장건물 신축이후의 ** 기대적인 이익**이 반영되어 다소 높게 산출된 것으로 판단된다.",
-        "reviewCycle": 1,
-        "reviewCount": 1,
-        "reviewCompletedAt": {
-          "1": "2026/08/16"
-        }
-      },
-      {
-        "date": "2026/07/24",
-        "type": "review",
-        "text": "## 조성원가법\nI. 공부상 지목에도 불구하고 현황 기준 대지로 평가함\nII. 조성완료시 토지가치(조성완료시점)\n1. 소지가격(매입가격)\n2. 조성비용\n  (1) 토지가치에 화체되는 조성비 \n      1)조성비, 지질조사 및 측량비\n      2)공통귀속분 중 토지가치 화체되는 가액\n      3)토지가치 화체되는 조성비\n  (2)조성비용의 현재가치\n**3. 조성완료시점의 토지가치(유효택지기준 단가, ~조성완료)**\n  - 기부체납 제외\nIII. 기준시점의 토지가치(성숙도수정 - 자본수익률, 지가변동률)\nIV. 시산가액 조정\n- 시적격차 및 제한된 거래로 인해 시장가치와 괴리\n- 적산가액은 공급자중심의 공급",
-        "id": "log_1784906683142_pcfz6c9",
-        "reviewCycle": 1,
-        "reviewCount": 1,
-        "reviewCompletedAt": {
-          "1": "2026/08/15"
-        }
-      },
-      {
-        "date": "2026/07/24",
-        "type": "review",
-        "text": "본건은 매립지로서 거래사례 및 수익사례의 수집이 어려우므로 조성원가법을 활용하여 평가액을 결정함. (방매사례는 거래가 활발히 이뤄지지 않는바 공급자 중심의 가격으로 판단되어 고려치 아니함) #매립지",
-        "id": "log_1784906683142_m4nfmua",
-        "reviewCycle": 1,
-        "reviewCount": 1,
-        "reviewCompletedAt": {
-          "1": "2026/08/15"
-        }
-      }
-    ],
+    "logs": [],
     "reinforced": false,
     "reviewCount": 0
   },
   "a2c": {
     "acquired": true,
-    "logs": [
-      {
-        "date": "2026/07/24",
-        "type": "review",
-        "text": "## 1000점 Q24 개발법 등등\nI. 택지후보지 -> 개발법에 의해 산정\n- 예정부동산의 가액에서 건축비를 차감하여 토지의 가치를 평가\n \n1. 기준시점 분양가격 산정\n  (1) 분양사례 택지 거래시점 기준으로 분양가격 산정함\n  (2) 준공대상 분양가격\n* 각 층별 분양면적: 지하실포함 연면적 / 층수\n\n2. 개발법에 의한 감정평가액\n  (1)분양획지수\n  (2)총분양가격\n  (3)조성비용 (개발비용 현가)\n\n* 면적, 분양획지수, 시점수정치",
-        "id": "log_1784906683142_xg5dqv5",
-        "reviewCycle": 1,
-        "reviewCount": 1,
-        "reviewCompletedAt": {
-          "1": "2026/08/16"
-        }
-      },
-      {
-        "id": "log_1785160575793_hd2sq4o",
-        "date": "2026/07/27",
-        "type": "study",
-        "text": "- 준공후 부동산가치: **순수익/(무위험률+위험가산율)**\n- 1000Q58",
-        "reviewCycle": 2,
-        "reviewCount": 2,
-        "reviewCompletedAt": {
-          "1": "2026/08/10",
-          "2": "2026/08/10"
-        }
-      },
-      {
-        "id": "log_1785132458670_lyo4faz",
-        "date": "2026/07/27",
-        "type": "study",
-        "text": "- 가설적 평가로서 **사업의 위험 및 향후의 기대이익이 **정확하게 반영되지 않을 수 있어 시산가액 간의 괴리가 발생하는 것으로 판단(가설적 평가)",
-        "reviewCycle": 1,
-        "reviewCount": 1,
-        "reviewCompletedAt": {
-          "1": "2026/08/16"
-        }
-      },
-      {
-        "id": "log_1785074412332_ejhnzvd",
-        "date": "2026/07/26",
-        "type": "study",
-        "text": "### 1000Q51 굿\nI. 본건은 최유효이용에 미달되는 토지의 평가로 지상에 철거대상의 노후한 건물이 소재한다. 이에 건물을 철거함이 타당하다고 판단되는 바 나지상태 토지의 감정평가액에서 철거비를 차감하여 평가한다. \nV. 나지 상정 감정평가액 : ...따라서 철거후 토지가치는",
-        "reviewCycle": 1,
-        "reviewCount": 1,
-        "reviewCompletedAt": {
-          "1": "2026/08/16"
-        }
-      },
-      {
-        "id": "log_1784908260823_g5owri8",
-        "date": "2026/07/25",
-        "type": "review",
-        "text": "I. 매입가 타당성 검토(1000점Q27)\nII. 감정평가액\n    1. 수정된 설계내역(대지면적, 건축면적, **건축연면적**)\n    2. 토지가액 산정 (총 분양수입 현가 - 총비용 현가)",
-        "reviewCycle": 1,
-        "reviewCount": 1,
-        "reviewCompletedAt": {
-          "1": "2026/08/16"
-        }
-      }
-    ],
+    "logs": [],
     "reinforced": false,
     "reviewCount": 2,
     "reviewCompletedAt": {
@@ -1223,85 +409,25 @@
   },
   "a2a1": {
     "acquired": true,
-    "logs": [
-      {
-        "id": "log_1784907892491_xsfp3lk",
-        "date": "2026/07/25",
-        "type": "review",
-        "text": "## 감가수정(분해법) \nI. 기능적 감가: 유행변화로 임대료에 반영\n\n1. 바닥처리결핍(부대설비)\n(1) 치유타당성 \n  - 영업경비 추가소요분 / R \n**(2) 감가수정액(치유비용-신축시설치비)**\n\n2. 방범시스템노후(부대시설)\n(1) 치유타당성\n(2)감가수정액 (치유비용-신축시설치비+재조달원가)\n\n3. 외부창고(과잉.주체부분)\n(1) 치유타당성\n(2) 감가수정액: 치유비용 + 재조달원가\n\n4. 치유불능 → 치유못함에 따른 손실액의 현가\n\nII. 경제적 감가: 외부적 감가\n무한: 순수익 손실 / R * 건물가격구성비\n유한: 순수익 손실 x 연금현가 x 건물가격구성비\n\nIII. 물리적 감가",
-        "reviewCycle": 1,
-        "reviewCount": 1,
-        "reviewCompletedAt": {
-          "1": "2026/08/15"
-        }
-      }
-    ],
+    "logs": [],
     "reinforced": false,
     "reviewCount": 0
   },
   "a1": {
     "acquired": true,
-    "logs": [
-      {
-        "id": "log_1785160635168_pogwcf7",
-        "date": "2026/07/27",
-        "type": "study",
-        "text": "*본건 평가선례는 가격균형 유지라는 취지에 따라 활용하지 아니한다.*",
-        "reviewCycle": 1,
-        "reviewCount": 1,
-        "reviewCompletedAt": {
-          "1": "2026/08/16"
-        }
-      }
-    ],
+    "logs": [],
     "reinforced": false,
     "reviewCount": 0
   },
   "t1a1": {
     "acquired": true,
-    "logs": [
-      {
-        "id": "log_1784975446744_fgn2hc1",
-        "date": "2026/07/25",
-        "type": "study",
-        "text": "II. 물류창고로서 가치형성요인을 고려하며 창고의 종류, 공법상 제한, 창고 규모, 그 밖의 거래정황 등을 고려하여 선택한다. 상온창고, 계획관리지역으로서 가치형성요인이 유사한 사례1을 선택한다. (규모차이, 사정개입, 창고유형 및 규모차이, 공법상 제한)\n\nIII. 요인비교치\n- 시점수정: 물류창고 가격변동과 잘 부합하는 **택배물동량 **기준으로 시점수정한다(지변률은 토지만의 가격변동, 자본수익률은 위치적 이용상황별 차이 있음)\n- 지역요인: 본건__, 사례__로서 비교(토지.건물 포함가격으로 제시되어 토지요인과 별도로 비교)\n- 개별요인 비교치: (1)토지요인 (2)건물요인(잔가율비교) (3)개별요인",
-        "reviewCycle": 1,
-        "reviewCount": 1,
-        "reviewCompletedAt": {
-          "1": "2026/08/16"
-        }
-      }
-    ],
+    "logs": [],
     "reinforced": false,
     "reviewCount": 0
   },
   "a3d": {
     "acquired": true,
-    "logs": [
-      {
-        "id": "log_1785232911270_fkdb80m",
-        "date": "2026/07/28",
-        "type": "study",
-        "text": "- 감정평가에 관한 규칙 제12조에 의하여 적산법을 적용한다.\n- 토지만의 임대사례 포착이 어려운 바 적산법을 기준함.",
-        "reviewCycle": 2,
-        "reviewCount": 2,
-        "reviewCompletedAt": {
-          "1": "2026/08/01",
-          "2": "2026/08/14"
-        }
-      },
-      {
-        "id": "log_1785045506183_coofnbs",
-        "date": "2026/07/26",
-        "type": "study",
-        "text": "## 적산법에 의한 임대료 (검토)\n1. 기초가액 (수익환원법은 순환논리) (x전유면적)\n  (1) 토지건물 전체가액\n  (2) 평가대상부분 층별효용비율(집합건물)\n  (3) 기초가액 (전체가액 x **층별효용비**)\n  - 층별효용비율 구할 때 면적 곱해주기!!\n\n2. 기대이율 (중위치 적용)\n\n**3. 필요제경비** (**감가상각비 **포함)\n\n4. 적산임대료",
-        "reviewCycle": 1,
-        "reviewCount": 1,
-        "reviewCompletedAt": {
-          "1": "2026/08/16"
-        }
-      }
-    ],
+    "logs": [],
     "reinforced": false,
     "reviewCount": 1,
     "reviewCompletedAt": {
@@ -1310,189 +436,43 @@
   },
   "f2": {
     "acquired": true,
-    "logs": [
-      {
-        "id": "log_1786689040962_e66zzj1",
-        "date": "2026/08/14",
-        "type": "study",
-        "text": "### 원리금균등상환 시 원금상환분:\nDS(부채서비스총액) - 대출액 x 이자율 \n* **매기 저당이자율 복리로 상승**\n[[할인현금수지분석법]]"
-      },
-      {
-        "id": "log_1786688951890_volgi0n",
-        "date": "2026/08/14",
-        "type": "study",
-        "text": "채권 물려받으면:\n저당상수(원래기간) x 연금현가(남은기간)\n* 이자 월할계산 할수도!!"
-      },
-      {
-        "id": "log_1785212020901_ot557sv",
-        "date": "2026/07/28",
-        "type": "study",
-        "text": "### 잔금에 대해 대출이자 및 원금일시상환:\n- 잔금비율 x 이자율 x 연금현가 + 잔금비율 x 현가(원금)",
-        "reviewCycle": 1,
-        "reviewCount": 1,
-        "reviewCompletedAt": {
-          "1": "2026/08/16"
-        }
-      },
-      {
-        "id": "log_1785056917739_kap1k8r",
-        "date": "2026/07/26",
-        "type": "study",
-        "text": "거래대금 현가: 남은금액 X 저당상수(이자율) X 연금현가(할인률)",
-        "reviewCycle": 1,
-        "reviewCount": 1,
-        "reviewCompletedAt": {
-          "1": "2026/08/16"
-        }
-      }
-    ],
+    "logs": [],
     "reinforced": true,
     "reviewCount": 0
   },
   "a3f": {
     "acquired": true,
-    "logs": [
-      {
-        "id": "log_1786689225643_kpz6irw",
-        "date": "2026/08/14",
-        "type": "study",
-        "text": "## ATCF\n- NOI - DS = BTCF\n- TAX = (ATCF - DEP + 원금상환분) x t [[화폐의 시간가치]]\n- ATCF = BTCF - TAX"
-      },
-      {
-        "id": "log_1785324119464_3akdmlj",
-        "date": "2026/07/29",
-        "type": "study",
-        "text": "임대내역 PGI \n- **선불적 성격의 일시금(권리금)** : x저당상수\n  (계약시 받은 것을 원금과 기회비용(이자)으로 배분)",
-        "reviewCycle": 1,
-        "reviewCount": 1,
-        "reviewCompletedAt": {
-          "1": "2026/08/15"
-        }
-      },
-      {
-        "id": "log_1785158369599_9kxixr3",
-        "date": "2026/07/27",
-        "type": "study",
-        "text": "전세보증금 기준으로 보증금과 월세를 표준적인 비율에 따라 수취 \n  -> 전세보증금 x (보증금비율x운용익 +** 지급임대료비율x전월세전환율**)",
-        "reviewCycle": 1,
-        "reviewCount": 1,
-        "reviewCompletedAt": {
-          "1": "2026/08/16"
-        }
-      },
-      {
-        "id": "log_1785059885435_2lla2pm",
-        "date": "2026/07/26",
-        "type": "study",
-        "text": "## 할인현금수지분석법(DCF)\n1. 1기 순수익\n\n2. 매기 순수익(단위: 천 원)\n현가합 구할 시 계산기에서 2행부터 입력!\n기출환원이율: 소득수익률 기준하되, 위험가산율을 고려한다.\n\n**3. 기말복귀가치 현가**\n\n4. 감정평가액 (수익가액)",
-        "reviewCycle": 1,
-        "reviewCount": 1,
-        "reviewCompletedAt": {
-          "1": "2026/08/16"
-        }
-      }
-    ],
+    "logs": [],
     "reinforced": true,
     "reviewCount": 0
   },
   "a3g": {
     "acquired": true,
-    "logs": [
-      {
-        "id": "log_1785061874735_c7bcwt4",
-        "date": "2026/07/26",
-        "type": "study",
-        "text": "### 토지잔여법 (1000Q46, 53)\n1. 복합부동산의 전체 순수익\n  - 영업경비에 감가상각비 포함 - 상각후환원이율\n2. 수익가액: 잔여수익 / 토지환원이율 \n\nII. 복합부동산 순수익\n3. 영업경비\n- 선납일시금; 권리금(xMC)\n- 보험료(연납, 5년말 원금의 10%에 대해 5%가산하여 환급):\n    - 0.1 x 연금내가(보험이자율) x SFF(할인률)\n    - 환급금(x연금내가) 을 매년의 할인액(SFF)으로 쪼개 차감\n- 영업경비 제외항목(부동산 운영과 무관): 부가물설치비, 종합부동산세, 취득세, 등기세, 양도소득세, 자기자금이자, 소득세, 동산세금, 법인세 (**포함: 정상운전자금이자, 재산세**)\n- 감가상각비: 대상평가액 x 1/잔존내용연수기준 (**상각후순수익**)",
-        "reviewCycle": 1,
-        "reviewCount": 1,
-        "reviewCompletedAt": {
-          "1": "2026/08/16"
-        }
-      }
-    ],
+    "logs": [],
     "reinforced": false,
     "reviewCount": 0
   },
   "a0": {
     "acquired": true,
-    "logs": [
-      {
-        "id": "log_1785070721999_mujlxlp",
-        "date": "2026/07/26",
-        "type": "study",
-        "text": "1000Q50",
-        "reviewCycle": 1,
-        "reviewCount": 1,
-        "reviewCompletedAt": {
-          "1": "2026/08/16"
-        }
-      }
-    ],
+    "logs": [],
     "reinforced": false,
     "reviewCount": 0
   },
   "t2d": {
     "acquired": true,
-    "logs": [
-      {
-        "id": "log_1785163361451_v57mf2y",
-        "date": "2026/07/27",
-        "type": "study",
-        "text": "*둘이상의 용도지역에 걸치는 토지로서 유사한 표준지르 기준하되** 용도지역의 비율은 행정적 조건으로 보정**한다.*",
-        "reviewCycle": 1,
-        "reviewCount": 1,
-        "reviewCompletedAt": {
-          "1": "2026/08/16"
-        }
-      },
-      {
-        "id": "log_1785157377374_9p9xibr",
-        "date": "2026/07/27",
-        "type": "study",
-        "text": "*둘이상의 용도지역에 걸치는 토지이나 1종일반주거지역에 **걸치는 면적이 미미한 바** 주된 용도지역(2종일주)을 기준으로 평가한다.*",
-        "reviewCycle": 1,
-        "reviewCount": 1,
-        "reviewCompletedAt": {
-          "1": "2026/08/16"
-        }
-      }
-    ],
+    "logs": [],
     "reinforced": false,
     "reviewCount": 0
   },
   "t3c": {
     "acquired": true,
-    "logs": [
-      {
-        "id": "log_1785231138008_8z0sqw3",
-        "date": "2026/07/28",
-        "type": "study",
-        "text": "### 기계기구 재조달원가\n- CIF x 신고일 환율.도입기계 보정지수 x 기준시점 한국환율 x 세금\n  - 감면 시 농어촌특별세 적용",
-        "reviewCycle": 1,
-        "reviewCount": 1,
-        "reviewCompletedAt": {
-          "1": "2026/08/16"
-        }
-      }
-    ],
+    "logs": [],
     "reinforced": false,
     "reviewCount": 0
   },
   "a3e": {
     "acquired": true,
-    "logs": [
-      {
-        "id": "log_1785585418709_3s1fe4m",
-        "date": "2026/08/01",
-        "type": "study",
-        "text": "I. 완전소유권가치(시장가치) \n  - 임대료 연금현가 + 거래가격x상승률(상승 및 할인)\nII. 임대권가치\n  - 실질임대료 (계약임대료 기준)\n  - 임대권가치 (임대차계약에 따른 할인률)\nIII 임차권가치 및 임차권수익률\n  - 임차권가치 (완전소유권 - 임대권)\n  - 귀속임대료 (연간 임대료 차이)\n  - 내제된 임차권가치 (임차권가치 = 귀속임대료 5년 연금현가r)",
-        "reviewCycle": 1,
-        "reviewCount": 1,
-        "reviewCompletedAt": {
-          "1": "2026/08/10"
-        }
-      }
-    ],
+    "logs": [],
     "reinforced": false,
     "reviewCount": 1,
     "reviewCompletedAt": {
@@ -1501,19 +481,7 @@
   },
   "t3b": {
     "acquired": true,
-    "logs": [
-      {
-        "id": "log_1786282453587_ssmha46",
-        "date": "2026/08/09",
-        "type": "study",
-        "text": "무형자산(감칙23조)",
-        "reviewCycle": 1,
-        "reviewCount": 1,
-        "reviewCompletedAt": {
-          "1": "2026/08/16"
-        }
-      }
-    ],
+    "logs": [],
     "reinforced": false,
     "reviewCount": 0
   },
@@ -1661,19 +629,7 @@
   },
   "p1e": {
     "acquired": true,
-    "logs": [
-      {
-        "id": "log_1786459183216_7l1j34z",
-        "date": "2026/08/11",
-        "type": "study",
-        "text": "- 스티그마 = 오염으로 인한 가치하락액 - 직접 복구비용\n- 오염 가치하락액 = 오염전토지 - 오염후토지 \n  - (시장성이 반영된 비준가액을 기준으로 한다)\n- 직접 복구비용: 시장할인율 적용하여 현가\n\n종합 65",
-        "reviewCycle": 1,
-        "reviewCount": 1,
-        "reviewCompletedAt": {
-          "1": "2026/08/15"
-        }
-      }
-    ],
+    "logs": [],
     "reinforced": false,
     "reviewCount": 0
   },
