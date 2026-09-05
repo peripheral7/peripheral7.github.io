@@ -92,6 +92,13 @@
   .input-box.short { min-height: 44px; padding: 10px 14px; resize: none; overflow: hidden; white-space: nowrap; }
   .input-box:focus { border-color: var(--primary); background: var(--card); box-shadow: 0 0 0 3px var(--primary-bg); }
 
+  /* 정리노트: 채점 대상이 아닌 참고용 요약 — 탭 최상단에 노출 */
+  .tab-note { background: var(--surface-muted); border: 1px solid var(--border); border-left: 4px solid var(--primary); padding: 16px 20px; margin-bottom: 22px; font-size: 13.5px; line-height: 1.75; color: var(--text-main); }
+  .tab-note-title { font-weight: 800; color: var(--text-dark); margin-bottom: 10px; font-size: 14.5px; }
+  .tab-note-item { margin-bottom: 10px; }
+  .tab-note-item:last-child { margin-bottom: 0; }
+  .tab-note strong { color: var(--text-dark); }
+
   /* Result Panel */
   .result-panel { display: none; margin-top: 16px; padding: 18px; border-radius: 0; font-size: 14.5px; }
   .result-good { background: var(--success-bg); border: 1px solid var(--success-border); color: var(--success-text); }
@@ -209,14 +216,17 @@
 const structure = [
   {
     id: 'c1', name: '1. 기초/TVM',
-    subs: [{id: 'tvm', name: 'TVM', active: false}]
+    subs: [
+      {id: 'basics', name: '감정평가기초', active: true},
+      {id: 'tvm', name: 'TVM', active: true}
+    ]
   },
   {
     id: 'c2', name: '2. 3방식',
     subs: [
-      {id: 'cmp', name: '비교방식', active: false},
-      {id: 'cost', name: '원가방식', active: false},
-      {id: 'inc', name: '수익방식', active: false},
+      {id: 'cmp', name: '비교방식', active: true},
+      {id: 'cost', name: '원가방식', active: true},
+      {id: 'inc', name: '수익방식', active: true},
       {id: 'mix', name: '3방식 병용', active: false}
     ]
   },
@@ -285,6 +295,11 @@ let currentMain = 'c9';
 let currentSub = 'general';
 
 const state = {
+  basics: { inputs: {}, graded: {}, individuallyGraded: {}, globalGraded: false },
+  tvm: { inputs: {}, graded: {}, individuallyGraded: {}, globalGraded: false },
+  cmp: { inputs: {}, graded: {}, individuallyGraded: {}, globalGraded: false },
+  cost: { inputs: {}, graded: {}, individuallyGraded: {}, globalGraded: false },
+  inc: { inputs: {}, graded: {}, individuallyGraded: {}, globalGraded: false },
   general: { inputs: {}, graded: {}, individuallyGraded: {}, globalGraded: false },
   gb: { inputs: {}, graded: {}, individuallyGraded: {}, globalGraded: false },
   repurchase: { inputs: {}, graded: {}, individuallyGraded: {}, globalGraded: false },
@@ -299,6 +314,11 @@ const state = {
 };
 
 const tabMeta = {
+  basics: { title: "감정평가기초 — 획지·필지·합필가치·토지형상", note: "<div class=\"tab-note-title\">감정평가기초 — 참고 정리</div><div class=\"tab-note-item\">개별요인 비교 시 <strong>도로의 폭</strong>은 접면도로 상태(가로조건) 판단의 기본 자료이나, 별도의 산식이나 고정기준이 정리되어 있지 않아 문제화하지 않았습니다.</div>" },
+  tvm: { title: "화폐의 시간가치(TVM) — 저당대출·잔금·거래대금 현가 산정" },
+  cmp: { title: "비교방식 — 그 밖의 요인·개별요인·배분법·시점수정" },
+  cost: { title: "원가방식 — 원가법·감가수정·조성원가법·개발법", note: "<div class=\"tab-note-title\">원가방식 — 참고 정리</div><div class=\"tab-note-item\"><strong>감정평가에 관한 규칙 제15조</strong>에 의하여 원가법에 의한다는 근거 규정 메모(문장이 불완전하게 남아 있어 질문화하지 않았습니다. 원문 확인 필요).</div>" },
+  inc: { title: "수익방식 — 환원이율·저당지분환원법·DCF·토지잔여법", note: "<div class=\"tab-note-title\">수익방식 — 참고 정리</div><div class=\"tab-note-item\">거래사례 특성 메모: <strong>상업용으로서 본건과 같이 도로 전면에 위치</strong>한 사례를 선정한다는 취지의 기록으로, 별도 질문화하지 않고 참고로만 남겨둡니다.</div>" },
   general: { title: "보상감정평가 절차 및 가치형성요인 검토" },
   gb: { title: "개발제한구역 내 토지 및 특수토지의 보상평가" },
   repurchase: { title: "환매대상 요건검토 및 환매금액 산정 감정평가" },
@@ -313,6 +333,401 @@ const tabMeta = {
 };
 
 const dataset = {
+  basics: [
+    {
+      id: 1,
+      prompt: "획지와 필지의 개념 차이",
+      keywords: [
+        { word: "소유권 범위를 나타내는 등록 단위", alt: [] },
+        { word: "가격수준이 비슷한 일단의 토지를 구분하는 평가상 단위", alt: [] }
+      ],
+      modelAnswer: "<strong>획지</strong>: 법률적인 개념으로 소유권 범위를 나타내는 등록 단위<br><strong>필지</strong>: 가격수준이 비슷한 일단의 토지를 구분하는 평가상 단위"
+    },
+    {
+      id: 2,
+      prompt: "합필 시 가치 및 사정보정치 산정절차",
+      keywords: [
+        { word: "증분가치", alt: [] },
+        { word: "배분되는 증분가치", alt: [] },
+        { word: "사정보정치", alt: [] }
+      ],
+      modelAnswer: "1. <strong>증분가치</strong> 산정<br>2. 합필대상 토지(예: A토지)에 배분되는 <strong>증분가치</strong> 산정<br>3. <strong>사정보정치</strong> 결정"
+    },
+    {
+      id: 3,
+      prompt: "토지 형상 판정 시 가각정리 부분의 고려 여부 및 도로 폭 산정기준",
+      keywords: [
+        { word: "가각 정리부분 고려 X", alt: ["가각정리 미고려"] },
+        { word: "도로의 폭", alt: [] }
+      ],
+      modelAnswer: "- 토지의 형상 판정 시 <strong>가각 정리부분은 고려하지 않는다</strong>.<br>- 도로의 폭 기준에 따라 접면도로 상태(가로조건)를 판단한다."
+    }
+  ],
+  tvm: [
+    {
+      id: 1,
+      prompt: "원리금균등상환 시 원금상환분의 산정",
+      keywords: [
+        { word: "DS(부채서비스총액) - 대출액 x 이자율", alt: [] },
+        { word: "매기 저당이자율 복리로 상승", alt: [] }
+      ],
+      modelAnswer: "원금상환분 = <strong>DS(부채서비스총액) − 대출액 × 이자율</strong><br>* 매기 저당이자율은 복리로 상승한다."
+    },
+    {
+      id: 2,
+      prompt: "채권(저당채무)을 물려받는 경우의 가치 산정",
+      keywords: [
+        { word: "저당상수(원래기간) x 연금현가(남은기간)", alt: [] },
+        { word: "이자 월할계산", alt: [] }
+      ],
+      modelAnswer: "<strong>저당상수(원래기간) × 연금현가(남은기간)</strong><br>* 이자는 월할계산 할 수도 있음에 유의."
+    },
+    {
+      id: 3,
+      prompt: "잔금에 대한 대출이자 및 원금 일시상환액 산정",
+      keywords: [
+        { word: "잔금비율 x 이자율 x 연금현가 + 잔금비율 x 현가(원금)", alt: [] }
+      ],
+      modelAnswer: "<strong>잔금비율 × 이자율 × 연금현가</strong> + <strong>잔금비율 × 현가(원금)</strong>"
+    },
+    {
+      id: 4,
+      prompt: "거래대금 현가(잔금 인수) 산정식",
+      keywords: [
+        { word: "남은금액 X 저당상수(이자율) X 연금현가(할인률)", alt: [] }
+      ],
+      modelAnswer: "거래대금 현가 = <strong>남은금액 × 저당상수(이자율) × 연금현가(할인률)</strong>"
+    }
+  ],
+  cmp: [
+    {
+      id: 1,
+      prompt: "본건 평가 시 기존 평가선례의 활용 여부",
+      keywords: [
+        { word: "가격균형 유지", alt: [] }
+      ],
+      modelAnswer: "본건 평가선례는 <strong>가격균형 유지</strong>라는 취지에 따라 활용하지 아니한다."
+    },
+    {
+      id: 2,
+      prompt: "그 밖의 요인비교치의 의의 및 적용근거",
+      keywords: [
+        { word: "감정평가에 관한 규칙, 대법원 판례, 유권해석, 토지보상평가지침", alt: ["대법원 판례"] },
+        { word: "형평성을 유지", alt: [] }
+      ],
+      modelAnswer: "상기와 같이 산출된 바 인근지가수준을 참작하여 그 밖의 요인을 보정한다(예: 40% 증액보정).<br>적용근거: <strong>감정평가에 관한 규칙, 대법원 판례, 유권해석, 토지보상평가지침</strong> 등에 의거 보상평가액의 <strong>형평성을 유지</strong>하고 적정한 가치를 판단하고자 그 밖의 요인을 보정한다."
+    },
+    {
+      id: 3,
+      prompt: "공장용지로 조성 완료된 토지의 지목 판단 및 표준지 선정",
+      keywords: [
+        { word: "현황 기준", alt: [] },
+        { word: "용도상 불가분", alt: [] },
+        { word: "일단지", alt: [] },
+        { word: "인접한 표준지", alt: [] }
+      ],
+      modelAnswer: "허가 후 토목공사가 완료되어 <strong>현황 기준</strong>하여 공장용지를 기준한다.<br>- <strong>용도상 불가분</strong>으로 판단, <strong>일단지</strong>로 평가한다.<br>- 최유효이용은 상업 및 업무용이며, 준공업지역으로서 노선상가지대로 지리적으로 <strong>인접한 표준지</strong>를 선정한다."
+    },
+    {
+      id: 4,
+      prompt: "토지 개별요인비교치의 6가지 항목",
+      keywords: [
+        { word: "가로조건", alt: [] },
+        { word: "접근조건", alt: [] },
+        { word: "환경조건", alt: [] },
+        { word: "획지조건", alt: [] },
+        { word: "행정조건", alt: [] },
+        { word: "기타조건", alt: [] }
+      ],
+      modelAnswer: "1. <strong>가로조건</strong>(도로상태 - 각지 포함)<br>2. <strong>접근조건</strong>(시가지와의 거리)<br>3. <strong>환경조건</strong><br>4. <strong>획지조건</strong>(형상, 지세)<br>5. <strong>행정조건</strong>(도로저촉)<br>6. <strong>기타조건</strong>"
+    },
+    {
+      id: 5,
+      prompt: "노후 건물이 소재한 거래사례 선정 시 유의사항",
+      keywords: [
+        { word: "배분법을 적용하지 않는다", alt: [] },
+        { word: "품등조건", alt: [] },
+        { word: "사용승인일", alt: [] }
+      ],
+      modelAnswer: "본건과 같은 이행단계에 있는 제시된 거래사례를 선정한다.<br>- 지상건물은 노후화되어 가치가 미미한 바 <strong>배분법을 적용하지 않는다</strong>.<br>- <strong>품등조건(건물 가격 구성비), 사용승인일</strong> 등 가치형성요인이 비슷한 사례를 선정한다."
+    },
+    {
+      id: 6,
+      prompt: "시점수정 시 지수별(생산자물가/건설비/아파트매매) 기준시점",
+      keywords: [
+        { word: "15일 전이면 전달, 15일 후면 해당달", alt: [] },
+        { word: "해당월 지수 미발표 시 전월(또는 전전월)", alt: [] },
+        { word: "무조건 전달", alt: [] }
+      ],
+      modelAnswer: "- <strong>생산자물가지수(재조달원가)</strong>: 기준시점이 <strong>15일 전이면 전달, 15일 후면 해당달</strong> 지수 적용<br>- <strong>건설비공사지수/건축비지수</strong>: 기준시점이 속하는 월의 지수로 비교하되, <strong>해당월 지수 미발표 시 전월(또는 전전월)</strong> 지수 적용<br>- <strong>아파트 매매가격지수</strong>: <strong>무조건 전달</strong> 지수 적용"
+    },
+    {
+      id: 7,
+      prompt: "배분법에 의한 거래사례 토지단가(토지배분단가) 산정절차",
+      keywords: [
+        { word: "현금등가", alt: [] },
+        { word: "토지배분단가", alt: [] }
+      ],
+      modelAnswer: "1. <strong>현금등가</strong>(금융보정)<br>2. 거래사례토지단가(=<strong>토지배분단가</strong>)"
+    }
+  ],
+  cost: [
+    {
+      id: 1,
+      prompt: "건물 완공일과 사용승인일 격차가 1년 이상인 경우 기준시점 처리",
+      keywords: [
+        { word: "완공일로 기준하여 잔존내용연수 고려", alt: [] },
+        { word: "실제 경제적 효용이 시작된 시기인 완공일 기준", alt: [] }
+      ],
+      modelAnswer: "평가목적으로 고려하여 <strong>완공일로 기준하여 잔존내용연수를 고려</strong>한다(<strong>실제 경제적 효용이 시작된 시기인 완공일 기준</strong>)."
+    },
+    {
+      id: 2,
+      tall: true,
+      prompt: "건물 원가법(감칙 15조)에 의한 적산가액 산정절차",
+      keywords: [
+        { word: "급수별 표준단가 + 부대설비보정단가", alt: [] },
+        { word: "직접법", alt: [] },
+        { word: "간접법", alt: [] },
+        { word: "간접법에 의한 재조달원가로 결정하되 실제 공사비를 통한 합리성이 안정됨", alt: [] },
+        { word: "감가수정", alt: [] }
+      ],
+      modelAnswer: "I. 원가법(감칙 15조)<br><br>II. 재조달원가<br>&nbsp;&nbsp;(급수별 표준단가 + 부대설비보정단가) / 연면적, 층별로 단가를 구함<br>II. 재조달원가 산정<br>&nbsp;&nbsp;1. <strong>직접법</strong> 2. <strong>간접법</strong>(시점, 개별) 3. 결정(적용단가)<br>&nbsp;&nbsp;※ '<strong>간접법에 의한 재조달원가로 결정하되 실제 공사비를 통한 합리성이 안정됨</strong>'<br><br>III. 적산가액(<strong>감가수정</strong> → 적용단가 × 면적)"
+    },
+    {
+      id: 3,
+      very_tall: true,
+      prompt: "건물 감가수정 방법의 종류와 산식",
+      keywords: [
+        { word: "최종잔가율^(경과연수/내용연수)", alt: ["정률법"] },
+        { word: "증축 경과연수/(기존 잔존내용연수+증축경과연수)", alt: [] },
+        { word: "증축부분 구조 다르더라도 기존부분 기준", alt: [] },
+        { word: "해당 부분의 경제적 내용연수를 기준", alt: [] },
+        { word: "유효연수법", alt: [] },
+        { word: "시장추출법", alt: [] },
+        { word: "분해법", alt: [] }
+      ],
+      modelAnswer: "- 최종잔가율에 따라 계산하며, 주체/부대부분이 나뉜 경우 비율로 가중한다.<br>- <strong>정률법</strong>: 최종잔가율^(경과연수/내용연수)<br>- 내용연수 조정: <strong>증축 경과연수/(기존 잔존내용연수+증축경과연수)</strong> 만큼 감가된다.<br>&nbsp;&nbsp;<strong>증축부분 구조 다르더라도 기존부분 기준</strong>으로 한다.<br>&nbsp;&nbsp;다만 기존부분 잔존연수 + 증축부분 경과연수가 해당 부분의 경제적 내용연수보다 크면 <strong>해당 부분의 경제적 내용연수를 기준</strong>으로 한다.<br>- <strong>유효연수법</strong>(경과연수 초과 시 관찰감가)<br>- <strong>시장추출법</strong><br>- <strong>분해법</strong>(기능적, 경제적, 물리적 감가)"
+    },
+    {
+      id: 4,
+      very_tall: true,
+      prompt: "감가수정(분해법)의 구성 — 기능적·경제적·물리적 감가",
+      keywords: [
+        { word: "치유타당성", alt: [] },
+        { word: "감가수정액(치유비용-신축시설치비)", alt: [] },
+        { word: "치유불능 → 치유못함에 따른 손실액의 현가", alt: [] },
+        { word: "무한: 순수익 손실 / R * 건물가격구성비", alt: [] },
+        { word: "유한: 순수익 손실 x 연금현가 x 건물가격구성비", alt: [] }
+      ],
+      modelAnswer: "I. 기능적 감가: 유행변화로 임대료에 반영<br>1. 바닥처리결핍(부대설비)<br>&nbsp;&nbsp;(1) <strong>치유타당성</strong><br>&nbsp;&nbsp;(2) <strong>감가수정액(치유비용-신축시설치비)</strong><br>2. 방범시스템노후(부대시설)<br>&nbsp;&nbsp;(1) 치유타당성 (2) 감가수정액(치유비용-신축시설치비+재조달원가)<br>3. 외부창고(과잉·주체부분)<br>&nbsp;&nbsp;(1) 치유타당성 (2) 감가수정액: 치유비용 + 재조달원가<br>4. <strong>치유불능 → 치유못함에 따른 손실액의 현가</strong><br><br>II. 경제적 감가: 외부적 감가<br>&nbsp;&nbsp;무한: <strong>순수익 손실 / R × 건물가격구성비</strong><br>&nbsp;&nbsp;유한: <strong>순수익 손실 × 연금현가 × 건물가격구성비</strong><br><br>III. 물리적 감가"
+    },
+    {
+      id: 5,
+      very_tall: true,
+      ref: "1000제 Q52",
+      prompt: "공장용지 조성원가법 적용 사례(건축허가 득한 조성 중 토지)",
+      keywords: [
+        { word: "공부상 지목에도 불구하고 현황인 공장용지를 기준", alt: [] },
+        { word: "투하자본수익률", alt: [] },
+        { word: "완료된 이후의 수익을 기준으로 산출했다는 점, 지상의 건물이 있는 점을 고려한 가설적 평가", alt: [] }
+      ],
+      modelAnswer: "I. 현재 공장으로서의 전용이 진행 중인 토지로서, 공장용지 조성을 완료하고 건축허가를 득한 상황이므로 <strong>공부상 지목에도 불구하고 현황인 공장용지를 기준</strong>으로 평가한다.<br>1. 준공시점 토지가격 — 소지매입가 적정성 검토, 준공시점 소지가격(<strong>투하자본수익률</strong>)<br>2. 조성비용 등<br>3. 준공시점 토지가액<br>4. 적산가액(기준시점)<br><br>V. 수익가액의 경우 공장이 <strong>완료된 이후의 수익을 기준으로 산출했다는 점, 지상의 건물이 있는 점을 고려한 가설적 평가</strong>라는 점 등으로 인하여 공장건물 신축 이후의 기대적인 이익이 반영되어 다소 높게 산출된 것으로 판단된다."
+    },
+    {
+      id: 6,
+      very_tall: true,
+      prompt: "조성원가법에 의한 토지평가 절차(공부상 지목 불문 현황 대지)",
+      keywords: [
+        { word: "공부상 지목에도 불구하고 현황 기준 대지로 평가", alt: [] },
+        { word: "조성비용의 현재가치", alt: [] },
+        { word: "조성완료시점의 토지가치(유효택지기준 단가, ~조성완료)", alt: [] },
+        { word: "기부체납 제외", alt: [] },
+        { word: "성숙도수정", alt: [] },
+        { word: "적산가액은 공급자중심의 공급", alt: [] }
+      ],
+      modelAnswer: "I. <strong>공부상 지목에도 불구하고 현황 기준 대지로 평가</strong>한다.<br>II. 조성완료시 토지가치(조성완료시점)<br>1. 소지가격(매입가격)<br>2. 조성비용<br>&nbsp;&nbsp;(1) 토지가치에 화체되는 조성비: ①조성비·지질조사 및 측량비 ②공통귀속분 중 토지가치 화체분 ③토지가치 화체되는 조성비<br>&nbsp;&nbsp;(2) <strong>조성비용의 현재가치</strong><br>3. <strong>조성완료시점의 토지가치(유효택지기준 단가, ~조성완료)</strong> — <strong>기부체납 제외</strong><br>III. 기준시점의 토지가치(<strong>성숙도수정</strong> — 자본수익률, 지가변동률)<br>IV. 시산가액 조정 — 시적격차 및 제한된 거래로 인해 시장가치와 괴리, <strong>적산가액은 공급자중심의 공급</strong>가격"
+    },
+    {
+      id: 7,
+      prompt: "매립지 평가 시 조성원가법 채택 사유",
+      keywords: [
+        { word: "거래사례 및 수익사례의 수집이 어려우므로 조성원가법을 활용", alt: [] },
+        { word: "방매사례는... 공급자 중심의 가격으로 판단되어 고려치 아니함", alt: [] }
+      ],
+      modelAnswer: "본건은 매립지로서 거래사례 및 수익사례의 <strong>수집이 어려우므로 조성원가법을 활용</strong>하여 평가액을 결정한다. (방매사례는 거래가 활발히 이뤄지지 않는 바 <strong>공급자 중심의 가격으로 판단되어 고려치 아니함</strong>)"
+    },
+    {
+      id: 8,
+      tall: true,
+      ref: "1000제 Q24",
+      prompt: "개발법에 의한 택지후보지 감정평가 절차",
+      keywords: [
+        { word: "예정부동산의 가액에서 건축비를 차감하여 토지의 가치를 평가", alt: [] },
+        { word: "분양사례 택지 거래시점 기준으로 분양가격 산정", alt: [] },
+        { word: "지하실포함 연면적 / 층수", alt: [] },
+        { word: "조성비용(개발비용 현가)", alt: [] }
+      ],
+      modelAnswer: "I. 택지후보지 → 개발법에 의해 산정<br>&nbsp;&nbsp;<strong>예정부동산의 가액에서 건축비를 차감하여 토지의 가치를 평가</strong>한다.<br>1. 기준시점 분양가격 산정<br>&nbsp;&nbsp;(1) <strong>분양사례 택지 거래시점 기준으로 분양가격 산정</strong><br>&nbsp;&nbsp;(2) 준공대상 분양가격<br>&nbsp;&nbsp;* 각 층별 분양면적 = <strong>지하실포함 연면적 / 층수</strong><br>2. 개발법에 의한 감정평가액<br>&nbsp;&nbsp;(1) 분양획지수 (2) 총분양가격 (3) <strong>조성비용(개발비용 현가)</strong><br>&nbsp;&nbsp;* 면적, 분양획지수, 시점수정치 고려"
+    },
+    {
+      id: 9,
+      ref: "1000제 Q58",
+      prompt: "준공 후 부동산가치 산정식",
+      keywords: [
+        { word: "순수익/(무위험률+위험가산율)", alt: [] }
+      ],
+      modelAnswer: "준공후 부동산가치 = <strong>순수익 / (무위험률 + 위험가산율)</strong>"
+    },
+    {
+      id: 10,
+      ref: "1000제 Q51",
+      prompt: "최유효이용 미달 토지(철거대상 건물 소재) 감정평가",
+      keywords: [
+        { word: "건물을 철거함이 타당", alt: [] },
+        { word: "나지상태 토지의 감정평가액에서 철거비를 차감", alt: [] }
+      ],
+      modelAnswer: "본건은 최유효이용에 미달되는 토지의 평가로 지상에 철거대상의 노후한 건물이 소재한다. 이에 <strong>건물을 철거함이 타당</strong>하다고 판단되는 바, <strong>나지상태 토지의 감정평가액에서 철거비를 차감</strong>하여 평가한다."
+    },
+    {
+      id: 11,
+      ref: "1000제 Q27",
+      prompt: "매입가 타당성 검토 및 개발법 토지가액 산정(수정 설계내역 반영)",
+      keywords: [
+        { word: "건축연면적", alt: [] },
+        { word: "총 분양수입 현가 - 총비용 현가", alt: [] }
+      ],
+      modelAnswer: "I. 매입가 타당성 검토<br>II. 감정평가액<br>1. 수정된 설계내역(대지면적, 건축면적, <strong>건축연면적</strong>)<br>2. 토지가액 산정(<strong>총 분양수입 현가 − 총비용 현가</strong>)"
+    }
+  ],
+  inc: [
+    {
+      id: 1,
+      ref: "Q18",
+      prompt: "물건별 투자수익률 비교(자본수익률·소득수익률) 해석",
+      keywords: [
+        { word: "자본수익률이 낮고 소득수익률이 높다", alt: [] },
+        { word: "오래된 건물... 자산가치 상승을 기대하기 어려운 것으로 해석", alt: [] }
+      ],
+      modelAnswer: "상대적으로 <strong>자본수익률이 낮고 소득수익률이 높다</strong>는 것은, 해당 물건이 안정적인 임대수익 위주이고 시세차익 기대는 낮다는 의미이다.<br>오래된 건물에 위치한 물건은 상대적으로 <strong>자산가치 상승을 기대하기 어려운 것으로 해석</strong>된다."
+    },
+    {
+      id: 2,
+      prompt: "임대료 감정평가액 결정 및 보증금·월임대료 배분 절차",
+      keywords: [
+        { word: "임대료등 감정평가액 결정", alt: [] },
+        { word: "보증금 및 월임대료 배분", alt: [] }
+      ],
+      modelAnswer: "1. <strong>임대료등 감정평가액 결정</strong><br>2. <strong>보증금 및 월임대료 배분</strong>"
+    },
+    {
+      id: 3,
+      prompt: "복합부동산 수익방식 — NOI 및 건물귀속순수익 산정",
+      keywords: [
+        { word: "상각전R = 상각후R + 1/50(감가율)", alt: [] },
+        { word: "감가상각비 경비포함 → 상각후R", alt: [] },
+        { word: "감가상각비 경비미포함 → 상각전R", alt: [] }
+      ],
+      modelAnswer: "1. NOI<br>2. 건물귀속순수익<br>&nbsp;&nbsp;- 상각전R = 상각후R + 1/50(감가율)<br>&nbsp;&nbsp;- <strong>감가상각비 경비포함 → 상각후R</strong><br>&nbsp;&nbsp;- <strong>감가상각비 경비미포함 → 상각전R</strong> → 건물귀속상각전순수익<br>3. (사례)토지귀속순수익<br>4. 대상토지 수익가액"
+    },
+    {
+      id: 4,
+      prompt: "환원이율 시장추출법에서 거래사례 시장추출률 비교 방법",
+      keywords: [
+        { word: "환원이율에 역수로 비교", alt: [] }
+      ],
+      modelAnswer: "환원이율 시장추출법에서 거래사례 시장추출률을 비교할 때는 <strong>환원이율에 역수로 비교</strong>한다."
+    },
+    {
+      id: 5,
+      prompt: "저당지분환원법(엘우드법) 산식",
+      keywords: [
+        { word: "y - L/v * [y + p*SFF(y) - MC]", alt: [] },
+        { word: "자기자본수익률", alt: [] },
+        { word: "상환비율", alt: [] },
+        { word: "원금만기 일시상환: p=0", alt: [] }
+      ],
+      modelAnswer: "저당지분환원율 = <strong>y − L/v × [y + p·SFF(y) − MC]</strong><br>(y: <strong>자기자본수익률</strong>, p: <strong>상환비율</strong>)<br>* <strong>원금만기 일시상환 시 p=0</strong>"
+    },
+    {
+      id: 6,
+      tall: true,
+      prompt: "임대차 현황에 사정이 개입된 경우 본건임대료 결정원칙",
+      keywords: [
+        { word: "관리비 및 임대비 기준: 전용면적", alt: [] },
+        { word: "객관적인 임대사례를 기준으로 수익을 비교하여 결정", alt: [] },
+        { word: "사정 x 시점 x 지역 x 개별 -> 본건임대료 결정", alt: [] },
+        { word: "시장추출법으로 결정하되 다른 방법에 의하여 그 적정성이 인정", alt: [] }
+      ],
+      modelAnswer: "- 관리비 및 임대비 기준은 <strong>전용면적</strong>이다. 표준적 임대료는 통상 월 기준으로 도표 정리한다.<br>- 임대차 현황에 사정개입이 있으면 인근의 표준적 임대차 현황을 기준한다.<br>- 본건이 공실 또는 사정이 개입된 임대료로 판단되면 <strong>객관적인 임대사례를 기준으로 수익을 비교하여 결정</strong>한다.<br>- 임대사례를 통한 표준적 임대료를 기준으로 <strong>사정×시점×지역×개별 → 본건임대료를 결정</strong>한다.<br>- 감정평가실무기준상 <strong>시장추출법으로 결정하되 다른 방법에 의하여 그 적정성이 인정</strong>되는 것으로 본다."
+    },
+    {
+      id: 7,
+      very_tall: true,
+      prompt: "환원이율 결정방법 7가지",
+      keywords: [
+        { word: "시장추출법", alt: [] },
+        { word: "물리적 투자결합법", alt: [] },
+        { word: "금융적 투자결합법", alt: [] },
+        { word: "저당지분환원법", alt: [] },
+        { word: "부채감당법: DCR x LTV x MC", alt: [] },
+        { word: "소득수익률기준", alt: [] },
+        { word: "요소구성법", alt: [] }
+      ],
+      modelAnswer: "환원이율 결정(보통 소수 한자리)<br>1. <strong>시장추출법</strong>: 유형(토지건물, 집합건물)과 이용상황, 잔존연수 유사<br>2. <strong>물리적 투자결합법</strong>: 토지·건물을 나누어 적용<br>3. <strong>금융적 투자결합법</strong>: 자기자본환원이율 및 이자율을 각각 자기자본비율, 부채비율로 가중(Kazdin 방식: 이자율 대신 저당상수)<br>4. <strong>저당지분환원법</strong>: y − L/v × [y + 상환비율p × SFF(y%) − MC] − SFF변동분<br>5. <strong>부채감당법</strong>: DCR × LTV × MC<br>6. <strong>소득수익률기준</strong>: [소득수익률 1년치 곱 − 1]<br>7. <strong>요소구성법</strong>(각 구성요소를 다 합산)"
+    },
+    {
+      id: 8,
+      prompt: "ATCF(세후현금수지) 산정",
+      keywords: [
+        { word: "NOI - DS = BTCF", alt: [] },
+        { word: "TAX = (ATCF - DEP + 원금상환분) x t", alt: [] },
+        { word: "ATCF = BTCF - TAX", alt: [] }
+      ],
+      modelAnswer: "NOI − DS = BTCF<br>TAX = (ATCF − DEP + 원금상환분) × t<br><strong>ATCF = BTCF − TAX</strong>"
+    },
+    {
+      id: 9,
+      prompt: "임대내역 PGI 중 선불적 성격의 일시금(권리금) 처리",
+      keywords: [
+        { word: "x저당상수", alt: [] },
+        { word: "원금과 기회비용(이자)으로 배분", alt: [] }
+      ],
+      modelAnswer: "선불적 성격의 일시금(권리금)은 <strong>저당상수를 곱</strong>하여 반영한다(계약 시 받은 금액을 <strong>원금과 기회비용(이자)으로 배분</strong>)."
+    },
+    {
+      id: 10,
+      prompt: "전세보증금 기준 보증금·월세 배분 산식",
+      keywords: [
+        { word: "보증금비율x운용익", alt: [] },
+        { word: "지급임대료비율x전월세전환율", alt: [] }
+      ],
+      modelAnswer: "전세보증금을 기준으로 보증금과 월세를 표준적인 비율에 따라 수취한다.<br>전세보증금 × (<strong>보증금비율×운용익</strong> + <strong>지급임대료비율×전월세전환율</strong>)"
+    },
+    {
+      id: 11,
+      prompt: "할인현금수지분석법(DCF)에 의한 수익가액 산정절차",
+      keywords: [
+        { word: "소득수익률 기준하되, 위험가산율을 고려", alt: [] },
+        { word: "기말복귀가치 현가", alt: [] }
+      ],
+      modelAnswer: "1. 1기 순수익<br>2. 매기 순수익(단위: 천 원) — 현가합 구할 시 계산기에서 2행부터 입력<br>&nbsp;&nbsp;기출환원이율: <strong>소득수익률 기준하되, 위험가산율을 고려</strong>한다.<br>3. <strong>기말복귀가치 현가</strong><br>4. 감정평가액(수익가액)"
+    },
+    {
+      id: 12,
+      very_tall: true,
+      ref: "1000제 Q46,53",
+      prompt: "토지잔여법에 의한 수익가액 산정",
+      keywords: [
+        { word: "영업경비에 감가상각비 포함 - 상각후환원이율", alt: [] },
+        { word: "잔여수익 / 토지환원이율", alt: [] },
+        { word: "영업경비 제외항목", alt: [] },
+        { word: "정상운전자금이자, 재산세", alt: [] },
+        { word: "대상평가액 x 1/잔존내용연수기준", alt: [] }
+      ],
+      modelAnswer: "1. 복합부동산의 전체 순수익 — 영업경비에 감가상각비 포함 시 <strong>상각후환원이율</strong> 적용<br>2. 수익가액: <strong>잔여수익 / 토지환원이율</strong><br><br>II. 복합부동산 순수익<br>3. 영업경비<br>&nbsp;&nbsp;- 선납일시금: 권리금(×MC)<br>&nbsp;&nbsp;- 보험료(연납, 5년말 원금의 10%에 대해 5% 가산하여 환급): 0.1 × 연금내가(보험이자율) × SFF(할인률); 환급금(×연금내가)을 매년의 할인액(SFF)으로 쪼개 차감<br>&nbsp;&nbsp;- <strong>영업경비 제외항목</strong>(부동산 운영과 무관): 부가물설치비, 종합부동산세, 취득세, 등기세, 양도소득세, 자기자금이자, 소득세, 동산세금, 법인세<br>&nbsp;&nbsp;(단, <strong>정상운전자금이자, 재산세</strong>는 영업경비에 포함)<br>&nbsp;&nbsp;- 감가상각비: <strong>대상평가액 × 1/잔존내용연수</strong> 기준(상각후순수익)"
+    }
+  ],
   general: [
     {
       id: 1,
@@ -1371,7 +1786,8 @@ function renderQuiz() {
   
   const container = document.getElementById("quiz-container");
   const list = dataset[currentSub];
-  
+  const noteHtml = tabMeta[currentSub].note ? `<div class="tab-note">${tabMeta[currentSub].note}</div>` : '';
+
   let normalHtml = '';
   let shortHtml = '';
   
@@ -1419,7 +1835,7 @@ function renderQuiz() {
   });
 
   if (currentSub === 'general' && shortHtml) {
-    container.innerHTML = normalHtml + `
+    container.innerHTML = noteHtml + normalHtml + `
       <div class="inline-card">
         <div class="section-divider" style="margin-top:0; display:flex; justify-content:space-between; align-items:center;">
           <span>공익사업별 법정 사업인정의제일</span>
@@ -1428,7 +1844,7 @@ function renderQuiz() {
         ${shortHtml}
       </div>`;
   } else {
-    container.innerHTML = normalHtml;
+    container.innerHTML = noteHtml + normalHtml;
   }
 
   list.forEach(q => {
