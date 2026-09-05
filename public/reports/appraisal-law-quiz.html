@@ -22,6 +22,7 @@
 
       --correct: #46704f;
       --incorrect: #ae4a30;
+      --ever-wrong: #b8790f;
 
       --badge-a: #3a4f42;
       --badge-b: #5c5645;
@@ -39,6 +40,7 @@
 
       --correct: #6a9a74;
       --incorrect: #d97a5c;
+      --ever-wrong: #d99a3f;
 
       --badge-a: #6a9a74;
       --badge-b: #a39c85;
@@ -436,6 +438,17 @@
       color: var(--correct) !important;
     }
     .blank-input.incorrect {
+      border-color: var(--incorrect) !important;
+      background: color-mix(in srgb, var(--incorrect) 15%, var(--input-bg)) !important;
+      color: var(--incorrect) !important;
+    }
+    /* 한 번이라도 틀렸던 빈칸은 리셋해도 남는 표시 — 다시 맞히면 사라짐 */
+    .blank-input.ever-wrong {
+      border-color: var(--ever-wrong) !important;
+      background: color-mix(in srgb, var(--ever-wrong) 15%, var(--input-bg)) !important;
+      color: var(--ever-wrong) !important;
+    }
+    .blank-input.ever-wrong.incorrect {
       border-color: var(--incorrect) !important;
       background: color-mix(in srgb, var(--incorrect) 15%, var(--input-bg)) !important;
       color: var(--incorrect) !important;
@@ -2045,7 +2058,7 @@
     // ---- 로컬 저장(빈칸 정답 / 서술형 / 메모) ----
     const STORAGE_KEY = 'admin-law-quiz-progress-v1';
     const SUMMARY_KEY = 'admin-law-quiz-summary-v1'; // 블로그 카드에서 복습 여부를 읽어가는 요약 키
-    let quizState = { blanks: {}, essays: {}, memos: {} };
+    let quizState = { blanks: {}, essays: {}, memos: {}, everWrong: {} };
 
     function loadStateFromStorage() {
       try {
@@ -2056,6 +2069,7 @@
             blanks: parsed.blanks || {},
             essays: parsed.essays || {},
             memos: parsed.memos || {},
+            everWrong: parsed.everWrong || {},
           };
         }
       } catch (e) { /* 저장소 접근 불가 시 무시 */ }
@@ -2220,12 +2234,21 @@
     }
 
     function applyGradeVisual(input, val, isMatch, revealHint) {
+      const key = blankKey(input);
       if (isMatch && val) {
         input.classList.remove('incorrect');
         input.classList.add('correct');
+        if (key && quizState.everWrong[key]) {
+          delete quizState.everWrong[key];
+          input.classList.remove('ever-wrong');
+        }
       } else {
         input.classList.remove('correct');
         input.classList.add('incorrect');
+        if (key) {
+          quizState.everWrong[key] = true;
+          input.classList.add('ever-wrong');
+        }
       }
       // 정답/오답 관계없이 채점하면 정답을 항상 보여준다
       const hint = input.nextElementSibling;
@@ -2831,6 +2854,16 @@
       });
     }
 
+    // 리셋으로 답안이 비워진 뒤에도 "한 번이라도 틀렸음" 표시는 남아있어야 하므로 별도 복원
+    function restoreEverWrong() {
+      document.querySelectorAll('.blank-input').forEach((input) => {
+        const key = blankKey(input);
+        if (key && quizState.everWrong[key]) {
+          input.classList.add('ever-wrong');
+        }
+      });
+    }
+
     function toggleTheme() {
       const cur = document.documentElement.getAttribute('data-theme');
       const btn = document.getElementById('themeToggleBtn');
@@ -2854,6 +2887,7 @@
     loadStateFromStorage();
     buildSidePanels();
     restoreBlanks();
+    restoreEverWrong();
     document.querySelectorAll('.card').forEach(syncCardGradeButton);
     applyFilters();
   </script>
