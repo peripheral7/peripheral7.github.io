@@ -86,10 +86,7 @@
   .btn-check:active { box-shadow: 0 1px 3px rgba(0,0,0,0.05); }
 
   /* Input Box */
-  .input-box { width: 100%; min-height: 90px; padding: 14px; border: 1px solid var(--border-focus); border-radius: 0; font-size: 14px; color: var(--text-dark); resize: vertical; outline: none; transition: all 0.2s ease; line-height: 1.6; background: var(--surface-muted); }
-  .input-box.tall { min-height: 180px; }
-  .input-box.very-tall { min-height: 380px; }
-  .input-box.short { min-height: 44px; padding: 10px 14px; resize: none; overflow: hidden; white-space: nowrap; }
+  .input-box { width: 100%; min-height: 52px; padding: 12px 14px; border: 1px solid var(--border-focus); border-radius: 0; font-size: 14px; color: var(--text-dark); resize: vertical; outline: none; transition: all 0.2s ease; line-height: 1.6; background: var(--surface-muted); }
   .input-box:focus { border-color: var(--primary); background: var(--card); box-shadow: 0 0 0 3px var(--primary-bg); }
 
   /* 정리노트: 채점 대상이 아닌 참고용 요약 — 탭 최상단에 노출 */
@@ -241,7 +238,7 @@ const structure = [
     id: 'c4', name: '4. 구분소유/지상권',
     subs: [
       {id: 'sec_own', name: '구분소유권', active: false},
-      {id: 'sec_gnd', name: '구분지상권', active: false}
+      {id: 'sec_gnd', name: '구분지상권', active: true}
     ]
   },
   {
@@ -295,6 +292,7 @@ let currentMain = 'c9';
 let currentSub = 'general';
 
 const state = {
+  sec_gnd: { inputs: {}, graded: {}, individuallyGraded: {}, globalGraded: false },
   hbu: { inputs: {}, graded: {}, individuallyGraded: {}, globalGraded: false },
   s_land: { inputs: {}, graded: {}, individuallyGraded: {}, globalGraded: false },
   s_house: { inputs: {}, graded: {}, individuallyGraded: {}, globalGraded: false },
@@ -324,15 +322,16 @@ const state = {
 };
 
 const tabMeta = {
+  sec_gnd: { title: "구분지상권 — 설정평가·입체이용저해율" },
   hbu: { title: "최유효이용 분석 — 대안선정·건부감가·개발대안 검토" },
   s_land: { title: "표준지공시지가 — 선정기준·교체사유·평가 유의사항" },
   s_house: { title: "표준주택가격 — 평가방법 및 공시가격 산정" },
-  t_land: { title: "토지/건물(복합부동산) — 일괄평가·구분건물·지상권·지역경계", note: "<div class=\"tab-note-title\">토지/건물(복합부동산) — 참고 정리</div><div class=\"tab-note-item\">\"토지, 건물 가격구성비 구하기\", \"거래대금현가\" 메모는 각각 배분법·TVM(1. 기초/TVM 탭)과 중복되는 상호참조 링크([[거래사례비교법]], [[감정평가기초]])라 별도 문항화하지 않았습니다.</div>" },
+  t_land: { title: "토지/건물(복합부동산) — 일괄평가·구분건물·지역경계" },
   t_mach: { title: "기계기구 등 — 재조달원가 산정" },
   t_pol: { title: "오염부동산 등 — 스티그마 효과 산정(오염 가치하락액)" },
   t_int: { title: "무형/기업가치 — 기업가치평가·영업권" },
   t_sec: { title: "유가증권 — 비상장주식 순자산가치법" },
-  rent: { title: "임대료 감정평가 — 임대사례비교법·적산법", note: "<div class=\"tab-note-title\">임대료 감정평가 — 참고 정리</div><div class=\"tab-note-item\">집합상가 투자수익률 관련 <strong>임대료형성요인비교치</strong> 메모는 세부 설명이 남아있지 않아 질문화하지 않았습니다.</div>" },
+  rent: { title: "임대료 감정평가 — 임대사례비교법·적산법" },
   lease: { title: "임대차 감정평가 — 완전소유권·임대권·임차권가치" },
   basics: { title: "감정평가기초 — 획지·필지·합필가치·토지형상", note: "<div class=\"tab-note-title\">감정평가기초 — 참고 정리</div><div class=\"tab-note-item\">개별요인 비교 시 <strong>도로의 폭</strong>은 접면도로 상태(가로조건) 판단의 기본 자료이나, 별도의 산식이나 고정기준이 정리되어 있지 않아 문제화하지 않았습니다.</div>" },
   tvm: { title: "화폐의 시간가치(TVM) — 저당대출·잔금·거래대금 현가 산정" },
@@ -353,6 +352,62 @@ const tabMeta = {
 };
 
 const dataset = {
+  sec_gnd: [
+    {
+      id: 1,
+      prompt: "지상권 설정 감정평가 시 표준지 선정기준",
+      keywords: [
+        { word: "지상건축물로 인한 영향이 없는 사례", alt: [] },
+        { word: "공법상 제한 유사한 표준지 선정", alt: [] }
+      ],
+      modelAnswer: "- <strong>지상건축물로 인한 영향이 없는 사례</strong>를 선정한다.<br>- <strong>공법상 제한이 유사한 표준지</strong>를 선정한다."
+    },
+    {
+      id: 2,
+      tall: true,
+      ref: "Q9-2",
+      prompt: "지상권 설정 시 토지가액 산정구조",
+      keywords: [
+        { word: "건축물 없는 상태 평가", alt: [] },
+        { word: "귀속임대료", alt: [] },
+        { word: "지상권설정시 토지가액 = 토지가격 - 지상권가치", alt: [] }
+      ],
+      modelAnswer: "I. 건축물 없는 상태로 평가<br><br>II. 지상권가액<br>1. <strong>귀속임대료</strong>: (1)시장임대료 (2)계약임대료 (3)귀속임대료<br>2. 지상권가치<br><br>III. <strong>지상권설정시 토지가액 = 토지가격 − 지상권가치</strong>"
+    },
+    {
+      id: 3,
+      tall: true,
+      ref: "종합39번",
+      prompt: "구분지상권 설정평가 시 노후율(입체이용저해율) 고려 여부",
+      keywords: [
+        { word: "건물이 최유효이용과 유사하고 철거타당성이 없는 바, 노후율을 고려", alt: [] },
+        { word: "입체이용저해율(노후율 고려): (건물등+지하) x 경과/내용+ 기타", alt: [] },
+        { word: "경과: 경제적내용연수 - 장래보존연수", alt: [] }
+      ],
+      modelAnswer: "현재 건부지상태이며, <strong>건물이 최유효이용과 유사하고 철거타당성이 없는 바, 노후율을 고려</strong>한다.<br>- <strong>입체이용저해율(노후율 고려)</strong>: (건물등+지하) × 경과/내용 + 기타<br>- <strong>경과 = 경제적내용연수 − 장래보존연수</strong><br>- 이유: 새로 지을 때 그만큼 손해이므로, 내용연수를 다 채우면 저해율을 그대로 반영하고 내용연수 초반이면 저해율에 덜 반영한다."
+    },
+    {
+      id: 4,
+      very_tall: true,
+      prompt: "구분지상권 설정 시 입체이용저해율 산정절차",
+      keywords: [
+        { word: "영구적인 시설물이므로 토지가액x입체이용저해율로 결정", alt: [] },
+        { word: "건물등이용저해율", alt: [] },
+        { word: "지하이용저해율", alt: [] },
+        { word: "그밖의이용저해율", alt: [] }
+      ],
+      modelAnswer: "1. 처리방침: <strong>영구적인 시설물이므로 토지가액×입체이용저해율로 결정</strong><br>2. 토지의 평가액<br>3. 입체이용저해율 산정<br>&nbsp;&nbsp;1) <strong>건물등이용저해율</strong>: 최유효층수 및 저층시가지 해당 여부로 저해층수·건물등이용저해율 결정<br>&nbsp;&nbsp;2) <strong>지하이용저해율</strong>: 토피심도, 저층시가지한계심도, 체감률(p) 적용<br>&nbsp;&nbsp;3) <strong>그밖의이용저해율</strong>: 토피가 일정 기준 이하이면 상하배분 최고치 적용<br>&nbsp;&nbsp;4) 입체이용저해율 결정<br>4. 구분지상권 설정가치(설정대가)"
+    },
+    {
+      id: 5,
+      prompt: "구분지상권 설정 후 토지 감정평가액 산정구조",
+      keywords: [
+        { word: "구분지상권 미설정부분", alt: [] },
+        { word: "구분지상권 설정부분", alt: [] }
+      ],
+      modelAnswer: "III. 구분지상권 설정후 토지 감정평가액<br>1. <strong>구분지상권 미설정부분</strong><br>2. <strong>구분지상권 설정부분</strong><br>3. 소계"
+    }
+  ],
   s_land: [
     {
       id: 1,
@@ -539,60 +594,6 @@ const dataset = {
     },
     {
       id: 11,
-      prompt: "지상권 설정 감정평가 시 표준지 선정기준",
-      keywords: [
-        { word: "지상건축물로 인한 영향이 없는 사례", alt: [] },
-        { word: "공법상 제한 유사한 표준지 선정", alt: [] }
-      ],
-      modelAnswer: "- <strong>지상건축물로 인한 영향이 없는 사례</strong>를 선정한다.<br>- <strong>공법상 제한이 유사한 표준지</strong>를 선정한다."
-    },
-    {
-      id: 12,
-      tall: true,
-      ref: "Q9-2",
-      prompt: "지상권 설정 시 토지가액 산정구조",
-      keywords: [
-        { word: "건축물 없는 상태 평가", alt: [] },
-        { word: "귀속임대료", alt: [] },
-        { word: "지상권설정시 토지가액 = 토지가격 - 지상권가치", alt: [] }
-      ],
-      modelAnswer: "I. 건축물 없는 상태로 평가<br><br>II. 지상권가액<br>1. <strong>귀속임대료</strong>: (1)시장임대료 (2)계약임대료 (3)귀속임대료<br>2. 지상권가치<br><br>III. <strong>지상권설정시 토지가액 = 토지가격 − 지상권가치</strong>"
-    },
-    {
-      id: 13,
-      tall: true,
-      ref: "종합39번",
-      prompt: "구분지상권 설정평가 시 노후율(입체이용저해율) 고려 여부",
-      keywords: [
-        { word: "건물이 최유효이용과 유사하고 철거타당성이 없는 바, 노후율을 고려", alt: [] },
-        { word: "입체이용저해율(노후율 고려): (건물등+지하) x 경과/내용+ 기타", alt: [] },
-        { word: "경과: 경제적내용연수 - 장래보존연수", alt: [] }
-      ],
-      modelAnswer: "현재 건부지상태이며, <strong>건물이 최유효이용과 유사하고 철거타당성이 없는 바, 노후율을 고려</strong>한다.<br>- <strong>입체이용저해율(노후율 고려)</strong>: (건물등+지하) × 경과/내용 + 기타<br>- <strong>경과 = 경제적내용연수 − 장래보존연수</strong><br>- 이유: 새로 지을 때 그만큼 손해이므로, 내용연수를 다 채우면 저해율을 그대로 반영하고 내용연수 초반이면 저해율에 덜 반영한다."
-    },
-    {
-      id: 14,
-      very_tall: true,
-      prompt: "구분지상권 설정 시 입체이용저해율 산정절차",
-      keywords: [
-        { word: "영구적인 시설물이므로 토지가액x입체이용저해율로 결정", alt: [] },
-        { word: "건물등이용저해율", alt: [] },
-        { word: "지하이용저해율", alt: [] },
-        { word: "그밖의이용저해율", alt: [] }
-      ],
-      modelAnswer: "1. 처리방침: <strong>영구적인 시설물이므로 토지가액×입체이용저해율로 결정</strong><br>2. 토지의 평가액<br>3. 입체이용저해율 산정<br>&nbsp;&nbsp;1) <strong>건물등이용저해율</strong>: 최유효층수 및 저층시가지 해당 여부로 저해층수·건물등이용저해율 결정<br>&nbsp;&nbsp;2) <strong>지하이용저해율</strong>: 토피심도, 저층시가지한계심도, 체감률(p) 적용<br>&nbsp;&nbsp;3) <strong>그밖의이용저해율</strong>: 토피가 일정 기준 이하이면 상하배분 최고치 적용<br>&nbsp;&nbsp;4) 입체이용저해율 결정<br>4. 구분지상권 설정가치(설정대가)"
-    },
-    {
-      id: 15,
-      prompt: "구분지상권 설정 후 토지 감정평가액 산정구조",
-      keywords: [
-        { word: "구분지상권 미설정부분", alt: [] },
-        { word: "구분지상권 설정부분", alt: [] }
-      ],
-      modelAnswer: "III. 구분지상권 설정후 토지 감정평가액<br>1. <strong>구분지상권 미설정부분</strong><br>2. <strong>구분지상권 설정부분</strong><br>3. 소계"
-    },
-    {
-      id: 16,
       prompt: "도시계획시설 저촉토지 — 저촉·미저촉 부분 평가 및 건물 배분법",
       keywords: [
         { word: "미저촉부분 단가 따로 구하기", alt: [] },
@@ -602,7 +603,7 @@ const dataset = {
       modelAnswer: "9-1. <strong>미저촉부분 단가 따로 구하기</strong>(저촉부분 평가액·미저촉부분 평가액 구분 산정)<br><br>10. 건물의 감정평가액(배분법)<br>&nbsp;&nbsp;(1) <strong>미저촉부분은 보수비 고려</strong><br>&nbsp;&nbsp;(2) <strong>저촉부분은 일부라도 전체 면적 적용</strong>"
     },
     {
-      id: 17,
+      id: 12,
       prompt: "둘 이상의 용도지역에 걸치는 토지평가 원칙",
       keywords: [
         { word: "면적비율에 의한 평균가격으로 평가", alt: [] },
@@ -2229,6 +2230,20 @@ const dataset = {
   ]
 };
 
+// 모범답안 분량에 맞춰 입력칸 높이를 최소한도로 추정(줄바꿈·글자수 기준)
+function estimateAnswerHeight(html) {
+  if (!html) return 52;
+  const text = html.replace(/<br\s*\/?>/gi, '\n').replace(/&nbsp;/g, ' ').replace(/<[^>]+>/g, '');
+  const CHARS_PER_ROW = 50;
+  let rows = 0;
+  text.split('\n').forEach(line => {
+    const len = line.trim().length;
+    rows += len === 0 ? 1 : Math.ceil(len / CHARS_PER_ROW);
+  });
+  rows = Math.max(rows, 2);
+  return Math.min(320, Math.max(52, rows * 23 + 30));
+}
+
 function renderMainTabs() {
   const container = document.getElementById("main-tabs");
   container.innerHTML = structure.map(c => `
@@ -2263,18 +2278,41 @@ function updateNavigation() {
   }
 }
 
+const LAST_TAB_KEY = 'appraisal-practice-last-tab-v1';
+
+function saveLastTab() {
+  try { localStorage.setItem(LAST_TAB_KEY, JSON.stringify({ main: currentMain, sub: currentSub })); } catch (e) {}
+}
+
+// 마지막으로 보던 탭 복원 — 구조가 바뀌어 더 이상 존재/활성 상태가 아니면 기본값 유지
+function restoreLastTab() {
+  try {
+    const raw = localStorage.getItem(LAST_TAB_KEY);
+    if (!raw) return;
+    const saved = JSON.parse(raw);
+    const cat = structure.find(c => c.id === saved.main);
+    if (!cat) return;
+    const subDef = cat.subs.find(s => s.id === saved.sub && s.active);
+    if (!subDef) return;
+    currentMain = saved.main;
+    currentSub = saved.sub;
+  } catch (e) {}
+}
+
 function switchMain(mainId) {
   currentMain = mainId;
   const cat = structure.find(c => c.id === mainId);
   const firstActive = cat.subs.find(s => s.active);
   currentSub = firstActive ? firstActive.id : null;
   updateNavigation();
+  saveLastTab();
 }
 
 function switchSub(subId) {
   if (!subId) return;
   currentSub = subId;
   updateNavigation();
+  saveLastTab();
 }
 
 function handleInputChange(id, value) {
@@ -2324,8 +2362,9 @@ function renderQuiz() {
             </div>
             <button class="btn btn-check" onclick="gradeSingle(${q.id}, false, true)">채점</button>
           </div>
-          <textarea 
-            class="input-box blank-input ${q.tall ? 'tall' : ''} ${q.very_tall ? 'very-tall' : ''} ${q.short ? 'short' : ''}" 
+          <textarea
+            class="input-box blank-input"
+            style="min-height:${estimateAnswerHeight(q.modelAnswer)}px;"
             id="input-${q.id}"
             oninput="handleInputChange(${q.id}, this.value)"
             onkeydown="handleKey(event, ${q.id})">${savedVal}</textarea>
@@ -2594,6 +2633,7 @@ document.addEventListener('click', (e) => {
 });
 
 try { localStorage.removeItem('appraisal-practice-review-counts-v1'); } catch (e) {} // 복습횟수 기능 제거에 따른 기존 저장값 정리
+restoreLastTab();
 updateNavigation();
 </script>
 </body>
