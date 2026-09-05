@@ -452,16 +452,16 @@
       background: color-mix(in srgb, var(--incorrect) 15%, var(--input-bg)) !important;
       color: var(--incorrect) !important;
     }
-    /* 한 번이라도 틀렸던 빈칸은 리셋해도 남는 표시 — 다시 맞히면 사라짐 */
+    /* 한 번이라도 틀렸던 빈칸은 주황 밑줄로 표시 — 리셋해도 남고, 정답을 한 번 더
+       확인해야(재확인) 사라진다. 박스 전체가 아니라 밑줄(하단 테두리)만 표시. */
     .blank-input.ever-wrong {
-      border-color: var(--ever-wrong) !important;
-      background: color-mix(in srgb, var(--ever-wrong) 15%, var(--input-bg)) !important;
-      color: var(--ever-wrong) !important;
+      border-bottom: 2px solid var(--ever-wrong) !important;
+    }
+    .blank-input.ever-wrong.correct {
+      border-bottom-color: var(--ever-wrong) !important;
     }
     .blank-input.ever-wrong.incorrect {
-      border-color: var(--incorrect) !important;
-      background: color-mix(in srgb, var(--incorrect) 15%, var(--input-bg)) !important;
-      color: var(--incorrect) !important;
+      border-bottom-color: var(--incorrect) !important;
     }
 
     /* 정답 힌트 — 박스 없이 화살표 + 텍스트로만 가볍게 표시(빈칸 옆이 덜 번잡하도록) */
@@ -2294,10 +2294,13 @@
     function applyGradeVisual(input, val, isMatch, revealHint) {
       const key = blankKey(input);
       if (revealHint) touchDailyLog(key);
+      const wasAlreadyCorrect = input.classList.contains('correct');
       if (isMatch && val) {
         input.classList.remove('incorrect');
         input.classList.add('correct');
-        if (key && quizState.everWrong[key]) {
+        // 오답 이력이 있으면 정답으로 고친 바로 그 순간이 아니라, "그 상태에서 한 번 더"
+        // 정답을 확인했을 때만 주황 밑줄을 지운다(재확인 전에는 남겨 둠).
+        if (key && quizState.everWrong[key] && wasAlreadyCorrect) {
           delete quizState.everWrong[key];
           input.classList.remove('ever-wrong');
         }
@@ -2445,7 +2448,11 @@
           if (e.key === 'Enter') {
             e.preventDefault();
 
-            if (input.dataset.checked !== "true") {
+            // 이미 채점됐어도 "오답 이력이 남아있는 정답"은 한 번 더 엔터로 재확인하면
+            // 확정(주황 밑줄 해제)되도록 재채점을 허용한다.
+            const key = blankKey(input);
+            const pendingConfirm = key && quizState.everWrong[key] && input.classList.contains('correct');
+            if (input.dataset.checked !== "true" || pendingConfirm) {
               gradeInput(input, true);
               updateScore();
               input.dataset.checked = "true";
