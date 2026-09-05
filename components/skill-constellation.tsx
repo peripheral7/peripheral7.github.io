@@ -1880,8 +1880,8 @@ export function SkillConstellation() {
     ? getLatestLogByDate(selectedProgress.logs)
     : null
 
-  const acquiredCount = Object.values(progress).filter(
-    (item) => item?.acquired,
+  const acquiredCount = nodeList.filter(
+    (node) => progress[node.id]?.acquired,
   ).length
   const totalCount = nodeList.length
   const progressPct = totalCount > 0 ? (acquiredCount / totalCount) * 100 : 0
