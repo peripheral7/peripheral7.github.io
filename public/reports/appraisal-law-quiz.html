@@ -96,7 +96,13 @@
       width: 280px;
       display: flex;
       flex-direction: column;
+      scrollbar-width: thin;
+      scrollbar-color: var(--border) transparent;
     }
+    .toc-sidebar::-webkit-scrollbar { width: 5px; }
+    .toc-sidebar::-webkit-scrollbar-track { background: transparent; }
+    .toc-sidebar::-webkit-scrollbar-thumb { background: var(--border); }
+    .toc-sidebar::-webkit-scrollbar-thumb:hover { background: var(--text-muted); }
 
     .toc-sidebar h3 {
       font-size: 1.1rem;
@@ -557,6 +563,38 @@
       transition: 0.2s;
     }
     #themeToggleBtn:hover { transform: scale(1.05); }
+
+    #scrollTopBtn {
+      position: fixed;
+      bottom: 92px;
+      right: 30px;
+      width: 50px;
+      height: 50px;
+      border-radius: 0;
+      background: var(--card-bg);
+      border: 1px solid var(--border);
+      color: var(--text-muted);
+      font-size: 1.1rem;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      box-shadow: 0 4px 10px rgba(0,0,0,0.15);
+      z-index: 1000;
+      cursor: pointer;
+      transition: 0.2s;
+      opacity: 0;
+      pointer-events: none;
+      transform: translateY(6px);
+    }
+    #scrollTopBtn.visible {
+      opacity: 1;
+      pointer-events: auto;
+      transform: translateY(0);
+    }
+    #scrollTopBtn:hover {
+      color: var(--toc-active);
+      border-color: var(--toc-active);
+    }
 
     .back-to-board {
       position: fixed;
@@ -2051,6 +2089,7 @@
   </div>
 
   <button id="themeToggleBtn" onclick="toggleTheme()" title="테마 전환">Dark</button>
+  <button id="scrollTopBtn" onclick="window.scrollTo({top:0,behavior:'smooth'})" title="맨 위로" aria-label="맨 위로">↑</button>
 
   <script>
     let isReviewMode = false;
@@ -2910,6 +2949,12 @@
         toggleCheckAndHints();
       }
     });
+
+    // 일정 스크롤 이상 내려갔을 때만 "맨 위로" 버튼을 보여준다
+    window.addEventListener('scroll', () => {
+      const btn = document.getElementById('scrollTopBtn');
+      if (btn) btn.classList.toggle('visible', window.scrollY > 600);
+    }, { passive: true });
 
     // 초기화: 저장된 진행상황 로드 → 카드별 서술형/메모 패널 부착 → 빈칸 답안 복원 → 필터/목차 렌더
     loadStateFromStorage();
