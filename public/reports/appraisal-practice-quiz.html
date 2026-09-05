@@ -252,14 +252,14 @@ const structure = [
       {id: 't_fac', name: '공장 / 사업체', active: false},
       {id: 't_int', name: '무형 / 기업가치', active: true},
       {id: 't_sec', name: '유가증권', active: true},
-      {id: 't_pol', name: '오염부동산 등', active: false}
+      {id: 't_pol', name: '오염부동산 등', active: true}
     ]
   },
   {
     id: 'c6', name: '6. 타당성/최유효',
     subs: [
       {id: 'feasibility', name: '타당성분석', active: true},
-      {id: 'hbu', name: '최유효분석', active: false}
+      {id: 'hbu', name: '최유효분석', active: true}
     ]
   },
   {
@@ -272,8 +272,8 @@ const structure = [
   {
     id: 'c8', name: '8. 표준지/주택',
     subs: [
-      {id: 's_land', name: '표준지', active: false},
-      {id: 's_house', name: '표준주택', active: false}
+      {id: 's_land', name: '표준지', active: true},
+      {id: 's_house', name: '표준주택', active: true}
     ]
   },
   {
@@ -295,8 +295,12 @@ let currentMain = 'c9';
 let currentSub = 'general';
 
 const state = {
+  hbu: { inputs: {}, graded: {}, individuallyGraded: {}, globalGraded: false },
+  s_land: { inputs: {}, graded: {}, individuallyGraded: {}, globalGraded: false },
+  s_house: { inputs: {}, graded: {}, individuallyGraded: {}, globalGraded: false },
   t_land: { inputs: {}, graded: {}, individuallyGraded: {}, globalGraded: false },
   t_mach: { inputs: {}, graded: {}, individuallyGraded: {}, globalGraded: false },
+  t_pol: { inputs: {}, graded: {}, individuallyGraded: {}, globalGraded: false },
   t_int: { inputs: {}, graded: {}, individuallyGraded: {}, globalGraded: false },
   t_sec: { inputs: {}, graded: {}, individuallyGraded: {}, globalGraded: false },
   rent: { inputs: {}, graded: {}, individuallyGraded: {}, globalGraded: false },
@@ -320,8 +324,12 @@ const state = {
 };
 
 const tabMeta = {
+  hbu: { title: "최유효이용 분석 — 대안선정·건부감가·개발대안 검토" },
+  s_land: { title: "표준지공시지가 — 선정기준·교체사유·평가 유의사항" },
+  s_house: { title: "표준주택가격 — 평가방법 및 공시가격 산정" },
   t_land: { title: "토지/건물(복합부동산) — 일괄평가·구분건물·지상권·지역경계", note: "<div class=\"tab-note-title\">토지/건물(복합부동산) — 참고 정리</div><div class=\"tab-note-item\">\"토지, 건물 가격구성비 구하기\", \"거래대금현가\" 메모는 각각 배분법·TVM(1. 기초/TVM 탭)과 중복되는 상호참조 링크([[거래사례비교법]], [[감정평가기초]])라 별도 문항화하지 않았습니다.</div>" },
   t_mach: { title: "기계기구 등 — 재조달원가 산정" },
+  t_pol: { title: "오염부동산 등 — 스티그마 효과 산정(오염 가치하락액)" },
   t_int: { title: "무형/기업가치 — 기업가치평가·영업권" },
   t_sec: { title: "유가증권 — 비상장주식 순자산가치법" },
   rent: { title: "임대료 감정평가 — 임대사례비교법·적산법", note: "<div class=\"tab-note-title\">임대료 감정평가 — 참고 정리</div><div class=\"tab-note-item\">집합상가 투자수익률 관련 <strong>임대료형성요인비교치</strong> 메모는 세부 설명이 남아있지 않아 질문화하지 않았습니다.</div>" },
@@ -345,6 +353,78 @@ const tabMeta = {
 };
 
 const dataset = {
+  s_land: [
+    {
+      id: 1,
+      very_tall: true,
+      ref: "종합106번",
+      prompt: "표준지공시지가 선정기준·교체사유 및 평가 시 유의사항",
+      keywords: [
+        { word: "대표성, 중용성, 안정성, 확장성", alt: [] },
+        { word: "국공유지는 선정하지 아니하나... 지가수준 대표할 표준지 필요하는 경우 선정", alt: [] },
+        { word: "기준성이 상실되면 교체·삭제할 수 있다", alt: [] },
+        { word: "면적비율에 의한 평균가격으로 평가", alt: [] },
+        { word: "나지상정평가", alt: [] },
+        { word: "현황 전을 기준하여 평가", alt: [] },
+        { word: "용도상 불가분 관계가 인정되므로 일단지를 기준", alt: [] }
+      ],
+      modelAnswer: "1. 선정기준<br>(1) 일반기준: <strong>대표성, 중용성, 안정성, 확장성</strong><br>(2) 예외: 특수토지 등은 토지형상·위치 등이 표준적인 것, <strong>국공유지는 선정하지 아니하나</strong> 일반재산인 경우와 <strong>지가수준 대표할 표준지 필요하는 경우 선정</strong>한다.<br><br>2. 교체사유<br>특별한 사유가 없는 한 교체하지 아니하나, 도시계획사항의 변경, 토지이용상황의 변경, 개별공시지가 산정 시 활용성이 낮은 경우 등 <strong>기준성이 상실되면 교체·삭제할 수 있다</strong>.<br><br>3. 표준지 평가 및 거래사례 선정 시 유의사항<br>- 도시계획도로에 저촉되고 잔여지 면적이 미미하면 저촉으로 본다.<br>- 녹지·주거지역에 걸치는 경우 <strong>면적비율에 의한 평균가격으로 평가</strong>한다.<br>- 최근 2년 이내, 위치적·물적 유사성이 있는 거래사례를 기준한다.<br>- 표준지는 <strong>나지상정평가</strong>하며, 환지예정지 지정 전이므로 종전토지를 기준한다.<br>- 주위환경으로 보아 일시적 이용으로 판단되면 대상토지만을 기준으로 평가한다.<br>- 개발제한구역 내 건축물이 없는 지목 대(垈)로서 건축이 불가능한 토지는 <strong>현황 전을 기준하여 평가</strong>한다.<br>- <strong>용도상 불가분 관계가 인정되므로 일단지를 기준</strong>하되, 도시계획시설도로가 실시계획인가고시 후 건설공사 중이면 현황도로로 본다."
+    },
+    {
+      id: 2,
+      very_tall: true,
+      ref: "종합107번",
+      prompt: "골프장을 표준지로 선정한 경우의 요인비교 및 3방식 적용",
+      keywords: [
+        { word: "서울과의 거리 기준, 역수로 비교", alt: [] },
+        { word: "전체(등록)면적과 개발지비율 기준", alt: [] },
+        { word: "부지에 화체되지 아니한 시설귀속소득", alt: [] },
+        { word: "재조달원가 - 적산가액(만년감가, 관찰감가도 경년감가에 상응)", alt: [] },
+        { word: "관리시설비용 제외", alt: [] }
+      ],
+      modelAnswer: "- 지역요인비교치: <strong>서울과의 거리 기준, 역수로 비교</strong><br>- 개별요인비교치: <strong>전체(등록)면적과 개발지비율 기준</strong><br>- 수익환원법: 장래 순수익 추정, 시설 재조달원가는 건축비지수로 보정<br>&nbsp;&nbsp;부지에 <strong>화체되지 아니한 시설귀속소득</strong>을 고려<br>&nbsp;&nbsp;<strong>재조달원가 − 적산가액</strong>(만년감가, 관찰감가도 경년감가에 상응)<br>&nbsp;&nbsp;귀속소득(× 건물환원이율)<br>- 원가법: 골프장부지에 화체되지 아니한 <strong>관리시설비용은 제외</strong>한다."
+    }
+  ],
+  s_house: [
+    {
+      id: 1,
+      tall: true,
+      prompt: "표준주택가격 평가방법 및 공시가격 산정절차",
+      keywords: [
+        { word: "토지, 건물을 일체로 하여 거래사례비교법으로 평가", alt: [] },
+        { word: "토지 건물가격의 배분", alt: [] },
+        { word: "조사보고서 작성 -> 공시가격 산정", alt: [] }
+      ],
+      modelAnswer: "표준주택 조사·평가 기준에 따라 <strong>토지, 건물을 일체로 하여 거래사례비교법으로 평가</strong>한다.<br>가격평가표 작성 및 공시가격: (1) <strong>토지·건물가격의 배분</strong>, (2) <strong>조사보고서 작성 → 공시가격 산정</strong>"
+    }
+  ],
+  hbu: [
+    {
+      id: 1,
+      prompt: "최유효이용 대안선정 시 용도·용적률 제한",
+      keywords: [
+        { word: "불허용도의 대안, 허용적률 이상으로 선정할 수 없다", alt: [] }
+      ],
+      modelAnswer: "대안선정 시 <strong>불허용도의 대안</strong>은 선정할 수 없으며, <strong>허용적률 이상으로도 선정할 수 없다</strong>."
+    },
+    {
+      id: 2,
+      prompt: "건부감가를 고려한 대상토지의 적정매도가격 산정",
+      keywords: [
+        { word: "최유효이용을 상정한 가격인 나지가격", alt: ["나지가격"] },
+        { word: "건부감가인 대상건물의 철거비를 공제", alt: ["철거비를 공제"] }
+      ],
+      modelAnswer: "대상의 적정매도가격은 대상토지의 <strong>최유효이용을 상정한 가격인 나지가격</strong>에서 <strong>건부감가인 대상건물의 철거비를 공제</strong>한 가격이다."
+    },
+    {
+      id: 3,
+      prompt: "개발대안 검토 시 토지가치 산정식",
+      keywords: [
+        { word: "(가격 - 관리비)/환원이율 - 건물공사비용", alt: [] }
+      ],
+      modelAnswer: "개발대안 검토: <strong>(가격 − 관리비) / 환원이율 − 건물공사비용</strong>"
+    }
+  ],
   t_land: [
     {
       id: 1,
@@ -530,6 +610,21 @@ const dataset = {
         { word: "걸치는 면적이 미미한 바 주된 용도지역을 기준", alt: [] }
       ],
       modelAnswer: "- <strong>면적비율에 의한 평균가격으로 평가</strong>한다.<br>- 둘 이상의 용도지역에 걸치는 토지로서 유사한 표준지를 기준하되, <strong>용도지역의 비율은 행정적 조건으로 보정</strong>한다.<br>- 다만 한 용도지역에 <strong>걸치는 면적이 미미한 바 주된 용도지역을 기준</strong>으로 평가하는 경우도 있다."
+    }
+  ],
+  t_pol: [
+    {
+      id: 1,
+      tall: true,
+      ref: "종합65번",
+      prompt: "오염부동산 평가 — 스티그마 효과 및 가치하락액 산정",
+      keywords: [
+        { word: "스티그마 = 오염으로 인한 가치하락액 - 직접 복구비용", alt: [] },
+        { word: "오염 가치하락액 = 오염전토지 - 오염후토지", alt: [] },
+        { word: "시장성이 반영된 비준가액을 기준", alt: [] },
+        { word: "직접 복구비용: 시장할인율 적용하여 현가", alt: [] }
+      ],
+      modelAnswer: "<strong>스티그마 = 오염으로 인한 가치하락액 − 직접 복구비용</strong><br>- <strong>오염 가치하락액 = 오염전토지 − 오염후토지</strong>(시장성이 반영된 비준가액을 기준으로 한다)<br>- <strong>직접 복구비용</strong>: 시장할인율을 적용하여 현가로 산정한다."
     }
   ],
   t_mach: [
