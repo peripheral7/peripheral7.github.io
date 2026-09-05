@@ -182,11 +182,10 @@
     .toc-item.active {
       color: var(--toc-active);
       font-weight: 800;
+    }
+    .toc-item.active .toc-item-label {
       text-decoration: underline;
       text-underline-offset: 3px;
-    }
-    .toc-item.active .toc-progress-badge {
-      text-decoration: none;
     }
 
     .content { width: 100%; max-width: 1180px; flex-shrink: 1; }
@@ -2062,8 +2061,22 @@
 
     // ---- 로컬 저장(빈칸 정답 / 서술형 / 메모) ----
     const STORAGE_KEY = 'admin-law-quiz-progress-v1';
-    const SUMMARY_KEY = 'admin-law-quiz-summary-v1'; // 블로그 카드에서 복습 여부를 읽어가는 요약 키
-    let quizState = { blanks: {}, essays: {}, memos: {}, everWrong: {} };
+    const SUMMARY_KEY = 'admin-law-quiz-summary-v1'; // 블로그 카드/메인페이지에서 학습현황을 읽어가는 요약 키
+    let quizState = { blanks: {}, essays: {}, memos: {}, everWrong: {}, daily: { date: '', keys: {} } };
+
+    function todayStr() {
+      const d = new Date();
+      return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
+    }
+
+    // 오늘 손댄 빈칸을 기록 — "오늘 학습량"의 기준(날짜가 바뀌면 자동으로 새로 셈)
+    function touchDailyLog(key) {
+      if (!key) return;
+      if (quizState.daily.date !== todayStr()) {
+        quizState.daily = { date: todayStr(), keys: {} };
+      }
+      quizState.daily.keys[key] = true;
+    }
 
     function loadStateFromStorage() {
       try {
@@ -2075,6 +2088,7 @@
             essays: parsed.essays || {},
             memos: parsed.memos || {},
             everWrong: parsed.everWrong || {},
+            daily: parsed.daily || { date: '', keys: {} },
           };
         }
       } catch (e) { /* 저장소 접근 불가 시 무시 */ }
@@ -2240,6 +2254,7 @@
 
     function applyGradeVisual(input, val, isMatch, revealHint) {
       const key = blankKey(input);
+      if (revealHint) touchDailyLog(key);
       if (isMatch && val) {
         input.classList.remove('incorrect');
         input.classList.add('correct');
@@ -2429,9 +2444,17 @@
 
       updateTocProgressBadges();
 
-      // 블로그 카드에서 복습 여부를 읽어갈 수 있도록 요약값 저장
+      // 블로그 카드/메인페이지에서 읽어갈 수 있도록 요약값 저장 — 전체 진행률보다도
+      // "오늘 얼마나 했는지"·"뭘 다시 봐야 하는지"가 실제 복습 판단에 더 중요함
       try {
-        localStorage.setItem(SUMMARY_KEY, JSON.stringify({ correct: allCorrect, total: allTotal, updatedAt: Date.now() }));
+        const needsReview = Object.keys(quizState.everWrong).length;
+        const todayCount = quizState.daily.date === todayStr() ? Object.keys(quizState.daily.keys).length : 0;
+        localStorage.setItem(SUMMARY_KEY, JSON.stringify({
+          correct: allCorrect, total: allTotal,
+          needsReview, todayCount,
+          lastStudyDate: quizState.daily.date || null,
+          updatedAt: Date.now(),
+        }));
       } catch (e) {}
     }
 
