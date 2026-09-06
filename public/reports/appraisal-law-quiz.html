@@ -2350,20 +2350,6 @@
 
       applyGradeVisual(input, val, isMatch, revealHint);
 
-      // 같은 카드 안에서 정답(data-ans)이 동일한 다른 빈칸은 함께 채점·토글된다
-      const card = input.closest('.card');
-      const ansAttr = input.getAttribute('data-ans');
-      if (card && ansAttr) {
-        card.querySelectorAll('.blank-input').forEach((sibling) => {
-          if (sibling === input || sibling.getAttribute('data-ans') !== ansAttr) return;
-          sibling.value = input.value;
-          if (revealHint) sibling.dataset.checked = 'true';
-          applyGradeVisual(sibling, val, isMatch, revealHint);
-          const k = blankKey(sibling);
-          if (k) quizState.blanks[k] = sibling.value;
-        });
-      }
-
       const key = blankKey(input);
       if (key) quizState.blanks[key] = input.value;
       persistState();
