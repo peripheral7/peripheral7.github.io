@@ -2469,6 +2469,17 @@
         input.onfocus = () => {
           updateTocHighlightFromCard(input.closest('.card'));
         };
+
+        // 재확인(더블 엔터)을 마치지 않은 채 다른 입력칸으로 넘어가면
+        // 그 자리에서 바로 지운다 — 카드 이동을 통해서만 지워지는 게 아니라
+        // 포커스가 빠지는 모든 경우(탭, 클릭, 스크롤 후 탭 등)에 동일하게 적용
+        input.onblur = () => {
+          if (input.classList.contains('ever-wrong')) {
+            resetEverWrongInput(input);
+            persistState();
+            syncCardGradeButton(input.closest('.card'));
+          }
+        };
       });
     }
 
@@ -2943,21 +2954,23 @@
     // 주황 밑줄(한 번이라도 틀렸던 빈칸)이 남아있는 카드로 목차를 통해 다시 이동하면
     // 입력값과 정답 힌트를 지워 처음부터 다시 풀게 한다 — 밑줄(ever-wrong) 자체는
     // 유지되어, 채점 로직상 같은 정답을 한 번 더 확인해야 비로소 해제된다
+    function resetEverWrongInput(input) {
+      input.value = '';
+      input.dataset.checked = 'false';
+      input.classList.remove('correct', 'incorrect');
+      const hint = input.nextElementSibling;
+      if (hint && hint.classList.contains('hint')) {
+        hint.classList.remove('visible');
+      }
+      const key = blankKey(input);
+      if (key) delete quizState.blanks[key];
+    }
+
     function resetEverWrongInCard(card) {
       if (!card) return;
       const inputs = card.querySelectorAll('.blank-input.ever-wrong');
       if (inputs.length === 0) return;
-      inputs.forEach((input) => {
-        input.value = '';
-        input.dataset.checked = 'false';
-        input.classList.remove('correct', 'incorrect');
-        const hint = input.nextElementSibling;
-        if (hint && hint.classList.contains('hint')) {
-          hint.classList.remove('visible');
-        }
-        const key = blankKey(input);
-        if (key) delete quizState.blanks[key];
-      });
+      inputs.forEach(resetEverWrongInput);
       persistState();
       syncCardGradeButton(card);
     }
