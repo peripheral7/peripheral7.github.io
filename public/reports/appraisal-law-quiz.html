@@ -272,7 +272,20 @@
       background: var(--toc-active);
     }
 
-    @media (max-width: 1200px) {
+    /* 태블릿 가로(~861~1200px): 데스크톱과 같은 좌측 sticky 목차를 유지하되 폭만 좁힘 */
+    @media (min-width: 861px) and (max-width: 1200px) {
+      .toc-sidebar { width: 190px; padding: 16px 12px; }
+      .toc-sidebar h3 { font-size: 0.95rem; margin-bottom: 12px; }
+      .toc-chapter-title { font-size: 0.62rem; }
+      .toc-item-label { font-size: 0.78rem; }
+      .toc-sub-item { padding-left: 10px; }
+      .toc-progress-badge { font-size: 0.55rem; padding: 1px 4px; }
+      .card-row { flex-direction: column; }
+      .side-panel { width: 100%; min-height: 220px; }
+    }
+
+    /* 태블릿 세로 이하: 목차를 상단에 접어 넣는 기존 방식 유지 */
+    @media (max-width: 860px) {
       .layout { flex-direction: column; align-items: stretch; }
       .toc-sidebar { width: 100%; position: static; max-height: 300px; margin-bottom: 20px; }
       .content { max-width: 100%; }
@@ -2845,12 +2858,12 @@
             '<button type="button" class="side-tab" data-tab="memo">메모</button>' +
           '</div>' +
           '<div class="side-pane essay-pane" data-pane="essay">' +
-            '<textarea class="essay-input" placeholder="서술형 답안을 쓰고 Enter로 채점"></textarea>' +
+            '<textarea class="essay-input" placeholder="서술형 답안을 쓰고 Enter로 채점" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false"></textarea>' +
             '<div class="essay-feedback"></div>' +
             '<div class="side-actions"><button type="button" class="mini-btn essay-reset-btn">초기화</button></div>' +
           '</div>' +
           '<div class="side-pane memo-pane" data-pane="memo" hidden>' +
-            '<textarea class="memo-input" placeholder="이 논점에 대한 메모를 남겨보세요"></textarea>' +
+            '<textarea class="memo-input" placeholder="이 논점에 대한 메모를 남겨보세요" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false"></textarea>' +
           '</div>';
         row.appendChild(panel);
 
@@ -2938,6 +2951,16 @@
       });
     }
 
+    // iOS Safari가 텍스트 입력창에 자동으로 띄우는 열쇠/카드/위치 자동완성 바를 억제
+    function disableAutofillHints() {
+      document.querySelectorAll('.blank-input').forEach((input) => {
+        input.setAttribute('autocomplete', 'off');
+        input.setAttribute('autocorrect', 'off');
+        input.setAttribute('autocapitalize', 'off');
+        input.setAttribute('spellcheck', 'false');
+      });
+    }
+
     function toggleTheme() {
       const cur = document.documentElement.getAttribute('data-theme');
       const btn = document.getElementById('themeToggleBtn');
@@ -2968,6 +2991,7 @@
     buildSidePanels();
     restoreBlanks();
     restoreEverWrong();
+    disableAutofillHints();
     document.querySelectorAll('.card').forEach(syncCardGradeButton);
     applyFilters();
   </script>
