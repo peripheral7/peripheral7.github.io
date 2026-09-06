@@ -491,8 +491,6 @@
       color: var(--correct);
       white-space: nowrap;
     }
-    .hint::before { content: '→ '; font-weight: 400; opacity: 0.55; }
-    
     .long-answer {
       display: none;
       margin-top: 12px;
@@ -2565,6 +2563,7 @@
         chapterTitle.innerText = chapters[chId] || chId;
         chapterTitle.onclick = () => {
           if(cards.length > 0) {
+            resetEverWrongInCard(cards[0]);
             scrollToCenter(cards[0]);
             updateTocHighlightFromCard(cards[0]);
           }
@@ -2590,6 +2589,7 @@
           li.appendChild(progressBadge);
 
           li.onclick = () => {
+            resetEverWrongInCard(card);
             scrollToCenter(card);
             const firstInput = card.querySelector('.blank-input');
             if (firstInput) firstInput.focus();
@@ -2952,6 +2952,28 @@
           input.classList.add('ever-wrong');
         }
       });
+    }
+
+    // 주황 밑줄(한 번이라도 틀렸던 빈칸)이 남아있는 카드로 목차를 통해 다시 이동하면
+    // 입력값과 정답 힌트를 지워 처음부터 다시 풀게 한다 — 밑줄(ever-wrong) 자체는
+    // 유지되어, 채점 로직상 같은 정답을 한 번 더 확인해야 비로소 해제된다
+    function resetEverWrongInCard(card) {
+      if (!card) return;
+      const inputs = card.querySelectorAll('.blank-input.ever-wrong');
+      if (inputs.length === 0) return;
+      inputs.forEach((input) => {
+        input.value = '';
+        input.dataset.checked = 'false';
+        input.classList.remove('correct', 'incorrect');
+        const hint = input.nextElementSibling;
+        if (hint && hint.classList.contains('hint')) {
+          hint.classList.remove('visible');
+        }
+        const key = blankKey(input);
+        if (key) delete quizState.blanks[key];
+      });
+      persistState();
+      syncCardGradeButton(card);
     }
 
     // iOS Safari가 텍스트 입력창에 자동으로 띄우는 열쇠/카드/위치 자동완성 바를 억제
