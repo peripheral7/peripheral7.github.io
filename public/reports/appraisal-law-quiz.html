@@ -2321,10 +2321,9 @@
       } else {
         input.classList.remove('correct');
         input.classList.add('incorrect');
-        if (key) {
-          quizState.everWrong[key] = true;
-          input.classList.add('ever-wrong');
-        }
+        // 주황 밑줄은 여기서 바로 붙이지 않는다 — 같은 자리에서 엔터로 바로
+        // 고쳐 맞히면 실수로 보고 넘어가고, 고치지 않은 채 다른 칸으로
+        // 벗어날 때(blur)에만 "틀린 채로 떠났다"고 보아 표시한다.
       }
       // 정답/오답 관계없이 채점하면 정답을 항상 보여준다
       const hint = input.nextElementSibling;
@@ -2474,11 +2473,22 @@
         // 그 자리에서 바로 지운다 — 카드 이동을 통해서만 지워지는 게 아니라
         // 포커스가 빠지는 모든 경우(탭, 클릭, 스크롤 후 탭 등)에 동일하게 적용
         input.onblur = () => {
-          if (input.classList.contains('ever-wrong')) {
-            resetEverWrongInput(input);
-            persistState();
-            syncCardGradeButton(input.closest('.card'));
+          // 미확정 상태로 이 칸을 벗어나는 두 경우를 여기서 함께 처리한다:
+          // ① 오답인 채로 고치지 않고 벗어남 -> 지금 주황 밑줄을 붙인다
+          // ② 오답 이력은 있으나 정답으로 고친 뒤 재확인(더블 엔터)을 안 하고 벗어남
+          // 두 경우 모두 결과는 동일 -> 밑줄만 남기고 입력값/채점상태는 초기화
+          const stillUnconfirmed = input.classList.contains('incorrect') ||
+            (input.classList.contains('ever-wrong') && input.classList.contains('correct'));
+          if (!stillUnconfirmed) return;
+
+          if (input.classList.contains('incorrect')) {
+            const key = blankKey(input);
+            if (key) quizState.everWrong[key] = true;
+            input.classList.add('ever-wrong');
           }
+          resetEverWrongInput(input);
+          persistState();
+          syncCardGradeButton(input.closest('.card'));
         };
       });
     }
