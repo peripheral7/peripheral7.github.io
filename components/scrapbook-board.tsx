@@ -54,8 +54,10 @@ export function ScrapbookBoard({ initialPosts }: { initialPosts: Post[] }) {
         </div>
       </div>
 
-      {/* 반응형 Masonry 그리드 (기존 로직 보존) */}
-      <div className="mx-auto max-w-7xl columns-1 gap-6 overflow-visible sm:columns-2 md:columns-3 xl:columns-4 [&>*:nth-child(3n)]:mt-8 [&>*:nth-child(4n)]:mt-4">
+      {/* 반응형 그리드 — CSS 다단(columns)은 항목을 위→아래로 열 단위 채우기 때문에
+          읽는 순서가 뒤섞이고, 열 높이 추정이 어긋나면 카드가 배경 밖으로 밀려나는
+          문제가 있어(특히 태블릿 md:columns-3 구간) grid로 교체해 DOM 순서를 그대로 보존 */}
+      <div className="mx-auto grid max-w-7xl grid-cols-1 gap-6 sm:grid-cols-2 md:grid-cols-3 xl:grid-cols-4">
         {filteredPosts.map((post, i) => (
           <div
             key={post.id}
