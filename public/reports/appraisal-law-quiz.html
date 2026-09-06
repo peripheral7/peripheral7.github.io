@@ -2113,6 +2113,7 @@
     // ---- 로컬 저장(빈칸 정답 / 서술형 / 메모) ----
     const STORAGE_KEY = 'admin-law-quiz-progress-v1';
     const SUMMARY_KEY = 'admin-law-quiz-summary-v1'; // 블로그 카드/메인페이지에서 학습현황을 읽어가는 요약 키
+    const FILTER_KEY = 'admin-law-quiz-filters-v1'; // 중요도/챕터 필터 선택을 새로고침·재방문 후에도 유지
     let quizState = { blanks: {}, essays: {}, memos: {}, everWrong: {}, daily: { date: '', keys: {} } };
 
     function todayStr() {
@@ -2308,13 +2309,10 @@
     function applyGradeVisual(input, val, isMatch, revealHint) {
       const key = blankKey(input);
       if (revealHint) touchDailyLog(key);
-      const wasAlreadyCorrect = input.classList.contains('correct');
       if (isMatch && val) {
         input.classList.remove('incorrect');
         input.classList.add('correct');
-        // 오답 이력이 있으면 정답으로 고친 바로 그 순간이 아니라, "그 상태에서 한 번 더"
-        // 정답을 확인했을 때만 주황 밑줄을 지운다(재확인 전에는 남겨 둠).
-        if (key && quizState.everWrong[key] && wasAlreadyCorrect) {
+        if (key && quizState.everWrong[key]) {
           delete quizState.everWrong[key];
           input.classList.remove('ever-wrong');
         }
@@ -2447,11 +2445,7 @@
           if (e.key === 'Enter') {
             e.preventDefault();
 
-            // 이미 채점됐어도 "오답 이력이 남아있는 정답"은 한 번 더 엔터로 재확인하면
-            // 확정(주황 밑줄 해제)되도록 재채점을 허용한다.
-            const key = blankKey(input);
-            const pendingConfirm = key && quizState.everWrong[key] && input.classList.contains('correct');
-            if (input.dataset.checked !== "true" || pendingConfirm) {
+            if (input.dataset.checked !== "true") {
               gradeInput(input, true);
               updateScore();
               input.dataset.checked = "true";
@@ -2472,20 +2466,14 @@
         // 재확인(더블 엔터)을 마치지 않은 채 다른 입력칸으로 넘어가면
         // 그 자리에서 바로 지운다 — 카드 이동을 통해서만 지워지는 게 아니라
         // 포커스가 빠지는 모든 경우(탭, 클릭, 스크롤 후 탭 등)에 동일하게 적용
+        // 오답인 채로 고치지 않고 이 칸을 벗어나면(blur) 그제서야 주황 밑줄을
+        // 붙이고 입력을 지운다. 정답을 맞히면 그 즉시 밑줄이 해제되므로
+        // (applyGradeVisual 참고) 여기서는 "아직 오답인" 경우만 다루면 된다.
         input.onblur = () => {
-          // 미확정 상태로 이 칸을 벗어나는 두 경우를 여기서 함께 처리한다:
-          // ① 오답인 채로 고치지 않고 벗어남 -> 지금 주황 밑줄을 붙인다
-          // ② 오답 이력은 있으나 정답으로 고친 뒤 재확인(더블 엔터)을 안 하고 벗어남
-          // 두 경우 모두 결과는 동일 -> 밑줄만 남기고 입력값/채점상태는 초기화
-          const stillUnconfirmed = input.classList.contains('incorrect') ||
-            (input.classList.contains('ever-wrong') && input.classList.contains('correct'));
-          if (!stillUnconfirmed) return;
-
-          if (input.classList.contains('incorrect')) {
-            const key = blankKey(input);
-            if (key) quizState.everWrong[key] = true;
-            input.classList.add('ever-wrong');
-          }
+          if (!input.classList.contains('incorrect')) return;
+          const key = blankKey(input);
+          if (key) quizState.everWrong[key] = true;
+          input.classList.add('ever-wrong');
           resetEverWrongInput(input);
           persistState();
           syncCardGradeButton(input.closest('.card'));
@@ -2663,6 +2651,33 @@
       }
     }
 
+    function saveFilters() {
+      try {
+        localStorage.setItem(FILTER_KEY, JSON.stringify({ grade: currentGrade, chapter: currentChapter }));
+      } catch (e) {}
+    }
+
+    function restoreFilters() {
+      let saved = null;
+      try {
+        saved = JSON.parse(localStorage.getItem(FILTER_KEY));
+      } catch (e) {}
+      if (!saved) return;
+
+      if (saved.grade) {
+        currentGrade = saved.grade;
+        document.querySelectorAll('#gradeFilters .filter-btn').forEach(b => {
+          b.classList.toggle('active', b.getAttribute('data-grade') === saved.grade);
+        });
+      }
+      if (saved.chapter) {
+        currentChapter = saved.chapter;
+        document.querySelectorAll('#chapterFilters .filter-btn').forEach(b => {
+          b.classList.toggle('active', b.getAttribute('data-chapter') === saved.chapter);
+        });
+      }
+    }
+
     function applyFilters() {
       isReviewMode = false;
       document.body.classList.remove('is-review');
@@ -2739,6 +2754,7 @@
         document.querySelectorAll('#gradeFilters .filter-btn').forEach(b => b.classList.remove('active'));
         btn.classList.add('active');
         currentGrade = btn.getAttribute('data-grade');
+        saveFilters();
         applyFilters();
       });
     });
@@ -2748,6 +2764,7 @@
         document.querySelectorAll('#chapterFilters .filter-btn').forEach(b => b.classList.remove('active'));
         btn.classList.add('active');
         currentChapter = btn.getAttribute('data-chapter');
+        saveFilters();
         applyFilters();
       });
     });
@@ -3027,6 +3044,7 @@
     restoreEverWrong();
     disableAutofillHints();
     document.querySelectorAll('.card').forEach(syncCardGradeButton);
+    restoreFilters();
     applyFilters();
   </script>
 </body>
