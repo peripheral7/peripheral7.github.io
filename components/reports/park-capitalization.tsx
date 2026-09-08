@@ -2,16 +2,18 @@ import { MapLightbox } from "@/components/reports/map-lightbox"
 import {
   parkCapBaselineTable,
   parkCapCircuityTable,
+  parkCapConventionTable,
   parkCapCorrespondence,
   parkCapFacts,
   parkCapFindings,
   parkCapFooter,
   parkCapLimits,
-  parkCapMagnitude,
   parkCapMaps,
+  parkCapMediationTable,
   parkCapMeta,
   parkCapMethodology,
-  parkCapModelSelectTable,
+  parkCapPathTable,
+  parkCapReplicationTable,
   parkCapSample,
   parkCapSpatialTable,
   parkCapSpecLadderTable,
@@ -192,7 +194,7 @@ export function ParkCapitalizationReport() {
       <p className="mt-3 max-w-3xl text-[0.92rem] leading-relaxed">
         네 지역의 공원을 규모별 면적비로 보면, 겉보기엔 비슷한 2기 신도시들이 판이한 녹지 구조를
         갖고 있다. 이 구성이 곧 통합 지표에 적용되는 가중치이며, 뒤에서 볼 편의의 방향과 크기를
-        결정한다. 참고로 <strong>통합 최근접거리의 평균은 네 지역 모두 308~371m로 거의 같다</strong> —
+        결정한다. 참고로 <strong>통합 최근접거리의 평균은 네 지역 모두 146~168m로 거의 같다</strong> —
         이 지표만 보면 네 도시의 공원 환경은 구별되지 않는다.
       </p>
 
@@ -240,18 +242,20 @@ export function ParkCapitalizationReport() {
       <p className="mt-3 max-w-3xl text-[0.92rem] leading-relaxed">
         통제변수를 완전히 고정한 채 공원 변수만 네 단계로 바꿔 추정했다. ⓪ 공원 변수를 넣지 않은
         모형, ① 위계를 통합한 최근접거리, ② 지역 대표공원 거리만, ③ 세 위계 동시. 로그–로그
-        설정이므로 계수는 탄력성이며, −0.067은 그 규모 공원까지의 거리가 10% 멀어질 때 단가가 약
-        0.67% 낮아진다는 뜻이다.
+        설정이므로 계수는 탄력성이며, −0.080은 그 규모 공원까지의 거리가 10% 멀어질 때 단가가 약
+        0.8% 낮아진다는 뜻이다.
       </p>
       <Table spec={parkCapSpecLadderTable} />
 
       <div className="mt-5 rounded border border-border border-l-[3px] border-l-accent bg-muted/40 px-4 py-3.5 text-[0.88rem] leading-relaxed">
-        <strong>①→②에서 회복되는 것과 ②→③에서 교정되는 것이 다르다.</strong> 동탄2 남부에서는
-        통합거리(0.014, t=0.34)를 대표공원 거리로 바꾸는 것만으로 −0.082(p&lt;0.01)가 나타난다 —
-        <em className="not-italic text-accent"> 효과의 존재 여부</em>가 회복된다. 반대로 운정에서는
-        대표공원 단독으로 유의해 보이던 −0.045가 세 위계를 함께 넣자 −0.009로 사라지고 Tier2가
-        −0.070으로 드러난다 — <em className="not-italic text-accent">효과의 귀속 대상</em>이 교정된다.
-        그리고 어느 도시에서 어느 이행이 결정적인지는 그 도시의 공원 스톡 구성이 정한다.
+        <strong>통합 지표는 신도시에서 정보를 담지 못한다.</strong> 공원 경계까지 재면 “가장 가까운
+        공원까지 거리”가 평균 146~168m로 네 지역이 사실상 같아진다 — 어느 단지든 걸어서 2분 안에
+        어떤 공원이든 닿는다는 뜻이고, 이 지표로는 도시 간 차이도 도시 내 차이도 잡히지 않는다.
+        실제로 동탄2 남부에서 통합계수는 +0.019(t=0.61), 광교는 +0.003(t=0.11)으로 부호조차 반대다.
+        여기서 <em className="not-italic text-accent">어느 규모의 공원인지를 지정하는 것만으로</em>{" "}
+        동탄2 남부는 −0.080(p&lt;0.01), 광교는 −0.044(p&lt;0.05)가 된다. 예외는 운정으로, 세 위계가
+        균등해 통합 지표가 특정 규모로 치우치지 않는 유일한 지역이며 그곳에서만 통합계수가
+        유의하다(−0.065, p&lt;0.05).
       </div>
 
       <div className="mt-6 grid grid-cols-1 gap-4 lg:grid-cols-2">
@@ -282,43 +286,55 @@ export function ParkCapitalizationReport() {
       {/* 04 기본모형 */}
       <SectionTitle n="04">헤도닉 회귀 — 기본모형</SectionTitle>
       <p className="mt-3 max-w-3xl text-[0.92rem] leading-relaxed">
-        가장 견고한 결과는 공원이 아니라 <strong>지하철 거리</strong>다. 네 지역 모두에서
-        −0.10~−0.26으로 유의하며, 어느 지역에서도 공원보다 계수가 크다. 특히 동탄2 북부에서
-        −0.26으로 가장 큰데, 이 지역의 공원 계수는 세 위계 모두 0에 가깝다.
+        세 위계를 동시에 넣으면 공원 계수 중 10% 수준에서라도 유의한 것은 동탄2 남부 Tier1
+        하나뿐이다. 가장 견고한 결과는 공원이 아니라 <strong>지하철 거리</strong>와{" "}
+        <strong>생활상권 지수</strong>다.
       </p>
       <Table spec={parkCapBaselineTable} />
 
-      <figure className="mt-5">
-        <div className="overflow-hidden rounded border border-border bg-card">
-          <figcaption className="border-b border-border px-4 py-2.5 font-mono text-[0.62rem] uppercase tracking-[0.12em] text-muted-foreground">
-            유의한 두 계수의 경제적 크기
-          </figcaption>
-          <div className="grid grid-cols-1 gap-px bg-border sm:grid-cols-2">
-            {parkCapMagnitude.map((m) => (
-              <div key={m.label} className="bg-card p-5">
-                <p className="text-[0.8rem] font-semibold">{m.label}</p>
-                <p className="mt-1 font-mono text-[0.68rem] text-muted-foreground">
-                  탄력성 {m.elast} · {m.base}
-                </p>
-                <p className="mt-3 font-mono text-[1.4rem] font-semibold tabular-nums text-accent">
-                  {m.pct}
-                </p>
-                <p className="text-[0.72rem] text-muted-foreground">
-                  100m 접근 시 · {m.won} · 거리 절반이면 {m.half}
-                </p>
-              </div>
-            ))}
-          </div>
-        </div>
-        <p className="mt-2 text-[0.75rem] leading-relaxed text-muted-foreground">
-          금액은 각 지역 평균 거래가(동탄2 남부 6.59억 · 운정 4.23억) 기준. 두 효과 모두 거리를
-          절반으로 줄여야 5% 남짓으로, 전용면적(−0.38~−0.61)이나 지하철(−0.26)에 비하면 작은
-          크기다.
-        </p>
-      </figure>
+      {/* 05 선행연구 재현 */}
+      <SectionTitle n="05">선행연구는 어떻게 유의한 효과를 얻었나</SectionTitle>
+      <p className="mt-3 max-w-3xl text-[0.92rem] leading-relaxed">
+        선행연구는 대체로 대표 대형공원 1개소의 중심좌표를 쓰고, 상권 접근성을 따로 통제하지
+        않는다. 우리 사양에서 출발해 그 관행으로 한 단계씩 되돌리며 어디서 유의성이 생기는지
+        특정했다.
+      </p>
+      <Table spec={parkCapReplicationTable} />
 
-      {/* 05 분석단위 */}
-      <SectionTitle n="05">거래를 세느냐 단지를 세느냐</SectionTitle>
+      <div className="mt-5 rounded border border-border border-l-[3px] border-l-accent bg-muted/40 px-4 py-3.5 text-[0.88rem] leading-relaxed">
+        <strong>거리 측정점이 아니라 어메니티 통제 누락이 결정적이다.</strong> 신도시는
+        지구단위계획에서 대형공원과 중심상업지구를 함께 배치한다 — 광교호수공원 ↔ 광교중앙역,
+        동탄호수공원 ↔ 워터프론트 상업지구. 상권을 통제하지 않으면 공원 계수가{" "}
+        <em className="not-italic text-accent">공원 + 상권 + 역세권이라는 복합 입지 프리미엄을
+        통째로 흡수한다.</em> 다만 이것이 선행연구의 오류라는 뜻은 아니다. 상권을 통제하지 않은
+        계수는 <strong>총효과</strong>를, 통제한 계수는 <strong>직접효과</strong>를 추정하며 서로
+        다른 질문에 답한다.
+      </div>
+
+      <Table spec={parkCapConventionTable} />
+
+      {/* 06 매개효과 */}
+      <SectionTitle n="06">상권은 공원 효과를 매개하는가</SectionTitle>
+      <p className="mt-3 max-w-3xl text-[0.92rem] leading-relaxed">
+        총효과와 직접효과가 다르다면 그 차이가 어디로 갔는지 확인할 수 있다. 공원 접근성(X)이
+        생활상권(M)을 거쳐 가격(Y)에 이르는 경로를 Baron–Kenny 3단계로 분해하고, 간접효과의
+        신뢰구간을 백분위 부트스트랩 5,000회로 구했다. 선형모형이므로{" "}
+        <strong>총효과 c = 직접효과 c′ + 간접효과 a·b</strong> 가 정확히 성립한다.
+      </p>
+      <Table spec={parkCapMediationTable} />
+      <Table spec={parkCapPathTable} />
+      <p className="mt-3 max-w-3xl text-[0.88rem] leading-relaxed text-muted-foreground">
+        풀링 기준 총효과 −0.067 중 −0.029(42.4%)가 상권을 경유하고, 신뢰구간이 0을 포함하지
+        않는다. 동탄2 남부에서는 47.5%다. 반면 동탄2 북부와 운정은 a 경로 자체가 비유의해 매개가
+        성립하지 않는다 — 특히 운정은 공원거리가 상권 지수를 전혀 설명하지 못한다(R²=0.000).
+        <strong className="text-foreground"> 공원과 상권이 함께 배치된 도시에서만 매개가
+        나타난다</strong>는 뜻이며, 이는 “상권 통제가 계수를 절반으로 줄인다”는 관찰의 메커니즘을
+        직접 보여준다. 다만 매개분석은 매개변수와 결과 사이에 미관측 교란이 없다는 강한 가정에
+        의존하므로, 표 5의 간접효과는 인과적 매개량이 아니라 선형 분해상의 몫으로 읽어야 한다.
+      </p>
+
+      {/* 07 분석단위 */}
+      <SectionTitle n="07">거래를 세느냐 단지를 세느냐</SectionTitle>
       <p className="mt-3 max-w-3xl text-[0.92rem] leading-relaxed">
         같은 자료를 거래 단위로 돌리면 공원 계수가 훨씬 강하게 나온다. 어느 단계에서 갈라지는지를
         한 단계씩 분해했다. 계약년월 고정효과 제거나 이상치 절사는 거의 영향이 없고, 결정적인 것은
@@ -328,34 +344,28 @@ export function ParkCapitalizationReport() {
       <p className="mt-3 max-w-3xl text-[0.88rem] leading-relaxed text-muted-foreground">
         공원까지의 거리는 단지 안에서 변하지 않는다. 광교 381건의 거래는 서로 다른 381개의 거리값이
         아니라 21개의 거리값이 반복된 것이며, 잔차의 급내상관은 0.46~0.85에 이른다. Moulton 보정계수
-        8.1~18.6은 순진한 OLS 표준오차가 2.9~4.3배 과소추정됨을 뜻하고, 실제 클러스터-로버스트
-        표준오차의 확대 배율(2.6~3.9배)과 잘 맞는다. 요컨대 <strong className="text-foreground">거래
-        2,740건의 유효표본은 2,740이 아니라 단지 수에 가깝다.</strong> 표준오차 문제는
-        클러스터-로버스트로 해결되지만, 좌표 중복이 공간가중치행렬을 무너뜨리는 문제는 그것으로
-        교정되지 않는다.
+        8.1~18.6은 순진한 OLS 표준오차가 2.9~4.3배 과소추정됨을 뜻한다.{" "}
+        <strong className="text-foreground">거래 2,740건의 유효표본은 2,740이 아니라 단지 수에
+        가깝다.</strong>
       </p>
 
-      {/* 06 공간계량 */}
-      <SectionTitle n="06">공간자기상관 — 분석단위를 바꾸자 사라졌다</SectionTitle>
+      {/* 08 공간계량 */}
+      <SectionTitle n="08">공간자기상관 — 분석단위를 바꾸자 사라졌다</SectionTitle>
       <p className="mt-3 max-w-3xl text-[0.92rem] leading-relaxed">
-        거래 단위 자료에서는 같은 단지의 거래 수십 건이 동일한 대표점 좌표를 공유한다. 그 결과
-        k=3 최근접 이웃의 99~100%가 같은 단지의 다른 거래가 되고, 공간가중치행렬 W가 공간적 인접성이
-        아니라 <strong>“같은 단지 여부”</strong>를 측정하게 된다. 이때 추정되는 공간오차계수
-        0.68~0.93은 공간적 파급이 아니라 동일 단지 반복거래의 가격 유사성이며, 클러스터-로버스트
-        표준오차가 이미 처리하는 구조를 이중으로 통제한 셈이다. 분석단위를 단지로 올리자 이
-        인위적 상관이 사라졌다.
+        거래 단위 자료에서는 같은 단지의 거래 수십 건이 동일한 대표점 좌표를 공유해, k=3 최근접
+        이웃의 99~100%가 같은 단지의 다른 거래가 된다. 공간가중치행렬 W가 공간적 인접성이 아니라{" "}
+        <strong>“같은 단지 여부”</strong>를 측정하는 것이다. 분석단위를 단지로 올리자 이 인위적
+        상관이 사라졌다.
       </p>
       <Table spec={parkCapSpatialTable} />
-      <Table spec={parkCapModelSelectTable} />
       <p className="mt-3 max-w-3xl text-[0.88rem] leading-relaxed text-muted-foreground">
-        Chow 검정 F=21.43(df 33/77, p&lt;0.001)로 네 지역을 하나로 묶는 것은 기각된다. 같은 동탄2
-        안에서도 남/북의 공원 구조와 계수가 다르므로, 행정구역이나 사업지구 단위가 곧 분석 단위가 될
-        수 없다. 규모 위계에 대해 제기한 집계편의의 논리를 공간 단위에 그대로 적용한 결과이기도 하다.
+        Chow 검정 F=19.06(df 33/77, p&lt;0.001)로 네 지역을 하나로 묶는 것은 기각된다. 잔차의
+        공간자기상관이 확인되지 않으므로 공간계량모형은 최종모형이 아니라 강건성 검토로만 다룬다.
       </p>
       <Table spec={parkCapCircuityTable} />
 
-      {/* 07 기술통계 */}
-      <SectionTitle n="07">표본과 기술통계</SectionTitle>
+      {/* 09 기술통계 */}
+      <SectionTitle n="09">표본과 기술통계</SectionTitle>
       <div className="mt-5 grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
         {parkCapSample.map((s) => (
           <div key={s.key} className="rounded border border-border bg-card p-4">
@@ -385,8 +395,8 @@ export function ParkCapitalizationReport() {
       </p>
       <Table spec={parkCapVifTable} />
 
-      {/* 08 방법론 */}
-      <SectionTitle n="08">데이터 구축 방법론</SectionTitle>
+      {/* 10 방법론 */}
+      <SectionTitle n="10">데이터 구축 방법론</SectionTitle>
       <div className="mt-5 flex flex-col gap-4">
         {parkCapMethodology.map((m) => (
           <div key={m.title} className="rounded border border-border bg-card px-4 py-3.5">
@@ -396,8 +406,8 @@ export function ParkCapitalizationReport() {
         ))}
       </div>
 
-      {/* 09 한계 */}
-      <SectionTitle n="09">한계</SectionTitle>
+      {/* 11 한계 */}
+      <SectionTitle n="11">한계</SectionTitle>
       <ul className="mt-4 flex flex-col gap-3">
         {parkCapLimits.map((l) => (
           <li key={l.tag} className="grid grid-cols-[auto_1fr] gap-3">
