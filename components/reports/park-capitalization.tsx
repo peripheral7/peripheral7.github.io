@@ -2,7 +2,10 @@ import { MapLightbox } from "@/components/reports/map-lightbox"
 import {
   parkCapBaselineTable,
   parkCapCircuityTable,
+  parkCapAxisMatchTable,
+  parkCapCommerceMaps,
   parkCapConventionTable,
+  parkCapDiscrimTable,
   parkCapCorrespondence,
   parkCapFacts,
   parkCapFindings,
@@ -12,6 +15,7 @@ import {
   parkCapLimits,
   parkCapMaps,
   parkCapMdeTable,
+  parkCapMeasureTable,
   parkCapMediationTable,
   parkCapMeta,
   parkCapMethodology,
@@ -23,6 +27,7 @@ import {
   parkCapTierRuleTable,
   parkCapTiers,
   parkCapUnitTable,
+  parkCapVarianceTable,
   parkCapVifTable,
   parkCapWeightedTable,
   type RegionKey,
@@ -200,8 +205,8 @@ export function ParkCapitalizationReport() {
         네 지역의 공원을 규모별 면적비로 보면, 겉보기엔 비슷한 2기 신도시들이 판이한 녹지 구조를
         갖고 있다. 이 구성이 곧 통합 지표에 적용되는 가중치이며, 뒤에서 볼 계수 이동의 크기와
         방향을 결정한다. 참고로{" "}
-        <strong>통합 최근접거리의 평균은 네 지역 모두 146~168m로 거의 같다</strong> — 이 지표만
-        보면 네 도시의 공원 환경은 구별되지 않는다.
+        <strong>반경 1km 내 공원면적은 광교 92.2ha에서 동탄2 북부 35.6ha까지 2.6배 차이</strong>가
+        나는데, 같은 도시들을 최근접거리로 재면 146~168m로 구별되지 않는다.
       </p>
 
       <div className="mt-5 flex flex-wrap gap-4 text-[0.72rem] text-muted-foreground">
@@ -244,22 +249,27 @@ export function ParkCapitalizationReport() {
       </div>
 
       {/* 03 핵심 결과 */}
-      <SectionTitle n="03">핵심 결과 — 어느 공원인지 지정하면 효과가 나타난다</SectionTitle>
+      <SectionTitle n="03">핵심 결과 — 두 개의 축, 도시마다 다른 축</SectionTitle>
       <p className="mt-3 max-w-3xl text-[0.92rem] leading-relaxed">
-        본 분석의 결론을 먼저 제시한다. 통제변수를 전혀 바꾸지 않고{" "}
-        <strong>&lsquo;공원&rsquo;이 무엇을 가리키는지만 바꾸면</strong> 계수가 0에서 유의한 부(−)의
-        값으로 이동한다. 로그–로그 설정이므로 −0.080은 그 규모 공원까지의 거리가 10% 멀어질 때
-        단가가 약 0.8% 낮아진다는 뜻이다.
+        본 분석의 결론을 먼저 제시한다.{" "}
+        <strong>공원 접근성은 두 개의 축으로 측정되어야 하며, 어느 축이 가격에 반영되는지는 그
+        도시의 공원 스톡 구성이 결정한다.</strong> 하나는 그 도시에서 효용이 가장 높은 대형공원까지의
+        거리(<em className="not-italic">위계 축</em>)이고, 다른 하나는 걸어서 닿는 범위 안에 공원이
+        얼마나 있는가(<em className="not-italic">스톡 축</em>)다. 로그–로그 설정이므로 −0.094는 그
+        공원까지의 거리가 10% 멀어질 때 단가가 약 0.94% 낮아진다는 뜻이다.
       </p>
       <Table spec={parkCapHeadlineTable} />
+      <Table spec={parkCapAxisMatchTable} />
 
       <div className="mt-5 rounded border border-border border-l-[3px] border-l-accent bg-muted/40 px-4 py-3.5 text-[0.88rem] leading-relaxed">
-        <strong>동탄2 남부에서 이 이행이 가장 극적인 것은 우연이 아니다.</strong> 이 지역은 대표공원
-        (동탄호수공원, 44.5ha)이 최근접 공원인 단지가 <strong>3.0%</strong>에 불과하다. 통합 지표의
-        가중치가 거의 전부 중·소규모에 실려 있어 호수공원의 잠재가격이 지수에서 소거되어 있었던
-        것이다. 반대로 <em className="not-italic text-accent">운정은 세 위계가 각각 33% 내외로
-        균등한 유일한 지역</em>이고, 그래서 네 지역 중 유일하게 통합 지표가 유의하다. 통합 지표의
-        유효성 자체가 그 도시의 공원 스톡 구성에 달려 있다.
+        <strong>대표공원이 뚜렷한 도시에서는 그 공원까지의 거리가, 위계가 균등한 도시에서는 주변
+        녹지의 총량이 가격에 반영된다.</strong> 동탄2 남부는 대표공원(동탄호수공원 44.5ha)이 최근접
+        공원인 단지가 <strong>3.0%</strong>에 불과해, 최근접거리로 재면 그 공원의 잠재가격이 지수에서
+        소거된다. 반대로 운정은 대표공원이 있고 우월비도 3.71배로 높지만 세 위계가 각각 33%씩 고르게
+        깔려 있어, <em className="not-italic text-accent">주민이 실제로 이용하는 것은 특정 공원이
+        아니라 주변 녹지 전체</em>인 것으로 보인다. 효과의 크기는 광교에서 최상위 위계 공원에 100m
+        접근하는 것이 약 +2.43%(평균 235m 기준, 거래가 약 2,490만원), 운정에서 반경 500m 내
+        공원면적이 두 배가 되는 것이 약 +2.74%에 해당한다.
       </div>
 
       <div className="mt-6 grid grid-cols-1 gap-4 lg:grid-cols-2">
@@ -288,25 +298,60 @@ export function ParkCapitalizationReport() {
       </div>
 
       {/* 04 다른 조작화 검증 */}
-      <SectionTitle n="04">다른 조작화를 검증한 결과</SectionTitle>
+      <SectionTitle n="04">다른 지표를 검증한 결과</SectionTitle>
       <p className="mt-3 max-w-3xl text-[0.92rem] leading-relaxed">
-        최상위 위계 단독 사양을 채택하기까지 네 가지 조작화를 모두 추정해 비교했다. 통제변수는
-        전부 고정하고 공원 변수만 바꾼다.
+        두 축을 채택하기까지 여섯 가지 접근성 지표를 모두 추정해 비교했다. 통제변수는 전부 고정하고
+        공원 변수만 바꾼다.
+      </p>
+      <Table spec={parkCapDiscrimTable} />
+      <Table spec={parkCapMeasureTable} />
+
+      <h4 className="mt-8 text-[0.95rem] font-bold">최근접거리 — 이론적으로 부적절하다</h4>
+      <p className="mt-2 max-w-3xl text-[0.9rem] leading-relaxed">
+        먼저 선행연구를 두 계열로 구분해 둘 필요가 있다. 하나는 &lsquo;가장 가까운 공원까지의
+        거리&rsquo;를 쓰는 <strong>최근접 계열</strong>(이세영 외 2006, 김태범·장희순 2020 등)이고,
+        다른 하나는 지역을 대표하는 <strong>대형공원 1개소</strong>까지의 거리를 쓰는 계열(김시은
+        2023, 이상준 외 2026)이다. 본 분석의 위계 축은 후자에 가깝다.
+      </p>
+      <Table spec={parkCapVarianceTable} />
+      <p className="mt-3 max-w-3xl text-[0.9rem] leading-relaxed">
+        두 계열의 변량 구조는 정반대다.{" "}
+        <strong>대형공원 거리는 최근접거리보다 도시 내 표준편차가 3~6배(213~848m 대 74~142m), 도시
+        간 변이계수가 9.5배(0.668 대 0.070) 크다.</strong> 대형공원 1개소를 지정해 온 선행연구가
+        유의한 결과를 얻어 온 데에는 이 변량 차이가 작용한다 — 대형공원을 지정한 것 자체는 옳은
+        선택이었고, 본 분석이 그 계열과 갈리는 지점은 지표가 아니라 경쟁 어메니티의 통제 여부다(§06).
+      </p>
+      <p className="mt-3 max-w-3xl text-[0.9rem] leading-relaxed">
+        문제가 되는 것은 최근접 계열이다. 이 지표는 실증적으로 유의하지 않아서가 아니라{" "}
+        <strong>이론적으로 부적절하기 때문에</strong> 채택하지 않는다.{" "}
+        <strong>첫째, min 연산은 정보를 버린다.</strong> 2ha짜리 소공원 하나가 단지 옆에 있으면
+        그 도시의 대형공원이 300m에 있든 3km에 있든 같은 값을 갖는다.{" "}
+        <strong>둘째, 계획 신도시에서 도시 간 변별력을 잃는다.</strong> 경계 기준 평균이 네 지역
+        모두 146~168m이고 도시 간 변이계수가 0.070에 불과하다.{" "}
+        <strong>셋째, 지시 대상이 관측치마다 다르다.</strong> 광교에서는 이 값이 52.4%의 단지에서
+        대형공원까지의 거리이고 47.6%에서는 중규모 공원까지의 거리이며, 동탄2 북부에서는 68.3%가
+        소규모 공원까지의 거리다.
+      </p>
+
+      <h4 className="mt-8 text-[0.95rem] font-bold">거리의 평균 — 부호가 뒤집힌다</h4>
+      <p className="mt-2 max-w-3xl text-[0.9rem] leading-relaxed">
+        &lsquo;평균적 접근성&rsquo;을 세 위계 거리의 기하평균으로 구성하면 광교에서 정(+)0.063으로
+        기대와 반대 부호이며 유의하다. 위계별 계수의 부호가 엇갈리는 상태에서 등가중 평균하면 상반된
+        신호가 상쇄되기 때문이며, 최근접거리가 실패하는 것과 구조가 같다.{" "}
+        <strong className="text-foreground">평균적 접근성은 거리의 평균이 아니라 면적의 합으로
+        측정해야 한다.</strong> 스톡 축은 min 연산의 정보 손실도 가중평균의 부호 혼합도 겪지 않으며,
+        반경 안의 모든 공원이 면적에 비례해 기여한다. 다만 반경 선택이 중요하다 — 운정에서 반경을
+        1km, 1.5km로 넓히면 계수가 +0.043(t=1.46), −0.002(t=−0.03)로 무너지는데, 인접 단지가 같은
+        공원을 공유해 단지 간 변량이 소멸하기 때문이다.
+      </p>
+
+      <h4 className="mt-8 text-[0.95rem] font-bold">조작화 사양 사다리</h4>
+      <p className="mt-2 max-w-3xl text-[0.9rem] leading-relaxed">
+        참고로 공원 변수의 조작화를 네 단계로 바꾸었을 때의 계수는 다음과 같다.
       </p>
       <Table spec={parkCapSpecLadderTable} />
 
-      <h4 className="mt-8 text-[0.95rem] font-bold">① 통합 최근접거리 — 신도시에서는 상수에 가깝다</h4>
-      <p className="mt-2 max-w-3xl text-[0.9rem] leading-relaxed">
-        선행연구가 가장 널리 쓰는 지표이지만, 계획적으로 조성된 신도시에서는 두 가지 이유로
-        작동하지 않는다. <strong>첫째, 변량이 없다.</strong> 경계 기준 평균이 네 지역 모두
-        146~168m이고 표준편차도 74~142m에 그친다. 어느 단지에서든 걸어서 2분이면 어떤 공원엔가
-        닿으므로, 이 변수로 가격 차이를 설명할 여지가 거의 없다.{" "}
-        <strong>둘째, 지시 대상이 관측치마다 다르다.</strong> 광교에서는 이 값이 52.4%의 단지에서
-        대형공원까지의 거리이고 47.6%에서는 중규모 공원까지의 거리이며, 동탄2 북부에서는 68.3%가
-        소규모 공원까지의 거리다. 하나의 변수가 관측치에 따라 다른 재화를 가리키는 셈이다.
-      </p>
-
-      <h4 className="mt-8 text-[0.95rem] font-bold">③ 전 위계 동시 투입 — 개념적으로는 정확하나 식별되지 않는다</h4>
+      <h4 className="mt-8 text-[0.95rem] font-bold">전 위계 동시 투입 — 개념적으로는 정확하나 식별되지 않는다</h4>
       <p className="mt-2 max-w-3xl text-[0.9rem] leading-relaxed">
         각 계수가 다른 위계까지의 거리를 고정한 편미분 효과를 추정하므로, 통합의 가중평균 문제도
         단독 투입의 누락변수 문제도 발생하지 않는다. 그럼에도 5% 수준에서 유의한 계수는 하나도
@@ -319,7 +364,7 @@ export function ParkCapitalizationReport() {
       </p>
       <Table spec={parkCapMdeTable} />
 
-      <h4 className="mt-8 text-[0.95rem] font-bold">④⑤ 가중지수 — 자유도는 아끼지만 상반된 신호를 섞는다</h4>
+      <h4 className="mt-8 text-[0.95rem] font-bold">가중지수 — 자유도는 아끼지만 상반된 신호를 섞는다</h4>
       <p className="mt-2 max-w-3xl text-[0.9rem] leading-relaxed">
         자유도 문제를 피하는 자연스러운 대안은 세 거리를 하나의 지수로 묶는 것이다. 중요한 것은 이
         사양이 <strong>전 위계 모형의 제약(restricted) 버전</strong>이라는 점이다. 지수에 계수 β를
@@ -377,6 +422,14 @@ export function ParkCapitalizationReport() {
       </p>
       <Table spec={parkCapMediationTable} />
       <Table spec={parkCapPathTable} />
+
+      <p className="mt-6 max-w-3xl text-[0.92rem] leading-relaxed">
+        a 경로의 강도 차이는 공간 배치에서 그대로 드러난다. 아래 지도는 같은 배경 규약에
+        생활상권 POI 밀도를 육각 그리드(폭 225m)로 얹고 공원은 윤곽선만 남긴 것이다.
+        동탄2 남부는 상권 밀집지가 공원 회랑을 따라 늘어서 있는 반면, 운정은 호수공원 주변이
+        비어 있고 상권이 지구 외곽에 별도로 형성되어 있다.
+      </p>
+      <MapLightbox maps={parkCapCommerceMaps} />
       <p className="mt-3 max-w-3xl text-[0.88rem] leading-relaxed text-muted-foreground">
         풀링 기준 총효과 −0.067 중 −0.027(40.4%)이 상권을 경유하고, 신뢰구간이 0을 포함하지
         않는다. 동탄2 남부에서는 47.5%다. 반면 운정은 공원거리가 상권 지수를 전혀 설명하지 못하고
