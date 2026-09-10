@@ -361,6 +361,57 @@ export const parkCapSample = [
   { key: "uj" as RegionKey, label: "운정", rows: [["단지", "26개"], ["집계 거래", "303건"], ["평균 단가", "501만원/㎡"], ["최상위 위계 거리", "720m"], ["통합 최근접", "146m"]] },
 ]
 
+export const parkCapSources = [
+  {
+    kind: "종속변수",
+    name: "아파트 매매 실거래",
+    org: "국토교통부 실거래가 공개시스템",
+    detail: "계약일 2025-01-01 ~ 2025-06-30 · 수원시 영통구, 용인시 기흥구·수지구, 화성시 동탄구, 파주시 5개 시군구 · 지번주소 기준. 계약일 기준이며 해제 신고분은 제외했다.",
+  },
+  {
+    kind: "공원",
+    name: "도시계획시설(공원) 결정경계",
+    org: "국토교통부 LSMD_CONT_UQ162 · 국가공간정보포털",
+    detail: "경기도(41) 2026년 8월 고시분 · 원좌표계 EPSG:5174. 관리번호 대분류 중 UQT2(공원)만 채택하고 UQT3(녹지)·UQT1(광장)은 제외했다.",
+  },
+  {
+    kind: "단지 특성",
+    name: "공동주택 단지 기본정보",
+    org: "공동주택관리정보시스템(K-apt)",
+    detail: "2026-06-26 내려받음 · 세대수, 총주차대수, 사용승인일, 시공사.",
+  },
+  {
+    kind: "상권",
+    name: "상가(상권)정보",
+    org: "소상공인시장진흥공단",
+    detail: "2025-06-30 및 2026-03-31 공표분 · 소매·음식·보건 업종만 생활상권 POI로 사용했다.",
+  },
+  {
+    kind: "입지",
+    name: "지하철역 위치",
+    org: "카카오맵에서 직접 조사",
+    detail: "공공 공간정보로 배포되는 목록이 네 지역의 신설 노선을 반영하지 못해, 운영 중인 역사를 직접 조사한 뒤 카카오 로컬 API로 좌표를 변환했다.",
+  },
+  {
+    kind: "좌표",
+    name: "아파트 단지 좌표",
+    org: "카카오 로컬 API 지오코딩",
+    detail: "도로명·지번주소 기반. 미매칭 건은 카카오맵에서 수작업으로 보정했다.",
+  },
+  {
+    kind: "도로망",
+    name: "OpenStreetMap 도로·보행망",
+    org: "OpenStreetMap (Geofabrik south-korea)",
+    detail: "보행 실측거리 검증(부록 B)과 지도 배경에 사용했다.",
+  },
+  {
+    kind: "보조",
+    name: "공동주택 단지 연계정보",
+    org: "국토교통부 APHUS_HSMP_CNTC_INFO · 국가공간정보포털",
+    detail: "표본이 지역 내 단지를 얼마나 포괄하는지 검증하는 데만 썼고 회귀에는 투입하지 않았다.",
+  },
+]
+
 export const parkCapMethodology = [
   {
     title: "① 공원 데이터 — 공식 도시계획시설 결정경계",
@@ -425,7 +476,7 @@ export const parkCapLimits = [
 
 export const parkCapFooter = {
   method:
-    "종속변수 층 보정 ln(만원/㎡) · 분석단위 단지(단지당 1개 평형, 84형 우선) · 공원 변수 1개(최상위 위계 경계거리) · 거리 규약 공원 폴리곤 경계까지 최단거리 · Tier1은 우월비 1.3배 하한 적용 · Tier3 거리와 반경 내 공원면적은 검토 후 미채택 · 계약년월 고정효과 미사용 · 이분산-로버스트(HC1) 표준오차 · 공간가중치 KNN k=3/5/8 및 거리 500m/1,000m 5개 사양 · 좌표계 EPSG:5179 · Chow F=8.48(df 32/78, p<0.001) · 매개분석 백분위 부트스트랩 5,000회.",
+    "자료 출처는 §부록 C 참조 · 좌표계 EPSG:5179 · 종속변수 층 보정 ln(만원/㎡) · 분석단위 단지(단지당 1개 평형, 84형 우선) · 공원 변수 1개(최상위 위계 경계거리) · 거리 규약 공원 폴리곤 경계까지 최단거리 · Tier1은 우월비 1.3배 하한 적용 · Tier3 거리와 반경 내 공원면적은 검토 후 미채택 · 계약년월 고정효과 미사용 · 이분산-로버스트(HC1) 표준오차 · 공간가중치 KNN k=3/5/8 및 거리 500m/1,000m 5개 사양 · 좌표계 EPSG:5179 · Chow F=8.48(df 32/78, p<0.001) · 매개분석 백분위 부트스트랩 5,000회.",
   files:
     "06_01_build_complex_dataset.py · 06_02_hedonic_complex.py · 06_05_replication_mediation.py · 06_06_tier1_absolute.py · 06_07_weighted_index.py · 06_08_aggregate_access.py · 06_09_tier3_contribution.py · 06_10_reduced_spec.py · 논문/_deck_maps.py · 논문/_deck_maps_commerce.py · 논문/_map_style.py · 06_01_complex_single_dom.xlsx · 06_02_regression.xlsx · 06_02_spatial.xlsx · 06_10_reduced_spec.xlsx",
 }

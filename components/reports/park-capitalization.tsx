@@ -19,6 +19,7 @@ import {
   parkCapRejected,
   parkCapReplicationTable,
   parkCapSample,
+  parkCapSources,
   parkCapSpatialTable,
   parkCapSpecContrastTable,
   parkCapTierRuleTable,
@@ -178,7 +179,8 @@ export function ParkCapitalizationReport() {
       {/* 01 자료와 기초통계 */}
       <SectionTitle n="01">자료와 기초통계</SectionTitle>
       <p className="mt-3 max-w-3xl text-[0.92rem] leading-relaxed">
-        2025년 상반기 국토교통부 아파트 실거래 2,740건을 단지 단위 121개로 집계했다. 평형을 국민
+        2025년 상반기 국토교통부 실거래가 공개시스템의 아파트 매매 2,740건을 단지 단위 121개로
+        집계했다(자료 출처 일람은 부록 C). 평형을 국민
         주택규모 두 구간으로 한정하고, 단지×평형 내부 상·하위 5%를 절사한 뒤, 지역×평형별 층
         계수로 기준층 가격에 환산해 평균했다. 마지막으로{" "}
         <strong>단지당 한 평형만 남긴다</strong> — 84형을 기본으로 하고 거래가 하한에 못 미치는 7개
@@ -343,9 +345,12 @@ export function ParkCapitalizationReport() {
       </p>
       <p className="mt-3 max-w-3xl text-[0.92rem] leading-relaxed">
         그 차이는 공간 배치에서 그대로 드러난다. 아래 지도는 같은 배경 규약에 생활상권 POI 밀도를
-        육각 그리드(폭 225m)로 얹고 공원은 윤곽선만 남긴 것이다. 동탄2 남부는 상권 밀집지가 공원
-        회랑을 따라 늘어서 있는 반면, 운정은 호수공원 주변이 비어 있고 상권이 지구 외곽에 별도로
-        형성되어 있다.
+        육각 그리드(폭 225m)로 얹고, 공원은 규모 위계별로 구분해 윤곽선으로 남긴 것이다 — 진한
+        윤곽이 <strong>Tier1(지역 대표공원)</strong>이다. 대표공원 조건을 충족하는 공원이 없는
+        동탄2 북부에는 진한 윤곽이 나타나지 않는다.{" "}
+        <strong>Tier1 주변에 상권이 붙어 있는지가 지역을 가른다.</strong> 동탄2 남부는 동탄호수공원
+        가장자리에 상권 밀집 셀이 직접 닿아 있고 상권 밀집지가 공원 회랑을 따라 늘어서 있는 반면,
+        운정은 운정호수공원 주변이 비어 있고 상권이 지구 외곽에 별도로 형성되어 있다.
       </p>
       <MapLightbox maps={parkCapCommerceMaps} />
       <p className="mt-3 max-w-3xl text-[0.88rem] leading-relaxed text-muted-foreground">
@@ -454,8 +459,34 @@ export function ParkCapitalizationReport() {
       <Table spec={parkCapCircuityTable} />
 
       {/* 부록 C */}
-      <SectionTitle n="부록 C">데이터 구축 방법론</SectionTitle>
-      <div className="mt-5 flex flex-col gap-4">
+      <SectionTitle n="부록 C">자료 출처와 구축 방법론</SectionTitle>
+      <p className="mt-3 max-w-3xl text-[0.92rem] leading-relaxed">
+        사용한 자료는 모두 공개 자료이며, 좌표계는 EPSG:5179(UTM-K)로 통일했다.
+      </p>
+      <div className="mt-5 overflow-hidden rounded border border-border bg-card">
+        {parkCapSources.map((s, i) => (
+          <div
+            key={s.name}
+            className={`grid grid-cols-1 gap-1 px-4 py-3.5 sm:grid-cols-[5.5rem_1fr] sm:gap-4 ${
+              i === 0 ? "" : "border-t border-border"
+            }`}
+          >
+            <span className="font-mono text-[0.66rem] uppercase tracking-[0.1em] text-muted-foreground">
+              {s.kind}
+            </span>
+            <div>
+              <strong className="text-[0.88rem]">{s.name}</strong>
+              <span className="ml-2 text-[0.8rem] text-accent">{s.org}</span>
+              <p className="mt-1 text-[0.82rem] leading-relaxed text-muted-foreground">
+                {s.detail}
+              </p>
+            </div>
+          </div>
+        ))}
+      </div>
+
+      <h4 className="mt-8 text-[0.95rem] font-bold">구축 방법</h4>
+      <div className="mt-4 flex flex-col gap-4">
         {parkCapMethodology.map((m) => (
           <div key={m.title} className="rounded border border-border bg-card px-4 py-3.5">
             <strong className="block text-[0.88rem]">{m.title}</strong>
