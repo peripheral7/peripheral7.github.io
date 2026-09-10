@@ -101,9 +101,43 @@ export const parkCapTiers = [
 
 const HEAD4 = ["변수", "광교", "동탄2 남부", "동탄2 북부", "운정"]
 
+// §01 기초통계
+export const parkCapDescTable: StatTable = {
+  caption: "표 1 · 지역별 기초통계 — 평균 (표준편차)",
+  head: HEAD4,
+  rows: [
+    { label: "단지 수", fit: true, cells: [{ v: "21" }, { v: "33" }, { v: "41" }, { v: "26" }] },
+    { label: "집계 거래", fit: true, cells: [{ v: "381" }, { v: "496" }, { v: "549" }, { v: "303" }] },
+    { label: "㎡당 실거래가 (만원)", strong: true, cells: [{ v: "1,213", t: "(334)" }, { v: "814", t: "(131)" }, { v: "1,051", t: "(262)" }, { v: "501", t: "(113)" }] },
+    { label: "전용면적 (㎡)", cells: [{ v: "84.3", t: "(1.4)" }, { v: "81.0", t: "(5.9)" }, { v: "79.8", t: "(9.2)" }, { v: "84.4", t: "(0.9)" }] },
+    { label: "건축연령 (년)", cells: [{ v: "13.0", t: "(3.0)" }, { v: "8.0", t: "(1.2)" }, { v: "9.0", t: "(2.1)" }, { v: "16.3", t: "(6.3)" }] },
+    { label: "세대수", cells: [{ v: "825", t: "(541)" }, { v: "967", t: "(339)" }, { v: "692", t: "(332)" }, { v: "1,057", t: "(414)" }] },
+    { label: "세대당 주차대수", cells: [{ v: "1.37", t: "(0.17)" }, { v: "1.26", t: "(0.15)" }, { v: "1.29", t: "(0.25)" }, { v: "1.40", t: "(0.24)" }] },
+    { label: "1군 브랜드 비율", cells: [{ v: "24%" }, { v: "15%" }, { v: "17%" }, { v: "19%" }] },
+    { label: "대표공원 거리 (m)", strong: true, cells: [{ v: "310", t: "(254)" }, { v: "1,203", t: "(848)" }, { v: "310", t: "(213)" }, { v: "720", t: "(309)" }] },
+    { label: "최근접 공원 거리 (m)", cells: [{ v: "168", t: "(117)" }, { v: "147", t: "(88)" }, { v: "160", t: "(142)" }, { v: "146", t: "(74)" }] },
+    { label: "지하철역 거리 (m)", cells: [{ v: "1,313", t: "(754)" }, { v: "3,524", t: "(779)" }, { v: "1,285", t: "(633)" }, { v: "1,199", t: "(429)" }] },
+    { label: "생활상권 중력지수", cells: [{ v: "4.65", t: "(1.24)" }, { v: "2.07", t: "(0.44)" }, { v: "3.86", t: "(1.09)" }, { v: "3.37", t: "(0.36)" }] },
+  ],
+  note: "거리는 모두 공원 폴리곤 경계까지의 최단 직선거리이며, 회귀에는 자연로그를 취해 넣는다. 대표공원이 없는 동탄2 북부는 최상위 위계인 Tier2까지의 거리다. 두 거리 지표의 대비가 이 연구의 출발점이다 — 최근접 공원 거리는 네 지역이 146~168m로 사실상 같은 반면, 대표공원 거리는 310m에서 1,203m까지 벌어진다.",
+}
+
+// §02 사양 대비
+export const parkCapSpecContrastTable: StatTable = {
+  caption: "표 2 · 대표공원 단독 vs 위계 2단 동시 투입",
+  head: ["지역", "① 통합 최근접거리", "② 대표공원 단독 — 채택", "③ 위계 2단 — Tier1", "③ 위계 2단 — Tier2", "수정 R² (①/②/③)"],
+  rows: [
+    { label: "광교", strong: true, cells: [{ v: "0.003", t: "(0.11)", muted: true }, { v: "−0.044**", t: "(−2.23)" }, { v: "−0.012", t: "(−0.40)", muted: true }, { v: "0.020*", t: "(1.71)" }, { v: ".949 / .954 / .953" }] },
+    { label: "동탄2 남부", strong: true, cells: [{ v: "0.019", t: "(0.61)", muted: true }, { v: "−0.080***", t: "(−3.03)" }, { v: "−0.062**", t: "(−1.98)" }, { v: "0.037", t: "(1.25)", muted: true }, { v: ".553 / .637 / .647" }] },
+    { label: "동탄2 북부", cells: [{ v: "−0.004", t: "(−0.25)", muted: true }, { v: "−0.011", t: "(−0.58)", muted: true }, { v: "—", muted: true }, { v: "−0.011", t: "(−0.58)", muted: true }, { v: ".803 / .804 / .804" }] },
+    { label: "운정", cells: [{ v: "−0.065**", t: "(−2.04)" }, { v: "−0.034", t: "(−1.21)", muted: true }, { v: "−0.029", t: "(−0.96)", muted: true }, { v: "−0.016", t: "(−0.46)", muted: true }, { v: ".913 / .887 / .882" }] },
+  ],
+  note: "세 사양의 통제변수는 동일하고 공원 변수만 바뀐다. 동탄2 북부는 대표공원 조건을 충족하는 공원이 없어 ②와 ③의 Tier2가 같은 변수다. Tier3(2~10ha) 거리는 네 지역 모두에서 부분 R²가 0.2%에 못 미쳐 회귀에서 제외했다(부록 A). *** p<0.01 · ** p<0.05 · * p<0.10.",
+}
+
 // §03 핵심 결과
 export const parkCapHeadlineTable: StatTable = {
-  caption: "표 1 · 채택 사양 — 대표공원까지의 거리와 단가",
+  caption: "표 4 · 채택 사양 — 대표공원까지의 거리와 단가",
   head: ["지역", "n", "계수 (HC1 t)", "p", "100m 접근 시", "84㎡ 환산"],
   rows: [
     { label: "광교", strong: true, cells: [{ v: "21" }, { v: "−0.044**", t: "t = −2.23" }, { v: "0.026" }, { v: "+1.71%" }, { v: "약 1,750만원" }] },
@@ -122,7 +156,7 @@ export const parkCapHeadlineTable: StatTable = {
 
 // §05 기본모형
 export const parkCapBaselineTable: StatTable = {
-  caption: "표 3 · 헤도닉 회귀 — 위계 2단 동시 투입",
+  caption: "표 5 · 헤도닉 회귀 — 전체 계수",
   head: HEAD4,
   rows: [
     { label: "건축연령", cells: [{ v: "−0.01***", t: "(−2.92)" }, { v: "−0.02", t: "(−1.33)", muted: true }, { v: "0.03***", t: "(3.59)" }, { v: "−0.03***", t: "(−9.40)" }] },
@@ -142,7 +176,7 @@ export const parkCapBaselineTable: StatTable = {
 
 // §06 선행연구 재현
 export const parkCapReplicationTable: StatTable = {
-  caption: "표 4 · 선행연구 사양으로 되돌아가는 재현 사다리",
+  caption: "표 3 · 선행연구 사양으로 되돌아가는 재현 사다리",
   head: ["단계", "광교", "동탄2 남부", "동탄2 북부", "운정"],
   rows: [
     { label: "L0 전 위계 · 경계거리 · 상권통제", cells: [{ v: "−0.026", t: "(−0.57)", muted: true }, { v: "−0.060*", t: "(−1.84)" }, { v: "−0.011", t: "(−0.57)", muted: true }, { v: "−0.024", t: "(−0.78)", muted: true }] },
@@ -156,7 +190,7 @@ export const parkCapReplicationTable: StatTable = {
 
 // §07 매개효과
 export const parkCapMediationTable: StatTable = {
-  caption: "표 5 · 공원 → 생활상권 → 가격 매개분석 (부트스트랩 5,000회)",
+  caption: "표 6 · 공원 → 생활상권 → 가격 매개분석 (부트스트랩 5,000회)",
   head: ["지역", "총효과 c", "직접효과 c′", "a (공원→상권)", "b (상권→가격)", "간접효과 a·b", "95% CI", "매개비율"],
   rows: [
     { label: "광교", cells: [{ v: "−0.189", t: "(−3.37)" }, { v: "−0.044", t: "(−1.32)", muted: true }, { v: "−1.436", t: "(−2.89)" }, { v: "0.101", t: "(6.99)" }, { v: "−0.145" }, { v: "−0.294 ~ 0.022", muted: true }, { v: "—", muted: true }] },
@@ -169,7 +203,7 @@ export const parkCapMediationTable: StatTable = {
 }
 
 export const parkCapPathTable: StatTable = {
-  caption: "표 6 · a 경로의 강도 — 생활상권을 공원 경계거리에 회귀",
+  caption: "표 7 · a 경로의 강도 — 생활상권을 공원 경계거리에 회귀",
   head: ["지역", "계수", "t값", "R²"],
   rows: [
     { label: "광교", cells: [{ v: "−0.428" }, { v: "−1.19", muted: true }, { v: "0.070", muted: true }] },
@@ -182,7 +216,7 @@ export const parkCapPathTable: StatTable = {
 
 // §08 연구설계 검증
 export const parkCapTierRuleTable: StatTable = {
-  caption: "표 7 · Tier1 판정 규칙 — 동탄2 북부에 대표공원을 둘 것인가",
+  caption: "표 A1 · Tier1 판정 규칙 — 동탄2 북부에 대표공원을 둘 것인가",
   head: ["규칙", "동탄2 북부 Tier1", "② 최상위 단독", "③ R²", "다른 지역에 대한 부작용"],
   rows: [
     { label: "지역 최대 1개소", cells: [{ v: "○ 여울공원" }, { v: "−0.019", t: "(−0.77)", muted: true }, { v: "0.846" }, { v: "없음" }] },
@@ -194,7 +228,7 @@ export const parkCapTierRuleTable: StatTable = {
 }
 
 export const parkCapConventionTable: StatTable = {
-  caption: "표 8 · 거리 측정 규약 (상권 통제 유지)",
+  caption: "표 A2 · 거리 측정 규약 (상권 통제 유지)",
   head: ["규약 · 사양", "광교", "동탄2 남부", "동탄2 북부", "운정"],
   rows: [
     { label: "경계거리 · 전 위계", strong: true, cells: [{ v: "−0.026", t: "(−0.57)", muted: true }, { v: "−0.060*", t: "(−1.84)" }, { v: "−0.011", t: "(−0.57)", muted: true }, { v: "−0.024", t: "(−0.78)", muted: true }] },
@@ -207,7 +241,7 @@ export const parkCapConventionTable: StatTable = {
 }
 
 export const parkCapUnitTable: StatTable = {
-  caption: "표 9 · 분석단위 — 거래를 세느냐 단지를 세느냐",
+  caption: "표 A3 · 분석단위 — 거래를 세느냐 단지를 세느냐",
   head: HEAD4,
   rows: [
     { label: "S0 거래단위 + 층 선형 + 월FE", cells: [{ v: "−0.070", t: "(−4.38)" }, { v: "−0.082", t: "(−4.38)" }, { v: "−0.036", t: "(−1.88)" }, { v: "−0.058", t: "(−1.91)" }] },
@@ -223,7 +257,7 @@ export const parkCapUnitTable: StatTable = {
 
 // §09 공간계량
 export const parkCapSpatialTable: StatTable = {
-  caption: "표 10 · OLS 잔차의 공간자기상관 — 가중치 사양 민감도 (Moran's I)",
+  caption: "표 8 · OLS 잔차의 공간자기상관 — 가중치 사양 민감도 (Moran's I)",
   head: ["지역", "KNN k=3", "KNN k=5", "KNN k=8", "거리 500m", "거리 1,000m"],
   rows: [
     { label: "광교", cells: [{ v: "−0.291", t: "p=0.034" }, { v: "−0.151", t: "p=0.161", muted: true }, { v: "−0.043", t: "p=0.392", muted: true }, { v: "−0.265", t: "p=0.159", muted: true }, { v: "−0.163", t: "p=0.221", muted: true }] },
@@ -235,7 +269,7 @@ export const parkCapSpatialTable: StatTable = {
 }
 
 export const parkCapCircuityTable: StatTable = {
-  caption: "표 11 · 직선거리 vs 보행 실측거리 일치도",
+  caption: "표 A4 · 직선거리 vs 보행 실측거리 일치도",
   head: ["지역", "Pearson r", "우회율 평균(SD)", "편차 평균(m)"],
   rows: [
     { label: "광교", cells: [{ v: "0.924" }, { v: "1.432 (0.440)" }, { v: "227.9" }] },
@@ -248,7 +282,7 @@ export const parkCapCircuityTable: StatTable = {
 
 // §10 기술통계
 export const parkCapVifTable: StatTable = {
-  caption: "표 2 · 변수별 VIF",
+  caption: "표 A5 · 변수별 VIF",
   head: HEAD4,
   rows: [
     { label: "건축연령", cells: [{ v: "2.94" }, { v: "2.15" }, { v: "1.76" }, { v: "2.28" }] },
@@ -266,6 +300,41 @@ export const parkCapVifTable: StatTable = {
   note: "공원 변수를 줄이면 공선성이 바로 완화된다. 세 위계를 모두 넣었을 때 광교의 최대 VIF는 21.6이었고 Tier1이 15.1이었는데, Tier3를 빼면 13.8/9.9로, 공원 변수를 하나만 남기면 7.5/4.3으로 내려간다. 나머지 세 지역은 채택 사양에서 전 변수 VIF가 2.7 이하다.",
 }
 
+export const parkCapConclusion = {
+  headline:
+    "신도시 아파트 가격에서 공원의 자본화 효과는 존재하지만 작고, 그 40%는 공원 자체가 아니라 공원과 함께 계획된 상권을 경유한다.",
+  grounds: [
+    {
+      title: "효과의 크기",
+      body: "대표공원까지의 거리는 네 지역 중 둘에서 유의하다(광교 −0.044, 동탄2 남부 −0.080). 100m 접근으로 환산하면 84㎡ 기준 각각 약 1,750만원·455만원이다. 나머지 둘은 부호가 이론과 맞지만 표본이 21~41개로 얇아 탐지 한계(MDE 0.055~0.080) 아래에 있다. 같은 회귀에서 지하철 거리(−0.28)와 상권 지수(+0.24)가 모든 공원 계수를 압도한다.",
+    },
+    {
+      title: "무엇을 재느냐가 계수를 만든다",
+      body: "같은 자료·같은 통제에서 공원 변수만 바꾸면 계수가 0에서 −0.080까지 이동한다. 통합 최근접거리는 계획 신도시에서 네 지역이 146~168m로 수렴해 변별력을 잃고, 대표공원 거리로 바꾸어야 효과가 드러난다. 위계를 둘로 나누어 함께 넣으면 −0.062로 줄고 Tier2 계수는 오히려 정(+)이 되는데, 규모가 다른 공원의 잠재가격이 서로 다르다는 뜻이다.",
+    },
+    {
+      title: "선행연구와의 차이는 거리 규약이 아니라 통제 변수",
+      body: "선행연구 사양을 단계적으로 재현하면 계수를 키우는 것은 중심점 좌표가 아니라 생활상권 통제를 빼는 한 단계였다(동탄2 남부 −0.118 → −0.240). 매개분석이 그 메커니즘을 확인한다 — 총효과 −0.067의 40.4%가 상권을 경유하며, 그 매개는 공원과 상업용지가 지구단위계획에서 함께 배치된 도시에서만 나타난다.",
+    },
+  ],
+  contribution:
+    "기여는 새로운 계수가 아니라 같은 자료 안에서 조작화의 사다리를 끝까지 보인 데 있다. 공원 접근성이라는 변수는 측정 방식이 정해지기 전까지 값이 정해지지 않으며, 그 방식은 도시의 공원 구성에 따라 서로 다른 재화를 가리킨다. 아울러 계획 신도시에서는 공원 효과가 상권 효과와 설계 단계에서부터 얽혀 있어, 통제 여부가 곧 추정대상(estimand)의 선택이 된다.",
+  questions: [
+    {
+      q: "본문 결과로 총효과와 직접효과 중 무엇을 세워야 하는가",
+      body: "상권을 통제한 −0.040은 '상권이 같을 때 공원만의 값', 통제하지 않은 −0.067은 '공원 근처에 사는 것의 값'이다. 정책 판단에는 후자가, 어메니티 가치 추정에는 전자가 맞아 보이는데 어느 쪽을 주 결과로 두는 것이 적절한지 판단을 구합니다.",
+    },
+    {
+      q: "표본 확대는 기간과 도시 중 어느 쪽이 먼저인가",
+      body: "관측 기간을 1년으로 늘리면 거래 하한을 넘는 단지가 늘어 지역별 자유도가 회복되고, 도시를 늘리면 '공원 구성이 조작화 편의를 결정한다'는 명제를 다수준 모형으로 직접 검정할 수 있습니다. 비용 대비 효과는 전자가 크지만 학술적 기여는 후자가 커 보입니다.",
+    },
+    {
+      q: "수변 혼입을 식별할 방법이 있는가",
+      body: "네 도시의 대표공원이 모두 호수공원이어서 대형공원 효과와 수변 조망 효과가 분리되지 않습니다. 비수변 대형공원을 가진 도시를 추가하는 것 외에, 향(向)이나 층 정보를 쓰는 다른 식별 전략이 있을지 조언을 구합니다.",
+    },
+  ],
+}
+
 export const parkCapRejected = [
   {
     title: "가장 가까운 공원까지의 거리",
@@ -280,7 +349,7 @@ export const parkCapRejected = [
     body: "거리 대신 '걸어서 닿는 범위 안에 공원이 몇 헥타르인가'를 재는 방식으로, 반경을 200m부터 1.5km까지 바꾸어 가며 추정했다. 앞의 두 지표와 달리 정보를 버리지도 상쇄되지도 않는다는 장점이 있지만, 네 도시 중 한 곳에서만 유의했다. 그 한 곳의 결과도 지하철역까지의 거리를 함께 통제한 뒤에야 나타나는 것이어서, '공원이 많은 단지가 비싸다'가 아니라 '역까지의 거리가 같을 때 비싸다'는 조건부 진술에 그친다. 규모를 구분하지 않고 면적만 더한다는 점에서 최근접거리를 비판한 논거가 그대로 적용되기도 한다.",
   },
   {
-    title: "위계를 셋으로 나누어 함께 넣기",
+    title: "위계를 셋으로 나누어 함께 넣기 — Tier3까지",
     body: "대형·중규모·소규모 공원까지의 거리를 각각 독립변수로 넣는 방식이다. 개념적으로는 가장 정확하다 — 각 계수가 다른 규모의 거리를 고정한 순효과를 추정하므로 앞의 지표들이 겪는 문제가 없다. 문제는 표본이다. 지역별 관측치가 21~41개인데 변수를 셋으로 늘리면 자유도가 부족해지고 거리끼리 상관되어 개별 계수를 신뢰하기 어려워진다. 특히 소규모 공원까지의 거리는 네 지역 모두에서 설명력에 거의 기여하지 않으면서 자유도만 소모했고, 이 변수를 덜어내자 나머지 계수가 오히려 뚜렷해졌다. 그래서 최종 모형은 공원 변수를 하나만 남긴다.",
   },
 ]
@@ -358,5 +427,5 @@ export const parkCapFooter = {
   method:
     "종속변수 층 보정 ln(만원/㎡) · 분석단위 단지(단지당 1개 평형, 84형 우선) · 공원 변수 1개(최상위 위계 경계거리) · 거리 규약 공원 폴리곤 경계까지 최단거리 · Tier1은 우월비 1.3배 하한 적용 · Tier3 거리와 반경 내 공원면적은 검토 후 미채택 · 계약년월 고정효과 미사용 · 이분산-로버스트(HC1) 표준오차 · 공간가중치 KNN k=3/5/8 및 거리 500m/1,000m 5개 사양 · 좌표계 EPSG:5179 · Chow F=8.48(df 32/78, p<0.001) · 매개분석 백분위 부트스트랩 5,000회.",
   files:
-    "06_01_build_complex_dataset.py · 06_02_hedonic_complex.py · 06_05_replication_mediation.py · 06_06_tier1_absolute.py · 06_07_weighted_index.py · 06_09_tier3_contribution.py · 06_10_reduced_spec.py · 06_01_complex_single_dom.xlsx · 06_02_regression.xlsx · 06_02_spatial.xlsx · 06_10_reduced_spec.xlsx",
+    "06_01_build_complex_dataset.py · 06_02_hedonic_complex.py · 06_05_replication_mediation.py · 06_06_tier1_absolute.py · 06_07_weighted_index.py · 06_08_aggregate_access.py · 06_09_tier3_contribution.py · 06_10_reduced_spec.py · 논문/_deck_maps.py · 논문/_deck_maps_commerce.py · 논문/_map_style.py · 06_01_complex_single_dom.xlsx · 06_02_regression.xlsx · 06_02_spatial.xlsx · 06_10_reduced_spec.xlsx",
 }
