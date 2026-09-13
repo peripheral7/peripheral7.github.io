@@ -1,0 +1,481 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>감정평가행정법 기본문제 25 · 부관·하자승계·하자치유</title>
+<style>
+  :root{
+    --bg:#f7f5f0; --card:#ffffff; --ink:#1f2937; --sub:#6b7280;
+    --accent:#8b5e3c; --accent2:#2f5d50; --line:#e5e1d8; --hi:#fff3e0;
+  }
+  *{box-sizing:border-box;}
+  body{
+    margin:0; font-family:-apple-system,BlinkMacSystemFont,"Apple SD Gothic Neo","Malgun Gothic",sans-serif;
+    background:var(--bg); color:var(--ink); padding:16px; max-width:480px; margin:0 auto;
+  }
+  h1{font-size:18px; margin:12px 0 2px; text-align:center;}
+  .sub{text-align:center; color:var(--sub); font-size:13px; margin-bottom:16px;}
+
+  /* ---- Outer: which of the 3 problems ---- */
+  .problem-tabs{display:flex; gap:6px; margin-bottom:16px; flex-wrap:wrap;}
+  .ptab{flex:1; min-width:120px; padding:11px 6px; text-align:center; border-radius:12px; background:#eee7da;
+        font-size:13px; font-weight:700; color:var(--sub); cursor:pointer; user-select:none;}
+  .ptab.active{background:var(--accent2); color:#fff;}
+  .problem{display:none;}
+  .problem.active{display:block;}
+  .problem-title{font-size:16px; font-weight:700; text-align:center; margin:0 0 2px;}
+  .problem-sub{text-align:center; color:var(--sub); font-size:12.5px; margin-bottom:14px;}
+
+  /* ---- Inner: 구조/암기카드/자가테스트/서술형팁 ---- */
+  .tabs{display:flex; gap:6px; margin-bottom:14px;}
+  .tab{flex:1; padding:9px 4px; text-align:center; border-radius:10px; background:#eee7da;
+       font-size:13px; font-weight:600; color:var(--sub); cursor:pointer; user-select:none;}
+  .tab.active{background:var(--accent); color:#fff;}
+  .view{display:none;} .view.active{display:block;}
+
+  /* ---- Structure map ---- */
+  .flowbox{background:var(--card); border:1px solid var(--line); border-radius:12px; padding:12px 14px; margin-bottom:10px;}
+  .flowbox .num{display:inline-block; width:22px; height:22px; border-radius:50%; background:var(--accent2);
+                color:#fff; font-size:12px; text-align:center; line-height:22px; margin-right:6px;}
+  .flowbox h3{margin:2px 0 6px; font-size:14.5px; display:inline;}
+  .flowbox p{margin:6px 0 0; font-size:13.5px; line-height:1.55; color:#374151;}
+  .flowbox .quote{background:var(--hi); border-left:3px solid var(--accent); padding:6px 8px; margin-top:6px;
+                   font-size:13px; border-radius:4px;}
+
+  /* ---- Flashcards ---- */
+  .card{
+    background:var(--card); border:1px solid var(--line); border-radius:14px; padding:18px;
+    min-height:150px; display:flex; flex-direction:column; justify-content:center;
+    box-shadow:0 2px 6px rgba(0,0,0,0.04); cursor:pointer; position:relative;
+  }
+  .card .tag{position:absolute; top:10px; left:14px; font-size:11px; color:var(--accent2); font-weight:700; letter-spacing:.5px;}
+  .card .front{font-size:15px; font-weight:600; text-align:center; line-height:1.5;}
+  .card .back{font-size:13.5px; line-height:1.6; color:#374151; text-align:left; display:none; margin-top:8px;}
+  .card.flipped .back{display:block;}
+  .card.flipped .front{color:var(--accent2); font-size:13.5px; font-weight:700; margin-bottom:2px;}
+  .hint{text-align:center; color:var(--sub); font-size:12px; margin-top:8px;}
+  .navrow{display:flex; justify-content:space-between; align-items:center; margin-top:14px;}
+  .navbtn{background:var(--accent); color:#fff; border:none; border-radius:8px; padding:9px 16px; font-size:13px; font-weight:600;}
+  .navbtn.secondary{background:#eee7da; color:var(--ink);}
+  .counter{font-size:12px; color:var(--sub);}
+
+  /* ---- Quiz ---- */
+  .qbox{background:var(--card); border:1px solid var(--line); border-radius:14px; padding:16px; margin-bottom:12px;}
+  .qbox .q{font-size:14px; font-weight:600; margin-bottom:10px;}
+  textarea{width:100%; min-height:70px; border:1px solid var(--line); border-radius:8px; padding:8px; font-size:13px; font-family:inherit; resize:vertical;}
+  .reveal{margin-top:10px; background:var(--hi); border-radius:8px; padding:10px; font-size:13px; line-height:1.6; display:none;}
+  .reveal.show{display:block;}
+  .smallbtn{margin-top:8px; background:var(--accent2); color:#fff; border:none; border-radius:8px; padding:7px 14px; font-size:12.5px;}
+
+  /* ---- Writing tips ---- */
+  .tip{background:var(--card); border:1px solid var(--line); border-radius:12px; padding:12px 14px; margin-bottom:10px;}
+  .tip .ttl{font-size:14px; font-weight:700; color:var(--accent); margin-bottom:4px;}
+  .tip p{margin:0; font-size:13px; line-height:1.6; color:#374151;}
+  .mnemonic{background:var(--accent2); color:#fff; text-align:center; padding:12px; border-radius:12px; font-size:14px; font-weight:700; margin-bottom:12px; line-height:1.5;}
+</style>
+</head>
+<body>
+
+<h1>감정평가행정법 기본문제 25</h1>
+<div class="sub">부관(기부채납조건) · 하자의 승계 · 하자의 치유</div>
+
+<div class="problem-tabs">
+  <div class="ptab active" data-problem="p1">문제1. 부관</div>
+  <div class="ptab" data-problem="p2">문제2. 하자의 승계</div>
+  <div class="ptab" data-problem="p3">문제3. 하자의 치유</div>
+</div>
+
+<!-- ======================================================================= -->
+<!-- PROBLEM 1: 부관 · 기부채납조건 -->
+<!-- ======================================================================= -->
+<div class="problem active" id="problem-p1">
+  <div class="problem-title">부관 · 기부채납조건</div>
+  <div class="problem-sub">사업인정에 붙은 부관(기부채납조건)의 해결 가능성</div>
+
+  <div class="tabs" data-problem="p1">
+    <div class="tab active" data-view="map">① 구조</div>
+    <div class="tab" data-view="cards">② 암기카드</div>
+    <div class="tab" data-view="quiz">③ 자가테스트</div>
+    <div class="tab" data-view="write">④ 서술형 팁</div>
+  </div>
+
+  <div class="view active" data-view="map">
+    <div class="flowbox">
+      <span class="num">1</span><h3>쟁점</h3>
+      <p>택지조성사업 사업인정에 붙은 <b>기부채납조건</b>이 과다하다고 판단한 甲이 취소소송을 제기하려 한다. <b>①독립쟁송가능성 → ②본안(부당결부금지원칙 위반 여부) → ③부관만의 독립취소가능성</b> 순으로 검토한다.</p>
+    </div>
+    <div class="flowbox">
+      <span class="num">2</span><h3>관련 행정작용의 법적성질</h3>
+      <p>사업인정은 <b>처분성 + 재량행위(이익형량 필요) + 형성행위</b>(判)의 성질을 가진다. 기부채납조건은 효력발생·소멸과 무관하게 독립된 의무를 부과하므로 부관 중 <b>부담</b>에 해당한다.</p>
+    </div>
+    <div class="flowbox">
+      <span class="num">3</span><h3>학설 — 독립쟁송가능성</h3>
+      <p>① 부담만가능성설 ② 분리가능성기준설 ③ 전면긍정설이 대립한다.</p>
+    </div>
+    <div class="flowbox">
+      <span class="num">4</span><h3>판례 및 검토 — 독립쟁송가능성</h3>
+      <p>判은 부담만 독립하여 행정소송의 대상이 된다고 본다. 위법한 행정작용의 통제를 넓히기 위해 <b>전면긍정설이 타당</b>하며, 사안의 기부채납조건은 부담이므로 어느 견해에 의하든 독립하여 취소소송의 대상이 된다.</p>
+    </div>
+    <div class="flowbox">
+      <span class="num">5</span><h3>부관의 가능성·내용상 한계</h3>
+      <p>행정기본법 §17① 재량행위에는, §17② 기속행위도 법률 근거가 있으면 부관을 붙일 수 있다. §17④에 따라 처분목적 위배금지·실질적 관련성·필요최소한의 범위라는 내용상 한계를 지켜야 한다.</p>
+    </div>
+    <div class="flowbox">
+      <span class="num">6</span><h3>부당결부금지의 원칙 위반여부</h3>
+      <p>행정작용과 실질적 관련이 없는 의무를 부과해서는 안 된다는 원칙(§13 근거). 요건은 <b>①공행정작용 ②반대급부와 결부 ③실질적 관련성 없음(원인적·목적적 관련성)</b>이다.</p>
+      <div class="quote">사안의 기부채납은 사업인정의 목적 실현에 필요하지 않고 토지보상법의 취지와도 무관하다 → 실질적 관련성이 없어 부당결부금지원칙 위반, 위법.</div>
+    </div>
+    <div class="flowbox">
+      <span class="num">7</span><h3>부관의 위법성 정도</h3>
+      <p>중대명백설 적용 — 일반원칙 위반으로 하자는 중대하나, 일반인의 시각에서 명백하다고 보기는 어려움 → <b>취소사유</b>(判 역시 위법하나 당연무효는 아니라고 봄).</p>
+    </div>
+    <div class="flowbox">
+      <span class="num">8</span><h3>부관만의 독립취소가능성</h3>
+      <p>기속행위는 근거 없이 붙은 부관이 당연취소되고, 재량행위는 ①긍정설 ②부정설 ③제한적긍정설(본질적 부분 여부로 판단)이 대립한다. 判은 부담이면 항상 독립취소가 가능하다고 보며, 검토상 <b>제한적긍정설</b>이 타당하다. 기부채납조건은 사업인정의 본질적 부분이 아니므로 독립적으로 취소 대상이 된다.</p>
+    </div>
+    <div class="flowbox">
+      <span class="num">9</span><h3>사례의 해결</h3>
+      <p>기부채납조건은 부담이며 부당결부금지원칙 위반으로 위법(취소사유)하고, 사업인정의 본질적 부분이 아니어서 독립취소가 가능하다. 따라서 <b>甲은 부담만의 취소를 구하는 취소소송을 제기하여 권리구제를 받을 수 있다.</b></p>
+    </div>
+  </div>
+
+  <div class="view" data-view="cards">
+    <div class="card" data-flashcard>
+      <div class="tag" data-card-tag>쟁점</div>
+      <div class="front" data-card-front>탭하면 답이 보입니다</div>
+      <div class="back" data-card-back></div>
+    </div>
+    <div class="hint">카드를 탭해서 뒤집어보세요</div>
+    <div class="navrow">
+      <button class="navbtn secondary" data-card-prev>← 이전</button>
+      <span class="counter" data-card-counter>1 / 10</span>
+      <button class="navbtn" data-card-next>다음 →</button>
+    </div>
+  </div>
+
+  <div class="view" data-view="quiz">
+    <div class="qbox">
+      <div class="q">Q1. 사업인정의 법적 성질 3가지와, 기부채납조건이 부관 중 무엇에 해당하는지 써보세요.</div>
+      <textarea placeholder="여기에 답을 적어보세요..."></textarea>
+      <button class="smallbtn" onclick="this.nextElementSibling.classList.toggle('show')">정답 확인</button>
+      <div class="reveal">처분성 · 재량행위 · 형성행위. 기부채납조건은 효력발생·소멸과 무관하게 독립된 의무를 부과하므로 부담에 해당.</div>
+    </div>
+    <div class="qbox">
+      <div class="q">Q2. 부당결부금지원칙의 요건 3가지를 쓰고, 사안에 적용해보세요.</div>
+      <textarea placeholder="여기에 답을 적어보세요..."></textarea>
+      <button class="smallbtn" onclick="this.nextElementSibling.classList.toggle('show')">정답 확인</button>
+      <div class="reveal">① 공행정작용 ② 반대급부와 결부 ③ 실질적 관련성 없음. 기부채납은 사업인정 목적과 무관 → 실질적 관련성 없어 위반, 위법.</div>
+    </div>
+    <div class="qbox">
+      <div class="q">Q3. 부관의 위법성 정도와 부관만의 독립취소가능성 결론을 이어서 써보세요.</div>
+      <textarea placeholder="여기에 답을 적어보세요..."></textarea>
+      <button class="smallbtn" onclick="this.nextElementSibling.classList.toggle('show')">정답 확인</button>
+      <div class="reveal">중대명백설상 중대하나 명백하지 않아 취소사유. 기부채납조건은 사업인정의 본질적 부분이 아니므로 독립적으로 취소 가능.</div>
+    </div>
+    <div class="qbox">
+      <div class="q">Q4. 사안의 해결을 한 문장으로 완성해보세요: "甲은 ___만의 ___소송을 제기하여 ___받을 수 있다."</div>
+      <textarea placeholder="여기에 답을 적어보세요..."></textarea>
+      <button class="smallbtn" onclick="this.nextElementSibling.classList.toggle('show')">정답 확인</button>
+      <div class="reveal">"甲은 (기부채납) 부담만의 취소소송을 제기하여 권리구제를 받을 수 있다."</div>
+    </div>
+  </div>
+
+  <div class="view" data-view="write">
+    <div class="mnemonic">법적성질 → 쟁송가능성 → 본안(부당결부) → 독립취소 → 결론<br><span style="font-weight:400; font-size:12.5px;">사업인정·부관의 성질 / 독립쟁송 / 부당결부금지 / 독립취소가능성 / 사례해결</span></div>
+    <div class="tip"><div class="ttl">1. 대목차부터 5개로 쪼개 놓기</div><p>이 문제는 세 갈래(쟁송가능성·본안·독립취소)가 얽혀 있어 대목차 I~V를 먼저 쓰고 들어가지 않으면 답안이 산으로 갑니다. 시작 전 목차만 먼저 적어두세요.</p></div>
+    <div class="tip"><div class="ttl">2. 순서를 절대 바꾸지 않기</div><p>"독립쟁송 → 본안 → 독립취소"의 순서가 논리적으로 강제됩니다. 위법함이 본안에서 확정되기 전에는 취소가능성을 논할 수 없기 때문입니다.</p></div>
+    <div class="tip"><div class="ttl">3. 부당결부금지 요건 포섭이 최대 배점</div><p>원인적 관련성·목적적 관련성을 각각 사안(기부채납과 사업인정 목적)에 직접 적용하는 문장을 빠뜨리지 마세요. 요건만 나열하고 포섭을 생략하면 감점됩니다.</p></div>
+    <div class="tip"><div class="ttl">4. 판례 결론 문구 중심으로</div><p>"부담만 독립쟁송·독립취소 가능"이라는 判의 결론만 정확히 재현하면 충분합니다. 전체 판시 이유를 외울 필요는 없습니다.</p></div>
+    <div class="tip"><div class="ttl">5. 사안포섭을 세 번 반복</div><p>①부관 종류 판단(부담) ②부당결부금지 위반 판단 ③독립취소가능 여부 판단, 이 세 지점에서 각각 사안포섭 문장이 필요합니다.</p></div>
+    <div class="tip"><div class="ttl">6. 시간·분량 배분</div><p>배점 40점의 절반 이상이 본안(부당결부금지)에 걸려 있습니다. 쟁송가능성은 짧게, 부당결부금지는 가장 두껍게, 독립취소가능성은 중간 분량으로 배분하세요.</p></div>
+  </div>
+</div>
+
+<!-- ======================================================================= -->
+<!-- PROBLEM 2: 하자의 승계 -->
+<!-- ======================================================================= -->
+<div class="problem" id="problem-p2">
+  <div class="problem-title">하자의 승계</div>
+  <div class="problem-sub">개별공시지가 위법이 재산세부과에 승계되는지</div>
+
+  <div class="tabs" data-problem="p2">
+    <div class="tab active" data-view="map">① 구조</div>
+    <div class="tab" data-view="cards">② 암기카드</div>
+    <div class="tab" data-view="quiz">③ 자가테스트</div>
+    <div class="tab" data-view="write">④ 서술형 팁</div>
+  </div>
+
+  <div class="view active" data-view="map">
+    <div class="flowbox">
+      <span class="num">1</span><h3>쟁점</h3>
+      <p>P가 확정된 개별공시지가의 위법을 이유로, 그 공시지가를 기초로 부과된 <b>재산세</b>에 대한 취소소송을 제기할 수 있는지 — <b>하자의 승계</b> 문제로 검토한다.</p>
+    </div>
+    <div class="flowbox">
+      <span class="num">2</span><h3>하자승계의 의의 및 인정필요성</h3>
+      <p>선행 행정행위의 위법을 이유로 적법한 후행 행정행위의 위법을 주장하는 것. 행정관계의 안정성·실효성과 국민의 <b>재판받을 권리</b>를 조화시키기 위해 인정할 필요가 있다.</p>
+    </div>
+    <div class="flowbox">
+      <span class="num">3</span><h3>전제요건</h3>
+      <p>① 선·후행위 모두 처분일 것 ② 선행행위는 <b>취소사유</b>의 위법이 있을 것 ③ 후행행위는 고유한 하자 없을 것(적법) ④ 선행행위에 <b>불가쟁력</b>이 발생할 것.</p>
+    </div>
+    <div class="flowbox">
+      <span class="num">4</span><h3>학설 ① 하자승계론(전통적 견해)</h3>
+      <p>선·후행위가 <b>일련의 절차</b>에서 하나의 법률효과를 목적으로 하는 경우 승계를 긍정한다.</p>
+    </div>
+    <div class="flowbox">
+      <span class="num">5</span><h3>학설 ② 구속력론(새로운 견해)</h3>
+      <p>구속력이 미치는 <b>대인적(동일 수범자)·사물적(동일 목적)·시간적(동일 사실·법상태)</b> 한계에 더해 <b>예측가능성·수인가능성</b>을 추가로 고려한다.</p>
+    </div>
+    <div class="flowbox">
+      <span class="num">6</span><h3>판례 및 검토</h3>
+      <p>원칙적으로 선·후행위가 결합해 하나의 법적효과를 달성하는지를 기준으로 판단하되, 예외적으로 별개 효과를 목적으로 하는 경우에도 아래와 같은 사정이 있으면 승계를 인정한다.</p>
+      <div class="quote">수인한도를 넘는 가혹한 결과를 가져오고, 그 결과가 당사자에게 예측 가능한 것이 아닌 경우에는 하자의 승계를 인정한다.</div>
+    </div>
+    <div class="flowbox">
+      <span class="num">7</span><h3>사례의 해결</h3>
+      <p>개별공시지가·재산세부과 모두 처분성이 인정되고, 이의신청·행정심판을 거쳤을 뿐 행정소송은 제기하지 않아 <b>불가쟁력이 발생</b>했다. P는 애초 세금 상승을 우려해 위법성을 다툴 수 있었으므로(예측가능) 재산세 부과는 수인한도 내에 있다. 따라서 <b>하자의 승계는 부정되며, P는 재산세에 대한 취소소송을 제기할 수 없다.</b></p>
+    </div>
+  </div>
+
+  <div class="view" data-view="cards">
+    <div class="card" data-flashcard>
+      <div class="tag" data-card-tag>쟁점</div>
+      <div class="front" data-card-front>탭하면 답이 보입니다</div>
+      <div class="back" data-card-back></div>
+    </div>
+    <div class="hint">카드를 탭해서 뒤집어보세요</div>
+    <div class="navrow">
+      <button class="navbtn secondary" data-card-prev>← 이전</button>
+      <span class="counter" data-card-counter>1 / 7</span>
+      <button class="navbtn" data-card-next>다음 →</button>
+    </div>
+  </div>
+
+  <div class="view" data-view="quiz">
+    <div class="qbox">
+      <div class="q">Q1. 하자승계가 논의되기 위한 전제요건 4가지를 써보세요.</div>
+      <textarea placeholder="여기에 답을 적어보세요..."></textarea>
+      <button class="smallbtn" onclick="this.nextElementSibling.classList.toggle('show')">정답 확인</button>
+      <div class="reveal">① 선·후행위 모두 처분 ② 선행행위 취소사유의 위법 ③ 후행행위 고유하자 없음(적법) ④ 선행행위 불가쟁력 발생.</div>
+    </div>
+    <div class="qbox">
+      <div class="q">Q2. 하자승계론과 구속력론의 판단 기준 차이를 한 줄로 써보세요.</div>
+      <textarea placeholder="여기에 답을 적어보세요..."></textarea>
+      <button class="smallbtn" onclick="this.nextElementSibling.classList.toggle('show')">정답 확인</button>
+      <div class="reveal">하자승계론: 하나의 법률효과를 목적으로 하는지 / 구속력론: 대인적·사물적·시간적 한계 + 예측가능성·수인가능성.</div>
+    </div>
+    <div class="qbox">
+      <div class="q">Q3. 판례가 별개 효과를 목적으로 하는 경우에도 예외적으로 승계를 인정하는 두 가지 요소는?</div>
+      <textarea placeholder="여기에 답을 적어보세요..."></textarea>
+      <button class="smallbtn" onclick="this.nextElementSibling.classList.toggle('show')">정답 확인</button>
+      <div class="reveal">수인한도를 넘는 가혹한 결과 + 그 결과가 당사자에게 예측 불가능했던 경우.</div>
+    </div>
+    <div class="qbox">
+      <div class="q">Q4. 사안의 해결을 완성해보세요: "P는 세금상승을 ___할 수 있었으므로, 재산세 취소소송을 ___."</div>
+      <textarea placeholder="여기에 답을 적어보세요..."></textarea>
+      <button class="smallbtn" onclick="this.nextElementSibling.classList.toggle('show')">정답 확인</button>
+      <div class="reveal">"P는 세금상승을 예측할 수 있었으므로(예측가능), 재산세 취소소송을 제기할 수 없다(하자승계 부정)."</div>
+    </div>
+  </div>
+
+  <div class="view" data-view="write">
+    <div class="mnemonic">쟁점 → 요건 → 학설 → 판례 → 검토 → 사안해결<br><span style="font-weight:400; font-size:12.5px;">하자승계는 요건 충족여부 판단이 배점의 절반</span></div>
+    <div class="tip"><div class="ttl">1. 전제요건을 학설보다 먼저, 명시적으로</div><p>하자승계는 요건 4가지(처분성·취소사유·후행행위 적법·불가쟁력)를 갖춰야 비로소 논의 대상이 됩니다. 학설로 바로 들어가지 말고 요건 충족 여부부터 짚어주세요.</p></div>
+    <div class="tip"><div class="ttl">2. 학설은 "무엇을 보는가"로 대비</div><p>하자승계론은 법률효과, 구속력론은 구속력의 범위(대인·사물·시간)+예측·수인가능성을 본다는 식으로 두 견해의 판단 대상 차이를 한 문장으로 대비시키면 채점자가 이해하기 쉽습니다.</p></div>
+    <div class="tip"><div class="ttl">3. 판례의 예외 법리를 정확히</div><p>"별개의 법률효과를 목적으로 하더라도 수인한도를 넘는 가혹한 결과 + 예측 불가능"이라는 두 요건이 함께 있어야 예외적으로 승계가 인정됩니다. 둘 중 하나만 쓰면 감점됩니다.</p></div>
+    <div class="tip"><div class="ttl">4. 사안의 사실관계를 적극적으로 활용</div><p>P가 이의신청·행정심판까지 거쳤다는 사실은 "예측가능했다"는 결론의 핵심 근거입니다. 이런 사실관계를 그대로 답안에 옮겨 적으며 포섭하세요.</p></div>
+    <div class="tip"><div class="ttl">5. 결론은 두 갈래로 명확히</div><p>"요건은 충족되는가"와 "하자승계가 인정되는가"를 분리해서 씁니다. 요건은 충족되더라도(불가쟁력 등), 예측가능·수인한도 판단에서 승계가 부정될 수 있음을 명확히 구분해 서술하세요.</p></div>
+    <div class="tip"><div class="ttl">6. 시간 배분</div><p>요건 정리는 짧게, 학설·판례의 예외 법리 설명과 사안포섭에 가장 많은 분량을 배분하세요. 결론 문장은 반드시 한 줄로 마무리합니다.</p></div>
+  </div>
+</div>
+
+<!-- ======================================================================= -->
+<!-- PROBLEM 3: 하자의 치유 -->
+<!-- ======================================================================= -->
+<div class="problem" id="problem-p3">
+  <div class="problem-title">하자의 치유</div>
+  <div class="problem-sub">행정행위 하자의 치유</div>
+
+  <div class="tabs" data-problem="p3">
+    <div class="tab active" data-view="map">① 구조</div>
+    <div class="tab" data-view="cards">② 암기카드</div>
+    <div class="tab" data-view="quiz">③ 자가테스트</div>
+    <div class="tab" data-view="write">④ 서술형 팁</div>
+  </div>
+
+  <div class="view active" data-view="map">
+    <div class="flowbox">
+      <span class="num">1</span><h3>개설</h3>
+      <p>하자의 치유란 처분 후 <b>흠결되었던 요건이 사후에 보완</b>되면 적법한 행위로 취급하는 것이다. <b>행정경제 도모</b>를 위해 인정된다.</p>
+    </div>
+    <div class="flowbox">
+      <span class="num">2</span><h3>인정여부</h3>
+      <p>判은 원칙적으로 부정하나, 예외적으로 국민의 권익을 침해하지 않는 범위에서 구체적 사정에 따라 합목적적으로 인정한다. 검토상 법치주의 관점에서는 부정이 원칙이나 행정능률을 고려하면 <b>제한적 긍정설</b>이 타당하다.</p>
+    </div>
+    <div class="flowbox">
+      <span class="num">3</span><h3>인정시기 학설 ① 쟁송제기이전설</h3>
+      <p>행정절차의 중요성과 국민의 권리구제를 고려하여 <b>쟁송제기 전</b>까지 치유가 가능하다는 견해.</p>
+    </div>
+    <div class="flowbox">
+      <span class="num">4</span><h3>인정시기 학설 ②③ 행정소송제기이전설 · 소송종결시설</h3>
+      <p>행정소송제기이전설은 행정심판 단계까지는 아직 행정청 단계이므로 <b>행정심판 불복시</b>까지, 소송종결시설은 분쟁의 일회적 해결(소송경제)을 위해 <b>소송절차 종결 전</b>까지 가능하다고 본다.</p>
+    </div>
+    <div class="flowbox">
+      <span class="num">5</span><h3>판례 및 검토 — 인정시기</h3>
+      <p>判은 불복 여부 결정 및 불복신청의 편의를 줄 수 있는 상당한 기간 내에 하여야 한다고 보아 쟁송제기이전설의 입장이다. 검토상으로도 치유시기를 쟁송 이후까지 연장하면 상대방 권리보호에 문제되므로 <b>쟁송제기이전설</b>이 타당하다.</p>
+    </div>
+    <div class="flowbox">
+      <span class="num">6</span><h3>인정범위 ① 무효사유에도 인정되는지</h3>
+      <p>무효·취소의 구별이 상대적이라는 논거로 무효인 행정행위에도 치유를 인정하는 견해가 있으나, <b>통설·판례는 취소할 수 있는 행정행위에 대해서만</b> 하자의 치유를 인정한다.</p>
+    </div>
+    <div class="flowbox">
+      <span class="num">7</span><h3>인정범위 ② 내용상 하자의 치유 여부</h3>
+      <p>절차·형식상 하자에만 한정하는 견해와 내용상 하자까지 포함하는 견해가 대립하나, 判은 내용에 관한 하자는 치유를 인정하지 않는다. 내용상 하자까지 포함하는 견해는 <b>법률적합성과의 조화를 깨뜨린다</b>는 점에서 문제가 있다.</p>
+    </div>
+  </div>
+
+  <div class="view" data-view="cards">
+    <div class="card" data-flashcard>
+      <div class="tag" data-card-tag>개설</div>
+      <div class="front" data-card-front>탭하면 답이 보입니다</div>
+      <div class="back" data-card-back></div>
+    </div>
+    <div class="hint">카드를 탭해서 뒤집어보세요</div>
+    <div class="navrow">
+      <button class="navbtn secondary" data-card-prev>← 이전</button>
+      <span class="counter" data-card-counter>1 / 7</span>
+      <button class="navbtn" data-card-next>다음 →</button>
+    </div>
+  </div>
+
+  <div class="view" data-view="quiz">
+    <div class="qbox">
+      <div class="q">Q1. 하자의 치유란 무엇이며, 인정되는 취지는?</div>
+      <textarea placeholder="여기에 답을 적어보세요..."></textarea>
+      <button class="smallbtn" onclick="this.nextElementSibling.classList.toggle('show')">정답 확인</button>
+      <div class="reveal">처분 후 흠결되었던 요건이 사후에 보완되면 적법한 행위로 취급하는 것. 행정경제 도모를 위해 인정.</div>
+    </div>
+    <div class="qbox">
+      <div class="q">Q2. 인정시기 학설 3가지를 쓰고, 판례가 어느 견해인지 표시해보세요.</div>
+      <textarea placeholder="여기에 답을 적어보세요..."></textarea>
+      <button class="smallbtn" onclick="this.nextElementSibling.classList.toggle('show')">정답 확인</button>
+      <div class="reveal">쟁송제기이전설 · 행정소송제기이전설 · 소송종결시설. 판례는 쟁송제기이전설 입장.</div>
+    </div>
+    <div class="qbox">
+      <div class="q">Q3. 인정범위에 관한 두 가지 쟁점과 각각의 결론을 써보세요.</div>
+      <textarea placeholder="여기에 답을 적어보세요..."></textarea>
+      <button class="smallbtn" onclick="this.nextElementSibling.classList.toggle('show')">정답 확인</button>
+      <div class="reveal">① 무효사유에도 인정되는지 — 통설·판례는 부정(취소사유만 인정) ② 내용상 하자도 치유되는지 — 판례는 부정(절차·형식상 하자에 한정).</div>
+    </div>
+    <div class="qbox">
+      <div class="q">Q4. 빈칸을 채워 정리해보세요: "하자의 치유는 ___사유에 대해, ___상 하자에 한정하여 인정된다."</div>
+      <textarea placeholder="여기에 답을 적어보세요..."></textarea>
+      <button class="smallbtn" onclick="this.nextElementSibling.classList.toggle('show')">정답 확인</button>
+      <div class="reveal">"하자의 치유는 취소사유에 대해, 절차·형식상 하자에 한정하여 인정된다."</div>
+    </div>
+  </div>
+
+  <div class="view" data-view="write">
+    <div class="mnemonic">개설 → 인정여부 → 인정시기 → 인정범위 → 정리<br><span style="font-weight:400; font-size:12.5px;">사안(사례)이 없는 설명형 문제 — 결론은 "정리"로 마무리</span></div>
+    <div class="tip"><div class="ttl">1. 사례가 없는 문제임을 표시하기</div><p>"설명하시오" 형 문제라 마지막에 "사안의 해결"이 아니라 <b>제도 전체를 정리하는 결론 문단</b>으로 마무리합니다. 다른 문제와 헷갈려 사안포섭 문장을 억지로 만들지 마세요.</p></div>
+    <div class="tip"><div class="ttl">2. 인정시기 학설 3개를 혼동하지 않기</div><p>쟁송제기이전설·행정소송제기이전설·소송종결시설은 시간 순으로 점점 늦어지는 구조입니다. 각 견해가 "어디까지"를 허용하는지 순서대로 암기하면 헷갈리지 않습니다.</p></div>
+    <div class="tip"><div class="ttl">3. 인정범위는 반드시 두 갈래 모두 언급</div><p>무효사유 여부와 내용상 하자 여부는 서로 다른 쟁점입니다. 하나만 쓰고 끝내면 배점을 절반 놓치므로 두 항목 모두 빠짐없이 서술하세요.</p></div>
+    <div class="tip"><div class="ttl">4. 판례 결론 문구 중심으로</div><p>"불복 여부 결정 및 편의를 줄 수 있는 상당한 기간 내"라는 판례 표현을 정확히 재현하면 인정시기 부분의 감점을 줄일 수 있습니다.</p></div>
+    <div class="tip"><div class="ttl">5. 견해 대립의 논거를 짧게라도 병기</div><p>결론만 쓰지 말고 "왜"를 한 줄씩 붙이세요. 예: 제한적 긍정설 — 행정능률 고려, 쟁송제기이전설 — 상대방 권리보호.</p></div>
+    <div class="tip"><div class="ttl">6. 시간 배분</div><p>개설·인정여부는 짧게, 인정시기(학설 3개 비교)와 인정범위(두 갈래)에 고르게 시간을 배분하세요. 배점이 크지 않은 문제이므로 군더더기 없이 핵심만 적는 것이 중요합니다.</p></div>
+  </div>
+</div>
+
+<script>
+  const PROBLEM_CARDS = {
+    p1: [
+      {tag:"① 쟁점", front:"이 사안의 핵심 검토 순서는?", back:"① 독립쟁송가능성 → ② 본안(부당결부금지원칙 위반 여부) → ③ 부관만의 독립취소가능성"},
+      {tag:"② 법적성질", front:"사업인정의 법적 성질 3가지는?", back:"처분성 · 재량행위(이익형량 필요) · 형성행위"},
+      {tag:"③ 부관의 의의", front:"부담이란? 사안의 기부채납조건은?", back:"효력발생·소멸과 무관하게 독립된 의무를 부과하는 부관. 기부채납조건은 부담에 해당."},
+      {tag:"④ 독립쟁송가능성", front:"독립쟁송가능성 학설 3가지와 판례는?", back:"부담만가능성설 · 분리가능성기준설 · 전면긍정설. 判은 부담만 독립쟁송 인정, 검토상 전면긍정설 타당."},
+      {tag:"⑤ 부관의 한계", front:"부관의 가능성·내용상 한계 근거조문은?", back:"§17①(재량행위) §17②(기속행위+법률근거) / §17④(목적위배금지·실질적관련·필요최소한)"},
+      {tag:"⑥ 부당결부금지", front:"부당결부금지원칙의 요건 3가지는?", back:"① 공행정작용 ② 반대급부와 결부 ③ 실질적 관련성 없음(원인적·목적적 관련성)"},
+      {tag:"⑦ 사안포섭(부당결부)", front:"기부채납조건이 부당결부금지원칙에 위반되는 이유는?", back:"사업인정 목적 실현에 불필요, 토지보상법 취지와도 무관 → 실질적 관련성 없음 → 위반, 위법"},
+      {tag:"⑧ 위법성 정도", front:"부관의 위법성 정도는?", back:"중대명백설 적용 → 중대하나 명백하지 않음 → 취소사유"},
+      {tag:"⑨ 독립취소가능성", front:"부관만의 독립취소가능성, 판례·검토·사안은?", back:"判: 부담은 항상 독립취소 가능 / 검토: 제한적긍정설 / 사안: 본질적 부분 아니므로 독립취소 가능"},
+      {tag:"⑩ 사안해결", front:"최종 결론 문장은?", back:"甲은 기부채납 부담만의 취소소송을 제기하여 권리구제를 받을 수 있다."}
+    ],
+    p2: [
+      {tag:"① 쟁점", front:"이 사안의 핵심 쟁점은?", back:"개별공시지가의 위법이 후속 재산세부과처분에 승계되는지(하자의 승계)."},
+      {tag:"② 의의", front:"하자의 승계란?", back:"선행 행정행위의 위법을 이유로 적법한 후행 행정행위의 위법을 주장할 수 있는 것."},
+      {tag:"③ 전제요건", front:"하자승계 전제요건 4가지는?", back:"① 모두 처분 ② 선행행위 취소사유의 위법 ③ 후행행위 고유하자 없음 ④ 선행행위 불가쟁력 발생."},
+      {tag:"④ 학설", front:"하자승계론과 구속력론의 판단 기준은?", back:"하자승계론: 하나의 법률효과 목적 여부 / 구속력론: 대인적·사물적·시간적 한계 + 예측가능성·수인가능성."},
+      {tag:"⑤ 판례", front:"판례가 예외적으로 승계를 인정하는 경우는?", back:"별개 효과를 목적으로 해도 수인한도를 넘는 가혹한 결과 + 예측 불가능한 경우."},
+      {tag:"⑥ 검토", front:"검토의 핵심은?", back:"법적안정성·재판청구권의 조화를 위해 예측가능성·수인가능성을 추가로 고려해야 함."},
+      {tag:"⑦ 사안해결", front:"최종 결론은?", back:"P는 애초 예측 가능했으므로 수인한도 내 → 하자승계 부정 → 재산세 취소소송 제기 불가."}
+    ],
+    p3: [
+      {tag:"① 개설", front:"하자의 치유란? 인정 취지는?", back:"처분 후 흠결되었던 요건이 사후에 보완되면 적법한 행위로 취급하는 것. 행정경제 도모를 위해 인정."},
+      {tag:"② 인정여부", front:"하자의 치유 인정여부에 대한 판례·검토는?", back:"判: 원칙적 부정, 예외적으로 국민 권익 침해 없는 범위서 인정 / 檢討: 제한적 긍정설."},
+      {tag:"③ 인정시기 학설", front:"인정시기 학설 3가지는?", back:"쟁송제기이전설 · 행정소송제기이전설 · 소송종결시설."},
+      {tag:"④ 판례(인정시기)", front:"인정시기에 대한 판례 입장은?", back:"불복 여부 결정 및 편의를 줄 수 있는 상당한 기간 내(쟁송제기이전설 입장)."},
+      {tag:"⑤ 검토(인정시기)", front:"인정시기 검토의 결론과 이유는?", back:"쟁송제기이전설 타당 — 치유시기를 쟁송 이후까지 연장하면 상대방 권리보호에 문제."},
+      {tag:"⑥ 인정범위-무효", front:"무효인 행정행위에도 하자의 치유가 인정되는가?", back:"통설·판례는 부정 — 취소할 수 있는 행정행위에 대해서만 인정."},
+      {tag:"⑦ 인정범위-내용", front:"내용상 하자에도 치유가 인정되는가?", back:"판례는 부정 — 절차·형식상 하자에 한정, 내용상 하자는 불인정."}
+    ]
+  };
+
+  // Each problem gets its own independent flashcard-index closure, scoped to
+  // its own DOM subtree, so the three problems' identical markup/ids-by-role
+  // never collide with each other.
+  function setupFlashcards(problemRoot, cards) {
+    let idx = 0;
+    const el = problemRoot.querySelector('[data-flashcard]');
+    const tagEl = problemRoot.querySelector('[data-card-tag]');
+    const frontEl = problemRoot.querySelector('[data-card-front]');
+    const backEl = problemRoot.querySelector('[data-card-back]');
+    const counterEl = problemRoot.querySelector('[data-card-counter]');
+
+    function render() {
+      const c = cards[idx];
+      el.classList.remove('flipped');
+      tagEl.textContent = c.tag;
+      frontEl.textContent = c.front;
+      backEl.textContent = c.back;
+      counterEl.textContent = (idx + 1) + " / " + cards.length;
+    }
+    el.addEventListener('click', () => el.classList.toggle('flipped'));
+    problemRoot.querySelector('[data-card-next]').addEventListener('click', () => {
+      idx = (idx + 1) % cards.length;
+      render();
+    });
+    problemRoot.querySelector('[data-card-prev]').addEventListener('click', () => {
+      idx = (idx - 1 + cards.length) % cards.length;
+      render();
+    });
+    render();
+  }
+
+  document.querySelectorAll('.problem').forEach((problemRoot) => {
+    const key = problemRoot.id.replace('problem-', '');
+    setupFlashcards(problemRoot, PROBLEM_CARDS[key]);
+
+    // Inner 구조/암기카드/자가테스트/서술형팁 tabs, scoped to this problem only
+    problemRoot.querySelectorAll(':scope > .tabs > .tab').forEach((tab) => {
+      tab.addEventListener('click', () => {
+        problemRoot.querySelectorAll(':scope > .tabs > .tab').forEach(t => t.classList.remove('active'));
+        problemRoot.querySelectorAll(':scope > .view').forEach(v => v.classList.remove('active'));
+        tab.classList.add('active');
+        problemRoot.querySelector(':scope > .view[data-view="' + tab.dataset.view + '"]').classList.add('active');
+      });
+    });
+  });
+
+  // Outer 문제1/문제2/문제3 switcher
+  document.querySelectorAll('.ptab').forEach((ptab) => {
+    ptab.addEventListener('click', () => {
+      document.querySelectorAll('.ptab').forEach(t => t.classList.remove('active'));
+      document.querySelectorAll('.problem').forEach(p => p.classList.remove('active'));
+      ptab.classList.add('active');
+      document.getElementById('problem-' + ptab.dataset.problem).classList.add('active');
+    });
+  });
+</script>
+</body>
+</html>
