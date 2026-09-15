@@ -109,6 +109,16 @@
   .reveal.show{display:block;}
   .smallbtn{margin-top:8px; background:var(--accent2); color:#fff; border:none; border-radius:8px; padding:7px 14px; font-size:var(--fs-tab);}
 
+  /* ---- Outline drill (목차 연습) ---- */
+  .obox{background:var(--card); border:1px solid var(--accent); border-radius:14px; padding:16px; margin-bottom:14px;}
+  .obox .o-label{display:flex; justify-content:space-between; align-items:baseline; margin-bottom:8px; flex-wrap:wrap; gap:4px;}
+  .obox .o-ttl{font-size:var(--fs-h3); font-weight:700; color:var(--accent);}
+  .obox .o-hint{font-size:var(--fs-sm); color:var(--sub);}
+  .obox textarea{min-height:120px;}
+  .obox .reveal .lv1{display:block; font-weight:700; color:var(--accent2); margin-top:8px;}
+  .obox .reveal .lv1:first-child{margin-top:0;}
+  .obox .reveal .lv2{display:block; margin:2px 0 2px 18px; color:#374151;}
+
   /* ---- Writing tips ---- */
   .tip{background:var(--card); border:1px solid var(--line); border-radius:12px; padding:12px 14px; margin-bottom:10px;}
   .tip .ttl{font-size:var(--fs-h3); font-weight:700; color:var(--accent); margin-bottom:4px;}
@@ -211,6 +221,25 @@
   </div>
 
   <div class="view" data-view="quiz">
+    <div class="obox">
+      <div class="o-label"><span class="o-ttl">목차 연습</span><span class="o-hint">대목차·소목차만 떠올려 적어보세요</span></div>
+      <textarea placeholder="Ⅰ. ...&#10;Ⅱ. ...&#10;  1. ...&#10;  2. ..."></textarea>
+      <button class="smallbtn" onclick="this.nextElementSibling.classList.toggle('show')">실제 목차 확인</button>
+      <div class="reveal">
+        <span class="lv1">Ⅰ. 문제의 소재</span>
+        <span class="lv1">Ⅱ. 관련 행정작용의 법적성질</span>
+        <span class="lv2">1. 사업인정</span>
+        <span class="lv2">2. 부관</span>
+        <span class="lv1">Ⅲ. 독립쟁송가능성과 쟁송형식</span>
+        <span class="lv2">1. 학설</span>
+        <span class="lv2">2. 판례</span>
+        <span class="lv2">3. 검토 및 사안의 경우</span>
+        <span class="lv1">Ⅳ. 부관의 위법성 여부(본안 판단)</span>
+        <span class="lv2">1. 부관의 한계</span>
+        <span class="lv2">2. 부관만의 독립취소가능성</span>
+        <span class="lv1">Ⅴ. 사례의 해결</span>
+      </div>
+    </div>
     <div class="qbox">
       <div class="q">Q1. 사업인정의 법적 성질 3가지와, 기부채납조건이 부관 중 무엇에 해당하는지 써보세요.</div>
       <textarea placeholder="여기에 답을 적어보세요..."></textarea>
@@ -298,6 +327,19 @@
   </div>
 
   <div class="view" data-view="quiz">
+    <div class="obox">
+      <div class="o-label"><span class="o-ttl">목차 연습</span><span class="o-hint">대목차·소목차만 떠올려 적어보세요</span></div>
+      <textarea placeholder="1. ...&#10;2. ...&#10;  (1) ...&#10;  (2) ..."></textarea>
+      <button class="smallbtn" onclick="this.nextElementSibling.classList.toggle('show')">실제 목차 확인</button>
+      <div class="reveal">
+        <span class="lv1">1. 논점의 정리</span>
+        <span class="lv1">2. 하자의 승계</span>
+        <span class="lv2">(1) 의의 및 인정필요성</span>
+        <span class="lv2">(2) 전제요건</span>
+        <span class="lv2">(3) 하자의 승계 해결논의</span>
+        <span class="lv1">3. 사례의 해결</span>
+      </div>
+    </div>
     <div class="qbox">
       <div class="q">Q1. 하자승계가 논의되기 위한 전제요건 4가지를 써보세요.</div>
       <textarea placeholder="여기에 답을 적어보세요..."></textarea>
@@ -389,6 +431,22 @@
   </div>
 
   <div class="view" data-view="quiz">
+    <div class="obox">
+      <div class="o-label"><span class="o-ttl">목차 연습</span><span class="o-hint">대목차·소목차만 떠올려 적어보세요</span></div>
+      <textarea placeholder="1. ...&#10;2. ...&#10;  (1) ...&#10;  (2) ..."></textarea>
+      <button class="smallbtn" onclick="this.nextElementSibling.classList.toggle('show')">실제 목차 확인</button>
+      <div class="reveal">
+        <span class="lv1">1. 논점의 정리</span>
+        <span class="lv1">2. 공정력과 구성요건적 효력의 의의 및 구별</span>
+        <span class="lv2">(1) 의의</span>
+        <span class="lv2">(2) 공정력과 구성요건적 효력과의 구별여부</span>
+        <span class="lv1">3. 민사소송과 선결문제(행정행위의 위법 여부가 쟁점인 경우)</span>
+        <span class="lv2">(1) 학설</span>
+        <span class="lv2">(2) 판례</span>
+        <span class="lv2">(3) 검토</span>
+        <span class="lv1">4. 사례의 해결</span>
+      </div>
+    </div>
     <div class="qbox">
       <div class="q">Q1. 선결문제란 무엇이며, 이 사안에서 선결문제가 되는 것은 무엇인가요?</div>
       <textarea placeholder="여기에 답을 적어보세요..."></textarea>
@@ -480,6 +538,22 @@
   </div>
 
   <div class="view" data-view="quiz">
+    <div class="obox">
+      <div class="o-label"><span class="o-ttl">목차 연습</span><span class="o-hint">대목차·소목차만 떠올려 적어보세요</span></div>
+      <textarea placeholder="Ⅰ. ...&#10;Ⅱ. ...&#10;  1. ...&#10;  2. ..."></textarea>
+      <button class="smallbtn" onclick="this.nextElementSibling.classList.toggle('show')">실제 목차 확인</button>
+      <div class="reveal">
+        <span class="lv1">Ⅰ. 개설</span>
+        <span class="lv1">Ⅱ. 하자의 치유의 인정여부</span>
+        <span class="lv1">Ⅲ. 하자의 치유의 인정시기(시간적 한계)</span>
+        <span class="lv2">1. 학설</span>
+        <span class="lv2">2. 판례</span>
+        <span class="lv2">3. 검토</span>
+        <span class="lv1">Ⅳ. 인정범위</span>
+        <span class="lv2">1. 무효사유인 경우에도 하자의 치유가 인정되는지 여부</span>
+        <span class="lv2">2. 내용상 하자의 치유 여부</span>
+      </div>
+    </div>
     <div class="qbox">
       <div class="q">Q1. 하자의 치유란 무엇이며, 인정되는 취지는?</div>
       <textarea placeholder="여기에 답을 적어보세요..."></textarea>
@@ -568,6 +642,17 @@
   </div>
 
   <div class="view" data-view="quiz">
+    <div class="obox">
+      <div class="o-label"><span class="o-ttl">목차 연습</span><span class="o-hint">대목차·소목차만 떠올려 적어보세요</span></div>
+      <textarea placeholder="Ⅰ. ...&#10;Ⅱ. ...&#10;Ⅲ. ..."></textarea>
+      <button class="smallbtn" onclick="this.nextElementSibling.classList.toggle('show')">실제 목차 확인</button>
+      <div class="reveal">
+        <span class="lv1">Ⅰ. 문제의 소재</span>
+        <span class="lv1">Ⅱ. 의의 및 근거</span>
+        <span class="lv1">Ⅲ. 요건</span>
+        <span class="lv1">Ⅳ. 사례의 해결</span>
+      </div>
+    </div>
     <div class="qbox">
       <div class="q">Q1. 사업인정의 법적 성질(판례)을 써보세요.</div>
       <textarea placeholder="여기에 답을 적어보세요..."></textarea>
@@ -649,6 +734,18 @@
   </div>
 
   <div class="view" data-view="quiz">
+    <div class="obox">
+      <div class="o-label"><span class="o-ttl">목차 연습</span><span class="o-hint">대목차·소목차만 떠올려 적어보세요</span></div>
+      <textarea placeholder="Ⅰ. ...&#10;Ⅱ. ...&#10;  1. ...&#10;  2. ..."></textarea>
+      <button class="smallbtn" onclick="this.nextElementSibling.classList.toggle('show')">실제 목차 확인</button>
+      <div class="reveal">
+        <span class="lv1">Ⅰ. 개설(의의 및 근거)</span>
+        <span class="lv1">Ⅱ. 요건</span>
+        <span class="lv2">1. 내용</span>
+        <span class="lv2">2. 선례가 필요한지 여부</span>
+        <span class="lv1">Ⅲ. 한계</span>
+      </div>
+    </div>
     <div class="qbox">
       <div class="q">Q1. 자기구속의 원칙의 의의를 써보세요.</div>
       <textarea placeholder="여기에 답을 적어보세요..."></textarea>
@@ -730,6 +827,19 @@
   </div>
 
   <div class="view" data-view="quiz">
+    <div class="obox">
+      <div class="o-label"><span class="o-ttl">목차 연습</span><span class="o-hint">대목차·소목차만 떠올려 적어보세요</span></div>
+      <textarea placeholder="Ⅰ. ...&#10;Ⅱ. ...&#10;  1. ...&#10;  2. ...&#10;  3. ..."></textarea>
+      <button class="smallbtn" onclick="this.nextElementSibling.classList.toggle('show')">실제 목차 확인</button>
+      <div class="reveal">
+        <span class="lv1">Ⅰ. 문제의 소재</span>
+        <span class="lv1">Ⅱ. 부당결부금지의 원칙 위반여부</span>
+        <span class="lv2">1. 의의 등</span>
+        <span class="lv2">2. 요건</span>
+        <span class="lv2">3. 사안의 경우</span>
+        <span class="lv1">Ⅲ. 사례의 해결</span>
+      </div>
+    </div>
     <div class="qbox">
       <div class="q">Q1. 사안의 부관이 부관 중 무엇에 해당하는지, 그 이유를 써보세요.</div>
       <textarea placeholder="여기에 답을 적어보세요..."></textarea>
@@ -811,6 +921,20 @@
   </div>
 
   <div class="view" data-view="quiz">
+    <div class="obox">
+      <div class="o-label"><span class="o-ttl">목차 연습</span><span class="o-hint">대목차·소목차만 떠올려 적어보세요</span></div>
+      <textarea placeholder="Ⅰ. ...&#10;Ⅱ. ...&#10;  1. ...&#10;  2. ...&#10;  3. ...&#10;  4. ..."></textarea>
+      <button class="smallbtn" onclick="this.nextElementSibling.classList.toggle('show')">실제 목차 확인</button>
+      <div class="reveal">
+        <span class="lv1">Ⅰ. 문제의 소재</span>
+        <span class="lv1">Ⅱ. 제재적 처분기준의 법적성질</span>
+        <span class="lv2">1. 문제점</span>
+        <span class="lv2">2. 학설</span>
+        <span class="lv2">3. 판례</span>
+        <span class="lv2">4. 검토 및 사안의 경우</span>
+        <span class="lv1">Ⅲ. 사례의 해결</span>
+      </div>
+    </div>
     <div class="qbox">
       <div class="q">Q1. 법규명령형식의 행정규칙이란 무엇이며, 왜 문제되는지 써보세요.</div>
       <textarea placeholder="여기에 답을 적어보세요..."></textarea>
@@ -892,6 +1016,18 @@
   </div>
 
   <div class="view" data-view="quiz">
+    <div class="obox">
+      <div class="o-label"><span class="o-ttl">목차 연습</span><span class="o-hint">대목차·소목차만 떠올려 적어보세요</span></div>
+      <textarea placeholder="Ⅰ. ...&#10;Ⅱ. ...&#10;  1. ...&#10;  2. ...&#10;  3. ..."></textarea>
+      <button class="smallbtn" onclick="this.nextElementSibling.classList.toggle('show')">실제 목차 확인</button>
+      <div class="reveal">
+        <span class="lv1">Ⅰ. 개설</span>
+        <span class="lv1">Ⅱ. 구체적 규범통제수단</span>
+        <span class="lv2">1. 주체 및 대상</span>
+        <span class="lv2">2. 재판의 전제성</span>
+        <span class="lv2">3. 효력</span>
+      </div>
+    </div>
     <div class="qbox">
       <div class="q">Q1. 구체적 규범통제의 의의와 헌법상 근거를 써보세요.</div>
       <textarea placeholder="여기에 답을 적어보세요..."></textarea>
@@ -973,6 +1109,19 @@
   </div>
 
   <div class="view" data-view="quiz">
+    <div class="obox">
+      <div class="o-label"><span class="o-ttl">목차 연습</span><span class="o-hint">대목차·소목차만 떠올려 적어보세요</span></div>
+      <textarea placeholder="Ⅰ. ...&#10;Ⅱ. ...&#10;  1. ...&#10;  2. ...&#10;  3. ...&#10;  4. ..."></textarea>
+      <button class="smallbtn" onclick="this.nextElementSibling.classList.toggle('show')">실제 목차 확인</button>
+      <div class="reveal">
+        <span class="lv1">Ⅰ. 개설</span>
+        <span class="lv1">Ⅱ. 대집행의 절차</span>
+        <span class="lv2">1. 계고</span>
+        <span class="lv2">2. 대집행영장에 의한 통지</span>
+        <span class="lv2">3. 대집행의 실행</span>
+        <span class="lv2">4. 비용징수</span>
+      </div>
+    </div>
     <div class="qbox">
       <div class="q">Q1. 대집행의 의의와 근거조문을 써보세요.</div>
       <textarea placeholder="여기에 답을 적어보세요..."></textarea>
@@ -1070,6 +1219,28 @@
   </div>
 
   <div class="view" data-view="quiz">
+    <div class="obox">
+      <div class="o-label"><span class="o-ttl">목차 연습</span><span class="o-hint">대목차·소목차만 떠올려 적어보세요</span></div>
+      <textarea placeholder="Ⅰ. ...&#10;Ⅱ. ...&#10;  1. ...&#10;  2. ...&#10;Ⅲ. ...&#10;  1. ..."></textarea>
+      <button class="smallbtn" onclick="this.nextElementSibling.classList.toggle('show')">실제 목차 확인</button>
+      <div class="reveal">
+        <span class="lv1">Ⅰ. 문제의 소재</span>
+        <span class="lv1">Ⅱ. 관련 행정작용의 법적 성질</span>
+        <span class="lv2">1. 사업인정의 의의 및 취지</span>
+        <span class="lv2">2. 법적 성질</span>
+        <span class="lv1">Ⅲ. 거부처분의 위법성 판단</span>
+        <span class="lv2">1. 사전통지의 의의 및 취지</span>
+        <span class="lv2">2. 거부처분이 사전통지의 대상인지 여부</span>
+        <span class="lv2">3. 이유제시의 하자유무</span>
+        <span class="lv2">4. 사안의 경우(거부처분이 위법한지 여부)</span>
+        <span class="lv1">Ⅳ. 절차적 하자의 독자성 인정여부</span>
+        <span class="lv2">1. 문제점</span>
+        <span class="lv2">2. 학설</span>
+        <span class="lv2">3. 판례</span>
+        <span class="lv2">4. 검토 및 사안의 경우</span>
+        <span class="lv1">Ⅴ. 사례의 해결</span>
+      </div>
+    </div>
     <div class="qbox">
       <div class="q">Q1. 이 문제에서 순서대로 검토해야 할 3가지 쟁점을 써보세요.</div>
       <textarea placeholder="여기에 답을 적어보세요..."></textarea>
