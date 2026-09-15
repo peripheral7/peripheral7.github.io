@@ -57,7 +57,7 @@ export function GalleryClient({ config }: { config: any }) {
           href="/" 
           className="inline-block border-b border-border pb-3 font-semibold text-foreground transition-colors hover:text-accent"
         >
-          ← 메인으로
+          ← BACK TO BOARD
         </Link>
       </aside>
 

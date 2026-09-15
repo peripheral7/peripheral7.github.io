@@ -34,7 +34,7 @@ export function FloatingBackButton({
 
   return (
     <div
-      className={`fixed left-4 top-4 z-50 transition-all duration-300 md:left-8 md:top-8 ${
+      className={`fixed left-4 top-4 z-50 transition-all duration-300 md:hidden ${
         visible
           ? "translate-y-0 opacity-100"
           : "-translate-y-4 opacity-0 pointer-events-none"

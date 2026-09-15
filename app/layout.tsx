@@ -1,6 +1,8 @@
 import { Analytics } from '@vercel/analytics/next'
 import type { Metadata, Viewport } from 'next'
 import { Archivo, JetBrains_Mono, Noto_Sans_KR, Orbit, Hahmlet } from 'next/font/google'
+import { SiteChrome } from '@/components/site-chrome'
+import { posts } from '@/lib/posts'
 import './globals.css'
 
 const archivo = Archivo({
@@ -65,7 +67,7 @@ export default function RootLayout({
       
     >
       <body className="font-sans antialiased">
-        {children}
+        <SiteChrome posts={posts}>{children}</SiteChrome>
         {process.env.NODE_ENV === 'production' && <Analytics />}
       </body>
     </html>
