@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>감정평가행정법 기본문제 25 · 부관·하자승계·하자치유</title>
+<title>감정평가행정법 기본문제 25 · 부관·하자승계·선결문제·하자치유</title>
 <style>
   :root{
     --bg:#f7f5f0; --card:#ffffff; --ink:#1f2937; --sub:#6b7280;
@@ -17,10 +17,10 @@
   h1{font-size:18px; margin:12px 0 2px; text-align:center;}
   .sub{text-align:center; color:var(--sub); font-size:13px; margin-bottom:16px;}
 
-  /* ---- Outer: which of the 3 problems ---- */
+  /* ---- Outer: which of the 4 problems ---- */
   .problem-tabs{display:flex; gap:6px; margin-bottom:16px; flex-wrap:wrap;}
-  .ptab{flex:1; min-width:120px; padding:11px 6px; text-align:center; border-radius:12px; background:#eee7da;
-        font-size:13px; font-weight:700; color:var(--sub); cursor:pointer; user-select:none;}
+  .ptab{flex:1; min-width:105px; padding:9px 4px; text-align:center; border-radius:12px; background:#eee7da;
+        font-size:12.5px; font-weight:700; color:var(--sub); cursor:pointer; user-select:none; line-height:1.4;}
   .ptab.active{background:var(--accent2); color:#fff;}
   .problem{display:none;}
   .problem.active{display:block;}
@@ -60,6 +60,7 @@
   .card.flipped .back{display:block;}
   .card.flipped .front{color:var(--accent2); font-size:13.5px; font-weight:700; margin-bottom:2px;}
   .hint{text-align:center; color:var(--sub); font-size:12px; margin-top:8px;}
+  .hint kbd{background:#eee7da; border:1px solid var(--line); border-radius:3px; padding:1px 6px; font-size:11px; font-family:inherit;}
   .navrow{display:flex; justify-content:space-between; align-items:center; margin-top:14px;}
   .navbtn{background:var(--accent); color:#fff; border:none; border-radius:8px; padding:9px 16px; font-size:13px; font-weight:600;}
   .navbtn.secondary{background:#eee7da; color:var(--ink);}
@@ -83,22 +84,23 @@
 <body>
 
 <h1>감정평가행정법 기본문제 25</h1>
-<div class="sub">부관(기부채납조건) · 하자의 승계 · 하자의 치유</div>
+<div class="sub">부관(기부채납조건) · 하자의 승계 · 선결문제 · 하자의 치유</div>
 
 <div class="problem-tabs">
-  <div class="ptab active" data-problem="p1">문제1. 부관</div>
-  <div class="ptab" data-problem="p2">문제2. 하자의 승계</div>
-  <div class="ptab" data-problem="p3">문제3. 하자의 치유</div>
+  <div class="ptab active" data-problem="p06">문제06<br>부관</div>
+  <div class="ptab" data-problem="p07a">문제07-⑴<br>하자의 승계</div>
+  <div class="ptab" data-problem="p07b">문제07-⑵<br>선결문제</div>
+  <div class="ptab" data-problem="p08">문제08<br>하자의 치유</div>
 </div>
 
 <!-- ======================================================================= -->
-<!-- PROBLEM 1: 부관 · 기부채납조건 -->
+<!-- 문제06: 부관 · 기부채납조건 -->
 <!-- ======================================================================= -->
-<div class="problem active" id="problem-p1">
-  <div class="problem-title">부관 · 기부채납조건</div>
+<div class="problem active" id="problem-p06">
+  <div class="problem-title">문제06 · 부관·기부채납조건</div>
   <div class="problem-sub">사업인정에 붙은 부관(기부채납조건)의 해결 가능성</div>
 
-  <div class="tabs" data-problem="p1">
+  <div class="tabs" data-problem="p06">
     <div class="tab active" data-view="map">① 구조</div>
     <div class="tab" data-view="cards">② 암기카드</div>
     <div class="tab" data-view="quiz">③ 자가테스트</div>
@@ -155,7 +157,7 @@
       <div class="front" data-card-front>탭하면 답이 보입니다</div>
       <div class="back" data-card-back></div>
     </div>
-    <div class="hint">카드를 탭해서 뒤집어보세요</div>
+    <div class="hint">탭 또는 <kbd>Space</kbd>/<kbd>Enter</kbd>로 확인 → 다시 누르면 다음 카드</div>
     <div class="navrow">
       <button class="navbtn secondary" data-card-prev>← 이전</button>
       <span class="counter" data-card-counter>1 / 10</span>
@@ -202,13 +204,13 @@
 </div>
 
 <!-- ======================================================================= -->
-<!-- PROBLEM 2: 하자의 승계 -->
+<!-- 문제07-(1): 하자의 승계 -->
 <!-- ======================================================================= -->
-<div class="problem" id="problem-p2">
-  <div class="problem-title">하자의 승계</div>
+<div class="problem" id="problem-p07a">
+  <div class="problem-title">문제07-⑴ · 하자의 승계</div>
   <div class="problem-sub">개별공시지가 위법이 재산세부과에 승계되는지</div>
 
-  <div class="tabs" data-problem="p2">
+  <div class="tabs" data-problem="p07a">
     <div class="tab active" data-view="map">① 구조</div>
     <div class="tab" data-view="cards">② 암기카드</div>
     <div class="tab" data-view="quiz">③ 자가테스트</div>
@@ -257,7 +259,7 @@
       <div class="front" data-card-front>탭하면 답이 보입니다</div>
       <div class="back" data-card-back></div>
     </div>
-    <div class="hint">카드를 탭해서 뒤집어보세요</div>
+    <div class="hint">탭 또는 <kbd>Space</kbd>/<kbd>Enter</kbd>로 확인 → 다시 누르면 다음 카드</div>
     <div class="navrow">
       <button class="navbtn secondary" data-card-prev>← 이전</button>
       <span class="counter" data-card-counter>1 / 7</span>
@@ -304,13 +306,110 @@
 </div>
 
 <!-- ======================================================================= -->
-<!-- PROBLEM 3: 하자의 치유 -->
+<!-- 문제07-(2): 선결문제 -->
 <!-- ======================================================================= -->
-<div class="problem" id="problem-p3">
-  <div class="problem-title">하자의 치유</div>
+<div class="problem" id="problem-p07b">
+  <div class="problem-title">문제07-⑵ · 선결문제</div>
+  <div class="problem-sub">민사법원의 행정행위(업무정지처분) 위법성 심사 가능여부</div>
+
+  <div class="tabs" data-problem="p07b">
+    <div class="tab active" data-view="map">① 구조</div>
+    <div class="tab" data-view="cards">② 암기카드</div>
+    <div class="tab" data-view="quiz">③ 자가테스트</div>
+    <div class="tab" data-view="write">④ 서술형 팁</div>
+  </div>
+
+  <div class="view active" data-view="map">
+    <div class="problem-statement">
+      <div class="ps-label"><span>문제 07-(2) · 원문</span><span>(15점)</span></div>
+      <p>감정평가사 甲은 자격증을 타인에게 대여하였다는 이유로 국토교통부장관으로부터 6개월의 업무정지처분을 받았다. 그러나 사실은 사무실의 다른 감정평가사인 乙이 자격증을 타인에게 임의로 대여한 것을 착오로 甲에게 업무정지처분을 내린 것이다. 甲은 이 처분으로 인한 재산상의 손해를 민사법원에 청구하고자 한다. 甲의 소송에 대해 당해 민사법원은 업무정지처분의 위법성을 심사할 수 있는가? (상기 손해배상은 민사소송으로서, 손해배상소송의 전제요건인 행정작용의 위법성 여부에 대하여 심사하여야 하는 문제가 발생함)</p>
+    </div>
+    <div class="flowbox">
+      <span class="num">1</span><h3>쟁점</h3>
+      <p>수소법원인 민사법원이 본안(손해배상) 판단의 전제로서 甲에 대한 업무정지처분의 <b>위법성</b>을 <b>선결문제</b>로서 심사할 수 있는지가 문제된다.</p>
+    </div>
+    <div class="flowbox">
+      <span class="num">2</span><h3>선결문제의 의의</h3>
+      <p>선결문제란 행정행위의 <b>위법 여부 또는 효력 유무</b>를 다른 특정사건의 재판에 있어서 먼저 해결해야 하는 경우를 말한다.</p>
+    </div>
+    <div class="flowbox">
+      <span class="num">3</span><h3>공정력과 구성요건적 효력의 의의 및 구별</h3>
+      <p><b>공정력</b>이란 행정행위에 하자가 있더라도 권한 있는 기관이 취소할 때까지 효력을 부정할 수 없는 구속력을, <b>구성요건적 효력</b>이란 유효한 행정행위의 존재가 다른 행정청·법원의 결정에 영향을 미치는 효력을 말한다. 근거와 내용을 달리하므로 <b>구별하는 것이 타당</b>하다(구별설).</p>
+    </div>
+    <div class="flowbox">
+      <span class="num">4</span><h3>학설 — 민사소송과 선결문제(위법 여부가 쟁점인 경우)</h3>
+      <p>① 부정설은 <b>적법성 추정설</b>의 입장으로 행정소송법 제11조 제1항을 <b>제한적으로 해석</b>하며, ② 긍정설은 <b>유효성 추정설</b>의 입장으로 동 조항을 <b>예시적으로 해석</b>한다.</p>
+    </div>
+    <div class="flowbox">
+      <span class="num">5</span><h3>판례 및 검토</h3>
+      <p>判은 위법한 대집행처분에 의한 국가배상청구소송에서 <b>"계고처분이 위법임을 이유로 손해배상을 청구한 사안에서 행정처분의 취소판결이 있어야만 손해배상청구를 할 수 있는 것은 아니다"</b>라고 하여 긍정설 입장이다. 구성요건적 효력의 본질은 적법성 추정이 아니라 <b>절차적·잠정적 통용력</b>에 불과하므로 긍정설이 타당하다.</p>
+    </div>
+    <div class="flowbox">
+      <span class="num">6</span><h3>사례의 해결</h3>
+      <p>민사법원에서 행정행위의 위법성을 확인할 수 있다고 보는 것이 타당하므로, <b>사안에서 민사법원은 업무정지처분의 위법성을 심리할 수 있다.</b></p>
+    </div>
+  </div>
+
+  <div class="view" data-view="cards">
+    <div class="card" data-flashcard>
+      <div class="tag" data-card-tag>쟁점</div>
+      <div class="front" data-card-front>탭하면 답이 보입니다</div>
+      <div class="back" data-card-back></div>
+    </div>
+    <div class="hint">탭 또는 <kbd>Space</kbd>/<kbd>Enter</kbd>로 확인 → 다시 누르면 다음 카드</div>
+    <div class="navrow">
+      <button class="navbtn secondary" data-card-prev>← 이전</button>
+      <span class="counter" data-card-counter>1 / 6</span>
+      <button class="navbtn" data-card-next>다음 →</button>
+    </div>
+  </div>
+
+  <div class="view" data-view="quiz">
+    <div class="qbox">
+      <div class="q">Q1. 선결문제란 무엇이며, 이 사안에서 선결문제가 되는 것은 무엇인가요?</div>
+      <textarea placeholder="여기에 답을 적어보세요..."></textarea>
+      <button class="smallbtn" onclick="this.nextElementSibling.classList.toggle('show')">정답 확인</button>
+      <div class="reveal">선결문제란 행정행위의 위법 여부·효력 유무를 다른 사건 재판에서 먼저 해결해야 하는 경우. 사안에서는 민사법원이 업무정지처분의 위법성을 선결문제로 심사할 수 있는지가 문제됨.</div>
+    </div>
+    <div class="qbox">
+      <div class="q">Q2. 공정력과 구성요건적 효력을 구별하는 이유를 한 줄로 써보세요.</div>
+      <textarea placeholder="여기에 답을 적어보세요..."></textarea>
+      <button class="smallbtn" onclick="this.nextElementSibling.classList.toggle('show')">정답 확인</button>
+      <div class="reveal">공정력은 상대방·이해관계인에 대한 구속력, 구성요건적 효력은 제3의 국가기관(법원 등)에 대한 구속력으로 근거와 내용이 다르므로 구별함.</div>
+    </div>
+    <div class="qbox">
+      <div class="q">Q3. 민사법원의 선결문제 심사가능성에 대한 부정설·긍정설의 논거를 각각 써보세요.</div>
+      <textarea placeholder="여기에 답을 적어보세요..."></textarea>
+      <button class="smallbtn" onclick="this.nextElementSibling.classList.toggle('show')">정답 확인</button>
+      <div class="reveal">부정설: 적법성 추정설, 행정소송법 제11조 제1항 제한적 해석 / 긍정설: 유효성 추정설, 동 조항 예시적 해석.</div>
+    </div>
+    <div class="qbox">
+      <div class="q">Q4. 사안의 해결을 완성해보세요: "민사법원은 업무정지처분의 ___을 ___할 수 있다."</div>
+      <textarea placeholder="여기에 답을 적어보세요..."></textarea>
+      <button class="smallbtn" onclick="this.nextElementSibling.classList.toggle('show')">정답 확인</button>
+      <div class="reveal">"민사법원은 업무정지처분의 위법성을 심리할 수 있다."</div>
+    </div>
+  </div>
+
+  <div class="view" data-view="write">
+    <div class="mnemonic">쟁점 → 선결문제 의의 → 공정력·구성요건적효력 구별 → 학설 → 판례·검토 → 사례해결<br><span style="font-weight:400; font-size:12.5px;">행정소송법 제11조 제1항의 해석 차이가 핵심</span></div>
+    <div class="tip"><div class="ttl">1. 선결문제 유형부터 특정하기</div><p>민사/형사 × 위법여부/효력유무의 조합 중 이 사안이 "민사소송 + 위법 여부"에 해당함을 먼저 밝히고 들어가세요.</p></div>
+    <div class="tip"><div class="ttl">2. 공정력·구성요건적 효력 구별을 빠뜨리지 않기</div><p>이 논점의 이론적 출발점입니다. 두 개념의 의의와 구별 실익을 짧게라도 반드시 짚고 학설로 넘어가세요.</p></div>
+    <div class="tip"><div class="ttl">3. 행정소송법 제11조 제1항의 해석이 쟁점의 축</div><p>부정설=제한적 해석, 긍정설=예시적 해석이라는 대비를 명확히 쓰면 학설 파트의 배점을 놓치지 않습니다.</p></div>
+    <div class="tip"><div class="ttl">4. 판례 문구를 그대로 재현</div><p>"취소판결이 있어야만 손해배상청구를 할 수 있는 것은 아니다"라는 표현을 정확히 옮기면 판례 파트 감점을 줄일 수 있습니다.</p></div>
+    <div class="tip"><div class="ttl">5. 검토는 구성요건효력의 본질론으로</div><p>"적법성 추정이 아니라 절차적·잠정적 통용력에 불과하다"는 한 문장이 검토의 핵심 논거입니다.</p></div>
+    <div class="tip"><div class="ttl">6. 결론은 한 줄로</div><p>"민사법원은 (해당 처분의) 위법성을 심리할 수 있다"로 짧고 명확하게 마무리하세요.</p></div>
+  </div>
+</div>
+
+<!-- ======================================================================= -->
+<!-- 문제08: 하자의 치유 -->
+<!-- ======================================================================= -->
+<div class="problem" id="problem-p08">
+  <div class="problem-title">문제08 · 하자의 치유</div>
   <div class="problem-sub">행정행위 하자의 치유</div>
 
-  <div class="tabs" data-problem="p3">
+  <div class="tabs" data-problem="p08">
     <div class="tab active" data-view="map">① 구조</div>
     <div class="tab" data-view="cards">② 암기카드</div>
     <div class="tab" data-view="quiz">③ 자가테스트</div>
@@ -358,7 +457,7 @@
       <div class="front" data-card-front>탭하면 답이 보입니다</div>
       <div class="back" data-card-back></div>
     </div>
-    <div class="hint">카드를 탭해서 뒤집어보세요</div>
+    <div class="hint">탭 또는 <kbd>Space</kbd>/<kbd>Enter</kbd>로 확인 → 다시 누르면 다음 카드</div>
     <div class="navrow">
       <button class="navbtn secondary" data-card-prev>← 이전</button>
       <span class="counter" data-card-counter>1 / 7</span>
@@ -406,7 +505,7 @@
 
 <script>
   const PROBLEM_CARDS = {
-    p1: [
+    p06: [
       {tag:"① 쟁점", front:"이 사안의 핵심 검토 순서는?", back:"① 독립쟁송가능성 → ② 본안(부당결부금지원칙 위반 여부) → ③ 부관만의 독립취소가능성"},
       {tag:"② 법적성질", front:"사업인정의 법적 성질 3가지는?", back:"처분성 · 재량행위(이익형량 필요) · 형성행위"},
       {tag:"③ 부관의 의의", front:"부담이란? 사안의 기부채납조건은?", back:"효력발생·소멸과 무관하게 독립된 의무를 부과하는 부관. 기부채납조건은 부담에 해당."},
@@ -418,7 +517,7 @@
       {tag:"⑨ 독립취소가능성", front:"부관만의 독립취소가능성, 판례·검토·사안은?", back:"判: 부담은 항상 독립취소 가능 / 검토: 제한적긍정설 / 사안: 본질적 부분 아니므로 독립취소 가능"},
       {tag:"⑩ 사안해결", front:"최종 결론 문장은?", back:"甲은 기부채납 부담만의 취소소송을 제기하여 권리구제를 받을 수 있다."}
     ],
-    p2: [
+    p07a: [
       {tag:"① 쟁점", front:"이 사안의 핵심 쟁점은?", back:"개별공시지가의 위법이 후속 재산세부과처분에 승계되는지(하자의 승계)."},
       {tag:"② 의의", front:"하자의 승계란?", back:"선행 행정행위의 위법을 이유로 적법한 후행 행정행위의 위법을 주장할 수 있는 것."},
       {tag:"③ 전제요건", front:"하자승계 전제요건 4가지는?", back:"① 모두 처분 ② 선행행위 취소사유의 위법 ③ 후행행위 고유하자 없음 ④ 선행행위 불가쟁력 발생."},
@@ -427,7 +526,15 @@
       {tag:"⑥ 검토", front:"검토의 핵심은?", back:"법적안정성·재판청구권의 조화를 위해 예측가능성·수인가능성을 추가로 고려해야 함."},
       {tag:"⑦ 사안해결", front:"최종 결론은?", back:"P는 애초 예측 가능했으므로 수인한도 내 → 하자승계 부정 → 재산세 취소소송 제기 불가."}
     ],
-    p3: [
+    p07b: [
+      {tag:"① 쟁점", front:"이 사안의 핵심 쟁점은?", back:"민사법원이 甲에 대한 업무정지처분의 위법성을 선결문제로서 심사할 수 있는지 여부."},
+      {tag:"② 선결문제의 의의", front:"선결문제란?", back:"행정행위의 위법 여부 또는 효력 유무를 다른 특정사건의 재판에서 먼저 해결해야 하는 경우."},
+      {tag:"③ 공정력·구성요건적효력", front:"공정력과 구성요건적 효력의 의의와 구별 이유는?", back:"공정력: 상대방에 대한 구속력 / 구성요건적 효력: 제3 국가기관에 대한 구속력 → 근거·내용이 달라 구별함(구별설)."},
+      {tag:"④ 학설", front:"민사법원의 선결문제 심사가능성 학설 2가지는?", back:"부정설(적법성추정설, 행정소송법 제11조 1항 제한적 해석) / 긍정설(유효성추정설, 예시적 해석)."},
+      {tag:"⑤ 판례 및 검토", front:"판례의 입장과 근거, 검토 결론은?", back:"긍정설. \"취소판결이 있어야만 손해배상청구 가능한 것은 아니다.\" 구성요건효력은 절차적·잠정적 통용력에 불과 → 긍정설 타당."},
+      {tag:"⑥ 사안해결", front:"최종 결론은?", back:"민사법원은 업무정지처분의 위법성을 심리할 수 있다."}
+    ],
+    p08: [
       {tag:"① 개설", front:"하자의 치유란? 인정 취지는?", back:"처분 후 흠결되었던 요건이 사후에 보완되면 적법한 행위로 취급하는 것. 행정경제 도모를 위해 인정."},
       {tag:"② 인정여부", front:"하자의 치유 인정여부에 대한 판례·검토는?", back:"判: 원칙적 부정, 예외적으로 국민 권익 침해 없는 범위서 인정 / 檢討: 제한적 긍정설."},
       {tag:"③ 인정시기 학설", front:"인정시기 학설 3가지는?", back:"쟁송제기이전설 · 행정소송제기이전설 · 소송종결시설."},
@@ -439,8 +546,9 @@
   };
 
   // Each problem gets its own independent flashcard-index closure, scoped to
-  // its own DOM subtree, so the three problems' identical markup/ids-by-role
-  // never collide with each other.
+  // its own DOM subtree, so the four problems' identical markup/ids-by-role
+  // never collide with each other. Returns controls so a page-level keydown
+  // handler can drive whichever problem/card is currently on screen.
   function setupFlashcards(problemRoot, cards) {
     let idx = 0;
     const el = problemRoot.querySelector('[data-flashcard]');
@@ -457,21 +565,22 @@
       backEl.textContent = c.back;
       counterEl.textContent = (idx + 1) + " / " + cards.length;
     }
-    el.addEventListener('click', () => el.classList.toggle('flipped'));
-    problemRoot.querySelector('[data-card-next]').addEventListener('click', () => {
-      idx = (idx + 1) % cards.length;
-      render();
-    });
-    problemRoot.querySelector('[data-card-prev]').addEventListener('click', () => {
-      idx = (idx - 1 + cards.length) % cards.length;
-      render();
-    });
+    function flip() { el.classList.toggle('flipped'); }
+    function next() { idx = (idx + 1) % cards.length; render(); }
+    function prev() { idx = (idx - 1 + cards.length) % cards.length; render(); }
+
+    el.addEventListener('click', flip);
+    problemRoot.querySelector('[data-card-next]').addEventListener('click', next);
+    problemRoot.querySelector('[data-card-prev]').addEventListener('click', prev);
     render();
+
+    return { isFlipped: () => el.classList.contains('flipped'), flip, next, prev };
   }
 
+  const flashcardControls = {};
   document.querySelectorAll('.problem').forEach((problemRoot) => {
     const key = problemRoot.id.replace('problem-', '');
-    setupFlashcards(problemRoot, PROBLEM_CARDS[key]);
+    flashcardControls[key] = setupFlashcards(problemRoot, PROBLEM_CARDS[key]);
 
     // Inner 구조/암기카드/자가테스트/서술형팁 tabs, scoped to this problem only
     problemRoot.querySelectorAll(':scope > .tabs > .tab').forEach((tab) => {
@@ -484,7 +593,7 @@
     });
   });
 
-  // Outer 문제1/문제2/문제3 switcher
+  // Outer 문제06/07-⑴/07-⑵/08 switcher
   document.querySelectorAll('.ptab').forEach((ptab) => {
     ptab.addEventListener('click', () => {
       document.querySelectorAll('.ptab').forEach(t => t.classList.remove('active'));
@@ -492,6 +601,25 @@
       ptab.classList.add('active');
       document.getElementById('problem-' + ptab.dataset.problem).classList.add('active');
     });
+  });
+
+  // Space/Enter on the 암기카드 view: 1st press reveals the answer (flip),
+  // pressing again advances to the next card -- mirrors the "1회 확인,
+  // 2회 이동" pattern already used for the blank-input quizzes on this site.
+  // Scoped to whichever problem/view is currently visible, and skipped while
+  // typing in a textarea (자가테스트) so Space still types a space there.
+  window.addEventListener('keydown', (e) => {
+    if (e.key !== ' ' && e.code !== 'Space' && e.key !== 'Enter') return;
+    const activeTag = document.activeElement ? document.activeElement.tagName : '';
+    if (activeTag === 'TEXTAREA' || activeTag === 'INPUT') return;
+    const activeProblem = document.querySelector('.problem.active');
+    if (!activeProblem) return;
+    const cardsView = activeProblem.querySelector(':scope > .view[data-view="cards"]');
+    if (!cardsView || !cardsView.classList.contains('active')) return;
+    e.preventDefault();
+    const controls = flashcardControls[activeProblem.id.replace('problem-', '')];
+    if (!controls.isFlipped()) controls.flip();
+    else controls.next();
   });
 </script>
 </body>
