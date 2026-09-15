@@ -120,11 +120,21 @@
   .toc .lv1:first-child{margin-top:0;}
   .toc .lv2{display:block; margin:2px 0 2px 18px; color:#374151; font-size:var(--fs-body);}
 
-  /* ---- Writing tips ---- */
-  .tip{background:var(--card); border:1px solid var(--line); border-radius:12px; padding:12px 14px; margin-bottom:10px;}
-  .tip .ttl{font-size:var(--fs-h3); font-weight:700; color:var(--accent); margin-bottom:4px;}
-  .tip p{margin:0; font-size:var(--fs-body); line-height:1.6; color:#374151;}
-  .mnemonic{background:var(--accent2); color:#fff; text-align:center; padding:12px; border-radius:12px; font-size:var(--fs-h3); font-weight:700; margin-bottom:12px; line-height:1.5;}
+  /* ---- Structure-tab margin notes (서술형 팁, relocated beside 구조) ---- */
+  .toc .toc-note{margin-top:8px; padding-top:8px; border-top:1px dashed var(--line); font-size:var(--fs-sm); color:var(--sub); line-height:1.6;}
+  .toc .toc-note b{color:var(--accent);}
+  .flowrow{display:flex; align-items:flex-start; gap:12px; margin-bottom:10px;}
+  .flowrow .flowbox{flex:1; min-width:0; margin-bottom:0;}
+  .flowrow .note{flex:0 0 170px; padding-left:10px; border-left:2px solid var(--accent); font-size:var(--fs-sm); line-height:1.6; color:var(--sub);}
+  .flowrow .note p{margin:0 0 6px;}
+  .flowrow .note p:last-child{margin-bottom:0;}
+  .flowrow .note b{color:var(--accent); font-weight:600;}
+  @media (min-width: 640px){ .flowrow .note{flex-basis:190px;} }
+  @media (min-width: 1000px){ .flowrow .note{flex-basis:230px;} }
+  @media (max-width: 639px){
+    .flowrow{flex-direction:column; gap:0;}
+    .flowrow .note{flex:none; width:100%; border-left:none; border-top:2px dashed var(--line); padding:6px 0 0; margin:2px 0 4px;}
+  }
 
   /* ---- Help toggle (bottom-right ?) ---- */
   .help-toggle{
@@ -188,7 +198,6 @@
     <div class="tab active" data-view="map">① 구조</div>
     <div class="tab" data-view="cards">② 암기카드</div>
     <div class="tab" data-view="quiz">③ 자가테스트</div>
-    <div class="tab" data-view="write">④ 서술형 팁</div>
   </div>
 
   <div class="view active" data-view="map">
@@ -210,6 +219,7 @@
       <span class="lv2">1. 부관의 한계</span>
       <span class="lv2">2. 부관만의 독립취소가능성</span>
       <span class="lv1">Ⅴ. 사례의 해결</span>
+      <div class="toc-note"><b>Tip.</b> 목차 Ⅰ~Ⅴ 먼저 쓰기 · 사안포섭 3회(부관종류·부당결부·독립취소) · 배점 절반이 Ⅳ(부당결부)</div>
     </div>
     <div class="flowbox">
       <span class="num">Ⅰ</span><h3>문제의 소재</h3>
@@ -220,16 +230,27 @@
       <p><b class="sub">1. 사업인정</b>(1) 의의: 사업인정이란 공익사업을 토지 등을 수용할 사업으로 결정하는 것을 말하며(토지보상법 제2조 제7호), 사업 전의 공익성 판단 등에 취지가 인정된다.<br>(2) 법적 성질: 判은 일정한 절차를 거칠 것을 조건으로 수용권을 설정하는 <b>형성행위</b>라 판시하였으며, 사업과 관련된 제 이익과의 형량을 거치는 바 <b>재량행위</b>이다(判: 공익성 여부를 모든 사항을 참작해 구체적으로 판단해야 하므로 행정청의 재량).</p>
       <p><b class="sub">2. 부관</b>(1) 의의 및 종류: 부관이란 행정기관에 의하여 주된 행정행위에 부가된 종된 규율로서, 행정의 유연성·탄력성 보장 등에 기능이 있다. 종류에는 조건·기한·<b>부담</b>·철회권 유보 등이 있으며, 부담이란 행정행위의 효력발생·소멸여부와 관계없이 작위·부작위 등 독립된 의무를 부과하는 부관이다.<br>(2) 사안의 경우: 기부채납조건은 사업인정에 부가된 종된 규율로서 기부채납의무를 부과하는 것이므로 <b>부관(부담)</b>에 해당한다.</p>
     </div>
+    <div class="flowrow">
     <div class="flowbox">
       <span class="num">Ⅲ</span><h3>독립쟁송가능성과 쟁송형식</h3>
       <p><b class="sub">1. 학설</b>① 부담만가능성설은 부담만 독립하여 행정쟁송의 대상이 될 수 있다고 본다(진정일부취소소송). ② 분리가능성기준설은 부관이 주된 행정행위로부터 분리 가능한 경우 독립쟁송이 가능하다고 본다. ③ 전면긍정설은 모든 부관에 대하여 독립쟁송이 가능하다고 본다.</p>
       <p><b class="sub">2. 판례</b>&lt;대법원&gt;은 부담만이 독립하여 행정소송의 대상이 될 수 있다고 하였으며, 기타 부관의 경우 전체의 취소를 구하는 것만 인정하고 있다. &lt;어업면허시 부속선 사용을 금지하는 부관 사건&gt;에서 위법한 부관을 삭제해 달라는 변경신청을 거부한 처분에 대한 취소소송을 인정하여 권리구제의 길을 열어 놓고 있다.</p>
       <p><b class="sub">3. 검토 및 사안의 경우</b>위법한 행정작용의 통제를 위하여 가능한 한 쟁송가능성을 넓혀야 하는바, <b>전면긍정설이 타당</b>하다. 사안의 경우 기부채납조건은 부담에 해당하므로 독립하여 취소소송의 대상이 되는 것은 분명하다.</p>
     </div>
+    <div class="note">
+      <p><b>Tip.</b> 판례 결론("부담만 독립쟁송·독립취소 가능") 문구로 재현</p>
+      <p>다음은 반드시 본안→독립취소 순서(논리상 강제)</p>
+    </div>
+    </div>
+    <div class="flowrow">
     <div class="flowbox">
       <span class="num">Ⅳ</span><h3>부관의 위법성 여부(본안 판단)</h3>
       <p><b class="sub">1. 부관의 한계</b>(1) 가능성: 행정기본법 §17①에서 재량행위에는, §17②에서는 기속행위도 법률 근거가 있으면 부관을 붙일 수 있다고 규정한다.<br>(2) 내용상 한계: 부관은 §17④에 따라 처분목적 위배금지·실질적 관련성·필요최소한의 범위라는 요건에 적합해야 한다. 이하 부당결부금지원칙과 관련하여 후술한다.<br>(3) 부당결부금지의 원칙 위반여부 — 1) 의의 및 근거: 행정작용과 실질적 관련이 없는 의무를 부과해서는 안 된다는 원칙으로, 법치국가의 원리·자의금지원칙에서 나오는 헌법상 원칙이며 <b>행정기본법 §13</b>에 근거한다. 2) 요건: <b>①공행정작용 ②반대급부와 결부 ③실질적 관련성 없음(원인적·목적적 관련성)</b>. 3) 사안의 경우: 기부채납은 사업인정의 목적 실현에 필요하지 않고 토지보상법의 취지와도 무관하여 실질적 관련성이 없어 부당결부금지원칙에 반하여 <b>위법</b>하다.<br>(4) 위법성 정도: 중대명백설상 하자는 중대하나 일반인의 시각에서 명백하다고 보기 어려워 <b>취소사유</b>(判 역시 위법하나 당연무효는 아니라고 봄).</p>
       <p><b class="sub">2. 부관만의 독립취소가능성</b>(1) 학설: 기속행위는 근거 없이 붙은 부관이 당연취소되고, 재량행위는 ①긍정설 ②부정설(재량권행사 제한) ③제한적긍정설(본질적 부분 여부로 판단)이 대립한다.<br>(2) 판례 및 검토: 判은 독립쟁송가능성이 인정되는 경우(부담) 항상 독립취소가 가능하다고 본다. 생각건대 국민의 권익구제와 행정목적 실현을 조절하는 <b>제한적긍정설</b>이 타당하다.<br>(3) 사안의 경우: 기부채납조건은 사업인정의 본질적 부분이 아니므로 <b>독립적으로 취소 대상이 된다.</b></p>
+    </div>
+    <div class="note">
+      <p><b>Tip.</b> 부당결부 요건 포섭이 최대 배점 — 원인적·목적적 관련성 사안적용 필수</p>
+    </div>
     </div>
     <div class="flowbox">
       <span class="num">Ⅴ</span><h3>사례의 해결</h3>
@@ -277,15 +298,7 @@
     </div>
   </div>
 
-  <div class="view" data-view="write">
-    <div class="mnemonic">법적성질 → 쟁송가능성 → 본안(부당결부) → 독립취소 → 결론<br><span style="font-weight:400; font-size:12.5px;">사업인정·부관의 성질 / 독립쟁송 / 부당결부금지 / 독립취소가능성 / 사례해결</span></div>
-    <div class="tip"><div class="ttl">1. 대목차부터 5개로 쪼개 놓기</div><p>이 문제는 세 갈래(쟁송가능성·본안·독립취소)가 얽혀 있어 대목차 I~V를 먼저 쓰고 들어가지 않으면 답안이 산으로 갑니다. 시작 전 목차만 먼저 적어두세요.</p></div>
-    <div class="tip"><div class="ttl">2. 순서를 절대 바꾸지 않기</div><p>"독립쟁송 → 본안 → 독립취소"의 순서가 논리적으로 강제됩니다. 위법함이 본안에서 확정되기 전에는 취소가능성을 논할 수 없기 때문입니다.</p></div>
-    <div class="tip"><div class="ttl">3. 부당결부금지 요건 포섭이 최대 배점</div><p>원인적 관련성·목적적 관련성을 각각 사안(기부채납과 사업인정 목적)에 직접 적용하는 문장을 빠뜨리지 마세요. 요건만 나열하고 포섭을 생략하면 감점됩니다.</p></div>
-    <div class="tip"><div class="ttl">4. 판례 결론 문구 중심으로</div><p>"부담만 독립쟁송·독립취소 가능"이라는 判의 결론만 정확히 재현하면 충분합니다. 전체 판시 이유를 외울 필요는 없습니다.</p></div>
-    <div class="tip"><div class="ttl">5. 사안포섭을 세 번 반복</div><p>①부관 종류 판단(부담) ②부당결부금지 위반 판단 ③독립취소가능 여부 판단, 이 세 지점에서 각각 사안포섭 문장이 필요합니다.</p></div>
-    <div class="tip"><div class="ttl">6. 시간·분량 배분</div><p>배점 40점의 절반 이상이 본안(부당결부금지)에 걸려 있습니다. 쟁송가능성은 짧게, 부당결부금지는 가장 두껍게, 독립취소가능성은 중간 분량으로 배분하세요.</p></div>
-  </div>
+
 </div>
 
 <!-- ======================================================================= -->
@@ -299,7 +312,6 @@
     <div class="tab active" data-view="map">① 구조</div>
     <div class="tab" data-view="cards">② 암기카드</div>
     <div class="tab" data-view="quiz">③ 자가테스트</div>
-    <div class="tab" data-view="write">④ 서술형 팁</div>
   </div>
 
   <div class="view active" data-view="map">
@@ -315,21 +327,34 @@
       <span class="lv2">(2) 전제요건</span>
       <span class="lv2">(3) 하자의 승계 해결논의</span>
       <span class="lv1">3. 사례의 해결</span>
+      <div class="toc-note"><b>Tip.</b> 결론은 '요건충족'과 '승계인정' 두 갈래로 분리 · 시간은 학설·판례·포섭에 집중</div>
     </div>
     <div class="flowbox">
       <span class="num">1</span><h3>논점의 정리</h3>
       <p>P가 확정된 개별공시지가의 위법을 이유로, 그 공시지가를 기초로 부과된 <b>재산세</b>에 대한 취소소송을 제기할 수 있는지 — <b>하자의 승계</b> 문제로 검토한다.</p>
     </div>
+    <div class="flowrow">
     <div class="flowbox">
       <span class="num">2</span><h3>하자의 승계</h3>
       <p><b class="sub">(1) 의의 및 인정필요성</b>선행 행정행위의 위법을 이유로 적법한 후행 행정행위의 위법을 주장하는 것. 행정관계의 안정성·실효성과 국민의 <b>재판받을 권리</b>를 조화시키기 위해 인정할 필요가 있다.</p>
       <p><b class="sub">(2) 전제요건</b>① 선·후행위 모두 처분일 것 ② 선행행위는 <b>취소사유</b>의 위법이 있을 것 ③ 후행행위는 고유한 하자 없을 것(적법) ④ 선행행위에 <b>불가쟁력</b>이 발생할 것.</p>
       <p><b class="sub">(3) 하자의 승계 해결논의</b>1) 학설: 전통적 견해(하자승계론)는 선·후행위가 <b>일련의 절차</b>에서 하나의 법률효과를 목적으로 하는 경우 승계를 긍정하며, 새로운 견해(구속력론)는 구속력이 미치는 <b>대인적(동일 수범자)·사물적(동일 목적)·시간적(동일 사실·법상태)</b> 한계에 더해 <b>예측가능성·수인가능성</b>을 추가로 고려한다.<br>2) 판례: 원칙적으로 선·후행위가 결합해 하나의 법적효과를 달성하는지를 기준으로 판단하되, 예외적으로 별개 효과를 목적으로 하는 경우에도 <b>수인한도를 넘는 가혹한 결과</b>를 가져오고 그 결과가 <b>예측 가능한 것이 아닌 경우</b>에는 승계를 인정한다.<br>3) 검토: 법적안정성·재판청구권의 조화를 위해 예측가능성·수인가능성 등을 추가로 고려하여야 한다.</p>
     </div>
+    <div class="note">
+      <p><b>Tip.</b> 요건 4가지를 학설보다 먼저 언급</p>
+      <p>하자승계론=법률효과 / 구속력론=범위+예측·수인가능성</p>
+      <p>판례 예외(가혹한 결과+예측불가) 두 요건 함께 서술</p>
+    </div>
+    </div>
+    <div class="flowrow">
     <div class="flowbox">
       <span class="num">3</span><h3>사례의 해결</h3>
       <p><b class="sub">(1) 요건 충족여부</b>개별공시지가·재산세부과 모두 처분성이 인정되고, 이의신청·행정심판을 거쳤을 뿐 행정소송은 제기하지 않아 <b>불가쟁력이 발생</b>했다.</p>
       <p><b class="sub">(2) 사안의 해결</b>P는 애초 세금 상승을 우려해 위법성을 다툴 수 있었으므로(예측가능) 재산세 부과는 수인한도 내에 있다. 따라서 <b>하자의 승계는 부정되며, P는 재산세에 대한 취소소송을 제기할 수 없다.</b></p>
+    </div>
+    <div class="note">
+      <p><b>Tip.</b> P의 이의신청·행정심판 이력 = '예측가능' 핵심 근거로 활용</p>
+    </div>
     </div>
   </div>
 
@@ -373,15 +398,7 @@
     </div>
   </div>
 
-  <div class="view" data-view="write">
-    <div class="mnemonic">쟁점 → 요건 → 학설 → 판례 → 검토 → 사안해결<br><span style="font-weight:400; font-size:12.5px;">하자승계는 요건 충족여부 판단이 배점의 절반</span></div>
-    <div class="tip"><div class="ttl">1. 전제요건을 학설보다 먼저, 명시적으로</div><p>하자승계는 요건 4가지(처분성·취소사유·후행행위 적법·불가쟁력)를 갖춰야 비로소 논의 대상이 됩니다. 학설로 바로 들어가지 말고 요건 충족 여부부터 짚어주세요.</p></div>
-    <div class="tip"><div class="ttl">2. 학설은 "무엇을 보는가"로 대비</div><p>하자승계론은 법률효과, 구속력론은 구속력의 범위(대인·사물·시간)+예측·수인가능성을 본다는 식으로 두 견해의 판단 대상 차이를 한 문장으로 대비시키면 채점자가 이해하기 쉽습니다.</p></div>
-    <div class="tip"><div class="ttl">3. 판례의 예외 법리를 정확히</div><p>"별개의 법률효과를 목적으로 하더라도 수인한도를 넘는 가혹한 결과 + 예측 불가능"이라는 두 요건이 함께 있어야 예외적으로 승계가 인정됩니다. 둘 중 하나만 쓰면 감점됩니다.</p></div>
-    <div class="tip"><div class="ttl">4. 사안의 사실관계를 적극적으로 활용</div><p>P가 이의신청·행정심판까지 거쳤다는 사실은 "예측가능했다"는 결론의 핵심 근거입니다. 이런 사실관계를 그대로 답안에 옮겨 적으며 포섭하세요.</p></div>
-    <div class="tip"><div class="ttl">5. 결론은 두 갈래로 명확히</div><p>"요건은 충족되는가"와 "하자승계가 인정되는가"를 분리해서 씁니다. 요건은 충족되더라도(불가쟁력 등), 예측가능·수인한도 판단에서 승계가 부정될 수 있음을 명확히 구분해 서술하세요.</p></div>
-    <div class="tip"><div class="ttl">6. 시간 배분</div><p>요건 정리는 짧게, 학설·판례의 예외 법리 설명과 사안포섭에 가장 많은 분량을 배분하세요. 결론 문장은 반드시 한 줄로 마무리합니다.</p></div>
-  </div>
+
 </div>
 
 <!-- ======================================================================= -->
@@ -395,7 +412,6 @@
     <div class="tab active" data-view="map">① 구조</div>
     <div class="tab" data-view="cards">② 암기카드</div>
     <div class="tab" data-view="quiz">③ 자가테스트</div>
-    <div class="tab" data-view="write">④ 서술형 팁</div>
   </div>
 
   <div class="view active" data-view="map">
@@ -414,21 +430,34 @@
       <span class="lv2">(2) 판례</span>
       <span class="lv2">(3) 검토</span>
       <span class="lv1">4. 사례의 해결</span>
+      <div class="toc-note"><b>Tip.</b> 먼저 '민사+위법여부' 유형임을 특정 · 결론은 한 줄로</div>
     </div>
     <div class="flowbox">
       <span class="num">1</span><h3>논점의 정리</h3>
       <p>수소법원인 민사법원이 본안(손해배상) 판단의 전제로서 甲에 대한 업무정지처분의 <b>위법성</b> 여부를 심사하여야 한다. <b>선결문제</b>란 행정행위의 위법 여부 또는 효력 유무를 다른 특정사건의 재판에 있어서 먼저 해결해야 하는 경우를 말하며, 사안은 민사법원에서 행정행위의 위법성 심사여부에 대한 선결문제의 심리가능성 문제이다.</p>
     </div>
+    <div class="flowrow">
     <div class="flowbox">
       <span class="num">2</span><h3>공정력과 구성요건적 효력의 의의 및 구별</h3>
       <p><b class="sub">(1) 의의</b><b>공정력</b>이란 행정행위에 하자가 있더라도 권한 있는 기관이 취소할 때까지 효력을 부정할 수 없는 구속력을, <b>구성요건적 효력</b>이란 유효한 행정행위의 존재가 다른 행정청·법원의 결정에 영향을 미치는 효력을 말한다.</p>
       <p><b class="sub">(2) 공정력과 구성요건적 효력과의 구별여부</b>①비구별설은 공정력을 상대방 및 이해관계인뿐만 아니라 타 국가기관에도 미치는 효력이라 보는 종래 통설의 입장이다. ②구별설은 공정력은 상대방·이해관계인에 대한 구속력, 구성요건적 효력은 제3의 국가기관에 대한 구속력으로 구분한다. ③생각건대 양자는 근거와 내용을 달리하므로 <b>구별하는 것이 타당</b>하다.</p>
     </div>
+    <div class="note">
+      <p><b>Tip.</b> 이 논점의 출발점 — 구별 실익 짧게라도 반드시 언급</p>
+    </div>
+    </div>
+    <div class="flowrow">
     <div class="flowbox">
       <span class="num">3</span><h3>민사소송과 선결문제(행정행위의 위법 여부가 쟁점인 경우)</h3>
       <p><b class="sub">(1) 학설</b>① 부정설은 <b>적법성 추정설</b>의 입장으로 행정소송법 제11조 제1항을 <b>제한적으로 해석</b>하며, ② 긍정설은 <b>유효성 추정설</b>의 입장으로 동 조항을 <b>예시적으로 해석</b>한다.</p>
       <p><b class="sub">(2) 판례</b>判은 위법한 대집행처분에 의한 국가배상청구소송에서 <b>"계고처분이 위법임을 이유로 손해배상을 청구한 사안에서 행정처분의 취소판결이 있어야만 손해배상청구를 할 수 있는 것은 아니다"</b>라고 하여 긍정설 입장이다.</p>
       <p><b class="sub">(3) 검토</b>구성요건적 효력의 본질은 적법성 추정이 아니라 <b>절차적·잠정적 통용력</b>에 불과한 것으로 봄이 타당한바, 위법성을 판단할 수 있다는 긍정설이 타당하다.</p>
+    </div>
+    <div class="note">
+      <p><b>Tip.</b> 부정설=제한적해석 / 긍정설=예시적해석 대비</p>
+      <p>판례문구 "취소판결 없어도 손배 가능" 그대로 재현</p>
+      <p>검토는 '절차적·잠정적 통용력' 논거로</p>
+    </div>
     </div>
     <div class="flowbox">
       <span class="num">4</span><h3>사례의 해결</h3>
@@ -476,15 +505,7 @@
     </div>
   </div>
 
-  <div class="view" data-view="write">
-    <div class="mnemonic">쟁점 → 선결문제 의의 → 공정력·구성요건적효력 구별 → 학설 → 판례·검토 → 사례해결<br><span style="font-weight:400; font-size:12.5px;">행정소송법 제11조 제1항의 해석 차이가 핵심</span></div>
-    <div class="tip"><div class="ttl">1. 선결문제 유형부터 특정하기</div><p>민사/형사 × 위법여부/효력유무의 조합 중 이 사안이 "민사소송 + 위법 여부"에 해당함을 먼저 밝히고 들어가세요.</p></div>
-    <div class="tip"><div class="ttl">2. 공정력·구성요건적 효력 구별을 빠뜨리지 않기</div><p>이 논점의 이론적 출발점입니다. 두 개념의 의의와 구별 실익을 짧게라도 반드시 짚고 학설로 넘어가세요.</p></div>
-    <div class="tip"><div class="ttl">3. 행정소송법 제11조 제1항의 해석이 쟁점의 축</div><p>부정설=제한적 해석, 긍정설=예시적 해석이라는 대비를 명확히 쓰면 학설 파트의 배점을 놓치지 않습니다.</p></div>
-    <div class="tip"><div class="ttl">4. 판례 문구를 그대로 재현</div><p>"취소판결이 있어야만 손해배상청구를 할 수 있는 것은 아니다"라는 표현을 정확히 옮기면 판례 파트 감점을 줄일 수 있습니다.</p></div>
-    <div class="tip"><div class="ttl">5. 검토는 구성요건효력의 본질론으로</div><p>"적법성 추정이 아니라 절차적·잠정적 통용력에 불과하다"는 한 문장이 검토의 핵심 논거입니다.</p></div>
-    <div class="tip"><div class="ttl">6. 결론은 한 줄로</div><p>"민사법원은 (해당 처분의) 위법성을 심리할 수 있다"로 짧고 명확하게 마무리하세요.</p></div>
-  </div>
+
 </div>
 
 <!-- ======================================================================= -->
@@ -498,7 +519,6 @@
     <div class="tab active" data-view="map">① 구조</div>
     <div class="tab" data-view="cards">② 암기카드</div>
     <div class="tab" data-view="quiz">③ 자가테스트</div>
-    <div class="tab" data-view="write">④ 서술형 팁</div>
   </div>
 
   <div class="view active" data-view="map">
@@ -517,6 +537,7 @@
       <span class="lv1">Ⅳ. 인정범위</span>
       <span class="lv2">1. 무효사유인 경우에도 하자의 치유가 인정되는지 여부</span>
       <span class="lv2">2. 내용상 하자의 치유 여부</span>
+      <div class="toc-note"><b>Tip.</b> 설명형 — 결론은 '정리' 문단으로 · 학설엔 근거 한 줄씩 병기(예: 제한적긍정설-능률성)</div>
     </div>
     <div class="flowbox">
       <span class="num">Ⅰ</span><h3>개설</h3>
@@ -526,16 +547,27 @@
       <span class="num">Ⅱ</span><h3>하자의 치유의 인정여부</h3>
       <p>견해 대립은 있으나, 判은 원칙적으로 하자의 치유를 인정하지 않으나 예외적으로 국민의 권익을 침해하지 않는 범위 내에서 구체적 사정에 따라 합목적적으로 인정하고 있다. 생각건대 <b>법치주의 관점</b>에서 하자 있는 행정행위의 치유는 부정함이 타당하나, <b>행정의 능률성</b>을 고려할 때 <b>제한적 긍정설</b>이 타당하다고 본다.</p>
     </div>
+    <div class="flowrow">
     <div class="flowbox">
       <span class="num">Ⅲ</span><h3>하자의 치유의 인정시기(시간적 한계)</h3>
       <p><b class="sub">1. 학설</b>① 쟁송제기이전설은 행정절차의 중요성과 국민 권리구제를 고려하여 <b>쟁송제기 전</b>까지 가능하다는 견해이며, ② 행정소송제기이전설은 심판단계에서는 아직 행정청인 바 <b>행정심판에 대한 불복시</b>까지 가능하다는 견해이다. ③ 소송종결시설은 분쟁의 일회적 해결이라는 소송경제적 관점에서 <b>소송절차종결 전</b>까지 가능하다는 견해이다.</p>
       <p><b class="sub">2. 판례</b>判은 하자의 치유를 허용하려면 불복 여부 결정 및 불복신청의 편의를 줄 수 있는 상당한 기간 내에 하여야 할 것이라고 하여 <b>행정쟁송제기이전설</b>의 입장으로 보인다.</p>
       <p><b class="sub">3. 검토</b>생각건대, 하자의 치유시기를 쟁송 이후까지 연장한다면 상대방 권리보호에 문제되는바 <b>권익보호를 위해 쟁송제기이전설이 타당</b>하다고 본다.</p>
     </div>
+    <div class="note">
+      <p><b>Tip.</b> 3학설은 허용시점이 점점 늦어지는 순서</p>
+      <p>판례 문구 "불복 편의 줄 상당한 기간 내" 재현</p>
+    </div>
+    </div>
+    <div class="flowrow">
     <div class="flowbox">
       <span class="num">Ⅳ</span><h3>인정범위</h3>
       <p><b class="sub">1. 무효사유인 경우에도 하자의 치유가 인정되는지 여부</b>무효와 취소의 구별이 상대적이라는 것을 논거로 무효인 행정행위에도 하자의 치유를 인정하는 견해도 있지만, <b>통설 및 판례는 취소할 수 있는 행정행위에 대해서만</b> 하자의 치유를 인정한다.</p>
       <p><b class="sub">2. 내용상 하자의 치유 여부</b>치유의 대상이 되는 하자와 관련하여 절차와 형식상 하자에만 한정하는 견해와 내용상 하자까지 포함하는 견해가 대립하나, 判은 <b>내용에 관한 하자는 치유가 인정되지 않는다</b>고 본다. 내용상의 하자까지 포함하는 견해는 <b>법률 적합성과의 조화를 깨뜨린다</b>는 점에서 문제가 있다.</p>
+    </div>
+    <div class="note">
+      <p><b>Tip.</b> 두 쟁점(무효사유·내용상하자) 모두 언급 — 하나만 쓰면 배점 절반 상실</p>
+    </div>
     </div>
   </div>
 
@@ -579,15 +611,7 @@
     </div>
   </div>
 
-  <div class="view" data-view="write">
-    <div class="mnemonic">개설 → 인정여부 → 인정시기 → 인정범위 → 정리<br><span style="font-weight:400; font-size:12.5px;">사안(사례)이 없는 설명형 문제 — 결론은 "정리"로 마무리</span></div>
-    <div class="tip"><div class="ttl">1. 사례가 없는 문제임을 표시하기</div><p>"설명하시오" 형 문제라 마지막에 "사안의 해결"이 아니라 <b>제도 전체를 정리하는 결론 문단</b>으로 마무리합니다. 다른 문제와 헷갈려 사안포섭 문장을 억지로 만들지 마세요.</p></div>
-    <div class="tip"><div class="ttl">2. 인정시기 학설 3개를 혼동하지 않기</div><p>쟁송제기이전설·행정소송제기이전설·소송종결시설은 시간 순으로 점점 늦어지는 구조입니다. 각 견해가 "어디까지"를 허용하는지 순서대로 암기하면 헷갈리지 않습니다.</p></div>
-    <div class="tip"><div class="ttl">3. 인정범위는 반드시 두 갈래 모두 언급</div><p>무효사유 여부와 내용상 하자 여부는 서로 다른 쟁점입니다. 하나만 쓰고 끝내면 배점을 절반 놓치므로 두 항목 모두 빠짐없이 서술하세요.</p></div>
-    <div class="tip"><div class="ttl">4. 판례 결론 문구 중심으로</div><p>"불복 여부 결정 및 편의를 줄 수 있는 상당한 기간 내"라는 판례 표현을 정확히 재현하면 인정시기 부분의 감점을 줄일 수 있습니다.</p></div>
-    <div class="tip"><div class="ttl">5. 견해 대립의 논거를 짧게라도 병기</div><p>결론만 쓰지 말고 "왜"를 한 줄씩 붙이세요. 예: 제한적 긍정설 — 행정능률 고려, 쟁송제기이전설 — 상대방 권리보호.</p></div>
-    <div class="tip"><div class="ttl">6. 시간 배분</div><p>개설·인정여부는 짧게, 인정시기(학설 3개 비교)와 인정범위(두 갈래)에 고르게 시간을 배분하세요. 배점이 크지 않은 문제이므로 군더더기 없이 핵심만 적는 것이 중요합니다.</p></div>
-  </div>
+
 </div>
 
 <!-- ======================================================================= -->
@@ -601,7 +625,6 @@
     <div class="tab active" data-view="map">① 구조</div>
     <div class="tab" data-view="cards">② 암기카드</div>
     <div class="tab" data-view="quiz">③ 자가테스트</div>
-    <div class="tab" data-view="write">④ 서술형 팁</div>
   </div>
 
   <div class="view active" data-view="map">
@@ -615,6 +638,7 @@
       <span class="lv1">Ⅱ. 의의 및 근거</span>
       <span class="lv1">Ⅲ. 요건</span>
       <span class="lv1">Ⅳ. 사례의 해결</span>
+      <div class="toc-note"><b>Tip.</b> 사업인정=재량행위임을 먼저 밝히고 시작 · 시간은 요건·포섭에 집중</div>
     </div>
     <div class="flowbox">
       <span class="num">Ⅰ</span><h3>문제의 소재</h3>
@@ -624,13 +648,24 @@
       <span class="num">Ⅱ</span><h3>의의 및 근거</h3>
       <p>비례의 원칙이란 <b>행정목적과 행정수단 사이에 합리적인 비례관계</b>가 있어야 한다는 원칙이다. 헌법적 근거는 헌법 제37조 제2항 및 실질적 법치국가원칙, 실정법적 근거는 <b>행정기본법 제10조</b>이다.</p>
     </div>
+    <div class="flowrow">
     <div class="flowbox">
       <span class="num">Ⅲ</span><h3>요건</h3>
       <p>① <b>적합성</b>: 행정목적 달성에 유효·적절할 것 ② <b>필요성</b>: 목적 달성에 필요한 최소한도에 그칠 것 ③ <b>상당성</b>: 침해되는 이익이 의도하는 공익보다 크지 아니할 것. 세 요건은 <b>단계적으로 심사</b>한다.</p>
     </div>
+    <div class="note">
+      <p><b>Tip.</b> 적합성→필요성→상당성 반드시 단계적 심사</p>
+    </div>
+    </div>
+    <div class="flowrow">
     <div class="flowbox">
       <span class="num">Ⅳ</span><h3>사례의 해결</h3>
       <p>도로사업 자체는 적절할 수 있으나(적합성 충족), 이를 달성하는 데 있어 <b>최소한도에 그쳐야</b> 한다(필요성). 따라서 갑의 주장대로 자신의 토지보다 <b>주변토지로 도로를 내는 것이 비용이 적게 드는 등 합리적인 사유</b>가 있다면, 갑 토지를 수용한 사업인정은 필요성 요건을 갖추지 못해 <b>위법</b>하게 된다.</p>
+    </div>
+    <div class="note">
+      <p><b>Tip.</b> 이 사안은 필요성 단계에서 결론 — 상당성까지 갈 필요 없음</p>
+      <p>결론은 가정형으로 OK</p>
+    </div>
     </div>
   </div>
 
@@ -674,15 +709,7 @@
     </div>
   </div>
 
-  <div class="view" data-view="write">
-    <div class="mnemonic">사업인정의 성질 → 비례원칙 의의·근거 → 적·필·상 요건 → 사안해결<br><span style="font-weight:400; font-size:12.5px;">이 사안은 "필요성(최소침해)" 위반이 핵심</span></div>
-    <div class="tip"><div class="ttl">1. 사업인정이 재량행위임을 먼저 밝히기</div><p>비례원칙 위반은 재량통제 수단이라는 점을 보여주려면, 먼저 사업인정의 법적 성질(재량행위)을 짚고 들어가야 합니다.</p></div>
-    <div class="tip"><div class="ttl">2. 3요건은 반드시 단계적으로</div><p>적합성 → 필요성 → 상당성 순서로, 앞 단계를 통과해야 다음 단계를 심사한다는 점을 명시하세요.</p></div>
-    <div class="tip"><div class="ttl">3. 이 사안은 필요성 단계에서 결론</div><p>적합성은 충족되므로, 상당성까지 갈 필요 없이 "필요성(최소침해)" 위반 여부만으로 결론을 낼 수 있는 문제입니다.</p></div>
-    <div class="tip"><div class="ttl">4. 비교대상(대안)의 존재를 요건에 직접 포섭</div><p>"주변토지로 도로를 내는 것이 더 합리적"이라는 사실관계 자체가 필요성 판단의 핵심 근거임을 문장으로 연결하세요.</p></div>
-    <div class="tip"><div class="ttl">5. 결론은 조건부로 써도 됩니다</div><p>사실관계가 완결되지 않은 문제이므로, "합리적 사유가 있다면 위법하게 된다"처럼 가정형 결론이 자연스럽습니다.</p></div>
-    <div class="tip"><div class="ttl">6. 시간 배분</div><p>의의·근거는 짧게, 3요건과 사안포섭(특히 필요성)에 집중하세요.</p></div>
-  </div>
+
 </div>
 
 <!-- ======================================================================= -->
@@ -696,7 +723,6 @@
     <div class="tab active" data-view="map">① 구조</div>
     <div class="tab" data-view="cards">② 암기카드</div>
     <div class="tab" data-view="quiz">③ 자가테스트</div>
-    <div class="tab" data-view="write">④ 서술형 팁</div>
   </div>
 
   <div class="view active" data-view="map">
@@ -707,19 +733,31 @@
       <span class="lv2">1. 내용</span>
       <span class="lv2">2. 선례가 필요한지 여부</span>
       <span class="lv1">Ⅲ. 한계</span>
+      <div class="toc-note"><b>Tip.</b> 근거는 평등원칙(통설) 먼저 — 신뢰보호설과 대비</div>
     </div>
     <div class="flowbox">
       <span class="num">Ⅰ</span><h3>개설(의의 및 근거)</h3>
       <p>자기구속의 원칙이란 행정관행이 성립된 경우, 행정청은 특별한 사정이 없는 한 <b>같은 사안에서 행정관행과 같은 결정을 하여야</b> 한다는 원칙이다. 신뢰보호에서 구하는 견해도 있으나, 상대방의 신뢰와 무관하게 성립한다는 점에서 <b>평등원칙</b>에서 구하는 견해가 통설이다. 判은 평등원칙 및 신뢰보호원칙에서 구하는 입장이다.</p>
     </div>
+    <div class="flowrow">
     <div class="flowbox">
       <span class="num">Ⅱ</span><h3>요건</h3>
       <p><b class="sub">1. 내용</b><b>재량행위 영역</b>일 것, <b>행정선례</b>가 있을 것, <b>동종의 사안</b>일 것을 요구한다.</p>
       <p><b class="sub">2. 선례가 필요한지 여부</b>재량준칙 존재시 선례가 불필요하다는 <b>선례불요설</b>, 1회 이상 선례가 존재하면 된다는 <b>1회 선례 충분설</b>, 관행화될 정도의 계속적 선례가 필요하다는 <b>행정관행설</b>이 대립한다. 判은 재량준칙이 공표된 것만으로는 부족하고 <b>되풀이 시행되어 행정관행이 성립한 경우</b>에 적용된다고 보아 행정관행설 입장이다. 생각건대 선례불요설은 재량준칙의 법규성을 인정하는 셈이 된다는 점, 1회 선례 충분설은 행정의 경직화를 초래한다는 점에서 <b>행정관행설</b>이 타당하다.</p>
     </div>
+    <div class="note">
+      <p><b>Tip.</b> 선례불요설&lt;1회충분설&lt;행정관행설 순 암기</p>
+      <p>판례=행정관행설 "되풀이 시행" 문구 재현</p>
+    </div>
+    </div>
+    <div class="flowrow">
     <div class="flowbox">
       <span class="num">Ⅲ</span><h3>한계</h3>
       <p><b>위법한 관행</b>의 경우와 <b>사정변경</b>이 있는 경우에 자기구속법리의 적용이 배제될 수 있다.</p>
+    </div>
+    <div class="note">
+      <p><b>Tip.</b> 위법한 관행 + 사정변경, 두 한계 모두 언급</p>
+    </div>
     </div>
   </div>
 
@@ -763,14 +801,7 @@
     </div>
   </div>
 
-  <div class="view" data-view="write">
-    <div class="mnemonic">의의·근거 → 요건(재량·선례·동종) → 선례 필요여부 학설 → 한계<br><span style="font-weight:400; font-size:12.5px;">"행정선례" 요건에서 3학설 구별이 채점 포인트</span></div>
-    <div class="tip"><div class="ttl">1. 선례 필요여부 3학설을 정확히 구별</div><p>선례불요설·1회 선례 충분설·행정관행설을 각각의 요구 강도(없음→1회→반복)로 순서를 매겨 암기하세요.</p></div>
-    <div class="tip"><div class="ttl">2. 판례=행정관행설 문구를 재현</div><p>"재량준칙 공표만으로는 부족, 되풀이 시행되어 행정관행이 성립해야 한다"는 표현을 그대로 옮기면 감점을 줄일 수 있습니다.</p></div>
-    <div class="tip"><div class="ttl">3. 근거는 평등원칙(통설)임을 먼저</div><p>신뢰보호설과의 차이(신뢰 유무와 무관하게 성립)를 한 줄로 대비시켜 쓰세요.</p></div>
-    <div class="tip"><div class="ttl">4. 한계 두 가지를 빠뜨리지 않기</div><p>위법한 관행의 경우와 사정변경이 있는 경우, 둘 다 언급해야 합니다.</p></div>
-    <div class="tip"><div class="ttl">5. 검토 논거를 병기</div><p>선례불요설은 재량준칙의 법규성을 인정하는 문제, 1회 선례 충분설은 행정 경직화를 초래한다는 비판을 각각 붙이세요.</p></div>
-  </div>
+
 </div>
 
 <!-- ======================================================================= -->
@@ -784,7 +815,6 @@
     <div class="tab active" data-view="map">① 구조</div>
     <div class="tab" data-view="cards">② 암기카드</div>
     <div class="tab" data-view="quiz">③ 자가테스트</div>
-    <div class="tab" data-view="write">④ 서술형 팁</div>
   </div>
 
   <div class="view active" data-view="map">
@@ -796,16 +826,27 @@
       <span class="lv2">2. 요건</span>
       <span class="lv2">3. 사안의 경우</span>
       <span class="lv1">Ⅲ. 사례의 해결</span>
+      <div class="toc-note"><b>Tip.</b> 결론은 '적법' — 문제06(위법)과 헷갈리지 말 것</div>
     </div>
+    <div class="flowrow">
     <div class="flowbox">
       <span class="num">Ⅰ</span><h3>문제의 소재</h3>
       <p>을 시장은 주택건설사업계획승인처분을 하면서 그 주택단지의 <b>진입도로 부지의 소유권을 확보</b>하여 진입도로 등 간선시설을 설치하고 그 부지 소유권을 <b>기부체납</b>하도록 하는 부관을 붙였는바, 이는 행정행위의 효력발생·소멸여부와 관계없이 작위 등 독립된 의무를 부과하는 <b>부담</b>으로 보인다. 당해 부관의 적법여부를 검토하기 위해 <b>부당결부금지원칙</b>이 문제된다.</p>
     </div>
+    <div class="note">
+      <p><b>Tip.</b> 부담 정의를 사안에 짧게 적용하고 시작</p>
+    </div>
+    </div>
+    <div class="flowrow">
     <div class="flowbox">
       <span class="num">Ⅱ</span><h3>부당결부금지의 원칙 위반여부</h3>
       <p><b class="sub">1. 의의 등</b>행정청은 행정작용을 할 때 상대방에게 해당 행정작용과 실질적인 관련이 없는 의무를 부과해서는 아니된다는 원칙으로, 법치국가의 원리와 자의금지원칙에서 나오는 헌법상 원칙이며 <b>행정기본법 제13조</b>에 근거한다.</p>
       <p><b class="sub">2. 요건</b>① 행정청의 <b>공행정작용</b>일 것 ② 상대방에게 부과되는 <b>반대급부와 결부</b>될 것 ③ 행정작용과 반대급부가 <b>실질적 관련성이 없을 것</b>. 원인적 관련성은 행정작용과 사인의 급부 사이 인과관계, 목적적 관련성은 주된 행정행위의 근거 법률·행정분야가 추구하는 목적에 의해서만 부과되어야 함을 의미한다.</p>
       <p><b class="sub">3. 사안의 경우</b>주택사업계획승인이 있으므로 진출입로가 필요한 것이어서 <b>원인적 관련성</b>이 있고, 주택사업계획승인은 주민들의 쾌적한 주거환경 제공이 목적이므로 진입로 개설은 이 목적에 부합해 <b>목적적 관련성</b>도 있는바, 주택건설사업계획승인과 기부체납 부관 사이에는 <b>부당결부가 존재하지 않는다.</b></p>
+    </div>
+    <div class="note">
+      <p><b>Tip.</b> 원인적·목적적 관련성을 사실과 한 문장씩 짝짓기</p>
+    </div>
     </div>
     <div class="flowbox">
       <span class="num">Ⅲ</span><h3>사례의 해결</h3>
@@ -853,13 +894,7 @@
     </div>
   </div>
 
-  <div class="view" data-view="write">
-    <div class="mnemonic">부관의 종류(부담) → 부당결부금지 의의·근거 → 요건 → 사안포섭(원인적·목적적) → 결론(적법)<br><span style="font-weight:400; font-size:12.5px;">문제06(기부채납 50%)과 같은 틀, 다른 결론</span></div>
-    <div class="tip"><div class="ttl">1. "적법"으로 끝나는 문제임을 기억하기</div><p>기부채납 부관은 항상 위법하다고 단정하지 말고, 사안마다 포섭 결과를 다시 확인하세요. 이 문제는 진입도로가 사업 자체에 필요한 시설이라 결론이 다릅니다.</p></div>
-    <div class="tip"><div class="ttl">2. 부관의 종류(부담) 판단을 먼저</div><p>"효력발생·소멸과 무관하게 독립된 의무 부과"라는 부담의 정의를 사안에 짧게 적용하고 시작하세요.</p></div>
-    <div class="tip"><div class="ttl">3. 원인적·목적적 관련성을 사실관계에 직접 대응</div><p>"진출입로가 필요하므로 원인적 관련성 O", "쾌적한 주거환경 목적에 부합하므로 목적적 관련성 O"처럼 요건과 사실을 한 문장씩 짝지으세요.</p></div>
-    <div class="tip"><div class="ttl">4. 문제06과 비교해서 암기</div><p>같은 "기부채납 부관 + 부당결부금지" 틀이지만, 문제06은 사업과 무관한 별도 부지 기부채납(위법), 이 문제는 사업에 필요한 진입도로 기부체납(적법)이라는 차이를 짝지어 기억하세요.</p></div>
-  </div>
+
 </div>
 
 <!-- ======================================================================= -->
@@ -873,7 +908,6 @@
     <div class="tab active" data-view="map">① 구조</div>
     <div class="tab" data-view="cards">② 암기카드</div>
     <div class="tab" data-view="quiz">③ 자가테스트</div>
-    <div class="tab" data-view="write">④ 서술형 팁</div>
   </div>
 
   <div class="view active" data-view="map">
@@ -891,6 +925,7 @@
       <span class="num">Ⅰ</span><h3>문제의 소재</h3>
       <p>업무정지 처분기준의 형식은 <b>법규명령</b>이지만, 그 실질은 국토교통부장관이 감정평가법인등의 의무불이행에 대한 제재적 조치를 취하기 위한 <b>사무처리기준</b>으로 볼 수 있다. 제재적 처분기준의 법규성 인정여부에 따라 업무정지처분의 위법성 판단기준이 달라지는 바, 이하 제재적 처분기준의 법적 성질을 살펴본다.</p>
     </div>
+    <div class="flowrow">
     <div class="flowbox">
       <span class="num">Ⅱ</span><h3>제재적 처분기준의 법적성질</h3>
       <p><b class="sub">1. 문제점</b>법규명령형식의 행정규칙이란 당해 규범의 내용은 행정사무처리기준에 불과하나 그것이 대통령령·부령 등 법규명령형식을 취한 경우를 말한다. 사안은 제재적 처분기준이 법규명령형식으로 제정되었으나 그 실질이 행정규칙의 내용을 갖는 경우 <b>대외적 구속력</b>이 문제된다.</p>
@@ -898,9 +933,21 @@
       <p><b class="sub">3. 판례</b>대법원은 <b>부령형식</b>의 행정규칙에 대해서는 일관되게 행정규칙으로 보고 있으나(도로법 시행규칙), <b>대통령령형식</b>의 행정규칙(주택건설촉진법 시행령 등)에 대해서는 법규성을 인정하여 형식에 따라 상이한 입장을 보인다. 한편 (구)청소년보호법 시행령상 <b>과징금부과기준</b>은 법규명령으로 보면서도 과징금 금액을 정액이 아니라 <b>최고한도액</b>으로 봄으로써 구체적 사정에 적용할 수 있는 재량이 행정청에 있다고 판시하였다.</p>
       <p><b class="sub">4. 검토 및 사안의 경우</b>상기 판례에서 모두 법규명령이라는 점에서 차이가 없음에도 법적 성질을 달리 보고 있다는 문제점이 있다. 생각건대, <b>예측 가능성</b> 등의 관점에서 법규성을 인정함이 타당하다. 사안의 별표3의 경우 제재적 처분기준으로 제정된 바, <b>법규성이 있다</b>고 판단된다.</p>
     </div>
+    <div class="note">
+      <p><b>Tip.</b> 형식설(안정성)·실질설(타당성)·수권기준설(수권유무)</p>
+      <p>판례는 부령↔대통령령 형식별로 상이</p>
+      <p>(구)청소년보호법=예외(최고한도액) 별도기억</p>
+      <p>검토는 '예측가능성' 논거로</p>
+    </div>
+    </div>
+    <div class="flowrow">
     <div class="flowbox">
       <span class="num">Ⅲ</span><h3>사례의 해결</h3>
       <p>별표의 제재적 처분기준은 형식은 법규명령이나 실질은 처분청의 내부기준으로서 그 성질이 문제되나, <b>법규명령설에 따라 법규명령으로 봄이 타당</b>하다.</p>
+    </div>
+    <div class="note">
+      <p><b>Tip.</b> 결론문장에 "사안의 별표3은~" 포섭 명시</p>
+    </div>
     </div>
   </div>
 
@@ -944,14 +991,7 @@
     </div>
   </div>
 
-  <div class="view" data-view="write">
-    <div class="mnemonic">문제점(형식·실질 괴리) → 학설 3개 → 판례(형식별 상이) → 검토(예측가능성) → 사안(별표3=법규명령)<br><span style="font-weight:400; font-size:12.5px;">(구)청소년보호법 시행령 판례는 예외 케이스로 별도 기억</span></div>
-    <div class="tip"><div class="ttl">1. 학설 3개를 한 줄 논거로 구분</div><p>형식설(형식·안정성), 실질설(실질·타당성), 수권여부기준설(상위법령 수권 유무)을 각각 키워드 하나로 압축해 암기하세요.</p></div>
-    <div class="tip"><div class="ttl">2. 판례는 "형식별로 다르다"를 먼저 정리</div><p>부령 vs 대통령령에 대한 판례 태도 차이를 대비해서 쓰는 것이 이 논점의 핵심입니다.</p></div>
-    <div class="tip"><div class="ttl">3. (구)청소년보호법 시행령 판례를 별도 언급</div><p>법규명령으로 보면서도 정액이 아닌 최고한도액으로 해석했다는 점이 채점 포인트이니 빠뜨리지 마세요.</p></div>
-    <div class="tip"><div class="ttl">4. 검토는 "예측가능성" 논거로</div><p>국민의 예측가능성 보장을 위해 법규성 인정이 타당하다는 흐름으로 마무리하세요.</p></div>
-    <div class="tip"><div class="ttl">5. 사안포섭(별표3)을 마지막 문장에 명시</div><p>결론 문단에 "사안의 별표3은 ~"라는 사안 적용 문장을 반드시 넣으세요.</p></div>
-  </div>
+
 </div>
 
 <!-- ======================================================================= -->
@@ -965,7 +1005,6 @@
     <div class="tab active" data-view="map">① 구조</div>
     <div class="tab" data-view="cards">② 암기카드</div>
     <div class="tab" data-view="quiz">③ 자가테스트</div>
-    <div class="tab" data-view="write">④ 서술형 팁</div>
   </div>
 
   <div class="view active" data-view="map">
@@ -980,16 +1019,28 @@
       <span class="lv2">1. 주체 및 대상</span>
       <span class="lv2">2. 재판의 전제성</span>
       <span class="lv2">3. 효력</span>
+      <div class="toc-note"><b>Tip.</b> 추상적 규범통제(헌재)와 구별되는 개념임을 먼저 명시</div>
     </div>
+    <div class="flowrow">
     <div class="flowbox">
       <span class="num">Ⅰ</span><h3>개설</h3>
       <p>구체적 규범통제란 다른 구체적 사건에 대하여 소송을 제기하였을 때 그 사안의 근거가 된 법규명령이 <b>재판의 전제</b>가 된 경우에 법규명령의 위법성을 심사하는 제도를 말한다. 우리나라는 <b>헌법 제107조 제1항</b>에서 헌법재판소의 위헌법률심판, <b>제107조 제2항</b>에서 법원의 명령·규칙심사권을 규정하고 있어 구체적 규범통제 제도를 취한다.</p>
     </div>
+    <div class="note">
+      <p><b>Tip.</b> 헌법 §107① 위헌법률심판 / §107② 명령·규칙심사권 병기</p>
+    </div>
+    </div>
+    <div class="flowrow">
     <div class="flowbox">
       <span class="num">Ⅱ</span><h3>구체적 규범통제수단</h3>
       <p><b class="sub">1. 주체 및 대상</b>통제의 주체로서 <b>각급 법원</b>이 통제하고, <b>대법원</b>이 최종적인 심사권을 갖는다. 대상은 <b>명령, 규칙</b>이다.</p>
       <p><b class="sub">2. 재판의 전제성</b>처분의 위법성이 법규명령 등에 기한 것일 때, 처분의 위법성 판단에 앞서 처분의 근거법령인 법규명령의 <b>위헌·위법성을 먼저 결정</b>하는 것을 말한다.</p>
       <p><b class="sub">3. 효력</b><b>개별적 효력설</b>은 위법한 명령은 당해 사건에 한하여 적용되지 않는 것으로 보며, <b>일반적 효력설</b>은 위법한 명령의 경우 당해 명령이 효력을 상실한다고 본다. 判은 "명령이 위법하다"는 판결이 난 경우 <b>당해 사건에서만 적용이 배제</b>되는 것으로 본다. 생각건대, 법의 공백상태 초래를 막기 위해 <b>개별적 효력설 및 판례 입장이 타당</b>하다.</p>
+    </div>
+    <div class="note">
+      <p><b>Tip.</b> '재판의 전제성'=위법성 판단에 앞서 결정</p>
+      <p>효력은 개별적효력설=판례=검토 일치 강조</p>
+    </div>
     </div>
   </div>
 
@@ -1033,13 +1084,7 @@
     </div>
   </div>
 
-  <div class="view" data-view="write">
-    <div class="mnemonic">개설(헌법 107조 1·2항) → 주체·대상 → 재판의 전제성 → 효력(학설·판례·검토)<br><span style="font-weight:400; font-size:12.5px;">사례 없는 설명형 — 목차 자체가 답안 구조</span></div>
-    <div class="tip"><div class="ttl">1. "구체적" 규범통제라는 명칭에 주목</div><p>추상적 규범통제(헌법재판소의 위헌법률심판형)와 구별되는 개념임을 먼저 밝히면 좋습니다.</p></div>
-    <div class="tip"><div class="ttl">2. 헌법 제107조 1항·2항을 반드시 병기</div><p>위헌법률심판(헌법재판소)과 명령·규칙심사권(법원)을 짝지어 암기하세요.</p></div>
-    <div class="tip"><div class="ttl">3. "재판의 전제성" 정의를 정확히</div><p>처분의 위법성 판단에 "앞서" 법규명령의 위헌·위법성을 먼저 결정한다는 시간적 순서를 명시하세요.</p></div>
-    <div class="tip"><div class="ttl">4. 효력 논의는 세 가지가 일치함을 강조</div><p>개별적 효력설 = 판례 = 검토 결론이 모두 같다는 점을 명확히 써서 혼동을 방지하세요.</p></div>
-  </div>
+
 </div>
 
 <!-- ======================================================================= -->
@@ -1053,7 +1098,6 @@
     <div class="tab active" data-view="map">① 구조</div>
     <div class="tab" data-view="cards">② 암기카드</div>
     <div class="tab" data-view="quiz">③ 자가테스트</div>
-    <div class="tab" data-view="write">④ 서술형 팁</div>
   </div>
 
   <div class="view active" data-view="map">
@@ -1069,17 +1113,25 @@
       <span class="lv2">2. 대집행영장에 의한 통지</span>
       <span class="lv2">3. 대집행의 실행</span>
       <span class="lv2">4. 비용징수</span>
+      <div class="toc-note"><b>Tip.</b> 절차 4단계 자체가 대목차 — 그대로 사용</div>
     </div>
     <div class="flowbox">
       <span class="num">Ⅰ</span><h3>개설</h3>
       <p>대집행이란 대체적 작위의무의 불이행의 경우, 당해 행정기관이 의무자가 행할 의무를 스스로 이행하거나 제3자로 하여금 이행하게 하고, 그 비용을 의무자로부터 징수하는 것을 말한다. <b>행정대집행법 제2조</b>에 근거한다.</p>
     </div>
+    <div class="flowrow">
     <div class="flowbox">
       <span class="num">Ⅱ</span><h3>대집행의 절차</h3>
       <p><b class="sub">1. 계고</b>상당한 이행기간을 정하여 그 기간까지 이행하지 않는 경우 대집행을 한다는 뜻을 <b>문서로 통지</b>하는 것을 말한다. 判은 계고처분 후 제2, 제3의 계고가 있더라도 이는 독립한 처분이 아니라 <b>대집행 기한의 연기통지</b>에 불과하다고 하였다. 준법률행위적 행정행위 중 <b>통지행위</b>이다.</p>
       <p><b class="sub">2. 대집행영장에 의한 통지</b>계고에 의해 지정된 기한까지 의무가 이행되지 않은 경우, 행정청이 <b>대집행의 시기, 대집행책임자의 이름, 대집행비용의 개산액</b>을 의무자에게 통지하는 절차이며, 준법률행위적 행정행위이다.</p>
       <p><b class="sub">3. 대집행의 실행</b>의무자가 지정된 기한까지 의무를 이행하지 않으면, 행정청이 스스로 의무자가 해야 할 행위를 하거나 제3자로 하여금 하게 하는 것을 말한다. <b>권력적 사실행위</b>에 해당한다.</p>
       <p><b class="sub">4. 비용징수</b>대집행의 비용은 원칙상 <b>의무자가 부담</b>해야 한다. 비용납부명령은 <b>급부하명(행정행위)</b>이며, <b>항고소송의 대상</b>이 된다.</p>
+    </div>
+    <div class="note">
+      <p><b>Tip.</b> 단계별 법적성질 병기(계고·통지=준법률행위적행위 / 실행=권력적사실행위 / 비용납부=급부하명)</p>
+      <p>반복계고 判 "연기통지 불과" 문구 재현</p>
+      <p>비용징수는 '항고소송 대상성' 결론에 명시</p>
+    </div>
     </div>
   </div>
 
@@ -1123,13 +1175,7 @@
     </div>
   </div>
 
-  <div class="view" data-view="write">
-    <div class="mnemonic">계고 → 통지 → 실행 → 비용징수<br><span style="font-weight:400; font-size:12.5px;">각 단계마다 법적 성질을 병기하는 것이 핵심</span></div>
-    <div class="tip"><div class="ttl">1. 절차 4단계를 목차로 그대로 사용</div><p>설명형 문제는 목차 자체가 답안 구조입니다. 계고→통지→실행→비용징수 순서를 그대로 대목차로 쓰세요.</p></div>
-    <div class="tip"><div class="ttl">2. 각 단계마다 "법적 성질"을 병기</div><p>계고·통지=준법률행위적 행정행위, 실행=권력적 사실행위, 비용납부명령=급부하명(행정행위)이라는 성질을 빠뜨리지 마세요.</p></div>
-    <div class="tip"><div class="ttl">3. 반복 계고 판례를 정확히 재현</div><p>"독립한 처분이 아니라 대집행 기한의 연기통지에 불과하다"는 문구를 그대로 옮기면 계고 부분 배점을 놓치지 않습니다.</p></div>
-    <div class="tip"><div class="ttl">4. 비용징수의 "항고소송 대상성"을 빠뜨리지 않기</div><p>대집행 논점 중 권리구제와 직접 연결되는 유일한 포인트이니 결론에 명시하세요.</p></div>
-  </div>
+
 </div>
 
 <!-- ======================================================================= -->
@@ -1143,7 +1189,6 @@
     <div class="tab active" data-view="map">① 구조</div>
     <div class="tab" data-view="cards">② 암기카드</div>
     <div class="tab" data-view="quiz">③ 자가테스트</div>
-    <div class="tab" data-view="write">④ 서술형 팁</div>
   </div>
 
   <div class="view active" data-view="map">
@@ -1168,6 +1213,7 @@
       <span class="lv2">3. 판례</span>
       <span class="lv2">4. 검토 및 사안의 경우</span>
       <span class="lv1">Ⅴ. 사례의 해결</span>
+      <div class="toc-note"><b>Tip.</b> 3단 구조(법적성질→사전통지→이유제시→절차하자독자성)를 대목차로 · 사안포섭은 각 쟁점+결론직전 종합 한 번 더</div>
     </div>
     <div class="flowbox">
       <span class="num">Ⅰ</span><h3>문제의 소재</h3>
@@ -1178,6 +1224,7 @@
       <p><b class="sub">1. 사업인정의 의의 및 취지</b>공익사업을 토지 등을 수용 또는 사용할 사업으로 결정하는 것을 말하며(토지보상법 제2조 제7호), 사업 전의 공익성 판단 등에 취지가 인정된다.</p>
       <p><b class="sub">2. 법적 성질</b>국토교통부장관이 토지보상법 제20조에 따라 사업시행자에게 수용권을 설정해주는 것이므로 국민의 권리에 영향을 미치는 <b>처분</b>이며, 이해관계인의 의견청취를 거치고 제 이익과의 형량을 거치는 바 <b>재량행위</b>이다.</p>
     </div>
+    <div class="flowrow">
     <div class="flowbox">
       <span class="num">Ⅲ</span><h3>거부처분의 위법성 판단</h3>
       <p><b class="sub">1. 사전통지의 의의 및 취지</b>행정청은 당사자에게 의무를 부과하거나 권익을 제한하는 처분을 하는 경우에는 미리 처분의 제목, 당사자의 성명 또는 명칭과 주소 등을 당사자에게 통지하여야 한다.</p>
@@ -1185,12 +1232,23 @@
       <p><b class="sub">3. 이유제시의 하자유무</b>① 의의 및 필요성(행정절차법 제23조): 처분의 이유제시란 행정청이 처분을 하는 경우 당사자에게 그 근거와 이유를 제시하는 것을 말하며, 쟁송준비 편의제공 등에 필요성이 인정된다. ② 필수적 절차인지 여부: 원칙적으로 모든 처분에 요구되나, 신청내용을 그대로 인정하는 처분·단순반복적이거나 경미하여 이유를 명백히 알 수 있는 처분·긴급을 요하는 경우에는 요구되지 않는다. ③ 이유제시의 정도와 하자: 사실상·법률상 근거를 상대방이 이해할 수 있도록 구체적으로 알려야 한다. ④ 이유제시의 시기 및 내용: 처분과 동시에 행하여야 하며, 쟁송 제기 여부·절차·기간 등도 알려야 한다.</p>
       <p><b class="sub">4. 사안의 경우(거부처분이 위법한지 여부)</b>사안의 거부처분은 사전통지의 대상에 해당하며, 을은 거부사유로 용도변경추진 및 보전필요성을 제시하였으나 구체적으로 용도변경이 불가능한 연유와 보전필요성이 정당한 거부사유인지에 대한 판단사항이 누락되어 있다. 따라서 거부처분의 근거와 이유가 갑이 납득할 수 있을 정도로 구체적이지 않은 바, 동 거부처분은 <b>사전통지 결여 및 이유제시 미흡으로 위법</b>하다.</p>
     </div>
+    <div class="note">
+      <p><b>Tip.</b> 사전통지: 판례(부정)→검토(긍정) "그러나 생각건대"로 전환</p>
+      <p>이유제시 생략 예외 3가지 전부 나열 필수</p>
+    </div>
+    </div>
+    <div class="flowrow">
     <div class="flowbox">
       <span class="num">Ⅳ</span><h3>절차적 하자의 독자성 인정여부</h3>
       <p><b class="sub">1. 문제점</b>사안은 실체적 하자는 없으나 사전통지 결여 및 이유제시 미흡으로 절차적 하자가 존재하는바, 이러한 경우 절차적 하자만으로 처분의 독자적인 위법성이 인정되는지가 문제된다.</p>
       <p><b class="sub">2. 학설</b><b>긍정설</b>은 적법절차 보장의 관점을, <b>부정설</b>은 행정경제상 불합리하다는 점을, <b>절충설</b>은 기속행위와 재량행위를 나누어 구별한다.</p>
       <p><b class="sub">3. 판례</b>判은 <b>기속행위(과세처분 이유부기)·재량행위(영업정지처분 청문결여)</b> 모두 독자적 위법사유로 인정하고 있다.</p>
       <p><b class="sub">4. 검토 및 사안의 경우</b>적법절차 관점, <b>행정소송법 제30조 제3항</b>의 기속력이 인정되는 바 <b>긍정</b>함이 타당하다. 사안의 경우 절차적 하자가 인정되는 바, 이러한 사유만으로 처분의 독자적인 위법성이 인정된다고 볼 수 있다.</p>
+    </div>
+    <div class="note">
+      <p><b>Tip.</b> 기속행위(과세처분 이유부기)·재량행위(영업정지 청문결여) 판례 둘 다 구체적으로</p>
+      <p>행정소송법 §30③(기속력)을 검토 근거로</p>
+    </div>
     </div>
     <div class="flowbox">
       <span class="num">Ⅴ</span><h3>사례의 해결</h3>
@@ -1238,15 +1296,7 @@
     </div>
   </div>
 
-  <div class="view" data-view="write">
-    <div class="mnemonic">법적성질 → 사전통지 대상여부 → 이유제시 하자 → 절차적 하자의 독자성 → 사례해결<br><span style="font-weight:400; font-size:12.5px;">3단 구조를 대목차로 그대로 쓰는 것이 핵심</span></div>
-    <div class="tip"><div class="ttl">1. "3단 구조"를 먼저 목차로 제시</div><p>법적성질 → 사전통지 → 이유제시 → 절차하자의 독자성. 대목차를 놓치면 배점을 크게 잃는 유형입니다.</p></div>
-    <div class="tip"><div class="ttl">2. 사전통지: 판례(부정)와 검토(긍정)가 다름에 유의</div><p>판례를 먼저 쓰고 "그러나 생각건대"로 검토를 전환하는 구조로 쓰세요.</p></div>
-    <div class="tip"><div class="ttl">3. 이유제시 예외 3가지는 반드시 전부 나열</div><p>하나라도 빠뜨리면 감점되는 부분입니다.</p></div>
-    <div class="tip"><div class="ttl">4. 절차적 하자의 독자성은 판례 사례를 구체적으로</div><p>기속행위(과세처분 이유부기)·재량행위(영업정지처분 청문결여) 모두 인정한 판례를 구체적으로 언급하세요.</p></div>
-    <div class="tip"><div class="ttl">5. 행정소송법 제30조 제3항(기속력)을 검토 근거로</div><p>취소판결 후 재처분시 절차하자를 보완해야 한다는 점과 연결지어 서술하세요.</p></div>
-    <div class="tip"><div class="ttl">6. 사안포섭은 쟁점마다 + 마지막 종합 한 번</div><p>사전통지·이유제시 각각에서 사안포섭 문장을 쓰고, 결론 직전에 "종합하면" 문단으로 한 번 더 묶어주세요.</p></div>
-  </div>
+
 </div>
 
 <div class="pagenav">
@@ -1257,7 +1307,8 @@
 <button class="help-toggle" id="helpToggle" type="button" aria-label="단축키 안내">?</button>
 <div class="help-panel" id="helpPanel">
   <div class="ttl">단축키 안내</div>
-  <div class="row"><kbd>1</kbd> 구조 · <kbd>2</kbd> 암기카드 · <kbd>3</kbd> 자가테스트 · <kbd>4</kbd> 서술형 팁</div>
+  <div class="row"><kbd>1</kbd> 구조 · <kbd>2</kbd> 암기카드 · <kbd>3</kbd> 자가테스트</div>
+  <div class="row">구조 탭 우측(모바일은 하단) 얇은 글씨가 서술형 답안 작성 팁입니다</div>
   <div class="row">암기카드 화면에서 탭 또는 <kbd>Space</kbd>/<kbd>Enter</kbd>: 처음 누르면 정답 확인, 다시 누르면 다음 카드로 이동</div>
   <div class="row">자가테스트 입력창에서 <kbd>Enter</kbd>: 정답·목차 확인 / <kbd>Shift</kbd>+<kbd>Enter</kbd>: 줄바꿈 / <kbd>Shift</kbd> 두 번: 확인 후 다음 문항으로 이동</div>
   <div class="row">화면 하단 버튼: 이전·다음 문제 이동 및 맨 위로 스크롤</div>
@@ -1490,7 +1541,7 @@
   // 2회 이동" pattern already used for the blank-input quizzes on this site.
   // Scoped to whichever problem/view is currently visible, and skipped while
   // typing in a textarea (자가테스트) so Space still types a space there.
-  const VIEW_BY_DIGIT = { '1': 'map', '2': 'cards', '3': 'quiz', '4': 'write' };
+  const VIEW_BY_DIGIT = { '1': 'map', '2': 'cards', '3': 'quiz' };
 
   window.addEventListener('keydown', (e) => {
     const activeTag = document.activeElement ? document.activeElement.tagName : '';
