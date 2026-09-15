@@ -138,27 +138,41 @@
   .kwfb .kw-miss{color:#b3402f; text-decoration:line-through; opacity:.65;}
   .kwfb .kw-empty{color:var(--sub);}
 
-  /* ---- Quiz toolbar: 전체 정답 확인 + 복습 체크리스트 ---- */
-  .quiz-toolbar{display:flex; align-items:center; justify-content:space-between; flex-wrap:wrap; gap:10px; margin-bottom:14px; max-width:var(--content-w);}
-  .checkall-btn{background:var(--accent2); color:#fff; border:none; border-radius:9px; padding:9px 16px; font-size:var(--fs-tab); font-weight:700; cursor:pointer;}
-  .review-row{display:flex; align-items:center; gap:6px; flex-wrap:wrap;}
+  /* ---- 복습 체크리스트 (문제 제목 하단, 상시 노출) ---- */
+  .review-row{display:flex; align-items:center; gap:8px; flex-wrap:wrap; margin-bottom:14px;}
+  .review-anchor{position:relative; width:27px; height:27px; flex-shrink:0;}
   .review-toggle{
-    width:27px; height:27px; border-radius:50%; border:none; flex-shrink:0; cursor:pointer;
-    background:#eee7da; color:var(--sub); font-size:13px; font-weight:700; line-height:1;
-    transition:background .15s, color .15s;
+    position:absolute; right:0; top:0; z-index:2; width:27px; height:27px; border-radius:50%;
+    border:none; cursor:pointer; background:#eee7da; padding:0;
+    transition:background .15s;
   }
-  .review-toggle.has-log{background:#dcefe6; color:var(--accent2);}
-  .review-picker{display:none; gap:4px;}
-  .review-picker.show{display:flex;}
-  .review-opt{width:25px; height:25px; border-radius:6px; border:none; cursor:pointer; padding:0;}
+  .review-toggle.lv-high{background:#1f5c46;}
+  .review-toggle.lv-mid{background:#4f9c7d;}
+  .review-toggle.lv-low{background:#a8d8c4;}
+  /* 좌측으로 펼쳐지는 확신도 선택지 — 토글 자체는 자리를 지키고(.review-anchor가
+     항상 27px로 고정), 피커만 그 왼쪽에서 아이폰 느낌의 빠른 슬라이드로 등장 */
+  .review-picker{
+    position:absolute; right:27px; top:0; z-index:1; display:flex; align-items:center; gap:4px; padding-right:6px;
+    transform:translateX(10px); opacity:0; pointer-events:none;
+    transition:transform .18s cubic-bezier(.32,.72,0,1), opacity .14s ease;
+  }
+  .review-picker.show{transform:translateX(0); opacity:1; pointer-events:auto;}
+  .review-opt{width:23px; height:23px; border-radius:6px; border:none; cursor:pointer; padding:0; flex-shrink:0;}
   .review-opt.lv-high{background:#1f5c46;}
   .review-opt.lv-mid{background:#4f9c7d;}
   .review-opt.lv-low{background:#a8d8c4;}
   .review-tags{display:flex; align-items:center; gap:4px; flex-wrap:wrap;}
-  .review-tag{padding:3px 7px; border-radius:5px; font-size:10.5px; font-weight:700; white-space:nowrap; color:#fff;}
+  .review-tag{border:none; padding:3px 7px; border-radius:5px; font-size:10.5px; font-weight:700; white-space:nowrap; color:#fff; cursor:pointer;}
   .review-tag.lv-high{background:#1f5c46;}
   .review-tag.lv-mid{background:#4f9c7d;}
   .review-tag.lv-low{background:#a8d8c4; color:#274238;}
+
+  /* ---- 페이지 상단 복습 히트맵 (깃허브 로그 스타일, 문제별 1칸) ---- */
+  .review-heatmap{display:grid; grid-template-columns:repeat(7, 1fr); gap:5px; max-width:var(--content-w); margin:0 auto 16px;}
+  .heat-cell{display:block; aspect-ratio:1; border-radius:5px; background:#eee7da;}
+  .heat-cell.lv-high{background:#1f5c46;}
+  .heat-cell.lv-mid{background:#4f9c7d;}
+  .heat-cell.lv-low{background:#a8d8c4;}
 
   /* ---- 목차 (구조 탭 상단 요약) ---- */
   .toc{background:#f7f5f0; border:1px solid var(--line); border-radius:10px; padding:12px 16px; margin-bottom:14px; max-width:var(--content-w);}
@@ -225,6 +239,8 @@
 
 <h1>감정평가행정법 기본문제 25</h1>
 
+<div class="review-heatmap" id="reviewHeatmap"></div>
+
 <div class="problem-tabs">
   <div class="ptab" data-problem="p01">문제1<br>비례의 원칙</div>
   <div class="ptab" data-problem="p02">문제2<br>자기구속</div>
@@ -250,6 +266,18 @@
 <div class="problem active" id="problem-p06">
   <div class="problem-title">문제06 · 부관·기부채납조건</div>
   <div class="problem-sub">사업인정에 붙은 부관(기부채납조건)의 해결 가능성</div>
+
+  <div class="review-row" data-problem="p06">
+    <div class="review-anchor">
+      <div class="review-picker">
+        <button type="button" class="review-opt lv-high" data-level="high" aria-label="확신도 높음"></button>
+        <button type="button" class="review-opt lv-mid" data-level="mid" aria-label="확신도 중간"></button>
+        <button type="button" class="review-opt lv-low" data-level="low" aria-label="확신도 낮음"></button>
+      </div>
+      <button type="button" class="review-toggle" aria-label="복습 체크"></button>
+    </div>
+    <div class="review-tags"></div>
+  </div>
 
   <div class="tabs" data-problem="p06">
     <div class="tab active" data-view="map">① 구조</div>
@@ -329,18 +357,6 @@
   </div>
 
   <div class="view" data-view="quiz">
-    <div class="quiz-toolbar">
-      <button type="button" class="checkall-btn" onclick="checkAllInQuiz(this)">전체 정답 확인</button>
-      <div class="review-row" data-problem="p06">
-        <button type="button" class="review-toggle" aria-label="복습 체크">✓</button>
-        <div class="review-picker">
-          <button type="button" class="review-opt lv-high" data-level="high" aria-label="확신도 높음"></button>
-          <button type="button" class="review-opt lv-mid" data-level="mid" aria-label="확신도 중간"></button>
-          <button type="button" class="review-opt lv-low" data-level="low" aria-label="확신도 낮음"></button>
-        </div>
-        <div class="review-tags"></div>
-      </div>
-    </div>
     <div class="qbox">
       <div class="q">Q1. 사업인정의 법적 성질 3가지와, 기부채납조건이 부관 중 무엇에 해당하는지 써보세요.</div>
       <textarea placeholder="여기에 답을 적어보세요..."></textarea>
@@ -372,6 +388,18 @@
 <div class="problem" id="problem-p07a">
   <div class="problem-title">문제07-⑴ · 하자의 승계</div>
   <div class="problem-sub">개별공시지가 위법이 재산세부과에 승계되는지</div>
+
+  <div class="review-row" data-problem="p07a">
+    <div class="review-anchor">
+      <div class="review-picker">
+        <button type="button" class="review-opt lv-high" data-level="high" aria-label="확신도 높음"></button>
+        <button type="button" class="review-opt lv-mid" data-level="mid" aria-label="확신도 중간"></button>
+        <button type="button" class="review-opt lv-low" data-level="low" aria-label="확신도 낮음"></button>
+      </div>
+      <button type="button" class="review-toggle" aria-label="복습 체크"></button>
+    </div>
+    <div class="review-tags"></div>
+  </div>
 
   <div class="tabs" data-problem="p07a">
     <div class="tab active" data-view="map">① 구조</div>
@@ -437,18 +465,6 @@
   </div>
 
   <div class="view" data-view="quiz">
-    <div class="quiz-toolbar">
-      <button type="button" class="checkall-btn" onclick="checkAllInQuiz(this)">전체 정답 확인</button>
-      <div class="review-row" data-problem="p07a">
-        <button type="button" class="review-toggle" aria-label="복습 체크">✓</button>
-        <div class="review-picker">
-          <button type="button" class="review-opt lv-high" data-level="high" aria-label="확신도 높음"></button>
-          <button type="button" class="review-opt lv-mid" data-level="mid" aria-label="확신도 중간"></button>
-          <button type="button" class="review-opt lv-low" data-level="low" aria-label="확신도 낮음"></button>
-        </div>
-        <div class="review-tags"></div>
-      </div>
-    </div>
     <div class="qbox">
       <div class="q">Q1. 하자승계가 논의되기 위한 전제요건 4가지를 써보세요.</div>
       <textarea placeholder="여기에 답을 적어보세요..."></textarea>
@@ -480,6 +496,18 @@
 <div class="problem" id="problem-p07b">
   <div class="problem-title">문제07-⑵ · 선결문제</div>
   <div class="problem-sub">민사법원의 행정행위(업무정지처분) 위법성 심사 가능여부</div>
+
+  <div class="review-row" data-problem="p07b">
+    <div class="review-anchor">
+      <div class="review-picker">
+        <button type="button" class="review-opt lv-high" data-level="high" aria-label="확신도 높음"></button>
+        <button type="button" class="review-opt lv-mid" data-level="mid" aria-label="확신도 중간"></button>
+        <button type="button" class="review-opt lv-low" data-level="low" aria-label="확신도 낮음"></button>
+      </div>
+      <button type="button" class="review-toggle" aria-label="복습 체크"></button>
+    </div>
+    <div class="review-tags"></div>
+  </div>
 
   <div class="tabs" data-problem="p07b">
     <div class="tab active" data-view="map">① 구조</div>
@@ -552,18 +580,6 @@
   </div>
 
   <div class="view" data-view="quiz">
-    <div class="quiz-toolbar">
-      <button type="button" class="checkall-btn" onclick="checkAllInQuiz(this)">전체 정답 확인</button>
-      <div class="review-row" data-problem="p07b">
-        <button type="button" class="review-toggle" aria-label="복습 체크">✓</button>
-        <div class="review-picker">
-          <button type="button" class="review-opt lv-high" data-level="high" aria-label="확신도 높음"></button>
-          <button type="button" class="review-opt lv-mid" data-level="mid" aria-label="확신도 중간"></button>
-          <button type="button" class="review-opt lv-low" data-level="low" aria-label="확신도 낮음"></button>
-        </div>
-        <div class="review-tags"></div>
-      </div>
-    </div>
     <div class="qbox">
       <div class="q">Q1. 선결문제란 무엇이며, 이 사안에서 선결문제가 되는 것은 무엇인가요?</div>
       <textarea placeholder="여기에 답을 적어보세요..."></textarea>
@@ -595,6 +611,18 @@
 <div class="problem" id="problem-p08">
   <div class="problem-title">문제08 · 하자의 치유</div>
   <div class="problem-sub">행정행위 하자의 치유</div>
+
+  <div class="review-row" data-problem="p08">
+    <div class="review-anchor">
+      <div class="review-picker">
+        <button type="button" class="review-opt lv-high" data-level="high" aria-label="확신도 높음"></button>
+        <button type="button" class="review-opt lv-mid" data-level="mid" aria-label="확신도 중간"></button>
+        <button type="button" class="review-opt lv-low" data-level="low" aria-label="확신도 낮음"></button>
+      </div>
+      <button type="button" class="review-toggle" aria-label="복습 체크"></button>
+    </div>
+    <div class="review-tags"></div>
+  </div>
 
   <div class="tabs" data-problem="p08">
     <div class="tab active" data-view="map">① 구조</div>
@@ -666,18 +694,6 @@
   </div>
 
   <div class="view" data-view="quiz">
-    <div class="quiz-toolbar">
-      <button type="button" class="checkall-btn" onclick="checkAllInQuiz(this)">전체 정답 확인</button>
-      <div class="review-row" data-problem="p08">
-        <button type="button" class="review-toggle" aria-label="복습 체크">✓</button>
-        <div class="review-picker">
-          <button type="button" class="review-opt lv-high" data-level="high" aria-label="확신도 높음"></button>
-          <button type="button" class="review-opt lv-mid" data-level="mid" aria-label="확신도 중간"></button>
-          <button type="button" class="review-opt lv-low" data-level="low" aria-label="확신도 낮음"></button>
-        </div>
-        <div class="review-tags"></div>
-      </div>
-    </div>
     <div class="qbox">
       <div class="q">Q1. 하자의 치유란 무엇이며, 인정되는 취지는?</div>
       <textarea placeholder="여기에 답을 적어보세요..."></textarea>
@@ -709,6 +725,18 @@
 <div class="problem" id="problem-p01">
   <div class="problem-title">문제1 · 비례의 원칙</div>
   <div class="problem-sub">주변도로 대안이 있었다는 이유로 사업인정이 위법한지</div>
+
+  <div class="review-row" data-problem="p01">
+    <div class="review-anchor">
+      <div class="review-picker">
+        <button type="button" class="review-opt lv-high" data-level="high" aria-label="확신도 높음"></button>
+        <button type="button" class="review-opt lv-mid" data-level="mid" aria-label="확신도 중간"></button>
+        <button type="button" class="review-opt lv-low" data-level="low" aria-label="확신도 낮음"></button>
+      </div>
+      <button type="button" class="review-toggle" aria-label="복습 체크"></button>
+    </div>
+    <div class="review-tags"></div>
+  </div>
 
   <div class="tabs" data-problem="p01">
     <div class="tab active" data-view="map">① 구조</div>
@@ -772,18 +800,6 @@
   </div>
 
   <div class="view" data-view="quiz">
-    <div class="quiz-toolbar">
-      <button type="button" class="checkall-btn" onclick="checkAllInQuiz(this)">전체 정답 확인</button>
-      <div class="review-row" data-problem="p01">
-        <button type="button" class="review-toggle" aria-label="복습 체크">✓</button>
-        <div class="review-picker">
-          <button type="button" class="review-opt lv-high" data-level="high" aria-label="확신도 높음"></button>
-          <button type="button" class="review-opt lv-mid" data-level="mid" aria-label="확신도 중간"></button>
-          <button type="button" class="review-opt lv-low" data-level="low" aria-label="확신도 낮음"></button>
-        </div>
-        <div class="review-tags"></div>
-      </div>
-    </div>
     <div class="qbox">
       <div class="q">Q1. 사업인정의 법적 성질(판례)을 써보세요.</div>
       <textarea placeholder="여기에 답을 적어보세요..."></textarea>
@@ -815,6 +831,18 @@
 <div class="problem" id="problem-p02">
   <div class="problem-title">문제2 · 자기구속의 원칙</div>
   <div class="problem-sub">행정의 자기구속 원칙의 의의·근거·요건·한계</div>
+
+  <div class="review-row" data-problem="p02">
+    <div class="review-anchor">
+      <div class="review-picker">
+        <button type="button" class="review-opt lv-high" data-level="high" aria-label="확신도 높음"></button>
+        <button type="button" class="review-opt lv-mid" data-level="mid" aria-label="확신도 중간"></button>
+        <button type="button" class="review-opt lv-low" data-level="low" aria-label="확신도 낮음"></button>
+      </div>
+      <button type="button" class="review-toggle" aria-label="복습 체크"></button>
+    </div>
+    <div class="review-tags"></div>
+  </div>
 
   <div class="tabs" data-problem="p02">
     <div class="tab active" data-view="map">① 구조</div>
@@ -872,18 +900,6 @@
   </div>
 
   <div class="view" data-view="quiz">
-    <div class="quiz-toolbar">
-      <button type="button" class="checkall-btn" onclick="checkAllInQuiz(this)">전체 정답 확인</button>
-      <div class="review-row" data-problem="p02">
-        <button type="button" class="review-toggle" aria-label="복습 체크">✓</button>
-        <div class="review-picker">
-          <button type="button" class="review-opt lv-high" data-level="high" aria-label="확신도 높음"></button>
-          <button type="button" class="review-opt lv-mid" data-level="mid" aria-label="확신도 중간"></button>
-          <button type="button" class="review-opt lv-low" data-level="low" aria-label="확신도 낮음"></button>
-        </div>
-        <div class="review-tags"></div>
-      </div>
-    </div>
     <div class="qbox">
       <div class="q">Q1. 자기구속의 원칙의 의의를 써보세요.</div>
       <textarea placeholder="여기에 답을 적어보세요..."></textarea>
@@ -915,6 +931,18 @@
 <div class="problem" id="problem-p03">
   <div class="problem-title">문제3 · 기부체납 부관의 적법여부</div>
   <div class="problem-sub">주택건설사업계획승인에 붙은 진입도로 기부체납 부관</div>
+
+  <div class="review-row" data-problem="p03">
+    <div class="review-anchor">
+      <div class="review-picker">
+        <button type="button" class="review-opt lv-high" data-level="high" aria-label="확신도 높음"></button>
+        <button type="button" class="review-opt lv-mid" data-level="mid" aria-label="확신도 중간"></button>
+        <button type="button" class="review-opt lv-low" data-level="low" aria-label="확신도 낮음"></button>
+      </div>
+      <button type="button" class="review-toggle" aria-label="복습 체크"></button>
+    </div>
+    <div class="review-tags"></div>
+  </div>
 
   <div class="tabs" data-problem="p03">
     <div class="tab active" data-view="map">① 구조</div>
@@ -973,18 +1001,6 @@
   </div>
 
   <div class="view" data-view="quiz">
-    <div class="quiz-toolbar">
-      <button type="button" class="checkall-btn" onclick="checkAllInQuiz(this)">전체 정답 확인</button>
-      <div class="review-row" data-problem="p03">
-        <button type="button" class="review-toggle" aria-label="복습 체크">✓</button>
-        <div class="review-picker">
-          <button type="button" class="review-opt lv-high" data-level="high" aria-label="확신도 높음"></button>
-          <button type="button" class="review-opt lv-mid" data-level="mid" aria-label="확신도 중간"></button>
-          <button type="button" class="review-opt lv-low" data-level="low" aria-label="확신도 낮음"></button>
-        </div>
-        <div class="review-tags"></div>
-      </div>
-    </div>
     <div class="qbox">
       <div class="q">Q1. 사안의 부관이 부관 중 무엇에 해당하는지, 그 이유를 써보세요.</div>
       <textarea placeholder="여기에 답을 적어보세요..."></textarea>
@@ -1016,6 +1032,18 @@
 <div class="problem" id="problem-p04">
   <div class="problem-title">문제4 · 업무정지처분의 법적 성질</div>
   <div class="problem-sub">제재적 처분기준(법규명령형식의 행정규칙)의 법적 성질</div>
+
+  <div class="review-row" data-problem="p04">
+    <div class="review-anchor">
+      <div class="review-picker">
+        <button type="button" class="review-opt lv-high" data-level="high" aria-label="확신도 높음"></button>
+        <button type="button" class="review-opt lv-mid" data-level="mid" aria-label="확신도 중간"></button>
+        <button type="button" class="review-opt lv-low" data-level="low" aria-label="확신도 낮음"></button>
+      </div>
+      <button type="button" class="review-toggle" aria-label="복습 체크"></button>
+    </div>
+    <div class="review-tags"></div>
+  </div>
 
   <div class="tabs" data-problem="p04">
     <div class="tab active" data-view="map">① 구조</div>
@@ -1078,18 +1106,6 @@
   </div>
 
   <div class="view" data-view="quiz">
-    <div class="quiz-toolbar">
-      <button type="button" class="checkall-btn" onclick="checkAllInQuiz(this)">전체 정답 확인</button>
-      <div class="review-row" data-problem="p04">
-        <button type="button" class="review-toggle" aria-label="복습 체크">✓</button>
-        <div class="review-picker">
-          <button type="button" class="review-opt lv-high" data-level="high" aria-label="확신도 높음"></button>
-          <button type="button" class="review-opt lv-mid" data-level="mid" aria-label="확신도 중간"></button>
-          <button type="button" class="review-opt lv-low" data-level="low" aria-label="확신도 낮음"></button>
-        </div>
-        <div class="review-tags"></div>
-      </div>
-    </div>
     <div class="qbox">
       <div class="q">Q1. 법규명령형식의 행정규칙이란 무엇이며, 왜 문제되는지 써보세요.</div>
       <textarea placeholder="여기에 답을 적어보세요..."></textarea>
@@ -1121,6 +1137,18 @@
 <div class="problem" id="problem-p05">
   <div class="problem-title">문제5 · 법규명령의 구체적 규범통제수단</div>
   <div class="problem-sub">법원에 의한 구체적 규범통제</div>
+
+  <div class="review-row" data-problem="p05">
+    <div class="review-anchor">
+      <div class="review-picker">
+        <button type="button" class="review-opt lv-high" data-level="high" aria-label="확신도 높음"></button>
+        <button type="button" class="review-opt lv-mid" data-level="mid" aria-label="확신도 중간"></button>
+        <button type="button" class="review-opt lv-low" data-level="low" aria-label="확신도 낮음"></button>
+      </div>
+      <button type="button" class="review-toggle" aria-label="복습 체크"></button>
+    </div>
+    <div class="review-tags"></div>
+  </div>
 
   <div class="tabs" data-problem="p05">
     <div class="tab active" data-view="map">① 구조</div>
@@ -1179,18 +1207,6 @@
   </div>
 
   <div class="view" data-view="quiz">
-    <div class="quiz-toolbar">
-      <button type="button" class="checkall-btn" onclick="checkAllInQuiz(this)">전체 정답 확인</button>
-      <div class="review-row" data-problem="p05">
-        <button type="button" class="review-toggle" aria-label="복습 체크">✓</button>
-        <div class="review-picker">
-          <button type="button" class="review-opt lv-high" data-level="high" aria-label="확신도 높음"></button>
-          <button type="button" class="review-opt lv-mid" data-level="mid" aria-label="확신도 중간"></button>
-          <button type="button" class="review-opt lv-low" data-level="low" aria-label="확신도 낮음"></button>
-        </div>
-        <div class="review-tags"></div>
-      </div>
-    </div>
     <div class="qbox">
       <div class="q">Q1. 구체적 규범통제의 의의와 헌법상 근거를 써보세요.</div>
       <textarea placeholder="여기에 답을 적어보세요..."></textarea>
@@ -1222,6 +1238,18 @@
 <div class="problem" id="problem-p09">
   <div class="problem-title">문제9 · 행정대집행</div>
   <div class="problem-sub">행정대집행법상 대집행의 절차</div>
+
+  <div class="review-row" data-problem="p09">
+    <div class="review-anchor">
+      <div class="review-picker">
+        <button type="button" class="review-opt lv-high" data-level="high" aria-label="확신도 높음"></button>
+        <button type="button" class="review-opt lv-mid" data-level="mid" aria-label="확신도 중간"></button>
+        <button type="button" class="review-opt lv-low" data-level="low" aria-label="확신도 낮음"></button>
+      </div>
+      <button type="button" class="review-toggle" aria-label="복습 체크"></button>
+    </div>
+    <div class="review-tags"></div>
+  </div>
 
   <div class="tabs" data-problem="p09">
     <div class="tab active" data-view="map">① 구조</div>
@@ -1278,18 +1306,6 @@
   </div>
 
   <div class="view" data-view="quiz">
-    <div class="quiz-toolbar">
-      <button type="button" class="checkall-btn" onclick="checkAllInQuiz(this)">전체 정답 확인</button>
-      <div class="review-row" data-problem="p09">
-        <button type="button" class="review-toggle" aria-label="복습 체크">✓</button>
-        <div class="review-picker">
-          <button type="button" class="review-opt lv-high" data-level="high" aria-label="확신도 높음"></button>
-          <button type="button" class="review-opt lv-mid" data-level="mid" aria-label="확신도 중간"></button>
-          <button type="button" class="review-opt lv-low" data-level="low" aria-label="확신도 낮음"></button>
-        </div>
-        <div class="review-tags"></div>
-      </div>
-    </div>
     <div class="qbox">
       <div class="q">Q1. 대집행의 의의와 근거조문을 써보세요.</div>
       <textarea placeholder="여기에 답을 적어보세요..."></textarea>
@@ -1321,6 +1337,18 @@
 <div class="problem" id="problem-p10">
   <div class="problem-title">문제10 · 거부처분의 위법성 판단</div>
   <div class="problem-sub">사전통지 결여·이유제시 미흡과 절차적 하자의 독자적 위법성</div>
+
+  <div class="review-row" data-problem="p10">
+    <div class="review-anchor">
+      <div class="review-picker">
+        <button type="button" class="review-opt lv-high" data-level="high" aria-label="확신도 높음"></button>
+        <button type="button" class="review-opt lv-mid" data-level="mid" aria-label="확신도 중간"></button>
+        <button type="button" class="review-opt lv-low" data-level="low" aria-label="확신도 낮음"></button>
+      </div>
+      <button type="button" class="review-toggle" aria-label="복습 체크"></button>
+    </div>
+    <div class="review-tags"></div>
+  </div>
 
   <div class="tabs" data-problem="p10">
     <div class="tab active" data-view="map">① 구조</div>
@@ -1407,18 +1435,6 @@
   </div>
 
   <div class="view" data-view="quiz">
-    <div class="quiz-toolbar">
-      <button type="button" class="checkall-btn" onclick="checkAllInQuiz(this)">전체 정답 확인</button>
-      <div class="review-row" data-problem="p10">
-        <button type="button" class="review-toggle" aria-label="복습 체크">✓</button>
-        <div class="review-picker">
-          <button type="button" class="review-opt lv-high" data-level="high" aria-label="확신도 높음"></button>
-          <button type="button" class="review-opt lv-mid" data-level="mid" aria-label="확신도 중간"></button>
-          <button type="button" class="review-opt lv-low" data-level="low" aria-label="확신도 낮음"></button>
-        </div>
-        <div class="review-tags"></div>
-      </div>
-    </div>
     <div class="qbox">
       <div class="q">Q1. 이 문제에서 순서대로 검토해야 할 3가지 쟁점을 써보세요.</div>
       <textarea placeholder="여기에 답을 적어보세요..."></textarea>
@@ -1450,6 +1466,18 @@
 <div class="problem" id="problem-p11">
   <div class="problem-title">문제11 · 이주대책</div>
   <div class="problem-sub">이주대책 거부처분의 사전통지·이유제시 흠결과 위법성</div>
+
+  <div class="review-row" data-problem="p11">
+    <div class="review-anchor">
+      <div class="review-picker">
+        <button type="button" class="review-opt lv-high" data-level="high" aria-label="확신도 높음"></button>
+        <button type="button" class="review-opt lv-mid" data-level="mid" aria-label="확신도 중간"></button>
+        <button type="button" class="review-opt lv-low" data-level="low" aria-label="확신도 낮음"></button>
+      </div>
+      <button type="button" class="review-toggle" aria-label="복습 체크"></button>
+    </div>
+    <div class="review-tags"></div>
+  </div>
 
   <div class="tabs" data-problem="p11">
     <div class="tab active" data-view="map">① 구조</div>
@@ -1520,18 +1548,6 @@
   </div>
 
   <div class="view" data-view="quiz">
-    <div class="quiz-toolbar">
-      <button type="button" class="checkall-btn" onclick="checkAllInQuiz(this)">전체 정답 확인</button>
-      <div class="review-row" data-problem="p11">
-        <button type="button" class="review-toggle" aria-label="복습 체크">✓</button>
-        <div class="review-picker">
-          <button type="button" class="review-opt lv-high" data-level="high" aria-label="확신도 높음"></button>
-          <button type="button" class="review-opt lv-mid" data-level="mid" aria-label="확신도 중간"></button>
-          <button type="button" class="review-opt lv-low" data-level="low" aria-label="확신도 낮음"></button>
-        </div>
-        <div class="review-tags"></div>
-      </div>
-    </div>
     <div class="qbox">
       <div class="q">Q1. 이주대책의 의의와 토지보상법령상 근거를 써보세요.</div>
       <textarea placeholder="여기에 답을 적어보세요..."></textarea>
@@ -1561,6 +1577,18 @@
 <div class="problem" id="problem-p12">
   <div class="problem-title">문제12 · 청문</div>
   <div class="problem-sub">행정절차법상 의견청취 절차 중 청문</div>
+
+  <div class="review-row" data-problem="p12">
+    <div class="review-anchor">
+      <div class="review-picker">
+        <button type="button" class="review-opt lv-high" data-level="high" aria-label="확신도 높음"></button>
+        <button type="button" class="review-opt lv-mid" data-level="mid" aria-label="확신도 중간"></button>
+        <button type="button" class="review-opt lv-low" data-level="low" aria-label="확신도 낮음"></button>
+      </div>
+      <button type="button" class="review-toggle" aria-label="복습 체크"></button>
+    </div>
+    <div class="review-tags"></div>
+  </div>
 
   <div class="tabs" data-problem="p12">
     <div class="tab active" data-view="map">① 구조</div>
@@ -1606,18 +1634,6 @@
   </div>
 
   <div class="view" data-view="quiz">
-    <div class="quiz-toolbar">
-      <button type="button" class="checkall-btn" onclick="checkAllInQuiz(this)">전체 정답 확인</button>
-      <div class="review-row" data-problem="p12">
-        <button type="button" class="review-toggle" aria-label="복습 체크">✓</button>
-        <div class="review-picker">
-          <button type="button" class="review-opt lv-high" data-level="high" aria-label="확신도 높음"></button>
-          <button type="button" class="review-opt lv-mid" data-level="mid" aria-label="확신도 중간"></button>
-          <button type="button" class="review-opt lv-low" data-level="low" aria-label="확신도 낮음"></button>
-        </div>
-        <div class="review-tags"></div>
-      </div>
-    </div>
     <div class="qbox">
       <div class="q">Q1. 청문의 의의를 써보세요.</div>
       <textarea placeholder="여기에 답을 적어보세요..."></textarea>
@@ -1647,6 +1663,18 @@
 <div class="problem" id="problem-p13a">
   <div class="problem-title">문제13-⑴ · 개별공시지가와 국가배상</div>
   <div class="problem-sub">하자 있는 개별공시지가 산정행위의 국가배상법상 위법 여부</div>
+
+  <div class="review-row" data-problem="p13a">
+    <div class="review-anchor">
+      <div class="review-picker">
+        <button type="button" class="review-opt lv-high" data-level="high" aria-label="확신도 높음"></button>
+        <button type="button" class="review-opt lv-mid" data-level="mid" aria-label="확신도 중간"></button>
+        <button type="button" class="review-opt lv-low" data-level="low" aria-label="확신도 낮음"></button>
+      </div>
+      <button type="button" class="review-toggle" aria-label="복습 체크"></button>
+    </div>
+    <div class="review-tags"></div>
+  </div>
 
   <div class="tabs" data-problem="p13a">
     <div class="tab active" data-view="map">① 구조</div>
@@ -1717,18 +1745,6 @@
   </div>
 
   <div class="view" data-view="quiz">
-    <div class="quiz-toolbar">
-      <button type="button" class="checkall-btn" onclick="checkAllInQuiz(this)">전체 정답 확인</button>
-      <div class="review-row" data-problem="p13a">
-        <button type="button" class="review-toggle" aria-label="복습 체크">✓</button>
-        <div class="review-picker">
-          <button type="button" class="review-opt lv-high" data-level="high" aria-label="확신도 높음"></button>
-          <button type="button" class="review-opt lv-mid" data-level="mid" aria-label="확신도 중간"></button>
-          <button type="button" class="review-opt lv-low" data-level="low" aria-label="확신도 낮음"></button>
-        </div>
-        <div class="review-tags"></div>
-      </div>
-    </div>
     <div class="qbox">
       <div class="q">Q1. 국가배상책임의 성립요건 5가지를 써보세요.</div>
       <textarea placeholder="여기에 답을 적어보세요..."></textarea>
@@ -1758,6 +1774,18 @@
 <div class="problem" id="problem-p13b">
   <div class="problem-title">문제13-⑵ · 상당인과관계</div>
   <div class="problem-sub">개별공시지가 산정과 B은행 손해 사이의 상당인과관계</div>
+
+  <div class="review-row" data-problem="p13b">
+    <div class="review-anchor">
+      <div class="review-picker">
+        <button type="button" class="review-opt lv-high" data-level="high" aria-label="확신도 높음"></button>
+        <button type="button" class="review-opt lv-mid" data-level="mid" aria-label="확신도 중간"></button>
+        <button type="button" class="review-opt lv-low" data-level="low" aria-label="확신도 낮음"></button>
+      </div>
+      <button type="button" class="review-toggle" aria-label="복습 체크"></button>
+    </div>
+    <div class="review-tags"></div>
+  </div>
 
   <div class="tabs" data-problem="p13b">
     <div class="tab active" data-view="map">① 구조</div>
@@ -1820,18 +1848,6 @@
   </div>
 
   <div class="view" data-view="quiz">
-    <div class="quiz-toolbar">
-      <button type="button" class="checkall-btn" onclick="checkAllInQuiz(this)">전체 정답 확인</button>
-      <div class="review-row" data-problem="p13b">
-        <button type="button" class="review-toggle" aria-label="복습 체크">✓</button>
-        <div class="review-picker">
-          <button type="button" class="review-opt lv-high" data-level="high" aria-label="확신도 높음"></button>
-          <button type="button" class="review-opt lv-mid" data-level="mid" aria-label="확신도 중간"></button>
-          <button type="button" class="review-opt lv-low" data-level="low" aria-label="확신도 낮음"></button>
-        </div>
-        <div class="review-tags"></div>
-      </div>
-    </div>
     <div class="qbox">
       <div class="q">Q1. 상당인과관계란 무엇인지 써보세요.</div>
       <textarea placeholder="여기에 답을 적어보세요..."></textarea>
@@ -1861,6 +1877,18 @@
 <div class="problem" id="problem-p14">
   <div class="problem-title">문제14 · 원처분주의와 재결주의</div>
   <div class="problem-sub">인용재결의 고유한 위법 여부</div>
+
+  <div class="review-row" data-problem="p14">
+    <div class="review-anchor">
+      <div class="review-picker">
+        <button type="button" class="review-opt lv-high" data-level="high" aria-label="확신도 높음"></button>
+        <button type="button" class="review-opt lv-mid" data-level="mid" aria-label="확신도 중간"></button>
+        <button type="button" class="review-opt lv-low" data-level="low" aria-label="확신도 낮음"></button>
+      </div>
+      <button type="button" class="review-toggle" aria-label="복습 체크"></button>
+    </div>
+    <div class="review-tags"></div>
+  </div>
 
   <div class="tabs" data-problem="p14">
     <div class="tab active" data-view="map">① 구조</div>
@@ -1934,18 +1962,6 @@
   </div>
 
   <div class="view" data-view="quiz">
-    <div class="quiz-toolbar">
-      <button type="button" class="checkall-btn" onclick="checkAllInQuiz(this)">전체 정답 확인</button>
-      <div class="review-row" data-problem="p14">
-        <button type="button" class="review-toggle" aria-label="복습 체크">✓</button>
-        <div class="review-picker">
-          <button type="button" class="review-opt lv-high" data-level="high" aria-label="확신도 높음"></button>
-          <button type="button" class="review-opt lv-mid" data-level="mid" aria-label="확신도 중간"></button>
-          <button type="button" class="review-opt lv-low" data-level="low" aria-label="확신도 낮음"></button>
-        </div>
-        <div class="review-tags"></div>
-      </div>
-    </div>
     <div class="qbox">
       <div class="q">Q1. 원처분주의란 무엇인지 써보세요.</div>
       <textarea placeholder="여기에 답을 적어보세요..."></textarea>
@@ -2428,14 +2444,10 @@
     gradeQboxKeywords(unit);
   }
 
-  // 문제 상단의 "전체 정답 확인" — 그 문제의 자가테스트 문항을 한번에 확인+채점
-  function checkAllInQuiz(btn) {
-    const quizView = btn.closest('.view[data-view="quiz"]');
-    if (!quizView) return;
-    quizView.querySelectorAll(':scope > .qbox').forEach((qbox) => revealUnit(qbox));
-  }
-
   // ---- 복습 체크리스트: 초록 버튼 → 진함/중간/연함 선택 → 오늘 날짜 태그 생성 ----
+  // 토글 버튼 자체는 체크 표시 없이 최신 확신도 색상만으로 상태를 표시하고,
+  // 클릭하면 좌측으로 확신도 3단계가 슬라이드로 펼쳐진다. 생성된 날짜 태그는
+  // 클릭하면 삭제된다. 같은 데이터로 상단 히트맵(문제별 1칸)도 함께 그린다.
   const REVIEW_KEY = 'admin-law-25-review-v1';
   const REVIEW_LEVELS = { high: 'lv-high', mid: 'lv-mid', low: 'lv-low' };
 
@@ -2458,10 +2470,12 @@
   }
   function renderReviewTags(row, entries) {
     const tagsEl = row.querySelector('.review-tags');
-    tagsEl.innerHTML = entries.map((e) =>
-      '<span class="review-tag ' + REVIEW_LEVELS[e.level] + '">' + e.date + '</span>'
+    tagsEl.innerHTML = entries.map((e, i) =>
+      '<button type="button" class="review-tag ' + REVIEW_LEVELS[e.level] + '" data-index="' + i + '" title="클릭하면 삭제">' + e.date + '</button>'
     ).join('');
-    row.querySelector('.review-toggle').classList.toggle('has-log', entries.length > 0);
+    const toggle = row.querySelector('.review-toggle');
+    toggle.classList.remove('lv-high', 'lv-mid', 'lv-low');
+    if (entries.length > 0) toggle.classList.add(REVIEW_LEVELS[entries[0].level]);
   }
   function addReviewEntry(row, level) {
     const problemId = row.dataset.problem;
@@ -2471,12 +2485,35 @@
     log[problemId] = entries;
     saveReviewLog(log);
     renderReviewTags(row, entries);
+    renderReviewHeatmap();
+  }
+  function removeReviewEntry(row, index) {
+    const problemId = row.dataset.problem;
+    const log = loadReviewLog();
+    const entries = log[problemId] || [];
+    entries.splice(index, 1);
+    log[problemId] = entries;
+    saveReviewLog(log);
+    renderReviewTags(row, entries);
+    renderReviewHeatmap();
   }
   function refreshAllReviewTags() {
     const log = loadReviewLog();
     document.querySelectorAll('.review-row').forEach((row) => {
       renderReviewTags(row, log[row.dataset.problem] || []);
     });
+  }
+  function renderReviewHeatmap() {
+    const heatmap = document.getElementById('reviewHeatmap');
+    if (!heatmap) return;
+    const log = loadReviewLog();
+    heatmap.innerHTML = PROBLEM_ORDER.map((id) => {
+      const entries = log[id] || [];
+      const cls = entries.length > 0 ? ' ' + REVIEW_LEVELS[entries[0].level] : '';
+      const ptab = document.querySelector('.ptab[data-problem="' + id + '"]');
+      const label = ptab ? ptab.textContent.replace(/\s+/g, ' ').trim() : id;
+      return '<span class="heat-cell' + cls + '" title="' + label + '"></span>';
+    }).join('');
   }
   function initReviewRows() {
     document.querySelectorAll('.review-row').forEach((row) => {
@@ -2490,13 +2527,24 @@
           picker.classList.remove('show');
         });
       });
+
+      // 태그는 매번 다시 그려지므로 개별 버튼이 아니라 컨테이너에 위임
+      row.querySelector('.review-tags').addEventListener('click', (e) => {
+        const tag = e.target.closest('.review-tag');
+        if (!tag) return;
+        removeReviewEntry(row, Number(tag.dataset.index));
+      });
     });
     // localStorage read-back can lag by a tick right after a fresh
     // load/reload in some environments, so re-render a couple more times
     // shortly after to make sure cached review tags actually show up.
-    refreshAllReviewTags();
-    setTimeout(refreshAllReviewTags, 0);
-    window.addEventListener('load', refreshAllReviewTags);
+    function refreshAll() {
+      refreshAllReviewTags();
+      renderReviewHeatmap();
+    }
+    refreshAll();
+    setTimeout(refreshAll, 0);
+    window.addEventListener('load', refreshAll);
   }
   function quizUnits(fromEl) {
     const quizView = fromEl.closest('.view[data-view="quiz"]');
