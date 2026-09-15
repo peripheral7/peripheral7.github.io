@@ -14,7 +14,15 @@
 
     /* Mobile-first type scale + container width — all redefined together
        at each breakpoint below, so widening the page and enlarging the
-       text happen in lockstep instead of the page just stretching. */
+       text happen in lockstep instead of the page just stretching.
+       --content-w is the guaranteed reading width for the body copy
+       (flowbox/toc/qbox/card/etc.) — it never shrinks to make room for a
+       margin note; --container-w (body's own max-width) just matches it
+       here. Only the separate 1234px tier further down widens
+       --container-w beyond --content-w, once there's finally enough
+       spare page width to fit a note beside the content without
+       shrinking it — see the .flowrow rules for that same breakpoint. */
+    --content-w: 448px; /* = the original 480px container minus its own 16px×2 padding */
     --container-w: 480px;
     --pad: 16px;
     --fs-title: 34px;
@@ -26,6 +34,7 @@
   }
   @media (min-width: 640px){
     :root{
+      --content-w: 704px; /* = 760px container minus its own 28px×2 padding */
       --container-w: 760px;
       --pad: 28px;
       --fs-title: 44px;
@@ -38,6 +47,7 @@
   }
   @media (min-width: 1000px){
     :root{
+      --content-w: 848px; /* = 920px container minus its own 36px×2 padding */
       --container-w: 920px;
       --pad: 36px;
       --fs-title: 50px;
@@ -46,6 +56,16 @@
       --fs-h3: 17px;
       --fs-body: 15.5px;
       --fs-sm: 13.5px;
+    }
+  }
+  @media (min-width: 1162px){
+    :root{
+      /* content-w(848) + note gap(12) + note width(230) + 2×pad(36) —
+         pad is inside this border-box max-width, so it has to be added
+         back on top for the note to actually fit without squeezing
+         content-w. Below this width there's no note-shaped gap to spare,
+         so .flowrow keeps notes stacked below instead (see .flowrow). */
+      --container-w: 1162px;
     }
   }
   *{box-sizing:border-box;}
@@ -75,11 +95,11 @@
 
   /* ---- Structure map ---- */
   .problem-statement{background:#eef3f7; border:1px solid #cdd9e2; border-left:4px solid #3b6b8f; border-radius:10px;
-                      padding:14px 16px; margin-bottom:14px;}
+                      padding:14px 16px; margin-bottom:14px; max-width:var(--content-w);}
   .problem-statement .ps-label{display:flex; justify-content:space-between; align-items:baseline;
                                 font-size:var(--fs-sm); font-weight:700; color:#3b6b8f; letter-spacing:.4px; margin-bottom:6px;}
   .problem-statement p{margin:0; font-size:var(--fs-body); line-height:1.65; color:#1f2937;}
-  .flowbox{background:var(--card); border:1px solid var(--line); border-radius:12px; padding:12px 14px; margin-bottom:10px;}
+  .flowbox{background:var(--card); border:1px solid var(--line); border-radius:12px; padding:12px 14px; margin-bottom:10px; max-width:var(--content-w);}
   .flowbox .num{display:inline-block; width:22px; height:22px; border-radius:50%; background:var(--accent2);
                 color:#fff; font-size:12px; text-align:center; line-height:22px; margin-right:6px;}
   .flowbox h3{margin:2px 0 6px; font-size:var(--fs-h3); display:inline;}
@@ -94,19 +114,20 @@
     background:var(--card); border:1px solid var(--line); border-radius:14px; padding:18px;
     min-height:150px; display:flex; flex-direction:column; justify-content:center;
     box-shadow:0 2px 6px rgba(0,0,0,0.04); cursor:pointer; position:relative;
+    max-width:var(--content-w);
   }
   .card .tag{position:absolute; top:10px; left:14px; font-size:var(--fs-sm); color:var(--accent2); font-weight:700; letter-spacing:.5px;}
   .card .front{font-size:var(--fs-h3); font-weight:600; text-align:center; line-height:1.5;}
   .card .back{font-size:var(--fs-body); line-height:1.6; color:#374151; text-align:left; display:none; margin-top:8px;}
   .card.flipped .back{display:block;}
   .card.flipped .front{color:var(--accent2); font-size:var(--fs-body); font-weight:700; margin-bottom:2px;}
-  .navrow{display:flex; justify-content:space-between; align-items:center; margin-top:14px;}
+  .navrow{display:flex; justify-content:space-between; align-items:center; margin-top:14px; max-width:var(--content-w);}
   .navbtn{background:var(--accent); color:#fff; border:none; border-radius:8px; padding:9px 16px; font-size:var(--fs-tab); font-weight:600;}
   .navbtn.secondary{background:#eee7da; color:var(--ink);}
   .counter{font-size:var(--fs-sm); color:var(--sub);}
 
   /* ---- Quiz ---- */
-  .qbox{background:var(--card); border:1px solid var(--line); border-radius:14px; padding:16px; margin-bottom:12px;}
+  .qbox{background:var(--card); border:1px solid var(--line); border-radius:14px; padding:16px; margin-bottom:12px; max-width:var(--content-w);}
   .qbox .q{font-size:var(--fs-h3); font-weight:600; margin-bottom:10px;}
   textarea{width:100%; min-height:70px; border:1px solid var(--line); border-radius:8px; padding:8px; font-size:var(--fs-body); font-family:inherit; resize:vertical;}
   .reveal{margin-top:10px; background:var(--hi); border-radius:8px; padding:10px; font-size:var(--fs-body); line-height:1.6; display:none;}
@@ -118,7 +139,7 @@
   .kwfb .kw-empty{color:var(--sub);}
 
   /* ---- Quiz toolbar: 전체 정답 확인 + 복습 체크리스트 ---- */
-  .quiz-toolbar{display:flex; align-items:center; justify-content:space-between; flex-wrap:wrap; gap:10px; margin-bottom:14px;}
+  .quiz-toolbar{display:flex; align-items:center; justify-content:space-between; flex-wrap:wrap; gap:10px; margin-bottom:14px; max-width:var(--content-w);}
   .checkall-btn{background:var(--accent2); color:#fff; border:none; border-radius:9px; padding:9px 16px; font-size:var(--fs-tab); font-weight:700; cursor:pointer;}
   .review-row{display:flex; align-items:center; gap:6px; flex-wrap:wrap;}
   .review-toggle{
@@ -140,7 +161,7 @@
   .review-tag.lv-low{background:#a8d8c4; color:#274238;}
 
   /* ---- 목차 (구조 탭 상단 요약) ---- */
-  .toc{background:#f7f5f0; border:1px solid var(--line); border-radius:10px; padding:12px 16px; margin-bottom:14px;}
+  .toc{background:#f7f5f0; border:1px solid var(--line); border-radius:10px; padding:12px 16px; margin-bottom:14px; max-width:var(--content-w);}
   .toc .toc-ttl{font-size:var(--fs-sm); font-weight:700; color:var(--sub); letter-spacing:.4px; margin-bottom:6px;}
   .toc .lv1{display:block; font-weight:700; color:var(--accent2); margin-top:6px; font-size:var(--fs-body);}
   .toc .lv1:first-child{margin-top:0;}
@@ -149,17 +170,22 @@
   /* ---- Structure-tab margin notes (서술형 팁, relocated beside 구조) ---- */
   .toc .toc-note{margin-top:8px; padding-top:8px; border-top:1px dashed var(--line); font-size:var(--fs-sm); color:var(--sub); line-height:1.6;}
   .toc .toc-note b{color:var(--accent);}
-  .flowrow{display:flex; align-items:flex-start; gap:12px; margin-bottom:10px;}
-  .flowrow .flowbox{flex:1; min-width:0; margin-bottom:0;}
-  .flowrow .note{flex:0 0 170px; padding-left:10px; border-left:2px solid var(--accent); font-size:var(--fs-sm); line-height:1.6; color:var(--sub);}
+  /* Notes stack BELOW the flowbox by default at every width — the flowbox
+     always keeps its full --content-w. Only past 1234px is there enough
+     spare page width (beyond content-w) to also fit a note beside it
+     without shrinking the flowbox, so that's the only place they go side
+     by side instead. See --container-w's 1234px tier below, which is
+     sized exactly to fit content-w(920) + gap + a 230px note. */
+  .flowrow{display:flex; flex-direction:column; gap:0; margin-bottom:10px;}
+  .flowrow .flowbox{margin-bottom:0; max-width:var(--content-w);}
+  .flowrow .note{width:100%; max-width:var(--content-w); border-top:2px dashed var(--line); padding:6px 0 0; margin:2px 0 4px; font-size:var(--fs-sm); line-height:1.6; color:var(--sub);}
   .flowrow .note p{margin:0 0 6px;}
   .flowrow .note p:last-child{margin-bottom:0;}
   .flowrow .note b{color:var(--accent); font-weight:600;}
-  @media (min-width: 640px){ .flowrow .note{flex-basis:190px;} }
-  @media (min-width: 1000px){ .flowrow .note{flex-basis:230px;} }
-  @media (max-width: 639px){
-    .flowrow{flex-direction:column; gap:0;}
-    .flowrow .note{flex:none; width:100%; border-left:none; border-top:2px dashed var(--line); padding:6px 0 0; margin:2px 0 4px;}
+  @media (min-width: 1162px){
+    .flowrow{flex-direction:row; align-items:flex-start; gap:12px;}
+    .flowrow .flowbox{flex:1; min-width:0;}
+    .flowrow .note{flex:0 0 230px; width:auto; max-width:none; border-top:none; border-left:2px solid var(--accent); padding:0 0 0 10px; margin:0;}
   }
 
   /* ---- Help toggle (bottom-right ?) ---- */
@@ -1449,6 +1475,7 @@
       <span class="lv2">3. 절차 하자의 독자적 위법성</span>
       <span class="lv2">4. 거부처분이 위법한지 여부</span>
       <span class="lv1">Ⅳ. 사례의 해결</span>
+      <div class="toc-note"><b>Tip.</b> 물음1)(5점)은 의의·근거 한 줄씩만 — 배점 대부분(25점)인 물음2)의 절차하자 논증에 시간 집중</div>
     </div>
     <div class="flowbox">
       <span class="num">Ⅰ</span><h3>문제의 소재</h3>
@@ -1459,12 +1486,19 @@
       <p><b class="sub">1. 이주대책의 의의</b>이주대책이란 주거용 건축물을 제공함에 따라 생활의 근거를 상실하게 되는 자를 위하여 이주대책을 수립·실시하거나 이주정착금을 지급하는 것을 말한다. 이는 이주자의 생활 안정의 기능, 원활한 사업 수행 등에 취지가 인정된다.</p>
       <p><b class="sub">2. 이주대책의 토지보상법령상 근거</b>토지보상법 제78조 및 동법 시행령 제40조는 이주대책에 대하여 규정하고 있다. 토지보상법 제78조 제1항은 "사업시행자는 공익사업의 시행으로 인하여 주거용 건축물을 제공함에 따라 생활의 근거를 상실하게 되는 자(이하 "이주대책대상자"라 한다)를 위하여 대통령령으로 정하는 바에 따라 이주대책을 수립·실시하거나 이주정착금을 지급하여야 한다"고 규정하고 있다. 즉 이주대책 수립은 사업시행자의 <b>의무사항</b>이다.</p>
     </div>
+    <div class="flowrow">
     <div class="flowbox">
       <span class="num">Ⅲ</span><h3>물음2)</h3>
       <p><b class="sub">1. 갑에 대한 거부처분이 사전통지 대상인지 여부</b>(1) 사전통지의 의의(행정절차법 제21조): 행정청은 당사자에게 의무를 부과하거나 권익을 제한하는 처분을 하는 경우에는 미리 처분의 제목, 당사자의 성명 또는 명칭과 주소, 의견을 제출할 수 있는 뜻과 의견을 제출하지 아니하는 경우의 처리방법 등을 당사자 등에게 통지하여야 한다.<br>(2) 거부처분시 사전통지 준용여부 — 1) 문제점 및 학설: 수익적 행정행위의 신청에 대한 행정청의 거부처분이 "권익을 제한하는 처분"에 해당하여 사전통지의 대상이 되는지 여부에 관하여 견해의 대립이 있다. ① 긍정설은 신청의 거부는 신청의 기대이익 제한인바 거부처분의 경우에도 사전통지가 필요하다고 하나, ② 부정설은 신청만으로는 권익을 제한하는 것이 아니라고 본다. ③ 제한적 긍정설은 인허가에 부가된 갱신의 경우, 권익에 제한이 있다고 본다. 2) 판례 및 검토: 판례는 신청에 따른 처분이 이루어지지 아니한 경우에는 아직 당사자에게 권익이 부여되지 않았으므로 거부처분을 권익을 제한하는 처분에 해당한다고 할 수 없어 사전통지의 대상이 되지 않는다고 본다. 생각건대 거부처분도 <b>기대이익의 제한</b>으로 볼 수 있어 사전통지의 대상이 된다고 보인다.<br>(3) 사안의 경우: 거부처분도 사전통지의 대상이 되는바, 을은 갑에게 거부처분 시에 사전통지를 하여야 한다.</p>
       <p><b class="sub">2. 갑에 대한 거부처분 시 이유제시가 필수적인 절차인지 여부</b>(1) 의의 및 필요성(행정절차법 제23조): ① 처분의 이유제시란 행정청이 처분을 하는 경우 당사자에게 그 근거와 이유를 제시하는 것을 말한다. ② 쟁송준비 편의의 제공 등에 필요성이 인정된다.<br>(2) 필수적 절차인지 여부: 행정절차법은 원칙적으로 모든 처분에 대해 이유를 제시하도록 하고 있다. 즉 이유제시는 침익적 행정처분의 경우뿐만 아니라 수익적 행정처분의 경우에도 요구된다. 다만, ① 신청내용을 모두 그대로 인정하는 처분인 경우, ② 단순·반복적인 처분 또는 경미한 처분으로서 당사자가 그 이유를 명백히 알 수 있는 경우, ③ 긴급을 요하는 경우에는 이유제시가 요구되지 않는다.<br>(3) 이유제시의 정도와 하자: ① 사실상·법률상 근거를 상대방이 이해할 수 있도록 구체적으로 알려야 한다. ② 판례도 처분시 근거법령을 명시하고 위반사실에 대해 처분이 있었음을 알 수 있을 정도로 사실을 적시할 것을 요한다고 한다.<br>(4) 사안의 경우: 사안의 이주대책 거부처분 시 행정절차법상 이유제시를 생략하는 사유에 해당되지 않는바, 을은 갑에게 거부처분 시 이유제시를 이해할 수 있을 정도로 구체적으로 제시하여야 할 것이다. 다만 이유제시는 거부처분을 할 때 구체적으로 제시하면 될 것이다.</p>
       <p><b class="sub">3. 절차 하자의 독자적 위법성</b>(1) 문제점: 상기 내용처럼 거부처분에 대한 사전통지와 이유제시의 결여는 절차상 하자가 인정될 것이다. 절차 하자의 독자성 문제는 실체적 하자가 없음에도 절차적 하자만으로 처분의 독자적인 위법성이 인정되는지 문제된다.<br>(2) 학설: 절차하자의 독자적 위법성 인정여부에 대하여 ① 적법절차보장 관점에서 긍정하는 견해, ② 행정경제상 불합리하다는 점을 논거로 부정하는 견해, ③ 절충설은 기속행위와 재량행위를 나누어 구별하는 견해가 대립한다.<br>(3) 판례 및 검토: 판례는 기속행위인 과세처분에서 이유부기 하자를, 재량행위인 영업정지처분 청문절차 결여의 하자를 절차하자의 독자적 위법성으로 인정하고 있다. 생각건대 ① 적법절차 관점, ② 행정소송법 제30조 제3항 기속력이 인정되는바 <b>긍정</b>함이 타당하다고 생각된다.</p>
       <p><b class="sub">4. 거부처분이 위법한지 여부</b>을이 갑에게 거부처분 하기 전 사전통지 및 이유제시 결여는 절차 하자를 구성하며, 그 절차 하자의 독자적 위법사유가 인정되는바, <b>을의 거부처분은 위법한 것</b>으로 보인다.</p>
+    </div>
+    <div class="note">
+      <p><b>Tip.</b> 사전통지: 판례(부정)→검토(긍정) "생각건대"로 반박 전환</p>
+      <p>이유제시 생략사유 3가지 빠짐없이 나열</p>
+      <p>절차하자 독자성: 判 기속행위·재량행위 사례 함께 언급</p>
+    </div>
     </div>
     <div class="flowbox">
       <span class="num">Ⅳ</span><h3>사례의 해결</h3>
@@ -1545,6 +1579,7 @@
       <span class="lv1">Ⅱ. 청문 제도의 내용</span>
       <span class="lv2">1. 필수적 절차 여부(청문 사유)</span>
       <span class="lv2">2. 청문 절차의 예외적 사유</span>
+      <div class="toc-note"><b>Tip.</b> 5점짜리 단답형 — 의의 한 줄 + 필수사유 3가지·예외사유 3가지+포기표시까지 빠짐없이 나열이면 충분, 길게 쓰지 말 것</div>
     </div>
     <div class="flowbox">
       <span class="num">Ⅰ</span><h3>청문의 의의</h3>
@@ -1635,6 +1670,7 @@
       <span class="lv2">(1) 법령의 의미</span>
       <span class="lv2">(2) 국가배상법상 위법 개념(위법의 일반적 판단기준)</span>
       <span class="lv1">5. 사례의 해결</span>
+      <div class="toc-note"><b>Tip.</b> 배점 대부분이 4번(위법개념 학설·판례·검토)에 집중 — 2번 개관은 짧게 지나갈 것</div>
     </div>
     <div class="flowbox">
       <span class="num">1</span><h3>논점의 정리</h3>
@@ -1649,10 +1685,17 @@
       <span class="num">3</span><h3>국가배상책임의 성립요건(국가배상법 제2조)</h3>
       <p>① 공무원이 직무를 집행하면서 ② 고의 또는 과실로 ③ 법령에 위반하여 ④ 타인에게 손해를 가한 때에 손해가 발생하였고, ⑤ 공무원의 불법한 가해행위와 손해사이에 인과관계(상당인과관계)가 있을 것이 요구된다. 사안은 <b>법령 위반</b>이 문제되는바, 이하 이와 관련하여 후술하기로 한다.</p>
     </div>
+    <div class="flowrow">
     <div class="flowbox">
       <span class="num">4</span><h3>국가배상법 제2조상 위법행위</h3>
       <p><b class="sub">(1) 법령의 의미</b>국가배상법은 "법령" 위반을 요구하고 있는데, 여기에서 "법령"이 무엇을 의미하는지에 관하여 학설의 일반적 견해는 '법 일반'을 의미한다고 본다. 성문법령뿐만 아니라 관습법, 법의 일반원칙, 조리 등 불문법도 포함한다. 다만 행정규칙은 법규성을 갖지 않는 한 법령에 포함되지 않는다는 견해가 일반적 견해이다.</p>
       <p><b class="sub">(2) 국가배상법상 위법 개념(위법의 일반적 판단기준)</b>1) 학설: ① 결과불법설은 국민이 받은 손해를 결과적으로 수인할 수 있는가를 기준으로 판단하며, ② 상대적 위법성설은 행위자체의 위법, 적법뿐만 아니라 피침해이익의 성격과 침해정도, 가해행위의 태양을 종합고려한다. ③ 행위위법설은 국가배상법상의 위법은 행위의 법규범에의 위반을 의미한다고 보는 견해이다. 협의의 행위위법설은 위법의 개념을 다원화하는 것은 혼동을 가져올 수 있는바, 항고소송의 위법과 동일한 것으로 파악하여 행위가 법규범에 위반되는 것을 의미한다고 한다. 광의의 행위위법설은 손해배상제도와 취소소송은 성질이 다르다는 점에서 다르게 보아, 협의의 행위위법 뿐만 아니라 헌법상 인정된 국가의 기본권 보장의무로부터 도출되는 공무원의 <b>손해방지의무</b> 위반도 법령위반으로 보는 견해이다. ④ 직무의무위반설은 국가배상법상의 위법을 대국민 관계에서의 공무원의 직무의무 위반으로 보는 견해이다.<br>2) 판례: 판례는 "그 행정처분이 <b>객관적 정당성을 상실</b>하였다고 인정될 정도(위법성)에 이른 경우에 국가배상법 제2조 소정의 국가배상책임의 요건을 충족하였다고 봄이 상당할 것이며"라고 판시하여 상대적 위법성설을 취한 듯한 판례도 보이나, 시위자들의 화염병으로 인한 약국화재에 대한 국가배상책임이 문제된 사건에서 원칙상 행위의 법 위반을 법령위반으로 본 바 있으며, 공무원의 직무상 의무위반을 법령위반으로 직무상 의무위반설을 취한 듯한 판례도 보인다.<br>3) 검토: 생각건대, 광의의 행위위법설에 따라 법령 위반 뿐만 아니라 명문의 규정이 없는 경우에도 국민의 생명, 신체, 재산 등의 안전에 구체적인 위험이 초래된 경우 등, 공무원의 손해방지의무 위반도 위법을 인정하여야 한다.</p>
+    </div>
+    <div class="note">
+      <p><b>Tip.</b> 학설 4개(결과불법·상대적위법성·행위위법·직무의무위반) 키워드로 압축</p>
+      <p>판례는 상대적위법성설·직무의무위반설 취한 듯한 표현이 각각 다른 사건에 있음을 주의</p>
+      <p>검토는 "광의의 행위위법설 + 손해방지의무" 문구로</p>
+    </div>
     </div>
     <div class="flowbox">
       <span class="num">5</span><h3>사례의 해결</h3>
@@ -1734,6 +1777,7 @@
       <span class="lv1">3. 상당인과관계의 의미 및 판단기준</span>
       <span class="lv1">4. 개별공시지가의 구속력 범위(관련 판례)</span>
       <span class="lv1">5. 사안의 해결</span>
+      <div class="toc-note"><b>Tip.</b> 짧은 배점 — 대법원 판례의 구속력 범위 문구를 정확히 재현하는 것이 핵심</div>
     </div>
     <div class="flowbox">
       <span class="num">1</span><h3>논점의 정리</h3>
@@ -1747,9 +1791,14 @@
       <span class="num">3</span><h3>상당인과관계의 의미 및 판단기준</h3>
       <p>① 상당인과관계란 전자가 없었더라면 후자도 없었을 관계가 있을 때 성립하는 관계를 의미하며, 국가배상책임이 인정되려면 공무원의 직무상 행위와 손해 사이에 인과관계가 있어야 한다. ② 인과관계의 유무 판단은 관련법령의 내용, 가해행위의 태양, 피해의 상황 등 제반사정을 복합적으로 고려하여야 한다.</p>
     </div>
+    <div class="flowrow">
     <div class="flowbox">
       <span class="num">4</span><h3>개별공시지가의 구속력 범위(관련 판례)</h3>
       <p>동법은 부동산의 적정한 가격형성과 각종 조세, 부담금 등의 형평성 도모, 국민경제 발전에 이바지함에 목적이 있는바(부동산공시법 제1조), 개별공시지가를 지표로 거래해야 한다는 법적 구속력을 부여하는 의미라고 보기는 어렵다. 또한 대법원은 "개별공시지가가 조세 등 지가 산정기준이 되는 범위 내에서는 납세자인 국민 등의 재산상 권리, 의무에 직접적 영향을 미칠 수 있지만, 더 나아가 <b>토지의 거래 또는 담보 제공을 받음에 있어서 그 실제 거래가액 또는 담보가치를 보장</b>한다거나 어떠한 구속력을 미친다고 할 수 없다"고 판시하였다.</p>
+    </div>
+    <div class="note">
+      <p><b>Tip.</b> "실제 거래가액 또는 담보가치를 보장한다거나 구속력을 미친다고 할 수 없다"는 판례 문구 그대로 인용</p>
+    </div>
     </div>
     <div class="flowbox">
       <span class="num">5</span><h3>사례의 해결</h3>
@@ -1835,6 +1884,7 @@
       <span class="lv2">3. 검토</span>
       <span class="lv1">Ⅴ. 행정소송법 제19조 단서를 위반한 소송의 효과</span>
       <span class="lv1">Ⅵ. 결</span>
+      <div class="toc-note"><b>Tip.</b> Ⅲ(재결 고유의 위법 일반론) → Ⅳ(제3자효 인용재결의 경우, 학설-판례-검토) 순서로 논리를 좁혀갈 것</div>
     </div>
     <div class="flowbox">
       <span class="num">Ⅰ</span><h3>서(논의의 필요성)</h3>
@@ -1848,11 +1898,17 @@
       <span class="num">Ⅲ</span><h3>재결자체의 고유한 위법인지 여부</h3>
       <p>주로 <b>주체, 절차, 형식</b>의 위법을 의미하고, 내용상 하자에 대해서는 부정하는 견해도 있으나, 처분이 아니거나 원고적격이 없음에도 본안 판단한 경우 등 재결의 고유한 위법이 인정될 수 있는바 <b>포함</b>하는 것이 통설·판례의 입장이다.</p>
     </div>
+    <div class="flowrow">
     <div class="flowbox">
       <span class="num">Ⅳ</span><h3>제3자효 행정행위에 대한 인용재결의 고유한 위법인지 여부</h3>
       <p><b class="sub">1. 학설</b>① 19조 본문설은 당해 인용재결이 원처분의 상대방에게는 최초의 처분으로서 성질을 갖는다는 점을 논거로 행정소송법 제19조 본문에 의해 처분이 소의 대상이 된다고 한다. ② 19조 단서설은 재결 자체에 고유한 위법이 있는 것으로 보아 동법 제19조 단서에 의해 재결이 소의 대상이 되는 것으로 본다.</p>
       <p><b class="sub">2. 판례</b>대법원은 "인용재결은 원처분과 내용을 달리 하는 것으로, 그 인용재결의 취소를 구하는 것은 원처분에 없는 고유한 하자를 주장하는 셈이어서 당연히 항고소송의 대상이 된다"고 판시하여 재결의 고유한 하자로 본다.</p>
       <p><b class="sub">3. 검토</b>생각건대, 여기서 원처분은 취소재결이 아니라 제3자효 행정행위 자체이기 때문에 19조 단서에 따라 <b>재결 자체의 고유한 위법을 다투는 것</b>으로 보아야 할 것이다.</p>
+    </div>
+    <div class="note">
+      <p><b>Tip.</b> 19조 본문설(원처분 상대방엔 최초처분) vs 단서설(재결 고유위법) 구별 명확히</p>
+      <p>판례 "원처분에 없는 고유한 하자" 표현 그대로 재현</p>
+    </div>
     </div>
     <div class="flowbox">
       <span class="num">Ⅴ</span><h3>행정소송법 제19조 단서를 위반한 소송의 효과</h3>
