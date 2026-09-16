@@ -143,15 +143,23 @@
   .review-toggle.lv-high{background:#1f5c46;}
   .review-toggle.lv-mid{background:#4f9c7d;}
   .review-toggle.lv-low{background:#a8d8c4;}
-  /* 위쪽으로 펼쳐지는 확신도 선택지 — 토글 자체는 자리를 지키고(.review-anchor가
-     항상 27px로 고정), 피커만 그 위쪽에서 아이폰 느낌의 빠른 슬라이드로 등장 */
+  /* 토글 바로 위, 토글과 같은 폭(27px)의 세로 한 줄로 정렬되는 확신도 선택지.
+     버튼마다 transition-delay를 줘서 토글에 가장 가까운(마지막 DOM 순서)
+     버튼부터 먼저, 나머지는 순차적으로 위로 슬라이드하며 빠르게 나타난다. */
   .review-picker{
-    position:absolute; right:0; bottom:27px; z-index:1; display:flex; align-items:center; gap:4px; padding-bottom:6px;
-    transform:translateY(10px); opacity:0; pointer-events:none;
-    transition:transform .18s cubic-bezier(.32,.72,0,1), opacity .14s ease;
+    position:absolute; right:0; bottom:27px; z-index:1; width:27px;
+    display:flex; flex-direction:column; align-items:center; gap:4px; padding-bottom:6px;
+    pointer-events:none;
   }
-  .review-picker.show{transform:translateY(0); opacity:1; pointer-events:auto;}
-  .review-opt{width:23px; height:23px; border-radius:6px; border:none; cursor:pointer; padding:0; flex-shrink:0;}
+  .review-opt{
+    width:23px; height:23px; border-radius:6px; border:none; cursor:pointer; padding:0; flex-shrink:0;
+    transform:translateY(8px); opacity:0; pointer-events:none;
+    transition:transform .13s cubic-bezier(.32,.72,0,1), opacity .1s ease;
+  }
+  .review-picker.show .review-opt{transform:translateY(0); opacity:1; pointer-events:auto;}
+  .review-picker.show .review-opt:nth-child(3){transition-delay:0ms;}
+  .review-picker.show .review-opt:nth-child(2){transition-delay:35ms;}
+  .review-picker.show .review-opt:nth-child(1){transition-delay:70ms;}
   .review-opt.lv-high{background:#1f5c46;}
   .review-opt.lv-mid{background:#4f9c7d;}
   .review-opt.lv-low{background:#a8d8c4;}
