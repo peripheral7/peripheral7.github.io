@@ -3,7 +3,7 @@
 @import 'shadcn/tailwind.css';
 
 @theme inline {
-  --font-sans: var(--font-archivo), var(--font-noto-kr), 'Archivo Fallback', sans-serif;
+  --font-sans: var(--font-pretendard), var(--font-noto-kr), 'Pretendard Fallback', sans-serif;
   --font-mono: var(--font-jetbrains), 'JetBrains Mono Fallback', monospace;
   --font-kr: var(--font-noto-kr), 'Noto Sans KR Fallback', sans-serif;
   --font-orbit: var(--font-orbit-raw), var(--font-noto-kr), 'Orbit Fallback', sans-serif;

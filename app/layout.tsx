@@ -1,14 +1,19 @@
 import { Analytics } from '@vercel/analytics/next'
 import type { Metadata, Viewport } from 'next'
-import { Archivo, JetBrains_Mono, Noto_Sans_KR, Orbit, Hahmlet } from 'next/font/google'
+import { JetBrains_Mono, Noto_Sans_KR, Orbit, Hahmlet } from 'next/font/google'
+import localFont from 'next/font/local'
 import { SiteChrome } from '@/components/site-chrome'
 import { posts } from '@/lib/posts'
 import './globals.css'
 
-const archivo = Archivo({
-  subsets: ['latin'],
-  variable: '--font-archivo',
-  weight: ['400', '500', '600', '700', '800', '900'],
+// Self-hosted (not on Google Fonts): thinner, more confident sans that
+// unifies Korean + Latin in one family instead of stitching two fonts
+// together like the previous Archivo + Noto Sans KR pairing did.
+const pretendard = localFont({
+  src: '../public/fonts/PretendardVariable.woff2',
+  variable: '--font-pretendard',
+  weight: '45 920',
+  display: 'swap',
 })
 
 const jetbrainsMono = JetBrains_Mono({
@@ -63,7 +68,7 @@ export default function RootLayout({
   return (
     <html
       lang="ko"
-      className={`bg-background ${archivo.variable} ${jetbrainsMono.variable} ${notoSansKR.variable} ${orbit.variable} ${hahmlet.variable}`}
+      className={`bg-background ${pretendard.variable} ${jetbrainsMono.variable} ${notoSansKR.variable} ${orbit.variable} ${hahmlet.variable}`}
       
     >
       <body className="font-sans antialiased">

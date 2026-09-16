@@ -31,7 +31,7 @@ export function ScrapbookBoard({ initialPosts }: { initialPosts: Post[] }) {
           <p className="font-mono text-xs uppercase tracking-[0.3em] text-accent font-bold">
             The board
           </p>
-          <h2 className="mt-3 font-sans text-3xl font-extrabold uppercase leading-none tracking-tight text-foreground md:text-5xl">
+          <h2 className="mt-3 font-sans text-3xl font-bold uppercase leading-none tracking-tight text-foreground md:text-5xl">
             Reports
           </h2>
         </div>
@@ -83,7 +83,7 @@ export function ScrapbookBoard({ initialPosts }: { initialPosts: Post[] }) {
               <p className="font-mono text-xs uppercase tracking-[0.3em] text-accent font-bold">
                 Add to the file
               </p>
-              <h3 className="mt-2 max-w-xl text-balance font-sans text-2xl font-extrabold uppercase leading-tight tracking-tight text-card-foreground">
+              <h3 className="mt-2 max-w-xl text-balance font-sans text-2xl font-bold uppercase leading-tight tracking-tight text-card-foreground">
                 Pin a paper, a photograph, or a machine
               </h3>
               <p className="mt-3 max-w-md text-sm leading-relaxed text-muted-foreground">
