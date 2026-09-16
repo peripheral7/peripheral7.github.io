@@ -8,9 +8,11 @@ export const aquiMeta = {
 }
 
 // rowStart는 실제 aspectRatio × colSpan으로 계산한 점유 높이 기준 자동 배치입니다.
-// 원래 같은 높이에서 나란히 짝지어졌던 5개 그룹(02/03, 04/05/06, 10/11, 16/17, 18/19)은
+// 원래 같은 높이에서 나란히 짝지어졌던 4개 그룹(02/03, 10/11, 16/17, 18/19)은
 // 계단식으로 세로 오프셋을 줘서 약 70%만 겹치도록(가로 간격은 그대로) 어긋나게 했습니다.
 // img-08↔07, img-13↔12는 원래 의도된 "모서리 겹침" 연출 그대로 유지했습니다.
+// 04/05/06(종이학·커피잔·나뭇가지 그릇)만 예외적으로 실제 여백(가로 1유닛 간격)을 두고
+// 세로도 계단식으로 크게 어긋나게 해, 서로 안 붙어 보이도록 따로 배치했습니다.
 export const aquiBoard: BoardSection[] = [
   {
     id: "clockwork-collage",
@@ -26,14 +28,14 @@ export const aquiBoard: BoardSection[] = [
       // 3. Red leaves — 02보다 계단식으로 아래로 어긋남 (70%만 겹침)
       { id: "img-03", src: `${FOLDER}20221116-161023-15.jpg`, alt: "Red leaves", aspectRatio: "2 / 3", colStart: 13, colSpan: 9, rowStart: 23, pin: "none" },
 
-      // 4. Origami crane — 그룹 anchor
-      { id: "img-04", src: `${FOLDER}20230126-131405-8.jpg`, alt: "Origami crane", aspectRatio: "3635 / 5453", colStart: 5, colSpan: 3, rowStart: 39, pin: "none" },
+      // 4. Origami crane — 그룹 anchor. 05/06과 가로 1유닛씩 띄우고 셋 다 높이를 다르게 줌
+      { id: "img-04", src: `${FOLDER}20230126-131405-8.jpg`, alt: "Origami crane", aspectRatio: "3635 / 5453", colStart: 4, colSpan: 3, rowStart: 38, pin: "none" },
 
-      // 5. 3 Cups — 04보다 계단식으로 아래로 어긋남
-      { id: "img-05", src: `${FOLDER}20231006_1.jpg`, alt: "3 Cups", aspectRatio: "3 / 2", colStart: 8, colSpan: 6, rowStart: 40, pin: "none" },
+      // 5. 3 Cups — 04와 가로 여백, 세로도 계단식으로 어긋남
+      { id: "img-05", src: `${FOLDER}20231006_1.jpg`, alt: "3 Cups", aspectRatio: "3 / 2", colStart: 8, colSpan: 5, rowStart: 40, pin: "none" },
 
-      // 6. Branch dish — 05보다 한 단 더 아래로 어긋남
-      { id: "img-06", src: `${FOLDER}20221116-132130-07.jpg`, alt: "Branch dish", aspectRatio: "5333 / 4000", colStart: 14, colSpan: 7, rowStart: 42, pin: "none" },
+      // 6. Branch dish — 05와 가로 여백, 셋 중 가장 크고 가장 아래로 어긋남
+      { id: "img-06", src: `${FOLDER}20221116-132130-07.jpg`, alt: "Branch dish", aspectRatio: "5333 / 4000", colStart: 14, colSpan: 8, rowStart: 41, pin: "none" },
 
       // 7. Cafe interior
       { id: "img-07", src: `${FOLDER}20221013-180609-006.jpg`, alt: "Cafe interior", aspectRatio: "3 / 2", colStart: 3, colSpan: 14, rowStart: 49, pin: "none" },
