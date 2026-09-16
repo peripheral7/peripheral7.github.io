@@ -143,20 +143,20 @@
   .review-toggle.lv-high{background:#1f5c46;}
   .review-toggle.lv-mid{background:#4f9c7d;}
   .review-toggle.lv-low{background:#a8d8c4;}
-  /* 좌측으로 펼쳐지는 확신도 선택지 — 토글 자체는 자리를 지키고(.review-anchor가
-     항상 27px로 고정), 피커만 그 왼쪽에서 아이폰 느낌의 빠른 슬라이드로 등장 */
+  /* 위쪽으로 펼쳐지는 확신도 선택지 — 토글 자체는 자리를 지키고(.review-anchor가
+     항상 27px로 고정), 피커만 그 위쪽에서 아이폰 느낌의 빠른 슬라이드로 등장 */
   .review-picker{
-    position:absolute; right:27px; top:0; z-index:1; display:flex; align-items:center; gap:4px; padding-right:6px;
-    transform:translateX(10px); opacity:0; pointer-events:none;
+    position:absolute; right:0; bottom:27px; z-index:1; display:flex; align-items:center; gap:4px; padding-bottom:6px;
+    transform:translateY(10px); opacity:0; pointer-events:none;
     transition:transform .18s cubic-bezier(.32,.72,0,1), opacity .14s ease;
   }
-  .review-picker.show{transform:translateX(0); opacity:1; pointer-events:auto;}
+  .review-picker.show{transform:translateY(0); opacity:1; pointer-events:auto;}
   .review-opt{width:23px; height:23px; border-radius:6px; border:none; cursor:pointer; padding:0; flex-shrink:0;}
   .review-opt.lv-high{background:#1f5c46;}
   .review-opt.lv-mid{background:#4f9c7d;}
   .review-opt.lv-low{background:#a8d8c4;}
   .review-tags{
-    position:absolute; top:0; right:27px; max-width:calc(100% - 35px);
+    position:absolute; top:0; right:35px; max-width:calc(100% - 43px);
     display:flex; align-items:center; gap:4px; flex-wrap:nowrap; overflow-x:auto;
   }
   .review-tag{border:none; padding:0 7px; height:27px; display:inline-flex; align-items:center; border-radius:5px; font-size:10.5px; font-weight:700; white-space:nowrap; color:#fff; cursor:pointer;}
@@ -261,7 +261,7 @@
   <div class="ptab" data-problem="p10">문제10<br>거부처분 위법성</div>
   <div class="ptab" data-problem="p11">문제11<br>이주대책</div>
   <div class="ptab" data-problem="p12">문제12<br>청문</div>
-  <div class="ptab" data-problem="p13a">문제13-⑴<br>개별공시지가 배상</div>
+  <div class="ptab" data-problem="p13a">문제13-⑴<br>국가배상법</div>
   <div class="ptab" data-problem="p13b">문제13-⑵<br>상당인과관계</div>
   <div class="ptab" data-problem="p14">문제14<br>원처분주의</div>
 </div>
