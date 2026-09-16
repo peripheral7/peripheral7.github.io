@@ -15,13 +15,12 @@
     /* Mobile-first type scale + container width — all redefined together
        at each breakpoint below, so widening the page and enlarging the
        text happen in lockstep instead of the page just stretching.
-       --content-w is the guaranteed reading width for the body copy
-       (flowbox/toc/qbox/card/etc.) — it never shrinks to make room for a
-       margin note; --container-w (body's own max-width) just matches it
-       here. Only the separate 1234px tier further down widens
-       --container-w beyond --content-w, once there's finally enough
-       spare page width to fit a note beside the content without
-       shrinking it — see the .flowrow rules for that same breakpoint. */
+       body/--container-w stays centered at exactly this width always —
+       margin notes never widen it or shrink --content-w. Past a wide
+       enough viewport (see the .flowrow/.note rules further down), a
+       note instead floats as its own absolutely-positioned box in the
+       empty margin outside body, beside the flowbox it belongs to;
+       below that it just stacks under the flowbox like on mobile. */
     --content-w: 448px; /* = the original 480px container minus its own 16px×2 padding */
     --container-w: 480px;
     --pad: 16px;
@@ -56,16 +55,6 @@
       --fs-h3: 17px;
       --fs-body: 15.5px;
       --fs-sm: 13.5px;
-    }
-  }
-  @media (min-width: 1162px){
-    :root{
-      /* content-w(848) + note gap(12) + note width(230) + 2×pad(36) —
-         pad is inside this border-box max-width, so it has to be added
-         back on top for the note to actually fit without squeezing
-         content-w. Below this width there's no note-shaped gap to spare,
-         so .flowrow keeps notes stacked below instead (see .flowrow). */
-      --container-w: 1162px;
     }
   }
   *{box-sizing:border-box;}
@@ -184,22 +173,30 @@
   /* ---- Structure-tab margin notes (서술형 팁, relocated beside 구조) ---- */
   .toc .toc-note{margin-top:8px; padding-top:8px; border-top:1px dashed var(--line); font-size:var(--fs-sm); color:var(--sub); line-height:1.6;}
   .toc .toc-note b{color:var(--accent);}
-  /* Notes stack BELOW the flowbox by default at every width — the flowbox
-     always keeps its full --content-w. Only past 1234px is there enough
-     spare page width (beyond content-w) to also fit a note beside it
-     without shrinking the flowbox, so that's the only place they go side
-     by side instead. See --container-w's 1234px tier below, which is
-     sized exactly to fit content-w(920) + gap + a 230px note. */
+  /* Notes stack BELOW the flowbox by default at every width — body stays
+     centered at its normal --container-w and the flowbox always keeps
+     its full --content-w; nothing here ever widens the page. Only past
+     1404px is there enough EMPTY margin on both sides of the (still
+     centered, still --container-w-wide) body for a note to float in
+     the right margin without the page needing to grow at all — a note
+     is 230px plus a 12px gap, and since body is centered that same gap
+     has to fit on the left side too even though nothing uses it there,
+     hence needing roughly double a plain 242px-wider page would. Below
+     that width the note has nowhere to float, so it just stacks under
+     the flowbox instead, exactly like on mobile. */
   .flowrow{display:flex; flex-direction:column; gap:0; margin-bottom:10px;}
   .flowrow .flowbox{margin-bottom:0; max-width:var(--content-w);}
   .flowrow .note{width:100%; max-width:var(--content-w); border-top:2px dashed var(--line); padding:6px 0 0; margin:2px 0 4px; font-size:var(--fs-sm); line-height:1.6; color:var(--sub);}
   .flowrow .note p{margin:0 0 6px;}
   .flowrow .note p:last-child{margin-bottom:0;}
   .flowrow .note b{color:var(--accent); font-weight:600;}
-  @media (min-width: 1162px){
-    .flowrow{flex-direction:row; align-items:flex-start; gap:12px;}
-    .flowrow .flowbox{flex:1; min-width:0;}
-    .flowrow .note{flex:0 0 230px; width:auto; max-width:none; border-top:none; border-left:2px solid var(--accent); padding:0 0 0 10px; margin:0;}
+  @media (min-width: 1404px){
+    .flowrow{position:relative; display:block;}
+    .flowrow .note{
+      position:absolute; top:0; left:100%; margin:0 0 0 12px;
+      width:230px; max-width:230px;
+      border-top:none; border-left:2px solid var(--accent); padding:0 0 0 10px;
+    }
   }
 
   /* ---- Help toggle (bottom-right ?) ---- */
