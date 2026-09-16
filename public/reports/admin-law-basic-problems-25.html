@@ -128,10 +128,10 @@
   .kwfb .kw-empty{color:var(--sub);}
 
   /* ---- 복습 체크리스트 (문제 제목 하단, 상시 노출) ---- */
-  .review-row{display:flex; align-items:center; gap:8px; flex-wrap:wrap; margin-bottom:14px;}
+  .review-row{display:flex; align-items:center; gap:8px; flex-wrap:wrap; width:fit-content; margin:0 0 14px auto;}
   .review-anchor{position:relative; width:27px; height:27px; flex-shrink:0;}
   .review-toggle{
-    position:absolute; right:0; top:0; z-index:2; width:27px; height:27px; border-radius:50%;
+    position:absolute; right:0; top:0; z-index:2; width:27px; height:27px; border-radius:7px;
     border:none; cursor:pointer; background:#eee7da; padding:0;
     transition:background .15s;
   }
@@ -157,8 +157,8 @@
   .review-tag.lv-low{background:#a8d8c4; color:#274238;}
 
   /* ---- 페이지 상단 복습 히트맵 (깃허브 로그 스타일, 문제별 1칸) ---- */
-  .review-heatmap{display:grid; grid-template-columns:repeat(7, 1fr); gap:5px; max-width:var(--content-w); margin:0 auto 16px;}
-  .heat-cell{display:block; aspect-ratio:1; border-radius:5px; background:#eee7da;}
+  .review-heatmap{display:grid; grid-template-columns:repeat(7, 14px); gap:3px; width:fit-content; margin:0 0 16px;}
+  .heat-cell{display:block; width:14px; height:14px; border-radius:3px; background:#eee7da;}
   .heat-cell.lv-high{background:#1f5c46;}
   .heat-cell.lv-mid{background:#4f9c7d;}
   .heat-cell.lv-low{background:#a8d8c4;}
