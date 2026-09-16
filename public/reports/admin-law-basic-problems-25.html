@@ -93,7 +93,7 @@
   .flowbox .num{display:inline-block; width:22px; height:22px; border-radius:50%; background:var(--accent2);
                 color:#fff; font-size:12px; text-align:center; line-height:22px; margin-right:6px;}
   .flowbox h3{margin:2px 0 6px; font-size:var(--fs-h3); display:inline;}
-  .flowbox p{margin:8px 0 0; font-size:var(--fs-body); line-height:1.55; color:#374151;}
+  .flowbox p{margin:14px 0 0; font-size:var(--fs-body); line-height:1.55; color:#374151;}
   .flowbox p:first-of-type{margin-top:6px;}
   .flowbox p b.sub{display:block; color:var(--accent2); font-size:var(--fs-body); margin-bottom:2px;}
   .flowbox .quote{background:var(--hi); border-left:3px solid var(--accent); padding:6px 8px; margin-top:6px;
@@ -246,9 +246,57 @@
   }
   .pagenav button:disabled{opacity:.35; cursor:default;}
   .pagenav .nav-top{background:var(--accent); color:#fff;}
+
+  /* ---- Ctrl+F 검색 ---- */
+  .search-overlay{
+    position:fixed; inset:0; z-index:300; display:flex; justify-content:center;
+    align-items:flex-start; padding-top:26vh; pointer-events:none;
+  }
+  .search-overlay.show{pointer-events:auto;}
+  .search-backdrop{
+    position:absolute; inset:0; background:rgba(20,18,14,0.1);
+    backdrop-filter:blur(6px); -webkit-backdrop-filter:blur(6px);
+    opacity:0; transition:opacity .2s ease;
+  }
+  .search-overlay.show .search-backdrop{opacity:1;}
+  .search-panel{
+    position:relative; z-index:1; width:min(92vw, 480px); margin:0 16px;
+    background:var(--card); border:1px solid var(--line); border-radius:14px;
+    box-shadow:0 14px 40px rgba(0,0,0,.2); overflow:hidden;
+    transform:translateY(-8px) scale(.97); opacity:0;
+    transition:transform .16s cubic-bezier(.32,.72,0,1), opacity .14s ease;
+  }
+  .search-overlay.show .search-panel{transform:translateY(0) scale(1); opacity:1;}
+  .search-input{
+    width:100%; display:block; border:none; outline:none; background:transparent;
+    padding:14px 16px; font-size:var(--fs-h3); font-family:inherit; color:var(--ink);
+  }
+  .search-input::placeholder{color:var(--sub);}
+  .search-results{max-height:min(52vh, 420px); overflow-y:auto; border-top:1px solid var(--line); display:none;}
+  .search-results.show{display:block;}
+  .search-item{padding:9px 16px; cursor:pointer; border-bottom:1px solid var(--line);}
+  .search-item:last-child{border-bottom:none;}
+  .search-item.active{background:var(--hi);}
+  .search-item .si-path{font-size:var(--fs-sm); color:var(--accent2); font-weight:700; margin-bottom:2px;}
+  .search-item .si-snippet{font-size:var(--fs-body); color:#374151; line-height:1.4;}
+  .search-item mark{background:#ffe08a; color:inherit; border-radius:2px; padding:0 1px;}
+  .search-empty{padding:14px 16px; font-size:var(--fs-body); color:var(--sub);}
+  @keyframes searchFlash{
+    0%,100%{box-shadow:0 0 0 0 rgba(139,94,60,0);}
+    30%{box-shadow:0 0 0 4px rgba(139,94,60,.35);}
+  }
+  .search-highlight{animation:searchFlash 1s ease;}
 </style>
 </head>
 <body>
+
+<div class="search-overlay" id="searchOverlay">
+  <div class="search-backdrop" id="searchBackdrop"></div>
+  <div class="search-panel">
+    <input type="text" id="searchInput" class="search-input" placeholder="검색... (Enter로 이동, Esc로 닫기)" autocomplete="off" />
+    <div class="search-results" id="searchResults"></div>
+  </div>
+</div>
 
 <div class="page-header">
   <h1>감정평가행정법 기본문제 25</h1>
@@ -2168,13 +2216,14 @@
     function flip() { el.classList.toggle('flipped'); }
     function next() { idx = (idx + 1) % cards.length; render(); }
     function prev() { idx = (idx - 1 + cards.length) % cards.length; render(); }
+    function goto(i) { idx = ((i % cards.length) + cards.length) % cards.length; render(); }
 
     el.addEventListener('click', flip);
     problemRoot.querySelector('[data-card-next]').addEventListener('click', next);
     problemRoot.querySelector('[data-card-prev]').addEventListener('click', prev);
     render();
 
-    return { isFlipped: () => el.classList.contains('flipped'), flip, next, prev };
+    return { isFlipped: () => el.classList.contains('flipped'), flip, next, prev, goto };
   }
 
   const flashcardControls = {};
@@ -2614,6 +2663,154 @@
     if (mid < vh * 0.25 || mid > vh * 0.75) {
       e.target.scrollIntoView({ block: 'center', behavior: 'smooth' });
     }
+  });
+
+  // ---- Ctrl+F 검색 ----
+  // 모든 문제(구조/암기카드/자가테스트)의 텍스트를 한 번 훑어 검색 인덱스를 만든다.
+  // 화면에 없는(display:none) 문제도 DOM엔 그대로 있으므로 전부 인덱싱된다.
+  const VIEW_LABEL = { map: '① 구조', cards: '② 암기카드', quiz: '③ 자가테스트' };
+
+  function buildSearchIndex() {
+    const index = [];
+    document.querySelectorAll('.problem').forEach((problemRoot) => {
+      const problemId = problemRoot.id.replace('problem-', '');
+      const ptab = document.querySelector('.ptab[data-problem="' + problemId + '"]');
+      const problemLabel = ptab ? ptab.textContent.replace(/\s+/g, ' ').trim() : problemId;
+
+      problemRoot.querySelectorAll('.flowbox, .qbox, .note, .toc-note').forEach((el) => {
+        const view = el.closest('.view');
+        if (!view) return;
+        const heading = el.querySelector('h3, .q');
+        const title = heading ? heading.textContent.replace(/\s+/g, ' ').trim() : 'Tip';
+        const text = el.textContent.replace(/\s+/g, ' ').trim();
+        if (!text) return;
+        index.push({ problemId, problemLabel, view: view.dataset.view, type: 'el', title, text, el });
+      });
+
+      (PROBLEM_CARDS[problemId] || []).forEach((c, i) => {
+        const text = [c.tag, c.front, c.back].join(' ').replace(/\s+/g, ' ').trim();
+        index.push({ problemId, problemLabel, view: 'cards', type: 'card', title: c.tag, text, cardIndex: i });
+      });
+    });
+    return index;
+  }
+
+  function escapeHtml(s) {
+    return s.replace(/[&<>"']/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
+  }
+  function makeSnippet(text, query) {
+    const i = text.toLowerCase().indexOf(query.toLowerCase());
+    if (i === -1) return escapeHtml(text.slice(0, 70)) + (text.length > 70 ? '…' : '');
+    const start = Math.max(0, i - 24);
+    const end = Math.min(text.length, i + query.length + 40);
+    const localIdx = i - start;
+    const snippet = text.slice(start, end);
+    return (start > 0 ? '…' : '') +
+      escapeHtml(snippet.slice(0, localIdx)) +
+      '<mark>' + escapeHtml(snippet.slice(localIdx, localIdx + query.length)) + '</mark>' +
+      escapeHtml(snippet.slice(localIdx + query.length)) +
+      (end < text.length ? '…' : '');
+  }
+
+  let SEARCH_INDEX = [];
+  const searchOverlay = document.getElementById('searchOverlay');
+  const searchBackdrop = document.getElementById('searchBackdrop');
+  const searchInput = document.getElementById('searchInput');
+  const searchResultsEl = document.getElementById('searchResults');
+  let searchResults = [];
+  let searchActiveIndex = -1;
+
+  function openSearch() {
+    if (SEARCH_INDEX.length === 0) SEARCH_INDEX = buildSearchIndex();
+    searchOverlay.classList.add('show');
+    searchInput.value = '';
+    renderSearchResults('');
+    setTimeout(() => searchInput.focus(), 10);
+  }
+  function closeSearch() {
+    searchOverlay.classList.remove('show');
+    searchInput.blur();
+  }
+  function renderSearchResults(query) {
+    const q = query.trim();
+    if (!q) {
+      searchResults = [];
+      searchActiveIndex = -1;
+      searchResultsEl.classList.remove('show');
+      searchResultsEl.innerHTML = '';
+      return;
+    }
+    const qLower = q.toLowerCase();
+    searchResults = SEARCH_INDEX
+      .filter((entry) => entry.text.toLowerCase().includes(qLower) || entry.title.toLowerCase().includes(qLower))
+      .slice(0, 30);
+    searchActiveIndex = searchResults.length ? 0 : -1;
+    searchResultsEl.classList.add('show');
+    if (searchResults.length === 0) {
+      searchResultsEl.innerHTML = '<div class="search-empty">검색 결과가 없습니다.</div>';
+      return;
+    }
+    searchResultsEl.innerHTML = searchResults.map((r, i) =>
+      '<div class="search-item' + (i === 0 ? ' active' : '') + '" data-index="' + i + '">' +
+        '<div class="si-path">' + escapeHtml(r.problemLabel.replace(/\s+/g, ' ')) + ' · ' + VIEW_LABEL[r.view] + ' · ' + escapeHtml(r.title) + '</div>' +
+        '<div class="si-snippet">' + makeSnippet(r.text, q) + '</div>' +
+      '</div>'
+    ).join('');
+  }
+  function setActiveResult(i) {
+    searchResultsEl.querySelectorAll('.search-item').forEach((it) => it.classList.remove('active'));
+    const items = searchResultsEl.querySelectorAll('.search-item');
+    if (items[i]) {
+      items[i].classList.add('active');
+      items[i].scrollIntoView({ block: 'nearest' });
+    }
+    searchActiveIndex = i;
+  }
+  function flashHighlight(el) {
+    el.classList.add('search-highlight');
+    setTimeout(() => el.classList.remove('search-highlight'), 1000);
+  }
+  function goToResult(entry) {
+    if (!entry) return;
+    const ptab = document.querySelector('.ptab[data-problem="' + entry.problemId + '"]');
+    if (ptab && !ptab.classList.contains('active')) ptab.click();
+    const problemRoot = document.getElementById('problem-' + entry.problemId);
+    const tab = problemRoot.querySelector(':scope > .tabs > .tab[data-view="' + entry.view + '"]');
+    if (tab && !tab.classList.contains('active')) tab.click();
+    closeSearch();
+    // scrollIntoView forces a synchronous layout flush, so it already sees the
+    // tab/view switch above without needing to wait a frame.
+    if (entry.type === 'card') {
+      flashcardControls[entry.problemId].goto(entry.cardIndex);
+      const cardEl = problemRoot.querySelector('[data-flashcard]');
+      if (cardEl) { cardEl.scrollIntoView({ behavior: 'smooth', block: 'center' }); flashHighlight(cardEl); }
+    } else if (entry.el) {
+      entry.el.scrollIntoView({ behavior: 'smooth', block: 'center' });
+      flashHighlight(entry.el);
+    }
+  }
+
+  searchInput.addEventListener('input', () => renderSearchResults(searchInput.value));
+  searchResultsEl.addEventListener('click', (e) => {
+    const item = e.target.closest('.search-item');
+    if (!item) return;
+    goToResult(searchResults[Number(item.dataset.index)]);
+  });
+  searchBackdrop.addEventListener('click', closeSearch);
+  searchInput.addEventListener('keydown', (e) => {
+    if (e.key === 'Escape') { e.preventDefault(); closeSearch(); return; }
+    if (e.key === 'ArrowDown') { e.preventDefault(); if (searchResults.length) setActiveResult((searchActiveIndex + 1) % searchResults.length); return; }
+    if (e.key === 'ArrowUp') { e.preventDefault(); if (searchResults.length) setActiveResult((searchActiveIndex - 1 + searchResults.length) % searchResults.length); return; }
+    if (e.key === 'Enter') { e.preventDefault(); if (searchResults[searchActiveIndex]) goToResult(searchResults[searchActiveIndex]); return; }
+  });
+  window.addEventListener('keydown', (e) => {
+    if ((e.ctrlKey || e.metaKey) && (e.key === 'f' || e.key === 'F')) {
+      e.preventDefault();
+      if (searchOverlay.classList.contains('show')) { searchInput.focus(); return; }
+      openSearch();
+      return;
+    }
+    if (e.key === 'Escape' && searchOverlay.classList.contains('show')) closeSearch();
   });
 </script>
 </body>
