@@ -38,7 +38,7 @@ const hahmlet = Hahmlet({
 export const metadata: Metadata = {
   title: 'THE FIELD FILE — Land, Light & Machines',
   description:
-    'A working notebook: research on land evaluation, photography, and motorcycles. Filed, pinned, and cross-referenced.',
+    'A working notebook: research on land evaluation and photography. Filed, pinned, and cross-referenced.',
   generator: 'v0.app',
   icons: {
     icon: [

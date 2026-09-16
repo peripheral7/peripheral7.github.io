@@ -8,10 +8,9 @@ const CATEGORY_LABELS: Record<Category, string> = {
   STUDY: "Study",
   RESEARCH: "Research",
   PHOTOGRAPHY: "Photography",
-  MOTORCYCLE: "Motorcycle",
 }
 
-const CATEGORY_ORDER: Category[] = ["STUDY", "RESEARCH", "PHOTOGRAPHY", "MOTORCYCLE"]
+const CATEGORY_ORDER: Category[] = ["STUDY", "RESEARCH", "PHOTOGRAPHY"]
 
 function normalize(path: string) {
   if (path.length > 1 && path.endsWith("/")) return path.slice(0, -1)
@@ -25,11 +24,14 @@ export function SiteSidebar({ posts }: { posts: Post[] }) {
   const currentCategory = currentPost?.category
 
   return (
-    <aside className="fixed left-0 top-0 hidden h-screen w-64 shrink-0 overflow-y-auto border-r border-border bg-background md:block">
-      <div className="flex h-full flex-col px-5 py-6">
+    <aside className="pointer-events-none fixed left-4 top-1/2 z-40 hidden max-h-[75vh] w-60 -translate-y-1/2 overflow-y-auto rounded-2xl border border-border/60 bg-background/95 shadow-xl backdrop-blur-sm md:block">
+      {/* the floating card overlaps page content instead of reserving space
+          for itself, so only the links themselves catch clicks (pointer-events-auto) —
+          empty padding/gaps stay click-through to whatever's underneath */}
+      <div className="flex flex-col px-5 py-6">
         <Link
           href="/"
-          className="font-mono text-xs font-semibold uppercase tracking-[0.25em] text-foreground transition-colors hover:text-accent"
+          className="pointer-events-auto font-mono text-xs font-semibold uppercase tracking-[0.25em] text-foreground transition-colors hover:text-accent"
         >
           ← THE FIELD FILE
         </Link>
@@ -44,7 +46,7 @@ export function SiteSidebar({ posts }: { posts: Post[] }) {
               <div key={category}>
                 <Link
                   href="/"
-                  className={`font-mono text-[0.7rem] uppercase tracking-[0.2em] transition-colors hover:text-accent ${
+                  className={`pointer-events-auto font-mono text-[0.7rem] uppercase tracking-[0.2em] transition-colors hover:text-accent ${
                     isOpen ? "text-accent" : "text-muted-foreground"
                   }`}
                 >
@@ -60,7 +62,7 @@ export function SiteSidebar({ posts }: { posts: Post[] }) {
                           <Link
                             href={post.href ?? "/"}
                             aria-current={isCurrent ? "page" : undefined}
-                            className={`block text-sm leading-snug transition-colors ${
+                            className={`pointer-events-auto block text-sm leading-snug transition-colors ${
                               isCurrent
                                 ? "font-semibold text-accent"
                                 : "text-foreground/80 hover:text-accent"

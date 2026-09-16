@@ -5,7 +5,7 @@ const f = (name: string) => `${FOLDER}${encodeURIComponent(name)}`
 
 export const cbr650fMeta = {
   title: "CBR650F (2016)",
-  eyebrow: "MOTORCYCLE / Filed: 2026.04.05",
+  eyebrow: "PHOTOGRAPHY / Filed: 2026.04.05",
   intro: "Fast Days",
 }
 

@@ -29,7 +29,7 @@ export function SiteChrome({
   return (
     <>
       <SiteSidebar posts={posts} />
-      <div className="md:pl-64">{children}</div>
+      {children}
     </>
   )
 }

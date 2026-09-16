@@ -7,7 +7,6 @@ import { SubjectProgressPanel } from "@/components/subject-progress-panel"
 const nav: { label: string; value: Filter }[] = [
   { label: "Research", value: "RESEARCH" },
   { label: "Photography", value: "PHOTOGRAPHY" },
-  { label: "Motorcycles", value: "MOTORCYCLE" },
   { label: "Index", value: "ALL" },
 ]
 
@@ -75,7 +74,7 @@ export function SiteHero() {
         </figure>
 
         <p className="mt-8 max-w-md text-pretty text-center text-sm leading-relaxed text-muted-foreground">
-          Land evaluation research, photographs, and motorcycle.
+          Land evaluation research and photographs.
         </p>
         <span className="mt-6 font-mono text-xs uppercase tracking-[0.2em] text-muted-foreground">
           Scroll to the board ↓
