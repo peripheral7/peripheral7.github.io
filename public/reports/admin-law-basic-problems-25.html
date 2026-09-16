@@ -63,7 +63,8 @@
     background:var(--bg); color:var(--ink); padding:var(--pad); max-width:var(--container-w); margin:0 auto;
     padding-bottom:calc(var(--pad) + 64px);
   }
-  h1{font-size:var(--fs-title); line-height:1.15; font-weight:800; margin:18px 0 22px; text-align:center; letter-spacing:-0.02em;}
+  h1{font-size:var(--fs-title); line-height:1.15; font-weight:800; margin:0; text-align:left; letter-spacing:-0.02em;}
+  .page-header{display:flex; align-items:flex-start; justify-content:space-between; gap:12px; margin:18px 0 22px;}
 
   /* ---- Outer: which of the 4 problems ---- */
   .problem-tabs{display:flex; gap:6px; margin-bottom:16px; flex-wrap:wrap;}
@@ -127,8 +128,12 @@
   .kwfb .kw-miss{color:#b3402f; text-decoration:line-through; opacity:.65;}
   .kwfb .kw-empty{color:var(--sub);}
 
-  /* ---- 복습 체크리스트 (문제 제목 하단, 상시 노출) ---- */
-  .review-row{display:flex; align-items:center; gap:8px; flex-wrap:wrap; width:fit-content; margin:0 0 14px auto;}
+  /* ---- 복습 체크리스트 (문제 제목 하단, 상시 노출) ----
+     토글(.review-anchor)은 행 우측 끝에 flex로 고정해 태그 개수와 무관하게
+     항상 같은 자리를 지키고, 태그는 (피커와 같은 방식으로) 토글 왼쪽에
+     절대배치해 늘어날수록 왼쪽으로만 확장되도록 한다. .review-row 자체는
+     폭을 좁히지 않아야 태그의 shrink-to-fit 계산이 넓은 기준폭을 갖는다. */
+  .review-row{position:relative; display:flex; justify-content:flex-end; margin:0 0 14px;}
   .review-anchor{position:relative; width:27px; height:27px; flex-shrink:0;}
   .review-toggle{
     position:absolute; right:0; top:0; z-index:2; width:27px; height:27px; border-radius:7px;
@@ -150,14 +155,17 @@
   .review-opt.lv-high{background:#1f5c46;}
   .review-opt.lv-mid{background:#4f9c7d;}
   .review-opt.lv-low{background:#a8d8c4;}
-  .review-tags{display:flex; align-items:center; gap:4px; flex-wrap:wrap;}
-  .review-tag{border:none; padding:3px 7px; border-radius:5px; font-size:10.5px; font-weight:700; white-space:nowrap; color:#fff; cursor:pointer;}
+  .review-tags{
+    position:absolute; top:0; right:27px; max-width:calc(100% - 35px);
+    display:flex; align-items:center; gap:4px; flex-wrap:nowrap; overflow-x:auto;
+  }
+  .review-tag{border:none; padding:0 7px; height:27px; display:inline-flex; align-items:center; border-radius:5px; font-size:10.5px; font-weight:700; white-space:nowrap; color:#fff; cursor:pointer;}
   .review-tag.lv-high{background:#1f5c46;}
   .review-tag.lv-mid{background:#4f9c7d;}
   .review-tag.lv-low{background:#a8d8c4; color:#274238;}
 
   /* ---- 페이지 상단 복습 히트맵 (깃허브 로그 스타일, 문제별 1칸) ---- */
-  .review-heatmap{display:grid; grid-template-columns:repeat(7, 14px); gap:3px; width:fit-content; margin:0 0 16px;}
+  .review-heatmap{display:grid; grid-template-columns:repeat(7, 14px); gap:3px; width:fit-content; flex-shrink:0; margin:4px 0 0;}
   .heat-cell{display:block; width:14px; height:14px; border-radius:3px; background:#eee7da;}
   .heat-cell.lv-high{background:#1f5c46;}
   .heat-cell.lv-mid{background:#4f9c7d;}
@@ -234,9 +242,10 @@
 </head>
 <body>
 
-<h1>감정평가행정법 기본문제 25</h1>
-
-<div class="review-heatmap" id="reviewHeatmap"></div>
+<div class="page-header">
+  <h1>감정평가행정법 기본문제 25</h1>
+  <div class="review-heatmap" id="reviewHeatmap"></div>
+</div>
 
 <div class="problem-tabs">
   <div class="ptab" data-problem="p01">문제1<br>비례의 원칙</div>
@@ -2467,9 +2476,12 @@
   }
   function renderReviewTags(row, entries) {
     const tagsEl = row.querySelector('.review-tags');
-    tagsEl.innerHTML = entries.map((e, i) =>
+    // 토글 바로 옆(오른쪽 끝)에 최신 태그가 오도록 배열 역순으로 그린다 —
+    // 오래된 태그일수록 왼쪽으로 밀려나고, 넘치면 좌측으로 스크롤된다.
+    tagsEl.innerHTML = entries.map((e, i) => [e, i]).reverse().map(([e, i]) =>
       '<button type="button" class="review-tag ' + REVIEW_LEVELS[e.level] + '" data-index="' + i + '" title="클릭하면 삭제">' + e.date + '</button>'
     ).join('');
+    tagsEl.scrollLeft = tagsEl.scrollWidth;
     const toggle = row.querySelector('.review-toggle');
     toggle.classList.remove('lv-high', 'lv-mid', 'lv-low');
     if (entries.length > 0) toggle.classList.add(REVIEW_LEVELS[entries[0].level]);
