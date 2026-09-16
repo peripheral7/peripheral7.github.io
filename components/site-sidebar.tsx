@@ -32,6 +32,8 @@ export function SiteSidebar({ posts }: { posts: Post[] }) {
     setOpenCategory(currentCategory ?? null)
   }, [currentCategory])
 
+  if (current === "/") return null
+
   return (
     <aside className="pointer-events-none fixed left-4 top-1/2 z-40 hidden max-h-[75vh] w-60 -translate-y-1/2 overflow-y-auto rounded-2xl border border-border/60 bg-background/95 shadow-xl backdrop-blur-sm md:block">
       {/* the floating card overlaps page content instead of reserving space
