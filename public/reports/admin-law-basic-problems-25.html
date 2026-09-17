@@ -3556,7 +3556,8 @@
   });
 
   // ---- Ctrl+F 검색 ----
-  // 모든 문제(구조/암기카드/자가테스트)의 텍스트를 한 번 훑어 검색 인덱스를 만든다.
+  // 모든 문제의 "① 구조" 탭 텍스트만 훑어 검색 인덱스를 만든다.
+  // 암기카드·자가테스트는 검색 대상에서 제외한다.
   // 화면에 없는(display:none) 문제도 DOM엔 그대로 있으므로 전부 인덱싱된다.
   const VIEW_LABEL = { map: '① 구조', cards: '② 암기카드', quiz: '③ 자가테스트' };
 
@@ -3567,19 +3568,14 @@
       const ptab = document.querySelector('.ptab[data-problem="' + problemId + '"]');
       const problemLabel = ptab ? ptab.textContent.replace(/\s+/g, ' ').trim() : problemId;
 
-      problemRoot.querySelectorAll('.flowbox, .qbox, .note, .toc-note').forEach((el) => {
+      problemRoot.querySelectorAll('.flowbox, .note, .toc-note').forEach((el) => {
         const view = el.closest('.view');
-        if (!view) return;
+        if (!view || view.dataset.view !== 'map') return;
         const heading = el.querySelector('h3, .q');
         const title = heading ? heading.textContent.replace(/\s+/g, ' ').trim() : 'Tip';
         const text = el.textContent.replace(/\s+/g, ' ').trim();
         if (!text) return;
         index.push({ problemId, problemLabel, view: view.dataset.view, type: 'el', title, text, el });
-      });
-
-      (PROBLEM_CARDS[problemId] || []).forEach((c, i) => {
-        const text = [c.tag, c.front, c.back].join(' ').replace(/\s+/g, ' ').trim();
-        index.push({ problemId, problemLabel, view: 'cards', type: 'card', title: c.tag, text, cardIndex: i });
       });
     });
     return index;
