@@ -119,10 +119,21 @@
   .counter{font-size:var(--fs-sm); color:var(--sub);}
 
   /* ---- Quiz ---- */
-  .qbox{background:var(--card); border:1px solid var(--line); border-radius:14px; padding:16px; margin-bottom:12px; max-width:var(--content-w);}
+  .qbox{position:relative; background:var(--card); border:1px solid var(--line); border-radius:14px; padding:16px; margin-bottom:12px; max-width:var(--content-w);}
+  /* 정답체크 상태 배지 — 문제박스 바깥 우측 상단에 플로팅.
+     틀리면 빨강, 틀린 뒤 처음 맞히면 옅은 빨강, 그 상태에서 한 번 더 맞히면(또는
+     한 번도 틀린 적 없이 바로 맞히면) 초록으로 확정된다. */
+  .qbox-status{
+    position:absolute; top:-7px; right:-7px; width:16px; height:16px; border-radius:5px;
+    box-shadow:0 1px 4px rgba(0,0,0,.28); display:none; transition:background-color .2s ease, opacity .2s ease;
+  }
+  .qbox-status.show{display:block;}
+  .qbox-status.wrong{background:#b3402f; opacity:1;}
+  .qbox-status.pale{background:#b3402f; opacity:.4;}
+  .qbox-status.confirmed{background:var(--accent2); opacity:1;}
   .qbox .q{font-size:var(--fs-h3); font-weight:600; margin-bottom:10px;}
   textarea{width:100%; min-height:70px; border:1px solid var(--line); border-radius:8px; padding:8px; font-size:var(--fs-body); font-family:inherit; resize:vertical;}
-  .reveal{margin-top:10px; background:var(--hi); border-radius:8px; padding:10px; font-size:var(--fs-body); line-height:1.6; display:none;}
+  .reveal{margin-top:10px; background:var(--hi); border-radius:8px; padding:10px; font-size:var(--fs-body); line-height:1.6; font-weight:600; display:none;}
   .reveal.show{display:block;}
   .kwfb{margin-top:8px; padding:9px 11px; background:var(--card); border:1px solid var(--line); border-radius:8px; font-size:var(--fs-sm); line-height:1.85; display:none;}
   .kwfb.show{display:block;}
@@ -3934,12 +3945,15 @@
   }
 
   // 키워드를 "핵심 단어" 단위로 분해한다.
-  //  1) 띄어쓰기가 있으면 그 기준으로 먼저 나누고, 각 단어 끝의 조사를 뗀다.
+  //  1) 띄어쓰기 또는 "·"/"ㆍ"(나열용 가운뎃점)를 기준으로 먼저 나누고,
+  //     각 단어 끝의 조사를 뗀다 — 예: "절차·형식상 하자" → "절차"+"형식상"+"하자",
+  //     이렇게 나누면 "절차 및 형식상 하자"처럼 가운뎃점 대신 다른 연결어를 쓴
+  //     답안도 각 핵심 단어가 그대로 포함되어 있으면 정답 처리된다.
   //  2) 띄어쓰기 없이 4자 이상 붙어있는 복합어(한자어는 대개 2음절 단어의 조합)는
   //     2글자 단위로 추가 분해한다 — 예: "이익형량" → "이익" + "형량".
   //  3) 2글자 미만으로 남는 조각(조사만 남는 경우 등)은 핵심어에서 제외한다.
   function splitKeywordWords(kw) {
-    const words = kw.trim().split(/\s+/).filter(Boolean).map(stripParticle);
+    const words = kw.trim().split(/[\s·ㆍ]+/).filter(Boolean).map(stripParticle);
     const chunks = [];
     words.forEach((w) => {
       if (w.length >= 4) {
@@ -3964,6 +3978,65 @@
     const hitCount = words.filter((w) => text.includes(w)).length;
     const requiredRatio = words.length <= 2 ? 1 : 0.75;
     return hitCount / words.length >= requiredRatio;
+  }
+
+  // ---- 정답체크 상태 배지: 문제박스 우측 상단에 플로팅 ----
+  // 틀리면 빨강, 그 뒤 처음 맞히면 옅은 빨강, 옅은 빨강 상태에서 한 번 더
+  // 맞히면(또는 한 번도 틀린 적 없이 바로 맞히면) 초록으로 확정된다.
+  // 채점 시마다 언제든 다시 틀리면 빨강으로 되돌아간다.
+  const QBOX_STATUS_KEY = 'admin-law-25-qbox-status-v1';
+  function loadQboxStatusLog() {
+    try {
+      return JSON.parse(localStorage.getItem(QBOX_STATUS_KEY)) || {};
+    } catch (e) {
+      return {};
+    }
+  }
+  function saveQboxStatusLog(log) {
+    try { localStorage.setItem(QBOX_STATUS_KEY, JSON.stringify(log)); } catch (e) {}
+  }
+  function qboxStatusKey(problemId, idx) {
+    return problemId + '-' + idx;
+  }
+  function renderQboxStatusBadge(unit, status) {
+    let badge = unit.querySelector('.qbox-status');
+    if (!badge) {
+      badge = document.createElement('div');
+      badge.className = 'qbox-status';
+      unit.appendChild(badge);
+    }
+    badge.classList.remove('wrong', 'pale', 'confirmed');
+    if (!status) {
+      badge.classList.remove('show');
+      return;
+    }
+    badge.classList.add(status, 'show');
+  }
+  function recordQboxResult(unit, problemId, idx, allHit) {
+    const key = qboxStatusKey(problemId, idx);
+    const log = loadQboxStatusLog();
+    const prev = log[key];
+    let next;
+    if (!allHit) {
+      next = 'wrong';
+    } else if (prev === 'wrong') {
+      next = 'pale';
+    } else {
+      next = 'confirmed';
+    }
+    log[key] = next;
+    saveQboxStatusLog(log);
+    renderQboxStatusBadge(unit, next);
+  }
+  function restoreQboxStatusBadges() {
+    const log = loadQboxStatusLog();
+    document.querySelectorAll('.problem').forEach((problemRoot) => {
+      const problemId = problemRoot.id.replace('problem-', '');
+      Array.from(problemRoot.querySelectorAll(':scope .qbox')).forEach((unit, idx) => {
+        const status = log[qboxStatusKey(problemId, idx)];
+        if (status) renderQboxStatusBadge(unit, status);
+      });
+    });
   }
 
   function gradeQboxKeywords(unit) {
@@ -3998,12 +4071,15 @@
       return;
     }
 
-    fb.innerHTML = keywords.map((kw) => {
-      return keywordHit(text, kw)
+    const hits = keywords.map((kw) => keywordHit(text, kw));
+    fb.innerHTML = keywords.map((kw, i) => {
+      return hits[i]
         ? '<span class="kw-hit">✓ ' + kw + '</span>'
         : '<span class="kw-miss">✗ ' + kw + '</span>';
     }).join('<br>');
     fb.classList.add('show');
+
+    recordQboxResult(unit, problemId, idx, hits.every(Boolean));
   }
 
   function revealUnit(unit) {
@@ -4313,6 +4389,8 @@
     }
     if (e.key === 'Escape' && searchOverlay.classList.contains('show')) closeSearch();
   });
+
+  restoreQboxStatusBadges();
 </script>
 </body>
 </html>
