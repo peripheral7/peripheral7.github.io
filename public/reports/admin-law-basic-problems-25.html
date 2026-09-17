@@ -95,6 +95,8 @@
   .flowbox h3{margin:2px 0 6px; font-size:var(--fs-h3); display:inline;}
   .flowbox p{margin:14px 0 0; font-size:var(--fs-body); line-height:1.55; color:#374151;}
   .flowbox p:first-of-type{margin-top:6px;}
+  /* (1)(2)(3) 단계처럼 <br>로 문단이 나뉘는 지점은 일반 줄간격보다 살짝 더 띄운다 */
+  .flowbox p br::before{content:""; display:block; margin-top:7px;}
   .flowbox p b.sub{display:block; color:var(--accent2); font-size:var(--fs-body); margin-bottom:2px;}
   .flowbox .quote{background:var(--hi); border-left:3px solid var(--accent); padding:6px 8px; margin-top:6px;
                    font-size:var(--fs-body); border-radius:4px;}
