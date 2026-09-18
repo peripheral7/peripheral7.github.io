@@ -121,13 +121,14 @@
   /* ---- Quiz ---- */
   .qbox{position:relative; background:var(--card); border:1px solid var(--line); border-radius:14px; padding:16px; margin-bottom:12px; max-width:var(--content-w);}
   /* 정답체크 상태 배지 — 문제박스 크기는 그대로 두고, body 자체의 좌우 padding
-     (--pad, 최소 16px)에 해당하는 여백 안으로 배지를 밀어낸다. 배지 폭이 16px이라
-     가장 좁은 화면(--pad:16px)에서도 body 바깥으로 넘치지 않아 가로 스크롤이
-     생기지 않으면서, 박스 바깥 우측에 위쪽 정렬로 완전히 분리되어 보인다.
+     (--pad, 최소 16px)에 해당하는 여백 안으로 배지를 밀어낸다. "박스 폭(12px) +
+     간격(4px) = 16px"로 가장 좁은 화면(--pad:16px)에서도 body 바깥으로 넘치지
+     않아 가로 스크롤이 생기지 않으면서, 박스 테두리에 붙지 않고 뚜렷한 간격을
+     두고 바깥 우측에 위쪽 정렬로 분리되어 보인다.
      틀리면 빨강, 틀린 뒤 처음 맞히면 옅은 빨강, 그 상태에서 한 번 더 맞히면(또는
      한 번도 틀린 적 없이 바로 맞히면) 초록으로 확정된다. */
   .qbox-status{
-    position:absolute; top:0; right:-16px; width:16px; height:16px; border-radius:5px;
+    position:absolute; top:2px; right:-16px; width:12px; height:12px; border-radius:4px;
     box-shadow:0 1px 4px rgba(0,0,0,.28); display:none; transition:background-color .2s ease, opacity .2s ease;
   }
   .qbox-status.show{display:block;}
@@ -222,7 +223,12 @@
   .flowrow .note p{margin:0 0 6px;}
   .flowrow .note p:last-child{margin-bottom:0;}
   .flowrow .note b{color:var(--accent); font-weight:600;}
-  .note .related-link{color:var(--accent2); font-weight:600; text-decoration:underline; text-underline-offset:2px; cursor:pointer;}
+  .note .related-link, .quiz-related .related-link{color:var(--accent2); font-weight:600; text-decoration:underline; text-underline-offset:2px; cursor:pointer;}
+  /* 자가테스트 하단의 "관련" 노트 — 구조 탭의 .flowrow .note와 같은 내용을 재사용하되,
+     qbox 옆이 아니라 자가테스트 마지막 문항 뒤에 항상 인라인(스택형)으로만 표시한다.
+     .flowrow가 없으므로 1404px 이상에서도 옆 여백으로 뜨지 않고 항상 제자리에 머문다. */
+  .quiz-related{max-width:var(--content-w); border-top:2px dashed var(--line); padding:8px 0 0; margin:4px 0 0; font-size:var(--fs-sm); line-height:1.6; color:var(--sub);}
+  .quiz-related b{color:var(--accent); font-weight:600;}
   @media (min-width: 1404px){
     .flowrow{position:relative; display:block;}
     .flowrow .note{
@@ -472,6 +478,9 @@
       <textarea placeholder="여기에 답을 적어보세요..."></textarea>
       <div class="reveal">"甲은 (기부채납) <b>부담만</b>의 <b>취소소송</b>을 제기하여 <b>권리구제</b>를 받을 수 있다."</div>
     </div>
+    <div class="quiz-related">
+      <p><b>관련.</b> <a href="#" class="related-link" data-jump="p03">문제3</a>과 짝 — 같은 부당결부금지원칙 쟁점, 결론만 위법(문제3은 적법)</p>
+    </div>
   </div>
 
 
@@ -584,6 +593,9 @@
       <div class="q">Q4. 사안의 해결을 완성해보세요: "P는 세금상승을 ___할 수 있었으므로, 재산세 취소소송을 ___."</div>
       <textarea placeholder="여기에 답을 적어보세요..."></textarea>
       <div class="reveal">"P는 세금상승을 <b>예측</b>할 수 있었으므로(예측가능), <b>재산세</b> 취소소송을 제기할 수 없다(<b>하자승계 부정</b>)."</div>
+    </div>
+    <div class="quiz-related">
+      <p><b>관련.</b> <a href="#" class="related-link" data-jump="p08">문제08</a>(하자의 치유)·<a href="#" class="related-link" data-jump="p18">문제18</a>(처분사유의 추가·변경)과 함께 "하자를 사후에 어떻게 다루는가" 챕터로 묶어 복습</p>
     </div>
   </div>
 
@@ -705,6 +717,9 @@
       <textarea placeholder="여기에 답을 적어보세요..."></textarea>
       <div class="reveal">"<b>민사법원</b>은 업무정지처분의 <b>위법성</b>을 <b>심리</b>할 수 있다."</div>
     </div>
+    <div class="quiz-related">
+      <p><b>관련.</b> <a href="#" class="related-link" data-jump="p05">문제5</a>(구체적 규범통제)와 짝 — 다른 절차에서 행정작용의 적법·유효 여부를 먼저 판단하는 구조가 동일</p>
+    </div>
   </div>
 
 
@@ -824,6 +839,9 @@
       <textarea placeholder="여기에 답을 적어보세요..."></textarea>
       <div class="reveal">"하자의 치유는 <b>취소사유</b>에 대해, <b>절차·형식상 하자</b>에 한정하여 인정된다."</div>
     </div>
+    <div class="quiz-related">
+      <p><b>관련.</b> <a href="#" class="related-link" data-jump="p07a">문제07-⑴</a>(하자의 승계)·<a href="#" class="related-link" data-jump="p18">문제18</a>(처분사유의 추가·변경)과 같은 챕터</p>
+    </div>
   </div>
 
 
@@ -935,6 +953,9 @@
       <textarea placeholder="여기에 답을 적어보세요..."></textarea>
       <div class="reveal">"주변토지로 도로를 내는 것이 비용 등에서 더 <b>합리적</b>이라면, 갑 토지를 수용한 사업인정은 <b>위법</b>하게 된다."</div>
     </div>
+    <div class="quiz-related">
+      <p><b>관련.</b> <a href="#" class="related-link" data-jump="p02">문제2</a>(자기구속원칙)·<a href="#" class="related-link" data-jump="p03">문제3</a>/<a href="#" class="related-link" data-jump="p06">문제06</a>(부당결부금지원칙)과 함께 행정법의 일반원칙 챕터</p>
+    </div>
   </div>
 
 
@@ -1040,6 +1061,9 @@
       <textarea placeholder="여기에 답을 적어보세요..."></textarea>
       <div class="reveal">"자기구속 법리는 <b>위법한 관행</b>이거나 <b>사정변경</b>이 있는 경우 적용이 배제된다."</div>
     </div>
+    <div class="quiz-related">
+      <p><b>관련.</b> <a href="#" class="related-link" data-jump="p01">문제1</a>(비례원칙)·<a href="#" class="related-link" data-jump="p03">문제3</a>/<a href="#" class="related-link" data-jump="p06">문제06</a>(부당결부금지원칙)과 함께 행정법의 일반원칙 챕터</p>
+    </div>
   </div>
 
 
@@ -1141,6 +1165,9 @@
       <div class="q">Q4. 빈칸을 채워보세요: "당해 부관은 부당결부금지의 원칙을 ___하였으므로 ___하다."</div>
       <textarea placeholder="여기에 답을 적어보세요..."></textarea>
       <div class="reveal">"당해 부관은 <b>부당결부금지</b>의 원칙을 위반하지 않았으므로 <b>적법</b>하다."</div>
+    </div>
+    <div class="quiz-related">
+      <p><b>관련.</b> <a href="#" class="related-link" data-jump="p06">문제06</a>과 짝 — 같은 부당결부금지원칙 쟁점, 결론만 적법(문제06은 위법)</p>
     </div>
   </div>
 
@@ -1252,6 +1279,9 @@
       <textarea placeholder="여기에 답을 적어보세요..."></textarea>
       <div class="reveal">"생각건대 <b>예측 가능성</b> 등의 관점에서 법규성을 인정함이 타당하며, 사안의 별표3은 <b>법규명령</b>으로 봄이 타당하다."</div>
     </div>
+    <div class="quiz-related">
+      <p><b>관련.</b> <a href="#" class="related-link" data-jump="p05">문제5</a>(구체적 규범통제)와 함께 행정입법(법규명령·행정규칙)의 효력 챕터</p>
+    </div>
   </div>
 
 
@@ -1353,6 +1383,9 @@
       <div class="q">Q4. 위법한 명령의 효력에 관한 학설 2가지와 판례·검토의 결론을 써보세요.</div>
       <textarea placeholder="여기에 답을 적어보세요..."></textarea>
       <div class="reveal">위법한 명령의 효력에 관하여, <b>개별적 효력설</b>은 위법한 명령이 당해 사건에 한하여 적용되지 않는다고 보고, <b>일반적 효력설</b>은 위법한 명령 자체가 효력을 상실한다고 본다. 판례는 명령이 위법하다는 판결이 있더라도 당해 사건에서만 적용이 배제된다고 보며, 검토상으로도 법의 공백상태 초래를 막기 위해 개별적 효력설이 타당하다.</div>
+    </div>
+    <div class="quiz-related">
+      <p><b>관련.</b> <a href="#" class="related-link" data-jump="p07b">문제07-⑵</a>(선결문제)와 짝 — 다른 절차에서 행정작용의 적법·유효 여부를 먼저 판단하는 구조가 동일</p>
     </div>
   </div>
 
@@ -1457,6 +1490,9 @@
       <div class="q">Q4. 대집행 실행과 비용납부명령 각각의 법적 성질을 써보세요.</div>
       <textarea placeholder="여기에 답을 적어보세요..."></textarea>
       <div class="reveal">대집행의 실행은 행정청이 의무자를 대신하여 물리적으로 행위를 완성하는 <b>권력적 사실행위</b>에 해당한다. 반면 비용징수를 위한 비용납부명령은 금전급부의무를 명하는 <b>급부하명</b>으로서 행정행위에 해당하므로, <b>항고소송</b>의 대상이 된다.</div>
+    </div>
+    <div class="quiz-related">
+      <p><b>관련.</b> 다른 문제와 뚜렷한 연관이 없는 독립 주제(행정강제)</p>
     </div>
   </div>
 
@@ -1592,6 +1628,9 @@
       <textarea placeholder="여기에 답을 적어보세요..."></textarea>
       <div class="reveal">절차적 하자의 독자적 위법성 인정여부에 대하여는 <b>적법절차</b> 보장을 논거로 하는 긍정설, 행정경제상 불합리함을 논거로 하는 부정설, 기속행위·재량행위를 나누어 보는 절충설이 대립하나, 적법절차의 관점과 이를 부정하면 <b>행정소송법 제30조</b> 제3항의 재처분의무(<b>기속력</b>)가 무의미해진다는 점에서 긍정설이 타당하다.</div>
     </div>
+    <div class="quiz-related">
+      <p><b>관련.</b> <a href="#" class="related-link" data-jump="p11">문제11</a>(이주대책)과 사실상 동일한 구조(사전통지→이유제시→절차하자 독자성)의 쌍둥이 문제</p>
+    </div>
   </div>
 
 
@@ -1710,6 +1749,9 @@
       <textarea placeholder="여기에 답을 적어보세요..."></textarea>
       <div class="reveal">"을의 거부처분은 사전통지 및 이유제시 결여로 <b>절차상 하자</b>를 구성하며, 그 절차하자의 <b>독자적 위법사유</b>가 인정되어 <b>위법</b>하다."</div>
     </div>
+    <div class="quiz-related">
+      <p><b>관련.</b> <a href="#" class="related-link" data-jump="p10">문제10</a>과 사실상 동일한 구조의 쌍둥이 문제이며, <a href="#" class="related-link" data-jump="p12">문제12</a>(청문)도 같은 절차 챕터</p>
+    </div>
   </div>
 </div>
 
@@ -1800,6 +1842,9 @@
       <div class="q">Q4. 청문 생략의 또 다른 사유를 완성해보세요: "당사자가 ___의 기회를 ___한다는 뜻을 명백히 표시한 경우"</div>
       <textarea placeholder="여기에 답을 적어보세요..."></textarea>
       <div class="reveal">"당사자가 <b>의견진술</b>의 기회를 <b>포기</b>한다는 뜻을 명백히 표시한 경우"</div>
+    </div>
+    <div class="quiz-related">
+      <p><b>관련.</b> <a href="#" class="related-link" data-jump="p10">문제10</a>·<a href="#" class="related-link" data-jump="p11">문제11</a>의 "의견청취" 부분을 심화한 문제 — 절차 챕터로 함께 복습</p>
     </div>
   </div>
 </div>
@@ -1917,6 +1962,9 @@
       <textarea placeholder="여기에 답을 적어보세요..."></textarea>
       <div class="reveal">"생각건대 <b>광의의 행위위법설</b>에 따라 <b>손해방지의무</b> 위반도 위법을 인정하여야 하며, S시장의 개별공시지가는 <b>국가배상법 제2조</b>상의 위법에 해당한다."</div>
     </div>
+    <div class="quiz-related">
+      <p><b>관련.</b> <a href="#" class="related-link" data-jump="p19">문제19</a>(기판력)와 짝 — 위법개념 학설(결과불법설·상대적위법성설·행위위법설·직무의무위반설)을 그대로 재사용</p>
+    </div>
   </div>
 </div>
 
@@ -2024,6 +2072,9 @@
       <div class="q">Q4. 사안의 결론을 완성해보세요: "S시장의 개별공시지가는 실제 거래가격이나 담보가치에 ___이 미친다고 볼 수 없으므로, B은행의 손해와는 ___ 없다."</div>
       <textarea placeholder="여기에 답을 적어보세요..."></textarea>
       <div class="reveal">"S시장의 개별공시지가는 실제 거래가격이나 담보가치에 <b>구속력</b>이 미친다고 볼 수 없으므로, B은행의 손해와는 <b>상당인과관계</b>가 없다."</div>
+    </div>
+    <div class="quiz-related">
+      <p><b>관련.</b> <a href="#" class="related-link" data-jump="p13a">문제13-⑴</a>과 같은 사례의 물음1·2</p>
     </div>
   </div>
 </div>
@@ -2144,6 +2195,9 @@
       <textarea placeholder="여기에 답을 적어보세요..."></textarea>
       <div class="reveal">"행정소송절차는 <b>원처분주의</b>의 원칙에 입각하되, <b>재결의 고유한 하자</b>가 있는 경우에는 재결에 대하여 소송을 제기할 수 있다."</div>
     </div>
+    <div class="quiz-related">
+      <p><b>관련.</b> <a href="#" class="related-link" data-jump="p16">문제16</a>(경정처분)과 짝 — "복수의 처분 중 무엇이 소의 대상인가"라는 동일한 질문의 다른 버전</p>
+    </div>
   </div>
 </div>
 
@@ -2242,6 +2296,9 @@
       <div class="q">Q4. 검토 결론을 완성해보세요: "판례상 신청권은 신청인이 누구인지와 무관하게 일반국민을 기준으로 ___하게 판단하므로, 이는 ___의 문제로 봄이 타당하다."</div>
       <textarea placeholder="여기에 답을 적어보세요..."></textarea>
       <div class="reveal">"판례상 신청권은 신청인이 누구인지와 무관하게 일반국민을 기준으로 <b>추상적으로 판단</b>하므로, 이는 <b>대상적격</b>의 문제로 봄이 타당하다."</div>
+    </div>
+    <div class="quiz-related">
+      <p><b>관련.</b> <a href="#" class="related-link" data-jump="p17">문제17</a>(경업자소송)과 함께 소송요건 챕터 — 대상적격(15)·원고적격(17) 대표유형. <a href="#" class="related-link" data-jump="p21">문제21</a>·<a href="#" class="related-link" data-jump="p23">문제23</a>의 신청권 논의도 이 문제와 같은 구도(거부처분·부작위 버전)</p>
     </div>
   </div>
 </div>
@@ -2344,6 +2401,9 @@
       <div class="q">Q4. 사례의 결론을 완성해보세요: "사안의 소의 대상은 ___이다."</div>
       <textarea placeholder="여기에 답을 적어보세요..."></textarea>
       <div class="reveal">"사안의 소의 대상은 <b>수정된 당초의 처분</b>이다."</div>
+    </div>
+    <div class="quiz-related">
+      <p><b>관련.</b> <a href="#" class="related-link" data-jump="p14">문제14</a>(원처분주의)와 짝 — "복수의 처분 중 무엇이 소의 대상인가"라는 동일한 질문의 다른 버전</p>
     </div>
   </div>
 </div>
@@ -2475,6 +2535,9 @@
       <textarea placeholder="여기에 답을 적어보세요..."></textarea>
       <div class="reveal">"사업인정은 <b>독점적 지위</b>를 창설하는 것이므로, 乙에 대한 사업인정은 甲의 독점적 지위에 영향을 미쳐 甲에게 <b>원고적격</b>이 인정된다."</div>
     </div>
+    <div class="quiz-related">
+      <p><b>관련.</b> <a href="#" class="related-link" data-jump="p15">문제15</a>(신청권)와 함께 소송요건 챕터 — 원고적격(17)·대상적격(15) 대표유형</p>
+    </div>
   </div>
 </div>
 
@@ -2601,6 +2664,9 @@
       <textarea placeholder="여기에 답을 적어보세요..."></textarea>
       <div class="reveal">"변경사유는 처분당시에 존재하는 사유이나, 당초 사유와 <b>기본적 사실관계의 동일성</b>이 없으므로 乙은 처분사유를 <b>추가·변경할 수 없다</b>."</div>
     </div>
+    <div class="quiz-related">
+      <p><b>관련.</b> <a href="#" class="related-link" data-jump="p07a">문제07-⑴</a>(하자의 승계)·<a href="#" class="related-link" data-jump="p08">문제08</a>(하자의 치유)와 같은 챕터 — 답안에서 문제08과 직접 비교됨</p>
+    </div>
   </div>
 </div>
 
@@ -2720,6 +2786,9 @@
       <textarea placeholder="여기에 답을 적어보세요..."></textarea>
       <div class="reveal">"국가배상의 위법과 항고소송의 위법을 판단하는 <b>요건 및 절차</b> 등이 다르므로, <b>제한적 긍정설</b>이 타당하다."</div>
     </div>
+    <div class="quiz-related">
+      <p><b>관련.</b> <a href="#" class="related-link" data-jump="p13a">문제13-⑴</a>(국가배상 위법성 학설)과 짝, <a href="#" class="related-link" data-jump="p20">문제20</a>(간접강제)과는 "판결의 효력" 챕터로 이어짐</p>
+    </div>
   </div>
 </div>
 
@@ -2812,6 +2881,9 @@
       <div class="q">Q4. 빈칸을 채워보세요: "재처분을 하였더라도 그것이 확정판결의 ___에 반하는 등으로 ___인 경우에도 간접강제를 신청할 수 있다."</div>
       <textarea placeholder="여기에 답을 적어보세요..."></textarea>
       <div class="reveal">"재처분을 하였더라도 그것이 확정판결의 <b>기속력</b>에 반하는 등으로 <b>당연무효</b>인 경우에도 간접강제를 신청할 수 있다."</div>
+    </div>
+    <div class="quiz-related">
+      <p><b>관련.</b> <a href="#" class="related-link" data-jump="p19">문제19</a>(기판력)의 결론(기판력≠기속력)에서 이어지는 "판결의 효력" 챕터</p>
     </div>
   </div>
 </div>
@@ -2943,6 +3015,9 @@
       <textarea placeholder="여기에 답을 적어보세요..."></textarea>
       <div class="reveal">"甲기업의 거부처분에 대한 집행정지 신청은 권리이익에 영향을 주는 신청이익이 없으므로, <b>각하</b>결정이 나올 것이다."</div>
     </div>
+    <div class="quiz-related">
+      <p><b>관련.</b> <a href="#" class="related-link" data-jump="p15">문제15</a>·<a href="#" class="related-link" data-jump="p23">문제23</a>과 같은 신청권/대상적격 구도(거부처분 버전), <a href="#" class="related-link" data-jump="p24">문제24</a>(행정심판 가구제)와는 집행정지·임시처분 논의가 그대로 이어짐</p>
+    </div>
   </div>
 </div>
 
@@ -3042,6 +3117,9 @@
       <div class="q">Q4. 검토 결론을 완성해보세요: "우리의 무효확인소송은 ___와 달리 보충성의 ___이 없다는 점에서 ___이 타당하다."</div>
       <textarea placeholder="여기에 답을 적어보세요..."></textarea>
       <div class="reveal">"우리의 무효확인소송은 일본이나 독일과 달리 보충성의 <b>명문 규정</b>이 없다는 점에서 <b>불요설</b>이 타당하다."</div>
+    </div>
+    <div class="quiz-related">
+      <p><b>관련.</b> 다른 문제와 뚜렷한 연관이 없는 독립 주제(무효등확인소송) — 소송종류론 챕터의 새 유형으로 정리</p>
     </div>
   </div>
 </div>
@@ -3146,6 +3224,9 @@
       <div class="q">Q4. 검토 및 사안의 결론을 완성해보세요: "신청권을 ___ 의미로 이해하고 이를 ___ 문제로 보는 견해가 타당하며, 국토교통부장관은 응답의무가 있음에도 처분을 하지 않았으므로 ___에 해당한다."</div>
       <textarea placeholder="여기에 답을 적어보세요..."></textarea>
       <div class="reveal">"신청권을 <b>형식적</b> 의미로 이해하고 이를 <b>대상적격</b> 인정문제로 보는 견해가 타당하며, 국토교통부장관은 응답의무가 있음에도 처분을 하지 않았으므로 <b>부작위</b>에 해당한다."</div>
+    </div>
+    <div class="quiz-related">
+      <p><b>관련.</b> <a href="#" class="related-link" data-jump="p15">문제15</a>(신청권)·<a href="#" class="related-link" data-jump="p21">문제21</a>의 신청권 논의와 같은 구도(거부처분 → 부작위 버전)</p>
     </div>
   </div>
 </div>
@@ -3256,6 +3337,9 @@
       <textarea placeholder="여기에 답을 적어보세요..."></textarea>
       <div class="reveal">"위원회의 심리·결정을 기다릴 경우 공공복리에 중대한 영향을 미칠 우려가 있다고 인정되면 <b>위원장</b>은 직권으로 위원회의 심리·결정을 <b>갈음</b>하는 결정을 할 수 있다."</div>
     </div>
+    <div class="quiz-related">
+      <p><b>관련.</b> <a href="#" class="related-link" data-jump="p21">문제21</a>의 Ⅲ.3(행정심판의 가구제)과 같은 내용을 독립 문제로 심화 — 집행정지·임시처분 요건은 이 문제를 중심으로 암기</p>
+    </div>
   </div>
 </div>
 
@@ -3351,6 +3435,9 @@
       <div class="q">Q4. 빈칸을 채워보세요: "불고지의 경우 처분이 있었던 날부터 ___일 이내에, 오고지의 경우는 그 ___된 기간 내에 심판청구 할 수 있다."</div>
       <textarea placeholder="여기에 답을 적어보세요..."></textarea>
       <div class="reveal">"불고지의 경우 처분이 있었던 날부터 <b>180</b>일 이내에, 오고지의 경우는 그 <b>잘못 고지</b>된 기간 내에 심판청구 할 수 있다."</div>
+    </div>
+    <div class="quiz-related">
+      <p><b>관련.</b> <a href="#" class="related-link" data-jump="p24">문제24</a>와 함께 행정심판법 챕터 — 다른 문제와의 직접적 연관은 적은 독립 주제</p>
     </div>
   </div>
 </div>
