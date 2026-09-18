@@ -119,15 +119,15 @@
   .counter{font-size:var(--fs-sm); color:var(--sub);}
 
   /* ---- Quiz ---- */
-  /* margin-right가 배지가 앉을 고정 여백을 만들어준다 — .qbox는 max-width만
-     정해져 있고 폭 지정이 없어, 오른쪽 여백만큼 자동으로 좁아지며 겹침 없이
-     항상(화면 폭과 무관하게) 박스 바깥 우측에 배지가 들어갈 공간이 생긴다. */
-  .qbox{position:relative; background:var(--card); border:1px solid var(--line); border-radius:14px; padding:16px; margin-bottom:12px; margin-right:26px; max-width:var(--content-w);}
-  /* 정답체크 상태 배지 — 문제박스 바깥, 우측에 위쪽 정렬로 플로팅.
+  .qbox{position:relative; background:var(--card); border:1px solid var(--line); border-radius:14px; padding:16px; margin-bottom:12px; max-width:var(--content-w);}
+  /* 정답체크 상태 배지 — 문제박스 크기는 그대로 두고, body 자체의 좌우 padding
+     (--pad, 최소 16px)에 해당하는 여백 안으로 배지를 밀어낸다. 배지 폭이 16px이라
+     가장 좁은 화면(--pad:16px)에서도 body 바깥으로 넘치지 않아 가로 스크롤이
+     생기지 않으면서, 박스 바깥 우측에 위쪽 정렬로 완전히 분리되어 보인다.
      틀리면 빨강, 틀린 뒤 처음 맞히면 옅은 빨강, 그 상태에서 한 번 더 맞히면(또는
      한 번도 틀린 적 없이 바로 맞히면) 초록으로 확정된다. */
   .qbox-status{
-    position:absolute; top:0; right:-26px; width:16px; height:16px; border-radius:5px;
+    position:absolute; top:0; right:-16px; width:16px; height:16px; border-radius:5px;
     box-shadow:0 1px 4px rgba(0,0,0,.28); display:none; transition:background-color .2s ease, opacity .2s ease;
   }
   .qbox-status.show{display:block;}
