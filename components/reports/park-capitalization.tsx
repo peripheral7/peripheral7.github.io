@@ -3,6 +3,7 @@ import {
   parkCapBaselineTable,
   parkCapCircuityTable,
   parkCapClassTable,
+  parkCapAll9Maps,
   parkCapCommerceMaps,
   parkCapConclusion,
   parkCapConventionTable,
@@ -16,7 +17,6 @@ import {
   parkCapMediationDropTable,
   parkCapMeta,
   parkCapMethodology,
-  parkCapModerationTable,
   parkCapRejected,
   parkCapReplicationTable,
   parkCapSensitivityTable,
@@ -178,80 +178,74 @@ export function ParkCapitalizationReport() {
 
       <div className="mt-5 rounded border border-border border-l-[3px] border-l-accent bg-muted/40 px-4 py-3.5 text-[0.88rem] leading-relaxed">
         <strong>이 분석이 묻는 것은 하나다 — 공원은 아파트 가격에 영향을 미치는가.</strong> 수도권
-        9개 신도시 333개 단지를 쓴다. 답을 얻으려면 두 가지를 먼저 정해야 한다. 어떤 공원을 잴
-        것인가(§02), 그리고 선행연구가 보고해 온 큰 계수는 무엇의 산물인가(§03). 공원이 상권을
-        경유해 가격에 이르는 경로도 검토했으나 8개 지역 중 한 곳에서만 성립해 부록 A로 내렸다.
+        9개 신도시 333개 단지를 쓰되,{" "}
+        <em className="not-italic text-accent">지역을 합치지 않고 각각 따로 추정한다.</em> 단가가
+        528만원에서 1,956만원까지 3.7배, 건축연령이 5년에서 31년까지 차이 나는 시장을 하나의
+        가격함수로 묶을 근거가 없기 때문이다. 지역 고정효과를 넣은 풀링도, 지역 간 계수를 다시
+        회귀하는 메타분석도 하지 않았다. 공원이 상권을 경유하는 경로는 8개 지역 중 한 곳에서만
+        성립해 부록 A로 내렸다.
       </div>
 
       {/* 01 핵심 결과 */}
       <SectionTitle n="01">공원은 아파트 가격에 영향을 미치는가</SectionTitle>
       <p className="mt-3 max-w-3xl text-[0.92rem] leading-relaxed">
-        결론부터 적는다. <strong>영향을 미친다 — 단, 지역을 대표하는 대규모 공원 한 곳에
-        한한다.</strong> 각 지역에서 30ha 이상인 공원 가운데 효용이 가장 높은 1개소를 대표공원으로
-        지정하고, 그 공원까지의 경계거리를 유일한 공원 변수로 넣었다. 효용은 공원 경계 300m 안의
-        생활상권 POI 수로 잰다 — 같은 규모라도 이용 유인이 있는 공원과 없는 공원을 가르는 관찰
-        가능한 대리변수다.
+        각 지역에서 30ha 이상인 공원 하나를 대표공원으로 지정하고 그 거리를 유일한 공원 변수로
+        넣었다. 어느 공원을 대표로 삼을지는 세 가지 기준으로 나누어 모두 추정했다 — 경계 300m 안
+        생활상권이 가장 많은 공원(A), 가장 넓은 공원(B), 그 지역 분석 단지들의 평균 거리가 가장
+        짧은 공원(C)이다.
       </p>
       <Table spec={parkCapHeadlineTable} />
 
       <div className="mt-5 rounded border border-border border-l-[3px] border-l-accent bg-muted/40 px-4 py-3.5 text-[0.88rem] leading-relaxed">
-        <strong>8개 지역을 묶으면 −0.054(p=0.001)로 수렴한다.</strong> 지역별로는 분당 −0.133,
-        동탄2 남부 −0.110, 김포한강 −0.072가 다중검정 보정을 통과하고 일산·광교가 10% 수준이다.
-        표본을 4개 지역 121개 단지에서 9개 지역 333개로 넓히자 흩어져 있던 계수가 모였다.
+        <strong>일관되지 않는다.</strong> 세 기준 모두에서 유의하고 다중검정 보정까지 통과하는
+        지역은 <strong>동탄2 남부 하나</strong>다(−0.110, p&lt;0.001). 광교(−0.055)와
+        일산(−0.060)은 10% 수준이며 세 기준에서 값이 같아 안정적이지만 보정을 넘지 못한다.
         <br />
         <br />
-        <em className="not-italic text-accent">그리고 두 가지 예외가 규칙을 확인해 준다.</em>{" "}
-        동탄2 북부는 9개 지역 중 유일하게 30ha 이상 공원이 하나도 없어(최대 29.4ha) 대표공원 자체를
-        지정할 수 없다. 양주옥정은 대표공원이 있으나 경계 300m 안 상권이 93건으로 9개 지역 최저이고,
-        계수도 +0.007로 무의미하다.{" "}
-        <strong>규모만으로는 부족하고 이용 유인이 함께 있어야 한다.</strong>
+        <em className="not-italic text-accent">그리고 김포한강에서는 부호가 뒤집힌다.</em> 대표공원을
+        상권 최대로 고르면 −0.072, 면적 최대로 고르면 −0.165, 접근 최대로 고르면 +0.060이다. 같은
+        지역·같은 표본·같은 통제변수인데 어느 공원을 대표로 삼느냐만 바꿔서 이렇게 움직인다.{" "}
+        <strong>30ha 이상 후보가 여럿인 지역에서는 선정이 곧 결론이다.</strong>
       </div>
 
-
-      <SectionTitle n="02">규모별로 자본화 효과가 다른가</SectionTitle>
+      {/* 02 대표공원 */}
+      <SectionTitle n="02">어느 공원이 대표공원인가</SectionTitle>
       <p className="mt-3 max-w-3xl text-[0.92rem] leading-relaxed">
-        &lsquo;공원까지의 거리&rsquo;를 하나의 변수로 쓰면 규모가 다른 공원이 한 값에 뭉개진다. 법정
-        기준부터가 규모에 따라 유치거리를 250m에서 &lsquo;제한 없음&rsquo;까지 차등하는데, 그렇다면
-        잠재가격도 규모마다 다를 것이다. 먼저 지역별로 대표공원이 어떻게 정해졌는지 본다.
+        선정이 결론을 좌우한다면, 실제로 어느 공원이 뽑혔는지 눈으로 확인해야 한다. 아래는 9개
+        지역의 공원 지도다. 붉은 윤곽이 대표공원(기준 A)이고 면적과 경계 300m 상권 건수를 공원 위에
+        적었다. 진한 초록이 대표공원, 중간 초록이 중규모(10~30ha), 옅은 초록이 소규모(2~10ha),
+        점이 분석 단지다.
       </p>
-      <Table spec={parkCapClassTable} />
-      <Table spec={parkCapSizeSpecTable} />
+      <MapLightbox maps={parkCapAll9Maps} />
 
       <div className="mt-5 rounded border border-border border-l-[3px] border-l-accent bg-muted/40 px-4 py-3.5 text-[0.88rem] leading-relaxed">
-        <strong>규모별로 다르다 — 그것도 아주 선명하게.</strong> 대표공원이 −0.057(p&lt;0.001)인
-        반면 <strong>중규모(10~30ha)는 −0.003(p=0.774)으로 사실상 0</strong>이다. 소규모(2~10ha)는
-        −0.026(p=0.011)으로 유의하지만 부분 결정계수가 <strong>0.17%</strong>에 그쳐 수정 결정계수를
-        0.002 올리는 데 그친다 — 표본이 292개면 실질적으로 무의미한 크기도 유의해진다는 점을 함께
-        읽어야 한다.{" "}
-        <em className="not-italic text-accent">즉 가격에 반영되는 것은 공원 총량이 아니라 대표공원
-        하나의 유무와 그 거리다.</em>
+        <strong>지도가 문제를 드러낸다.</strong> 분당의 대표공원은 지구{" "}
+        <strong>서쪽 가장자리</strong>에, 판교의 대표공원은 <strong>동쪽 가장자리</strong>에 있다 —
+        두 지역의 경계가 맞닿아 있어 사실 같은 공원이다. 김포한강도 대표공원이 동쪽에 치우쳐 있고
+        분석 단지 대부분은 서쪽·중앙에 있다.
+        <br />
+        <br />
+        원인은 상권 기준에 있다.{" "}
+        <em className="not-italic text-accent">지구 경계에 걸친 공원은 300m 버퍼로 옆 시가지의
+        상권까지 끌어온다.</em> 그래서 &lsquo;그 신도시 주민이 쓰는 공원&rsquo;이 아니라 &lsquo;옆
+        동네 상권과 붙은 공원&rsquo;이 뽑힌다. 반대로 후보가 1~3개소인 광교·동탄2 남부·일산·운정은
+        세 기준이 같은 공원을 가리켜 이 문제가 없다.
       </div>
+      <Table spec={parkCapClassTable} />
 
-      <h4 className="mt-8 text-[0.95rem] font-bold">대표공원을 무엇으로 고를 것인가</h4>
+      <h4 className="mt-8 text-[0.95rem] font-bold">규모별로 나누어 넣으면</h4>
       <p className="mt-2 max-w-3xl text-[0.9rem] leading-relaxed">
-        30ha 이상 후보가 여럿인 지역에서는 &lsquo;효용 최대&rsquo;와 &lsquo;면적 최대&rsquo;가 다른
-        공원을 가리킬 수 있다. 9개 지역 중 6곳은 두 기준이 일치하지만 3곳에서 갈린다.
+        대표공원·중규모·소규모 거리를 한 회귀에 함께 넣어 지역별로 추정했다.
+      </p>
+      <Table spec={parkCapSizeSpecTable} />
+      <p className="mt-3 max-w-3xl text-[0.9rem] leading-relaxed">
+        <strong>여기서도 일관된 패턴이 없다.</strong> 중규모 계수가 분당 +0.062(p&lt;0.01), 광교
+        −0.028(p&lt;0.05), 양주옥정 −0.134(p&lt;0.01)로 방향이 엇갈린다. 소규모는 광교
+        −0.059(p&lt;0.01) 외에 유의한 곳이 없다.{" "}
+        <strong className="text-foreground">지역을 합치면 이 불일치가 평균되어 깔끔한 결과가
+        나오지만, 그 평균값은 어느 지역의 가격함수도 아니다.</strong>
       </p>
       <Table spec={parkCapSensitivityTable} />
-      <p className="mt-3 max-w-3xl text-[0.9rem] leading-relaxed">
-        <strong>방향이 일치하지 않는다.</strong> 분당은 효용 기준이 −0.133 대 −0.015로 훨씬 강하고,
-        김포한강은 반대로 면적 기준이 −0.165 대 −0.072로 더 강하다. 어느 한쪽이 일관되게 낫다는
-        증거는 없으며, 이 민감도는 한계로 남긴다(부록 D).
-      </p>
-
-      <h4 className="mt-8 text-[0.95rem] font-bold">공원 구성비가 가격효과를 조절하는가</h4>
-      <p className="mt-2 max-w-3xl text-[0.9rem] leading-relaxed">
-        지역마다 계수가 다르다면, 그 차이를 지역의 공원 구성으로 설명할 수 있을까. 1단계에서 지역별
-        계수 8개를 얻고, 2단계에서 그 계수를 공원 면적 비중·집중도에 역분산 가중회귀했다.
-      </p>
-      <Table spec={parkCapModerationTable} />
-      <p className="mt-3 max-w-3xl text-[0.9rem] leading-relaxed">
-        <strong>조절효과는 확인되지 않았다.</strong> 어느 조절변수도 유의하지 않고(p=0.25~0.96), 풀링
-        상호작용에서 집중도만 10% 수준이다. 다만{" "}
-        <strong className="text-foreground">지역이 8개뿐이므로 이것은 조절효과의 부재를 입증한 것이
-        아니라 검정하지 못한 것</strong>으로 읽어야 한다. 클러스터가 8개인 상호작용의 표준오차는
-        신뢰하기 어렵다.
-      </p>
 
       {/* 03 선행연구 재현 */}
       <SectionTitle n="03">선행연구는 재현되는가</SectionTitle>
@@ -289,9 +283,8 @@ export function ParkCapitalizationReport() {
       <Table spec={parkCapDescTable} />
 
       <p className="mt-6 max-w-3xl text-[0.92rem] leading-relaxed">
-        아래 지도는 공원 규모 구성이 지역마다 얼마나 다른지를 보여주는 예시로, 초기 4개 지역에 대해
-        작성한 것이다. 도시계획시설(공원) 결정경계 기준으로 공원을 규모 3단계로 칠하고 분석 단지를
-        점으로 얹었다. 이미지를 클릭하면 원본 크기로 열린다.
+        아래는 초기 4개 지역의 상세 지도다(9개 지역 전체 지도는 §02). 도시계획시설(공원) 결정경계
+        기준으로 공원을 규모 3단계로 칠하고 분석 단지를 점으로 얹었다.
       </p>
       <MapLightbox maps={parkCapMaps} />
       <div className="mt-5 flex flex-wrap gap-4 text-[0.72rem] text-muted-foreground">
@@ -351,16 +344,16 @@ export function ParkCapitalizationReport() {
       </p>
       <Table spec={parkCapMediationDropTable} />
       <p className="mt-3 max-w-3xl text-[0.9rem] leading-relaxed">
-        네 지역만 보던 때에는 풀링 매개비율이 40.4%였고, 이를 본문 결과로 서술했다. 그러나 당시에도
-        신뢰구간이 0을 배제하는 지역은 동탄2 남부 하나뿐이었고 그 지역을 빼면 매개가 사라졌다.{" "}
-        <strong className="text-foreground">표본을 9개 지역으로 넓히자 풀링 매개비율이
-        12.7%로 줄었다.</strong> 표본을 넓힐수록 작아지는 효과는 일반적 메커니즘이 아니라 일부 지역의
-        배치 특성이라고 보아야 한다.
+        <strong>8개 지역 중 신뢰구간이 0을 배제하는 곳은 둘이고, 그중 하나는 해석할 수 없다.</strong>{" "}
+        분당은 간접효과 신뢰구간이 0을 배제하지만 총효과가 −0.012(t=−0.70)로 사실상 0이어서
+        매개비율이 정의되지 않는다. 실질적으로 매개가 성립하는 곳은 광교 하나(56.9%)다.
       </p>
       <p className="mt-3 max-w-3xl text-[0.9rem] leading-relaxed">
-        방향 자체가 어긋나는 지역도 있다. 김포한강은 a 경로가 <strong>+0.276(t=3.19)</strong>으로,
-        대표공원에서 멀수록 상권이 강하다. 매개 가설이 전제하는 &lsquo;공원과 상권의 동시 배치&rsquo;가
-        모든 신도시의 공통 원리는 아니라는 뜻이다.
+        방향도 엇갈린다. 광교·동탄2 남부·일산은 a 경로가 음(−)으로 &lsquo;공원에 가까울수록 상권이
+        강하다&rsquo;인 반면, 분당은 <strong>+0.434(t=3.60)</strong>로 반대다.{" "}
+        <strong className="text-foreground">공원과 상권의 동시 배치는 모든 신도시의 공통 설계
+        원리가 아니다.</strong> 지역을 합쳐 매개비율을 하나로 보고하면 이 차이가 지워지므로, 이
+        보고서는 풀링 매개를 싣지 않는다.
       </p>
       <p className="mt-4 max-w-3xl text-[0.9rem] leading-relaxed">
         아래 지도는 생활상권 POI 밀도를 육각 그리드(폭 225m)로 얹고 공원을 규모별로 구분한 것이다
