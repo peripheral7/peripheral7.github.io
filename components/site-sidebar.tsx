@@ -35,7 +35,7 @@ export function SiteSidebar({ posts }: { posts: Post[] }) {
   if (current === "/") return null
 
   return (
-    <aside className="pointer-events-none fixed left-4 top-1/2 z-40 hidden max-h-[75vh] w-60 -translate-y-1/2 overflow-y-auto rounded-2xl border border-border/60 bg-background/95 shadow-xl backdrop-blur-sm md:block">
+    <aside className="pointer-events-none fixed left-4 top-4 z-40 hidden max-h-[75vh] w-60 overflow-y-auto rounded-2xl border border-border/60 bg-background/95 shadow-xl backdrop-blur-sm md:block xl:top-1/2 xl:-translate-y-1/2">
       {/* the floating card overlaps page content instead of reserving space
           for itself, so only the links themselves catch clicks (pointer-events-auto) —
           empty padding/gaps stay click-through to whatever's underneath */}
