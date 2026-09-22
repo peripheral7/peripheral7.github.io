@@ -117,6 +117,11 @@
   .navbtn{background:var(--accent); color:#fff; border:none; border-radius:8px; padding:9px 16px; font-size:var(--fs-tab); font-weight:600;}
   .navbtn.secondary{background:#eee7da; color:var(--ink);}
   .counter{font-size:var(--fs-sm); color:var(--sub);}
+  /* 암기카드 탭은 카드 1장 + 이동버튼뿐이라 구조/자가테스트 탭보다 훨씬 짧다.
+     탭 전환 시 문서 높이가 갑자기 줄어들며 스크롤 위치가 튀는 것을 막기 위해,
+     자가테스트 탭의 평균 높이 정도로 최소 높이를 맞춰 여백으로 채운다(카드
+     자체 크기는 그대로 두고, 카드 아래 빈 공간만 늘어난다). */
+  .view[data-view="cards"]{min-height:780px;}
 
   /* ---- Quiz ---- */
   .qbox{position:relative; background:var(--card); border:1px solid var(--line); border-radius:14px; padding:16px; margin-bottom:12px; max-width:var(--content-w);}
@@ -3482,17 +3487,20 @@
   const VIEW_BY_DIGIT = { '1': 'map', '2': 'cards', '3': 'quiz' };
 
   window.addEventListener('keydown', (e) => {
-    const activeTag = document.activeElement ? document.activeElement.tagName : '';
-    if (activeTag === 'TEXTAREA' || activeTag === 'INPUT') return;
     const activeProblem = document.querySelector('.problem.active');
     if (!activeProblem) return;
 
-    // Ctrl(또는 Cmd)+1~3: switch the active problem's inner tab (구조/암기카드/자가테스트)
+    // Ctrl(또는 Cmd)+1~3: switch the active problem's inner tab (구조/암기카드/자가테스트).
+    // 자가테스트 입력창에 포커스가 있어도(타이핑 중이어도) 동작해야 하므로,
+    // 아래 TEXTAREA/INPUT 가드보다 먼저 검사한다.
     if ((e.ctrlKey || e.metaKey) && VIEW_BY_DIGIT[e.key]) {
       const tab = activeProblem.querySelector(':scope > .tabs > .tab[data-view="' + VIEW_BY_DIGIT[e.key] + '"]');
       if (tab) { e.preventDefault(); tab.click(); }
       return;
     }
+
+    const activeTag = document.activeElement ? document.activeElement.tagName : '';
+    if (activeTag === 'TEXTAREA' || activeTag === 'INPUT') return;
 
     // Space/Enter on 암기카드: 1st press reveals the answer, 2nd press advances
     if (e.key !== ' ' && e.code !== 'Space' && e.key !== 'Enter') return;
