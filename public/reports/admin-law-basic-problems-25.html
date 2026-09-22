@@ -330,7 +330,22 @@
     font-size:var(--fs-sm); line-height:1.4; cursor:pointer; transition:border-color .15s, background .15s;
   }
   .mm-sat:hover{border-color:var(--accent2); background:var(--hi);}
+  .mm-sat.mm-skeleton, .mm-parent.mm-skeleton{cursor:default;}
+  .mm-sat.mm-skeleton:hover{border-color:var(--line); background:#f7f5f0;}
   .mm-empty{font-size:var(--fs-sm); color:var(--sub); text-align:center; padding:8px 4px; line-height:1.5;}
+  .mm-parents{display:flex; flex-direction:column; gap:6px;}
+  .mm-parent{
+    background:transparent; border:1.5px dashed var(--accent2); color:var(--accent2); border-radius:9px;
+    padding:7px 10px; font-size:var(--fs-sm); font-weight:600; text-align:center; cursor:pointer; line-height:1.4;
+  }
+  .mm-assoc-label{font-size:11px; color:var(--sub); text-align:center; margin:10px 0 6px; letter-spacing:.3px;}
+  .mm-peers{display:flex; flex-direction:column; gap:6px;}
+  .mm-peer{
+    border:1px dashed var(--sub); border-radius:9px; padding:6px 10px; font-size:var(--fs-sm);
+    cursor:pointer; line-height:1.35; color:var(--ink);
+  }
+  .mm-peer:hover{border-color:var(--accent); color:var(--accent);}
+  .mm-peer-note{display:block; font-size:10.5px; color:var(--sub); margin-top:1px;}
   .mm-expand{
     display:block; width:100%; margin-top:12px; padding:8px; border:none; border-radius:8px;
     background:#eee7da; color:var(--ink); font-size:var(--fs-sm); font-weight:700; cursor:pointer;
@@ -355,15 +370,43 @@
   .mm-full-close{position:absolute; top:14px; right:16px; border:none; background:none; font-size:22px; color:var(--sub); cursor:pointer; line-height:1; padding:4px;}
   .mm-full-ttl{font-size:var(--fs-h2); font-weight:800; margin:0 0 4px;}
   .mm-full-sub{font-size:var(--fs-sm); color:var(--sub); margin-bottom:18px;}
-  .mm-cluster{margin-bottom:16px; padding-bottom:14px; border-bottom:1px dashed var(--line);}
-  .mm-cluster:last-child{border-bottom:none; margin-bottom:0; padding-bottom:0;}
-  .mm-cluster-ttl{font-size:var(--fs-body); font-weight:700; color:var(--accent2); margin-bottom:8px;}
-  .mm-full-nodes{display:flex; flex-wrap:wrap; gap:8px;}
-  .mm-full-node{
-    background:#f7f5f0; border:1px solid var(--line); border-radius:8px; padding:7px 11px;
-    font-size:var(--fs-sm); cursor:pointer; white-space:nowrap; transition:border-color .15s, background .15s;
+
+  /* ---- 상하관계(계층) vs 연관관계(대등) 표시 구분 ----
+     상하관계: 실선 테두리 박스 + 좌측 세로선(트리 들여쓰기)으로 "포함/응용" 방향을
+     보여준다. 해당 문제가 없는 뼈대 개념(예: 항고소송)은 점선 테두리로 구분해
+     클릭해도 이동하지 않음을 암시한다. 연관관계: 점선 알약(pill) 모양으로,
+     트리 어디에 있든 상관없이 노드에 덧붙어 "대등하게 참고할 문제"임을 보여준다. */
+  .mm-section-ttl{font-size:var(--fs-body); font-weight:800; color:var(--ink); margin:20px 0 12px; padding-top:16px; border-top:2px solid var(--line);}
+  .mm-section-ttl:first-child{margin-top:0; padding-top:0; border-top:none;}
+  .mm-section-note{font-size:var(--fs-sm); color:var(--sub); margin:-8px 0 14px;}
+
+  .mm-tree-item{margin-bottom:8px;}
+  .mm-tree-children{margin-left:16px; padding-left:16px; border-left:2px solid var(--line); margin-top:8px; display:flex; flex-direction:column; gap:10px;}
+  .mm-edge-label{display:block; font-size:10.5px; color:var(--sub); margin-bottom:3px;}
+  .mm-tree-box{
+    display:inline-block; background:#f7f5f0; border:1px solid var(--line); border-radius:8px;
+    padding:7px 11px; font-size:var(--fs-sm); cursor:pointer; transition:border-color .15s, background .15s;
   }
-  .mm-full-node:hover{border-color:var(--accent2); background:var(--hi);}
+  .mm-tree-box:hover{border-color:var(--accent2); background:var(--hi);}
+  .mm-tree-box.mm-skeleton{
+    background:transparent; border:1.5px dashed var(--accent2); color:var(--accent2);
+    font-weight:700; cursor:default;
+  }
+  .mm-tree-box.mm-skeleton:hover{background:transparent;}
+  .mm-tree-peers{display:inline-flex; flex-wrap:wrap; gap:4px; margin-left:8px; vertical-align:middle;}
+  .mm-peer-pill{
+    display:inline-block; border:1px dashed var(--sub); border-radius:12px; padding:3px 9px;
+    font-size:11px; color:var(--sub); cursor:pointer; white-space:nowrap; background:var(--card);
+  }
+  .mm-peer-pill:hover{border-color:var(--accent); color:var(--accent);}
+
+  .mm-assoc-cluster{
+    display:flex; flex-wrap:wrap; align-items:center; gap:8px; margin-bottom:10px;
+    padding:10px 12px; background:#f7f5f0; border-radius:10px; border:1px dashed var(--line);
+  }
+  .mm-assoc-cluster .mm-tree-box{background:var(--card);}
+
+  .mm-full-nodes{display:flex; flex-wrap:wrap; gap:8px;}
 </style>
 </head>
 <body>
@@ -3519,66 +3562,190 @@
   updateNavButtons();
 
   // ---- 문제 지도(마인드맵): 우측 여백 미니맵 + 전체 개요 ----
-  // 미니맵의 위성 노드는 각 문제 본문에 이미 있는 "관련." 노트의
-  // related-link들을 그대로 읽어서 만든다(별도 데이터로 중복 관리하지 않음).
-  // 한쪽 문제만 상대를 언급한 경우(예: p13b→p13a)도 양방향으로 보이도록
-  // 인접 관계를 대칭으로 구성한다. 전체 개요(9개 챕터)는 "관련." 텍스트를
-  // 사람이 읽고 묶은 결과라 기계적으로 재현할 수 없으므로 고정 데이터로 둔다.
+  // "관련." 노트의 단순 나열과 달리, 여기서는 관계를 두 종류로 구분해서 다룬다.
+  //   상하관계(HIER_EDGES): [상위, 하위, 설명]. 상위는 해당 문제가 없는 뼈대
+  //     개념(예: 항고소송·소송요건·행정법의 일반원칙)일 수도, "기준 문제"
+  //     역할을 하는 실제 문제(예: 문제15→문제21/23)일 수도 있다. 뼈대 개념은
+  //     id를 'x:'로 시작해 실제 문제 id와 구분하고, 점선 테두리로 표시하며
+  //     클릭해도 이동하지 않는다.
+  //   연관관계(ASSOC_EDGES): [a, b, 설명]. 대등한 관계(짝·쌍둥이·같은 챕터)로,
+  //     트리 안에서든 밖에서든 상관없이 점선 알약(pill) 배지로 노드에 덧붙는다.
+  // 한 문제가 상위 개념을 두 개 이상 가질 수도 있다(예: 문제15는 "항고소송의
+  // 취소소송 대상"이면서 동시에 "신청권 논의의 기준"이기도 하다) — 트리
+  // 렌더링에서는 그 문제가 등장하는 모든 자리에 그대로 나타나며, 어느 쪽도
+  // 더 하위로 확장되지 않는 리프(leaf)이므로 중복이 문제되지 않는다.
   function shortLabel(id) {
     const ptab = document.querySelector('.ptab[data-problem="' + id + '"]');
     return ptab ? ptab.innerHTML.replace(/<br\s*\/?>/gi, ' ').replace(/<[^>]+>/g, '').replace(/\s+/g, ' ').trim() : id;
   }
-  function buildProblemAdjacency() {
-    const adj = {};
-    PROBLEM_ORDER.forEach((id) => { adj[id] = new Set(); });
-    document.querySelectorAll('.problem').forEach((problemRoot) => {
-      const fromId = problemRoot.id.replace('problem-', '');
-      problemRoot.querySelectorAll('.related-link[data-jump]').forEach((a) => {
-        const toId = a.dataset.jump;
-        if (!toId || toId === fromId || !adj[toId]) return;
-        adj[fromId].add(toId);
-        adj[toId].add(fromId);
-      });
-    });
-    return adj;
-  }
-  const PROBLEM_ADJACENCY = buildProblemAdjacency();
+  const SKELETON_LABELS = {
+    'x:hango': '항고소송',
+    'x:sosong': '소송요건',
+    'x:sincheong': '신청권의 체계적 지위',
+    'x:wonchik': '행정법의 일반원칙',
+    'x:budang': '부당결부금지원칙',
+    'x:panhyo': '판결의 효력',
+    'x:jeolcha': '절차적 하자(사전통지·이유제시·의견청취)'
+  };
+  function isSkeleton(id) { return id.indexOf('x:') === 0; }
+  function nodeLabel(id) { return SKELETON_LABELS[id] || shortLabel(id); }
+
+  const HIER_EDGES = [
+    ['x:hango', 'p15', '취소소송의 대상(거부처분)'],
+    ['x:hango', 'p22', '무효등확인소송'],
+    ['x:hango', 'p23', '부작위위법확인소송'],
+    ['x:sosong', 'x:sincheong', ''],
+    ['x:sosong', 'p17', '원고적격 대표유형'],
+    ['x:sincheong', 'p15', '기준 — 대상적격설이 타당'],
+    ['x:sincheong', 'p21', '거부처분 버전 응용'],
+    ['x:sincheong', 'p23', '부작위 버전 응용'],
+    ['p21', 'p24', '가구제 부분을 독립 문제로 심화'],
+    ['x:wonchik', 'p01', '비례의 원칙'],
+    ['x:wonchik', 'p02', '자기구속의 원칙'],
+    ['x:wonchik', 'x:budang', ''],
+    ['x:budang', 'p03', '적법 결론'],
+    ['x:budang', 'p06', '위법 결론'],
+    ['x:panhyo', 'p19', '기판력'],
+    ['x:panhyo', 'p20', '기속력(간접강제)'],
+    ['x:jeolcha', 'p10', ''],
+    ['x:jeolcha', 'p11', ''],
+    ['x:jeolcha', 'p12', '의견청취를 심화']
+  ];
+  const ASSOC_EDGES = [
+    ['p03', 'p06', '짝·결론반대'],
+    ['p10', 'p11', '쌍둥이 구조'],
+    ['p14', 'p16', '짝·같은 질문의 다른 버전'],
+    ['p04', 'p05', '행정입법 효력 챕터'],
+    ['p05', 'p07b', '구조 동일'],
+    ['p13a', 'p19', '위법개념 학설 재사용'],
+    ['p13a', 'p13b', '같은 사례 물음1·2'],
+    ['p07a', 'p08', '같은 챕터'],
+    ['p07a', 'p18', '같은 챕터'],
+    ['p08', 'p18', '직접 비교'],
+    ['p15', 'p17', '소송요건 챕터 짝'],
+    ['p24', 'p25', '행정심판법 챕터']
+  ];
+
+  const HIER_CHILDREN = {};
+  const HIER_PARENT = {};
+  HIER_EDGES.forEach(([p, c, label]) => {
+    (HIER_CHILDREN[p] = HIER_CHILDREN[p] || []).push({ id: c, label: label });
+    (HIER_PARENT[c] = HIER_PARENT[c] || []).push({ id: p, label: label });
+  });
+  const ASSOC_MAP = {};
+  ASSOC_EDGES.forEach(([a, b, label]) => {
+    (ASSOC_MAP[a] = ASSOC_MAP[a] || []).push({ id: b, label: label });
+    (ASSOC_MAP[b] = ASSOC_MAP[b] || []).push({ id: a, label: label });
+  });
 
   function renderMiniMindmap() {
     const body = document.querySelector('#mindmapMini .mm-body');
     const active = document.querySelector('.problem.active');
     if (!body || !active) return;
     const id = active.id.replace('problem-', '');
-    const neighbors = Array.from(PROBLEM_ADJACENCY[id] || []);
-    const satsHtml = neighbors.length
-      ? '<div class="mm-line"></div><div class="mm-sats">' +
-        neighbors.map((n) => '<div class="mm-sat" data-jump="' + n + '">' + shortLabel(n) + '</div>').join('') +
-        '</div>'
-      : '<div class="mm-line"></div><div class="mm-empty">다른 문제와 뚜렷한<br>연관 없음(독립 주제)</div>';
-    body.innerHTML = '<div class="mm-center">' + shortLabel(id) + '</div>' + satsHtml;
+    const parents = HIER_PARENT[id] || [];
+    const children = HIER_CHILDREN[id] || [];
+    const peers = ASSOC_MAP[id] || [];
+
+    let html = '';
+    if (parents.length) {
+      html += '<div class="mm-parents">' + parents.map((p) =>
+        '<div class="mm-parent' + (isSkeleton(p.id) ? ' mm-skeleton' : '') + '"' +
+        (isSkeleton(p.id) ? '' : ' data-jump="' + p.id + '"') + '>' + nodeLabel(p.id) + '</div>'
+      ).join('') + '</div><div class="mm-line"></div>';
+    }
+    html += '<div class="mm-center">' + shortLabel(id) + '</div>';
+    if (children.length) {
+      html += '<div class="mm-line"></div><div class="mm-sats">' + children.map((c) =>
+        '<div class="mm-sat' + (isSkeleton(c.id) ? ' mm-skeleton' : '') + '"' +
+        (isSkeleton(c.id) ? '' : ' data-jump="' + c.id + '"') + '>' + nodeLabel(c.id) + '</div>'
+      ).join('') + '</div>';
+    }
+    if (peers.length) {
+      html += '<div class="mm-assoc-label">↔ 연관(대등한 관계)</div><div class="mm-peers">' + peers.map((p) =>
+        '<div class="mm-peer" data-jump="' + p.id + '">' + nodeLabel(p.id) +
+        (p.label ? '<span class="mm-peer-note">' + p.label + '</span>' : '') + '</div>'
+      ).join('') + '</div>';
+    }
+    if (!parents.length && !children.length && !peers.length) {
+      html += '<div class="mm-line"></div><div class="mm-empty">다른 문제와 뚜렷한<br>연관 없음(독립 주제)</div>';
+    }
+    body.innerHTML = html;
   }
   renderMiniMindmap();
 
-  const PROBLEM_CLUSTERS = [
-    { title: '① 행정법의 일반원칙', members: ['p01', 'p02', 'p03', 'p06'] },
-    { title: '② 행정입법의 효력·규범통제', members: ['p04', 'p05', 'p07b'] },
-    { title: '③ 하자를 사후에 다루는 법리', members: ['p07a', 'p08', 'p18'] },
-    { title: '④ 절차상 하자(사전통지·이유제시·의견청취)', members: ['p10', 'p11', 'p12'] },
-    { title: '⑤ 판결의 효력(국가배상·기판력·기속력)', members: ['p13a', 'p13b', 'p19', 'p20'] },
-    { title: '⑥ 소의 대상', members: ['p14', 'p16'] },
-    { title: '⑦ 소송요건(신청권·대상적격·원고적격) + 거부처분·부작위·가구제', members: ['p15', 'p17', 'p21', 'p23', 'p24', 'p25'] },
-    { title: '독립 주제(다른 문제와 뚜렷한 연관 없음)', members: ['p09', 'p22'] }
-  ];
+  function nodeBoxHtml(id, extraClass) {
+    const peers = ASSOC_MAP[id] || [];
+    const peersHtml = peers.length
+      ? '<span class="mm-tree-peers">' + peers.map((p) =>
+          '<span class="mm-peer-pill" data-jump="' + p.id + '">↔ ' + nodeLabel(p.id) + '</span>'
+        ).join('') + '</span>'
+      : '';
+    return '<div class="mm-tree-box' + (isSkeleton(id) ? ' mm-skeleton' : '') + (extraClass ? ' ' + extraClass : '') + '"' +
+      (isSkeleton(id) ? '' : ' data-jump="' + id + '"') + '>' + nodeLabel(id) + '</div>' + peersHtml;
+  }
+  function renderSubtree(id) {
+    const children = HIER_CHILDREN[id] || [];
+    let html = '<div class="mm-tree-item">' + nodeBoxHtml(id);
+    if (children.length) {
+      html += '<div class="mm-tree-children">' + children.map((c) =>
+        '<div>' + (c.label ? '<span class="mm-edge-label">' + c.label + '</span>' : '') + renderSubtree(c.id) + '</div>'
+      ).join('') + '</div>';
+    }
+    html += '</div>';
+    return html;
+  }
+  const HIER_ROOTS = ['x:hango', 'x:sosong', 'x:wonchik', 'x:panhyo', 'x:jeolcha'];
+  const nodesInTree = new Set();
+  HIER_ROOTS.forEach(function walk(rootId) {
+    (function collect(id) {
+      nodesInTree.add(id);
+      (HIER_CHILDREN[id] || []).forEach((c) => collect(c.id));
+    })(rootId);
+  });
+
+  function computeExternalClusters() {
+    const seen = new Set();
+    const clusters = [];
+    PROBLEM_ORDER.forEach((id) => {
+      if (nodesInTree.has(id) || seen.has(id) || !ASSOC_MAP[id]) return;
+      const queue = [id];
+      const comp = [];
+      while (queue.length) {
+        const cur = queue.shift();
+        if (seen.has(cur)) continue;
+        seen.add(cur);
+        comp.push(cur);
+        (ASSOC_MAP[cur] || []).forEach((n) => {
+          if (!nodesInTree.has(n.id) && !seen.has(n.id)) queue.push(n.id);
+        });
+      }
+      if (comp.length > 1) clusters.push(comp);
+    });
+    return clusters;
+  }
 
   function renderFullMindmap() {
     const body = document.getElementById('mindmapFullBody');
     if (!body || body.dataset.rendered) return;
-    body.innerHTML = PROBLEM_CLUSTERS.map((cluster) => {
-      const nodes = cluster.members.map((id) =>
-        '<span class="mm-full-node" data-jump="' + id + '">' + shortLabel(id) + '</span>'
+    let html = '<div class="mm-section-ttl">상하관계 — 기준 개념 → 응용·심화</div>';
+    html += '<div class="mm-section-note">점선 테두리는 해당 문제가 없는 뼈대 개념(클릭 불가), 실선은 실제 문제입니다.</div>';
+    html += HIER_ROOTS.map(renderSubtree).join('');
+
+    const clusters = computeExternalClusters();
+    if (clusters.length) {
+      html += '<div class="mm-section-ttl">연관관계로만 묶인 문제 — 대등한 관계</div>';
+      html += clusters.map((comp) =>
+        '<div class="mm-assoc-cluster">' + comp.map((id) => nodeBoxHtml(id)).join('') + '</div>'
       ).join('');
-      return '<div class="mm-cluster"><div class="mm-cluster-ttl">' + cluster.title + '</div><div class="mm-full-nodes">' + nodes + '</div></div>';
-    }).join('');
+    }
+
+    const standalone = PROBLEM_ORDER.filter((id) => !nodesInTree.has(id) && !ASSOC_MAP[id]);
+    if (standalone.length) {
+      html += '<div class="mm-section-ttl">독립 주제</div>';
+      html += '<div class="mm-full-nodes">' + standalone.map((id) => nodeBoxHtml(id)).join('') + '</div>';
+    }
+    body.innerHTML = html;
     body.dataset.rendered = '1';
   }
 
