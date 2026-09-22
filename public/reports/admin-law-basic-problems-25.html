@@ -301,6 +301,69 @@
     30%{box-shadow:0 0 0 4px rgba(139,94,60,.35);}
   }
   .search-highlight{animation:searchFlash 1s ease;}
+
+  /* ---- 문제 지도(마인드맵): 우측 여백 미니맵 + 전체 개요 ----
+     body가 --container-w(최대 920px)로 중앙 고정되므로, 그 오른쪽 빈 여백에
+     들어갈 폭(250px+간격)을 확보할 수 있는 1500px 이상에서만 띄운다. 그
+     아래 폭에서는 아예 숨긴다(줄어든 여백에 억지로 욱여넣지 않음). 미니맵은
+     현재 문제 1개를 중심에 두고 그와 직접 연결된 문제만 보여주며, 전체 27개
+     문제의 챕터별 구조는 "전체 지도 보기"를 눌러야 나오는 별도 모달에서
+     확인한다(좁은 여백에 27개를 다 넣으면 글자가 너무 작아지기 때문). */
+  .mindmap-mini{
+    position:fixed; top:110px; z-index:40;
+    left:calc(50% + (var(--container-w) / 2) + 24px);
+    width:250px; max-height:calc(100vh - 140px); overflow-y:auto;
+    background:var(--card); border:1px solid var(--line); border-radius:14px;
+    padding:14px; box-shadow:0 6px 20px rgba(0,0,0,.12);
+    display:none;
+  }
+  @media (min-width:1500px){ .mindmap-mini{display:block;} }
+  .mindmap-mini .mm-ttl{font-size:var(--fs-sm); font-weight:700; color:var(--sub); letter-spacing:.4px; margin-bottom:10px; text-align:center;}
+  .mm-center{
+    background:var(--accent2); color:#fff; border-radius:10px; padding:10px 12px;
+    font-size:var(--fs-sm); font-weight:700; text-align:center; line-height:1.4;
+  }
+  .mm-line{width:2px; height:14px; background:var(--line); margin:0 auto;}
+  .mm-sats{display:flex; flex-direction:column; gap:8px;}
+  .mm-sat{
+    background:#f7f5f0; border:1px solid var(--line); border-radius:9px; padding:8px 10px;
+    font-size:var(--fs-sm); line-height:1.4; cursor:pointer; transition:border-color .15s, background .15s;
+  }
+  .mm-sat:hover{border-color:var(--accent2); background:var(--hi);}
+  .mm-empty{font-size:var(--fs-sm); color:var(--sub); text-align:center; padding:8px 4px; line-height:1.5;}
+  .mm-expand{
+    display:block; width:100%; margin-top:12px; padding:8px; border:none; border-radius:8px;
+    background:#eee7da; color:var(--ink); font-size:var(--fs-sm); font-weight:700; cursor:pointer;
+  }
+  .mm-expand:hover{background:var(--accent); color:#fff;}
+
+  .mindmap-overlay{
+    position:fixed; inset:0; z-index:310; display:flex; justify-content:center; align-items:center;
+    padding:20px; pointer-events:none;
+  }
+  .mindmap-overlay.show{pointer-events:auto;}
+  .mm-full-backdrop{position:absolute; inset:0; background:rgba(20,18,14,.35); backdrop-filter:blur(4px); -webkit-backdrop-filter:blur(4px); opacity:0; transition:opacity .2s ease;}
+  .mindmap-overlay.show .mm-full-backdrop{opacity:1;}
+  .mm-full-panel{
+    position:relative; z-index:1; width:min(94vw, 900px); max-height:86vh; overflow-y:auto;
+    background:var(--card); border:1px solid var(--line); border-radius:16px;
+    box-shadow:0 20px 50px rgba(0,0,0,.25); padding:24px 26px;
+    transform:translateY(-10px) scale(.97); opacity:0;
+    transition:transform .16s cubic-bezier(.32,.72,0,1), opacity .14s ease;
+  }
+  .mindmap-overlay.show .mm-full-panel{transform:translateY(0) scale(1); opacity:1;}
+  .mm-full-close{position:absolute; top:14px; right:16px; border:none; background:none; font-size:22px; color:var(--sub); cursor:pointer; line-height:1; padding:4px;}
+  .mm-full-ttl{font-size:var(--fs-h2); font-weight:800; margin:0 0 4px;}
+  .mm-full-sub{font-size:var(--fs-sm); color:var(--sub); margin-bottom:18px;}
+  .mm-cluster{margin-bottom:16px; padding-bottom:14px; border-bottom:1px dashed var(--line);}
+  .mm-cluster:last-child{border-bottom:none; margin-bottom:0; padding-bottom:0;}
+  .mm-cluster-ttl{font-size:var(--fs-body); font-weight:700; color:var(--accent2); margin-bottom:8px;}
+  .mm-full-nodes{display:flex; flex-wrap:wrap; gap:8px;}
+  .mm-full-node{
+    background:#f7f5f0; border:1px solid var(--line); border-radius:8px; padding:7px 11px;
+    font-size:var(--fs-sm); cursor:pointer; white-space:nowrap; transition:border-color .15s, background .15s;
+  }
+  .mm-full-node:hover{border-color:var(--accent2); background:var(--hi);}
 </style>
 </head>
 <body>
@@ -310,6 +373,22 @@
   <div class="search-panel">
     <input type="text" id="searchInput" class="search-input" placeholder="검색... (Enter로 이동, Esc로 닫기)" autocomplete="off" />
     <div class="search-results" id="searchResults"></div>
+  </div>
+</div>
+
+<div class="mindmap-mini" id="mindmapMini">
+  <div class="mm-ttl">문제 지도</div>
+  <div class="mm-body"></div>
+  <button class="mm-expand" id="mmExpand" type="button">전체 지도 보기 →</button>
+</div>
+
+<div class="mindmap-overlay" id="mindmapOverlay">
+  <div class="mm-full-backdrop" id="mmFullBackdrop"></div>
+  <div class="mm-full-panel">
+    <button class="mm-full-close" id="mmFullClose" type="button" aria-label="닫기">×</button>
+    <div class="mm-full-ttl">전체 문제 지도</div>
+    <div class="mm-full-sub">25개 기본문제(27개 파트)가 어떤 챕터·구도로 묶이는지 한눈에 보기</div>
+    <div id="mindmapFullBody"></div>
   </div>
 </div>
 
@@ -3395,10 +3474,11 @@
     window.scrollTo({ top: 0, behavior: 'smooth' });
   }
   document.addEventListener('click', (e) => {
-    const link = e.target.closest('.related-link, .heat-cell-wrap');
+    const link = e.target.closest('.related-link, .heat-cell-wrap, .mm-sat, .mm-full-node');
     if (!link) return;
     e.preventDefault();
     jumpToProblem(link.dataset.jump);
+    closeMindmapOverlay();
   });
 
   // Outer 문제06/07-⑴/07-⑵/08 switcher
@@ -3410,6 +3490,7 @@
       document.getElementById('problem-' + ptab.dataset.problem).classList.add('active');
       updateNavButtons();
       saveViewState();
+      renderMiniMindmap();
     });
   });
 
@@ -3436,6 +3517,82 @@
     window.scrollTo({ top: 0, behavior: 'smooth' });
   });
   updateNavButtons();
+
+  // ---- 문제 지도(마인드맵): 우측 여백 미니맵 + 전체 개요 ----
+  // 미니맵의 위성 노드는 각 문제 본문에 이미 있는 "관련." 노트의
+  // related-link들을 그대로 읽어서 만든다(별도 데이터로 중복 관리하지 않음).
+  // 한쪽 문제만 상대를 언급한 경우(예: p13b→p13a)도 양방향으로 보이도록
+  // 인접 관계를 대칭으로 구성한다. 전체 개요(9개 챕터)는 "관련." 텍스트를
+  // 사람이 읽고 묶은 결과라 기계적으로 재현할 수 없으므로 고정 데이터로 둔다.
+  function shortLabel(id) {
+    const ptab = document.querySelector('.ptab[data-problem="' + id + '"]');
+    return ptab ? ptab.innerHTML.replace(/<br\s*\/?>/gi, ' ').replace(/<[^>]+>/g, '').replace(/\s+/g, ' ').trim() : id;
+  }
+  function buildProblemAdjacency() {
+    const adj = {};
+    PROBLEM_ORDER.forEach((id) => { adj[id] = new Set(); });
+    document.querySelectorAll('.problem').forEach((problemRoot) => {
+      const fromId = problemRoot.id.replace('problem-', '');
+      problemRoot.querySelectorAll('.related-link[data-jump]').forEach((a) => {
+        const toId = a.dataset.jump;
+        if (!toId || toId === fromId || !adj[toId]) return;
+        adj[fromId].add(toId);
+        adj[toId].add(fromId);
+      });
+    });
+    return adj;
+  }
+  const PROBLEM_ADJACENCY = buildProblemAdjacency();
+
+  function renderMiniMindmap() {
+    const body = document.querySelector('#mindmapMini .mm-body');
+    const active = document.querySelector('.problem.active');
+    if (!body || !active) return;
+    const id = active.id.replace('problem-', '');
+    const neighbors = Array.from(PROBLEM_ADJACENCY[id] || []);
+    const satsHtml = neighbors.length
+      ? '<div class="mm-line"></div><div class="mm-sats">' +
+        neighbors.map((n) => '<div class="mm-sat" data-jump="' + n + '">' + shortLabel(n) + '</div>').join('') +
+        '</div>'
+      : '<div class="mm-line"></div><div class="mm-empty">다른 문제와 뚜렷한<br>연관 없음(독립 주제)</div>';
+    body.innerHTML = '<div class="mm-center">' + shortLabel(id) + '</div>' + satsHtml;
+  }
+  renderMiniMindmap();
+
+  const PROBLEM_CLUSTERS = [
+    { title: '① 행정법의 일반원칙', members: ['p01', 'p02', 'p03', 'p06'] },
+    { title: '② 행정입법의 효력·규범통제', members: ['p04', 'p05', 'p07b'] },
+    { title: '③ 하자를 사후에 다루는 법리', members: ['p07a', 'p08', 'p18'] },
+    { title: '④ 절차상 하자(사전통지·이유제시·의견청취)', members: ['p10', 'p11', 'p12'] },
+    { title: '⑤ 판결의 효력(국가배상·기판력·기속력)', members: ['p13a', 'p13b', 'p19', 'p20'] },
+    { title: '⑥ 소의 대상', members: ['p14', 'p16'] },
+    { title: '⑦ 소송요건(신청권·대상적격·원고적격) + 거부처분·부작위·가구제', members: ['p15', 'p17', 'p21', 'p23', 'p24', 'p25'] },
+    { title: '독립 주제(다른 문제와 뚜렷한 연관 없음)', members: ['p09', 'p22'] }
+  ];
+
+  function renderFullMindmap() {
+    const body = document.getElementById('mindmapFullBody');
+    if (!body || body.dataset.rendered) return;
+    body.innerHTML = PROBLEM_CLUSTERS.map((cluster) => {
+      const nodes = cluster.members.map((id) =>
+        '<span class="mm-full-node" data-jump="' + id + '">' + shortLabel(id) + '</span>'
+      ).join('');
+      return '<div class="mm-cluster"><div class="mm-cluster-ttl">' + cluster.title + '</div><div class="mm-full-nodes">' + nodes + '</div></div>';
+    }).join('');
+    body.dataset.rendered = '1';
+  }
+
+  const mindmapOverlay = document.getElementById('mindmapOverlay');
+  function openMindmapOverlay() {
+    renderFullMindmap();
+    mindmapOverlay.classList.add('show');
+  }
+  function closeMindmapOverlay() {
+    mindmapOverlay.classList.remove('show');
+  }
+  document.getElementById('mmExpand').addEventListener('click', openMindmapOverlay);
+  document.getElementById('mmFullClose').addEventListener('click', closeMindmapOverlay);
+  document.getElementById('mmFullBackdrop').addEventListener('click', closeMindmapOverlay);
 
   // ---- 마지막으로 보던 위치 저장/복원 (localStorage) ----
   if ('scrollRestoration' in history) history.scrollRestoration = 'manual';
@@ -4122,6 +4279,7 @@
       return;
     }
     if (e.key === 'Escape' && searchOverlay.classList.contains('show')) closeSearch();
+    if (e.key === 'Escape' && mindmapOverlay.classList.contains('show')) closeMindmapOverlay();
   });
 
   restoreQboxStatusBadges();
