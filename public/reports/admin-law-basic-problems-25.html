@@ -3113,7 +3113,7 @@
 <button class="help-toggle" id="helpToggle" type="button" aria-label="단축키 안내">?</button>
 <div class="help-panel" id="helpPanel">
   <div class="ttl">단축키 안내</div>
-  <div class="row"><kbd>1</kbd> 구조 · <kbd>2</kbd> 암기카드 · <kbd>3</kbd> 자가테스트</div>
+  <div class="row"><kbd>Ctrl</kbd>+<kbd>1</kbd> 구조 · <kbd>Ctrl</kbd>+<kbd>2</kbd> 암기카드 · <kbd>Ctrl</kbd>+<kbd>3</kbd> 자가테스트</div>
   <div class="row">구조 탭 우측(모바일은 하단) 얇은 글씨가 서술형 답안 작성 팁입니다</div>
   <div class="row">암기카드 화면에서 탭 또는 <kbd>Space</kbd>/<kbd>Enter</kbd>: 처음 누르면 정답 확인, 다시 누르면 다음 카드로 이동</div>
   <div class="row">자가테스트 입력창에서 <kbd>Enter</kbd>: 정답 확인 + 주요 키워드 채점(✓/✗) / <kbd>Shift</kbd>+<kbd>Enter</kbd>: 줄바꿈 / <kbd>Shift</kbd> 두 번: 확인 후 다음 문항으로 이동</div>
@@ -3487,8 +3487,8 @@
     const activeProblem = document.querySelector('.problem.active');
     if (!activeProblem) return;
 
-    // 1~4: switch the active problem's inner tab (구조/암기카드/자가테스트/서술형팁)
-    if (VIEW_BY_DIGIT[e.key]) {
+    // Ctrl(또는 Cmd)+1~3: switch the active problem's inner tab (구조/암기카드/자가테스트)
+    if ((e.ctrlKey || e.metaKey) && VIEW_BY_DIGIT[e.key]) {
       const tab = activeProblem.querySelector(':scope > .tabs > .tab[data-view="' + VIEW_BY_DIGIT[e.key] + '"]');
       if (tab) { e.preventDefault(); tab.click(); }
       return;
@@ -3720,9 +3720,19 @@
   // 완전 일치를 우선 시도하고(기존 동작 그대로), 실패하면 핵심 단어 대부분이
   // 포함되는지로 관대하게 재판정한다. 한 단어짜리(더 쪼갤 수 없는) 짧은 키워드는
   // 과도한 관대화를 막기 위해 기존의 완전 일치 판정만 사용한다.
+  // 단, 조문 번호 등 숫자는 절대 관대화 대상이 아니다 — "제34조"가 2글자
+  // 단위로 "제3"+"4조"로 쪼개지면 "제30조"처럼 앞자리만 같은 다른 숫자와
+  // 부분일치해 오채점될 수 있으므로, 키워드에 포함된 숫자는 항상 정확한
+  // 값이 실제 숫자 경계(앞뒤에 다른 숫자가 붙어있지 않음)까지 일치해야
+  // 관대한 재판정으로 넘어갈 수 있다.
   function keywordHit(text, kwRaw) {
     const cleanKw = kwRaw.replace(/\s+/g, '');
     if (text.includes(cleanKw)) return true;
+
+    const numbers = kwRaw.match(/\d+/g) || [];
+    for (const num of numbers) {
+      if (!new RegExp('(?<!\\d)' + num + '(?!\\d)').test(text)) return false;
+    }
 
     const words = splitKeywordWords(kwRaw);
     if (words.length < 2) return false;
