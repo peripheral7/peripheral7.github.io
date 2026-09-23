@@ -346,6 +346,7 @@
   }
   .mm-peer:hover{border-color:var(--accent); color:var(--accent);}
   .mm-peer-note{display:block; font-size:10.5px; color:var(--sub); margin-top:1px;}
+  .mm-peer-compare{display:block; font-size:10.5px; color:var(--accent2); margin-top:3px; line-height:1.4;}
   .mm-expand{
     display:block; width:100%; margin-top:12px; padding:8px; border:none; border-radius:8px;
     background:#eee7da; color:var(--ink); font-size:var(--fs-sm); font-weight:700; cursor:pointer;
@@ -393,12 +394,14 @@
     font-weight:700; cursor:default;
   }
   .mm-tree-box.mm-skeleton:hover{background:transparent;}
-  .mm-tree-peers{display:inline-flex; flex-wrap:wrap; gap:4px; margin-left:8px; vertical-align:middle;}
+  .mm-tree-peers{display:inline-flex; flex-wrap:wrap; gap:8px; margin-left:8px; vertical-align:middle;}
+  .mm-peer-entry{display:inline-flex; flex-direction:column; align-items:flex-start; max-width:240px; vertical-align:top;}
   .mm-peer-pill{
     display:inline-block; border:1px dashed var(--sub); border-radius:12px; padding:3px 9px;
     font-size:11px; color:var(--sub); cursor:pointer; white-space:nowrap; background:var(--card);
   }
   .mm-peer-pill:hover{border-color:var(--accent); color:var(--accent);}
+  .mm-peer-entry .mm-peer-compare{font-size:10px; color:var(--sub); margin-top:3px; line-height:1.35; white-space:normal;}
 
   .mm-assoc-cluster{
     display:flex; flex-wrap:wrap; align-items:center; gap:8px; margin-bottom:10px;
@@ -437,6 +440,16 @@
   .wq-a{display:none; margin-top:7px; padding-top:7px; border-top:1px dashed var(--line); font-size:var(--fs-sm); line-height:1.5; color:var(--accent2); font-weight:600;}
   .wq-card.show .wq-a{display:block;}
   .wq-hint{font-size:10.5px; color:var(--sub); margin-top:4px;}
+  .wq-answer-row{margin-top:7px;}
+  .wq-input{
+    width:100%; box-sizing:border-box; border:1.5px solid var(--line); border-radius:8px;
+    padding:6px 8px; font-size:var(--fs-sm); font-family:inherit; transition:border-color .15s ease;
+  }
+  .wq-input:focus{outline:none; border-color:var(--accent2);}
+  .wq-input.wq-wrong{border-color:#b3402f;}
+  .wq-input:disabled{background:var(--hi); color:var(--accent2); font-weight:700; border-color:transparent;}
+  .wq-card.wq-fading .wq-src::before{background:#4f9c7d;}
+  .wq-card.wq-fade-out{opacity:0; transition:opacity 5s ease; pointer-events:none;}
 </style>
 </head>
 <body>
@@ -550,7 +563,7 @@
     </div>
     <div class="flowbox">
       <span class="num">Ⅱ</span><h3>관련 행정작용의 법적성질</h3>
-      <p><b class="sub">1. 사업인정</b>(1) 의의: 사업인정이란 공익사업을 토지 등을 수용할 사업으로 결정하는 것을 말하며(토지보상법 제2조 제7호), 사업 전의 공익성 판단 등에 취지가 인정된다.<br>(2) 법적 성질: 判은 일정한 절차를 거칠 것을 조건으로 수용권을 설정하는 <b>형성행위</b>라 판시하였으며, 사업과 관련된 제 이익과의 형량을 거치는 바 <b>재량행위</b>이다(判: 공익성 여부를 모든 사항을 참작해 구체적으로 판단해야 하므로 행정청의 재량).</p>
+      <p><b class="sub">1. 사업인정</b>(1) 의의: 사업인정이란 공익사업을 토지 등을 수용할 사업으로 결정하는 것을 말하며(토지보상법 제2조 제7호), 사업 전의 공익성 판단 등에 취지가 인정된다.<br>(2) 법적 성질: 사업인정은 상대방에게 수용권을 설정해 주어 권리·의무에 직접 영향을 미치는 <b>처분성</b>이 인정되며, 判은 일정한 절차를 거칠 것을 조건으로 수용권을 설정하는 <b>형성행위</b>라 판시하였고, 사업과 관련된 제 이익과의 형량을 거치는 바 <b>재량행위</b>이다(判: 공익성 여부를 모든 사항을 참작해 구체적으로 판단해야 하므로 행정청의 재량).</p>
       <p><b class="sub">2. 부관</b>(1) 의의 및 종류: 부관이란 행정기관에 의하여 주된 행정행위에 부가된 종된 규율로서, 행정의 유연성·탄력성 보장 등에 기능이 있다. 종류에는 조건·기한·<b>부담</b>·철회권 유보 등이 있으며, 부담이란 행정행위의 효력발생·소멸여부와 관계없이 작위·부작위 등 독립된 의무를 부과하는 부관이다.<br>(2) 사안의 경우: 기부채납조건은 사업인정에 부가된 종된 규율로서 기부채납의무를 부과하는 것이므로 <b>부관(부담)</b>에 해당한다.</p>
     </div>
     <div class="flowrow">
@@ -598,7 +611,7 @@
     <div class="qbox">
       <div class="q">Q1. 사업인정의 법적 성질 3가지와, 기부채납조건이 부관 중 무엇에 해당하는지 써보세요.</div>
       <textarea placeholder="여기에 답을 적어보세요..."></textarea>
-      <div class="reveal">판례에 따르면 사업인정은 일정한 절차를 거칠 것을 조건으로 수용권을 설정하는 <b>형성행위</b>이며, 사업과 관련된 제 이익과의 형량을 거치므로 <b>재량행위</b>이기도 하다. 부관 중 <b>부담</b>이란 행정행위의 <u>효력발생·소멸 여부와 관계없이</u> 상대방에게 작위·부작위 등의 <u>독립된 의무를 부과</u>하는 것을 말하는데, 기부채납조건은 사업인정에 부가되어 기부채납의무를 독립적으로 부과하므로 부담에 해당한다.</div>
+      <div class="reveal">사업인정은 상대방에게 수용권을 설정해 주어 권리·의무에 직접 영향을 미치는 <b>처분성</b>이 인정되고, 판례에 따르면 일정한 절차를 거칠 것을 조건으로 수용권을 설정하는 <b>형성행위</b>이며, 사업과 관련된 제 이익과의 형량을 거치므로 <b>재량행위</b>이기도 하다. 부관 중 <b>부담</b>이란 행정행위의 <u>효력발생·소멸 여부와 관계없이</u> 상대방에게 작위·부작위 등의 <u>독립된 의무를 부과</u>하는 것을 말하는데, 기부채납조건은 사업인정에 부가되어 기부채납의무를 독립적으로 부과하므로 부담에 해당한다.</div>
     </div>
     <div class="qbox">
       <div class="q">Q2. 부당결부금지원칙의 요건 3가지를 쓰고, 사안에 적용해보세요.</div>
@@ -3271,6 +3284,7 @@
   <button type="button" id="prevProblemBtn" aria-label="이전 문제">← 이전</button>
   <button type="button" id="scrollTopBtn" class="nav-top" aria-label="맨 위로">맨 위로</button>
   <button type="button" id="nextProblemBtn" aria-label="다음 문제">다음 →</button>
+  <button type="button" id="resetQuizBtn" aria-label="자가테스트 답안 초기화">답안 초기화</button>
 </div>
 <button class="help-toggle" id="helpToggle" type="button" aria-label="단축키 안내">?</button>
 <div class="help-panel" id="helpPanel">
@@ -3607,6 +3621,17 @@
   document.getElementById('scrollTopBtn').addEventListener('click', () => {
     window.scrollTo({ top: 0, behavior: 'smooth' });
   });
+  // ---- (3)자가테스트 답안 초기화: 현재 문제의 입력 내용을 지우고 답안(및
+  // 키워드 채점 표시)을 숨긴다. 정답체크 배지·기록로그 등 채점 기록 자체는
+  // 건드리지 않는다 — 화면을 백지로 되돌려 다시 풀어볼 수 있게 하는 용도. ----
+  document.getElementById('resetQuizBtn').addEventListener('click', () => {
+    const activeProblem = document.querySelector('.problem.active');
+    const quizView = activeProblem && activeProblem.querySelector(':scope > .view[data-view="quiz"]');
+    if (!quizView) return;
+    quizView.querySelectorAll('textarea').forEach((ta) => { ta.value = ''; });
+    quizView.querySelectorAll('.reveal.show').forEach((r) => r.classList.remove('show'));
+    quizView.querySelectorAll('.kwfb').forEach((fb) => { fb.classList.remove('show'); fb.innerHTML = ''; });
+  });
   updateNavButtons();
 
   // ---- 문제 지도(마인드맵): 우측 여백 미니맵 + 전체 개요 ----
@@ -3677,17 +3702,21 @@
     ['x:beol', 'x:hyeongbeol', ''],
     ['x:beol', 'x:jilseobeol', '']
   ];
+  // 4번째 요소(compare)는 "동일한 구조" 또는 "결론이 상반"되는 짝에만 채워
+  // 넣어, 무엇이 같고 무엇이 다른지 한눈에 대조할 수 있게 한다. 단순히
+  // "같은 챕터"로만 묶인 짝(구조가 мirror되지도, 결론이 갈리지도 않는 경우)은
+  // 굳이 새로 지어내지 않고 비워 둔다.
   const ASSOC_EDGES = [
-    ['p03', 'p06', '짝·결론반대'],
-    ['p10', 'p11', '쌍둥이 구조'],
-    ['p14', 'p16', '짝·같은 질문의 다른 버전'],
+    ['p03', 'p06', '짝·결론반대', '진입도로(목적관련성 O→적법, p03) ↔ 공공용지 조성(관련성 X→위법, p06)'],
+    ['p10', 'p11', '쌍둥이 구조', '사업인정 거부(p10) ↔ 이주대책 거부(p11) — 동일한 3단계 절차하자 틀 적용'],
+    ['p14', 'p16', '짝·같은 질문의 다른 버전', '원처분↔재결 중 대상(원처분주의, p14) ↔ 당초처분↔경정처분 중 대상(역흡수설, p16)'],
     ['p04', 'p05', '행정입법 효력 챕터'],
-    ['p05', 'p07b', '구조 동일'],
+    ['p05', 'p07b', '구조 동일', '법규명령의 위법여부 판단(p05) ↔ 행정행위의 위법여부·효력유무 판단(p07b)'],
     ['p13a', 'p19', '위법개념 학설 재사용'],
     ['p13a', 'p13b', '같은 사례 물음1·2'],
     ['p07a', 'p08', '같은 챕터'],
     ['p07a', 'p18', '같은 챕터'],
-    ['p08', 'p18', '직접 비교'],
+    ['p08', 'p18', '직접 비교', '하자의 치유=처분 후 발생한 사유의 사후보완(p08) ↔ 처분사유 추가·변경=처분당시 이미 존재한 사유(p18)'],
     ['p15', 'p17', '소송요건 챕터 짝'],
     ['p24', 'p25', '행정심판법 챕터']
   ];
@@ -3699,9 +3728,9 @@
     (HIER_PARENT[c] = HIER_PARENT[c] || []).push({ id: p, label: label });
   });
   const ASSOC_MAP = {};
-  ASSOC_EDGES.forEach(([a, b, label]) => {
-    (ASSOC_MAP[a] = ASSOC_MAP[a] || []).push({ id: b, label: label });
-    (ASSOC_MAP[b] = ASSOC_MAP[b] || []).push({ id: a, label: label });
+  ASSOC_EDGES.forEach(([a, b, label, compare]) => {
+    (ASSOC_MAP[a] = ASSOC_MAP[a] || []).push({ id: b, label: label, compare: compare });
+    (ASSOC_MAP[b] = ASSOC_MAP[b] || []).push({ id: a, label: label, compare: compare });
   });
 
   function renderMiniMindmap() {
@@ -3730,7 +3759,8 @@
     if (peers.length) {
       html += '<div class="mm-assoc-label">↔ 연관(대등한 관계)</div><div class="mm-peers">' + peers.map((p) =>
         '<div class="mm-peer" data-jump="' + p.id + '">' + nodeLabel(p.id) +
-        (p.label ? '<span class="mm-peer-note">' + p.label + '</span>' : '') + '</div>'
+        (p.label ? '<span class="mm-peer-note">' + p.label + '</span>' : '') +
+        (p.compare ? '<span class="mm-peer-compare">' + p.compare + '</span>' : '') + '</div>'
       ).join('') + '</div>';
     }
     if (!parents.length && !children.length && !peers.length) {
@@ -3744,7 +3774,8 @@
     const peers = ASSOC_MAP[id] || [];
     const peersHtml = peers.length
       ? '<span class="mm-tree-peers">' + peers.map((p) =>
-          '<span class="mm-peer-pill" data-jump="' + p.id + '">↔ ' + nodeLabel(p.id) + '</span>'
+          '<span class="mm-peer-entry"><span class="mm-peer-pill" data-jump="' + p.id + '">↔ ' + nodeLabel(p.id) + '</span>' +
+          (p.compare ? '<span class="mm-peer-compare">' + p.compare + '</span>' : '') + '</span>'
         ).join('') + '</span>'
       : '';
     return '<div class="mm-tree-box' + (isSkeleton(id) ? ' mm-skeleton' : '') + (extraClass ? ' ' + extraClass : '') + '"' +
@@ -3973,7 +4004,7 @@
       ['권력적 사실행위', '급부하명', '항고소송']
     ],
     p10: [
-      ['사전통지', '이유제시', '절차적 하자의 독자성'],
+      ['사전통지', '이유제시', '절차적 하자의 독자적 위법성'],
       ['권익이 부여되지 않았', '권익을 제한하는 처분이 아니'],
       ['신청내용을 그대로 인정', '단순반복', '긴급', '행정절차법 제23조'],
       ['적법절차', '행정소송법 제30조', '기속력']
@@ -4140,7 +4171,7 @@
       { q: '대집행 실행과 비용납부명령 각각의 법적 성질은?', a: ['권력적 사실행위', '급부하명', '항고소송'] }
     ],
     p10: [
-      { q: '이 문제에서 순서대로 검토할 3가지 쟁점은?', a: ['사전통지', '이유제시', '절차적 하자의 독자성'] },
+      { q: '이 문제에서 순서대로 검토할 3가지 쟁점은?', a: ['사전통지', '이유제시', '절차적 하자의 독자적 위법성'] },
       { q: '거부처분이 사전통지 대상인지 판례 입장과 논거는?', a: ['권익이 부여되지 않았', '권익을 제한하는 처분이 아니'] },
       { q: '이유제시가 생략될 수 있는 예외 3가지는?', a: ['신청내용을 그대로 인정', '단순반복', '긴급', '행정절차법 제23조'] },
       { q: '절차적 하자의 독자적 위법성 인정 논거 2가지는?', a: ['적법절차', '행정소송법 제30조', '기속력'] }
@@ -4492,21 +4523,45 @@
 
   // ---- 오답 단답노트 렌더링: qbox-status 로그에서 그때그때 다시 계산한다 ----
   // (빨강/주황인 문항만 모으고, 초록 이상이 되면 자동으로 목록에서 빠진다)
+  // 정답을 맞혀 사라지는 중인 카드(wrongNoteFading)는 이미 초록 이상이
+  // 되었더라도 5초 페이드 애니메이션이 끝날 때까지 목록에 남겨 둔다 —
+  // 그래야 그 사이 다른 문항이 틀려 실시간으로 새 카드가 추가되어도
+  // 페이드 중인 카드가 갑자기 사라지거나 다시 나타나지 않는다.
+  const wrongNoteFading = new Set();
+
   function renderWrongList() {
     const panel = document.getElementById('wrongqMini');
     if (!panel) return;
     const body = panel.querySelector('.wq-body');
+
+    // 재렌더는 어느 카드에서든 채점이 일어날 때마다 실시간으로 일어나므로,
+    // 다른 카드에 입력 중이던 값·오답 표시·포커스를 스냅샷해 뒀다가 재렌더
+    // 후 같은 key의 카드에 복원한다(그러지 않으면 매 채점마다 전체 목록이
+    // 새 DOM으로 교체되면서 다른 카드의 입력 중이던 내용이 날아간다).
+    const preserved = {};
+    body.querySelectorAll('.wq-card').forEach((cardEl) => {
+      const key = cardEl.getAttribute('data-key');
+      const inputEl = cardEl.querySelector('.wq-input');
+      if (!key || !inputEl) return;
+      preserved[key] = {
+        value: inputEl.value,
+        wrong: inputEl.classList.contains('wq-wrong'),
+        focused: document.activeElement === inputEl
+      };
+    });
+
     const log = loadQboxStatusLog();
     const items = [];
     Object.keys(log).forEach((key) => {
       const tier = qboxTier(log[key]);
-      if (tier !== 'red' && tier !== 'orange') return;
+      const fading = wrongNoteFading.has(key);
+      if (tier !== 'red' && tier !== 'orange' && !fading) return;
       const lastDash = key.lastIndexOf('-');
       const problemId = key.slice(0, lastDash);
       const idx = Number(key.slice(lastDash + 1));
       const sq = (SHORTQ_BY_PROBLEM[problemId] || [])[idx];
       if (!sq) return;
-      items.push({ problemId: problemId, idx: idx, sq: sq, tier: tier });
+      items.push({ problemId: problemId, idx: idx, sq: sq, tier: tier, key: key, fading: fading });
     });
 
     if (!items.length) {
@@ -4516,14 +4571,113 @@
 
     body.innerHTML = items.map((it) => {
       const label = shortLabel(it.problemId);
-      const tagText = it.tier === 'red' ? ' · 오답' : ' · 재확인 필요';
-      return '<div class="wq-card' + (it.tier === 'orange' ? ' tier-orange' : '') + '">' +
+      const tagText = it.fading ? ' · 정답!' : (it.tier === 'red' ? ' · 오답' : ' · 재확인 필요');
+      return '<div class="wq-card' + (it.tier === 'orange' && !it.fading ? ' tier-orange' : '') + (it.fading ? ' wq-fading' : '') + '" data-key="' + it.key + '">' +
         '<div class="wq-src" data-jump="' + it.problemId + '">' + label + tagText + '</div>' +
         '<div class="wq-q" data-wq-toggle>' + it.sq.q + '</div>' +
+        '<div class="wq-answer-row"><input type="text" class="wq-input" autocomplete="off" placeholder="정답 입력 후 Enter"' + (it.fading ? ' disabled' : '') + ' /></div>' +
         '<div class="wq-a">' + it.sq.a.join(' / ') + '</div>' +
       '</div>';
     }).join('');
+
+    body.querySelectorAll('.wq-card').forEach((cardEl) => {
+      const key = cardEl.getAttribute('data-key');
+      const saved = preserved[key];
+      const inputEl = cardEl.querySelector('.wq-input');
+      if (!saved || !inputEl) return;
+      inputEl.value = saved.value;
+      if (saved.wrong) inputEl.classList.add('wq-wrong');
+      if (saved.focused) inputEl.focus();
+    });
+
+    // 방금 정답 처리되어 페이드아웃을 시작해야 하는 카드는 이 렌더 시점에는
+    // opacity:1(기본값)로 막 새로 그려진 DOM이므로, 다음 프레임에 가서
+    // wq-fade-out 클래스를 붙여야 opacity 전환 애니메이션이 실제로 재생된다.
+    wrongNoteFading.forEach((key) => {
+      const cardEl = body.querySelector('.wq-card[data-key="' + key + '"]');
+      if (!cardEl || cardEl.classList.contains('wq-fade-out')) return;
+      requestAnimationFrame(() => {
+        requestAnimationFrame(() => { cardEl.classList.add('wq-fade-out'); });
+      });
+    });
   }
+
+  // ---- 오답 단답노트 카드 내 즉석 채점: 자가테스트와 동일한 keywordHit 로직을
+  // 재사용해 채점하고, 실제 qbox의 상태(streak/heatmap)까지 함께 갱신한다.
+  // 정답이면 다음 카드의 입력창으로 포커스를 넘기고 5초 페이드 후 카드를
+  // 목록에서 제거하며, 오답이면 정답은 보여주지 않고 입력창 테두리만 빨갛게
+  // 표시한다. ----
+  function checkWrongNoteAnswer(input) {
+    const cardEl = input.closest('.wq-card');
+    if (!cardEl) return;
+    const key = cardEl.getAttribute('data-key');
+    const lastDash = key.lastIndexOf('-');
+    const problemId = key.slice(0, lastDash);
+    const idx = Number(key.slice(lastDash + 1));
+    const sq = (SHORTQ_BY_PROBLEM[problemId] || [])[idx];
+    if (!sq) return;
+
+    const text = input.value.replace(/\s+/g, '');
+    const allHit = text.length > 0 && sq.a.every((kw) => keywordHit(text, kw));
+
+    const problemRoot = document.getElementById('problem-' + problemId);
+    const qboxes = problemRoot ? Array.from(problemRoot.querySelectorAll(':scope .qbox')) : [];
+    const realUnit = qboxes[idx];
+
+    if (!allHit) {
+      input.classList.add('wq-wrong');
+      if (realUnit) recordQboxResult(realUnit, problemId, idx, false);
+      else renderWrongList();
+      return;
+    }
+
+    const panel = document.getElementById('wrongqMini');
+    const cardsBefore = panel ? Array.from(panel.querySelectorAll('.wq-card')) : [];
+    const cardIndex = cardsBefore.indexOf(cardEl);
+
+    // 이 카드에 딸린 문항이 기존에 "빨강"이었다면, 한 번 맞혔다고 바로 목록에서
+    // 빼지 않는다 — 이 페이지의 기존 채점 원칙(qboxTier)상 빨강 다음 첫 정답은
+    // "주황(재확인 필요)"일 뿐 아직 확정이 아니기 때문이다. 이번 정답으로 실제
+    // 초록 이상(streak 2회 이상)이 되어 목록에서 빠질 자격이 생기는 경우에만
+    // 페이드아웃 후 제거한다. 그렇지 않으면(빨강→주황) 카드는 사라지지 않고
+    // 그대로 남아 주황 상태로 갱신된다.
+    const prevEntry = loadQboxStatusLog()[key];
+    const nextStreak = (prevEntry ? prevEntry.streak : 0) + 1;
+    const nextTier = qboxTier({ streak: nextStreak, everWrong: prevEntry ? prevEntry.everWrong : false });
+    const willClear = nextTier !== 'red' && nextTier !== 'orange';
+
+    if (willClear) wrongNoteFading.add(key);
+    if (realUnit) recordQboxResult(realUnit, problemId, idx, true);
+    else renderWrongList();
+
+    if (panel && cardIndex !== -1) {
+      const cardsAfter = Array.from(panel.querySelectorAll('.wq-card'));
+      for (let j = cardIndex + 1; j < cardsAfter.length; j++) {
+        const nextInput = cardsAfter[j].querySelector('.wq-input:not(:disabled)');
+        if (nextInput) { nextInput.focus(); break; }
+      }
+    }
+
+    if (willClear) {
+      setTimeout(() => {
+        wrongNoteFading.delete(key);
+        renderWrongList();
+      }, 5000);
+    }
+  }
+
+  document.addEventListener('keydown', (e) => {
+    if (e.key !== 'Enter') return;
+    const input = e.target.closest('.wq-input');
+    if (!input) return;
+    e.preventDefault();
+    checkWrongNoteAnswer(input);
+  });
+  document.addEventListener('input', (e) => {
+    if (e.target.classList && e.target.classList.contains('wq-input')) {
+      e.target.classList.remove('wq-wrong');
+    }
+  });
 
   function quizUnits(fromEl) {
     const quizView = fromEl.closest('.view[data-view="quiz"]');
@@ -4722,6 +4876,20 @@
     if (e.key === 'Escape' && searchOverlay.classList.contains('show')) closeSearch();
     if (e.key === 'Escape' && mindmapOverlay.classList.contains('show')) closeMindmapOverlay();
   });
+
+  // ---- (3)자가테스트에도 (1)구조 탭의 "문제 원문"을 그대로 복제해 보여준다 ----
+  // 원문이 있는 문제만 삽입한다(순수 논술형 문제는 원문 자체가 없음).
+  function insertProblemStatementsIntoQuiz() {
+    document.querySelectorAll('.problem').forEach((problemRoot) => {
+      const mapView = problemRoot.querySelector(':scope > .view[data-view="map"]');
+      const quizView = problemRoot.querySelector(':scope > .view[data-view="quiz"]');
+      if (!mapView || !quizView) return;
+      const stmt = mapView.querySelector(':scope > .problem-statement');
+      if (!stmt || quizView.querySelector(':scope > .problem-statement')) return;
+      quizView.insertBefore(stmt.cloneNode(true), quizView.firstChild);
+    });
+  }
+  insertProblemStatementsIntoQuiz();
 
   restoreQboxStatusBadges();
 </script>
