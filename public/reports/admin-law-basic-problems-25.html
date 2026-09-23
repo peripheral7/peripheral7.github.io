@@ -3506,6 +3506,14 @@
         tab.classList.add('active');
         problemRoot.querySelector(':scope > .view[data-view="' + tab.dataset.view + '"]').classList.add('active');
         saveViewState();
+        // 탭 전환 시 문제 소제목이 항상 화면 상단에 오도록 스크롤한다 — 암기카드처럼
+        // 짧은 탭으로 바뀌면서 이전 스크롤 위치가 그대로 유지돼 엉뚱한 빈 공간을
+        // 보게 되는 것을 막는다(높이를 맞추는 것보다 이 쪽이 항상 정확하다).
+        const title = problemRoot.querySelector(':scope > .problem-title');
+        if (title) {
+          const y = title.getBoundingClientRect().top + window.scrollY;
+          window.scrollTo({ top: y, behavior: 'smooth' });
+        }
       });
     });
   });
