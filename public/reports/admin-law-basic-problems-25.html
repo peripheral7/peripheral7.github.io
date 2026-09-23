@@ -1467,7 +1467,7 @@
       <p>대집행이란 대체적 작위의무의 불이행의 경우, 당해 행정기관이 의무자가 행할 의무를 스스로 이행하거나 제3자로 하여금 이행하게 하고, 그 비용을 의무자로부터 징수하는 것을 말한다. <b>행정대집행법 제2조</b>에 근거한다.</p>
     </div>
     <div class="note">
-      <p><b>관련.</b> 다른 문제와 뚜렷한 연관이 없는 독립 주제(행정강제)</p>
+      <p><b>관련.</b> 행정의 실효성 확보수단(행정상 강제집행) 챕터의 하나 — 같은 챕터의 이행강제금·직접강제·강제징수, 행정상 즉시강제, 행정벌(형벌·질서벌)과 묶어 큰 그림으로 암기</p>
     </div>
     </div>
     <div class="flowrow">
@@ -1521,7 +1521,7 @@
       <div class="reveal">대집행의 실행은 행정청이 의무자를 대신하여 물리적으로 행위를 완성하는 <b>권력적 사실행위</b>에 해당한다. 반면 비용징수를 위한 비용납부명령은 <u>금전급부의무를 명하는</u> <b>급부하명</b>으로서 행정행위에 해당하므로, <b>항고소송</b>의 대상이 된다.</div>
     </div>
     <div class="quiz-related">
-      <p><b>관련.</b> 다른 문제와 뚜렷한 연관이 없는 독립 주제(행정강제)</p>
+      <p><b>관련.</b> 행정의 실효성 확보수단(행정상 강제집행) 챕터의 하나 — 같은 챕터의 이행강제금·직접강제·강제징수, 행정상 즉시강제, 행정벌(형벌·질서벌)과 묶어 큰 그림으로 암기</p>
     </div>
   </div>
 
@@ -3633,7 +3633,16 @@
     'x:wonchik': '행정법의 일반원칙',
     'x:budang': '부당결부금지원칙',
     'x:panhyo': '판결의 효력',
-    'x:jeolcha': '절차적 하자(사전통지·이유제시·의견청취)'
+    'x:jeolcha': '절차적 하자(사전통지·이유제시·의견청취)',
+    'x:silhyo': '행정의 실효성 확보수단',
+    'x:gangje': '행정상 강제집행',
+    'x:ihaeng': '이행강제금(집행벌)',
+    'x:jikjeop': '직접강제',
+    'x:gangjing': '행정상 강제징수',
+    'x:jeukshi': '행정상 즉시강제',
+    'x:beol': '행정벌',
+    'x:hyeongbeol': '행정형벌',
+    'x:jilseobeol': '행정질서벌(과태료)'
   };
   function isSkeleton(id) { return id.indexOf('x:') === 0; }
   function nodeLabel(id) { return SKELETON_LABELS[id] || shortLabel(id); }
@@ -3657,7 +3666,16 @@
     ['x:panhyo', 'p20', '기속력(간접강제)'],
     ['x:jeolcha', 'p10', ''],
     ['x:jeolcha', 'p11', ''],
-    ['x:jeolcha', 'p12', '의견청취를 심화']
+    ['x:jeolcha', 'p12', '의견청취를 심화'],
+    ['x:silhyo', 'x:gangje', ''],
+    ['x:silhyo', 'x:jeukshi', ''],
+    ['x:silhyo', 'x:beol', ''],
+    ['x:gangje', 'p09', '대집행'],
+    ['x:gangje', 'x:ihaeng', ''],
+    ['x:gangje', 'x:jikjeop', ''],
+    ['x:gangje', 'x:gangjing', ''],
+    ['x:beol', 'x:hyeongbeol', ''],
+    ['x:beol', 'x:jilseobeol', '']
   ];
   const ASSOC_EDGES = [
     ['p03', 'p06', '짝·결론반대'],
@@ -3743,7 +3761,7 @@
     html += '</div>';
     return html;
   }
-  const HIER_ROOTS = ['x:hango', 'x:sosong', 'x:wonchik', 'x:panhyo', 'x:jeolcha'];
+  const HIER_ROOTS = ['x:hango', 'x:sosong', 'x:wonchik', 'x:panhyo', 'x:jeolcha', 'x:silhyo'];
   const nodesInTree = new Set();
   HIER_ROOTS.forEach(function walk(rootId) {
     (function collect(id) {
