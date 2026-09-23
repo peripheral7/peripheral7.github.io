@@ -64,7 +64,7 @@
     padding-bottom:calc(var(--pad) + 64px);
   }
   h1{font-size:var(--fs-title); line-height:1.15; font-weight:800; margin:0; text-align:left; letter-spacing:-0.02em;}
-  .page-header{display:flex; align-items:flex-start; justify-content:space-between; gap:12px; margin:18px 0 22px;}
+  .page-header{display:flex; align-items:flex-start; justify-content:space-between; gap:12px; margin:18px 0 32px;}
 
   /* ---- Outer: which of the 4 problems ---- */
   .problem-tabs{display:flex; gap:6px; margin-bottom:16px; flex-wrap:wrap;}
@@ -74,7 +74,7 @@
   .problem{display:none;}
   .problem.active{display:block;}
   .problem-title{font-size:var(--fs-h2); font-weight:700; text-align:center; margin:0 0 2px;}
-  .problem-sub{text-align:center; color:var(--sub); font-size:var(--fs-sm); margin-bottom:14px;}
+  .problem-sub{text-align:center; color:var(--sub); font-size:var(--fs-sm); margin-bottom:24px;}
 
   /* ---- Inner: 구조/암기카드/자가테스트/서술형팁 ---- */
   .tabs{display:flex; gap:6px; margin-bottom:14px;}
@@ -3571,17 +3571,23 @@
     const key = problemRoot.id.replace('problem-', '');
     flashcardControls[key] = setupFlashcards(problemRoot, PROBLEM_CARDS[key]);
 
-    // Inner 구조/암기카드/자가테스트/서술형팁 tabs, scoped to this problem only
+    // Inner 구조/암기카드/자가테스트/서술형팁 tabs, scoped to this problem only.
+    // 탭별로 마지막 스크롤 높이를 기억해 뒀다가, 그 탭으로 돌아오면 그대로
+    // 복원한다(처음 보는 탭이면 지금 스크롤 위치를 그대로 유지).
+    const tabScrollMemory = {};
     problemRoot.querySelectorAll(':scope > .tabs > .tab').forEach((tab) => {
       tab.addEventListener('click', () => {
+        const prevTab = problemRoot.querySelector(':scope > .tabs > .tab.active');
+        if (prevTab) tabScrollMemory[prevTab.dataset.view] = window.scrollY;
+
         problemRoot.querySelectorAll(':scope > .tabs > .tab').forEach(t => t.classList.remove('active'));
         problemRoot.querySelectorAll(':scope > .view').forEach(v => v.classList.remove('active'));
         tab.classList.add('active');
         problemRoot.querySelector(':scope > .view[data-view="' + tab.dataset.view + '"]').classList.add('active');
         saveViewState();
-        // 탭(구조/암기카드/자가테스트) 전환 시 스크롤 위치는 건드리지 않는다 —
-        // 같은 자리에서 탭 내용만 바뀌므로, 내려가 있었다면 내려간 그 위치
-        // 그대로 보여준다(각 탭 높이를 비슷하게 맞춰 둔 것도 이 때문).
+
+        const remembered = tabScrollMemory[tab.dataset.view];
+        if (typeof remembered === 'number') window.scrollTo(0, remembered);
       });
     });
   });
