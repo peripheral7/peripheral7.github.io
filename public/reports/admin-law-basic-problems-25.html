@@ -413,8 +413,8 @@
 
   /* ---- 오답 단답노트: 좌측 여백, 우측 문제 지도와 대칭 위치 ----
      (3)자가테스트에서 틀리거나(빨강) 아직 확정 안 된(주황) 문항의 키워드를
-     하나하나 쪼갠 단답형 카드 큐. 정답을 맞히면 3초간 하얗게 사라지며 큐에서
-     완전히 빠지고, 오답이면 정답을 보여준 채 3초간 하얗게 사라진 뒤 큐의
+     하나하나 쪼갠 단답형 카드 큐. 정답을 맞히면 2초간 하얗게 사라지며 큐에서
+     완전히 빠지고, 오답이면 정답을 보여준 채 2초간 하얗게 사라진 뒤 큐의
      맨 뒤로 다시 밀려난다(renderWrongList/checkAtomicAnswer 참고). 스크롤은
      되지만 스크롤바 자체는 보이지 않도록 숨긴다. */
   .wrongq-mini{
@@ -449,11 +449,13 @@
   }
   .wq-input:focus{outline:none; border-color:var(--accent2);}
   .wq-input:disabled{background:var(--hi); color:var(--accent2); font-weight:700; border-color:transparent;}
-  /* 정답/오답 모두 제출 후 3초에 걸쳐 카드 전체(배경·글자·테두리)가 하얗게
-     사라진다 — 자식 요소들이 각자 색을 지정해 두었으므로 !important로 덮어써야
-     실제로 전부 하얗게 바랜다. */
-  .wq-card.wq-fade-out{background:#fff; border-color:#fff; transition:background-color 3s ease, border-color 3s ease; pointer-events:none;}
-  .wq-card.wq-fade-out *{color:#fff !important; border-color:#fff !important; transition:color 3s ease, border-color 3s ease !important;}
+  /* 정답/오답 모두 제출 후 2초에 걸쳐 카드 전체(배경·글자·테두리, 빨간 점과
+     입력창의 노란 배경 포함)가 하얗게 사라진다 — 자식 요소·의사요소가 각자
+     색을 지정해 두었으므로 !important로 배경까지 덮어써야 실제로 카드
+     전체가 하얗게 바랜다. */
+  .wq-card.wq-fade-out{background:#fff; border-color:#fff; transition:background-color 2s ease, border-color 2s ease; pointer-events:none;}
+  .wq-card.wq-fade-out *{color:#fff !important; background:#fff !important; border-color:#fff !important; transition:color 2s ease, background-color 2s ease, border-color 2s ease !important;}
+  .wq-card.wq-fade-out .wq-src::before{background:#fff !important; transition:background-color 2s ease !important;}
 </style>
 </head>
 <body>
@@ -4412,7 +4414,7 @@
       ],
       [
         { q: '판례의 위법성 판시 문구 — 행정처분이 어떠했다고 인정될 정도인가?', a: '객관적 정당성을 상실' },
-        { q: '국가배상책임이 문제된 시위 관련 사건에서 등장하는 물건은?', a: '화염병' },
+        { q: '원칙상 행위의 법 위반을 법령위반으로 본 판례의 사건 개요는?', a: '시위자들의 화염병으로 인한 약국화재' },
         { q: '직무의무위반설을 취한 듯한 판례가 법령위반으로 본 것은?', a: '직무상 의무위반' },
         { q: '위 판시의 근거조문은?', a: '국가배상법 제2조' }
       ],
@@ -4621,8 +4623,7 @@
         { q: '행정소송은 목적이 달라 확인의 이익이 불필요하다는 학설은?', a: '불요설' }
       ],
       [
-        { q: '판례 변경의 계기가 된 처분청은?', a: '수원시장' },
-        { q: '그 처분의 내용은?', a: '하수도 원인자부담금' },
+        { q: '판례 변경의 계기가 된 사건(처분청과 처분 내용)은?', a: '수원시장의 하수도 원인자부담금 부과처분' },
         { q: '이 사건에서 판례가 요구하지 않은 것은?', a: '보충성' }
       ],
       [
@@ -5064,7 +5065,7 @@
     });
 
     // 페이드 중인 카드는 다음 프레임에 가서 wq-fade-out을 붙여야 opacity가
-    // 아니라 색상 전환(3초)이 실제로 애니메이션된다.
+    // 아니라 색상 전환(2초)이 실제로 애니메이션된다.
     fadingAtomicCards.forEach((reason, key) => {
       const cardEl = body.querySelector('.wq-card[data-key="' + key + '"]');
       if (!cardEl || cardEl.classList.contains('wq-fade-out')) return;
@@ -5075,9 +5076,9 @@
   }
 
   // ---- 오답 단답노트 카드 내 즉석 채점: 자가테스트와 동일한 keywordHit 로직으로
-  // 한 단어짜리 정답을 채점한다. 정답이면 3초간 하얗게 사라진 뒤 큐에서 완전히
+  // 한 단어짜리 정답을 채점한다. 정답이면 2초간 하얗게 사라진 뒤 큐에서 완전히
   // 빠지고(다시 나타나지 않도록 confirmedAtomicKeys에 기록), 오답이면 정답을
-  // 표기한 채 3초간 하얗게 사라진 뒤 큐의 맨 뒤로 다시 밀려난다. ----
+  // 표기한 채 2초간 하얗게 사라진 뒤 큐의 맨 뒤로 다시 밀려난다. ----
   function checkAtomicAnswer(input) {
     const cardEl = input.closest('.wq-card');
     if (!cardEl) return;
@@ -5111,7 +5112,7 @@
         const freshInput = document.querySelector('#wrongqMini .wq-card[data-key="' + key + '"] .wq-input');
         if (freshInput) freshInput.value = '';
       }
-    }, 3000);
+    }, 2000);
   }
 
   document.addEventListener('keydown', (e) => {
