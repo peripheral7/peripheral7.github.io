@@ -4161,6 +4161,9 @@
     if (!text) {
       fb.classList.remove('show');
       fb.innerHTML = '';
+      // 답을 안 쓰고 바로 Enter로 정답만 확인한 경우도 "틀림"으로 기록한다 —
+      // 그러지 않으면 배지가 아예 안 뜨는 것처럼 보여 혼란을 준다.
+      recordQboxResult(unit, problemId, idx, false);
       return;
     }
     if (keywords.length === 0) {
