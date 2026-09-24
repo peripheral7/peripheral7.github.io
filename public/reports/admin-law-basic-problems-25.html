@@ -421,9 +421,10 @@
   /* ---- 오답 단답노트: 좌측 여백, 우측 문제 지도와 대칭 위치 ----
      (3)자가테스트에서 틀리거나(빨강) 아직 확정 안 된(주황) 문항의 키워드를
      하나하나 쪼갠 단답형 카드 큐. 정답을 맞히면 1초간 하얗게 사라지며 큐에서
-     완전히 빠지고, 오답이면 정답을 보여준 채 1초간 하얗게 사라진 뒤 큐의
-     맨 뒤로 다시 밀려난다(renderWrongList/checkAtomicAnswer 참고). 스크롤은
-     되지만 스크롤바 자체는 보이지 않도록 숨긴다. */
+     완전히 빠지고, 오답이면 정답을 보여주며 카드 전체 테두리를 붉게 표시했다가
+     (잠시 유지) 1초간 하얗게 사라진 뒤 큐의 맨 뒤로 다시 밀려난다
+     (renderWrongList/checkAtomicAnswer 참고). 스크롤은 되지만 스크롤바 자체는
+     보이지 않도록 숨긴다. */
   .wrongq-mini{
     position:fixed; top:110px; z-index:40;
     right:calc(50% + (var(--container-w) / 2) + 24px);
@@ -464,11 +465,15 @@
   }
   .wq-input:focus{outline:none; border-color:var(--accent2);}
   .wq-input:disabled{background:var(--hi); color:var(--accent2); font-weight:700; border-color:transparent;}
-  /* 정답/오답 모두 제출 후 1초에 걸쳐 카드 전체(배경·글자·테두리, 빨간 점과
-     입력창의 노란 배경 포함)가 하얗게 사라진다 — 자식 요소·의사요소가 각자
-     색을 지정해 두었으므로 !important로 배경까지 덮어써야 실제로 카드
-     전체가 하얗게 바랜다. */
-  .wq-card.wq-fade-out{background:#fff; border-color:#fff; transition:background-color 1s ease, border-color 1s ease; pointer-events:none;}
+  /* 오답 카드: 정답을 펼친 채 카드 전체 테두리를 붉게 표시한다(안쪽 1px 링을
+     더해 2px처럼 보이게 하되 레이아웃은 밀지 않는다). 이 붉은 테두리는 잠시
+     유지된 뒤, 아래 wq-fade-out이 하얗게 지우는 효과의 시작점이 된다. */
+  .wq-card.wq-wrong{border-color:#b3402f; box-shadow:inset 0 0 0 1px #b3402f;}
+  /* 정답은 제출 즉시, 오답은 붉은 테두리를 잠시 보여준 뒤 1초에 걸쳐 카드
+     전체(배경·글자·테두리, 빨간 점과 입력창의 노란 배경 포함)가 하얗게
+     사라진다 — 자식 요소·의사요소가 각자 색을 지정해 두었으므로 !important로
+     배경까지 덮어써야 실제로 카드 전체가 하얗게 바랜다. */
+  .wq-card.wq-fade-out{background:#fff; border-color:#fff; box-shadow:inset 0 0 0 0 #fff; transition:background-color 1s ease, border-color 1s ease, box-shadow 1s ease; pointer-events:none;}
   .wq-card.wq-fade-out *{color:#fff !important; background:#fff !important; border-color:#fff !important; transition:color 1s ease, background-color 1s ease, border-color 1s ease !important;}
   .wq-card.wq-fade-out .wq-src::before{background:#fff !important; transition:background-color 1s ease !important;}
 </style>
@@ -5083,9 +5088,14 @@
   // 저장된 큐를 복원한다 — 이미 확인이 끝났거나 데이터에서 사라진 카드는 제외.
   let atomicQueue = Array.from(new Set(loadAtomicQueue()))
     .filter((key) => !confirmedAtomicKeys.has(key) && atomicItemFor(key));
-  // 카드별 페이드 사유: 'correct'(정답 — 페이드 후 큐에서 제거) 또는
-  // 'wrong'(오답 — 정답을 보여주며 페이드 후 큐의 맨 뒤로 이동).
+  // 카드별 제출 후 진행 단계:
+  //  'correct'    — 정답: 바로 흰색으로 페이드, 끝나면 큐에서 제거
+  //  'wrong'      — 오답: 정답을 펼치고 카드 전체 테두리를 붉게 표시(잠시 유지)
+  //  'wrong-fade' — 오답: 붉은 테두리째 흰색으로 페이드, 끝나면 큐의 맨 뒤로 이동
   const fadingAtomicCards = new Map();
+  // 붉은 테두리를 보여주는 시간과 흰색 페이드 시간(CSS wq-fade-out의 1s와 맞출 것).
+  const ATOMIC_WRONG_HOLD_MS = 800;
+  const ATOMIC_FADE_MS = 1000;
 
   function atomicKey(problemId, qIdx, kwIdx) { return problemId + '-' + qIdx + '-' + kwIdx; }
   function parseAtomicKey(key) {
@@ -5149,6 +5159,32 @@
     saveAtomicQueue();
   }
 
+  function buildAtomicCard(key) {
+    const item = atomicItemFor(key);
+    if (!item) return null;
+    const p = parseAtomicKey(key);
+    const holder = document.createElement('div');
+    holder.innerHTML = '<div class="wq-card" data-key="' + key + '">' +
+      '<div class="wq-src" data-jump="' + p.problemId + '">' + shortLabel(p.problemId) + '</div>' +
+      '<div class="wq-q" data-wq-toggle>' + item.q + '</div>' +
+      '<div class="wq-answer-row"><input type="text" class="wq-input" autocomplete="off" placeholder="정답 입력 후 Enter" /></div>' +
+      '<div class="wq-a">' + item.a + '</div>' +
+    '</div>';
+    return holder.firstElementChild;
+  }
+
+  // 카드의 시각 상태를 fadingAtomicCards의 진행 단계에 맞춘다. 카드 DOM을
+  // 재사용하므로 이미 붙어 있는 클래스만 바꿔 주면 CSS 전환(transition)이 그
+  // 자리에서 이어서 재생된다.
+  function applyAtomicCardState(cardEl, reason) {
+    const wrong = reason === 'wrong' || reason === 'wrong-fade';
+    if (wrong) cardEl.classList.add('show');
+    cardEl.classList.toggle('wq-wrong', wrong);
+    cardEl.classList.toggle('wq-fade-out', reason === 'correct' || reason === 'wrong-fade');
+    const inputEl = cardEl.querySelector('.wq-input');
+    if (inputEl) inputEl.disabled = !!reason;
+  }
+
   function renderWrongList() {
     const panel = document.getElementById('wrongqMini');
     if (!panel) return;
@@ -5156,64 +5192,77 @@
 
     syncAtomicQueue();
 
-    // 다른 카드에 입력 중이던 값·포커스는 재렌더 후에도 복원한다(채점은
-    // 어느 카드에서든 실시간으로 큐 전체를 다시 그리기 때문).
-    const preserved = {};
-    body.querySelectorAll('.wq-card').forEach((cardEl) => {
-      const key = cardEl.getAttribute('data-key');
-      const inputEl = cardEl.querySelector('.wq-input');
-      if (!key || !inputEl) return;
-      preserved[key] = { value: inputEl.value, focused: document.activeElement === inputEl };
-    });
-
     if (!atomicQueue.length) {
       body.innerHTML = '<div class="wq-empty">아직 틀린 문제가 없습니다.</div>';
       return;
     }
 
-    body.innerHTML = atomicQueue.map((key) => {
-      const p = parseAtomicKey(key);
-      const item = atomicItemFor(key);
-      if (!item) return '';
-      const label = shortLabel(p.problemId);
-      const reason = fadingAtomicCards.get(key);
-      const fading = !!reason;
-      const autoShow = reason === 'wrong';
-      // wq-fade-out 클래스는 여기서 바로 붙이지 않는다 — 이 카드가 막 새로
-      // 생성되는 DOM이라 시작상태 없이 붙이면 전환(transition)이 재생되지
-      // 않고 즉시 하얗게 바뀌어 버린다. 아래에서 다음 프레임에 따로 붙인다.
-      return '<div class="wq-card' + (autoShow ? ' show' : '') + '" data-key="' + key + '">' +
-        '<div class="wq-src" data-jump="' + p.problemId + '">' + label + '</div>' +
-        '<div class="wq-q" data-wq-toggle>' + item.q + '</div>' +
-        '<div class="wq-answer-row"><input type="text" class="wq-input" autocomplete="off" placeholder="정답 입력 후 Enter"' + (fading ? ' disabled' : '') + ' /></div>' +
-        '<div class="wq-a">' + item.a + '</div>' +
-      '</div>';
-    }).join('');
+    // 카드 DOM은 매번 새로 만들지 않고 재사용한다: 페이드 중인 카드를 다시 만들면
+    // 전환이 처음부터 다시 시작되고, 다른 카드에 입력 중이던 값·포커스도 잃기
+    // 때문이다(채점은 어느 카드에서든 큐 전체를 다시 그린다). 큐에서 빠진 카드와
+    // 빈 목록 안내문은 지운다.
+    const queued = new Set(atomicQueue);
+    Array.from(body.children).forEach((el) => {
+      if (!queued.has(el.getAttribute('data-key'))) el.remove();
+    });
+    const existing = new Map();
+    Array.from(body.children).forEach((el, idx) => existing.set(el.getAttribute('data-key'), { el: el, idx: idx }));
 
-    body.querySelectorAll('.wq-card').forEach((cardEl) => {
-      const key = cardEl.getAttribute('data-key');
-      const saved = preserved[key];
-      const inputEl = cardEl.querySelector('.wq-input');
-      if (!saved || !inputEl) return;
-      inputEl.value = saved.value;
-      if (saved.focused) inputEl.focus();
+    const desired = [];
+    atomicQueue.forEach((key) => {
+      const hit = existing.get(key);
+      const el = hit ? hit.el : buildAtomicCard(key);
+      if (el) desired.push({ el: el, key: key, idx: hit ? hit.idx : -1 });
     });
 
-    // 페이드 중인 카드는 다음 프레임에 가서 wq-fade-out을 붙여야 opacity가
-    // 아니라 색상 전환(1초)이 실제로 애니메이션된다.
-    fadingAtomicCards.forEach((reason, key) => {
-      const cardEl = body.querySelector('.wq-card[data-key="' + key + '"]');
-      if (!cardEl || cardEl.classList.contains('wq-fade-out')) return;
-      requestAnimationFrame(() => {
-        requestAnimationFrame(() => { cardEl.classList.add('wq-fade-out'); });
-      });
-    });
+    // 남는 카드는 큐 순서와 현재 DOM 순서가 이미 같은 가장 긴 줄로 잡아 그 자리에
+    // 그대로 두고, 나머지만 옮긴다. 카드를 옮기면 그 카드의 전환이 취소되고 포커스도
+    // 잃으므로, 페이드 중이거나 입력 중인 카드에는 큰 가중치를 줘 최대한 안 옮긴다.
+    const active = document.activeElement;
+    const activeSel = active && active.classList && active.classList.contains('wq-input')
+      ? [active.selectionStart, active.selectionEnd] : null;
+    const n = desired.length;
+    const weight = desired.map((d) => (fadingAtomicCards.has(d.key) || d.el.contains(active) ? 1000 : 1));
+    const best = new Array(n).fill(0);
+    const prev = new Array(n).fill(-1);
+    let bestEnd = -1;
+    for (let i = 0; i < n; i++) {
+      if (desired[i].idx < 0) continue;
+      best[i] = weight[i];
+      for (let j = 0; j < i; j++) {
+        if (desired[j].idx >= 0 && desired[j].idx < desired[i].idx && best[j] + weight[i] > best[i]) {
+          best[i] = best[j] + weight[i];
+          prev[i] = j;
+        }
+      }
+      if (bestEnd === -1 || best[i] > best[bestEnd]) bestEnd = i;
+    }
+    const stay = new Set();
+    for (let i = bestEnd; i !== -1; i = prev[i]) stay.add(desired[i].el);
+
+    // 뒤에서부터 각 카드를 "다음 카드 바로 앞"에 꽂는다(남는 카드와, 이미 그 자리에
+    // 있는 카드는 건드리지 않음 — insertBefore는 제자리여도 노드를 뗐다 붙인다).
+    let next = null;
+    for (let i = n - 1; i >= 0; i--) {
+      const el = desired[i].el;
+      const inPlace = el.parentNode === body && el.nextElementSibling === next;
+      if (!stay.has(el) && !inPlace) body.insertBefore(el, next);
+      next = el;
+    }
+    // 그래도 입력 중이던 카드가 옮겨져 포커스를 잃었다면 커서 위치까지 되돌린다.
+    if (active && active !== document.activeElement && body.contains(active) && !active.disabled) {
+      active.focus();
+      if (activeSel) { try { active.setSelectionRange(activeSel[0], activeSel[1]); } catch (e) {} }
+    }
+
+    desired.forEach((d) => applyAtomicCardState(d.el, fadingAtomicCards.get(d.key)));
   }
 
   // ---- 오답 단답노트 카드 내 즉석 채점: 자가테스트와 동일한 keywordHit 로직으로
   // 한 단어짜리 정답을 채점한다. 정답이면 1초간 하얗게 사라진 뒤 큐에서 완전히
   // 빠지고(다시 나타나지 않도록 confirmedAtomicKeys에 기록), 오답이면 정답을
-  // 표기한 채 1초간 하얗게 사라진 뒤 큐의 맨 뒤로 다시 밀려난다. ----
+  // 펼치고 카드 전체 테두리를 붉게 표시해 잠시 보여준 다음 1초간 하얗게 사라진
+  // 뒤 큐의 맨 뒤로 다시 밀려난다. ----
   function checkAtomicAnswer(input) {
     const cardEl = input.closest('.wq-card');
     if (!cardEl) return;
@@ -5243,7 +5292,20 @@
       }
     }
 
+    // 오답은 붉은 테두리를 ATOMIC_WRONG_HOLD_MS 동안 보여준 뒤 페이드를 시작한다.
+    // (그 사이 전체 초기화로 진행 단계 기록이 지워졌다면 아무것도 하지 않는다.)
+    let doneMs = ATOMIC_FADE_MS;
+    if (!isCorrect) {
+      setTimeout(() => {
+        if (!fadingAtomicCards.has(key)) return;
+        fadingAtomicCards.set(key, 'wrong-fade');
+        renderWrongList();
+      }, ATOMIC_WRONG_HOLD_MS);
+      doneMs += ATOMIC_WRONG_HOLD_MS;
+    }
+
     setTimeout(() => {
+      if (!fadingAtomicCards.has(key)) return;
       fadingAtomicCards.delete(key);
       if (isCorrect) {
         confirmedAtomicKeys.add(key);
@@ -5256,15 +5318,18 @@
       }
       saveAtomicQueue();
       renderWrongList();
-      // 오답으로 맨 뒤에 다시 쌓인 카드는 방금 틀렸던 입력값을 그대로 들고
-      // 있으면 안 된다 — renderWrongList의 입력값 보존 로직(다른 카드가
-      // 채점되는 동안 타이핑 중이던 내용을 지키기 위한 것)이 이 카드에도
-      // 적용되므로, 리셋된 새 시도를 위해 명시적으로 비워준다.
+      // 오답으로 맨 뒤에 다시 쌓인 카드는 펼쳐진 정답과 방금 틀렸던 입력값을
+      // 그대로 들고 있으면 안 된다 — 카드 DOM을 재사용하므로 저절로 지워지지
+      // 않는다. 새 시도를 위해 정답을 다시 접고 입력값을 명시적으로 비워준다.
       if (!isCorrect) {
-        const freshInput = document.querySelector('#wrongqMini .wq-card[data-key="' + key + '"] .wq-input');
-        if (freshInput) freshInput.value = '';
+        const freshCard = document.querySelector('#wrongqMini .wq-card[data-key="' + key + '"]');
+        if (freshCard) {
+          freshCard.classList.remove('show');
+          const freshInput = freshCard.querySelector('.wq-input');
+          if (freshInput) freshInput.value = '';
+        }
       }
-    }, 1000);
+    }, doneMs);
   }
 
   document.addEventListener('keydown', (e) => {
