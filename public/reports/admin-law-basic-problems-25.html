@@ -4166,12 +4166,12 @@
     ]
   };
 
-  // ---- 오답 단답노트: (3)자가테스트의 키워드 하나하나를 "문제 하나 = 정답 하나"로
-  // 쪼갠 단답형 문제 큐. 학설처럼 여러 개가 나열되는 경우도 각각 별도 문제로 쪼갠다.
-    // ---- 오답 단답노트: (3)자가테스트의 키워드 하나하나를 "문제 하나 = 정답 하나"로
+  // ---- 오답 단답노트: (3)자가테스트 문항이 묻는 항목 하나하나를 "문제 하나 = 정답 하나"로
   // 쪼갠 단답형 문제 큐. 학설처럼 여러 개가 나열되는 경우도 각각 별도 문제로 쪼갠다.
   // a는 카드에 표시되는 정답(전체 문구), k는 채점 기준 키워드(짧은 핵심 단어) —
   // k가 없으면 a 전체를 그대로 채점 기준으로 쓴다(이미 충분히 짧은 경우).
+  // 카드 키(문제-문항-순번)가 인덱스 기반이라 저장된 진행상황과 맞물리므로, 새
+  // 항목은 항상 각 그룹의 맨 끝에 덧붙이고 기존 항목의 순서는 바꾸지 않는다.
   const SHORTQ_BY_PROBLEM = {
     p06: [
       [
@@ -4262,7 +4262,8 @@
       [
         { q: '치유의 인정시기 학설 중, 쟁송제기 전까지 가능하다는 견해는?', a: '쟁송제기이전설' },
         { q: '행정심판 불복시(행정소송 제기 전)까지 가능하다는 견해는?', a: '행정소송제기이전설' },
-        { q: '소송절차종결 전까지 가능하다는 견해는?', a: '소송종결시설' }
+        { q: '소송절차종결 전까지 가능하다는 견해는?', a: '소송종결시설' },
+        { q: '치유의 인정시기에 관한 판례는 어느 학설의 입장인가?', a: '쟁송제기이전설' }
       ],
       [
         { q: '하자의 치유 인정범위 쟁점① — 이 사유에도 치유가 인정되는지가 문제되는 것은?', a: '무효사유' },
@@ -4348,7 +4349,8 @@
       [
         { q: '규범형식을 중시해 구속력을 긍정하는 견해는?', a: '형식설' },
         { q: '형식설의 논거는?', a: '법적안정성' },
-        { q: '규범의 실질을 중시해 구속력을 부정하는 견해는?', a: '실질설' }
+        { q: '규범의 실질을 중시해 구속력을 부정하는 견해는?', a: '실질설' },
+        { q: '실질설의 논거는?', a: '구체적 사정에 따른 타당한 행정작용', k: '타당' }
       ],
       [
         { q: '판례가 일관되게 법규성을 부정하는 것은 어떤 형식의 행정규칙인가?', a: '부령형식' },
@@ -4388,7 +4390,8 @@
       [
         { q: '대집행 절차 1단계 — 이행을 문서로 통지하는 것은?', a: '계고' },
         { q: '대집행 절차 2단계 — 시기·책임자·비용개산액을 통지하는 것은?', a: '대집행영장' },
-        { q: '대집행 절차 4단계 — 비용을 의무자로부터 무엇하는가?', a: '비용징수' }
+        { q: '대집행 절차 4단계 — 비용을 의무자로부터 무엇하는가?', a: '비용징수' },
+        { q: '대집행 절차 3단계 — 행정청이 스스로 또는 제3자로 하여금 의무자가 할 행위를 대신 행하는 것은?', a: '대집행의 실행', k: '실행' }
       ],
       [
         { q: '2차, 3차 계고의 법적 성질 — 새로운 의무를 부과하는 것인가?', a: '독립한 처분이 아니', k: '독립한 처분' },
@@ -4407,8 +4410,9 @@
         { q: '세 번째 쟁점 — 절차적 하자만으로 인정되는지가 문제되는 것은?', a: '절차적 하자의 독자적 위법성', k: '독자적 위법성' }
       ],
       [
-        { q: '판례(부정설)의 논거 — 신청에 대한 처분이 없는 이상 당사자에게 어떠한가?', a: '권익이 부여되지 않았', k: '권익이 부여' },
-        { q: '그러므로 거부처분은 무엇이 아니라고 보는가?', a: '권익을 제한하는 처분이 아니', k: '권익을 제한' }
+        { q: '판례의 논거 — 신청에 대한 처분이 없는 이상 당사자에게 어떠한가?', a: '권익이 부여되지 않았', k: '권익이 부여' },
+        { q: '그러므로 거부처분은 무엇이 아니라고 보는가?', a: '권익을 제한하는 처분이 아니', k: '권익을 제한' },
+        { q: '거부처분이 사전통지 대상인지에 관한 판례의 입장(학설)은?', a: '부정설' }
       ],
       [
         { q: '이유제시 생략사유① — 처분이 무엇인 경우인가?', a: '신청내용을 그대로 인정', k: '그대로 인정' },
@@ -4433,8 +4437,10 @@
         { q: '이주대책의 근거조문은?', a: '토지보상법 제78조' }
       ],
       [
-        { q: '판례(부정설)가 사전통지 대상이 아니라고 보는 논거는?', a: '권익이 부여되지 않았', k: '권익이 부여' },
-        { q: '검토상 거부처분도 신청인의 무엇을 제한한다고 보는가?', a: '기대이익' }
+        { q: '판례가 거부처분을 사전통지 대상이 아니라고 보는 논거는?', a: '권익이 부여되지 않았', k: '권익이 부여' },
+        { q: '검토상 거부처분도 신청인의 무엇을 제한한다고 보는가?', a: '기대이익' },
+        { q: '거부처분이 사전통지 대상인지에 관한 판례의 결론(학설)은?', a: '부정설' },
+        { q: '거부처분이 사전통지 대상인지에 관한 검토상 타당한 결론(학설)은?', a: '긍정설' }
       ],
       [
         { q: '이유제시 생략사유① — 처분이 어떠한 경우인가?', a: '신청내용을 그대로 인정', k: '그대로 인정' },
@@ -4480,7 +4486,8 @@
         { q: '국가배상 요건② — 공무원에게 어떤 주관적 잘못이 있어야 하는가?', a: '고의 또는 과실' },
         { q: '국가배상 요건③ — 공무원의 행위가 무엇에 위반해야 하는가?', a: '법령에 위반' },
         { q: '국가배상 요건⑤ — 가해행위와 손해 사이에 있어야 하는 것은?', a: '상당인과관계' },
-        { q: '국가배상책임의 근거조문은?', a: '국가배상법 제2조' }
+        { q: '국가배상책임의 근거조문은?', a: '국가배상법 제2조' },
+        { q: '국가배상 요건④ — 가해행위로 인해 누구에게 어떤 피해가 발생해야 하는가?', a: '타인에게 손해', k: '손해' }
       ],
       [
         { q: '손해를 수인할 수 있는지를 기준으로 하는 학설은?', a: '결과불법설' },
@@ -4629,7 +4636,8 @@
       ],
       [
         { q: '변경사유와 당초 사유 사이에 없다고 본 것은?', a: '기본적 사실관계의 동일성', k: '기본적 사실관계' },
-        { q: '사안의 결론 — 乙은 처분사유를 어떻게 할 수 없는가?', a: '추가·변경할 수 없다', k: '추가·변경' }
+        { q: '사안의 결론 — 乙은 처분사유를 어떻게 할 수 없는가?', a: '추가·변경할 수 없다', k: '추가·변경' },
+        { q: '사안에서 변경사유는 언제 존재하던 사유인가?', a: '처분당시' }
       ]
     ],
     p19: [
@@ -4677,7 +4685,9 @@
       [
         { q: '거부가 처분이 되기 위해 인정되어야 하는 신청권의 종류는?', a: '법규상 신청권' },
         { q: '신청권의 체계적 지위 — 검토상 어느 소송요건 문제인가?', a: '대상적격' },
-        { q: '법규상 신청권의 근거조문은?', a: '토지보상법 제20조' }
+        { q: '법규상 신청권의 근거조문은?', a: '토지보상법 제20조' },
+        { q: '사업인정 거부가 처분이 되기 위한 요건① — 무엇의 거부여야 하는가?', a: '공권력행사의 거부', k: '공권력' },
+        { q: '사업인정 거부가 처분이 되기 위한 요건② — 국민의 무엇에 영향을 미쳐야 하는가?', a: '권리·의무에 영향', k: '권리·의무' }
       ],
       [
         { q: '甲기업이 제기할 수 있는 행정심판① — 거부처분 자체를 다투는 심판은?', a: '거부처분취소심판' },
@@ -4713,7 +4723,8 @@
       ],
       [
         { q: '판례 변경의 계기가 된 사건(처분청과 처분 내용)은?', a: '수원시장의 하수도 원인자부담금 부과처분', k: '하수도 원인자부담금' },
-        { q: '이 사건에서 판례가 요구하지 않은 것은?', a: '보충성' }
+        { q: '이 사건에서 판례가 요구하지 않은 것은?', a: '보충성' },
+        { q: '확인의 이익에 관한 판례의 최근 입장(학설)은?', a: '불요설' }
       ],
       [
         { q: '일본·독일과 달리 우리 법에 없는 것은?', a: '명문 규정' },
@@ -4749,7 +4760,8 @@
         { q: '집행부정지 원칙의 종래 근거는?', a: '공정력' },
         { q: '오늘날 집행부정지 원칙의 근거① — 행정심판의 무엇을 막기 위함인가?', a: '남용방지' },
         { q: '오늘날 집행부정지 원칙의 근거② — 행정목적의 원활한 수행이라는 무엇에 따른 것인가?', a: '입법정책' },
-        { q: '집행부정지 원칙의 근거조문은?', a: '행정심판법 제30조' }
+        { q: '집행부정지 원칙의 근거조문은?', a: '행정심판법 제30조' },
+        { q: '집행부정지 원칙 — 행정심판이 제기되어도 원칙적으로 영향을 받지 않는 것은?', a: '처분의 효력이나 집행·절차의 속행', k: '효력' }
       ],
       [
         { q: '행정심판법상 집행정지 요건은?', a: '중대한 손해' },
@@ -4761,7 +4773,8 @@
         { q: '적극요건② — 위법부당이 어떠해야 하는가?', a: '상당히 의심' },
         { q: '임시처분 소극요건① — 무엇에 중대한 영향을 미치면 안 되는가?', a: '공공복리' },
         { q: '임시처분 소극요건② — 어떤 경우에 불허되는가?', a: '집행정지로 목적을 달성', k: '집행정지로 목적' },
-        { q: '임시처분의 근거조문은?', a: '행정심판법 제31조' }
+        { q: '임시처분의 근거조문은?', a: '행정심판법 제31조' },
+        { q: '임시처분 적극요건③ — 중대한 불이익이나 무엇이 존재해야 하는가?', a: '급박한 위험', k: '급박' }
       ],
       [
         { q: '긴급한 경우 직권으로 결정할 수 있는 주체는?', a: '위원장' },
@@ -4772,7 +4785,8 @@
       [
         { q: '고지해야 할 내용① — 행정심판을 제기할 수 있는지의 여부는?', a: '제기가능여부' },
         { q: '고지해야 할 내용② — 심판청구를 어떤 절차로 해야 하는지는?', a: '심판청구절차' },
-        { q: '고지해야 할 내용③ — 언제까지 청구해야 하는지는?', a: '청구기간' }
+        { q: '고지해야 할 내용③ — 언제까지 청구해야 하는지는?', a: '청구기간' },
+        { q: '고지제도의 취지는?', a: '행정의 민주화', k: '민주화' }
       ],
       [
         { q: '행정절차법상 고지의무의 근거조문은?', a: '행정절차법 제26조' },
@@ -4904,6 +4918,7 @@
     log[key] = next;
     saveQboxStatusLog(log);
     renderQboxStatusBadge(unit, qboxTier(next));
+    if (!allHit) bumpAtomicGroup(problemId, idx);
     renderReviewHeatmap();
     renderWrongList();
   }
@@ -5038,13 +5053,16 @@
     }).join('');
   }
 
-  // ---- 오답 단답노트: (3)자가테스트에서 빨강/주황(qboxTier)인 문항의 키워드마다
+  // ---- 오답 단답노트: (3)자가테스트에서 틀린(빨강/주황, qboxTier) 문항의 키워드마다
   // SHORTQ_BY_PROBLEM에 이미 쪼개져 있는 단답형 카드 하나씩을 큐에 쌓는다.
-  // atomicQueue는 실제로 화면에 보여줄 순서를 담은 배열이며(세션 동안만 유지),
-  // confirmedAtomicKeys는 "이미 한 번 맞혀서 다시 안 물어봐도 되는" 키워드를
-  // localStorage에 영구히 기록한다(qbox 자체의 streak/heatmap과는 별개로 관리 —
-  // 이 노트는 원래 문항 전체가 아니라 키워드 단위로 확인하는 보조 드릴이다).
+  // 카드는 한번 만들어지면 노트에서 직접 풀거나(정답) 전체 초기화를 누를 때까지
+  // 남는다 — 자가테스트에서 나중에 맞혀 초록이 되어도 지워지지 않는다. 그래서
+  // atomicQueue(화면에 보여줄 순서를 담은 배열)를 localStorage에 저장하고,
+  // confirmedAtomicKeys에는 "노트에서 풀어 확인이 끝난" 키워드를 영구히 기록한다
+  // (qbox 자체의 streak/heatmap과는 별개로 관리 — 이 노트는 문항 전체가 아니라
+  // 키워드 단위로 확인하는 보조 드릴이다).
   const ATOMIC_CONFIRMED_KEY = 'admin-law-25-atomic-confirmed-v1';
+  const ATOMIC_QUEUE_KEY = 'admin-law-25-atomic-queue-v1';
   function loadConfirmedAtomicKeys() {
     try { return new Set(JSON.parse(localStorage.getItem(ATOMIC_CONFIRMED_KEY)) || []); }
     catch (e) { return new Set(); }
@@ -5052,8 +5070,19 @@
   function saveConfirmedAtomicKeys(set) {
     try { localStorage.setItem(ATOMIC_CONFIRMED_KEY, JSON.stringify(Array.from(set))); } catch (e) {}
   }
+  function loadAtomicQueue() {
+    try {
+      const arr = JSON.parse(localStorage.getItem(ATOMIC_QUEUE_KEY));
+      return Array.isArray(arr) ? arr : [];
+    } catch (e) { return []; }
+  }
+  function saveAtomicQueue() {
+    try { localStorage.setItem(ATOMIC_QUEUE_KEY, JSON.stringify(atomicQueue)); } catch (e) {}
+  }
   const confirmedAtomicKeys = loadConfirmedAtomicKeys();
-  let atomicQueue = [];
+  // 저장된 큐를 복원한다 — 이미 확인이 끝났거나 데이터에서 사라진 카드는 제외.
+  let atomicQueue = Array.from(new Set(loadAtomicQueue()))
+    .filter((key) => !confirmedAtomicKeys.has(key) && atomicItemFor(key));
   // 카드별 페이드 사유: 'correct'(정답 — 페이드 후 큐에서 제거) 또는
   // 'wrong'(오답 — 정답을 보여주며 페이드 후 큐의 맨 뒤로 이동).
   const fadingAtomicCards = new Map();
@@ -5070,31 +5099,22 @@
     const arr = (SHORTQ_BY_PROBLEM[p.problemId] || [])[p.qIdx];
     return arr ? arr[p.kwIdx] : null;
   }
-  // qbox-status 로그와 큐를 동기화한다: 빨강/주황인 문항의 아직 미확인 키워드를
-  // 큐에 새로 추가하고, 더 이상 빨강/주황이 아닌 문항(예: 자가테스트에서 다시
-  // 맞혀 초록이 된 경우)의 카드는 큐에서 뺀다(단, 페이드 중인 카드는 애니메이션이
-  // 끝날 때까지 건드리지 않는다).
+  // qbox-status 로그와 큐를 맞춘다: 지금 틀린(빨강/주황) 문항의 아직 확인 안 된
+  // 키워드를 큐 맨 위에 새로 추가한다. 반대로 카드를 큐에서 빼는 일은 여기서
+  // 하지 않는다 — 자가테스트에서 다시 맞혀 초록이 되어도 카드는 노트에서 풀기
+  // 전까지 남아야 하므로, 제거는 노트에서 정답을 맞힐 때와 전체 초기화에서만
+  // 일어난다.
   function syncAtomicQueue() {
     const log = loadQboxStatusLog();
-    const wrongGroups = new Set();
-    Object.keys(log).forEach((qkey) => {
-      const tier = qboxTier(log[qkey]);
-      if (tier === 'red' || tier === 'orange') wrongGroups.add(qkey);
-    });
-
-    atomicQueue = atomicQueue.filter((key) => {
-      if (fadingAtomicCards.has(key)) return true;
-      const p = parseAtomicKey(key);
-      return wrongGroups.has(p.problemId + '-' + p.qIdx);
-    });
-
     const inQueue = new Set(atomicQueue);
     // 새로 나타나는 카드는 맨 위에서부터 보이도록 모아 뒀다가 큐 맨 앞에
     // 한 번에 붙인다(이미 있는 카드는 여기서 다시 추가되지 않으므로 —
     // inQueue 체크 — 중복 생성되지 않고, 오답으로 맨 뒤에 가 있던 카드의
     // 위치도 그대로 유지된다).
     const newItems = [];
-    wrongGroups.forEach((qkey) => {
+    Object.keys(log).forEach((qkey) => {
+      const tier = qboxTier(log[qkey]);
+      if (tier !== 'red' && tier !== 'orange') return;
       const lastDash = qkey.lastIndexOf('-');
       const problemId = qkey.slice(0, lastDash);
       const qIdx = Number(qkey.slice(lastDash + 1));
@@ -5106,7 +5126,27 @@
         inQueue.add(key);
       });
     });
-    if (newItems.length) atomicQueue = newItems.concat(atomicQueue);
+    if (newItems.length) {
+      atomicQueue = newItems.concat(atomicQueue);
+      saveAtomicQueue();
+    }
+  }
+
+  // 자가테스트에서 문항을 틀릴 때마다(recordQboxResult) 그 문항의 카드를 큐 맨
+  // 위로 올린다: 아직 큐에 남아 있는 카드는 중복 생성하지 않고 위로 옮기고,
+  // 앞서 노트에서 풀어 확인이 끝났던 카드는 새 오답이므로 다시 쌓는다.
+  // (페이드 중인 카드는 애니메이션이 끝날 때까지 자리를 건드리지 않는다.)
+  function bumpAtomicGroup(problemId, qIdx) {
+    const items = (SHORTQ_BY_PROBLEM[problemId] || [])[qIdx] || [];
+    const keys = items
+      .map((item, kwIdx) => atomicKey(problemId, qIdx, kwIdx))
+      .filter((key) => !fadingAtomicCards.has(key));
+    if (!keys.length) return;
+    keys.forEach((key) => confirmedAtomicKeys.delete(key));
+    saveConfirmedAtomicKeys(confirmedAtomicKeys);
+    const moved = new Set(keys);
+    atomicQueue = keys.concat(atomicQueue.filter((key) => !moved.has(key)));
+    saveAtomicQueue();
   }
 
   function renderWrongList() {
@@ -5214,6 +5254,7 @@
         const idx = atomicQueue.indexOf(key);
         if (idx !== -1) { atomicQueue.splice(idx, 1); atomicQueue.push(key); }
       }
+      saveAtomicQueue();
       renderWrongList();
       // 오답으로 맨 뒤에 다시 쌓인 카드는 방금 틀렸던 입력값을 그대로 들고
       // 있으면 안 된다 — renderWrongList의 입력값 보존 로직(다른 카드가
@@ -5242,6 +5283,7 @@
     atomicQueue.forEach((key) => confirmedAtomicKeys.add(key));
     saveConfirmedAtomicKeys(confirmedAtomicKeys);
     atomicQueue = [];
+    saveAtomicQueue();
     fadingAtomicCards.clear();
     renderWrongList();
   });
