@@ -63,7 +63,8 @@
     background:var(--bg); color:var(--ink); padding:var(--pad); max-width:var(--container-w); margin:0 auto;
     padding-bottom:calc(var(--pad) + 64px);
   }
-  h1{font-size:var(--fs-title); line-height:1.15; font-weight:800; margin:0; text-align:left; letter-spacing:-0.02em;}
+  /* word-break:keep-all — 히트맵 열 수가 창 폭에 따라 바뀌어 제목이 쓸 수 있는 폭도 달라지므로, 한글이 낱말 중간("기/본문제")에서 끊기지 않게 한다 */
+  h1{font-size:var(--fs-title); line-height:1.15; font-weight:800; margin:0; text-align:left; letter-spacing:-0.02em; word-break:keep-all;}
   .page-header{display:flex; align-items:flex-start; justify-content:space-between; gap:12px; margin:18px 0 32px;}
 
   /* ---- Outer: which of the 4 problems ---- */
@@ -150,6 +151,17 @@
   /* 볼드(정답 채점 키워드)와 구분되는 2단계 강조 — 채점되지는 않지만 서술에 꼭
      필요한 전문용어·중요 배점 포인트를 진하게 굵히지 않고 밑줄로만 표시한다. */
   .reveal u{text-decoration:underline; text-decoration-color:var(--accent2); text-decoration-thickness:1.5px; text-underline-offset:3px;}
+  /* ---- 정답 아래 참고표(채점과 무관한 참고자료): 예) 문제21 Q5의 행정소송법·행정심판법 집행정지 요건 비교.
+     채점은 KEYWORDS_BY_PROBLEM과 입력한 답만 보므로 이 표는 채점에 영향을 주지 않는다. ---- */
+  .reveal .ref-table{margin-top:12px; padding-top:10px; border-top:1px dashed var(--line);}
+  .reveal .ref-table-ttl{font-size:var(--fs-sm); font-weight:700; color:var(--sub); margin-bottom:6px;}
+  .reveal .ref-table-scroll{overflow-x:auto;}
+  .reveal .ref-table table{width:100%; border-collapse:collapse; background:#fff; font-size:var(--fs-sm); line-height:1.5;}
+  /* keep-all: 한글 낱말이 칸 안에서 중간("공공복/리")에 끊기지 않게, 칸보다 긴 낱말만 anywhere로 끊는다 */
+  .reveal .ref-table th, .reveal .ref-table td{border:1px solid var(--line); padding:6px 8px; text-align:left; vertical-align:top; word-break:keep-all; overflow-wrap:anywhere;}
+  .reveal .ref-table thead th{background:#f1ece2; text-align:center;}
+  .reveal .ref-table tbody th{background:#faf7f0; width:6.4em;}
+  .reveal .ref-table-note{margin:8px 0 0; font-size:var(--fs-sm); color:var(--sub); line-height:1.55;}
   .kwfb{margin-top:8px; padding:9px 11px; background:var(--card); border:1px solid var(--line); border-radius:8px; font-size:var(--fs-sm); line-height:1.85; display:none;}
   .kwfb.show{display:block;}
   .kwfb .kw-hit{color:var(--accent2); font-weight:700;}
@@ -162,10 +174,13 @@
      기본 단계는 "미확정"(빨강+주황+안 푼 문항) 비율로 정해진다 — 주황은 아직
      확정 안 된 상태라 빨강과 같이 묶고, 채점을 한 번이라도 시작했다면 안 푼
      문항도 전부 미확정으로 간주한다(4개 중 1개만 틀려도 나머지 3개가
-     "미채점"이라는 이유로 초록이 되지 않도록). 그 위에 두 가지 보정으로 한
-     단계씩 올린다: ① 전 문항을 채점했고 그중 빨강이 하나도 없으면(전부 주황
-     이상), ② 빨강이 남아있어도 초록+진한초록이 전체의 과반수 이상이면.
-     자세한 계산은 heatmapLevelFor() 참고. */
+     "미채점"이라는 이유로 초록이 되지 않도록). 중간초록 이상은 초록+진한초록
+     (초록 완료)이 전체 문항의 절반 이상일 때만 나온다 — 전부 주황이어도 중간초록이
+     되지 않는다. 그 위에, 초록 완료가 절반 이상일 때 한해 한 단계 올리는 보정이
+     있다: ① 전 문항을 채점했고 빨강이 하나도 없으면(나머지는 주황), ② 빨강이
+     남아있어도.
+     자세한 계산은 heatmapLevelFor() 참고. 칸의 배열(열 수)은 문제 버튼(.ptab)의
+     배열과 같게 syncHeatmapColumns()가 맞춘다(아래 기본값 7열은 JS가 없을 때만). */
   .review-heatmap{display:grid; grid-template-columns:repeat(7, 14px); gap:3px; width:fit-content; flex-shrink:0; margin:4px 0 0;}
   .heat-cell-wrap{position:relative; display:block; width:14px; height:14px; cursor:pointer;}
   .heat-cell{display:block; width:14px; height:14px; border-radius:3px; background:#eee7da;}
@@ -2983,7 +2998,7 @@
     <div class="qbox">
       <div class="q">Q1. 사업인정 거부가 처분이 되기 위한 요건과, 신청권 존부에 대한 검토의 결론을 써보세요.</div>
       <textarea placeholder="여기에 답을 적어보세요..."></textarea>
-      <div class="reveal">국토교통부장관의 거부는 공권력행사의 거부로서 국민의 권리·의무에 영향을 미치며, <b>토지보상법 제20조</b> 및 동법 시행령 제10조 등에 근거하여 <b>법규상 신청권</b>이 인정되므로 처분에 해당한다. 신청권은 구체적 사건의 신청인이 누구인지와 무관하게 일반국민을 기준으로 추상적으로 판단하는 것이므로 <b>대상적격</b>의 문제로 봄이 타당하다.</div>
+      <div class="reveal">사업인정 거부가 항고소송의 대상인 처분(거부처분)이 되려면 판례상 ① <b>공권력행사의 거부</b>일 것 ② 그 거부가 국민의 <b>권리·의무에 영향</b>을 미칠 것 ③ 법규상 또는 조리상 <b>신청권</b>이 존재할 것의 요건을 모두 충족하여야 한다. 이 중 신청권은 구체적 사건의 신청인이 누구인지와 무관하게 일반국민을 기준으로 추상적으로 판단하는 것이므로 본안문제나 원고적격이 아니라 <b>대상적격</b>의 문제로 봄이 타당하다. 사안에서 국토교통부장관의 거부는 공권력행사의 거부로서 사업시행자인 甲기업의 권리·의무에 영향을 미치고, <b>토지보상법 제20조</b> 및 동법 시행령 제10조 등에 근거하여 <b>법규상 신청권</b>이 인정되므로 처분에 해당한다.</div>
     </div>
     <div class="qbox">
       <div class="q">Q2. 甲기업이 제기할 수 있는 행정심판 수단 2가지와, 가구제 수단으로 실효적인 것을 써보세요.</div>
@@ -3003,7 +3018,27 @@
     <div class="qbox">
       <div class="q">Q5. 행정소송법상 집행정지의 요건 6가지를 써보세요.</div>
       <textarea placeholder="여기에 답을 적어보세요..."></textarea>
-      <div class="reveal">행정소송법 제23조 제2항에 근거한 집행정지가 인정되려면 ① <b>정지대상인 처분 등이 존재</b>할 것 ② <b>적법한 본안소송</b>이 계속 중일 것 ③ <b>회복하기 어려운 손해</b>가 생길 우려가 있을 것 ④ <b>긴급한 필요</b>가 존재할 것 ⑤ <b>공공복리</b>에 중대한 영향이 없을 것 ⑥ <b>본안청구가 이유 없음이 명백</b>하지 아니할 것을 요한다.</div>
+      <div class="reveal">행정소송법 제23조 제2항에 근거한 집행정지가 인정되려면 ① <b>정지대상인 처분 등이 존재</b>할 것 ② <b>적법한 본안소송</b>이 계속 중일 것 ③ <b>회복하기 어려운 손해</b>가 생길 우려가 있을 것 ④ <b>긴급한 필요</b>가 존재할 것 ⑤ <b>공공복리</b>에 중대한 영향이 없을 것 ⑥ <b>본안청구가 이유 없음이 명백</b>하지 아니할 것을 요한다.
+        <div class="ref-table">
+          <div class="ref-table-ttl">참고 · 집행정지 요건 비교 — 행정소송법 vs 행정심판법 (채점과 무관)</div>
+          <div class="ref-table-scroll">
+            <table>
+              <thead><tr><th>구분</th><th>행정소송법 (제23조)</th><th>행정심판법 (제30조)</th></tr></thead>
+              <tbody>
+                <tr><th>결정 주체</th><td>본안이 계속된 <u>법원</u> (당사자의 신청 또는 직권, 제2항)</td><td><u>행정심판위원회</u> (직권 또는 당사자의 신청, 제2항) — 긴급하면 위원장이 위원회의 심리·결정을 갈음하는 결정(제6항)</td></tr>
+                <tr><th>① 처분 등의 존재</th><td>정지 대상인 처분 등이 존재할 것</td><td>같음 — 정지 대상인 처분이 존재할 것</td></tr>
+                <tr><th>② 본안 계속</th><td>적법한 본안소송(취소소송 등)이 계속 중일 것 (제2항)</td><td>심판청구가 제기되어 있을 것 — 신청은 심판청구와 동시에 또는 위원회 의결 전까지(제5항)</td></tr>
+                <tr><th>③ 손해</th><td><u>회복하기 어려운 손해</u>를 예방할 것 (제2항)</td><td><u>중대한 손해</u>를 예방할 것 (제2항) — <u>요건이 완화</u>됨</td></tr>
+                <tr><th>④ 긴급성</th><td>긴급한 필요가 있을 것 (제2항)</td><td>예방할 필요성이 긴급할 것 (제2항) — 같음</td></tr>
+                <tr><th>⑤ 공공복리</th><td>공공복리에 중대한 영향을 미칠 우려가 없을 것 (제3항)</td><td>같음 (제3항)</td></tr>
+                <tr><th>⑥ 본안청구</th><td>이유 없음이 명백하지 아니할 것 (명문 규정은 없고 판례·통설상 소극적 요건)</td><td>명문 규정은 없으나 같은 요건으로 보는 것이 일반적</td></tr>
+                <tr><th>효력정지의 보충성</th><td>집행정지로 목적을 달성할 수 있으면 효력정지는 허용되지 않음 (제2항 단서)</td><td>같음 (제2항 단서)</td></tr>
+                <tr><th>신청 방식</th><td>신청 시 이유에 대한 소명이 있어야 함 (제4항)</td><td>신청의 취지와 원인을 적은 서면을 위원회에 제출 (제5항)</td></tr>
+              </tbody>
+            </table>
+          </div>
+          <p class="ref-table-note">핵심 차이는 ③ — 행정심판법은 행정소송법의 '회복하기 어려운 손해'보다 <u>완화된 '중대한 손해'</u>를 요건으로 한다(<a href="#" class="related-link" data-jump="p24">문제24</a> 참고).</p>
+        </div></div>
     </div>
     <div class="quiz-related">
       <p><b>관련.</b> <a href="#" class="related-link" data-jump="p15">문제15</a>·<a href="#" class="related-link" data-jump="p23">문제23</a>과 같은 신청권/대상적격 구도(거부처분 버전), <a href="#" class="related-link" data-jump="p24">문제24</a>(행정심판 가구제)와는 집행정지·임시처분 논의가 그대로 이어짐</p>
@@ -3416,6 +3451,7 @@
 <div class="help-panel" id="helpPanel">
   <div class="ttl">단축키 안내</div>
   <div class="row"><kbd>Ctrl</kbd>+<kbd>1</kbd> 구조 · <kbd>Ctrl</kbd>+<kbd>2</kbd> 암기카드 · <kbd>Ctrl</kbd>+<kbd>3</kbd> 자가테스트</div>
+  <div class="row"><kbd>Ctrl</kbd>+<kbd>Q</kbd> 오답 단답노트 입력창으로 이동(노트는 창 폭 1500px 이상에서 보입니다)</div>
   <div class="row">구조 탭 우측(모바일은 하단) 얇은 글씨가 서술형 답안 작성 팁입니다</div>
   <div class="row">암기카드 화면에서 탭 또는 <kbd>Space</kbd>/<kbd>Enter</kbd>: 처음 누르면 정답 확인, 다시 누르면 다음 카드로 이동</div>
   <div class="row">자가테스트 입력창에서 <kbd>Enter</kbd>: 정답 확인 + 주요 키워드 채점(✓/✗) / <kbd>Shift</kbd>+<kbd>Enter</kbd>: 줄바꿈 / <kbd>Shift</kbd> 두 번: 확인 후 다음 문항으로 이동</div>
@@ -4085,6 +4121,27 @@
     });
   });
 
+  // ---- Ctrl+Q: 오답 단답노트 입력창으로 바로 이동 ----
+  // 노트(#wrongqMini) 맨 위 카드의 입력창으로 포커스를 옮겨 바로 답을 칠 수 있게 한다(Enter로 채점하면 자동으로 다음
+  // 카드로 이어진다). 자가테스트 입력창에서 타이핑 중이어도 동작해야 하므로 window에서 받고, 영문 키가 아닌 입력 상태
+  // (한글 등)에서는 물리 키(KeyQ)로 판별한다. 노트는 창 폭 1500px 이상에서만 보이므로(그보다 좁으면 display:none)
+  // 그때는 아무 일도 하지 않는다. 검색창·전체 문제 지도가 열려 있을 때도 건드리지 않는다.
+  window.addEventListener('keydown', (e) => {
+    if (!e.ctrlKey || e.metaKey || e.altKey || e.shiftKey) return;
+    const k = String(e.key || '');
+    const isQ = /^[a-z]$/i.test(k) ? k.toLowerCase() === 'q' : e.code === 'KeyQ';
+    if (!isQ) return;
+    const overlayOpen = ['searchOverlay', 'mindmapOverlay'].some((id) => {
+      const el = document.getElementById(id);
+      return !!el && el.classList.contains('show');
+    });
+    const panel = document.getElementById('wrongqMini');
+    if (overlayOpen || !panel || getComputedStyle(panel).display === 'none') return;
+    e.preventDefault();
+    const input = panel.querySelector('.wq-input:not(:disabled)');
+    if (input) input.focus();
+  });
+
   // ---- 자가테스트 입력창 단축키 ----
   // Enter: 정답/목차 확인(reveal) · Shift+Enter: 줄바꿈(기본 동작 유지)
   // Shift 두 번 연속(다른 키 조합 없이): 확인 후 다음 문항으로 포커스 이동
@@ -4228,7 +4285,7 @@
       ['기속력', '당연무효']
     ],
     p21: [
-      ['법규상 신청권', '대상적격', '토지보상법 제20조'],
+      ['공권력행사의 거부', '권리·의무에 영향', '법규상 신청권', '대상적격', '토지보상법 제20조'],
       ['거부처분취소심판', '의무이행심판', '임시처분'],
       ['같은 상태를 만드는 것', '제한적 긍정설'],
       ['각하'],
@@ -4880,9 +4937,10 @@
 
   // ---- 상단 기록로그(히트맵): 자가테스트 정답체크 배지 비율로 자동 계산 ----
   // 수동 입력은 없다. 문제별로 qbox-status 배지(빨강/주황/초록/진한초록)를 세어
-  // 빨간박스 비율이 절반 이상이면 아주 연한 초록(lv-low), 채점 기록이 없거나
-  // 빨간박스가 일부 섞여 있으면 중간 초록(lv-mid), 전 문항을 채점했고 빨간박스가
-  // 하나도 없으면 진한 초록(lv-high)으로 채운다.
+  // 미확정(빨강+주황+안 푼 문항)이 절반 이상이면 아주 연한 초록(lv-low), 그보다 적으면
+  // 중간 초록(lv-mid), 전부 초록 이상이면 진한 초록(lv-high)이 기본이고, 초록 완료가
+  // 절반 이상일 때만 한 단계 올리는 보정이 붙는다(heatmapLevelFor 참고). 그래서
+  // 중간초록 이상은 "초록+진한초록이 전체의 절반 이상"인 문제에만 나온다.
   function computeProblemStats(problemId) {
     const problemRoot = document.getElementById('problem-' + problemId);
     const qboxes = problemRoot ? Array.from(problemRoot.querySelectorAll(':scope .qbox')) : [];
@@ -4913,14 +4971,16 @@
     else if (unresolved / stats.total >= 0.5) level = 0;
     else level = 1;
 
-    // 보정(한 단계 상향, 진한초록을 넘어서지는 않음):
-    // A) 전 문항을 채점했고 그중 빨강이 하나도 없으면(전부 주황 이상) — "모두
-    //    주황 이상"인 문제가 "전부 빨강"인 문제와 같은 연한초록에 머무르지 않도록.
-    // B) 빨강이 남아있어도, 초록+진한초록이 전체 문항의 과반수 이상이면 —
-    //    일부 실수가 있어도 확실히 아는 문항이 더 많다는 점을 반영.
-    if (level < 2) {
+    // 보정(한 단계 상향, 진한초록을 넘어서지는 않음) — 초록 완료(초록+진한초록)가 전체 문항의
+    // 절반 이상일 때만 적용한다. 그래야 전부 주황("모두 주황"은 아직 확정 전)이거나 초록이 절반에
+    // 못 미치는 문제가 중간초록으로 올라가지 않는다. 즉 중간초록 이상 = 초록 완료 절반 이상.
+    // A) 전 문항을 채점했고 그중 빨강이 하나도 없으면(나머지는 주황) — 절반 이상이 확정됐는데
+    //    나머지가 주황일 뿐이므로 한 단계 올린다.
+    // B) 빨강이 남아있어도 — 일부 실수가 있어도 확실히 아는 문항이 더 많다는 점을 반영.
+    const greenDone = stats.green + stats.darkgreen;
+    if (level < 2 && greenDone / stats.total >= 0.5) {
       if (stats.red === 0 && ungraded === 0) level++;
-      else if (stats.red > 0 && (stats.green + stats.darkgreen) / stats.total >= 0.5) level++;
+      else if (stats.red > 0) level++;
     }
 
     return LEVELS[level];
@@ -4939,6 +4999,29 @@
         '<div class="heat-tip"><div class="heat-tip-name">' + label + '</div></div>' +
       '</span>';
     }).join('');
+    syncHeatmapColumns();
+  }
+
+  // 히트맵 칸의 배열을 문제 버튼(.ptab)의 배열에 맞춘다. 버튼은 flex-wrap이라 창 폭에 따라 한 줄에 놓이는 개수가
+  // 달라지므로(좁을수록 적게, 넓을수록 많게 — 2~7개) 실제로 첫 줄에 놓인 버튼 수를 재어 히트맵의 열 수로 쓴다 —
+  // 칸 i가 버튼 i와 같은 줄·같은 열에 오도록(둘 다 PROBLEM_ORDER 순서). 창 크기가 바뀔 때마다 다시 맞춘다.
+  function syncHeatmapColumns() {
+    const heatmap = document.getElementById('reviewHeatmap');
+    const tabs = document.querySelectorAll('.problem-tabs .ptab');
+    if (!heatmap || !tabs.length || tabs[0].offsetParent === null) return;
+    const firstTop = tabs[0].getBoundingClientRect().top;
+    let cols = 0;
+    for (const tab of tabs) {
+      if (Math.abs(tab.getBoundingClientRect().top - firstTop) > 2) break;
+      cols++;
+    }
+    const value = 'repeat(' + Math.max(cols, 1) + ', 14px)';
+    if (heatmap.style.gridTemplateColumns !== value) heatmap.style.gridTemplateColumns = value;
+  }
+  window.addEventListener('resize', syncHeatmapColumns);
+  if ('ResizeObserver' in window) {
+    const problemTabsEl = document.querySelector('.problem-tabs');
+    if (problemTabsEl) new ResizeObserver(syncHeatmapColumns).observe(problemTabsEl);
   }
 
   // ---- 오답 단답노트: (3)자가테스트에서 틀린(빨강/주황, qboxTier) 문항의 단답 카드
