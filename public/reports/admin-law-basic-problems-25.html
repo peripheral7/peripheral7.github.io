@@ -186,7 +186,6 @@
   }
   .heat-cell-wrap:hover .heat-tip{opacity:1; pointer-events:auto; transform:translateY(0);}
   .heat-tip-name{font-size:12.5px; font-weight:700; color:var(--accent2); text-decoration:underline; text-underline-offset:2px;}
-  .heat-tip-stat{margin-top:3px; font-size:11px; color:var(--sub); white-space:nowrap;}
 
   /* ---- 목차 (구조 탭 상단 요약) ---- */
   .toc{background:#f7f5f0; border:1px solid var(--line); border-radius:10px; padding:12px 16px; margin-bottom:14px; max-width:var(--content-w);}
@@ -4934,13 +4933,10 @@
       const level = heatmapLevelFor(stats);
       const ptab = document.querySelector('.ptab[data-problem="' + id + '"]');
       const label = ptab ? ptab.innerHTML.replace(/<br\s*\/?>/gi, ' ').replace(/<[^>]+>/g, '').replace(/\s+/g, ' ').trim() : id;
-      const ungraded = stats.total - stats.graded;
-      const stat = stats.graded > 0
-        ? stats.graded + '/' + stats.total + ' 채점 · 빨강 ' + stats.red + ' · 주황 ' + stats.orange + (ungraded > 0 ? ' · 미채점 ' + ungraded : '')
-        : '채점 기록 없음';
+      // 마우스를 올렸을 때 툴팁에는 문제 이름만 보인다 — 채점 상태(채점 수·빨강/주황·미채점)는 표시하지 않고, 상태는 칸 색으로만 나타낸다.
       return '<span class="heat-cell-wrap" data-jump="' + id + '">' +
         '<span class="heat-cell' + (level ? ' ' + level : '') + '"></span>' +
-        '<div class="heat-tip"><div class="heat-tip-name">' + label + '</div><div class="heat-tip-stat">' + stat + '</div></div>' +
+        '<div class="heat-tip"><div class="heat-tip-name">' + label + '</div></div>' +
       '</span>';
     }).join('');
   }
