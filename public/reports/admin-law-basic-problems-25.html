@@ -512,6 +512,21 @@
   .sync-adv{margin-top:10px; font-size:var(--fs-sm);}
   .sync-adv summary{cursor:pointer; color:var(--sub);}
   .sync-adv button{display:block; width:100%; margin-top:6px; text-align:left;}
+
+  /* ---- 모바일(폭 ≤520px): 하단 중앙 페이지 이동 바(버튼 4개, 폭 약 337px)가 화면 폭 대부분을 차지해 오른쪽 아래
+     원형 버튼('?'·구름)을 덮는다(폭 약 460px 미만에서 겹침 — '답안 초기화' 글자가 가려짐). 바(높이 약 53px + 아래 여백 18px)
+     위로 원형 버튼과 각 패널을 62px씩 올려 겹치지 않게 한다. 폭 521px 이상(태블릿·데스크톱)은 그대로. ---- */
+  @media (max-width:520px){
+    .help-toggle{bottom:82px;}
+    .help-panel{bottom:132px;}
+    .sync-toggle{bottom:142px;}
+    .sync-panel{bottom:192px;}
+  }
+  /* 폭 360px 미만(예: 320px 기기)에서는 이동 바 자체(337px)가 화면보다 넓어 양끝이 잘리므로 좌우 여백만 줄인다(높이는 그대로 → 위 62px 계산 유지). */
+  @media (max-width:359px){
+    .pagenav{gap:4px; padding:6px 5px;}
+    .pagenav button{padding:10px 11px;}
+  }
 </style>
 </head>
 <body>
