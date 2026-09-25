@@ -48,6 +48,13 @@
   --radius-4xl: calc(var(--radius) * 2.6);
 }
 
+/* 사이트 목차를 바꾸는 폭(nav: 변형): 이 폭 이상이면 왼쪽 플로팅 카드(SiteSidebar), 미만이면 화면 위 상단바(SiteTopbar).
+   1440px = 플로팅 카드(왼쪽 16px + 폭 240px)가 가운데 정렬된 본문(최대 폭 약 900px)과 겹치지 않기 시작하는 폭이다.
+   풀HD(1920px)·QHD(2560px) 모니터의 절반 창(약 960·1280px)은 모두 이보다 좁아 상단바가 된다. */
+@theme {
+  --breakpoint-nav: 90rem;
+}
+
 @layer base {
   :root {
     color-scheme: light;

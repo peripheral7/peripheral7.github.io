@@ -1,5 +1,4 @@
 import Image from "next/image"
-import { FloatingBackButton } from "@/components/simple-post-header"
 
 
 export type PinStyle = "pin" | "tape" | "clip" | "none"
@@ -146,19 +145,16 @@ export function PostBoard({
   title,
   eyebrow,
   intro,
-  backHref = "/",
   sections,
 }: {
   title: string
   sidebarTitle?: string
   eyebrow?: string
   intro?: string
-  backHref?: string
   sections: BoardSection[]
 }) {
   return (
     <div className="relative min-h-screen bg-black text-foreground overflow-x-hidden">
-      <FloatingBackButton href={backHref} />
       <main className="mx-auto w-full max-w-5xl min-h-screen bg-background px-4 pt-24 pb-16 md:px-12 lg:px-16 shadow-2xl transition-all duration-300">
         <header className="mb-10 border-b border-border pb-8">
           {eyebrow && (

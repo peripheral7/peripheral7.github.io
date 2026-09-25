@@ -10,7 +10,6 @@ export default function Cbr650fBoardPage() {
     <main className="min-h-screen bg-background text-foreground">
       <PostBoard
         {...cbr650fMeta}
-        backHref="/"
         sections={cbr650fBoard}
       />
     </main>

@@ -4,20 +4,9 @@ import Link from "next/link"
 import { usePathname } from "next/navigation"
 import { useEffect, useState } from "react"
 import type { Category, Post } from "@/lib/posts"
+import { CATEGORY_LABELS, CATEGORY_ORDER, normalizePath as normalize } from "@/lib/site-nav"
 
-const CATEGORY_LABELS: Record<Category, string> = {
-  STUDY: "Study",
-  RESEARCH: "Research",
-  PHOTOGRAPHY: "Photography",
-}
-
-const CATEGORY_ORDER: Category[] = ["STUDY", "RESEARCH", "PHOTOGRAPHY"]
-
-function normalize(path: string) {
-  if (path.length > 1 && path.endsWith("/")) return path.slice(0, -1)
-  return path || "/"
-}
-
+// 폭 1440px 이상(nav 브레이크포인트, app/globals.css)에서만 보이는 왼쪽 플로팅 목차. 그보다 좁은 창에서는 상단바(SiteTopbar)가 대신한다.
 export function SiteSidebar({ posts }: { posts: Post[] }) {
   const pathname = usePathname()
   const current = normalize(pathname ?? "/")
@@ -35,7 +24,7 @@ export function SiteSidebar({ posts }: { posts: Post[] }) {
   if (current === "/") return null
 
   return (
-    <aside className="pointer-events-none fixed left-4 top-4 z-40 hidden max-h-[75vh] w-60 overflow-y-auto rounded-2xl border border-border/60 bg-background/95 shadow-xl backdrop-blur-sm md:block xl:top-1/2 xl:-translate-y-1/2">
+    <aside className="pointer-events-none fixed left-4 top-1/2 z-40 hidden max-h-[75vh] w-60 -translate-y-1/2 overflow-y-auto rounded-2xl border border-border/60 bg-background/95 shadow-xl backdrop-blur-sm nav:block">
       {/* the floating card overlaps page content instead of reserving space
           for itself, so only the links themselves catch clicks (pointer-events-auto) —
           empty padding/gaps stay click-through to whatever's underneath */}

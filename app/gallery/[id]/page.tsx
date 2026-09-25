@@ -26,7 +26,7 @@ export default async function GalleryPage({ params }: { params: Promise<{ id: st
   if (board) {
     return (
       <main className="min-h-screen bg-background text-foreground">
-        <PostBoard title={post.title} eyebrow={`${post.category} / Filed: ${post.date}`} backHref="/" sections={board} />
+        <PostBoard title={post.title} eyebrow={`${post.category} / Filed: ${post.date}`} sections={board} />
       </main>
     )
   }

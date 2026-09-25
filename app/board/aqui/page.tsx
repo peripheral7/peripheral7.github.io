@@ -10,7 +10,6 @@ export default function AquiBoardPage() {
     <main className="min-h-screen bg-background text-foreground">
       <PostBoard
         {...aquiMeta}
-        backHref="/"
         sections={aquiBoard}
       />
     </main>

@@ -2,6 +2,7 @@
 
 import { usePathname } from "next/navigation"
 import { SiteSidebar } from "@/components/site-sidebar"
+import { SiteTopbar } from "@/components/site-topbar"
 import type { Post } from "@/lib/posts"
 
 // The appraiser skill-tree is a full-viewport canvas that measures
@@ -28,7 +29,9 @@ export function SiteChrome({
 
   return (
     <>
+      {/* 넓은 창(nav 브레이크포인트 이상)은 왼쪽 플로팅 목차, 좁은 창은 상단바 — CSS로만 바뀌어 깜빡임이 없다 */}
       <SiteSidebar posts={posts} />
+      <SiteTopbar posts={posts} />
       {children}
     </>
   )
