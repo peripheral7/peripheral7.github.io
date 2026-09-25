@@ -15,10 +15,18 @@ node_modules
 .DS_Store
 
 # 03_stock_trading — VCP 파이프라인: 시크릿/캐시/로컬 중복 산출물 제외
-# (공개 결과물은 public/reports/vcp_dashboard.html, public/reports/data.json 로만 커밋됨)
+# (공개 결과물 public/reports/vcp_dashboard.html, data.json 은 main에 커밋하지 않는다 — 매일 통째로 바뀌는
+#  큰 파일이라 히스토리가 불어난다. 03_stock_trading/publish_data.ps1이 data 브랜치에 커밋 1개로 덮어써 올리고,
+#  배포 워크플로가 빌드할 때 data 브랜치에서 가져온다. 로컬에는 main.py가 만든 파일이 그대로 남는다.)
+/public/reports/vcp_dashboard.html
+/public/reports/data.json
 03_stock_trading/.env
 03_stock_trading/__pycache__/
 03_stock_trading/vcp_dashboard*.html
 03_stock_trading/*.log
 # 로컬 정적 빌드 산출물 (배포는 GitHub Actions가 수행)
 /out
+
+# Cloudflare Workers 로컬 개발 산출물/시크릿
+.wrangler/
+.dev.vars

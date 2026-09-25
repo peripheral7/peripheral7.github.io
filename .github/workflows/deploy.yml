@@ -2,7 +2,8 @@ name: Deploy to GitHub Pages
 
 on:
   push:
-    branches: ["main"]
+    # data: VCP 대시보드 산출물(03_stock_trading/publish_data.ps1이 매일 커밋 1개로 덮어씀)이 올라와도 배포한다.
+    branches: ["main", "data"]
   workflow_dispatch:
 
 permissions:
@@ -20,6 +21,8 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v4
+        with:
+          ref: main   # data 브랜치 푸시로 실행돼도 사이트 소스는 항상 main
 
       - name: Setup pnpm
         uses: pnpm/action-setup@v4
@@ -34,6 +37,18 @@ jobs:
 
       - name: Install dependencies
         run: pnpm install --frozen-lockfile
+
+      # vcp_dashboard.html / data.json 은 main 히스토리에 쌓지 않고 data 브랜치(커밋 1개)에만 둔다.
+      # data 브랜치가 없으면 대시보드 링크가 깨진 사이트가 배포되지 않도록 여기서 멈춘다(이전 배포는 그대로 유지됨).
+      - name: Fetch VCP dashboard data (data branch)
+        run: |
+          if ! git fetch --depth=1 origin data; then
+            echo "::error::data 브랜치가 없습니다. 03_stock_trading/publish_data.ps1 -Force 로 먼저 게시하세요."
+            exit 1
+          fi
+          git show FETCH_HEAD:vcp_dashboard.html > public/reports/vcp_dashboard.html
+          git show FETCH_HEAD:data.json > public/reports/data.json
+          ls -l public/reports/vcp_dashboard.html public/reports/data.json
 
       - name: Build (static export)
         run: pnpm next build

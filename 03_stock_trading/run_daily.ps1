@@ -1,5 +1,7 @@
 ﻿# 매일 아침 8시, Windows 작업 스케줄러가 이 스크립트를 실행한다.
-# main.py 실행 -> public/reports/vcp_dashboard.html, data.json 갱신 -> 변경 시에만 커밋 & push.
+# main.py 실행 -> public/reports/vcp_dashboard.html, data.json 갱신 -> 변경 시에만 data 브랜치에 게시.
+# (두 파일은 main에 커밋하지 않는다: 매일 통째로 바뀌는 큰 파일이라 히스토리가 계속 불어난다.
+#  publish_data.ps1이 data 브랜치에 "커밋 1개"로 덮어써 올리고, 배포 워크플로가 main + data를 합쳐 빌드한다.)
 # 로그: 이 파일과 같은 폴더의 run_daily.log (실행마다 append)
 #
 # 주의: 이 파일은 반드시 UTF-8 BOM으로 저장되어야 한다. Windows PowerShell 5.1은 BOM이 없으면
@@ -25,17 +27,7 @@ try {
     }
 
     Set-Location $RepoRoot
-    & $Git add -- "public/reports/vcp_dashboard.html" "public/reports/data.json"
-    & $Git diff --cached --quiet -- "public/reports/vcp_dashboard.html" "public/reports/data.json"
-
-    if ($LASTEXITCODE -eq 0) {
-        Write-Host "변경사항 없음 — 커밋 생략"
-    } else {
-        $dateStr = Get-Date -Format "yyyy-MM-dd"
-        & $Git commit -m "Auto: VCP 대시보드 데이터 갱신 ($dateStr)"
-        & $Git push origin main
-        Write-Host "커밋 및 푸시 완료"
-    }
+    & (Join-Path $ScriptDir "publish_data.ps1") -RepoRoot $RepoRoot -Git $Git
 } catch {
     Write-Host "오류 발생: $_"
 } finally {
