@@ -4064,6 +4064,28 @@
     document.getElementById('helpPanel').classList.toggle('show');
   });
 
+  // ---- 바깥(배경)을 누르면 떠 있는 패널(도움말 '?'·진행사항 서버 저장 구름)이 닫힌다 · Esc로도 닫힌다 ----
+  // click이 아니라 pointerdown으로 받는다: 패널 안에서 글자를 드래그해 선택하다 밖에서 손을 떼도 닫히지 않고(click은 두 지점의
+  // 공통 조상에서 일어난다), 클릭 표시가 없는 배경에는 click이 안 오는 iOS에서도 동작한다. 캡처 단계에서 받아 다른 요소가 이벤트를
+  // 막아도 닫히고, 누른 곳의 원래 동작(탭 전환 등)은 막지 않는다. 각 패널의 토글 버튼은 자기 click 처리(열기/닫기)에 맡긴다.
+  const FLOATING_PANELS = [['helpPanel', 'helpToggle'], ['syncPanel', 'syncToggle']];
+  document.addEventListener('pointerdown', (e) => {
+    if (!(e.target instanceof Element)) return;
+    FLOATING_PANELS.forEach(([panelId, toggleId]) => {
+      const panel = document.getElementById(panelId);
+      if (!panel || !panel.classList.contains('show')) return;
+      if (e.target.closest('#' + panelId + ', #' + toggleId)) return;
+      panel.classList.remove('show');
+    });
+  }, true);
+  document.addEventListener('keydown', (e) => {
+    if (e.key !== 'Escape') return;
+    FLOATING_PANELS.forEach(([panelId]) => {
+      const panel = document.getElementById(panelId);
+      if (panel) panel.classList.remove('show');
+    });
+  });
+
   // ---- 자가테스트 입력창 단축키 ----
   // Enter: 정답/목차 확인(reveal) · Shift+Enter: 줄바꿈(기본 동작 유지)
   // Shift 두 번 연속(다른 키 조합 없이): 확인 후 다음 문항으로 포커스 이동
