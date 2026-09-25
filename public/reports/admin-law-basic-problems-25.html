@@ -5797,6 +5797,12 @@
     saveMeta();
   }
 
+  // 마지막으로 서버와 맞춘 뒤 로컬에 바뀐 것이 있는지(서버에 문서가 아직 없으면, 올릴 진행사항이 있는지).
+  function isDirty() {
+    const snap = readLocal();
+    return meta.synced === null ? hasProgress(snap) : stable(snap) !== meta.synced;
+  }
+
   async function pushIfDirty(attempt) {
     attempt = attempt || 0;
     const snap = readLocal();
@@ -5831,7 +5837,7 @@
       meta.lastOkAt = Date.now(); saveMeta();
       failures = 0;
       // 저장하는 사이 또 바뀌었다면 아직 대기 중(다음 저장이 곧 이어진다).
-      setPhase(stable(readLocal()) === meta.synced ? 'idle' : 'pending');
+      setPhase(isDirty() ? 'pending' : 'idle');
     } catch (e) {
       if (e instanceof AuthError) { setPhase('auth'); return; }
       setPhase(e instanceof TypeError ? 'offline' : 'error', e && e.message);
