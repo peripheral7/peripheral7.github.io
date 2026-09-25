@@ -2,8 +2,10 @@
 # data 브랜치에 "부모 없는 커밋 1개"로 덮어써 올린다(강제 푸시 — 이전 커밋은 남지 않는다).
 #
 # 이유: 이 두 파일은 매일 통째로 바뀌는 큰 생성 파일(약 7MB)이라 main에 커밋하면 저장소 용량이
-# 계속 불어난다(GitHub Pages 소스 저장소 권장 한도 1GB). 배포 워크플로(.github/workflows/deploy.yml)가
-# data 브랜치 푸시를 감지해 main + data를 합쳐 사이트를 다시 빌드한다.
+# 계속 불어난다(GitHub Pages 소스 저장소 권장 한도 1GB).
+# data 브랜치에는 배포 트리거 워크플로(data-branch/.github/workflows/trigger-deploy.yml)도 함께 담는다:
+# push 트리거는 푸시된 브랜치에 있는 워크플로만 실행하므로, 이 트리거가 main의 deploy.yml을 실행해
+# main + data를 합쳐 사이트를 다시 빌드한다.
 #
 # run_daily.ps1이 main.py 실행 후 호출한다. 단독 실행도 가능:
 #   powershell -File publish_data.ps1 -RepoRoot <저장소 경로> [-Force]
@@ -20,6 +22,14 @@ $ErrorActionPreference = "Stop"
 $Files  = @("vcp_dashboard.html", "data.json")
 $SrcDir = Join-Path $RepoRoot "public\reports"
 
+# data 브랜치에 담을 파일 목록: (브랜치 안 경로, 원본 경로). 산출물 두 개 + 배포 트리거 워크플로.
+$Items = @()
+foreach ($f in $Files) { $Items += [pscustomobject]@{ Rel = $f; Src = (Join-Path $SrcDir $f) } }
+$ExtraDir = Join-Path $PSScriptRoot "data-branch"
+Get-ChildItem -LiteralPath $ExtraDir -Recurse -File -Force | ForEach-Object {
+    $Items += [pscustomobject]@{ Rel = $_.FullName.Substring($ExtraDir.Length + 1).Replace('\', '/'); Src = $_.FullName }
+}
+
 # 실패해도 괜찮은 git 호출(예: 아직 없는 브랜치 조회)용. Windows PowerShell 5.1은 stderr를 리다이렉트한 네이티브
 # 명령이 뭔가 출력하면 $ErrorActionPreference = 'Stop'에서 예외를 던지므로, 그 구간만 Continue로 바꾸고 종료 코드만 본다.
 function Invoke-GitQuiet {
@@ -35,9 +45,9 @@ $remoteUrl = (& $Git remote get-url origin).Trim()
 $changed = [bool]$Force
 if (-not $changed) {
     Invoke-GitQuiet fetch --quiet origin data | Out-Null
-    foreach ($f in $Files) {
-        $new = (& $Git hash-object -- (Join-Path $SrcDir $f)).Trim()
-        $old = Invoke-GitQuiet rev-parse --verify --quiet "origin/data:$f"
+    foreach ($it in $Items) {
+        $new = (& $Git hash-object -- $it.Src).Trim()
+        $old = Invoke-GitQuiet rev-parse --verify --quiet "origin/data:$($it.Rel)"
         if ($LASTEXITCODE -ne 0 -or "$old".Trim() -ne $new) { $changed = $true }
     }
 }
@@ -46,16 +56,20 @@ if (-not $changed) {
     return
 }
 
-# 2) 임시 저장소에 두 파일만 담아 커밋 1개를 만들고 data 브랜치로 강제 푸시한다.
+# 2) 임시 저장소에 위 파일들만 담아 커밋 1개를 만들고 data 브랜치로 강제 푸시한다.
 #    (blog 저장소의 작업 트리·브랜치는 건드리지 않는다.)
 $tmp = Join-Path ([System.IO.Path]::GetTempPath()) ("vcp-data-" + [guid]::NewGuid().ToString("N"))
 New-Item -ItemType Directory -Path $tmp | Out-Null
 try {
-    foreach ($f in $Files) { Copy-Item -LiteralPath (Join-Path $SrcDir $f) -Destination (Join-Path $tmp $f) }
+    foreach ($it in $Items) {
+        $dest = Join-Path $tmp $it.Rel
+        New-Item -ItemType Directory -Force -Path (Split-Path -Parent $dest) | Out-Null
+        Copy-Item -LiteralPath $it.Src -Destination $dest
+    }
     Set-Location $tmp
     & $Git init --quiet --initial-branch=data
     if ($LASTEXITCODE -ne 0) { throw "임시 저장소 초기화 실패 (exit code $LASTEXITCODE)" }
-    & $Git add -- $Files
+    & $Git add -A
     $dateStr = Get-Date -Format "yyyy-MM-dd"
     & $Git commit --quiet -m "Auto: VCP 데이터 ($dateStr)"
     if ($LASTEXITCODE -ne 0) { throw "임시 저장소 커밋 실패 (exit code $LASTEXITCODE)" }

@@ -2,8 +2,9 @@ name: Deploy to GitHub Pages
 
 on:
   push:
-    # data: VCP 대시보드 산출물(03_stock_trading/publish_data.ps1이 매일 커밋 1개로 덮어씀)이 올라와도 배포한다.
-    branches: ["main", "data"]
+    branches: ["main"]
+  # VCP 대시보드 산출물이 data 브랜치에 올라오면(03_stock_trading/publish_data.ps1, 매일) data 브랜치에 함께 담긴
+  # 트리거 워크플로(trigger-deploy.yml)가 이 워크플로를 workflow_dispatch로 실행한다.
   workflow_dispatch:
 
 permissions:
