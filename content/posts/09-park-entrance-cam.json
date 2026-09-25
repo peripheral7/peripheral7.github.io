@@ -1,0 +1,14 @@
+{
+  "variant": "interactive",
+  "category": "RESEARCH",
+  "title": "공원 진출입로 촬영 앱",
+  "meta": "현장조사용 모바일 웹앱 — 진출입로를 찍으면 사진 + GPS 위치 + 시각 + 이름이 한 묶음으로 저장된다",
+  "ref": "FIELD-PARK-ENTRANCE-CAM",
+  "image": "/images/reports/park-entrance-cam/preview.png",
+  "imageAlt": "공원 진출입로 촬영 앱 화면 — 상단 GPS ±8m 표시, 공원·진출입로 이름·구분 입력, 하단 촬영·기록·내보내기 탭",
+  "body": "공원 진출입로를 찍으면 사진과 GPS 위치, 촬영 시각, 공원·진출입로 이름이 한 묶음으로 저장되는 현장조사용 앱. 폰 브라우저에서 열고 홈 화면에 추가하면 앱처럼 쓰며, 인터넷이 없는 공원에서도 열린다. 기록은 폰 안에만 저장되고 ZIP(사진·CSV·GeoJSON)으로 내보낸다.",
+  "href": "/field-cam",
+  "linkLabel": "앱 소개 · 열기",
+  "date": "2026.09.25",
+  "tags": ["Field", "GPS", "PWA"]
+}
