@@ -1,0 +1,14 @@
+{
+  // 공원 진출입로 촬영 앱(정적 PWA)을 Cloudflare Workers 정적 자산으로 배포하는 설정.
+  // 앱 파일은 이 저장소가 아니라 KICA 논문작성/field_app/dist 에 있으므로, 배포할 때
+  // 실제 경로를 --assets 로 넘긴다(README 참고).
+  "name": "park-entrance-cam",
+  "main": "worker.js",
+  "compatibility_date": "2026-09-01",
+  "assets": {
+    "directory": "./dist",
+    "binding": "ASSETS",
+    // 이 경로만 Worker를 거친다. 그 외 정적 파일은 Worker 없이 바로 서빙된다(요청 무료·무제한).
+    "run_worker_first": ["/index.html"]
+  }
+}

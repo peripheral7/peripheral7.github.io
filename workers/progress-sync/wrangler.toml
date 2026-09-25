@@ -1,0 +1,8 @@
+name = "progress-sync"
+main = "src/index.js"
+compatibility_date = "2026-09-01"
+
+[[d1_databases]]
+binding = "DB"
+database_name = "progress-sync"
+database_id = "83b55235-5802-4325-bbdc-106699a4af30"
