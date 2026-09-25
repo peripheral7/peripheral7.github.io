@@ -51,8 +51,18 @@ jobs:
           git show FETCH_HEAD:data.json > public/reports/data.json
           ls -l public/reports/vcp_dashboard.html public/reports/data.json
 
+      # next/font/google 이 빌드 중에 폰트를 내려받아, 러너의 일시적인 네트워크 오류만으로도 빌드가 실패할 수 있다 → 한 번 재시도한다.
+      # 실행 로그는 저장소 관리자만 볼 수 있으므로, 실패하면 마지막 출력을 주석(annotation)으로도 남긴다(로그인 없이 실행 페이지에서 보인다).
       - name: Build (static export)
-        run: pnpm next build
+        run: |
+          set -o pipefail
+          for attempt in 1 2; do
+            if pnpm next build 2>&1 | tee build.log; then exit 0; fi
+            level=warning; [ "$attempt" -eq 2 ] && level=error
+            echo "::${level} title=next build failed (attempt ${attempt}/2)::$(tail -n 25 build.log | tr -d '\r' | awk 'BEGIN{ORS="%0A"} {print}')"
+            [ "$attempt" -lt 2 ] && sleep 10
+          done
+          exit 1
 
       - name: Setup Pages
         uses: actions/configure-pages@v5
