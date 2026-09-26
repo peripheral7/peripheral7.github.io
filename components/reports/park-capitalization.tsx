@@ -2,6 +2,7 @@ import { MapLightbox } from "@/components/reports/map-lightbox"
 import {
   parkCapCoreMaps,
   parkCapConclusion,
+  parkCapVerdict,
   parkCapFacts,
   parkCapFindings,
   parkCapFooter,
@@ -167,6 +168,26 @@ export function ParkCapitalizationReport() {
       <p className="mt-4 max-w-3xl text-[0.95rem] leading-relaxed text-muted-foreground">
         {parkCapMeta.summary}
       </p>
+
+      <div className="mt-7 rounded border border-border border-l-[3px] border-l-accent bg-card px-5 py-5">
+        <p className="font-mono text-[0.6rem] uppercase tracking-[0.14em] text-accent">결론부터</p>
+        <p className="mt-2.5 text-[1.05rem] font-bold leading-relaxed">{parkCapVerdict.lead}</p>
+        <p className="mt-3 text-[0.9rem] leading-relaxed text-muted-foreground">{parkCapVerdict.body}</p>
+        <div className="mt-4 grid grid-cols-1 gap-px overflow-hidden rounded border border-border bg-border sm:grid-cols-3">
+          {parkCapVerdict.points.map((p) => (
+            <div key={p.k} className="bg-card px-4 py-3">
+              <div className="flex items-baseline justify-between gap-2">
+                <span className="text-[0.76rem] font-semibold">{p.k}</span>
+                <span className="font-mono text-[0.92rem] font-bold tabular-nums text-accent">{p.v}</span>
+              </div>
+              <p className="mt-1 text-[0.74rem] leading-relaxed text-muted-foreground">{p.note}</p>
+            </div>
+          ))}
+        </div>
+        <p className="mt-3.5 text-[0.76rem] text-muted-foreground">
+          아래는 그 결론에 이른 과정이다. 근거와 한계를 모두 본 뒤의 결론은 §05에 다시 정리했다.
+        </p>
+      </div>
 
       <dl className="mt-6 flex flex-wrap gap-x-8 gap-y-3 border-y border-border py-4">
         {parkCapFacts.map((f) => (
@@ -346,8 +367,8 @@ export function ParkCapitalizationReport() {
       <Table spec={parkCapSemTable} />
       <div className="mt-5 rounded border border-border border-l-[3px] border-l-accent bg-muted/40 px-4 py-3.5 text-[0.88rem] leading-relaxed">
         <strong>공간의존은 실재하지만 결론을 바꾸지 않는다.</strong> λ는 여섯 설정 중 다섯에서
-        유의하고 여과잔차의 자기상관은 완전히 사라지는데, 대표공원 계수는 −0.039에서 −0.056 사이로
-        OLS의 −0.051과 사실상 같다.{" "}
+        유의하고 여과잔차의 자기상관은 완전히 사라지는데, 대표공원 계수는 −0.023에서 −0.036 사이로
+        OLS의 −0.036과 사실상 같다.{" "}
         <em className="not-italic text-accent">북부에서 공원이 잡히지 않는 것은 표준오차가 왜곡되어서가
         아니라, 그 구역에 생활권의 초점이 될 대형공원이 없기 때문이다.</em>
       </div>
@@ -367,7 +388,10 @@ export function ParkCapitalizationReport() {
       </p>
 
       {/* 04 결론 */}
-      <SectionTitle n="05">결론</SectionTitle>
+      <SectionTitle n="05">결론 — 다시</SectionTitle>
+      <p className="mt-3 max-w-3xl text-[0.92rem] leading-relaxed text-muted-foreground">
+        맨 앞에 적은 한 줄을, 이제 근거와 한계를 모두 본 상태에서 다시 펼친다.
+      </p>
       <div className="mt-4 rounded border border-border border-l-[3px] border-l-accent bg-card px-5 py-4">
         <p className="text-[1.02rem] font-semibold leading-relaxed">{parkCapConclusion.headline}</p>
       </div>
