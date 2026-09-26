@@ -184,9 +184,6 @@ export function ParkCapitalizationReport() {
             </div>
           ))}
         </div>
-        <p className="mt-3.5 text-[0.76rem] text-muted-foreground">
-          아래는 그 결론에 이른 과정이다. 근거와 한계를 모두 본 뒤의 결론은 §05에 다시 정리했다.
-        </p>
       </div>
 
       <dl className="mt-6 flex flex-wrap gap-x-8 gap-y-3 border-y border-border py-4">
@@ -223,11 +220,10 @@ export function ParkCapitalizationReport() {
           다섯 구역의 대표공원
         </p>
         <p className="mt-2 max-w-3xl text-[0.9rem] leading-relaxed text-muted-foreground">
-          가장 진한 초록이 각 구역의 대표공원, 점이 분석 단지다. 지도를 나란히 놓으면 이 보고서의
-          결론이 눈으로도 보인다 — 동탄2 남부는 대표공원이 시가지 한복판에 앉아 단지들이 그 둘레에
-          퍼져 있고, 북부의 여울공원은 하천을 따라 가늘게 뻗어 지구 가장자리를 스친다. 광교는 공원이
-          지구를 통째로 갈라놓아 어느 단지든 가깝고, 일월은 촘촘한 기성시가지 속에 공원 하나가 섬처럼
-          놓여 있다.
+          가장 진한 초록이 각 구역의 대표공원, 점이 분석 단지다. 동탄2 남부는 대표공원이 시가지
+          한복판에 앉아 단지들이 그 둘레에 퍼져 있다. 북부의 여울공원은 하천을 따라 가늘게 뻗어
+          지구 가장자리를 스친다. 광교는 공원이 지구를 통째로 갈라놓아 어느 단지든 가깝고, 일월은
+          촘촘한 기성시가지 속에 공원 하나가 섬처럼 놓여 있다.
         </p>
         <MapLightbox maps={parkCapCoreMaps} />
       </div>
@@ -247,9 +243,8 @@ export function ParkCapitalizationReport() {
       {/* 01 읽는 법 */}
       <SectionTitle n="01">이 보고서를 읽는 법</SectionTitle>
       <p className="mt-3 max-w-3xl text-[0.92rem] leading-relaxed">
-        표본이 지역당 23~36개로 작다. 이 크기에서는 계수 하나에 별표가 몇 개 붙었는지보다, 그 별표가
-        어떤 조건에서 붙었는지가 중요하다. 아래 다섯 가지를 먼저 읽어 두면 각 구역의 결과를 정확히
-        해석할 수 있다.
+        구역별 표본이 23~36개로 작다. 계수에 별표가 몇 개 붙었는지보다 그 별표가 어떤 조건에서
+        붙었는지가 중요하다.
       </p>
       <div className="mt-5 flex flex-col gap-4">
         {parkCapStatNotes.map((sn) => (
@@ -268,9 +263,8 @@ export function ParkCapitalizationReport() {
       {/* 02 지역별 */}
       <SectionTitle n="02">구역별로 본 공원 효과</SectionTitle>
       <p className="mt-3 max-w-3xl text-[0.92rem] leading-relaxed">
-        다섯 구역을 효과가 뚜렷한 순서로 싣는다. 구역마다 대표공원을 하나 지정하고 그 거리를 유일한
-        공원 변수로 넣었으며, 나머지 일곱 개 통제변수는 전 구역 동일하다. 앞의 두 구역이 핵심 대조군인
-        동탄2 남부와, 비교 사례인 일월저수지 일대다.
+        구역마다 대표공원을 하나 지정하고 그 거리를 유일한 공원 변수로 넣는다. 나머지 일곱 개
+        통제변수는 전 구역 동일하다. 효과가 뚜렷한 순서로 싣는다.
       </p>
 
       <div className="mt-6 flex flex-col gap-6">
@@ -299,7 +293,6 @@ export function ParkCapitalizationReport() {
               <dl className="flex flex-col self-start rounded border border-border bg-muted/30 px-3.5 py-2">
                 <Fact k="계수 (HC1 t)" v={`${r.coef} (${r.t})`} />
                 <Fact k="p값" v={r.p} />
-                <Fact k="HC3 재추정" v={r.hc3} />
                 <Fact k="수정 R²" v={r.adjr2} />
                 <Fact k="최대 VIF" v={r.vif} />
                 <Fact k="대표공원 거리" v={r.dist} />
@@ -315,7 +308,7 @@ export function ParkCapitalizationReport() {
       {/* 03 나란히 놓고 보기 */}
       <SectionTitle n="03">다섯 구역을 나란히 놓으면</SectionTitle>
       <p className="mt-3 max-w-3xl text-[0.92rem] leading-relaxed">
-        공원 계수만이 아니라 모형 전체를 비교하면, 구역마다 가격을 움직이는 축이 다르다는 것이 드러난다.
+        모형 전체를 비교하면 구역마다 가격을 움직이는 축이 다르다.
       </p>
       <Table spec={parkCapFullCoefTable} />
       <Table spec={parkCapStdTable} />
@@ -337,7 +330,7 @@ export function ParkCapitalizationReport() {
       <SectionTitle n="04">상권을 경유하는가, 결과는 흔들리지 않는가</SectionTitle>
       <p className="mt-3 max-w-3xl text-[0.92rem] leading-relaxed">
         공원이 상권을 끌어들이고 그 상권이 가격에 자본화된다면, 공원 효과의 일부는 상권을 경유한다.
-        Baron &amp; Kenny 단계적 회귀로 이 경로를 분리하고 부트스트랩 5,000회로 구간을 구했다.
+        Baron &amp; Kenny 단계적 회귀로 경로를 분리하고 부트스트랩 5,000회로 구간을 구한다.
       </p>
       <Table spec={parkCapMediationTable} />
       <div className="mt-5 rounded border border-border border-l-[3px] border-l-accent bg-muted/40 px-4 py-3.5 text-[0.88rem] leading-relaxed">
@@ -354,15 +347,14 @@ export function ParkCapitalizationReport() {
       </p>
       <Table spec={parkCapSpatialTable} />
       <p className="mt-3 max-w-3xl text-[0.88rem] leading-relaxed text-muted-foreground">
-        처음에는 동탄1을 동탄2 북부에 합쳐 하나의 지역으로 두었다. 동탄여울공원이 두 지구의 접경에
-        있어 동탄1을 빼면 공원 서편 배후지가 사라지기 때문이다. 그러나 그렇게 묶은 표본은 모란
-        I가 0.384(p=0.001)로 단일 시장이 아니었고, 평균 단가도 985만원과 737만원으로 34% 차이 났다.{" "}
+        동탄1을 동탄2 북부에 합쳐 두었을 때는 모란 I가 0.280(p=0.001)으로 단일 시장이 아니었고,
+        평균 단가도 993만원과 737만원으로 35% 차이 났다.{" "}
         <strong className="text-foreground">독립 구역으로 분리하자 동탄1의 자기상관은 사라졌다</strong>
-        (I≈0, p=0.75).
+        (I≈0, p=0.84).
       </p>
       <p className="mt-6 max-w-3xl text-[0.92rem] leading-relaxed">
-        그래도 동탄2 북부에는 자기상관이 남는다. 표준오차가 실제보다 작아져 공원 계수의 비유의가
-        가짜일 수 있으므로, 공간오차모형(SEM)으로 오차항의 공간의존을 흡수해 다시 추정했다.
+        동탄2 북부에는 자기상관이 남는다. 표준오차가 작아져 공원 계수의 비유의가 가짜일 수 있으므로,
+        공간오차모형(SEM)으로 오차항의 공간의존을 흡수해 다시 추정한다.
       </p>
       <Table spec={parkCapSemTable} />
       <div className="mt-5 rounded border border-border border-l-[3px] border-l-accent bg-muted/40 px-4 py-3.5 text-[0.88rem] leading-relaxed">
@@ -373,25 +365,20 @@ export function ParkCapitalizationReport() {
         아니라, 그 구역에 생활권의 초점이 될 대형공원이 없기 때문이다.</em>
       </div>
       <p className="mt-6 max-w-3xl text-[0.92rem] leading-relaxed">
-        광교에도 확인할 것이 하나 있다. 구역을 광교지구 택지개발사업 경계로 자르면 광교호수공원
-        <strong> 남안</strong>의 단지 여섯 곳이 빠진다. 행정구역이 용인시 기흥구 영덕동, 지구가
-        용인흥덕지구여서 광교 밖이지만 호수까지는 145~714m로 가깝다. 표본에서 가장 가까운 쪽이
-        잘려 나간 것이 광교의 계수가 양(+)인 원인일 수 있으므로, 경계를 넓혀 가며 확인했다.
+        광교를 광교지구 경계로 자르면 광교호수공원 <strong>남안</strong>의 단지 여섯 곳이 빠진다.
+        행정구역이 용인시 기흥구 영덕동이라 광교 밖이지만 호수까지는 145~714m로 가깝다. 가장 가까운
+        쪽이 잘려 나간 것이 광교의 계수가 양(+)인 원인일 수 있으므로 배후지를 넓혀 가며 확인한다.
       </p>
       <Table spec={parkCapGwanggyoTable} />
       <p className="mt-3 max-w-3xl text-[0.88rem] leading-relaxed text-muted-foreground">
-        아니었다. 경계를 넓힐수록 계수가 0에 가까워질 뿐 부호가 바뀌지 않는다. 오히려 확장 표본이
-        구역을 좁게 잡은 근거가 된다 — 흥덕지구 더미가 −0.272(p&lt;0.001)로, 같은 호수를 낀 거리에서도
-        두 지구의 단가가 32% 차이 난다(852만원 대 1,249만원). 같은 공원을 공유하되 서로 다른 시장인
-        것이다. 광교지구 안에도 호수에서 89m 떨어진 단지가 있어, 남안 단지를 빼도 근거리 관측이
-        사라지지는 않는다.
+        원인이 아니다. 배후지를 넓힐수록 계수가 0에 가까워질 뿐 부호가 바뀌지 않는다. 2.5km까지
+        넓혀 140개로 늘리고 구역 더미를 셋으로 나누면 수정 R²가 0.763까지 오르고 더미가 모두
+        유의하지만, 공원 계수는 +0.008에 머문다. 배후지가 여러 시장으로 이루어져 있되 어느
+        시장에서도 공원 거리가 가격을 설명하지 못한다.
       </p>
 
       {/* 04 결론 */}
-      <SectionTitle n="05">결론 — 다시</SectionTitle>
-      <p className="mt-3 max-w-3xl text-[0.92rem] leading-relaxed text-muted-foreground">
-        맨 앞에 적은 한 줄을, 이제 근거와 한계를 모두 본 상태에서 다시 펼친다.
-      </p>
+      <SectionTitle n="05">결론</SectionTitle>
       <div className="mt-4 rounded border border-border border-l-[3px] border-l-accent bg-card px-5 py-4">
         <p className="text-[1.02rem] font-semibold leading-relaxed">{parkCapConclusion.headline}</p>
       </div>
@@ -414,7 +401,7 @@ export function ParkCapitalizationReport() {
       </div>
       <p className="mt-6 max-w-3xl text-[0.9rem] leading-relaxed">{parkCapConclusion.contribution}</p>
 
-      <h4 className="mt-8 text-[0.95rem] font-bold">지도교수께 여쭙고 싶은 세 가지</h4>
+      <h4 className="mt-8 text-[0.95rem] font-bold">남은 질문</h4>
       <ol className="mt-3 flex flex-col gap-4">
         {parkCapConclusion.questions.map((q) => (
           <li key={q.q} className="rounded border border-border bg-card px-4 py-3.5">
@@ -427,7 +414,9 @@ export function ParkCapitalizationReport() {
       {/* 부록 A 자료 */}
       <SectionTitle n="부록 A">자료와 방법</SectionTitle>
       <p className="mt-3 max-w-3xl text-[0.92rem] leading-relaxed">
-        사용한 자료는 모두 공개 자료이며, 좌표계는 EPSG:5179(UTM-K)로 통일했다.
+        모두 공개 자료이며 좌표계는 EPSG:5179(UTM-K)로 통일한다. 공원 결정경계에는 이름 필드가
+        비어 있어, 대표공원은 OpenStreetMap 지명 폴리곤과 겹쳐 확정한다(동탄여울공원 90.2% ·
+        반석산근린공원 100%).
       </p>
       <div className="mt-5 overflow-hidden rounded border border-border bg-card">
         {parkCapSources.map((sc, i) => (
