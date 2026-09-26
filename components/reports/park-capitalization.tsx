@@ -17,6 +17,8 @@ import {
   parkCapMediationTable,
   parkCapMoneyTable,
   parkCapSpatialTable,
+  parkCapSemTable,
+  parkCapGwanggyoTable,
   type RegionKey,
   type StatTable,
 } from "@/content/reports/park-capitalization"
@@ -296,7 +298,7 @@ export function ParkCapitalizationReport() {
       </div>
 
       {/* 04 매개와 공간 */}
-      <SectionTitle n="04">상권을 경유하는가, 잔차는 흩어져 있는가</SectionTitle>
+      <SectionTitle n="04">상권을 경유하는가, 결과는 흔들리지 않는가</SectionTitle>
       <p className="mt-3 max-w-3xl text-[0.92rem] leading-relaxed">
         공원이 상권을 끌어들이고 그 상권이 가격에 자본화된다면, 공원 효과의 일부는 상권을 경유한다.
         Baron &amp; Kenny 단계적 회귀로 이 경로를 분리하고 부트스트랩 5,000회로 구간을 구했다.
@@ -322,6 +324,32 @@ export function ParkCapitalizationReport() {
         <strong className="text-foreground">독립 구역으로 분리하자 동탄1의 자기상관은 사라졌다</strong>
         (I≈0, p=0.75).
       </p>
+      <p className="mt-6 max-w-3xl text-[0.92rem] leading-relaxed">
+        그래도 동탄2 북부에는 자기상관이 남는다. 표준오차가 실제보다 작아져 공원 계수의 비유의가
+        가짜일 수 있으므로, 공간오차모형(SEM)으로 오차항의 공간의존을 흡수해 다시 추정했다.
+      </p>
+      <Table spec={parkCapSemTable} />
+      <div className="mt-5 rounded border border-border border-l-[3px] border-l-accent bg-muted/40 px-4 py-3.5 text-[0.88rem] leading-relaxed">
+        <strong>공간의존은 실재하지만 결론을 바꾸지 않는다.</strong> λ는 여섯 설정 중 다섯에서
+        유의하고 여과잔차의 자기상관은 완전히 사라지는데, 대표공원 계수는 −0.039에서 −0.056 사이로
+        OLS의 −0.051과 사실상 같다.{" "}
+        <em className="not-italic text-accent">북부에서 공원이 잡히지 않는 것은 표준오차가 왜곡되어서가
+        아니라, 그 구역에 생활권의 초점이 될 대형공원이 없기 때문이다.</em>
+      </div>
+      <p className="mt-6 max-w-3xl text-[0.92rem] leading-relaxed">
+        광교에도 확인할 것이 하나 있다. 구역을 광교지구 택지개발사업 경계로 자르면 광교호수공원
+        <strong> 남안</strong>의 단지 여섯 곳이 빠진다. 행정구역이 용인시 기흥구 영덕동, 지구가
+        용인흥덕지구여서 광교 밖이지만 호수까지는 145~714m로 가깝다. 표본에서 가장 가까운 쪽이
+        잘려 나간 것이 광교의 계수가 양(+)인 원인일 수 있으므로, 경계를 넓혀 가며 확인했다.
+      </p>
+      <Table spec={parkCapGwanggyoTable} />
+      <p className="mt-3 max-w-3xl text-[0.88rem] leading-relaxed text-muted-foreground">
+        아니었다. 경계를 넓힐수록 계수가 0에 가까워질 뿐 부호가 바뀌지 않는다. 오히려 확장 표본이
+        구역을 좁게 잡은 근거가 된다 — 흥덕지구 더미가 −0.272(p&lt;0.001)로, 같은 호수를 낀 거리에서도
+        두 지구의 단가가 32% 차이 난다(852만원 대 1,249만원). 같은 공원을 공유하되 서로 다른 시장인
+        것이다. 광교지구 안에도 호수에서 89m 떨어진 단지가 있어, 남안 단지를 빼도 근거리 관측이
+        사라지지는 않는다.
+      </p>
 
       {/* 04 결론 */}
       <SectionTitle n="05">결론</SectionTitle>
@@ -340,6 +368,10 @@ export function ParkCapitalizationReport() {
             </div>
           </div>
         ))}
+      </div>
+      <div className="mt-6 rounded border border-border bg-muted/30 px-4 py-3.5 text-[0.88rem] leading-relaxed">
+        <strong>강건성 </strong>
+        {parkCapConclusion.robustness}
       </div>
       <p className="mt-6 max-w-3xl text-[0.9rem] leading-relaxed">{parkCapConclusion.contribution}</p>
 
