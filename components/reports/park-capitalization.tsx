@@ -19,7 +19,6 @@ import {
   parkCapSpatialTable,
   parkCapSemTable,
   parkCapGwanggyoTable,
-  parkCapExtentTable,
   type RegionKey,
   type StatTable,
 } from "@/content/reports/park-capitalization"
@@ -401,25 +400,8 @@ export function ParkCapitalizationReport() {
         ))}
       </ol>
 
-      {/* 부록 A 공원의 범위 */}
-      <SectionTitle n="부록 A">공원의 범위를 어디까지 볼 것인가</SectionTitle>
-      <p className="mt-3 max-w-3xl text-[0.92rem] leading-relaxed">
-        동탄호수공원의 도시계획시설 결정 레코드는 44.5ha인데, 그 동쪽 50m 지점에서 하천을 따라
-        동쪽으로 이어지는 별도 레코드(19.5ha)가 있다. 보행로로 연결되어 실제 이용에서는 한 공원처럼
-        쓰이므로, 이 녹지를 대표공원에 포함하면 결과가 달라지는지 확인했다. 간선도로로 단절되는
-        지점인 <strong>동탄순환대로에서 끊어</strong> 안쪽 15.0ha만 더했다(합계 59.5ha).
-      </p>
-      <Table spec={parkCapExtentTable} />
-      <div className="mt-5 rounded border border-border border-l-[3px] border-l-accent bg-muted/40 px-4 py-3.5 text-[0.88rem] leading-relaxed">
-        <strong>넓히면 오히려 약해진다.</strong> 28개 단지 중 22개의 공원 거리가 평균 514m 줄어드는데도
-        계수는 −0.066에서 −0.034로 절반이 되고 유의성을 잃으며, AIC가 5.77 나빠진다.{" "}
-        <em className="not-italic text-accent">자본화되는 것은 호수공원 그 자체이지, 이어지는 선형
-        녹지가 아니다.</em> 이는 동탄2 북부에서 하천변 선형공원인 여울공원이 잡히지 않은 것과 같은
-        구조이며, 「공원의 규모가 아니라 생활권의 초점인가」라는 이 보고서의 결론과 맞물린다.
-      </div>
-
-      {/* 부록 B 자료 */}
-      <SectionTitle n="부록 B">자료와 방법</SectionTitle>
+      {/* 부록 A 자료 */}
+      <SectionTitle n="부록 A">자료와 방법</SectionTitle>
       <p className="mt-3 max-w-3xl text-[0.92rem] leading-relaxed">
         사용한 자료는 모두 공개 자료이며, 좌표계는 EPSG:5179(UTM-K)로 통일했다.
       </p>
@@ -451,8 +433,8 @@ export function ParkCapitalizationReport() {
         ))}
       </div>
 
-      {/* 부록 C 한계 */}
-      <SectionTitle n="부록 C">한계</SectionTitle>
+      {/* 부록 B 한계 */}
+      <SectionTitle n="부록 B">한계</SectionTitle>
       <ul className="mt-4 flex flex-col gap-3">
         {parkCapLimits.map((l) => (
           <li key={l.tag} className="grid grid-cols-[auto_1fr] gap-3">
