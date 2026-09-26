@@ -19,6 +19,7 @@ import {
   parkCapSpatialTable,
   parkCapSemTable,
   parkCapGwanggyoTable,
+  parkCapExtentTable,
   type RegionKey,
   type StatTable,
 } from "@/content/reports/park-capitalization"
@@ -196,6 +197,21 @@ export function ParkCapitalizationReport() {
           </div>
         ))}
       </div>
+      {/* 지도 — 다섯 구역 */}
+      <div className="mt-8">
+        <p className="font-mono text-[0.62rem] uppercase tracking-[0.12em] text-muted-foreground">
+          다섯 구역의 대표공원
+        </p>
+        <p className="mt-2 max-w-3xl text-[0.9rem] leading-relaxed text-muted-foreground">
+          가장 진한 초록이 각 구역의 대표공원, 점이 분석 단지다. 지도를 나란히 놓으면 이 보고서의
+          결론이 눈으로도 보인다 — 동탄2 남부는 대표공원이 시가지 한복판에 앉아 단지들이 그 둘레에
+          퍼져 있고, 북부의 여울공원은 하천을 따라 가늘게 뻗어 지구 가장자리를 스친다. 광교는 공원이
+          지구를 통째로 갈라놓아 어느 단지든 가깝고, 일월은 촘촘한 기성시가지 속에 공원 하나가 섬처럼
+          놓여 있다.
+        </p>
+        <MapLightbox maps={parkCapCoreMaps} />
+      </div>
+
       <Table spec={parkCapHeadlineTable} />
 
       <div className="mt-5 rounded border border-border border-l-[3px] border-l-accent bg-muted/40 px-4 py-3.5 text-[0.88rem] leading-relaxed">
@@ -385,24 +401,22 @@ export function ParkCapitalizationReport() {
         ))}
       </ol>
 
-      {/* 부록 A 지도 */}
-      <SectionTitle n="부록 A">대표공원은 어디인가</SectionTitle>
+      {/* 부록 A 공원의 범위 */}
+      <SectionTitle n="부록 A">공원의 범위를 어디까지 볼 것인가</SectionTitle>
       <p className="mt-3 max-w-3xl text-[0.92rem] leading-relaxed">
-        도시계획시설(공원) 결정경계 자료에는 공원 이름이 없다 — ALIAS 필드가 전부 비어 있어
-        &lsquo;동탄여울공원&rsquo;을 코드로 특정할 방법이 없다. 그래서 OpenStreetMap의 지명 폴리곤과
-        겹쳐 보고 확정했다. 동탄여울공원은 OSM 폴리곤의 90.2%를 덮고 교차하는 결정 레코드가 그
-        하나뿐이며, 반석산근린공원은 OSM 폴리곤을 100% 포함한다. 아래 지도에서 가장 진한 초록이
-        대표공원, 점이 분석 단지다.
+        동탄호수공원의 도시계획시설 결정 레코드는 44.5ha인데, 그 동쪽 50m 지점에서 하천을 따라
+        동쪽으로 이어지는 별도 레코드(19.5ha)가 있다. 보행로로 연결되어 실제 이용에서는 한 공원처럼
+        쓰이므로, 이 녹지를 대표공원에 포함하면 결과가 달라지는지 확인했다. 간선도로로 단절되는
+        지점인 <strong>동탄순환대로에서 끊어</strong> 안쪽 15.0ha만 더했다(합계 59.5ha).
       </p>
-      <MapLightbox maps={parkCapCoreMaps} />
-      <p className="mt-3 max-w-3xl text-[0.88rem] leading-relaxed text-muted-foreground">
-        지도를 나란히 놓으면 이 보고서의 결론이 눈으로도 보인다. 동탄2 남부는 대표공원이 시가지
-        한복판에 앉아 단지들이 그 둘레에 퍼져 있고, 북부의 여울공원은 하천을 따라 가늘게 뻗어 지구
-        가장자리를 스친다. 광교는 공원이 지구를 통째로 갈라놓아 어느 단지든 가깝고, 일월은 촘촘한
-        기성시가지 속에 공원 하나가 섬처럼 놓여 있다.{" "}
-        <strong className="text-foreground">어느 공원을 대표로 삼느냐가 결론을 상당 부분 정한다</strong>
-        는 점은 한계로 남긴다.
-      </p>
+      <Table spec={parkCapExtentTable} />
+      <div className="mt-5 rounded border border-border border-l-[3px] border-l-accent bg-muted/40 px-4 py-3.5 text-[0.88rem] leading-relaxed">
+        <strong>넓히면 오히려 약해진다.</strong> 28개 단지 중 22개의 공원 거리가 평균 514m 줄어드는데도
+        계수는 −0.066에서 −0.034로 절반이 되고 유의성을 잃으며, AIC가 5.77 나빠진다.{" "}
+        <em className="not-italic text-accent">자본화되는 것은 호수공원 그 자체이지, 이어지는 선형
+        녹지가 아니다.</em> 이는 동탄2 북부에서 하천변 선형공원인 여울공원이 잡히지 않은 것과 같은
+        구조이며, 「공원의 규모가 아니라 생활권의 초점인가」라는 이 보고서의 결론과 맞물린다.
+      </div>
 
       {/* 부록 B 자료 */}
       <SectionTitle n="부록 B">자료와 방법</SectionTitle>
