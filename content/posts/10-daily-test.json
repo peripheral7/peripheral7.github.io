@@ -1,0 +1,14 @@
+{
+  "variant": "interactive",
+  "category": "STUDY",
+  "title": "매일 테스트",
+  "meta": "법규·실무 100점 시험지 — 인쇄해서 손으로 풀고, 프롬프트로 채점한 분석노트를 올려 점수·연속 기록을 쌓는다",
+  "ref": "APPRAISER-DAILY-TEST",
+  "image": "/images/reports/daily-test/preview.png",
+  "imageAlt": "매일 테스트 법규 제2회 문제지 — 감정평가사 2차 시험 형식, 총 100점, 문제 번호 옆에 배점 표기",
+  "body": "행정법 기본문제 27문제(원문·원문 배점)와 감정평가실무 종합문제집 170문항을 100점짜리 39회차(법규 5 · 실무 34)로 묶었다. 요일별로 다음 회차가 정해지고, 문제와 배점만 담긴 A4 문제지를 인쇄해 손으로 푼 뒤, 모범답안·채점 기준이 든 프롬프트로 AI에게 채점을 받아 분석노트를 붙여넣으면 점수·연속 일수·취약 쟁점이 기록된다. 기록은 이 브라우저에만 저장되며 백업 파일로 내려받을 수 있다.",
+  "href": "/reports/daily-test.html",
+  "linkLabel": "시험지 열기",
+  "date": "2026.09.26",
+  "tags": ["Appraiser", "StudyLog", "Daily"]
+}

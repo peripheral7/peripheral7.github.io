@@ -1,0 +1,1296 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>매일 테스트 — 법규·실무 100점 시험지와 기록</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Serif+KR:wght@400;500;600;700;900&display=swap" rel="stylesheet">
+<style>
+  /* ==========================================================================
+     매일 테스트 — 종이 시험지(인쇄) → 손으로 풀기 → 프롬프트로 채점 → 분석노트 업로드 → 점수·연속 기록.
+     디자인은 행정법 기본문제 25 페이지와 같은 결(한지색 바탕 + 소나무 초록 + 갈색 강조).
+     ========================================================================== */
+  :root{
+    --bg:#f7f5f0; --card:#ffffff; --ink:#1f2937; --sub:#6b7280; --line:#e5e1d8;
+    --accent:#8b5e3c; --accent2:#2f5d50; --hi:#fff3e0; --chip:#eee7da;
+    --ok:#2f7d5b; --warn:#b7791f; --bad:#b3402f; --law:#2f5d50; --prac:#8b5e3c;
+    /* 점수 단계: 0=과락권(40 미만) · 1=40~59 · 2=60~79 · 3=80~89 · 4=90 이상 */
+    --t0:#efd2c8; --t1:#f5deb5; --t2:#cfe5d8; --t3:#7fb99c; --t4:#2f6f56;
+    --fs-title:32px; --fs-h2:18px; --fs-body:15px; --fs-sm:13px; --pad:16px;
+  }
+  @media (min-width:640px){ :root{ --fs-title:40px; --fs-h2:20px; --fs-body:16px; --fs-sm:13.5px; --pad:24px; } }
+  *{box-sizing:border-box;}
+  html{-webkit-text-size-adjust:100%;}
+  body{
+    margin:0 auto; max-width:780px; padding:var(--pad); padding-bottom:calc(var(--pad) + 72px);
+    font-family:"Noto Serif KR","Nanum Myeongjo","Batang",serif; font-size:var(--fs-body); line-height:1.6;
+    background:var(--bg); color:var(--ink);
+  }
+  button{font:inherit; color:inherit;}
+  [hidden]{display:none !important;}
+  h1{font-size:var(--fs-title); line-height:1.15; font-weight:900; margin:0; letter-spacing:-0.02em; word-break:keep-all;}
+  h2{font-size:var(--fs-h2); margin:0 0 10px; font-weight:800; letter-spacing:-0.01em;}
+  h3{font-size:15px; margin:0 0 6px; font-weight:800;}
+  p{margin:0;}
+  .sub{color:var(--sub); font-size:var(--fs-sm);}
+  .mono{font-family:ui-monospace,"JetBrains Mono",Consolas,monospace;}
+
+  .back{display:inline-block; margin-bottom:14px; color:var(--sub); font-size:12px; letter-spacing:.06em; text-decoration:none; border-bottom:1px solid transparent;}
+  .back:hover{color:var(--accent2); border-color:var(--accent2);}
+  .head{margin:4px 0 18px;}
+  .head p{margin-top:6px; color:var(--sub); font-size:var(--fs-sm);}
+
+  /* ---- 탭 ---- */
+  .tabs{display:flex; gap:6px; margin-bottom:16px; position:sticky; top:0; z-index:20; padding:8px 0; background:linear-gradient(var(--bg) 80%, rgba(247,245,240,0));}
+  .tab{flex:1; padding:10px 4px; text-align:center; border:0; border-radius:12px; background:var(--chip); color:var(--sub);
+       font-weight:700; font-size:14px; cursor:pointer; user-select:none;}
+  .tab:hover{background:#e6dcc9;}
+  .tab[aria-selected="true"]{background:var(--accent2); color:#fff;}
+
+  /* ---- 카드·버튼 ---- */
+  .card{background:var(--card); border:1px solid var(--line); border-radius:14px; padding:16px; margin-bottom:14px; box-shadow:0 2px 6px rgba(0,0,0,.03);}
+  .card.flat{box-shadow:none;}
+  .btn{display:inline-flex; align-items:center; justify-content:center; gap:6px; padding:10px 16px; border:1px solid var(--line); border-radius:12px;
+       background:#fff; font-weight:700; font-size:14px; cursor:pointer; transition:background .12s, border-color .12s; text-decoration:none; color:var(--ink);}
+  .btn:hover{border-color:var(--accent2); color:var(--accent2);}
+  .btn:focus-visible, .tab:focus-visible, .chip-btn:focus-visible, .cal-day:focus-visible, .step:focus-visible{outline:2px solid var(--accent2); outline-offset:2px;}
+  .btn.primary{background:var(--accent2); border-color:var(--accent2); color:#fff;}
+  .btn.primary:hover{background:#244a40; color:#fff;}
+  .btn.big{width:100%; padding:14px 18px; font-size:16px; border-radius:14px;}
+  .btn.danger{color:var(--bad);}
+  .btn.danger:hover{border-color:var(--bad); color:var(--bad);}
+  .btn.sm{padding:5px 11px; font-size:12.5px; border-radius:9px;}
+  .btn:disabled{opacity:.45; cursor:default;}
+  .row{display:flex; gap:8px; flex-wrap:wrap; align-items:center;}
+  .row.between{justify-content:space-between;}
+  .grow{flex:1;}
+  .chip{display:inline-block; padding:2px 9px; border-radius:999px; background:var(--chip); color:#5a4a3a; font-size:12px; font-weight:700; white-space:nowrap;}
+  .chip.green{background:#dcebe3; color:#255a44;}
+  .chip.brown{background:#efe0d0; color:#7a4f2e;}
+  .chip.warn{background:#f8e8c8; color:#8a5a12;}
+  .chip.bad{background:#f3d9d1; color:#8e3323;}
+  .chip.line{background:#fff; border:1px solid var(--line); color:var(--sub);}
+  .note{font-size:var(--fs-sm); color:var(--sub); line-height:1.65;}
+  .empty{padding:18px 8px; text-align:center; color:var(--sub); font-size:var(--fs-sm);}
+  .msg{padding:10px 12px; border-radius:10px; background:var(--hi); border-left:3px solid var(--accent); font-size:var(--fs-sm); line-height:1.65;}
+  .msg.ok{background:#e8f2ec; border-color:var(--ok);}
+  .msg.warn{background:#fbeed2; border-color:var(--warn);}
+  .msg.bad{background:#f9e4de; border-color:var(--bad);}
+  .stack > * + *{margin-top:10px;}
+  ul.plain{margin:6px 0 0; padding-left:18px;}
+  ul.plain li + li{margin-top:3px;}
+
+  /* ---- 점수 링 · 지표 ---- */
+  .hero{display:flex; gap:16px; align-items:center;}
+  .ring{width:112px; height:112px; flex:none; position:relative;}
+  .ring svg{width:100%; height:100%; transform:rotate(-90deg);}
+  .ring .bg{fill:none; stroke:var(--chip); stroke-width:11;}
+  .ring .fg{fill:none; stroke-width:11; stroke-linecap:round; transition:stroke-dasharray .5s ease;}
+  .ring .num{position:absolute; inset:0; display:flex; flex-direction:column; align-items:center; justify-content:center; line-height:1.1;}
+  .ring .num b{font-size:32px; font-weight:900; letter-spacing:-0.03em;}
+  .ring .num span{font-size:11px; color:var(--sub);}
+  .kpis{display:grid; grid-template-columns:repeat(3,1fr); gap:8px;}
+  @media (min-width:520px){ .kpis.five{grid-template-columns:repeat(5,1fr);} }
+  .kpi{background:var(--card); border:1px solid var(--line); border-radius:12px; padding:10px 8px; text-align:center;}
+  .kpi b{display:block; font-size:22px; font-weight:900; letter-spacing:-0.02em; line-height:1.2;}
+  .kpi span{display:block; font-size:11.5px; color:var(--sub); margin-top:2px;}
+  .week{display:grid; grid-template-columns:repeat(7,1fr); gap:6px;}
+  .wd{border:1px solid var(--line); border-radius:10px; padding:6px 0 7px; text-align:center; background:#fff; min-width:0;}
+  .wd small{display:block; font-size:11px; color:var(--sub);}
+  .wd b{display:block; font-size:15px; font-weight:800; min-height:22px; line-height:22px;}
+  .wd i{display:block; font-style:normal; font-size:10.5px; font-weight:700; line-height:1.2;}
+  .wd i.law{color:var(--law);} .wd i.practice{color:var(--prac);} .wd i.rest{color:var(--sub); font-weight:500;}
+  .wd.today{border-color:var(--accent2); box-shadow:0 0 0 1px var(--accent2) inset;}
+  .wd.future{opacity:.6;}
+  .wd.missed{border-style:dashed; border-color:#d9a89c;}
+  .t0{background:var(--t0);} .t1{background:var(--t1);} .t2{background:var(--t2);} .t3{background:var(--t3);} .t4{background:var(--t4); color:#fff;}
+  .t4 small, .t4 i{color:rgba(255,255,255,.85) !important;}
+  .meter{height:8px; border-radius:999px; background:var(--chip); overflow:hidden;}
+  .meter i{display:block; height:100%; background:var(--accent2); border-radius:999px; transition:width .4s ease;}
+  .meter.prac i{background:var(--prac);}
+
+  /* ---- 오늘 · 회차 카드 · 3단계 ---- */
+  .sess-head{display:flex; gap:8px; align-items:baseline; flex-wrap:wrap;}
+  .sess-title{font-size:22px; font-weight:900; letter-spacing:-0.02em;}
+  .steps3{display:grid; grid-template-columns:repeat(3,1fr); gap:8px; margin-top:12px;}
+  .step{display:flex; flex-direction:column; align-items:center; gap:2px; padding:12px 6px; border:1.5px solid var(--line); border-radius:12px; background:#fff; cursor:pointer; text-align:center; line-height:1.3;}
+  .step:hover{border-color:var(--accent2);}
+  .step b{font-size:13.5px;} .step small{font-size:11.5px; color:var(--sub);}
+  .step .n{width:22px; height:22px; line-height:22px; border-radius:50%; background:var(--accent2); color:#fff; font-size:12px; font-weight:800;}
+  .step.on{border-color:var(--accent2); background:#f1f7f4;}
+  .scope-box{margin-top:10px; padding:10px 12px; background:#faf7f0; border-radius:10px; font-size:var(--fs-sm); line-height:1.7;}
+  .plan-row{display:flex; gap:10px; align-items:center; padding:9px 2px; border-top:1px solid var(--line); flex-wrap:wrap;}
+  .plan-row:first-child{border-top:0;}
+  .plan-row .d{min-width:5.6em; font-weight:700;}
+  .plan-row .grow{min-width:8em;}
+  .sess-row{display:flex; gap:8px; align-items:center; padding:8px 2px; border-top:1px dashed var(--line); flex-wrap:wrap;}
+  .sess-row:first-child{border-top:0;}
+  .sess-row .k{min-width:4.6em; font-weight:800;}
+
+  /* ---- 회차 화면(문제지 · 프롬프트 · 업로드) ---- */
+  .sess-bar{display:flex; gap:8px; align-items:center; flex-wrap:wrap; margin-bottom:12px;}
+  select, input[type=number], input[type=date]{font:inherit; padding:7px 10px; border:1.5px solid var(--line); border-radius:9px; background:#fff; color:var(--ink); max-width:100%;}
+  textarea.box{width:100%; padding:12px; border:1.5px solid var(--line); border-radius:10px; font:inherit; font-size:14px; line-height:1.55; background:#fffdf9; color:var(--ink); resize:vertical;}
+  textarea.box:focus{outline:none; border-color:var(--accent2); box-shadow:0 0 0 3px rgba(47,93,80,.15);}
+  textarea.prompt{font-family:ui-monospace,"JetBrains Mono",Consolas,monospace; font-size:12.5px; line-height:1.5; min-height:260px; max-height:420px; background:#f7f4ee;}
+  .paper-wrap{overflow-x:auto; padding-bottom:4px;}
+  .up-table{width:100%; border-collapse:collapse; font-size:var(--fs-sm);}
+  .up-table th, .up-table td{padding:6px 6px; border-top:1px solid var(--line); text-align:left; vertical-align:top;}
+  .up-table th{color:var(--sub); font-weight:700; border-top:0; white-space:nowrap;}
+  .up-table td.n{text-align:right; white-space:nowrap;}
+  .field{display:flex; gap:10px; align-items:center; padding:9px 0; border-top:1px dashed var(--line); flex-wrap:wrap;}
+  .field:first-of-type{border-top:0;}
+  .field > label, .field > .lbl{min-width:8em; font-weight:700;}
+
+  /* ---- 시험지(화면 미리보기 · 인쇄 공용) ---- */
+  .paper{background:#fff; color:#111; border:1px solid var(--line); border-radius:6px; padding:28px 30px; box-shadow:0 2px 10px rgba(0,0,0,.06); min-width:0;}
+  .paper .p-org{font-size:12.5px; letter-spacing:.08em; color:#444; text-align:center;}
+  .paper .p-title{font-size:23px; font-weight:900; text-align:center; margin:4px 0 10px; letter-spacing:-0.01em;}
+  .paper .p-meta{display:flex; justify-content:center; gap:18px; flex-wrap:wrap; font-size:13.5px; color:#222; padding-bottom:10px; border-bottom:2px solid #111;}
+  .paper .p-fields{display:flex; justify-content:space-between; gap:16px; flex-wrap:wrap; margin:12px 0 8px; font-size:13.5px;}
+  .paper .p-fields i{display:inline-block; width:8em; border-bottom:1px solid #111; height:1em; vertical-align:baseline; margin-left:4px;}
+  .paper .p-fields i.s{width:4em;}
+  .paper .p-notice{font-size:12.5px; line-height:1.7; color:#333; border:1px solid #999; padding:8px 12px; margin:10px 0 16px;}
+  .paper .prob{margin:0 0 20px;}
+  .paper .prob-h{display:flex; justify-content:space-between; align-items:baseline; gap:10px; border-bottom:1px solid #111; padding-bottom:3px; margin-bottom:8px;}
+  .paper .prob-h b{font-size:16px; font-weight:900;}
+  .paper .prob-h span{font-size:14px; font-weight:700;}
+  .paper .prob-q p{margin:0 0 6px; font-size:14.5px; line-height:1.85; text-align:left; word-break:keep-all;}
+  .paper .prob-q p.sq{padding-left:1.4em; text-indent:-1.4em;}
+  .paper .prob-ctx{margin:8px 0; padding:8px 12px; border:1px solid #bbb; background:#fafafa; font-size:13.5px; line-height:1.7;}
+  .paper .prob-ref{font-size:11.5px; color:#666; margin-top:2px;}
+  .paper .lines{margin-top:10px;}
+  .paper .lines i{display:block; height:26px; border-bottom:1px solid #bbb;}
+  .paper .p-foot{margin-top:18px; padding-top:6px; border-top:1px dashed #999; font-size:10.5px; color:#777; word-break:break-all;}
+  .paper table{border-collapse:collapse; margin:6px 0;} .paper td, .paper th{border:1px solid #999; padding:3px 8px; font-size:13px;}
+
+  /* ---- 결과 · 분석노트 ---- */
+  .ri{border:1px solid var(--line); border-radius:12px; padding:12px; margin-bottom:10px; background:#fff;}
+  .ri.miss{border-left:4px solid var(--bad);} .ri.part{border-left:4px solid var(--warn);} .ri.full{border-left:4px solid var(--ok);}
+  .ri .q{font-weight:700; line-height:1.5; word-break:keep-all;}
+  .tag{display:inline-block; margin:2px 4px 2px 0; padding:2px 10px; border-radius:8px; font-size:12.5px; font-weight:700;}
+  .tag.weak{background:#f3d9d1; color:#8e3323;} .tag.strong{background:#dcebe3; color:#255a44;} .tag.next{background:#f8e8c8; color:#8a5a12;}
+  .md{font-size:14.5px; line-height:1.75; word-break:break-word;}
+  .md h4{font-size:15.5px; margin:16px 0 6px; padding-bottom:3px; border-bottom:1px solid var(--line);}
+  .md h4:first-child{margin-top:0;}
+  .md p{margin:0 0 8px;} .md ul, .md ol{margin:4px 0 10px; padding-left:22px;} .md li{margin:2px 0;}
+  .md blockquote{margin:8px 0; padding:6px 12px; border-left:3px solid var(--accent); background:#faf7f0; color:#4b4237;}
+  .md table{border-collapse:collapse; width:100%; margin:8px 0 12px; font-size:13.5px;}
+  .md th, .md td{border:1px solid var(--line); padding:5px 8px; text-align:left; vertical-align:top;}
+  .md th{background:#f5f1e8;}
+  .md pre{background:#f4f1ea; padding:10px 12px; border-radius:8px; overflow:auto; font-size:12.5px;}
+  .md code{background:#f1ece2; padding:1px 5px; border-radius:4px; font-size:.92em;}
+  .md hr{border:0; border-top:1px solid var(--line); margin:12px 0;}
+  .scroll-x{overflow-x:auto;}
+
+  /* ---- 기록: 차트 · 달력 · 목록 ---- */
+  .chart{width:100%; height:auto; display:block;}
+  .chart text{font-size:11px; fill:var(--sub); font-family:inherit;}
+  .chart .grid{stroke:var(--line); stroke-width:1;}
+  .chart .goal{stroke:var(--accent); stroke-width:1.2; stroke-dasharray:4 4;}
+  .chart .line{fill:none; stroke-width:2; stroke-linejoin:round; stroke-linecap:round;}
+  .chart .line.law{stroke:var(--law);} .chart .line.practice{stroke:var(--prac);}
+  .chart circle.pt{stroke:#fff; stroke-width:1.5; cursor:pointer;}
+  .chart circle.pt.law{fill:var(--law);} .chart circle.pt.practice{fill:var(--prac);}
+  .chart circle.pt:focus{outline:none; stroke:var(--ink); stroke-width:2;}
+  .seg{display:inline-flex; border:1px solid var(--line); border-radius:10px; overflow:hidden; background:#fff;}
+  .seg button{border:0; background:none; padding:6px 11px; font-size:12.5px; font-weight:700; color:var(--sub); cursor:pointer;}
+  .seg button[aria-pressed="true"]{background:var(--accent2); color:#fff;}
+  .cal{display:grid; grid-template-columns:repeat(7,1fr); gap:5px;}
+  .cal .dow{text-align:center; font-size:11.5px; color:var(--sub); padding:2px 0;}
+  .cal-day{aspect-ratio:1/1; min-width:0; border:1px solid var(--line); border-radius:9px; background:#fff; padding:3px 2px; cursor:pointer;
+           display:flex; flex-direction:column; align-items:center; justify-content:center; line-height:1.15; font-size:12px;}
+  .cal-day small{font-size:10.5px; opacity:.85;}
+  .cal-day b{font-size:12.5px; font-weight:800;}
+  .cal-day.out{visibility:hidden;}
+  .cal-day.today{box-shadow:0 0 0 2px var(--accent2) inset;}
+  .cal-day.sel{outline:2px solid var(--ink); outline-offset:1px;}
+  .cal-day.none{color:#a09a8c;}
+  .legend{display:flex; gap:10px; flex-wrap:wrap; font-size:11.5px; color:var(--sub); align-items:center;}
+  .legend i{display:inline-block; width:12px; height:12px; border-radius:3px; margin-right:4px; vertical-align:-2px;}
+  .legend i.l{background:var(--law);} .legend i.p{background:var(--prac);}
+  .hist{list-style:none; margin:0; padding:0;}
+  .hist li{display:flex; gap:8px; align-items:center; padding:9px 2px; border-top:1px solid var(--line); flex-wrap:wrap;}
+  .hist li:first-child{border-top:0;}
+  .hist .sc{min-width:3.2em; text-align:center; padding:3px 6px; border-radius:8px; font-weight:900;}
+  table.ut{width:100%; border-collapse:collapse; font-size:var(--fs-sm);}
+  table.ut th, table.ut td{padding:6px 6px; border-top:1px solid var(--line); text-align:left; vertical-align:middle;}
+  table.ut th{color:var(--sub); font-weight:700; border-top:0;}
+  table.ut td.n{text-align:right; white-space:nowrap;}
+  .mini{height:6px; border-radius:999px; background:var(--chip); overflow:hidden; min-width:60px;}
+  .mini i{display:block; height:100%; background:var(--accent2);}
+  details.fold summary{cursor:pointer; color:var(--accent2); font-weight:700; font-size:var(--fs-sm);}
+  .toast{position:fixed; left:50%; bottom:22px; transform:translateX(-50%); background:#1f2937; color:#fff; padding:10px 16px; border-radius:12px; font-size:13.5px; z-index:99; max-width:90vw; box-shadow:0 6px 18px rgba(0,0,0,.25);}
+  @media (max-width:420px){ .hero{flex-direction:column; align-items:flex-start;} .ring{width:96px; height:96px;} .ring .num b{font-size:27px;} .paper{padding:18px 14px;} }
+
+  /* ---- 인쇄: 시험지(#paper)만 A4로 ---- */
+  @page{ size:A4; margin:16mm 15mm 18mm; }
+  @media print{
+    html, body{background:#fff !important; color:#000 !important;}
+    body{max-width:none; padding:0 !important; margin:0; font-size:11pt;}
+    .no-print{display:none !important;}
+    .paper-wrap{overflow:visible; padding:0;}
+    .paper{border:0 !important; box-shadow:none !important; border-radius:0; padding:0 !important;}
+    .paper .p-title{font-size:20pt;}
+    .paper .prob{break-inside:avoid;}
+    .paper .prob.tall{break-inside:auto;}
+    .paper .prob-q{break-inside:avoid;}
+    .paper .prob-q p{font-size:11.5pt; line-height:1.9;}
+    .paper .lines i{height:8.2mm; border-bottom-color:#999;}
+    a{color:inherit; text-decoration:none;}
+  }
+</style>
+</head>
+<body>
+
+<a class="back no-print" href="/">← BACK TO BOARD</a>
+
+<div class="head no-print" id="head">
+  <h1>매일 테스트</h1>
+  <p>법규·실무 100점 시험지 — 인쇄해서 손으로 풀고, 프롬프트로 채점한 분석노트를 올리면 점수·연속 기록이 쌓입니다.</p>
+</div>
+
+<div class="tabs no-print" id="tabs" role="tablist" aria-label="화면 선택">
+  <button class="tab" role="tab" data-tab="today" aria-selected="true">오늘</button>
+  <button class="tab" role="tab" data-tab="plan" aria-selected="false">일정</button>
+  <button class="tab" role="tab" data-tab="records" aria-selected="false">기록</button>
+  <button class="tab" role="tab" data-tab="settings" aria-selected="false">설정</button>
+</div>
+
+<main id="app"><div class="empty">문제를 불러오는 중…</div></main>
+
+<script>
+(() => {
+'use strict';
+
+// ==========================================================================
+// 저장소 키 · 상수
+// ==========================================================================
+const KEY_DATA = 'daily-test-records-v1';      // { v, settings, records[] } — 기록(원본)
+const KEY_SUMMARY = 'daily-test-summary-v1';   // 메인 페이지가 읽어 가는 요약(연속일·오늘 과목·다음 회차)
+const BANK_URL = 'daily-test-bank.json';       // scripts/build-daily-test-bank.mjs 가 원본 페이지에서 만든 문제 은행
+const RESULT_FORMAT = 'daily-test-result';     // 채점 프롬프트가 요구하는 기록용 JSON 형식 이름
+const TIER_LABEL = ['과락권', '복습 필요', '합격선 근처', '안정권', '아주 좋음'];
+const SUBJ = { law: '법규', practice: '실무' };
+const NOTE_MAX = 20000;                        // 분석노트 본문 저장 상한(글자)
+const DAY_STARTS = [0, 3, 4, 5, 6];
+const DEFAULTS = {
+  // 요일별 과목(월~일). 평일엔 짧은 실무 5문항, 주말엔 100분짜리 법규 — 바꿔도 된다.
+  pattern: ['practice', 'practice', 'practice', 'practice', 'practice', 'law', 'law'],
+  goal: 70,            // 목표 점수
+  dayStart: 0,         // 하루가 바뀌는 시각(0=자정). 밤늦게 공부하면 3~5시로 두면 새벽에 본 시험이 "어제"로 묶인다
+  lines: false,        // 문제지에 답안 줄을 넣을지
+};
+const DOW = ['일', '월', '화', '수', '목', '금', '토'];
+const DEV_HOST = /^(localhost|127\.0\.0\.1)$/.test(location.hostname);
+
+// ==========================================================================
+// 작은 도구들
+// ==========================================================================
+const $ = (sel, root) => (root || document).querySelector(sel);
+const $$ = (sel, root) => Array.from((root || document).querySelectorAll(sel));
+const esc = (s) => String(s == null ? '' : s).replace(/[&<>"']/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
+const clamp = (n, a, b) => Math.min(b, Math.max(a, n));
+const pad2 = (n) => String(n).padStart(2, '0');
+const round1 = (n) => Math.round(n * 10) / 10;
+const mean = (a) => (a.length ? a.reduce((x, y) => x + y, 0) / a.length : null);
+const fmtNum = (n) => (Number.isInteger(n) ? String(n) : String(round1(n)));
+
+// 날짜는 항상 이 기기의 "현지 날짜"(YYYY-MM-DD). 개발 호스트에서는 테스트가 오늘을 바꿔 볼 수 있다.
+let todayOverride = null;
+const dstr = (d) => d.getFullYear() + '-' + pad2(d.getMonth() + 1) + '-' + pad2(d.getDate());
+const parseDate = (s) => { const [y, m, d] = s.split('-').map(Number); return new Date(y, m - 1, d); };
+const validDate = (s) => typeof s === 'string' && /^\d{4}-\d{2}-\d{2}$/.test(s) && dstr(parseDate(s)) === s;
+const today = () => todayOverride || dstr(new Date(Date.now() - (S.data ? S.data.settings.dayStart : 0) * 3600000));
+const addDays = (s, n) => { const d = parseDate(s); d.setDate(d.getDate() + n); return dstr(d); };
+const diffDays = (a, b) => Math.round((parseDate(a) - parseDate(b)) / 86400000);
+const wdIndex = (s) => (parseDate(s).getDay() + 6) % 7;            // 월=0 … 일=6
+const weekStart = (s) => addDays(s, -wdIndex(s));
+const mdLabel = (s) => { const d = parseDate(s); return (d.getMonth() + 1) + '/' + d.getDate() + ' (' + DOW[d.getDay()] + ')'; };
+const longDate = (s) => { const d = parseDate(s); return d.getFullYear() + '년 ' + (d.getMonth() + 1) + '월 ' + d.getDate() + '일 ' + DOW[d.getDay()] + '요일'; };
+const tierOf = (score) => (score < 40 ? 0 : score < 60 ? 1 : score < 80 ? 2 : score < 90 ? 3 : 4);
+
+const store = {
+  get(k) { try { return localStorage.getItem(k); } catch (e) { return null; } },
+  set(k, v) { try { localStorage.setItem(k, v); return true; } catch (e) { return false; } },
+  del(k) { try { localStorage.removeItem(k); } catch (e) {} },
+};
+
+// ---- HTML → 평문(배경자료를 프롬프트에 넣을 때) ---------------------------------
+function htmlToText(html) {
+  const s = String(html || '').replace(/<br\s*\/?>/gi, '\n').replace(/<\/(p|div|li|tr|h\d)>/gi, '\n').replace(/<\/t[hd]>/gi, ' | ').replace(/<li[^>]*>/gi, '- ');
+  const box = document.createElement('div');
+  box.innerHTML = s;
+  return (box.textContent || '').replace(/[ \t]+/g, ' ').replace(/ *\n */g, '\n').replace(/\n{3,}/g, '\n\n').trim();
+}
+
+// ---- 마크다운(분석노트) → 안전한 HTML: 먼저 전부 이스케이프하고, 알려진 서식만 되살린다 ------------
+function mdInline(s) {
+  return esc(s).replace(/&lt;br\s*\/?&gt;/gi, '<br>').replace(/`([^`]+)`/g, '<code>$1</code>').replace(/\*\*([^*]+)\*\*/g, '<b>$1</b>').replace(/(^|[^*])\*([^*\s][^*]*)\*(?!\*)/g, '$1<i>$2</i>');
+}
+function mdToHtml(src) {
+  const lines = String(src || '').replace(/\r\n?/g, '\n').split('\n');
+  const out = [];
+  let i = 0;
+  const isTableSep = (l) => /^\s*\|?\s*:?-{2,}:?\s*(\|\s*:?-{2,}:?\s*)*\|?\s*$/.test(l || '');
+  const cells = (l) => l.trim().replace(/^\|/, '').replace(/\|$/, '').split('|').map((c) => c.trim());
+  while (i < lines.length) {
+    const line = lines[i];
+    if (/^\s*```/.test(line)) {                                    // 코드 블록
+      const buf = []; i++;
+      while (i < lines.length && !/^\s*```/.test(lines[i])) buf.push(lines[i++]);
+      i++; out.push('<pre>' + esc(buf.join('\n')) + '</pre>'); continue;
+    }
+    if (!line.trim()) { i++; continue; }
+    let m;
+    if ((m = line.match(/^\s*(#{1,6})\s+(.*)$/))) { out.push('<h4>' + mdInline(m[2]) + '</h4>'); i++; continue; }
+    if (/^\s*([-*_])\1{2,}\s*$/.test(line)) { out.push('<hr>'); i++; continue; }
+    if (line.includes('|') && isTableSep(lines[i + 1])) {           // 표
+      const head = cells(line); i += 2;
+      const rows = [];
+      while (i < lines.length && lines[i].includes('|') && lines[i].trim()) rows.push(cells(lines[i++]));
+      out.push('<div class="scroll-x"><table><thead><tr>' + head.map((c) => '<th>' + mdInline(c) + '</th>').join('') + '</tr></thead><tbody>'
+        + rows.map((r) => '<tr>' + head.map((_, k) => '<td>' + mdInline(r[k] || '') + '</td>').join('') + '</tr>').join('') + '</tbody></table></div>');
+      continue;
+    }
+    if (/^\s*>/.test(line)) {                                       // 인용
+      const buf = [];
+      while (i < lines.length && /^\s*>/.test(lines[i])) buf.push(lines[i++].replace(/^\s*>\s?/, ''));
+      out.push('<blockquote>' + buf.map(mdInline).join('<br>') + '</blockquote>'); continue;
+    }
+    if (/^\s*([-*+]|\d+[.)])\s+/.test(line)) {                       // 목록(글머리표 ↔ 번호가 바뀌면 새 목록)
+      const ordered = /^\s*\d+[.)]\s+/.test(line);
+      const same = (l) => /^\s*([-*+]|\d+[.)])\s+/.test(l) && /^\s*\d+[.)]\s+/.test(l) === ordered;
+      const buf = [];
+      while (i < lines.length && same(lines[i])) buf.push(lines[i++].replace(/^\s*([-*+]|\d+[.)])\s+/, ''));
+      out.push((ordered ? '<ol>' : '<ul>') + buf.map((x) => '<li>' + mdInline(x) + '</li>').join('') + (ordered ? '</ol>' : '</ul>')); continue;
+    }
+    const buf = [];                                                 // 문단
+    while (i < lines.length && lines[i].trim() && !/^\s*(#{1,6}\s|```|>|([-*+]|\d+[.)])\s+)/.test(lines[i]) && !(lines[i].includes('|') && isTableSep(lines[i + 1]))) buf.push(lines[i++]);
+    if (!buf.length) { out.push('<p>' + mdInline(lines[i++]) + '</p>'); continue; }
+    out.push('<p>' + buf.map(mdInline).join('<br>') + '</p>');
+  }
+  return out.join('\n');
+}
+
+// ==========================================================================
+// 전역 상태
+// ==========================================================================
+const S = {
+  bank: null, pById: {}, sById: {}, sessOf: { law: [], practice: [] },
+  data: null,            // 저장되는 것: { v, settings, records }
+  view: 'today',         // today | plan | records | settings | session | result
+  sid: null, step: 1, sdate: null, recId: null,
+  calMonth: null, calSel: null, chartRange: 30, chartSeries: 'all', histCount: 15,
+  up: { text: '', parsed: null, date: '', fileName: '' },   // 업로드 화면 상태(다시 그려도 붙여넣은 글이 남도록)
+};
+
+// ---- 저장 · 불러오기 -------------------------------------------------------
+function freshData() { return { v: 1, settings: JSON.parse(JSON.stringify(DEFAULTS)), records: [] }; }
+function normalizeSettings(s) {
+  const d = JSON.parse(JSON.stringify(DEFAULTS));
+  s = s && typeof s === 'object' ? s : {};
+  const pat = Array.isArray(s.pattern) && s.pattern.length === 7 && s.pattern.every((x) => ['law', 'practice', 'rest'].includes(x)) ? s.pattern.slice() : d.pattern;
+  return {
+    pattern: pat,
+    goal: clamp(Math.round(Number(s.goal) || d.goal), 10, 100),
+    dayStart: DAY_STARTS.includes(Number(s.dayStart)) ? Number(s.dayStart) : d.dayStart,
+    lines: !!s.lines,
+  };
+}
+function normalizeRecord(r) {
+  if (!r || typeof r !== 'object' || !r.id || !validDate(r.date) || !Array.isArray(r.items)) return null;
+  const items = r.items.filter((it) => it && it.id).map((it) => ({ id: String(it.id), got: Number(it.got) || 0, max: Number(it.max) || 0, t: it.t ? String(it.t).slice(0, 80) : '', missing: Array.isArray(it.missing) ? it.missing.map((x) => String(x).slice(0, 160)).slice(0, 8) : [], comment: it.comment ? String(it.comment).slice(0, 400) : '' }));
+  if (!items.length) return null;
+  const score = round1(items.reduce((a, it) => a + it.got, 0));
+  const strs = (a, n) => (Array.isArray(a) ? a.map((x) => String(x).trim().slice(0, 80)).filter(Boolean).slice(0, n) : []);
+  return {
+    id: String(r.id), session: String(r.session || ''), s: r.s === 'practice' ? 'practice' : 'law', date: r.date, score, max: round1(items.reduce((a, it) => a + it.max, 0)) || 100,
+    items, weak: strs(r.weak, 8), strong: strs(r.strong, 8), next: strs(r.next, 8), summary: String(r.summary || '').slice(0, 800),
+    minutes: Number.isFinite(Number(r.minutes)) && r.minutes !== null && r.minutes !== '' ? Math.round(Number(r.minutes)) : null,
+    note: String(r.note || '').slice(0, NOTE_MAX), createdAt: Number(r.createdAt) || 0,
+  };
+}
+function loadData() {
+  let data = freshData();
+  const raw = store.get(KEY_DATA);
+  if (raw) {
+    try {
+      const p = JSON.parse(raw);
+      if (p && Array.isArray(p.records)) data = { v: 1, settings: p.settings, records: p.records.map(normalizeRecord).filter(Boolean) };
+    } catch (e) {
+      store.set(KEY_DATA + '-broken-' + Date.now(), raw);   // 깨진 저장값은 지우지 않고 따로 남겨 둔다
+    }
+  }
+  data.settings = normalizeSettings(data.settings);
+  data.records.sort(recOrder);
+  return data;
+}
+const recOrder = (a, b) => (a.date < b.date ? -1 : a.date > b.date ? 1 : (a.createdAt || 0) - (b.createdAt || 0));
+let saveFailed = false;
+function flushData() {
+  const ok = store.set(KEY_DATA, JSON.stringify(S.data));
+  if (!ok && !saveFailed) { saveFailed = true; toast('저장 공간이 부족해요. 설정에서 백업을 받고 오래된 분석노트를 지워 주세요.'); }
+  if (ok) saveFailed = false;
+  writeSummary();
+  return ok;
+}
+
+// ==========================================================================
+// 문제 은행 · 회차
+// ==========================================================================
+function indexBank(b) {
+  S.bank = b;
+  b.problems.forEach((p) => { S.pById[p.id] = p; });
+  b.sessions.forEach((s) => { S.sById[s.id] = s; S.sessOf[s.s].push(s); });
+}
+const sessTitle = (sess) => SUBJ[sess.s] + ' 제' + sess.n + '회';
+const probs = (sess) => sess.problems.map((id) => S.pById[id]);
+function sessScope(sess) {
+  const ps = probs(sess);
+  if (sess.s === 'law') return ps[0].label + ' ~ ' + ps[ps.length - 1].label;
+  return Array.from(new Set(ps.map((p) => p.unitName))).join(' · ');
+}
+function sessTopics(sess) {
+  const ps = probs(sess);
+  return sess.s === 'law' ? ps.map((p) => p.label + ' ' + p.title).join(' · ') : Array.from(new Set(ps.map((p) => p.chapter + ' / ' + p.unitName))).join(' · ');
+}
+function sessMinutes(sess) {
+  if (sess.s === 'law') return 100;                                   // 실제 시험처럼 1점 = 1분
+  return Math.round(probs(sess).reduce((a, p) => a + (p.size === 3 ? 8 : p.size === 2 ? 6 : 4), 0) / 5) * 5 || 5;
+}
+function doneCounts(s) {
+  const cnt = {};
+  S.sessOf[s].forEach((x) => { cnt[x.id] = 0; });
+  S.data.records.forEach((r) => { if (r.s === s && cnt[r.session] != null) cnt[r.session]++; });
+  return cnt;
+}
+// 다음 회차: 이번 회독에서 아직 안 한 가장 앞 회차(모두 했으면 다음 회독의 1회차부터)
+function pickNext(s, cnt) {
+  const list = S.sessOf[s];
+  const min = Math.min.apply(null, list.map((x) => cnt[x.id]));
+  return { sess: list.find((x) => cnt[x.id] === min), round: min + 1 };
+}
+function nextSession(s) { return pickNext(s, doneCounts(s)); }
+
+// ==========================================================================
+// 일정 — 요일별 과목 패턴 + "다음 회차" 포인터. 빠진 날이 있어도 회차는 이어서 진행된다.
+// ==========================================================================
+const subjectOn = (date) => S.data.settings.pattern[wdIndex(date)];
+const recordsOn = (date) => S.data.records.filter((r) => r.date === date);
+function projection(days) {
+  const sim = { law: doneCounts('law'), practice: doneCounts('practice') };
+  const t = today();
+  const out = [];
+  for (let i = 0; i < days; i++) {
+    const date = addDays(t, i), subj = subjectOn(date);
+    if (subj === 'rest') { out.push({ date, subj }); continue; }
+    const done = recordsOn(date).filter((r) => r.s === subj);
+    if (i === 0 && done.length) { out.push({ date, subj, done: done[done.length - 1] }); continue; }   // 오늘 이미 함(회차 포인터에 이미 반영됨)
+    const nx = pickNext(subj, sim[subj]);
+    out.push({ date, subj, sess: nx.sess, round: nx.round });
+    sim[subj][nx.sess.id]++;
+  }
+  return out;
+}
+const plannedPerWeek = () => S.data.settings.pattern.filter((x) => x !== 'rest').length;
+
+// ==========================================================================
+// 기록에서 계산하는 것들
+// ==========================================================================
+const byDay = () => { const m = {}; S.data.records.forEach((r) => { (m[r.date] = m[r.date] || []).push(r); }); return m; };
+const dayAvg = (list) => mean(list.map((r) => r.score));
+function streakInfo(daySet, todayS) {
+  const doneToday = daySet.has(todayS);
+  let cur = 0; let d = doneToday ? todayS : addDays(todayS, -1);
+  while (daySet.has(d)) { cur++; d = addDays(d, -1); }
+  let best = 0, run = 0, prev = null;
+  Array.from(daySet).sort().forEach((s) => { run = prev && diffDays(s, prev) === 1 ? run + 1 : 1; best = Math.max(best, run); prev = s; });
+  return { current: cur, best, doneToday, lastRun: run };   // lastRun: 마지막 응시일로 끝나는 연속 일수(메인 페이지가 "지금도 이어지는지" 판단할 때 씀)
+}
+function stats() {
+  const recs = S.data.records, t = today();
+  const days = byDay(), dayList = Object.keys(days).sort();
+  const scores = recs.map((r) => r.score);
+  const win = (from, to) => recs.filter((r) => r.date >= from && r.date <= to).map((r) => r.score);
+  const last7 = win(addDays(t, -6), t), prev7 = win(addDays(t, -13), addDays(t, -7));
+  const sub = (k) => mean(recs.filter((r) => r.s === k).map((r) => r.score));
+  return {
+    days, dayList, dayCount: dayList.length, recCount: recs.length,
+    avg: mean(scores), best: scores.length ? Math.max.apply(null, scores) : null, avg7: mean(last7), avgPrev7: mean(prev7), n7: last7.length,
+    lawAvg: sub('law'), practiceAvg: sub('practice'),
+    streak: streakInfo(new Set(dayList), t),
+  };
+}
+function nextTitles() { const o = {}; ['law', 'practice'].forEach((s) => { const n = nextSession(s); o[s] = { id: n.sess.id, title: sessTitle(n.sess), round: n.round }; }); return o; }
+// 메인 페이지(블로그 홈)가 읽는 요약. "오늘 했는지·연속이 이어지는지"는 페이지를 안 열어도 날짜가 바뀌면 달라지므로,
+// 계산 결과가 아니라 재료(마지막 응시일·그날 평균·그날로 끝나는 연속 일수·요일 패턴·다음 회차)를 저장하고 읽는 쪽이 오늘 날짜로 판단한다.
+function writeSummary() {
+  try {
+    const st = stats();
+    const last = st.dayList.length ? st.dayList[st.dayList.length - 1] : null;
+    store.set(KEY_SUMMARY, JSON.stringify({
+      v: 2, lastDate: last, lastScore: last ? Math.round(dayAvg(st.days[last])) : null, run: st.streak.lastRun, best: st.streak.best, days: st.dayCount,
+      goal: S.data.settings.goal, dayStart: S.data.settings.dayStart, pattern: S.data.settings.pattern, next: nextTitles(), updatedAt: Date.now(),
+    }));
+  } catch (e) {}
+}
+// 문제별 최근 성적(득점률) — 취약 문제 찾기용
+function problemStats() {
+  const m = {};
+  S.data.records.forEach((r) => r.items.forEach((it) => {
+    if (!it.max) return;
+    const o = m[it.id] || (m[it.id] = { id: it.id, tries: 0, sum: 0, last: 0, date: '', recId: '', t: it.t });
+    o.tries++; o.sum += it.got / it.max; o.last = it.got / it.max; o.date = r.date; o.recId = r.id; if (it.t) o.t = it.t;
+  }));
+  return m;
+}
+function weakTags() {
+  const m = {};
+  S.data.records.forEach((r) => r.weak.forEach((w) => {
+    const key = w.replace(/\s+/g, ' ').trim();
+    const o = m[key] || (m[key] = { tag: key, n: 0, last: '' });
+    o.n++; if (r.date > o.last) o.last = r.date;
+  }));
+  return Object.values(m).sort((a, b) => b.n - a.n || (a.last < b.last ? 1 : -1));
+}
+
+// ==========================================================================
+// 문제지(인쇄용) · 채점 프롬프트
+// ==========================================================================
+const paragraphs = (t) => String(t || '').split('\n').map((x) => x.trim()).filter(Boolean);
+function qHTML(text) {
+  return paragraphs(text).map((p) => '<p' + (/^[⑴⑵⑶⑷⑸①②③④⑤]/.test(p) ? ' class="sq"' : '') + '>' + mdInline(p) + '</p>').join('');
+}
+function paperNotice(sess) {
+  return sess.s === 'law'
+    ? '※ 각 문제의 배점은 문제 번호 옆에 표시되어 있습니다. ※ 답안지에 문제 번호를 쓰고 서술하시오. 목차(Ⅰ, Ⅱ …)를 먼저 잡고, 조문·판례·학설과 사안 포섭을 구체적으로 쓰시오.'
+    : '※ 각 문항의 주제에 대하여 핵심 개념·산식·근거 법령·유의사항을 간결하게 서술하시오. 배점은 답안 분량을 고려해 정해져 있습니다. ※ 답안지에 문항 번호를 쓰고 서술하시오.';
+}
+function paperHTML(sess, date, withLines) {
+  const ps = probs(sess), subj = S.bank.subjects[sess.s];
+  let h = '<article class="paper" id="paper">';
+  h += '<header><div class="p-org">감정평가사 2차 시험 · ' + esc(subj.name) + '</div><h2 class="p-title" style="margin-top:4px">매일 테스트 — ' + esc(sessTitle(sess)) + '</h2>';
+  h += '<div class="p-meta"><span>총 100점</span><span>권장 시간 ' + sessMinutes(sess) + '분</span><span>' + esc(longDate(date)) + '</span></div>';
+  h += '<div class="p-fields"><span>이름<i></i></span><span>시작 ~ 종료<i></i></span><span>득점<i class="s"></i> / 100</span></div></header>';
+  h += '<div class="p-notice">' + esc(paperNotice(sess)) + '</div>';
+  ps.forEach((p, i) => {
+    const pts = sess.points[p.id];
+    const lines = withLines ? Math.max(4, Math.round(pts * (sess.s === 'law' ? 0.7 : 0.5))) : 0;
+    h += '<section class="prob' + (lines > 12 ? ' tall' : '') + '"><div class="prob-h"><b>' + (sess.s === 'law' ? '문제 ' : '문항 ') + (i + 1) + '.</b><span>(' + pts + '점)</span></div>';
+    h += '<div class="prob-q">' + qHTML(p.question);
+    if (p.context) h += '<div class="prob-ctx">' + p.context + '</div>';
+    if (p.ref) h += '<div class="prob-ref">(출처: ' + esc(p.ref) + ')</div>';
+    h += '</div>';
+    if (lines) h += '<div class="lines">' + '<i></i>'.repeat(lines) + '</div>';
+    h += '</section>';
+  });
+  h += '<div class="p-foot">' + esc(sess.id) + ' · ' + esc(sess.problems.join(', ')) + '</div></article>';
+  return h;
+}
+function buildPrompt(sess, date) {
+  const subj = S.bank.subjects[sess.s], ps = probs(sess), law = sess.s === 'law';
+  const L = [];
+  L.push('당신은 감정평가사 2차 시험 「' + subj.name + '」 채점위원 겸 학습 코치입니다.');
+  L.push('아래 [문제 및 채점 기준]을 근거로, 내가 이 대화에 첨부하거나 붙여넣은 [내 답안]을 채점하고 분석노트를 작성해 주세요.');
+  L.push('');
+  L.push('# 시험 정보');
+  L.push('- 회차: ' + sessTitle(sess) + ' (session: ' + sess.id + ')');
+  L.push('- 응시일: ' + date);
+  L.push('- 문항 수·총점: ' + ps.length + '문항 · 100점 (권장 시간 ' + sessMinutes(sess) + '분)');
+  L.push('');
+  L.push('# 채점 원칙');
+  L.push(law
+    ? '1. 문제별 [모범답안(구조·핵심)]과 그 안의 [채점 포인트]·Tip을 기준으로 채점합니다. 표현이 달라도 같은 법리·같은 취지면 인정하고, 모범답안에 없더라도 정당한 논거는 인정할 수 있습니다.'
+    : '1. 문제별 [모범답안]과 [핵심 키워드]를 기준으로 채점합니다. 표현이 달라도 같은 개념·같은 취지면 인정하고, 모범답안에 없더라도 정당한 내용은 인정할 수 있습니다.');
+  if (law) L.push('2. 배점 배분(법규): 쟁점 파악·목차 구성 약 20% / 법리·학설·판례·조문의 정확성 약 35% / 사안 포섭 약 35% / 결론·논리 일관성 약 10%. [채점 포인트]에 배점 힌트가 있으면 그것을 우선합니다.');
+  else L.push('2. 배점 배분(실무): 각 문항의 [핵심 키워드]를 같은 비중의 채점 항목으로 보고, 항목별로 충족 / 부분 / 미충족을 판단해 득점을 정합니다. 산식·수치·근거 법령이 틀리면 그 항목은 인정하지 않습니다.');
+  L.push('3. 부분점수를 인정하고 득점은 0.5점 단위로 줍니다. 문제별 득점은 그 문제의 배점을 넘을 수 없습니다.');
+  L.push('4. 답안이 없거나 읽을 수 없는 문제는 0점으로 하되, 판독이 불확실한 부분은 그 사실을 적고 문맥으로 최대한 판단합니다.');
+  L.push('5. 실제 채점 관행에 맞춰 냉정하게(후하지도 박하지도 않게) 채점합니다. 모범답안 문장을 그대로 옮겨 정답을 알려 주기보다, 내 답안에서 무엇이 빠졌고 무엇이 틀렸는지를 짚어 주세요.');
+  L.push('6. 문제 번호(' + (law ? '문제' : '문항') + ' 1, 2 …)는 아래 [문제 및 채점 기준]의 번호와 같습니다.');
+  L.push('');
+  L.push('# 출력 형식 (아래 4개 항목을 이 순서·제목 그대로)');
+  L.push('## 1. 채점표');
+  L.push('표 — 문제 | 배점 | 득점 | 한줄 평 (마지막 줄에 합계)');
+  L.push('## 2. 문제별 피드백');
+  L.push('문제마다 ① 잘한 점 ② 놓친 핵심(모범답안 대비) ③ 다시 쓴다면 첫 두 문장 예시');
+  L.push('## 3. 분석노트');
+  L.push('- 총평(3~4문장)');
+  L.push('- 취약 쟁점 TOP 3와 원인(개념 부족 / 암기 누락 / 사안 포섭 미흡 / 서술 구조 / 시간 부족 중에서)');
+  L.push('- 다음 회차 전까지 할 일 3가지(구체적으로)');
+  L.push('## 4. 기록용 JSON');
+  L.push('맨 마지막에 아래 JSON 코드블록을 정확히 1개 출력하세요. 설명·주석이 없는 순수 JSON이어야 하며, format·session·id·max 값은 그대로 두고 got(득점)·total·나머지 값만 채웁니다. weak(취약 쟁점)·strong(잘한 점)·next(할 일)는 20자 안팎의 짧은 문구로 씁니다. minutes(소요 시간, 분)는 내가 알려 준 경우에만 숫자로, 아니면 null 입니다.');
+  L.push('```json');
+  L.push(JSON.stringify({
+    format: RESULT_FORMAT, v: 1, session: sess.id, date, minutes: null,
+    items: ps.map((p) => ({ id: p.id, max: sess.points[p.id], got: 0, missing: [], comment: '' })),
+    total: 0, summary: '', weak: [], strong: [], next: [],
+  }, null, 2));
+  L.push('```');
+  L.push('');
+  L.push('# 문제 및 채점 기준');
+  ps.forEach((p, i) => {
+    L.push('');
+    L.push('## ' + (law ? '문제 ' : '문항 ') + (i + 1) + ' [id: ' + p.id + '] — 배점 ' + sess.points[p.id] + '점');
+    L.push('【문제】');
+    L.push(p.question);
+    if (p.context) L.push('【제시 자료】\n' + htmlToText(p.context));
+    if (p.ref) L.push('(출처: ' + p.ref + ')');
+    if (p.questionSource === '재구성') L.push('(※ 이 문제문은 모범답안의 사안·쟁점에 맞춰 재구성한 것입니다.)');
+    L.push('【모범답안' + (law ? '(구조·핵심)' : '') + '】');
+    L.push(p.answer);
+    if (!law) {
+      L.push('【핵심 키워드】 — 항목별 충족 여부로 채점(A / B 는 같은 뜻으로 인정하는 표현)');
+      p.keywords.forEach((k, j) => L.push((j + 1) + '. ' + k.join(' / ')));
+    }
+  });
+  L.push('');
+  L.push('※ 채점을 마치면 반드시 맨 끝에 위 「4. 기록용 JSON」 코드블록을 출력하세요(점수 기록에 쓰입니다).');
+  L.push('');
+  L.push('# 내 답안');
+  L.push('(여기에 답안 텍스트를 붙여넣거나, 손으로 쓴 답안의 사진·PDF를 첨부하세요. 문제 번호별로 구분되어 있어야 합니다.)');
+  return L.join('\n');
+}
+
+// ==========================================================================
+// 채점 결과(분석노트) 읽기 — 프롬프트가 요구한 JSON 코드블록을 찾아 검증한다
+// ==========================================================================
+function balancedFrom(text, open) {
+  let depth = 0, quote = false;
+  for (let i = open; i < text.length; i++) {
+    const c = text[i];
+    if (quote) { if (c === '\\') i++; else if (c === '"') quote = false; continue; }
+    if (c === '"') quote = true;
+    else if (c === '{') depth++;
+    else if (c === '}' && --depth === 0) return i;
+  }
+  return -1;
+}
+// 문자열 바깥의 // 와 /* */ 주석, 그리고 } ] 바로 앞의 쉼표를 지운다(AI가 예시 틀을 베끼며 붙이곤 하는 것들)
+function stripJsonNoise(raw) {
+  let out = '', i = 0, quote = false;
+  while (i < raw.length) {
+    const c = raw[i], n = raw[i + 1];
+    if (quote) {
+      if (c === '\n') { out += '\\n'; i++; continue; }                  // 문자열 안의 줄바꿈 문자(잘못 적힌 JSON) → \n
+      if (c === '\r' || c === '\t') { out += c === '\t' ? ' ' : ''; i++; continue; }
+      out += c; if (c === '\\') { out += n || ''; i += 2; continue; } if (c === '"') quote = false; i++; continue;
+    }
+    if (c === '"') { quote = true; out += c; i++; continue; }
+    if (c === '/' && n === '/') { while (i < raw.length && raw[i] !== '\n') i++; continue; }
+    if (c === '/' && n === '*') { const end = raw.indexOf('*/', i + 2); i = end < 0 ? raw.length : end + 2; continue; }
+    out += c; i++;
+  }
+  let res = '', q = false;
+  for (let k = 0; k < out.length; k++) {                                   // 후행 쉼표: 문자열 밖에서 , 다음에 공백만 있고 } 또는 ] 가 오면 뺀다
+    const c = out[k];
+    if (q) { res += c; if (c === '\\') res += out[++k] || ''; else if (c === '"') q = false; continue; }
+    if (c === '"') { q = true; res += c; continue; }
+    if (c === ',') { let j = k + 1; while (j < out.length && /\s/.test(out[j])) j++; if (out[j] === '}' || out[j] === ']') continue; }
+    res += c;
+  }
+  return res;
+}
+function lenientParse(raw) {
+  const tries = [raw, stripJsonNoise(raw.replace(/[“”]/g, '"').replace(/[‘’]/g, "'").replace(/^﻿/, ''))];
+  let lastErr = null;
+  for (const t of tries) { try { return { value: JSON.parse(t) }; } catch (e) { lastErr = e; } }
+  return { error: lastErr };
+}
+function jsonCandidates(text) {
+  const out = [];
+  for (const m of text.matchAll(/```[ \t]*[a-zA-Z0-9_-]*[ \t]*\r?\n([\s\S]*?)```/g)) out.push({ raw: m[1].trim(), from: m.index, to: m.index + m[0].length });
+  if (!out.length || !out.some((c) => c.raw.includes(RESULT_FORMAT))) {   // 코드블록 없이 JSON만 붙여넣은 경우(또는 파일 전체가 JSON)
+    for (const m of text.matchAll(/"format"\s*:\s*"daily-test-result"/g)) {
+      let open = text.lastIndexOf('{', m.index);
+      while (open >= 0) { const close = balancedFrom(text, open); if (close > m.index) { out.push({ raw: text.slice(open, close + 1), from: open, to: close + 1 }); break; } open = text.lastIndexOf('{', open - 1); }
+    }
+  }
+  return out;
+}
+// → { ok, rec, warnings[], errors[] }
+function parseResult(text, opts) {
+  opts = opts || {};
+  const warnings = [], errors = [];
+  const src = String(text || '');
+  if (!src.trim()) return { ok: false, warnings, errors: ['붙여넣은 내용이 없어요.'] };
+  const cands = jsonCandidates(src);
+  if (!cands.length) return { ok: false, warnings, errors: ['기록용 JSON 블록을 찾지 못했어요. 채점 프롬프트의 "4. 기록용 JSON" 항목까지 포함된 답변 전체를 붙여넣어 주세요.'] };
+  let data = null, used = null, lastErr = '';
+  for (let k = cands.length - 1; k >= 0; k--) {                       // 마지막으로 유효한 후보를 쓴다(프롬프트의 예시 틀을 그대로 되풀이한 블록이 앞에 있을 수 있어서)
+    const p = lenientParse(cands[k].raw);
+    if (p.error) { lastErr = String(p.error.message || p.error); continue; }
+    const v = p.value;
+    if (v && typeof v === 'object' && !Array.isArray(v) && (v.format === RESULT_FORMAT || (v.session && Array.isArray(v.items)))) { data = v; used = cands[k]; break; }
+    lastErr = 'JSON은 읽었지만 기록용 형식(format: ' + RESULT_FORMAT + ')이 아니에요.';
+  }
+  if (!data) return { ok: false, warnings, errors: ['JSON을 읽지 못했어요' + (lastErr ? ' — ' + lastErr : '') + '. 코드블록이 잘리지 않았는지 확인해 주세요.'] };
+  if (data.format !== RESULT_FORMAT) warnings.push('format 값이 없거나 달라서 내용으로 판단해 읽었어요.');
+
+  const sess = S.sById[String(data.session || '')];
+  if (!sess) return { ok: false, warnings, errors: ['알 수 없는 회차예요: "' + esc(String(data.session || '')) + '". 프롬프트에 들어 있던 session 값을 그대로 써야 해요.'] };
+
+  const items = [];
+  const given = Array.isArray(data.items) ? data.items : [];
+  // 문제 id 가 하나도 맞지 않는데 항목 수가 같으면(id 를 빼먹거나 "문제1" 처럼 적은 경우) 순서대로 맞춘다
+  const byOrder = given.length === sess.problems.length && !given.some((x) => x && sess.problems.includes(String(x.id)));
+  if (byOrder) warnings.push('문제 id를 알아볼 수 없어 항목 순서대로 맞췄어요.');
+  sess.problems.forEach((pid, i) => {
+    const max = sess.points[pid];
+    const it = byOrder ? given[i] : given.find((x) => x && String(x.id) === pid);
+    const p = S.pById[pid];
+    const t = sess.s === 'law' ? p.label + ' ' + p.title : p.topic.slice(0, 40);
+    if (!it) { warnings.push((i + 1) + '번(' + t + ') 채점 결과가 없어 0점으로 처리했어요.'); items.push({ id: pid, got: 0, max, t, missing: [], comment: '' }); return; }
+    const rawGot = it.got != null ? it.got : it.score != null ? it.score : it.points != null ? it.points : it['득점'];   // 다른 이름으로 적은 득점도 읽는다
+    let got = Number(String(rawGot).replace(/[^\d.\-]/g, ''));
+    if (!Number.isFinite(got)) { warnings.push((i + 1) + '번 득점을 읽지 못해 0점으로 처리했어요.'); got = 0; }
+    if (got > max) { warnings.push((i + 1) + '번 득점(' + got + ')이 배점(' + max + ')보다 커서 배점으로 맞췄어요.'); got = max; }
+    if (got < 0) got = 0;
+    if (it.max != null && Number(it.max) !== max) warnings.push((i + 1) + '번 배점을 ' + it.max + '점이라 적었지만 시험지 배점(' + max + '점)으로 계산했어요.');
+    items.push({ id: pid, got: round1(got), max, t, missing: Array.isArray(it.missing) ? it.missing.map((x) => String(x).trim().slice(0, 160)).filter(Boolean).slice(0, 8) : [], comment: it.comment ? String(it.comment).trim().slice(0, 400) : '' });
+  });
+  const extra = byOrder ? [] : given.filter((x) => x && x.id && !sess.problems.includes(String(x.id)));
+  if (extra.length) warnings.push('이 회차에 없는 문제 ' + extra.length + '개는 무시했어요.');
+
+  const total = round1(items.reduce((a, it) => a + it.got, 0));
+  if (data.total != null && Math.abs(Number(data.total) - total) > 0.6) warnings.push('AI가 적은 총점(' + data.total + ')과 문제별 득점의 합(' + total + ')이 달라서 합계로 계산했어요.');
+  if (total === 0 && items.every((it) => it.got === 0)) warnings.push('모든 문제가 0점이에요. 프롬프트의 빈 틀(got: 0)을 그대로 붙여넣은 건 아닌지 확인해 주세요.');
+
+  let date = validDate(data.date) ? data.date : '';
+  if (!date) warnings.push('응시일을 읽지 못해 ' + (opts.today || today()) + '로 넣었어요(아래에서 바꿀 수 있어요).');
+  else if (date > (opts.today || today())) { warnings.push('응시일(' + date + ')이 미래라서 오늘로 바꿨어요.'); date = ''; }
+  const strs = (a, n) => (Array.isArray(a) ? a.map((x) => String(x).trim().slice(0, 80)).filter(Boolean).slice(0, n) : []);
+  let note = (src.slice(0, used.from) + src.slice(used.to)).trim();
+  note = note.replace(/(?:^|\n)\s*#{1,6}\s*4\.?\s*기록용\s*JSON[^\n]*\s*$/i, '').trim();   // 블록을 떼고 남은 소제목
+  if (note.length > NOTE_MAX) { warnings.push('분석노트가 너무 길어 앞 ' + NOTE_MAX + '자만 저장해요.'); note = note.slice(0, NOTE_MAX); }
+  const minutes = data.minutes != null && data.minutes !== '' && Number.isFinite(Number(data.minutes)) ? Math.round(Number(data.minutes)) : null;
+  return {
+    ok: true, warnings, errors,
+    rec: { session: sess.id, s: sess.s, date: date || opts.today || today(), score: total, max: 100, items, weak: strs(data.weak, 8), strong: strs(data.strong, 8), next: strs(data.next, 8),
+           summary: String(data.summary || '').trim().slice(0, 800), minutes, note },
+    dateFromJson: !!date,
+  };
+}
+function saveParsed(parsed, date, replaceId) {
+  const rec = normalizeRecord(Object.assign({}, parsed.rec, { id: 'r' + Date.now().toString(36) + Math.random().toString(36).slice(2, 6), date, createdAt: Date.now() }));
+  if (!rec) return null;
+  if (replaceId) S.data.records = S.data.records.filter((r) => r.id !== replaceId);
+  S.data.records.push(rec);
+  S.data.records.sort(recOrder);
+  flushData();
+  return rec;
+}
+
+// ==========================================================================
+// 화면 전환 · 렌더링
+// ==========================================================================
+function go(view, extra) {
+  S.view = view;
+  if (extra) Object.assign(S, extra);
+  if (['today', 'plan', 'records', 'settings'].includes(view)) { if (location.hash !== '#' + view) history.replaceState(null, '', '#' + view); }
+  else if (view === 'session' && S.sid) history.replaceState(null, '', '#s=' + S.sid);
+  render();
+  window.scrollTo(0, 0);
+}
+function toast(msg) {
+  const old = $('.toast'); if (old) old.remove();
+  const el = document.createElement('div'); el.className = 'toast no-print'; el.textContent = msg; document.body.appendChild(el);
+  setTimeout(() => el.remove(), 3200);
+}
+function render() {
+  if (!S.bank) return;
+  const sub = S.view === 'session' || S.view === 'result';
+  $('#head').hidden = sub;
+  $$('#tabs .tab').forEach((b) => b.setAttribute('aria-selected', String(b.dataset.tab === S.view)));
+  const app = $('#app');
+  lastChartW = chartW();
+  if (S.view === 'session') app.innerHTML = renderSession();
+  else if (S.view === 'result') app.innerHTML = renderResult();
+  else if (S.view === 'plan') app.innerHTML = renderPlan();
+  else if (S.view === 'records') app.innerHTML = renderRecords();
+  else if (S.view === 'settings') app.innerHTML = renderSettings();
+  else app.innerHTML = renderToday();
+  afterRender();
+}
+
+// ---- 공통 조각 --------------------------------------------------------------
+function ringHTML(score, label) {
+  const R = 46, C = 2 * Math.PI * R;
+  const tier = score == null ? 0 : tierOf(score);
+  const color = ['#c9583c', '#d29a2b', '#5f9f80', '#3d8064', '#2f6f56'][tier];
+  const pct = score == null ? 0 : clamp(score, 0, 100) / 100;
+  return '<div class="ring" role="img" aria-label="' + esc(label || '점수') + '"><svg viewBox="0 0 110 110"><circle class="bg" cx="55" cy="55" r="' + R + '"/><circle class="fg" cx="55" cy="55" r="' + R + '" stroke="' + color + '" stroke-dasharray="' + (C * pct).toFixed(1) + ' ' + C.toFixed(1) + '"/></svg>'
+    + '<div class="num"><b>' + (score == null ? '–' : fmtNum(Math.round(score * 10) / 10)) + '</b><span>/ 100</span></div></div>';
+}
+const subjChip = (s) => '<span class="chip ' + (s === 'law' ? 'green' : 'brown') + '">' + SUBJ[s] + '</span>';
+function stepsHTML(sid, on) {
+  const b = (n, t, small) => '<button class="step' + (on === n ? ' on' : '') + '" data-act="open" data-sid="' + esc(sid) + '" data-step="' + n + '"><span class="n">' + n + '</span><b>' + t + '</b><small>' + small + '</small></button>';
+  return '<div class="steps3">' + b(1, '문제지 인쇄', '문제·배점만') + b(2, '채점 프롬프트', '복사해서 AI에게') + b(3, '결과 업로드', '분석노트 올리기') + '</div>';
+}
+function encourage(st) {
+  const cur = st.streak.current;
+  if (st.streak.doneToday) return cur >= 2 ? cur + '일 연속! 내일도 이어가 볼까요?' : '오늘 기록 완료. 내일 또 만나요.';
+  if (!st.dayCount) return '오늘이 1일차예요. 문제지를 출력하는 것부터 시작해요.';
+  if (cur > 0) return cur + '일 연속 중 — 오늘 하면 ' + (cur + 1) + '일째!';
+  return '오늘 다시 시작해요. 하루만 채우면 연속 기록이 새로 쌓입니다.';
+}
+function sparkHTML(points, goal) {
+  const W = chartW(), H = 74, l = 6, r = 6, tp = 8, bt = 10;
+  const x = (i) => (points.length === 1 ? W / 2 : l + (i / (points.length - 1)) * (W - l - r));
+  const y = (v) => tp + (1 - clamp(v, 0, 100) / 100) * (H - tp - bt);
+  const line = points.map((p, i) => (i ? 'L' : 'M') + x(i).toFixed(1) + ' ' + y(p.v).toFixed(1)).join(' ');
+  const dots = points.map((p, i) => '<circle cx="' + x(i).toFixed(1) + '" cy="' + y(p.v).toFixed(1) + '" r="3.5" class="t' + tierOf(p.v) + '" stroke="#fff" stroke-width="1"><title>' + esc(mdLabel(p.date) + ' ' + fmtNum(p.v) + '점') + '</title></circle>').join('');
+  return '<svg class="chart" viewBox="0 0 ' + W + ' ' + H + '" role="img" aria-label="최근 점수 추이"><line class="goal" x1="' + l + '" x2="' + (W - r) + '" y1="' + y(goal).toFixed(1) + '" y2="' + y(goal).toFixed(1) + '"/><path class="line" style="stroke:var(--accent2)" d="' + line + '"/>' + dots + '</svg>';
+}
+let lastChartW = 0;
+function chartW() { const app = $('#app'); return clamp(Math.round((app ? app.clientWidth : 700) - 34), 240, 740); }
+function weekHTML() {
+  const t = today(), ws = weekStart(t), days = byDay(), first = Object.keys(days).sort()[0] || '';
+  let cells = '';
+  for (let i = 0; i < 7; i++) {
+    const d = addDays(ws, i), list = days[d], subj = subjectOn(d);
+    const avg = list ? dayAvg(list) : null;
+    const missed = !list && d < t && subj !== 'rest' && first && d > first;   // 첫 기록 이후에 비어 있는 시험일만 '미응시'로 표시(시작 전 날짜는 표시하지 않음)
+    const cls = 'wd' + (list ? ' t' + tierOf(avg) : '') + (d === t ? ' today' : '') + (d > t ? ' future' : '') + (missed ? ' missed' : '');
+    cells += '<div class="' + cls + '" title="' + esc(mdLabel(d) + (list ? ' · ' + fmtNum(round1(avg)) + '점' : '')) + '"><small>' + DOW[parseDate(d).getDay()] + '</small><b>' + (list ? Math.round(avg) : (d === t && subj !== 'rest' ? '·' : '')) + '</b><i class="' + subj + '">' + (subj === 'rest' ? '쉼' : SUBJ[subj]) + '</i></div>';
+  }
+  return '<div class="week">' + cells + '</div>';
+}
+function weekDone() { const ws = weekStart(today()); return Object.keys(byDay()).filter((d) => d >= ws && d <= addDays(ws, 6)).length; }
+
+// ---- 오늘 -------------------------------------------------------------------
+function renderToday() {
+  const st = stats(), t = today(), set = S.data.settings;
+  const subj = subjectOn(t);
+  const doneRecs = subj === 'rest' ? [] : recordsOn(t).filter((r) => r.s === subj);
+  let main;
+  if (subj === 'rest') {
+    const nl = nextSession('law'), np = nextSession('practice');
+    main = '<p class="note">오늘은 <b>쉬는 날</b>이에요. 그래도 풀고 싶다면 다음 회차를 열어 보세요.</p>'
+      + '<div class="row" style="margin-top:10px"><button class="btn" data-act="open" data-sid="' + nl.sess.id + '" data-step="1">' + esc(sessTitle(nl.sess)) + '</button><button class="btn" data-act="open" data-sid="' + np.sess.id + '" data-step="1">' + esc(sessTitle(np.sess)) + '</button></div>';
+  } else if (doneRecs.length) {
+    const r = doneRecs[doneRecs.length - 1], sess = S.sById[r.session];
+    const nx = nextSession(subj);
+    main = '<div class="hero">' + ringHTML(r.score, '오늘 점수 ' + r.score) + '<div class="grow stack">'
+      + '<div>' + subjChip(subj) + ' <span class="chip green">오늘 완료</span> <span class="chip line">' + esc(TIER_LABEL[tierOf(r.score)]) + '</span></div>'
+      + '<div><b>' + esc(sess ? sessTitle(sess) : r.session) + '</b><div class="sub">' + (r.minutes ? r.minutes + '분 · ' : '') + esc(r.summary.slice(0, 70)) + '</div></div>'
+      + '<div><button class="btn" data-act="viewrec" data-id="' + esc(r.id) + '">결과·분석노트 보기</button></div></div></div>'
+      + '<p class="note" style="margin-top:12px">' + esc(encourage(st)) + '</p>'
+      + '<div class="row" style="margin-top:10px"><button class="btn grow" data-act="open" data-sid="' + nx.sess.id + '" data-step="1">한 회차 더: ' + esc(sessTitle(nx.sess)) + '</button></div>';
+  } else {
+    const nx = nextSession(subj), sess = nx.sess;
+    main = '<div class="sess-head">' + subjChip(subj) + '<span class="sess-title">' + esc(sessTitle(sess)) + '</span>' + (nx.round > 1 ? '<span class="chip warn">' + nx.round + '회독</span>' : '') + '</div>'
+      + '<p class="note" style="margin-top:4px">100점 · 약 ' + sessMinutes(sess) + '분 · ' + probs(sess).length + (sess.s === 'law' ? '문제' : '문항') + '</p>'
+      + '<div class="scope-box"><b>범위</b> ' + esc(sessTopics(sess)) + '</div>'
+      + stepsHTML(sess.id, 0)
+      + '<p class="note" style="margin-top:10px">' + esc(encourage(st)) + '</p>';
+  }
+  const recent = st.dayList.slice(-14).map((d) => ({ date: d, v: dayAvg(st.days[d]) }));
+  const wk = weekDone(), goalWk = plannedPerWeek();
+  return '<section class="card"><h2>' + esc(longDate(t)) + '</h2>' + main + '</section>'
+    + '<section class="card"><div class="row between"><h2 style="margin:0">연속 기록</h2><span class="sub">이번 주 ' + wk + ' / ' + goalWk + '일</span></div>'
+    + '<div class="kpis" style="margin:12px 0"><div class="kpi"><b>' + st.streak.current + '</b><span>연속 일수</span></div><div class="kpi"><b>' + st.streak.best + '</b><span>최장 연속</span></div><div class="kpi"><b>' + st.dayCount + '</b><span>총 응시일</span></div></div>'
+    + weekHTML()
+    + '<div class="meter" style="margin-top:12px" title="이번 주 계획"><i style="width:' + clamp(goalWk ? wk / goalWk * 100 : 0, 0, 100) + '%"></i></div></section>'
+    + '<section class="card"><div class="row between"><h2 style="margin:0">최근 점수</h2><span class="sub">목표 ' + set.goal + '점</span></div>'
+    + (recent.length ? '<div style="margin-top:8px">' + sparkHTML(recent, set.goal) + '</div><p class="note" style="margin-top:6px">7일 평균 <b>' + fmtAvg(st.avg7) + '</b>' + deltaHTML(st) + '</p>'
+      : '<div class="empty">아직 기록이 없어요. 첫 점수를 남겨 보세요.</div>')
+    + '</section>'
+    + '<section class="card flat"><h3>이렇게 진행돼요</h3><ol class="plain note" style="margin:4px 0 0"><li><b>문제지 인쇄</b> — 문제와 배점만 담긴 A4 시험지를 출력해 시간을 재고 손으로 풀어요.</li><li><b>채점 프롬프트</b> — 문제·모범답안·채점 기준이 든 프롬프트를 복사해, 답안 사진과 함께 AI에게 보내 채점과 분석노트를 받아요.</li><li><b>결과 업로드</b> — 받은 답변을 그대로 붙여넣으면 점수·취약 쟁점이 기록되고 연속 일수가 쌓여요.</li></ol></section>';
+}
+function fmtAvg(v) { return v == null ? '–' : Math.round(v) + '점'; }
+function deltaHTML(st) {
+  if (st.avg7 == null || st.avgPrev7 == null) return '';
+  const d = Math.round(st.avg7 - st.avgPrev7);
+  return ' · 지난주보다 <b style="color:' + (d >= 0 ? 'var(--ok)' : 'var(--bad)') + '">' + (d >= 0 ? '+' : '') + d + '</b>';
+}
+
+// ---- 일정 -------------------------------------------------------------------
+function trackCard(s) {
+  const list = S.sessOf[s], cnt = doneCounts(s), nx = pickNext(s, cnt);
+  const doneOnce = list.filter((x) => cnt[x.id] > 0).length;
+  const rows = list.map((x) => {
+    const last = S.data.records.filter((r) => r.session === x.id).slice(-1)[0];
+    const status = cnt[x.id] ? '<span class="chip green">' + cnt[x.id] + '회 완료</span>' + (last ? ' <span class="chip ' + 't' + tierOf(last.score) + '" style="color:#222">' + fmtNum(last.score) + '점</span>' : '') : '<span class="chip line">미응시</span>';
+    return '<div class="sess-row"><span class="k">제' + x.n + '회</span><span class="grow sub">' + esc(sessScope(x)) + '</span>' + status
+      + '<button class="btn sm" data-act="open" data-sid="' + x.id + '" data-step="1">열기</button></div>';
+  }).join('');
+  return '<section class="card"><div class="row between"><h2 style="margin:0">' + SUBJ[s] + ' <span class="sub">' + esc(S.bank.subjects[s].name) + '</span></h2><span class="chip ' + (s === 'law' ? 'green' : 'brown') + '">' + nx.round + '회독</span></div>'
+    + '<p class="note" style="margin:6px 0 8px">' + list.length + '회차 · 회차마다 100점 · ' + (s === 'law' ? '단원 순서대로 배점 합이 100에 가깝게 5~6문제씩' : '종합문제집 순서대로 5문항씩') + '</p>'
+    + '<div class="meter' + (s === 'practice' ? ' prac' : '') + '"><i style="width:' + Math.round(doneOnce / list.length * 100) + '%"></i></div>'
+    + '<p class="note" style="margin-top:6px">이번 회독 ' + list.filter((x) => cnt[x.id] >= nx.round).length + ' / ' + list.length + '회 완료 · 다음: <b>' + esc(sessTitle(nx.sess)) + '</b></p>'
+    + '<details class="fold" style="margin-top:8px"' + (list.length <= 6 ? ' open' : '') + '><summary>전체 회차 보기</summary><div style="margin-top:6px">' + rows + '</div></details></section>';
+}
+function renderPlan() {
+  const proj = projection(14);
+  const rows = proj.map((p, i) => {
+    let mid;
+    if (p.subj === 'rest') mid = '<span class="sub">쉬는 날</span>';
+    else if (p.done) mid = subjChip(p.subj) + ' <b>' + esc(S.sById[p.done.session] ? sessTitle(S.sById[p.done.session]) : p.done.session) + '</b> <span class="chip green">완료 ' + fmtNum(p.done.score) + '점</span>';
+    else mid = subjChip(p.subj) + ' <b>' + esc(sessTitle(p.sess)) + '</b>' + (p.round > 1 ? ' <span class="chip warn">' + p.round + '회독</span>' : '') + '<div class="sub">' + esc(sessScope(p.sess)) + '</div>';
+    const btn = p.sess ? '<button class="btn sm" data-act="open" data-sid="' + p.sess.id + '" data-step="1">' + (i === 0 ? '오늘 시작' : '미리 열기') + '</button>' : '';
+    return '<div class="plan-row"><span class="d">' + esc(mdLabel(p.date)) + (i === 0 ? ' <span class="chip green">오늘</span>' : '') + '</span><span class="grow">' + mid + '</span>' + btn + '</div>';
+  }).join('');
+  const pat = S.data.settings.pattern;
+  const patUI = '<div class="week" style="margin-top:8px">' + ['월', '화', '수', '목', '금', '토', '일'].map((d, i) => '<div class="wd"><small>' + d + '</small><select data-pat="' + i + '" aria-label="' + d + '요일 과목" style="width:100%;padding:5px 2px;font-size:12.5px">'
+    + [['law', '법규'], ['practice', '실무'], ['rest', '쉼']].map(([v, l]) => '<option value="' + v + '"' + (pat[i] === v ? ' selected' : '') + '>' + l + '</option>').join('') + '</select></div>').join('') + '</div>';
+  return '<section class="card"><h2>다가오는 14일</h2><p class="note" style="margin-bottom:6px">요일별 과목에 맞춰 <b>다음 회차</b>가 이어집니다. 하루 빠져도 회차는 밀리지 않고 그다음 시험일에 이어서 나와요.</p>' + rows + '</section>'
+    + '<section class="card"><h2>요일별 과목</h2><p class="note">평일엔 짧은 실무 5문항, 주말엔 100분짜리 법규로 시작했어요. 바꾸면 위 일정이 바로 바뀝니다.</p>' + patUI + '</section>'
+    + trackCard('law') + trackCard('practice');
+}
+
+// ---- 회차 화면: 문제지 · 프롬프트 · 업로드 ---------------------------------------
+function sessionPicker(sess) {
+  const opt = (x) => {
+    const c = S.data.records.filter((r) => r.session === x.id).length;
+    return '<option value="' + x.id + '"' + (x.id === sess.id ? ' selected' : '') + '>' + esc(sessTitle(x)) + (c ? ' ✓' + c : '') + ' — ' + esc(sessScope(x)) + '</option>';
+  };
+  return '<select id="sessPick" aria-label="회차 선택" style="max-width:100%"><optgroup label="법규">' + S.sessOf.law.map(opt).join('') + '</optgroup><optgroup label="실무">' + S.sessOf.practice.map(opt).join('') + '</optgroup></select>';
+}
+function renderSession() {
+  const sess = S.sById[S.sid];
+  if (!sess) { S.view = 'today'; return renderToday(); }
+  const date = S.sdate || today();
+  let body = '';
+  if (S.step === 1) {
+    body = '<div class="card no-print"><div class="row between"><div><b>문제지</b> <span class="sub">문제와 배점만 나와요 (모범답안 없음)</span></div>'
+      + '<div class="row"><label class="row sub" style="gap:6px"><input type="checkbox" id="linesChk"' + (S.data.settings.lines ? ' checked' : '') + '> 답안 줄 넣기</label>'
+      + '<button class="btn primary" data-act="print">🖨 인쇄하기</button></div></div>'
+      + '<p class="note" style="margin-top:8px">인쇄 창에서 <b>배율 100% · 머리글/바닥글 끄기</b>로 두면 깔끔해요. PDF로 저장해 태블릿에 띄워 풀어도 됩니다. 시작 시각을 적고 ' + sessMinutes(sess) + '분을 재 보세요.</p></div>'
+      + '<div class="paper-wrap">' + paperHTML(sess, date, S.data.settings.lines) + '</div>';
+  } else if (S.step === 2) {
+    const prompt = buildPrompt(sess, date);
+    body = '<div class="card no-print"><div class="row between"><b>채점 프롬프트</b><span class="sub">' + prompt.length.toLocaleString('ko-KR') + '자</span></div>'
+      + '<ol class="plain note" style="margin:8px 0 10px"><li>아래 <b>프롬프트 복사</b>를 눌러 Claude 같은 AI 대화창에 붙여넣어요.</li><li>맨 아래 <b>[내 답안]</b> 자리에 답안 텍스트를 붙여넣거나, 손으로 쓴 답안 사진을 함께 첨부해요.</li><li>AI가 채점표·피드백·분석노트와 <b>기록용 JSON</b>을 주면, <b>3 결과 업로드</b>에서 답변 전체를 붙여넣어 기록해요.</li></ol>'
+      + '<div class="field"><label for="sdate">응시일</label><input type="date" id="sdate" value="' + esc(date) + '" max="' + esc(today()) + '"><span class="sub">프롬프트의 JSON 틀에 들어가요</span></div>'
+      + '<div class="row" style="margin:8px 0"><button class="btn primary" data-act="copyPrompt">프롬프트 복사</button><button class="btn" data-act="savePrompt">.md 파일로 저장</button></div>'
+      + '<textarea class="box prompt" id="promptBox" readonly spellcheck="false">' + esc(prompt) + '</textarea>'
+      + '<p class="note" style="margin-top:8px">모범답안·채점 기준이 프롬프트에 들어 있어서 길어요. 답안 사진을 첨부하는 대화창이라면 그대로 보내면 됩니다.</p></div>';
+  } else {
+    body = '<div class="card no-print"><b>결과 업로드</b><p class="note" style="margin:6px 0 10px">AI의 답변 <b>전체</b>(채점표·피드백·분석노트·JSON)를 붙여넣거나 파일(.md · .txt · .json)로 올려 주세요. JSON 블록으로 점수를 읽고, 나머지 글은 분석노트로 저장해요.</p>'
+      + '<textarea class="box" id="upText" rows="9" placeholder="여기에 AI의 답변 전체를 붙여넣으세요…" spellcheck="false">' + esc(S.up.text) + '</textarea>'
+      + '<div class="row" style="margin-top:8px"><label class="btn" for="upFile" style="cursor:pointer">파일 선택</label><input type="file" id="upFile" accept=".md,.txt,.json,text/plain,text/markdown,application/json" hidden><span class="sub" id="upFileName">' + esc(S.up.fileName) + '</span><span class="grow"></span><button class="btn" data-act="upClear">비우기</button></div>'
+      + '<div id="upResult" style="margin-top:12px">' + upResultHTML() + '</div></div>';
+  }
+  return '<div class="sess-bar no-print"><button class="btn sm" data-act="tab" data-tab="today">← 돌아가기</button>' + sessionPicker(sess)
+    + '<span class="chip ' + (sess.s === 'law' ? 'green' : 'brown') + '">' + esc(sessTitle(sess)) + ' · 100점</span></div>'
+    + '<div class="no-print">' + stepsHTML(sess.id, S.step) + '</div><div style="height:12px" class="no-print"></div>' + body;
+}
+function upResultHTML() {
+  const p = S.up.parsed;
+  if (!p) return '<p class="note">붙여넣으면 바로 읽어서 미리보기를 보여드려요.</p>';
+  let h = '';
+  if (!p.ok) return '<div class="msg bad">' + p.errors.map((e) => '<div>' + e + '</div>').join('') + '</div>';
+  const sess = S.sById[p.rec.session];
+  if (p.warnings.length) h += '<div class="msg warn" style="margin-bottom:10px">' + p.warnings.map((w) => '<div>• ' + esc(w) + '</div>').join('') + '</div>';
+  if (S.sid && p.rec.session !== S.sid && S.sById[S.sid]) h += '<div class="msg" style="margin-bottom:10px">지금 열어 둔 회차는 <b>' + esc(sessTitle(S.sById[S.sid])) + '</b>인데, 붙여넣은 결과는 <b>' + esc(sessTitle(sess)) + '</b>의 것이에요. 저장하면 ' + esc(sessTitle(sess)) + ' 기록으로 남아요.</div>';
+  h += '<div class="hero" style="margin-bottom:10px">' + ringHTML(p.rec.score, '읽은 점수 ' + p.rec.score) + '<div class="grow stack"><div>' + subjChip(p.rec.s) + ' <b>' + esc(sessTitle(sess)) + '</b></div>'
+    + (p.rec.summary ? '<div class="note">' + esc(p.rec.summary) + '</div>' : '') + '<div class="note">분석노트 ' + p.rec.note.length.toLocaleString('ko-KR') + '자 · 취약 쟁점 ' + p.rec.weak.length + '개</div></div></div>';
+  h += '<div class="scroll-x"><table class="up-table"><thead><tr><th>문제</th><th class="n">득점 / 배점</th><th>한줄 평</th></tr></thead><tbody>'
+    + p.rec.items.map((it, i) => '<tr><td>' + (i + 1) + '. ' + esc(it.t) + '</td><td class="n"><b>' + fmtNum(it.got) + '</b> / ' + it.max + '</td><td>' + esc(it.comment) + '</td></tr>').join('') + '</tbody></table></div>';
+  if (p.rec.weak.length) h += '<div style="margin-top:8px">' + p.rec.weak.map((w) => '<span class="tag weak">' + esc(w) + '</span>').join('') + '</div>';
+  const dup = S.data.records.find((r) => r.session === p.rec.session && r.date === (S.up.date || p.rec.date));
+  h += '<div class="field" style="margin-top:10px"><label for="upDate">응시일</label><input type="date" id="upDate" value="' + esc(S.up.date || p.rec.date) + '" max="' + esc(today()) + '"></div>';
+  if (dup) h += '<div class="msg warn" style="margin:8px 0">같은 날 같은 회차 기록(' + fmtNum(dup.score) + '점)이 이미 있어요. 저장하면 별도 기록으로 추가되고, "덮어쓰기"를 누르면 그 기록을 바꿔요.</div>';
+  h += '<div class="row" style="margin-top:8px"><button class="btn primary" data-act="saveResult">기록에 저장</button>' + (dup ? '<button class="btn" data-act="saveResult" data-replace="' + esc(dup.id) + '">덮어쓰기</button>' : '') + '</div>';
+  return h;
+}
+function runParse() {
+  S.up.parsed = S.up.text.trim() ? parseResult(S.up.text) : null;
+  if (S.up.parsed && S.up.parsed.ok) S.up.date = S.up.parsed.rec.date;
+  const box = $('#upResult'); if (box) box.innerHTML = upResultHTML();
+}
+
+// ---- 결과(분석노트) 보기 ------------------------------------------------------
+function renderResult() {
+  const r = S.data.records.find((x) => x.id === S.recId);
+  if (!r) { S.view = 'records'; return renderRecords(); }
+  const sess = S.sById[r.session];
+  const items = r.items.map((it, i) => {
+    const ratio = it.max ? it.got / it.max : 0;
+    const cls = ratio >= 0.8 ? 'full' : ratio >= 0.5 ? 'part' : 'miss';
+    const p = S.pById[it.id];
+    return '<div class="ri ' + cls + '"><div class="row between"><span class="chip">' + (i + 1) + '. ' + esc(it.t || (p ? p.label : it.id)) + '</span><b>' + fmtNum(it.got) + ' / ' + fmtNum(it.max) + '점</b></div>'
+      + (it.comment ? '<p style="margin-top:6px">' + esc(it.comment) + '</p>' : '')
+      + (it.missing.length ? '<ul class="plain note">' + it.missing.map((m) => '<li>' + esc(m) + '</li>').join('') + '</ul>' : '') + '</div>';
+  }).join('');
+  const tags = (arr, cls) => arr.length ? arr.map((w) => '<span class="tag ' + cls + '">' + esc(w) + '</span>').join('') : '<span class="sub">없음</span>';
+  return '<div class="sess-bar no-print"><button class="btn sm" data-act="tab" data-tab="records">← 기록으로</button></div>'
+    + '<section class="card"><div class="hero">' + ringHTML(r.score, '점수 ' + r.score) + '<div class="grow stack"><div>' + subjChip(r.s) + ' <b>' + esc(sess ? sessTitle(sess) : r.session) + '</b> <span class="chip line">' + esc(TIER_LABEL[tierOf(r.score)]) + '</span></div>'
+    + '<div class="sub">' + esc(mdLabel(r.date)) + (r.minutes ? ' · ' + r.minutes + '분' : '') + ' · ' + r.items.length + '문항</div>' + (r.summary ? '<p>' + esc(r.summary) + '</p>' : '') + '</div></div>'
+    + '<div class="row" style="margin-top:12px">' + (sess ? '<button class="btn" data-act="open" data-sid="' + sess.id + '" data-step="1">이 회차 다시 열기</button>' : '') + '<span class="grow"></span><button class="btn danger" data-act="delrec" data-id="' + esc(r.id) + '">기록 삭제</button></div></section>'
+    + '<h2 style="margin:14px 2px 8px">문제별 결과</h2>' + items
+    + '<section class="card"><h3>취약 쟁점</h3><div>' + tags(r.weak, 'weak') + '</div><h3 style="margin-top:12px">잘한 점</h3><div>' + tags(r.strong, 'strong') + '</div><h3 style="margin-top:12px">다음 할 일</h3><div>' + tags(r.next, 'next') + '</div></section>'
+    + '<section class="card"><h2>분석노트</h2>' + (r.note ? '<div class="md">' + mdToHtml(r.note) + '</div>' : '<p class="note">저장된 분석노트 본문이 없어요.</p>') + '</section>';
+}
+
+// ---- 기록 -------------------------------------------------------------------
+function renderRecords() {
+  const st = stats(), set = S.data.settings;
+  const kp = '<div class="kpis five"><div class="kpi"><b>' + st.dayCount + '</b><span>응시일</span></div><div class="kpi"><b>' + (st.avg == null ? '–' : Math.round(st.avg)) + '</b><span>평균</span></div><div class="kpi"><b>' + (st.best == null ? '–' : fmtNum(st.best)) + '</b><span>최고</span></div><div class="kpi"><b>' + (st.avg7 == null ? '–' : Math.round(st.avg7)) + '</b><span>7일 평균</span></div><div class="kpi"><b>' + st.streak.current + '</b><span>연속(최장 ' + st.streak.best + ')</span></div></div>';
+  const sub = '<p class="note" style="margin-top:8px">과목별 평균 — 법규 <b>' + fmtAvg(st.lawAvg) + '</b> · 실무 <b>' + fmtAvg(st.practiceAvg) + '</b> <span class="sub">(과락선 40 · 합격선 평균 60)</span></p>';
+  const chartCard = '<section class="card"><div class="row between"><h2 style="margin:0">점수 추이</h2><div class="row"><div class="seg" role="group" aria-label="기간">' + [14, 30, 90].map((n) => '<button data-act="range" data-v="' + n + '" aria-pressed="' + (S.chartRange === n) + '">' + n + '일</button>').join('') + '</div>'
+    + '<div class="seg" role="group" aria-label="과목">' + [['all', '전체'], ['law', '법규'], ['practice', '실무']].map(([v, l]) => '<button data-act="series" data-v="' + v + '" aria-pressed="' + (S.chartSeries === v) + '">' + l + '</button>').join('') + '</div></div></div>'
+    + '<div style="margin-top:10px">' + chartHTML() + '</div><div class="legend" style="margin-top:6px"><span><i class="l"></i>법규</span><span><i class="p"></i>실무</span><span>점선 = 목표 ' + set.goal + '점</span></div>'
+    + '<p class="note" id="chartTip" style="margin-top:6px;min-height:1.6em">점을 눌러 보세요.</p></section>';
+  return '<section class="card">' + kp + sub + '</section>' + chartCard + calendarHTML(st) + weakHTML() + historyHTML();
+}
+function chartHTML() {
+  const set = S.data.settings, R = S.chartRange;
+  const W = chartW(), H = Math.round(clamp(W * 0.44, 190, 270)), l = 30, r = 10, tp = 12, bt = 26;
+  const x = (i) => l + (R === 1 ? 0 : (i / (R - 1))) * (W - l - r);
+  const y = (v) => tp + (1 - clamp(v, 0, 100) / 100) * (H - tp - bt);
+  const t = today(), from = addDays(t, -(R - 1));
+  let g = '';
+  [0, 25, 50, 75, 100].forEach((v) => { g += '<line class="grid" x1="' + l + '" x2="' + (W - r) + '" y1="' + y(v).toFixed(1) + '" y2="' + y(v).toFixed(1) + '"/><text x="' + (l - 6) + '" y="' + (y(v) + 3.5).toFixed(1) + '" text-anchor="end">' + v + '</text>'; });
+  g += '<line class="goal" x1="' + l + '" x2="' + (W - r) + '" y1="' + y(set.goal).toFixed(1) + '" y2="' + y(set.goal).toFixed(1) + '"/><text x="' + (W - r) + '" y="' + (y(set.goal) - 4).toFixed(1) + '" text-anchor="end" style="fill:var(--accent)">목표 ' + set.goal + '</text>';
+  [0, Math.round((R - 1) / 2), R - 1].forEach((i, k) => { g += '<text x="' + x(i).toFixed(1) + '" y="' + (H - 8) + '" text-anchor="' + (k === 0 ? 'start' : k === 2 ? 'end' : 'middle') + '">' + esc(mdLabel(addDays(from, i)).replace(/ \(.\)/, '')) + '</text>'; });
+  const recs = S.data.records.filter((r) => r.date >= from && r.date <= t && (S.chartSeries === 'all' || r.s === S.chartSeries));
+  if (!recs.length) return '<svg class="chart" viewBox="0 0 ' + W + ' ' + H + '" role="img" aria-label="점수 추이(기록 없음)">' + g + '<text x="' + (W / 2) + '" y="' + (H / 2) + '" text-anchor="middle" style="font-size:13px">이 기간에는 기록이 없어요</text></svg>';
+  let lines = '', dots = '';
+  ['law', 'practice'].forEach((s) => {
+    const pts = recs.filter((r) => r.s === s);
+    if (!pts.length) return;
+    if (pts.length > 1) lines += '<path class="line ' + s + '" d="' + pts.map((p, i) => (i ? 'L' : 'M') + x(diffDays(p.date, from)).toFixed(1) + ' ' + y(p.score).toFixed(1)).join(' ') + '"/>';
+    dots += pts.map((p) => '<circle class="pt ' + s + '" tabindex="0" data-id="' + esc(p.id) + '" cx="' + x(diffDays(p.date, from)).toFixed(1) + '" cy="' + y(p.score).toFixed(1) + '" r="5.5"><title>' + esc(SUBJ[s] + ' ' + mdLabel(p.date) + ' ' + fmtNum(p.score) + '점') + '</title></circle>').join('');
+  });
+  return '<svg class="chart" viewBox="0 0 ' + W + ' ' + H + '" role="img" aria-label="최근 ' + R + '일 점수 추이">' + g + lines + dots + '</svg>';
+}
+function calendarHTML(st) {
+  const t = today();
+  const month = S.calMonth || t.slice(0, 7);
+  const [y, m] = month.split('-').map(Number);
+  const first = new Date(y, m - 1, 1), last = new Date(y, m, 0).getDate();
+  const lead = (first.getDay() + 6) % 7;
+  let cells = ['월', '화', '수', '목', '금', '토', '일'].map((d) => '<div class="dow">' + d + '</div>').join('');
+  for (let i = 0; i < lead; i++) cells += '<div class="cal-day out"></div>';
+  for (let d = 1; d <= last; d++) {
+    const ds = y + '-' + pad2(m) + '-' + pad2(d), list = st.days[ds];
+    const avg = list ? dayAvg(list) : null;
+    cells += '<button class="cal-day ' + (list ? 't' + tierOf(avg) : 'none') + (ds === t ? ' today' : '') + (S.calSel === ds ? ' sel' : '') + '" data-act="day" data-date="' + ds + '" aria-label="' + esc(mdLabel(ds) + (list ? ' 평균 ' + fmtNum(round1(avg)) + '점' : ' 기록 없음')) + '"><small>' + d + '</small>' + (list ? '<b>' + Math.round(avg) + '</b>' : '') + '</button>';
+  }
+  const canNext = month < t.slice(0, 7);
+  return '<section class="card"><div class="row between"><h2 style="margin:0">' + y + '년 ' + m + '월</h2><div class="row"><button class="btn" data-act="cal" data-d="-1" style="padding:5px 12px" aria-label="이전 달">‹</button><button class="btn" data-act="cal" data-d="1" style="padding:5px 12px" aria-label="다음 달"' + (canNext ? '' : ' disabled') + '>›</button></div></div>'
+    + '<div class="cal" style="margin-top:10px">' + cells + '</div>'
+    + '<div class="legend" style="margin-top:10px"><span><i class="t0"></i>40 미만</span><span><i class="t1"></i>40~59</span><span><i class="t2"></i>60~79</span><span><i class="t3"></i>80~89</span><span><i class="t4"></i>90+</span></div>'
+    + '<div id="dayDetail" style="margin-top:10px">' + dayDetailHTML() + '</div></section>';
+}
+function dayDetailHTML() {
+  if (!S.calSel) return '<p class="note">날짜를 누르면 그날의 시험을 볼 수 있어요.</p>';
+  const list = recordsOn(S.calSel);
+  if (!list.length) return '<p class="note">' + esc(mdLabel(S.calSel)) + ' — 기록이 없어요.</p>';
+  return '<ul class="hist">' + list.map((r) => histRowHTML(r)).join('') + '</ul>';
+}
+function histRowHTML(r) {
+  const sess = S.sById[r.session];
+  return '<li><span class="sc t' + tierOf(r.score) + '">' + fmtNum(r.score) + '</span><span class="grow"><b>' + esc(mdLabel(r.date)) + '</b> ' + subjChip(r.s) + ' ' + esc(sess ? sessTitle(sess) : r.session)
+    + '<br><span class="sub">' + (r.minutes ? r.minutes + '분 · ' : '') + esc((r.summary || (r.weak[0] ? '취약: ' + r.weak.slice(0, 2).join(', ') : '')).slice(0, 60)) + '</span></span><button class="btn sm" data-act="viewrec" data-id="' + esc(r.id) + '">보기</button></li>';
+}
+function historyHTML() {
+  const list = S.data.records.slice().sort((a, b) => (a.date === b.date ? (b.createdAt || 0) - (a.createdAt || 0) : a.date < b.date ? 1 : -1));
+  if (!list.length) return '<section class="card"><h2>시험 기록</h2><div class="empty">아직 기록이 없어요. 오늘 탭에서 문제지를 출력해 시작해 보세요.</div></section>';
+  const shown = list.slice(0, S.histCount);
+  return '<section class="card"><h2>시험 기록</h2><ul class="hist">' + shown.map(histRowHTML).join('') + '</ul>' + (list.length > shown.length ? '<button class="btn" style="margin-top:8px" data-act="more">더 보기 (' + (list.length - shown.length) + '개)</button>' : '') + '</section>';
+}
+function weakHTML() {
+  const ps = problemStats(), all = Object.values(ps);
+  if (!all.length) return '';
+  const low = all.filter((x) => x.last < 0.7).sort((a, b) => a.last - b.last).slice(0, 6);
+  const tags = weakTags().slice(0, 12);
+  const label = (x) => { const p = S.pById[x.id]; return p ? (p.s === 'law' ? p.label + ' ' + p.title : p.unitName + ' — ' + p.topic.slice(0, 28)) : (x.t || x.id); };
+  const lowRows = low.length ? low.map((x) => '<tr><td>' + esc(label(x)) + '</td><td class="n">' + Math.round(x.last * 100) + '%</td><td class="n sub">' + esc(mdLabel(x.date)) + '</td></tr>').join('') : '<tr><td colspan="3" class="sub">70% 미만인 문제가 없어요 👍</td></tr>';
+  const chapters = {};
+  all.forEach((x) => { const p = S.pById[x.id]; if (!p) return; const k = p.s === 'law' ? '법규 · ' + p.label : '실무 · ' + p.chapter + ' / ' + p.unitName; (chapters[k] = chapters[k] || []).push(x.last); });
+  const unitRows = Object.keys(chapters).map((k) => { const v = mean(chapters[k]); return '<tr><td>' + esc(k) + '</td><td class="n">' + chapters[k].length + '</td><td><div class="mini"><i style="width:' + Math.round(v * 100) + '%"></i></div></td><td class="n">' + Math.round(v * 100) + '%</td></tr>'; }).join('');
+  return '<section class="card"><h2>취약 분석</h2><h3>다시 볼 문제 <span class="sub">(가장 최근 득점률 70% 미만)</span></h3><div class="scroll-x"><table class="ut"><tbody>' + lowRows + '</tbody></table></div>'
+    + (tags.length ? '<h3 style="margin-top:14px">자주 나온 취약 쟁점 <span class="sub">(분석노트 기준)</span></h3><div>' + tags.map((t) => '<span class="tag weak" title="마지막 ' + esc(t.last) + '">' + esc(t.tag) + (t.n > 1 ? ' ×' + t.n : '') + '</span>').join('') + '</div>' : '')
+    + '<details class="fold" style="margin-top:12px"><summary>단원별 득점률</summary><div class="scroll-x"><table class="ut" style="margin-top:8px"><thead><tr><th>단원</th><th class="n">푼 문제</th><th></th><th class="n">득점률</th></tr></thead><tbody>' + unitRows + '</tbody></table></div></details></section>';
+}
+
+// ---- 설정 -------------------------------------------------------------------
+function renderSettings() {
+  const set = S.data.settings;
+  const sel = (id, opts, val) => '<select id="' + id + '">' + opts.map(([v, l]) => '<option value="' + v + '"' + (String(v) === String(val) ? ' selected' : '') + '>' + l + '</option>').join('') + '</select>';
+  const bytes = (store.get(KEY_DATA) || '').length;
+  const pat = set.pattern;
+  return '<section class="card"><h2>일정 · 표시</h2>'
+    + '<div class="field"><span class="lbl">요일별 과목</span><span class="week" style="flex:1;min-width:14em">' + ['월', '화', '수', '목', '금', '토', '일'].map((d, i) => '<span class="wd"><small>' + d + '</small><select data-pat="' + i + '" aria-label="' + d + '요일 과목" style="width:100%;padding:4px 0;font-size:12px">'
+      + [['law', '법규'], ['practice', '실무'], ['rest', '쉼']].map(([v, l]) => '<option value="' + v + '"' + (pat[i] === v ? ' selected' : '') + '>' + l + '</option>').join('') + '</select></span>').join('') + '</span></div>'
+    + '<div class="field"><label for="setGoal">목표 점수</label><input id="setGoal" type="number" min="10" max="100" step="5" value="' + set.goal + '" style="width:5.5em"> <span class="sub">차트에 점선으로 표시돼요</span></div>'
+    + '<div class="field"><label for="setDayStart">하루가 바뀌는 시각</label>' + sel('setDayStart', DAY_STARTS.map((h) => [h, h === 0 ? '자정 (0시)' : '오전 ' + h + '시']), set.dayStart)
+    + '<span class="note grow" style="min-width:14em">밤늦게 공부하는 편이면 새벽 시각으로 두세요. 그 시각 전에 본 시험은 전날 기록이 돼요.</span></div>'
+    + '<div class="field"><label for="setLines">문제지 답안 줄</label>' + sel('setLines', [[0, '넣지 않음 (문제만)'], [1, '문제마다 줄 넣기']], set.lines ? 1 : 0) + '</div></section>'
+    + '<section class="card"><h2>내 기록 관리</h2><p class="note">기록과 분석노트는 <b>이 브라우저에만</b> 저장돼요(약 ' + Math.max(1, Math.round(bytes / 1024)) + 'KB · ' + S.data.records.length + '개). 브라우저 데이터를 지우면 사라지니 가끔 백업 파일로 내려받아 두세요.</p>'
+    + '<div class="row" style="margin-top:10px"><button class="btn" data-act="export">백업 파일 내려받기</button><label class="btn" for="importFile" style="cursor:pointer">백업 파일 불러오기</label><input id="importFile" type="file" accept="application/json,.json" hidden><span class="grow"></span><button class="btn danger" data-act="reset">모든 기록 지우기</button></div></section>'
+    + '<section class="card flat"><h3>문제 은행</h3><p class="note">법규 ' + S.bank.problems.filter((p) => p.s === 'law').length + '문제 · 실무 ' + S.bank.problems.filter((p) => p.s === 'practice').length + '문항 → 법규 ' + S.sessOf.law.length + '회차 + 실무 ' + S.sessOf.practice.length + '회차(각 100점). 원본 학습 페이지에서 자동으로 만들어져요(' + esc(S.bank.sourceHash) + ').</p>'
+    + '<p class="note" style="margin-top:6px">법규는 원문 배점(없는 문제는 추정)을 바탕으로 5점 단위로 100점에 맞췄고, 원문이 없던 문제 2·3·4번은 모범답안에 맞춰 문제문을 재구성했어요. 실무는 종합문제집의 주제형 문항이라 답안 분량에 따라 15~25점으로 나눴어요.</p></section>';
+}
+
+// ==========================================================================
+// 이벤트
+// ==========================================================================
+function afterRender() {
+  const ta = $('#promptBox'); if (ta) { ta.scrollTop = 0; }
+}
+function openSession(sid, step) {
+  if (!S.sById[sid]) return;
+  S.sid = sid; S.step = step || 1;
+  if (!S.sdate || S.sdate > today()) S.sdate = today();
+  go('session');
+}
+async function copyText(text) {
+  try { await navigator.clipboard.writeText(text); return true; } catch (e) {}
+  try { const ta = document.createElement('textarea'); ta.value = text; ta.style.position = 'fixed'; ta.style.opacity = '0'; document.body.appendChild(ta); ta.select(); const ok = document.execCommand('copy'); ta.remove(); return ok; } catch (e) { return false; }
+}
+function download(name, text, type) {
+  const blob = new Blob([text], { type: type || 'text/plain' });
+  const a = document.createElement('a'); a.href = URL.createObjectURL(blob); a.download = name;
+  document.body.appendChild(a); a.click(); setTimeout(() => { URL.revokeObjectURL(a.href); a.remove(); }, 500);
+}
+
+document.addEventListener('click', async (e) => {
+  const el = e.target.closest('[data-act]');
+  if (!el) return;
+  const act = el.dataset.act;
+  switch (act) {
+    case 'tab': go(el.dataset.tab); break;
+    case 'open': openSession(el.dataset.sid, Number(el.dataset.step) || 1); break;
+    case 'print': window.print(); break;
+    case 'copyPrompt': { const sess = S.sById[S.sid]; const ok = await copyText(buildPrompt(sess, S.sdate || today())); toast(ok ? '프롬프트를 복사했어요. AI 대화창에 붙여넣으세요.' : '복사에 실패했어요. 아래 칸을 직접 선택해 복사해 주세요.'); break; }
+    case 'savePrompt': { const sess = S.sById[S.sid]; download('채점프롬프트-' + sess.id + '-' + (S.sdate || today()) + '.md', buildPrompt(sess, S.sdate || today()), 'text/markdown'); break; }
+    case 'upClear': S.up = { text: '', parsed: null, date: '', fileName: '' }; render(); break;
+    case 'saveResult': {
+      const p = S.up.parsed; if (!p || !p.ok) break;
+      const date = S.up.date && validDate(S.up.date) ? S.up.date : p.rec.date;
+      const rec = saveParsed(p, date, el.dataset.replace || '');
+      if (!rec) { toast('기록을 저장하지 못했어요.'); break; }
+      S.up = { text: '', parsed: null, date: '', fileName: '' };
+      toast('기록했어요: ' + fmtNum(rec.score) + '점');
+      go('result', { recId: rec.id });
+      break;
+    }
+    case 'viewrec': go('result', { recId: el.dataset.id }); break;
+    case 'delrec': if (confirm('이 시험 기록(점수와 분석노트)을 삭제할까요? 되돌릴 수 없어요.')) { S.data.records = S.data.records.filter((r) => r.id !== el.dataset.id); flushData(); toast('삭제했어요.'); go('records'); } break;
+    case 'range': S.chartRange = Number(el.dataset.v); render(); break;
+    case 'series': S.chartSeries = el.dataset.v; render(); break;
+    case 'cal': { const t = today(); const base = S.calMonth || t.slice(0, 7); const [y, m] = base.split('-').map(Number); const nd = new Date(y, m - 1 + Number(el.dataset.d), 1); const nm = nd.getFullYear() + '-' + pad2(nd.getMonth() + 1); if (nm <= t.slice(0, 7)) { S.calMonth = nm; render(); } break; }
+    case 'day': S.calSel = S.calSel === el.dataset.date ? null : el.dataset.date; render(); break;
+    case 'more': S.histCount += 15; render(); break;
+    case 'export': exportData(); break;
+    case 'reset': if (confirm('모든 시험 기록(점수·분석노트·연속 일수)을 지웁니다. 되돌릴 수 없어요. 계속할까요?')) { S.data.records = []; flushData(); toast('기록을 모두 지웠어요.'); render(); } break;
+    default: break;
+  }
+});
+document.addEventListener('change', (e) => {
+  const t = e.target;
+  if (t.id === 'sessPick') { S.sid = t.value; render(); }
+  else if (t.id === 'sdate') { if (validDate(t.value) && t.value <= today()) { S.sdate = t.value; } render(); }
+  else if (t.id === 'linesChk') { S.data.settings.lines = t.checked; flushData(); render(); }
+  else if (t.id === 'upDate') { S.up.date = validDate(t.value) ? t.value : S.up.date; const box = $('#upResult'); if (box) box.innerHTML = upResultHTML(); }
+  else if (t.id === 'upFile') readUpload(t.files && t.files[0]);
+  else if (t.id === 'importFile') importData(t.files && t.files[0]);
+  else if (t.id === 'setGoal') updateSettings({ goal: Number(t.value) });
+  else if (t.id === 'setDayStart') updateSettings({ dayStart: Number(t.value) });
+  else if (t.id === 'setLines') updateSettings({ lines: Number(t.value) === 1 });
+  else if (t.dataset && t.dataset.pat != null) { const pat = S.data.settings.pattern.slice(); pat[Number(t.dataset.pat)] = t.value; updateSettings({ pattern: pat }); }
+});
+let parseTimer = null;
+document.addEventListener('input', (e) => {
+  if (e.target.id === 'upText') { S.up.text = e.target.value; S.up.fileName = ''; clearTimeout(parseTimer); parseTimer = setTimeout(runParse, 250); }
+});
+$('#tabs').addEventListener('click', (e) => { const b = e.target.closest('.tab'); if (b) go(b.dataset.tab); });
+window.addEventListener('hashchange', () => {
+  const v = location.hash.slice(1), m = v.match(/^s=([\w-]+)$/);
+  if (m && S.sById[m[1]] && !(S.view === 'session' && S.sid === m[1])) openSession(m[1], 1);
+  else if (['today', 'plan', 'records', 'settings'].includes(v) && v !== S.view) { S.view = v; render(); }
+});
+document.addEventListener('pointerover', (e) => { const c = e.target.closest && e.target.closest('circle.pt'); if (c) showChartTip(c.dataset.id); });
+document.addEventListener('focusin', (e) => { const c = e.target; if (c.matches && c.matches('circle.pt')) showChartTip(c.dataset.id); });
+document.addEventListener('keydown', (e) => { const t = e.target; if (t && t.matches && t.matches('circle.pt') && (e.key === 'Enter' || e.key === ' ')) { e.preventDefault(); showChartTip(t.dataset.id); } });
+document.addEventListener('click', (e) => { const c = e.target.closest && e.target.closest('circle.pt'); if (c) showChartTip(c.dataset.id); });
+let resizeTimer = null;
+window.addEventListener('resize', () => {
+  clearTimeout(resizeTimer);
+  resizeTimer = setTimeout(() => { if ((S.view === 'today' || S.view === 'records') && Math.abs(chartW() - lastChartW) > 24) render(); }, 200);
+});
+
+function showChartTip(id) {
+  const tip = $('#chartTip'); if (!tip) return;
+  const r = S.data.records.find((x) => x.id === id); if (!r) return;
+  const sess = S.sById[r.session];
+  tip.innerHTML = '<b>' + esc(mdLabel(r.date)) + '</b> ' + subjChip(r.s) + ' ' + esc(sess ? sessTitle(sess) : r.session) + ' <b>' + fmtNum(r.score) + '점</b> <button class="btn sm" data-act="viewrec" data-id="' + esc(r.id) + '">결과</button>';
+}
+function updateSettings(patch) {
+  S.data.settings = normalizeSettings(Object.assign({}, S.data.settings, patch));
+  flushData(); render();
+}
+function readUpload(file) {
+  if (!file) return;
+  const reader = new FileReader();
+  reader.onload = () => { S.up.text = String(reader.result || ''); S.up.fileName = file.name; render(); runParse(); };
+  reader.onerror = () => toast('파일을 읽지 못했어요.');
+  reader.readAsText(file);
+}
+function exportData() {
+  const payload = { app: 'daily-test', v: 1, exportedAt: new Date().toISOString(), data: S.data };
+  download('daily-test-backup-' + today() + '.json', JSON.stringify(payload, null, 1), 'application/json');
+}
+function importData(file) {
+  if (!file) return;
+  const reader = new FileReader();
+  reader.onload = () => {
+    try {
+      const p = JSON.parse(String(reader.result));
+      const data = p && p.data ? p.data : p;
+      if (!data || !Array.isArray(data.records)) throw new Error('형식이 맞지 않아요');
+      const have = new Set(S.data.records.map((r) => r.id));
+      const add = data.records.map(normalizeRecord).filter((r) => r && !have.has(r.id));
+      if (!confirm('백업에서 시험 기록 ' + add.length + '개를 합칩니다(이미 있는 기록은 그대로 둬요). 계속할까요?')) return;
+      S.data.records = S.data.records.concat(add).sort(recOrder);
+      flushData(); toast('기록 ' + add.length + '개를 불러왔어요.'); render();
+    } catch (err) { toast('불러오지 못했어요: ' + err.message); }
+  };
+  reader.readAsText(file);
+}
+
+// ==========================================================================
+// 시작
+// ==========================================================================
+async function init() {
+  const app = $('#app');
+  try {
+    const res = await fetch(BANK_URL, { cache: 'no-cache' });
+    if (!res.ok) throw new Error('HTTP ' + res.status);
+    const bank = await res.json();
+    if (bank.v !== 2) throw new Error('문제 은행 형식이 달라요(v' + bank.v + ')');
+    indexBank(bank);
+  } catch (err) {
+    app.innerHTML = '<div class="card"><div class="msg bad">문제 은행을 불러오지 못했어요 (' + esc(err.message) + '). 네트워크를 확인하고 다시 시도해 주세요.</div><button class="btn primary" style="margin-top:10px" onclick="location.reload()">다시 시도</button></div>';
+    return;
+  }
+  S.data = loadData();
+  const h = location.hash.slice(1);
+  const m = h.match(/^s=([\w-]+)$/);
+  if (m && S.sById[m[1]]) { S.sid = m[1]; S.step = 1; S.sdate = today(); S.view = 'session'; }
+  else S.view = ['today', 'plan', 'records', 'settings'].includes(h) ? h : 'today';
+  writeSummary();
+  render();
+}
+
+// 테스트·점검용(로컬 개발 호스트에서는 오늘 날짜도 바꿔 볼 수 있다)
+window.DailyTest = {
+  get state() { return S; },
+  parseResult, buildPrompt, paperHTML, mdToHtml, streakInfo, stats, projection, nextSession, doneCounts, saveParsed, normalizeRecord, problemStats, weakTags, sessTitle, sessScope, sessMinutes,
+  save: flushData, render, go, openSession, today, addDays, dstr, normalizeSettings, subjectOn,
+  setToday(s) { if (DEV_HOST) { todayOverride = s || null; render(); } },
+  reload() { S.data = loadData(); render(); },
+  ready: null,
+};
+window.DailyTest.ready = init();
+})();
+</script>
+</body>
+</html>
