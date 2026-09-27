@@ -721,6 +721,43 @@ function buildPrompt(sess, date) {
   return L.join('\n');
 }
 
+// ---- 직접 채점 가이드(AI 없이) — 문제 배점을 어떤 기준으로 나눌지, 사람이 손으로 채점할 때 참고할 것 ----------
+function selfGradeGuideHTML(sess) {
+  const ps = probs(sess);
+  let h = '<details class="fold no-print"><summary>AI 없이 직접 채점하려면 (배점 가이드)</summary><div style="margin-top:8px">';
+  if (sess.s === 'law') {
+    const est = ps.filter((p) => p.pointsSource === '추정').map((p) => p.label);
+    const synth = ps.filter((p) => p.questionSource === '재구성').map((p) => p.label);
+    h += '<p class="note">문제지에 적힌 <b>그 문제의 배점</b> 안에서 아래 비중으로 나눠 채점하세요. 모범답안의 [채점 포인트]에 배점 힌트가 있으면 그것을 먼저 따르세요.</p>'
+      + '<table class="ut" style="margin:6px 0"><tbody>'
+      + '<tr><td>쟁점 파악·목차 구성</td><td class="n">약 20%</td></tr>'
+      + '<tr><td>법리·학설·판례·조문의 정확성</td><td class="n">약 35%</td></tr>'
+      + '<tr><td>사안 포섭</td><td class="n">약 35%</td></tr>'
+      + '<tr><td>결론·논리 일관성</td><td class="n">약 10%</td></tr>'
+      + '</tbody></table>'
+      + '<ol class="plain note">'
+      + '<li>모범답안과 목차·논점이 같은지 맞춰 보고,</li>'
+      + '<li>법리·조문·판례가 정확한지 확인하고(표현이 달라도 같은 취지면 인정),</li>'
+      + '<li>사안 포섭이 빠지지 않았는지 보고,</li>'
+      + '<li>결론까지 자연스러운지 확인해, 위 비중대로 0.5점 단위로 더하세요(문제별 합계는 그 문제 배점을 넘을 수 없어요).</li>'
+      + '</ol>'
+      + '<div class="msg warn">이 비중은 감정평가사 2차의 <b>공식 채점기준이 아니에요</b> — 실제 채점위원의 세부 배점표는 공개되지 않고, 이 비중은 법 논술 답안을 채점하는 일반적인 관행을 따른 참고 기준일 뿐이에요.'
+      + (est.length ? ' 이 회차의 ' + esc(est.join('·')) + '번은 원문에 배점이 없어 추정한 값이에요.' : '')
+      + (synth.length ? ' ' + esc(synth.join('·')) + '번은 원문 문제 자체가 없어 모범답안에 맞춰 문제문을 새로 썼어요.' : '')
+      + '</div>';
+  } else {
+    h += '<p class="note">위 프롬프트에서 문항마다 나오는 [핵심 키워드] 그룹 수만큼 <b>그 문항의 배점</b>을 똑같이 나눠, 그룹별로 충족(전부) / 부분 / 미충족(0점)을 판단해 더하세요.</p>'
+      + '<ul class="plain note">'
+      + (sess.s === 'practice' ? '<li>산식·수치·근거 법령이 틀리면 그 항목은 인정하지 않아요.</li>' : '<li>정의·요건·종류·특징이 정확한지, 비슷한 개념과 혼동하지 않았는지 보세요(예: 가치발생요인 ↔ 가치형성요인).</li>')
+      + '<li>표현이 달라도 같은 개념·같은 취지면 인정하고, 모범답안에 없어도 정당한 내용은 인정할 수 있어요.</li>'
+      + '</ul>'
+      + '<div class="msg warn">이 문항은 애초에 기출문제가 아니라 ' + (sess.s === 'practice' ? '종합문제집' : '기본개념 정리') + ' 자체 문제라, 배점도 답안 분량을 기준으로 제가 추정한 값이에요. 공식 채점기준은 없어요.</div>';
+  }
+  h += '<p class="note" style="margin-top:8px">채점을 마쳤으면 위 프롬프트 맨 아래 <b>기록용 JSON</b> 틀을 그대로 복사해 <code>got</code> 값에 점수를 직접 채우고, <b>3 결과 업로드</b>에 붙여넣으세요 — AI 없이도 점수·연속 기록이 그대로 남아요.</p>';
+  h += '</div></details>';
+  return h;
+}
+
 // ==========================================================================
 // 채점 결과(분석노트) 읽기 — 프롬프트가 요구한 JSON 코드블록을 찾아 검증한다
 // ==========================================================================
@@ -1061,7 +1098,8 @@ function renderSession() {
       + '<div class="field"><label for="sdate">응시일</label><input type="date" id="sdate" value="' + esc(date) + '" max="' + esc(today()) + '"><span class="sub">프롬프트의 JSON 틀에 들어가요</span></div>'
       + '<div class="row" style="margin:8px 0"><button class="btn primary" data-act="copyPrompt">프롬프트 복사</button><button class="btn" data-act="savePrompt">.md 파일로 저장</button></div>'
       + '<textarea class="box prompt" id="promptBox" readonly spellcheck="false">' + esc(prompt) + '</textarea>'
-      + '<p class="note" style="margin-top:8px">모범답안·채점 기준이 프롬프트에 들어 있어서 길어요. 답안 사진을 첨부하는 대화창이라면 그대로 보내면 됩니다.</p></div>';
+      + '<p class="note" style="margin-top:8px">모범답안·채점 기준이 프롬프트에 들어 있어서 길어요. 답안 사진을 첨부하는 대화창이라면 그대로 보내면 됩니다.</p></div>'
+      + '<section class="card no-print">' + selfGradeGuideHTML(sess) + '</section>';
   } else {
     body = '<div class="card no-print"><b>결과 업로드</b><p class="note" style="margin:6px 0 10px">AI의 답변 <b>전체</b>(채점표·피드백·분석노트·JSON)를 붙여넣거나 파일(.md · .txt · .json)로 올려 주세요. JSON 블록으로 점수를 읽고, 나머지 글은 분석노트로 저장해요.</p>'
       + '<textarea class="box" id="upText" rows="9" placeholder="여기에 AI의 답변 전체를 붙여넣으세요…" spellcheck="false">' + esc(S.up.text) + '</textarea>'
