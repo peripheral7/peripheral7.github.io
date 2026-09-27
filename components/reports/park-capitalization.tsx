@@ -1,7 +1,6 @@
 import { MapLightbox } from "@/components/reports/map-lightbox"
 import {
   parkCapCoreMaps,
-  parkCapParkMaps,
   parkCapHexMaps,
   parkCapConclusion,
   parkCapVerdict,
@@ -199,18 +198,19 @@ export function ParkCapitalizationReport() {
         ))}
       </dl>
 
-      {/* 지도 — 공원만 */}
+      {/* 지도 — 다섯 구역의 대표공원과 분석 단지 */}
       <div className="mt-10">
         <p className="font-mono text-[0.62rem] uppercase tracking-[0.12em] text-muted-foreground">
-          다섯 구역의 공원 배치
+          다섯 구역의 대표공원과 분석 단지
         </p>
         <p className="mt-2 max-w-3xl text-[0.9rem] leading-relaxed text-muted-foreground">
-          가장 진한 초록이 각 구역의 대표공원이고, 옅은 초록은 2ha 이상의 다른 공원이다. 단지를
-          걷어내고 공원만 두면 이 연구의 질문이 그대로 보인다 — 동탄2 남부는 대표공원이 시가지
-          한복판에 앉아 있고, 북부의 여울공원은 하천을 따라 가늘게 뻗어 동탄1과의 접경을 스친다.
-          광교는 공원이 지구를 통째로 갈라놓고, 일월은 촘촘한 기성시가지 속에 섬처럼 놓여 있다.
+          가장 진한 초록이 각 구역의 대표공원, 옅은 초록이 2ha 이상의 다른 공원, 작은 사각점이
+          분석 단지다. 동탄2 남부는 대표공원이 시가지 한복판에 앉아 단지들이 그 둘레에 퍼져 있다.
+          북부의 여울공원은 하천을 따라 가늘게 뻗어 동탄1과의 접경을 스친다. 광교는 공원이 지구를
+          통째로 갈라놓아 지구 안 단지는 어디든 가깝고, 일월은 촘촘한 기성시가지 속에 공원 하나가
+          섬처럼 놓여 있다.
         </p>
-        <MapLightbox maps={parkCapParkMaps} />
+        <MapLightbox maps={parkCapCoreMaps} />
       </div>
 
       {/* 00 한눈에 보기 */}
@@ -230,20 +230,6 @@ export function ParkCapitalizationReport() {
           </div>
         ))}
       </div>
-      {/* 지도 — 다섯 구역 */}
-      <div className="mt-8">
-        <p className="font-mono text-[0.62rem] uppercase tracking-[0.12em] text-muted-foreground">
-          다섯 구역의 대표공원
-        </p>
-        <p className="mt-2 max-w-3xl text-[0.9rem] leading-relaxed text-muted-foreground">
-          가장 진한 초록이 각 구역의 대표공원, 점이 분석 단지다. 동탄2 남부는 대표공원이 시가지
-          한복판에 앉아 단지들이 그 둘레에 퍼져 있다. 북부의 여울공원은 하천을 따라 가늘게 뻗어
-          지구 가장자리를 스친다. 광교는 공원이 지구를 통째로 갈라놓아 어느 단지든 가깝고, 일월은
-          촘촘한 기성시가지 속에 공원 하나가 섬처럼 놓여 있다.
-        </p>
-        <MapLightbox maps={parkCapCoreMaps} />
-      </div>
-
       <Table spec={parkCapHeadlineTable} />
 
       <div className="mt-5 rounded border border-border border-l-[3px] border-l-accent bg-muted/40 px-4 py-3.5 text-[0.88rem] leading-relaxed">
@@ -352,7 +338,7 @@ export function ParkCapitalizationReport() {
           공원과 생활상권의 겹침
         </p>
         <p className="mt-2 max-w-3xl text-[0.9rem] leading-relaxed text-muted-foreground">
-          같은 도판에 생활업종 점포 밀도를 육각형으로 얹었다. 진할수록 점포가 몰려 있다. 동탄2
+          같은 도판에 생활업종 점포 밀도를 육각형으로 얹었다. 파랑이 진할수록 점포가 몰려 있다. 한 칸에 점포가 열 곳 미만이면 비워 두었다 — 그 칸까지 칠하면 화면 절반이 상권이 되어 강도 차이가 읽히지 않는다. 동탄2
           남부·북부에서는 상권 덩어리가 대표공원에 붙어 있어 공원 거리가 상권 지수를 설명하는
           a경로가 뚜렷하고(부분 R² 0.232·0.150), 일월저수지 일대에서는 상권이 공원과 무관한 축을
           따라 깔려 있다(0.011). 그러나 이 겹침이 간접효과로 이어지지는 않는다.
