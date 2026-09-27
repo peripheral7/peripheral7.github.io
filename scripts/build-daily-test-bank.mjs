@@ -11,7 +11,8 @@
 //
 // 회차(session) 구성 — 한 회차는 항상 100점:
 //   · 법규: 단원 순서대로 묶되, 원문 배점 합이 100에 가장 가깝도록(5~6문제) 나눈 뒤 5점 단위로 100점에 맞춘다.
-//           원문 배점이 없는 문제(1~5, 9, 10번)는 추정 배점을 쓰고, 원문 자체가 없는 2~4번은 모범답안에 맞춰 문제문을 재구성한다.
+//           원문 배점이 없는 문제(5, 9, 10번)는 추정 배점을 쓴다. 원문 자체가 없는 문제는 모범답안에 맞춰 문제문을 재구성한다(현재는 없음 — 2·3·4번은
+//           2026-09-27에 원본 교재(이현진 감정평가 및 보상법규 기본문제 50선) 스캔으로 원문·배점을 확인해 채워 넣었다).
 //   · 실무: 종합문제집 순서대로 5문제씩. 배점은 답안 분량(tall / very_tall)에 따라 5점 단위로 조정한다.
 //   · 이론: 기본개념 문항을 파일 순서대로 5문제씩. 배점은 모범답안 분량에 따라 5점 단위로 조정한다(실무와 같은 방식).
 //
@@ -41,14 +42,11 @@ const LAW_GROUP_MIN = 3
 const LAW_GROUP_MAX = 6
 
 // 원문 배점이 원본에 없는 문제의 추정 배점(같은 단원군의 비슷한 문제와 실제 시험 관행을 참고한 값 — 상대 비중으로만 쓰인다)
-const LAW_POINTS_ESTIMATE = { p01: 20, p02: 15, p03: 20, p04: 20, p05: 10, p09: 10, p10: 15 }
+const LAW_POINTS_ESTIMATE = { p05: 10, p09: 10, p10: 15 }
 
 // 원문이 원본에 없는 문제 — 모범답안(구조)에 담긴 사안·쟁점에 맞춰 문제문을 재구성한다(이 표에 있는 문제는 questionSource='재구성').
-const LAW_QUESTION_SYNTH = {
-  p02: '행정의 자기구속의 원칙에 대하여 설명하시오. (의의 및 근거, 성립요건, 한계를 포함할 것)',
-  p03: '을 시장은 주택건설사업계획승인처분을 하면서, 그 주택단지의 진입도로 부지의 소유권을 확보하여 진입도로 등 간선시설을 설치하고 그 부지 소유권을 시(市)에 기부채납하도록 하는 부관을 붙였다. 위 부관의 적법 여부를 검토하시오.',
-  p04: '국토교통부장관은 감정평가사 甲에게 관계 법령 [별표3]에 따른 제재적 처분기준을 적용하여 업무정지처분을 하였다. 위 [별표3]은 법규명령의 형식으로 제정되어 있으나 그 실질은 제재적 처분의 사무처리기준이다. 위 제재적 처분기준의 법적 성질을 논하고, 甲에 대한 업무정지처분의 위법성 판단에서 이 기준이 어떤 의미를 갖는지 검토하시오.',
-}
+// 지금은 비어 있다: 예전에 있던 p02·p03·p04 항목은 2026-09-27에 원본 교재 스캔을 확인해 실제 원문으로 대체했다.
+const LAW_QUESTION_SYNTH = {}
 
 const read = (file) => fs.readFileSync(path.join(REPORTS, file), 'utf8').replace(/\r\n/g, '\n')
 
@@ -150,14 +148,18 @@ function buildLaw() {
     const title = text((block.match(/<div class="problem-title">([\s\S]*?)<\/div>/) || [])[1] || '').replace(/^문제\s*\d+(?:-\S+)?\s*·\s*/, '') || unit.name
     const topic = text((block.match(/<div class="problem-sub">([\s\S]*?)<\/div>/) || [])[1] || '')
 
-    // 원문 + 배점
+    // 원문 + 배점 (+ 있으면 제시자료: 법령 별표 등 문제를 푸는 데 필요한 자료 — 참고용 부가자료가 아니라 원문의 일부)
     let question = null
     let points = null
+    let context = null
     const st = map.match(/<div class="problem-statement">([\s\S]*?)<\/div>\s*<div class="toc">/)
     if (st) {
-      const pm = st[1].match(/<div class="ps-label">[\s\S]*?<span>\((\d+)점\)<\/span>/)
+      let inner = st[1]
+      const pm = inner.match(/<div class="ps-label">[\s\S]*?<span>\((\d+)점\)<\/span>/)
       if (pm) points = Number(pm[1])
-      const paras = [...st[1].matchAll(/<p[^>]*>([\s\S]*?)<\/p>/g)].map((m) => htmlToMd(m[1]))
+      const ctxm = inner.match(/<div class="ps-context">([\s\S]*)<\/div>\s*$/)
+      if (ctxm) { context = safeHtml(ctxm[1]); inner = inner.slice(0, ctxm.index) }
+      const paras = [...inner.matchAll(/<p[^>]*>([\s\S]*?)<\/p>/g)].map((m) => htmlToMd(m[1]))
       question = paras.join('\n')
     }
     const questionSource = question ? '원문' : '재구성'
@@ -197,7 +199,7 @@ function buildLaw() {
     const answer = parts.join('\n\n')
     if (answer.length < 80) throw new Error('모범답안(구조)을 충분히 읽지 못했습니다: ' + unit.id)
 
-    problems.push({
+    const item = {
       id: 'law:' + unit.id,
       s: 'law',
       order: idx + 1,
@@ -210,7 +212,9 @@ function buildLaw() {
       pointsSource,
       locked,
       answer,
-    })
+    }
+    if (context) item.context = context
+    problems.push(item)
   })
   return { problems }
 }

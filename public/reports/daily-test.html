@@ -1232,7 +1232,7 @@ function renderSettings() {
     + '<section class="card"><h2>내 기록 관리</h2><p class="note">기록과 분석노트는 <b>이 브라우저에만</b> 저장돼요(약 ' + Math.max(1, Math.round(bytes / 1024)) + 'KB · ' + S.data.records.length + '개). 브라우저 데이터를 지우면 사라지니 가끔 백업 파일로 내려받아 두세요.</p>'
     + '<div class="row" style="margin-top:10px"><button class="btn" data-act="export">백업 파일 내려받기</button><label class="btn" for="importFile" style="cursor:pointer">백업 파일 불러오기</label><input id="importFile" type="file" accept="application/json,.json" hidden><span class="grow"></span><button class="btn danger" data-act="reset">모든 기록 지우기</button></div></section>'
     + '<section class="card flat"><h3>문제 은행</h3><p class="note">법규 ' + cnt('law') + '문제 · 실무 ' + cnt('practice') + '문항 · 이론 ' + cnt('theory') + '문항 → 법규 ' + S.sessOf.law.length + '회차 + 실무 ' + S.sessOf.practice.length + '회차 + 이론 ' + S.sessOf.theory.length + '회차(각 100점). 법규·실무는 원본 학습 페이지에서, 이론은 content/daily-test/theory-basics.md 에서 자동으로 만들어져요(' + esc(S.bank.sourceHash) + ').</p>'
-    + '<p class="note" style="margin-top:6px">법규는 원문 배점(없는 문제는 추정)을 바탕으로 5점 단위로 100점에 맞췄고, 원문이 없던 문제 2·3·4번은 모범답안에 맞춰 문제문을 재구성했어요. 실무는 종합문제집의 주제형 문항이라 답안 분량에 따라 15~25점으로 나눴어요. 이론(기본개념)은 표준 교재 목차로 새로 쓴 초안이라 본인 교재와 다른 부분은 고쳐 쓰면 돼요.</p></section>';
+    + '<p class="note" style="margin-top:6px">법규는 원문 배점(문제5·9·10번은 추정)을 바탕으로 5점 단위로 100점에 맞췄어요. 실무는 종합문제집의 주제형 문항이라 답안 분량에 따라 15~25점으로 나눴어요. 이론(기본개념)은 표준 교재 목차로 새로 쓴 초안이라 본인 교재와 다른 부분은 고쳐 쓰면 돼요.</p></section>';
 }
 
 // ==========================================================================

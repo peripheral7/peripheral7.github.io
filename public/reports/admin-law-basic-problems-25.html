@@ -90,6 +90,15 @@
   .problem-statement .ps-label{display:flex; justify-content:space-between; align-items:baseline;
                                 font-size:var(--fs-sm); font-weight:700; color:#3b6b8f; letter-spacing:.4px; margin-bottom:6px;}
   .problem-statement p{margin:0; font-size:var(--fs-body); line-height:1.65; color:#1f2937;}
+  .problem-statement p + p{margin-top:8px;}
+  /* 문제 원문에 딸린 제시자료(법령 별표 등) — 참고용이 아니라 문제를 푸는 데 필요한 자료라 problem-statement 안에 둔다 */
+  .problem-statement .ps-context{margin-top:10px; padding-top:10px; border-top:1px dashed #b7c6d1;}
+  .problem-statement .ps-context-ttl{font-size:var(--fs-sm); font-weight:700; color:#3b6b8f;}
+  .problem-statement .ps-context-sub{font-size:var(--fs-sm); font-weight:700; text-align:center; margin:2px 0 8px; color:#1f2937;}
+  .problem-statement .ps-context p{margin:6px 0 0; font-size:var(--fs-sm); color:#1f2937;}
+  .problem-statement .ps-context table{width:100%; border-collapse:collapse; background:#fff; font-size:var(--fs-sm); line-height:1.5; margin-top:6px;}
+  .problem-statement .ps-context th, .problem-statement .ps-context td{border:1px solid #cdd9e2; padding:6px 8px; text-align:left; vertical-align:top; word-break:keep-all; overflow-wrap:anywhere;}
+  .problem-statement .ps-context thead th{background:#e3ecf3; text-align:center;}
   .flowbox{background:var(--card); border:1px solid var(--line); border-radius:12px; padding:12px 14px; margin-bottom:10px; max-width:var(--content-w);}
   .flowbox .num{display:inline-block; width:22px; height:22px; border-radius:50%; background:var(--accent2);
                 color:#fff; font-size:12px; text-align:center; line-height:22px; margin-right:6px;}
@@ -585,7 +594,7 @@
 <div class="problem-tabs">
   <div class="ptab" data-problem="p01">문제1<br>비례의 원칙</div>
   <div class="ptab" data-problem="p02">문제2<br>자기구속</div>
-  <div class="ptab" data-problem="p03">문제3<br>기부체납 부관</div>
+  <div class="ptab" data-problem="p03">문제3<br>기부채납 부관</div>
   <div class="ptab" data-problem="p04">문제4<br>업무정지 성질</div>
   <div class="ptab" data-problem="p05">문제5<br>구체적 규범통제</div>
   <div class="ptab active" data-problem="p06">문제06<br>부관</div>
@@ -1075,8 +1084,8 @@
 
   <div class="view active" data-view="map">
     <div class="problem-statement">
-      <div class="ps-label"><span>문제 1 · 원문</span></div>
-      <p>주변도로 내는게 도로사업에 더 합리적이라는 이유로 자신의 토지를 수용한 사업인정이 위법하다는 주장을 판단하기 위해 비례의 원칙을 설명하시오.</p>
+      <div class="ps-label"><span>문제 1 · 원문</span><span>(10점)</span></div>
+      <p>서울시장은 도로의 건설을 위해서 甲 소유의 토지가 필요하여 이 토지를 수용하고자 국토교통부장관에게 사업인정을 받았다. 그러나 甲은 자신의 토지보다 그 주변으로 도로를 내는 것이 비용도 적게 드는 등 보다 합리적이라는 이유로 자신의 토지를 수용한 사업인정이 위법하다고 주장한다. 甲의 주장을 판단하기 위해서 비례의 원칙을 설명하시오.</p>
     </div>
     <div class="toc">
       <div class="toc-ttl">목차</div>
@@ -1176,6 +1185,10 @@
   </div>
 
   <div class="view active" data-view="map">
+    <div class="problem-statement">
+      <div class="ps-label"><span>문제 2 · 원문</span><span>(10점)</span></div>
+      <p>자기구속의 원칙(자기구속의 법리)에 대하여 설명하시오.</p>
+    </div>
     <div class="toc">
       <div class="toc-ttl">목차</div>
       <span class="lv1">Ⅰ. 개설(의의 및 근거)</span>
@@ -1259,11 +1272,11 @@
 </div>
 
 <!-- ======================================================================= -->
-<!-- 문제3: 기부체납 부관의 적법여부 검토 -->
+<!-- 문제3: 기부채납 부관의 적법여부 검토 -->
 <!-- ======================================================================= -->
 <div class="problem" id="problem-p03">
-  <div class="problem-title">문제3 · 기부체납 부관의 적법여부</div>
-  <div class="problem-sub">주택건설사업계획승인에 붙은 진입도로 기부체납 부관</div>
+  <div class="problem-title">문제3 · 기부채납 부관의 적법여부</div>
+  <div class="problem-sub">주택건설사업계획승인에 붙은 진입도로 기부채납 부관</div>
 
   <div class="tabs" data-problem="p03">
     <div class="tab active" data-view="map">① 구조</div>
@@ -1272,6 +1285,10 @@
   </div>
 
   <div class="view active" data-view="map">
+    <div class="problem-statement">
+      <div class="ps-label"><span>문제 3 · 원문</span><span>(10점)</span></div>
+      <p>甲이 주택건설사업을 위해 주택건설사업계획승인을 신청하자 권한 행정청인 乙시장은 주택건설사업계획승인처분을 하면서 그 주택단지의 진입도로 부지의 소유권을 확보하여 진입도로 등 간선시설을 설치하고 그 부지 소유권을 기부채납하도록 하는 부관을 붙였다. 당해 부관의 적법여부를 일반원칙의 관점에서 검토하시오.</p>
+    </div>
     <div class="toc">
       <div class="toc-ttl">목차</div>
       <span class="lv1">Ⅰ. 문제의 소재</span>
@@ -1285,7 +1302,7 @@
     <div class="flowrow">
     <div class="flowbox">
       <span class="num">Ⅰ</span><h3>문제의 소재</h3>
-      <p>을 시장은 주택건설사업계획승인처분을 하면서 그 주택단지의 <b>진입도로 부지의 소유권을 확보</b>하여 진입도로 등 간선시설을 설치하고 그 부지 소유권을 <b>기부체납</b>하도록 하는 부관을 붙였는바, 이는 행정행위의 효력발생·소멸여부와 관계없이 작위 등 독립된 의무를 부과하는 <b>부담</b>으로 보인다. 당해 부관의 적법여부를 검토하기 위해 <b>부당결부금지원칙</b>이 문제된다.</p>
+      <p>을 시장은 주택건설사업계획승인처분을 하면서 그 주택단지의 <b>진입도로 부지의 소유권을 확보</b>하여 진입도로 등 간선시설을 설치하고 그 부지 소유권을 <b>기부채납</b>하도록 하는 부관을 붙였는바, 이는 행정행위의 효력발생·소멸여부와 관계없이 작위 등 독립된 의무를 부과하는 <b>부담</b>으로 보인다. 당해 부관의 적법여부를 검토하기 위해 <b>부당결부금지원칙</b>이 문제된다.</p>
     </div>
     <div class="note">
       <p><b>Tip.</b> 부담 정의를 사안에 짧게 적용하고 시작</p>
@@ -1297,7 +1314,7 @@
       <span class="num">Ⅱ</span><h3>부당결부금지의 원칙 위반여부</h3>
       <p><b class="sub">1. 의의 등</b>행정청은 행정작용을 할 때 상대방에게 해당 행정작용과 실질적인 관련이 없는 의무를 부과해서는 아니된다는 원칙으로, 법치국가의 원리와 자의금지원칙에서 나오는 헌법상 원칙이며 <b>행정기본법 제13조</b>에 근거한다.</p>
       <p><b class="sub">2. 요건</b>① 행정청의 <b>공행정작용</b>일 것 ② 상대방에게 부과되는 <b>반대급부와 결부</b>될 것 ③ 행정작용과 반대급부가 <b>실질적 관련성이 없을 것</b>. 원인적 관련성은 행정작용과 사인의 급부 사이 인과관계, 목적적 관련성은 주된 행정행위의 근거 법률·행정분야가 추구하는 목적에 의해서만 부과되어야 함을 의미한다.</p>
-      <p><b class="sub">3. 사안의 경우</b>주택사업계획승인이 있으므로 진출입로가 필요한 것이어서 <b>원인적 관련성</b>이 있고, 주택사업계획승인은 주민들의 쾌적한 주거환경 제공이 목적이므로 진입로 개설은 이 목적에 부합해 <b>목적적 관련성</b>도 있는바, 주택건설사업계획승인과 기부체납 부관 사이에는 <b>부당결부가 존재하지 않는다.</b></p>
+      <p><b class="sub">3. 사안의 경우</b>주택사업계획승인이 있으므로 진출입로가 필요한 것이어서 <b>원인적 관련성</b>이 있고, 주택사업계획승인은 주민들의 쾌적한 주거환경 제공이 목적이므로 진입로 개설은 이 목적에 부합해 <b>목적적 관련성</b>도 있는바, 주택건설사업계획승인과 기부채납 부관 사이에는 <b>부당결부가 존재하지 않는다.</b></p>
     </div>
     <div class="note">
       <p><b>Tip.</b> 원인적·목적적 관련성을 사실과 한 문장씩 짝짓기</p>
@@ -1365,6 +1382,22 @@
   </div>
 
   <div class="view active" data-view="map">
+    <div class="problem-statement">
+      <div class="ps-label"><span>문제 4 · 원문</span><span>(15점)</span></div>
+      <p>감정평가법인 甲은 국토교통부장관 乙의 지도, 감독에 따를 의무(업무에 관한 사항을 보고하지 않음: 1차 위반)를 이행하지 않은 사실이 적발되어, 국토교통부장관인 乙로부터 1월의 업무정지처분을 받았다. 이에 甲은 3년 이상 부동산 가격공시업무 등 감정평가업을 모범적으로 해 온 사실이 있음에도 불구하고, 단 한 차례의 잘못으로 1월의 업무정지처분을 내리는 것은 위법하다고 주장한다. 사안의 제재적 처분기준의 법적 성질을 검토하시오.</p>
+      <div class="ps-context">
+        <div class="ps-context-ttl">감정평가 및 감정평가사에 관한 법률 시행령 [별표 3]</div>
+        <div class="ps-context-sub">감정평가법인 등의 설립인가 취소와 업무정지의 기준(제29조 관련)</div>
+        <p>1. 일반기준 (중략)</p>
+        <p>2. 개별기준</p>
+        <table>
+          <thead><tr><th>위반행위</th><th>근거 법조문</th><th>1차 위반</th><th>2차 위반</th><th>3차 이상 위반</th></tr></thead>
+          <tbody>
+            <tr><td>너. 법 제47조에 따른 지도와 감독 등에 관해 다음의 어느 하나에 해당하는 경우<br>1) 업무에 관한 사항을 보고 또는 자료의 제출을 하지 않거나 거짓으로 보고 또는 제출한 경우</td><td>법 제32조 제1항 제16호가목</td><td>업무정지 1개월</td><td>업무정지 3개월</td><td>업무정지 6개월</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
     <div class="toc">
       <div class="toc-ttl">목차</div>
       <span class="lv1">Ⅰ. 문제의 소재</span>
