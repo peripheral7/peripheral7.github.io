@@ -73,6 +73,22 @@ export const parkCapHeadlineTable: StatTable = {
   note: "계수는 대표공원 경계까지의 거리를 자연로그로 취한 값의 탄력성이다. 표준오차는 이분산-로버스트(HC1)다. 광교는 계수가 +0.014, p=0.585로 사실상 영(0)이다. 동탄1은 공원 거리와 지하철 거리의 상관이 0.97이어서 두 계수를 분리할 수 없다(VIF 29.46). *** p<0.01 · ** p<0.05 · * p<0.10.",
 }
 
+export const parkCapParkMaps = [
+  { key: "ds" as RegionKey, label: "동탄2 남부", sub: "동탄호수공원 44.5ha", src: "/images/reports/park-core/park-dongtan-south.png" },
+  { key: "dn" as RegionKey, label: "동탄2 북부", sub: "동탄여울공원 29.4ha", src: "/images/reports/park-core/park-dongtan-north.png" },
+  { key: "d1" as RegionKey, label: "동탄1", sub: "반석산근린공원 67.1ha", src: "/images/reports/park-core/park-dongtan1.png" },
+  { key: "gg" as RegionKey, label: "광교", sub: "광교호수공원 132.8ha", src: "/images/reports/park-core/park-gwanggyo.png" },
+  { key: "iw" as RegionKey, label: "일월저수지 일대", sub: "일월공원 28.1ha", src: "/images/reports/park-core/park-ilwol.png" },
+]
+
+export const parkCapHexMaps = [
+  { key: "ds" as RegionKey, label: "동탄2 남부", sub: "동탄호수공원 44.5ha", src: "/images/reports/park-core/hex-dongtan-south.png" },
+  { key: "dn" as RegionKey, label: "동탄2 북부", sub: "동탄여울공원 29.4ha", src: "/images/reports/park-core/hex-dongtan-north.png" },
+  { key: "d1" as RegionKey, label: "동탄1", sub: "반석산근린공원 67.1ha", src: "/images/reports/park-core/hex-dongtan1.png" },
+  { key: "gg" as RegionKey, label: "광교", sub: "광교호수공원 132.8ha", src: "/images/reports/park-core/hex-gwanggyo.png" },
+  { key: "iw" as RegionKey, label: "일월저수지 일대", sub: "일월공원 28.1ha", src: "/images/reports/park-core/hex-ilwol.png" },
+]
+
 export const parkCapCoreMaps = [
   { key: "ds" as RegionKey, label: "동탄2 남부", sub: "동탄호수공원 44.5ha · 30개 단지", src: "/images/reports/park-core/dongtan-south.png" },
   { key: "dn" as RegionKey, label: "동탄2 북부", sub: "동탄여울공원 29.4ha · 32개 단지", src: "/images/reports/park-core/dongtan-north.png" },
