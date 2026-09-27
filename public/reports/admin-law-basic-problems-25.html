@@ -3543,7 +3543,7 @@
   <div class="row">구조 탭 우측(모바일은 하단) 얇은 글씨가 서술형 답안 작성 팁입니다</div>
   <div class="row">암기카드 화면에서 탭 또는 <kbd>Space</kbd>/<kbd>Enter</kbd>: 처음 누르면 정답 확인, 다시 누르면 다음 카드로 이동</div>
   <div class="row">자가테스트 입력창에서 <kbd>Enter</kbd>: 정답 확인 + 주요 키워드 채점(✓/✗) / <kbd>Shift</kbd>+<kbd>Enter</kbd>: 줄바꿈 / <kbd>Shift</kbd> 두 번: 확인 후 다음 문항으로 이동</div>
-  <div class="row">화면 하단 버튼: 이전·다음 문제 이동 및 맨 위로 스크롤</div>
+  <div class="row">화면 하단 버튼 또는 <kbd>Ctrl</kbd>+<kbd>←</kbd>/<kbd>→</kbd>: 이전·다음 문제 이동 (버튼 옆엔 맨 위로 스크롤도 있어요)</div>
 </div>
 
 <script>
@@ -3866,6 +3866,16 @@
   document.getElementById('nextProblemBtn').addEventListener('click', () => goToProblem(currentProblemIndex() + 1));
   document.getElementById('scrollTopBtn').addEventListener('click', () => {
     window.scrollTo({ top: 0, behavior: 'smooth' });
+  });
+  // 키보드로도 이전/다음 문제 이동: Ctrl(또는 Cmd)+←/→. 입력칸(자가테스트 textarea 등)에 포커스가
+  // 있을 때는 커서를 한 단어씩 옮기는 브라우저 기본 동작이 우선이므로 그대로 둔다.
+  document.addEventListener('keydown', (e) => {
+    if (!(e.ctrlKey || e.metaKey) || e.shiftKey || e.altKey) return;
+    if (e.key !== 'ArrowLeft' && e.key !== 'ArrowRight') return;
+    const t = e.target;
+    if (t && (t.tagName === 'INPUT' || t.tagName === 'TEXTAREA' || t.isContentEditable)) return;
+    e.preventDefault();
+    goToProblem(currentProblemIndex() + (e.key === 'ArrowRight' ? 1 : -1));
   });
   // ---- (3)자가테스트 답안 초기화: 현재 문제의 입력 내용을 지우고 답안(및
   // 키워드 채점 표시)을 숨긴다. 정답체크 배지·기록로그 등 채점 기록 자체는
