@@ -10,15 +10,23 @@ type Summary = {
   lastStudyDate?: string | null
 } | null
 
+const DAILY_SUBJECTS = ["law", "practice", "theory"] as const
+type DailySubject = (typeof DAILY_SUBJECTS)[number]
+const DAILY_LABEL: Record<DailySubject, string> = { law: "법규", practice: "실무", theory: "이론" }
+const isDailySubject = (x: unknown): x is DailySubject => DAILY_SUBJECTS.includes(x as DailySubject)
+
 // 매일 테스트(/reports/daily-test.html)가 남기는 요약. "오늘 했는지·연속이 이어지는지"는 페이지를 열지 않아도
-// 날짜가 바뀌면 달라지므로, 결과가 아니라 재료(마지막 응시일·그날 점수·그날로 끝나는 연속 일수·요일 패턴·다음 회차)를 저장해 두고
-// 여기서 오늘 날짜로 판단한다.
+// 날짜가 바뀌면 달라지므로, 결과가 아니라 재료(마지막 응시일·그날 점수·그날로 끝나는 연속 일수·요일별 과목·과목별 시작일·
+// 과목별 마지막 기록·다음 회차)를 저장해 두고 여기서 오늘 날짜로 판단한다.
+// pattern: v3 = 요일마다 그날 볼 과목들(배열, 월~일), v2(예전) = 요일마다 과목 하나('law'|'practice'|'rest').
 type DailySummary = {
   lastDate: string | null
   lastScore: number | null
   run: number
   dayStart: number
-  pattern: string[]
+  pattern: (string | string[])[]
+  starts?: Partial<Record<DailySubject, string>>
+  last?: Partial<Record<DailySubject, { date: string; score: number } | null>>
   next: Record<string, { title: string } | undefined>
 } | null
 
@@ -72,11 +80,17 @@ function dailyStatus(s: NonNullable<DailySummary>) {
   const today = fmtDate(now)
   const yesterday = fmtDate(new Date(now.getFullYear(), now.getMonth(), now.getDate() - 1))
   const weekday = (now.getDay() + 6) % 7 // 월=0 … 일=6
-  const subject = s.pattern[weekday]
+  const raw = s.pattern[weekday]
+  const listed = (Array.isArray(raw) ? raw : [raw]).filter(isDailySubject)
+  // 과목별 시작일이 아직 안 된 과목은 오늘 계획에서 뺀다(예: 이론 기본개념은 정해진 날부터)
+  const planned = DAILY_SUBJECTS.filter((k) => listed.includes(k) && !(s.starts?.[k] && today < (s.starts[k] as string)))
+  // 예전(v2) 요약에는 과목별 기록이 없다 — 그날 응시가 있으면 그날의 (하나뿐인) 과목을 한 것으로 본다
+  const isDone = (k: DailySubject) => (s.last ? s.last[k]?.date === today : s.lastDate === today)
+  const done = planned.filter(isDone).length
+  const pending = planned.filter((k) => !isDone(k)).map((k) => s.next?.[k]?.title ?? DAILY_LABEL[k])
   const doneToday = s.lastDate === today
   const streak = s.lastDate === today || s.lastDate === yesterday ? s.run : 0
-  const next = subject === "law" || subject === "practice" ? s.next?.[subject]?.title ?? null : null
-  return { doneToday, streak, subject, next, score: s.lastScore }
+  return { planned: planned.length, done, pending, doneToday, streak, score: s.lastScore }
 }
 
 export function SubjectProgressPanel() {
@@ -107,19 +121,27 @@ export function SubjectProgressPanel() {
               매일 테스트
             </span>
             <span className="text-[0.7rem] tracking-wide text-muted-foreground">
-              {dailyState.doneToday ? (
+              {dailyState.planned === 0 && !dailyState.doneToday ? (
+                <span className="text-muted-foreground/70">오늘은 쉬는 날</span>
+              ) : dailyState.pending.length === 0 ? (
                 <>
                   오늘 완료 <span className="text-foreground">{dailyState.score}</span>점
                 </>
-              ) : dailyState.next ? (
-                <>
-                  오늘 <span className="text-foreground">{dailyState.next}</span>
-                  <span className="ml-1 text-muted-foreground/70">· 미응시</span>
-                </>
               ) : (
-                <span className="text-muted-foreground/70">오늘은 쉬는 날</span>
+                <>
+                  오늘 <span className="text-foreground">{dailyState.done}</span>/{dailyState.planned} 완료
+                </>
               )}
             </span>
+            {dailyState.pending.length > 0 && (
+              <span className="flex flex-wrap gap-x-2 text-[0.7rem] tracking-wide text-muted-foreground/70">
+                {dailyState.pending.map((title) => (
+                  <span key={title} className="whitespace-nowrap">
+                    {title}
+                  </span>
+                ))}
+              </span>
+            )}
             <span className="text-[0.7rem] tracking-wide">
               {dailyState.streak > 0 ? (
                 <>

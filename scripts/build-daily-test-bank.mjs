@@ -3,6 +3,8 @@
 // 원본은 이미 있는 두 학습 페이지이고, 이 스크립트는 거기서 문제·모범답안·배점을 읽어 한 파일로 모은다(원본을 고치면 다시 실행):
 //   · 법규(행정법)  ← admin-law-basic-problems-25.html — 문제마다 "원문"(사례형 서술 문제)과 원문 배점, 모범답안(구조)
 //   · 감정평가실무   ← appraisal-practice-quiz.html(종합문제집) — 주제형 서술 문항 + 핵심 키워드 + 모범답안
+//   · 감정평가이론   ← content/daily-test/theory-basics.md — "기본개념" 약술 문항(주제 + 핵심 키워드 + 모범답안). 저장소에 이론 자료가 없어
+//                      표준 교재 목차로 새로 쓴 원본 파일이며, 고치면 이 스크립트를 다시 돌린다(형식은 그 파일 머리말 참고).
 //
 // 시험은 손으로 푸는 종이 시험이다: 문제지(문제·배점만)를 인쇄하고, 답안은 프롬프트로 채점한 뒤 분석노트를 업로드해 기록한다.
 // 그래서 은행에는 "문제지에 찍을 것"(question, points)과 "채점 프롬프트에 넣을 것"(answer, keywords)이 함께 들어 있다.
@@ -11,6 +13,7 @@
 //   · 법규: 단원 순서대로 묶되, 원문 배점 합이 100에 가장 가깝도록(5~6문제) 나눈 뒤 5점 단위로 100점에 맞춘다.
 //           원문 배점이 없는 문제(1~5, 9, 10번)는 추정 배점을 쓰고, 원문 자체가 없는 2~4번은 모범답안에 맞춰 문제문을 재구성한다.
 //   · 실무: 종합문제집 순서대로 5문제씩. 배점은 답안 분량(tall / very_tall)에 따라 5점 단위로 조정한다.
+//   · 이론: 기본개념 문항을 파일 순서대로 5문제씩. 배점은 모범답안 분량에 따라 5점 단위로 조정한다(실무와 같은 방식).
 //
 // 사용: node scripts/build-daily-test-bank.mjs        → public/reports/daily-test-bank.json 을 다시 쓴다
 //       node scripts/build-daily-test-bank.mjs --check → 파일을 쓰지 않고 지금 파일이 원본과 같은지만 확인(다르면 종료코드 1)
@@ -26,11 +29,13 @@ const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..')
 const REPORTS = path.join(ROOT, 'public', 'reports')
 const LAW_FILE = 'admin-law-basic-problems-25.html'
 const PRACTICE_FILE = 'appraisal-practice-quiz.html'
+const THEORY_FILE = 'content/daily-test/theory-basics.md'
 const OUT = path.join(REPORTS, 'daily-test-bank.json')
 
 const SESSION_POINTS = 100
 const POINT_UNIT = 5 // 배점은 5점 단위
 const PRACTICE_PER_SESSION = 5
+const THEORY_PER_SESSION = 5
 const PRACTICE_SIZE_WEIGHT = { 1: 1, 2: 1.25, 3: 1.5 } // 답안 분량(z)별 가중치
 const LAW_GROUP_MIN = 3
 const LAW_GROUP_MAX = 6
@@ -264,6 +269,79 @@ function buildPractice() {
   return { problems }
 }
 
+// ---------------------------------------------------------------- 감정평가이론(기본개념)
+// content/daily-test/theory-basics.md 를 읽는다.
+//   # 장  /  ## 소단원  /  ### 문항 주제 {#id}  /  키워드: 항목1; 항목2|동의어  /  (모범답안 여러 줄)
+const plainText = (s) => String(s).replace(/\*\*/g, '').replace(/\s+/g, '')
+function parseKeywords(line, where) {
+  const groups = String(line || '')
+    .split(';')
+    .map((g) => g.split('|').map((x) => x.trim()).filter(Boolean))
+    .filter((g) => g.length)
+  if (!groups.length) throw new Error(where + ': 키워드 줄이 없거나 비어 있습니다')
+  return groups
+}
+function buildTheory() {
+  const file = path.join(ROOT, THEORY_FILE)
+  if (!fs.existsSync(file)) throw new Error('이론 원본을 찾지 못했습니다: ' + THEORY_FILE)
+  const src = fs.readFileSync(file, 'utf8').replace(/\r\n/g, '\n').replace(/<!--[\s\S]*?-->/g, '')
+  let chapter = ''
+  let unit = ''
+  let cur = null
+  const raw = []
+  const flush = () => { if (cur) raw.push(cur); cur = null }
+  for (const line of src.split('\n')) {
+    let m
+    if ((m = line.match(/^# (.+)$/))) { flush(); chapter = m[1].trim(); continue }
+    if ((m = line.match(/^## (.+)$/))) { flush(); unit = m[1].trim(); continue }
+    if (/^###\s/.test(line)) {
+      m = line.match(/^###\s+(.+?)\s*\{#([\w-]+)\}\s*$/)
+      if (!m) throw new Error('문항 제목 끝에 {#id} 가 없습니다: ' + line)
+      flush()
+      cur = { id: m[2], topic: m[1].trim(), chapter, unit, kw: null, body: [] }
+      continue
+    }
+    if (!cur) continue
+    if (cur.kw === null && /^키워드:/.test(line)) { cur.kw = line.replace(/^키워드:\s*/, ''); continue }
+    cur.body.push(line)
+  }
+  flush()
+  if (!raw.length) throw new Error('이론 문항을 하나도 읽지 못했습니다')
+
+  const seen = new Set()
+  const perUnit = {}
+  const problems = raw.map((r, idx) => {
+    const where = '이론 ' + r.id + '(' + r.topic + ')'
+    if (seen.has(r.id)) throw new Error('이론 문항 id 중복: ' + r.id)
+    seen.add(r.id)
+    if (!r.chapter || !r.unit) throw new Error(where + ': 장(#)과 소단원(##) 아래에 있어야 합니다')
+    const answer = r.body.join('\n').trim()
+    if (answer.length < 30) throw new Error(where + ': 모범답안이 너무 짧습니다')
+    const keywords = parseKeywords(r.kw, where)
+    const flat = plainText(answer)
+    keywords.forEach((alts) => {
+      if (!alts.some((k) => flat.includes(plainText(k)))) throw new Error(where + ': 키워드 [' + alts.join(' | ') + '] 가 모범답안에 없습니다')
+    })
+    const key = r.chapter + '/' + r.unit
+    perUnit[key] = (perUnit[key] || 0) + 1
+    const chars = answer.replace(/\*\*/g, '').length
+    return {
+      id: 'theory:' + r.id,
+      s: 'theory',
+      order: idx + 1,
+      chapter: r.chapter,
+      unitName: r.unit,
+      label: r.unit + ' #' + perUnit[key],
+      topic: r.topic,
+      question: completeQuestion(r.topic),
+      answer,
+      keywords,
+      size: chars > 330 ? 3 : chars > 180 ? 2 : 1, // 모범답안 분량(실무의 tall / very_tall 에 해당)
+    }
+  })
+  return { problems }
+}
+
 // ---------------------------------------------------------------- 배점 · 회차
 // weights 를 POINT_UNIT 단위로 나눠 합이 total 이 되게 배분한다(최대잔여법). locked 인 항목은 weights 그대로 고정한다.
 export function distribute(weights, locked, total = SESSION_POINTS, unit = POINT_UNIT) {
@@ -306,7 +384,22 @@ function partitionLaw(problems) {
   return go(0).cuts
 }
 
-function makeSessions(law, practice) {
+// 실무·이론: 파일(문제집) 순서대로 perSession 개씩, 분량(size)에 따라 5점 단위로 100점 배분
+function keywordSessions(subject, list, perSession) {
+  const out = []
+  for (let a = 0, k = 0; a < list.length; a += perSession, k++) {
+    const group = list.slice(a, a + perSession)
+    const pts = distribute(group.map((p) => PRACTICE_SIZE_WEIGHT[p.size] || 1), group.map(() => false))
+    out.push({
+      id: subject + '-' + (k + 1), s: subject, n: k + 1,
+      problems: group.map((p) => p.id),
+      points: Object.fromEntries(group.map((p, i) => [p.id, pts[i]])),
+    })
+  }
+  return out
+}
+
+function makeSessions(law, practice, theory) {
   const sessions = []
   partitionLaw(law).forEach(([a, b, raw], k) => {
     const group = law.slice(a, b + 1)
@@ -317,15 +410,8 @@ function makeSessions(law, practice) {
       points: Object.fromEntries(group.map((p, i) => [p.id, pts[i]])),
     })
   })
-  for (let a = 0, k = 0; a < practice.length; a += PRACTICE_PER_SESSION, k++) {
-    const group = practice.slice(a, a + PRACTICE_PER_SESSION)
-    const pts = distribute(group.map((p) => PRACTICE_SIZE_WEIGHT[p.size] || 1), group.map(() => false))
-    sessions.push({
-      id: 'practice-' + (k + 1), s: 'practice', n: k + 1,
-      problems: group.map((p) => p.id),
-      points: Object.fromEntries(group.map((p, i) => [p.id, pts[i]])),
-    })
-  }
+  sessions.push(...keywordSessions('practice', practice, PRACTICE_PER_SESSION))
+  sessions.push(...keywordSessions('theory', theory, THEORY_PER_SESSION))
   return sessions
 }
 
@@ -333,13 +419,14 @@ function makeSessions(law, practice) {
 function build() {
   const law = buildLaw()
   const practice = buildPractice()
-  const problems = [...law.problems, ...practice.problems]
+  const theory = buildTheory()
+  const problems = [...law.problems, ...practice.problems, ...theory.problems]
   const ids = new Set()
   for (const p of problems) {
     if (ids.has(p.id)) throw new Error('문항 id 중복: ' + p.id)
     ids.add(p.id)
   }
-  const sessions = makeSessions(law.problems, practice.problems)
+  const sessions = makeSessions(law.problems, practice.problems, theory.problems)
   for (const s of sessions) {
     const total = Object.values(s.points).reduce((a, b) => a + b, 0)
     if (total !== SESSION_POINTS) throw new Error(s.id + ' 배점 합이 ' + total + ' 입니다(100이어야 함)')
@@ -347,12 +434,13 @@ function build() {
   const sourceHash = crypto.createHash('sha1').update(JSON.stringify([problems, sessions])).digest('hex').slice(0, 12)
 
   return {
-    v: 2,
+    v: 3,
     sourceHash,
-    sources: { law: LAW_FILE, practice: PRACTICE_FILE },
+    sources: { law: LAW_FILE, practice: PRACTICE_FILE, theory: THEORY_FILE },
     subjects: {
       law: { name: '감정평가 및 보상법규(행정법)', short: '법규' },
       practice: { name: '감정평가실무', short: '실무' },
+      theory: { name: '감정평가이론(기본개념)', short: '이론' },
     },
     problems,
     sessions,
@@ -373,7 +461,7 @@ if (isMain) {
 
   fs.writeFileSync(OUT, json, 'utf8')
   console.log('wrote ' + path.relative(ROOT, OUT) + ' (' + (Buffer.byteLength(json) / 1024).toFixed(1) + ' KB, source ' + bank.sourceHash + ')')
-  for (const key of ['law', 'practice']) {
+  for (const key of ['law', 'practice', 'theory']) {
     const list = bank.sessions.filter((s) => s.s === key)
     console.log(' ' + bank.subjects[key].short + ': 문제 ' + bank.problems.filter((p) => p.s === key).length + '개 / 회차 ' + list.length + '개')
   }
