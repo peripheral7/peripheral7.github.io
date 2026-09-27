@@ -359,8 +359,8 @@ export function ParkCapitalizationReport() {
       <Table spec={parkCapSemTable} />
       <div className="mt-5 rounded border border-border border-l-[3px] border-l-accent bg-muted/40 px-4 py-3.5 text-[0.88rem] leading-relaxed">
         <strong>공간의존은 실재하지만 결론을 바꾸지 않는다.</strong> λ는 여섯 설정 중 다섯에서
-        유의하고 여과잔차의 자기상관은 완전히 사라지는데, 대표공원 계수는 −0.023에서 −0.036 사이로
-        OLS의 −0.036과 사실상 같다.{" "}
+        유의하고 여과잔차의 자기상관은 완전히 사라지는데, 대표공원 계수는 −0.002에서 −0.013 사이로
+        OLS의 −0.014와 사실상 같다.{" "}
         <em className="not-italic text-accent">북부에서 공원이 잡히지 않는 것은 표준오차가 왜곡되어서가
         아니라, 그 구역에 생활권의 초점이 될 대형공원이 없기 때문이다.</em>
       </div>
