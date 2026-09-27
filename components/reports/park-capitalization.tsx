@@ -319,11 +319,12 @@ export function ParkCapitalizationReport() {
       <div className="mt-5 rounded border border-border border-l-[3px] border-l-accent bg-muted/40 px-4 py-3.5 text-[0.88rem] leading-relaxed">
         <strong>공원의 면적 순위와 자본화 순위가 어긋난다.</strong> 대표공원을 큰 순서로 놓으면
         광교 132.8 → 동탄1 67.1 → 동탄2 남부 44.5 → 동탄2 북부 29.4 → 일월 28.1ha인데, 계수가
-        유의한 곳은 가장 작은 일월과 가운데인 동탄2 남부다. 가장 큰 광교는 계수가 영에 가깝다.
+        유의한 곳은 가장 작은 일월과 가운데인 동탄2 남부다. 가장 큰 광교는 부호는 맞지만 유의하지
+        않다.
         <br />
         <br />
         <em className="not-italic text-accent">가격을 지배하는 요인도 구역마다 다르다.</em> 동탄2
-        남부는 전용면적과 대표공원, 동탄2 북부와 동탄1은 지하철 거리, 광교는 건축연령, 일월은 생활상권이 1위다.
+        남부는 생활상권과 대표공원, 동탄2 북부·동탄1·광교는 지하철 거리, 일월은 생활상권이 1위다.
         같은 동탄2 안에서도 남과 북의 축이 다르며, 이것이 지역을 합쳐 추정하지 않은 이유이기도 하다.
       </div>
 
@@ -340,20 +341,22 @@ export function ParkCapitalizationReport() {
         <p className="mt-2 max-w-3xl text-[0.9rem] leading-relaxed text-muted-foreground">
           같은 도판에 생활업종 점포 밀도를 육각형으로 얹었다. 파랑이 진할수록 점포가 몰려 있다. 한 칸에 점포가 열 곳 미만이면 비워 두었다 — 그 칸까지 칠하면 화면 절반이 상권이 되어 강도 차이가 읽히지 않는다. 동탄2
           남부·북부에서는 상권 덩어리가 대표공원에 붙어 있어 공원 거리가 상권 지수를 설명하는
-          a경로가 뚜렷하고(부분 R² 0.232·0.150), 일월저수지 일대에서는 상권이 공원과 무관한 축을
-          따라 깔려 있다(0.011). 그러나 이 겹침이 간접효과로 이어지지는 않는다.
+          a경로가 뚜렷하다(부분 R² 0.587·광교 0.161). 일월저수지 일대에서는 상권이 공원과 무관한
+          축을 따라 깔려 있다(0.011). 붉은 점은 지하철역이다 — 북부·광교·동탄1에서는 상권 덩어리가
+          공원이 아니라 역에 붙어 있다.
         </p>
         <MapLightbox maps={parkCapHexMaps} />
       </div>
 
       <Table spec={parkCapMediationTable} />
       <div className="mt-5 rounded border border-border border-l-[3px] border-l-accent bg-muted/40 px-4 py-3.5 text-[0.88rem] leading-relaxed">
-        <strong>매개는 다섯 구역 어디에서도 확립되지 않는다.</strong> 간접효과의 95% 구간이 모두 0을
-        포함한다. 그런데 갈라 보면 절반은 성립한다 —{" "}
-        <em className="not-italic text-accent">상권이 가격을 설명하는 b경로는 다섯 중 세 곳에서
-        유의하다.</em> 서지 않는 것은 &lsquo;그 상권이 공원 때문에 생겼다&rsquo;는 연결고리
-        쪽이다. 공원 거리가 상권을 설명하는 a경로가 뚜렷한 곳은 동탄2 남부(부분 R² 0.195)와
-        북부(0.387)뿐이고, 그마저 간접효과로는 구간이 0을 넘지 못한다.
+        <strong>매개는 동탄2 남부에서만 확립된다.</strong> 간접효과의 95% 구간이 0을 배제하는 곳은
+        다섯 중 하나다 —{" "}
+        <em className="not-italic text-accent">총효과 −0.134 가운데 −0.061이 상권을 경유하고
+        −0.073이 직접 남는 부분매개다.</em> 공원 거리가 상권 지수를 설명하는 a경로의 부분 R²도
+        0.587로 압도적으로 크다. 동탄2 남부는 지구단위계획에서 호수공원과 배후 상업지를 겹쳐
+        배치한 곳이고, 그 설계가 자료에 그대로 남아 있다. 나머지 네 구역에서는 구간이 모두 0을
+        포함한다 — 공원이 상권을 만든다는 연결고리는 두 시설을 의도적으로 겹쳐 놓았을 때만 선다.
       </div>
       <p className="mt-6 max-w-3xl text-[0.92rem] leading-relaxed">
         가까운 단지끼리 모형이 설명하지 못한 부분을 공유하면 표준오차가 실제보다 작아진다. 직접효과
