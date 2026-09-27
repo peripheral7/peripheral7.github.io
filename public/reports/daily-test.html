@@ -134,6 +134,8 @@
   .plan-row:first-child{border-top:0;}
   .plan-row .d{min-width:5.6em; font-weight:700;}
   .plan-row .grow{min-width:8em;}
+  /* 오늘 행: 칩 대신 얇은 초록 테두리로 표시(오늘·기록 탭의 today 표시와 같은 방식) */
+  .plan-row.today{border-radius:8px; box-shadow:0 0 0 1px var(--accent2) inset; padding:9px 8px;}
   .sess-row{display:flex; gap:8px; align-items:center; padding:8px 2px; border-top:1px dashed var(--line); flex-wrap:wrap;}
   .sess-row:first-child{border-top:0;}
   .sess-row .k{min-width:4.6em; font-weight:800;}
@@ -1063,7 +1065,7 @@ function renderPlan() {
       return '<div class="plan-item"><span class="pi-main">' + subjChip(it.subj) + ' <b>' + esc(sessTitle(it.sess)) + '</b>' + (it.round > 1 ? ' <span class="chip warn">' + it.round + '회독</span>' : '') + '</span>'
         + '<button class="btn sm" data-act="open" data-sid="' + it.sess.id + '" data-step="1">' + (i === 0 ? '오늘 시작' : '미리 열기') + '</button></div><div class="sub pi-scope">' + esc(sessScope(it.sess)) + '</div>';
     }).join('');
-    return '<div class="plan-row"><span class="d">' + esc(mdLabel(p.date)) + (i === 0 ? ' <span class="chip green">오늘</span>' : '') + '</span><span class="grow">' + inner + '</span></div>';
+    return '<div class="plan-row' + (i === 0 ? ' today' : '') + '"><span class="d">' + esc(mdLabel(p.date)) + '</span><span class="grow">' + inner + '</span></div>';
   }).join('');
   const notes = startNotes();
   return '<section class="card"><h2>다가오는 14일</h2><p class="note" style="margin-bottom:6px">요일마다 정해 둔 <b>과목들</b>의 다음 회차가 함께 이어집니다. 하루 빠져도 회차는 밀리지 않고 그다음 시험일에 이어서 나와요.</p>'
