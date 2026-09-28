@@ -13,8 +13,11 @@
 //   · 법규: 단원 순서대로 묶되, 원문 배점 합이 100에 가장 가깝도록(5~6문제) 나눈 뒤 5점 단위로 100점에 맞춘다.
 //           원문 배점이 없는 문제(5, 9, 10번)는 추정 배점을 쓴다. 원문 자체가 없는 문제는 모범답안에 맞춰 문제문을 재구성한다(현재는 없음 — 2·3·4번은
 //           2026-09-27에 원본 교재(이현진 감정평가 및 보상법규 기본문제 50선) 스캔으로 원문·배점을 확인해 채워 넣었다).
-//   · 실무: 종합문제집 순서대로 5문제씩. 배점은 답안 분량(tall / very_tall)에 따라 5점 단위로 조정한다.
-//   · 이론: 기본개념 문항을 파일 순서대로 5문제씩. 배점은 모범답안 분량에 따라 5점 단위로 조정한다(실무와 같은 방식).
+//   · 실무: 문항이 쉽고 답이 짧아서, 문항마다 모범답안 글자 수(공백 제외)로 배점을 정한다 — 90자 미만 5점 / 90~149자 10점 / 150~209자 15점 /
+//           210자 이상 20점. 종합문제집 순서대로, 문항 배점의 합이 100에 가장 가깝게 이어서 묶으므로 한 회차에 10문항 안팎이 들어간다(짧은 답이
+//           몰려 있으면 더 많이, 긴 답이 몰려 있으면 더 적게). 합이 100이 아니면 5점 단위로 살짝 조정한다.
+//           회차 id 는 예전 구성(5문항씩, practice-N)의 기록과 섞이지 않도록 practice2-N 을 쓴다.
+//   · 이론: 기본개념 문항을 파일 순서대로 5문제씩. 배점은 모범답안 분량(size)에 따라 5점 단위로 조정한다.
 //
 // 사용: node scripts/build-daily-test-bank.mjs        → public/reports/daily-test-bank.json 을 다시 쓴다
 //       node scripts/build-daily-test-bank.mjs --check → 파일을 쓰지 않고 지금 파일이 원본과 같은지만 확인(다르면 종료코드 1)
@@ -35,9 +38,12 @@ const OUT = path.join(REPORTS, 'daily-test-bank.json')
 
 const SESSION_POINTS = 100
 const POINT_UNIT = 5 // 배점은 5점 단위
-const PRACTICE_PER_SESSION = 5
 const THEORY_PER_SESSION = 5
-const PRACTICE_SIZE_WEIGHT = { 1: 1, 2: 1.25, 3: 1.5 } // 답안 분량(z)별 가중치
+const PRACTICE_SIZE_WEIGHT = { 1: 1, 2: 1.25, 3: 1.5 } // 답안 분량(size)별 가중치(이론 회차에 쓴다)
+// 실무 배점: [모범답안 글자 수(공백 제외) 미만, 배점] — 60자마다 한 단계. 답이 짧을수록 적은 점수를 줘서 한 회차에 더 많은 문항을 푼다.
+const PRACTICE_POINT_TIERS = [[90, 5], [150, 10], [210, 15], [Infinity, 20]]
+const PRACTICE_GROUP_MIN = 4
+const PRACTICE_GROUP_MAX = 24
 const LAW_GROUP_MIN = 3
 const LAW_GROUP_MAX = 6
 
@@ -235,6 +241,35 @@ export function completeQuestion(prompt) {
   return q + '에 대하여 서술하시오.'
 }
 
+const answerChars = (answer) => String(answer).replace(/\*\*/g, '').replace(/\s+/g, '').length
+// 실무 문항 하나의 기준 배점(모범답안이 길수록 많이)
+const practiceTier = (chars) => PRACTICE_POINT_TIERS.findIndex(([lt]) => chars < lt)
+export const practiceBasePoints = (chars) => PRACTICE_POINT_TIERS[practiceTier(chars)][1]
+
+// 묶음의 기준 배점 합이 100이 아니면(5점 단위 어긋남) 길이 구간 경계에 가장 가까운 문항부터 한 단계씩만 옮겨 100에 맞춘다:
+// 모자라면 "다음 구간 경계에 가장 가까운" 문항을 한 단계 위로, 넘치면 "지금 구간 경계에 가장 가까운" 문항을 한 단계 아래로.
+// 그래서 모든 문항은 5~20점 안에 머물고, 조정되는 건 경계에 걸친 한두 문항뿐이다. 조정할 문항이 없으면 null(호출 쪽이 비례 배분으로 대신한다).
+function fitToSession(chars) {
+  const tier = chars.map(practiceTier)
+  const top = PRACTICE_POINT_TIERS.length - 1
+  const pts = () => tier.reduce((a, t) => a + PRACTICE_POINT_TIERS[t][1], 0)
+  const lo = (t) => (t === 0 ? 0 : PRACTICE_POINT_TIERS[t - 1][0])
+  for (let guard = 0; pts() !== SESSION_POINTS; guard++) {
+    if (guard > 50) return null
+    const up = pts() < SESSION_POINTS
+    let pick = -1
+    let bestGap = Infinity
+    tier.forEach((t, i) => {
+      if (up ? t >= top : t <= 0) return
+      const gap = up ? PRACTICE_POINT_TIERS[t][0] - chars[i] : chars[i] - lo(t)
+      if (gap < bestGap) { bestGap = gap; pick = i }
+    })
+    if (pick < 0) return null
+    tier[pick] += up ? 1 : -1
+  }
+  return tier.map((t) => PRACTICE_POINT_TIERS[t][1])
+}
+
 function buildPractice() {
   const html = read(PRACTICE_FILE)
   const structure = evalLiteral(html, 'const structure')
@@ -249,6 +284,7 @@ function buildPractice() {
       list.forEach((q, i) => {
         if (!q.prompt || !Array.isArray(q.keywords) || q.keywords.length === 0) throw new Error('실무 문항 형식 오류: ' + sub.id + '#' + q.id)
         order++
+        const answer = htmlToMd(q.modelAnswer || '')
         const item = {
           id: 'practice:' + sub.id + ':' + q.id,
           s: 'practice',
@@ -259,7 +295,8 @@ function buildPractice() {
           label: sub.name + ' #' + (i + 1),
           topic: htmlToMd(q.prompt).replace(/\s+/g, ' '), // 종합문제집에 적힌 원래 주제 표현(취약 분석·기록 목록에서 짧게 부를 때 쓴다)
           question: completeQuestion(htmlToMd(q.prompt)),
-          answer: htmlToMd(q.modelAnswer || ''),
+          answer,
+          chars: answerChars(answer), // 모범답안 글자 수(공백·** 제외) — 배점을 정하는 기준
           // 키워드마다 word + alt(동의어) — 하나라도 답에 들어 있으면 그 키워드를 쓴 것으로 본다
           keywords: q.keywords.map((k) => [k.word, ...(k.alt || [])].map((x) => String(x).trim()).filter(Boolean)),
           size: q.very_tall ? 3 : q.tall ? 2 : 1, // 답안 분량(원본의 tall / very_tall 표시)
@@ -388,7 +425,42 @@ function partitionLaw(problems) {
   return go(0).cuts
 }
 
-// 실무·이론: 파일(문제집) 순서대로 perSession 개씩, 분량(size)에 따라 5점 단위로 100점 배분
+// 실무: 문항마다 기준 배점(답안 길이)을 정하고, 문제집 순서를 지키며 묶음의 배점 합이 100에 가깝도록(크기 4~24) 나눈다 — 동적계획법.
+// 오차는 제곱으로 셈해서, 어느 한 회차에 오차가 몰리지 않고 여러 회차에 조금씩 나뉘게 한다.
+function partitionByPoints(weights, min, max) {
+  const n = weights.length
+  const memo = new Map()
+  const go = (i) => {
+    if (i === n) return { cost: 0, cuts: [] }
+    if (memo.has(i)) return memo.get(i)
+    let best = { cost: Infinity, cuts: [] }
+    let sum = 0
+    for (let j = i; j < n && j - i + 1 <= max; j++) {
+      sum += weights[j]
+      if (j - i + 1 < min && j < n - 1) continue
+      const rest = go(j + 1)
+      const cost = (sum - SESSION_POINTS) ** 2 + rest.cost
+      if (cost < best.cost) best = { cost, cuts: [[i, j, sum]].concat(rest.cuts) }
+    }
+    memo.set(i, best)
+    return best
+  }
+  return go(0).cuts
+}
+function practiceSessions(list) {
+  const base = list.map((p) => practiceBasePoints(p.chars))
+  return partitionByPoints(base, PRACTICE_GROUP_MIN, PRACTICE_GROUP_MAX).map(([a, b, raw], k) => {
+    const group = list.slice(a, b + 1)
+    const pts = fitToSession(group.map((p) => p.chars)) || distribute(base.slice(a, b + 1), group.map(() => false))
+    return {
+      id: 'practice2-' + (k + 1), s: 'practice', n: k + 1, rawSum: raw,
+      problems: group.map((p) => p.id),
+      points: Object.fromEntries(group.map((p, i) => [p.id, pts[i]])),
+    }
+  })
+}
+
+// 이론: 파일(문제집) 순서대로 perSession 개씩, 분량(size)에 따라 5점 단위로 100점 배분
 function keywordSessions(subject, list, perSession) {
   const out = []
   for (let a = 0, k = 0; a < list.length; a += perSession, k++) {
@@ -414,7 +486,7 @@ function makeSessions(law, practice, theory) {
       points: Object.fromEntries(group.map((p, i) => [p.id, pts[i]])),
     })
   })
-  sessions.push(...keywordSessions('practice', practice, PRACTICE_PER_SESSION))
+  sessions.push(...practiceSessions(practice))
   sessions.push(...keywordSessions('theory', theory, THEORY_PER_SESSION))
   return sessions
 }
@@ -470,4 +542,5 @@ if (isMain) {
     console.log(' ' + bank.subjects[key].short + ': 문제 ' + bank.problems.filter((p) => p.s === key).length + '개 / 회차 ' + list.length + '개')
   }
   bank.sessions.filter((s) => s.s === 'law').forEach((s) => console.log('   ' + s.id + ': ' + s.problems.map((id) => id.replace('law:', '')).join(', ') + ' (원문 합 ' + s.rawSum + ' → 배점 ' + s.problems.map((id) => s.points[id]).join('/') + ')'))
+  bank.sessions.filter((s) => s.s === 'practice').forEach((s) => console.log('   ' + s.id + ': ' + s.problems.length + '문항 (기준 배점 합 ' + s.rawSum + ' → 배점 ' + s.problems.map((id) => s.points[id]).join('/') + ')'))
 }

@@ -494,7 +494,15 @@ function sessTopics(sess) {
 }
 function sessMinutes(sess) {
   if (sess.s === 'law') return 100;                                   // 실제 시험처럼 1점 = 1분
+  if (sess.s === 'practice') return 40;                               // 실무는 답이 짧아서 100점 ≈ 40분(1점 ≈ 24초 — 배점이 곧 답안 길이라 회차마다 같다)
   return Math.round(probs(sess).reduce((a, p) => a + (p.size === 3 ? 8 : p.size === 2 ? 6 : 4), 0) / 5) * 5 || 5;
+}
+// 기록에 적힌 회차 이름 — 회차 구성이 바뀌어 지금은 없는 회차(예: 예전 실무 practice-3)의 기록도 알아볼 수 있게 한다.
+function recTitle(r) {
+  const sess = S.sById[r.session];
+  if (sess) return sessTitle(sess);
+  const n = (String(r.session).match(/(\d+)$/) || [])[1];
+  return (SUBJ[r.s] || '') + (n ? ' 제' + n + '회' : ' 기록') + ' (이전 구성)';
 }
 function doneCounts(s) {
   const cnt = {};
@@ -645,7 +653,7 @@ function paperHTML(sess, date, withLines, domId) {
   h += '<div class="p-notice">' + esc(paperNotice(sess)) + '</div>';
   ps.forEach((p, i) => {
     const pts = sess.points[p.id];
-    const lines = withLines ? Math.max(4, Math.round(pts * (sess.s === 'law' ? 0.7 : 0.5))) : 0;
+    const lines = withLines ? Math.max(sess.s === 'practice' ? 2 : 4, Math.round(pts * (sess.s === 'law' ? 0.7 : 0.5))) : 0;
     h += '<section class="prob' + (lines > 12 ? ' tall' : '') + '"><div class="prob-h"><b>' + (sess.s === 'law' ? '문제 ' : '문항 ') + (i + 1) + '.</b><span>(' + pts + '점)</span></div>';
     h += '<div class="prob-q">' + qHTML(p.question);
     if (p.context) h += '<div class="prob-ctx">' + p.context + '</div>';
@@ -753,7 +761,9 @@ function selfGradeGuideHTML(sess) {
       + (sess.s === 'practice' ? '<li>산식·수치·근거 법령이 틀리면 그 항목은 인정하지 않아요.</li>' : '<li>정의·요건·종류·특징이 정확한지, 비슷한 개념과 혼동하지 않았는지 보세요(예: 가치발생요인 ↔ 가치형성요인).</li>')
       + '<li>표현이 달라도 같은 개념·같은 취지면 인정하고, 모범답안에 없어도 정당한 내용은 인정할 수 있어요.</li>'
       + '</ul>'
-      + '<div class="msg warn">이 문항은 애초에 기출문제가 아니라 ' + (sess.s === 'practice' ? '종합문제집' : '기본개념 정리') + ' 자체 문제라, 배점도 답안 분량을 기준으로 제가 추정한 값이에요. 공식 채점기준은 없어요.</div>';
+      + '<div class="msg warn">이 문항은 애초에 기출문제가 아니라 ' + (sess.s === 'practice' ? '종합문제집' : '기본개념 정리') + ' 자체 문제라, 배점도 답안 분량을 기준으로 제가 정한 값이에요'
+      + (sess.s === 'practice' ? '(모범답안 90자 미만 5점 · 90~149자 10점 · 150~209자 15점 · 210자 이상 20점 — 배점이 곧 답안 분량이라 점수가 큰 문항일수록 더 자세히 써야 해요)' : '')
+      + '. 공식 채점기준은 없어요.</div>';
   }
   h += '<p class="note" style="margin-top:8px">채점을 마쳤으면 위 프롬프트 맨 아래 <b>기록용 JSON</b> 틀을 그대로 복사해 <code>got</code> 값에 점수를 직접 채우고, <b>3 결과 업로드</b>에 붙여넣으세요 — AI 없이도 점수·연속 기록이 그대로 남아요.</p>';
   h += '</div></details>';
@@ -978,10 +988,10 @@ function weekHTML() {
 function subjectBlock(k, t) {
   const done = doneOnBy(t, k);
   if (done.length) {
-    const r = done[done.length - 1], sess = S.sById[r.session], nx = nextSession(k);
+    const r = done[done.length - 1], nx = nextSession(k);
     return '<div class="subj-block" data-subj="' + k + '"><div class="hero sm">' + ringHTML(r.score, SUBJ[k] + ' 점수 ' + r.score) + '<div class="grow stack">'
       + '<div>' + subjChip(k) + ' <span class="chip green">완료</span> <span class="chip line">' + esc(TIER_LABEL[tierOf(r.score)]) + '</span></div>'
-      + '<div><b>' + esc(sess ? sessTitle(sess) : r.session) + '</b><div class="sub">' + (r.minutes ? r.minutes + '분 · ' : '') + esc((r.summary || '').slice(0, 60)) + '</div></div>'
+      + '<div><b>' + esc(recTitle(r)) + '</b><div class="sub">' + (r.minutes ? r.minutes + '분 · ' : '') + esc((r.summary || '').slice(0, 60)) + '</div></div>'
       + '<div class="row"><button class="btn sm" data-act="viewrec" data-id="' + esc(r.id) + '">결과·분석노트</button><button class="btn sm" data-act="open" data-sid="' + nx.sess.id + '" data-step="1">한 회차 더: ' + esc(sessTitle(nx.sess)) + '</button></div></div></div></div>';
   }
   const nx = nextSession(k), sess = nx.sess;
@@ -1037,7 +1047,7 @@ function trackCard(k) {
   const list = S.sessOf[k], cnt = doneCounts(k), nx = pickNext(k, cnt);
   const doneOnce = list.filter((x) => cnt[x.id] > 0).length;
   const start = S.data.settings.starts[k];
-  const desc = { law: '단원 순서대로 배점 합이 100에 가깝게 5~6문제씩', practice: '종합문제집 순서대로 5문항씩', theory: '기본개념을 순서대로 5문항씩(표준 목차 초안)' };
+  const desc = { law: '단원 순서대로 배점 합이 100에 가깝게 5~6문제씩', practice: '종합문제집 순서대로, 답이 짧은 문항은 5점·긴 문항은 20점으로 두고 합이 100점이 되게 묶음(10문항 안팎)', theory: '기본개념을 순서대로 5문항씩(표준 목차 초안)' };
   const rows = list.map((x) => {
     const last = S.data.records.filter((r) => r.session === x.id).slice(-1)[0];
     const status = cnt[x.id] ? '<span class="chip green">' + cnt[x.id] + '회 완료</span>' + (last ? ' <span class="chip ' + 't' + tierOf(last.score) + '" style="color:#222">' + fmtNum(last.score) + '점</span>' : '') : '<span class="chip line">미응시</span>';
@@ -1061,7 +1071,7 @@ function renderPlan() {
   const proj = projection(14);
   const rows = proj.map((p, i) => {
     const inner = !p.items.length ? '<span class="sub">쉬는 날</span>' : p.items.map((it) => {
-      if (it.done) { const ds = S.sById[it.done.session]; return '<div class="plan-item"><span class="pi-main">' + subjChip(it.subj) + ' <b>' + esc(ds ? sessTitle(ds) : it.done.session) + '</b> <span class="chip green">완료 ' + fmtNum(it.done.score) + '점</span></span></div>'; }
+      if (it.done) { return '<div class="plan-item"><span class="pi-main">' + subjChip(it.subj) + ' <b>' + esc(recTitle(it.done)) + '</b> <span class="chip green">완료 ' + fmtNum(it.done.score) + '점</span></span></div>'; }
       return '<div class="plan-item"><span class="pi-main">' + subjChip(it.subj) + ' <b>' + esc(sessTitle(it.sess)) + '</b>' + (it.round > 1 ? ' <span class="chip warn">' + it.round + '회독</span>' : '') + '</span>'
         + '<button class="btn sm" data-act="open" data-sid="' + it.sess.id + '" data-step="1">' + (i === 0 ? '오늘 시작' : '미리 열기') + '</button></div><div class="sub pi-scope">' + esc(sessScope(it.sess)) + '</div>';
     }).join('');
@@ -1164,7 +1174,7 @@ function renderResult() {
   }).join('');
   const tags = (arr, cls) => arr.length ? arr.map((w) => '<span class="tag ' + cls + '">' + esc(w) + '</span>').join('') : '<span class="sub">없음</span>';
   return '<div class="sess-bar no-print"><button class="btn sm" data-act="tab" data-tab="records">← 기록으로</button></div>'
-    + '<section class="card"><div class="hero">' + ringHTML(r.score, '점수 ' + r.score) + '<div class="grow stack"><div>' + subjChip(r.s) + ' <b>' + esc(sess ? sessTitle(sess) : r.session) + '</b> <span class="chip line">' + esc(TIER_LABEL[tierOf(r.score)]) + '</span></div>'
+    + '<section class="card"><div class="hero">' + ringHTML(r.score, '점수 ' + r.score) + '<div class="grow stack"><div>' + subjChip(r.s) + ' <b>' + esc(recTitle(r)) + '</b> <span class="chip line">' + esc(TIER_LABEL[tierOf(r.score)]) + '</span></div>'
     + '<div class="sub">' + esc(mdLabel(r.date)) + (r.minutes ? ' · ' + r.minutes + '분' : '') + ' · ' + r.items.length + '문항</div>' + (r.summary ? '<p>' + esc(r.summary) + '</p>' : '') + '</div></div>'
     + '<div class="row" style="margin-top:12px">' + (sess ? '<button class="btn" data-act="open" data-sid="' + sess.id + '" data-step="1">이 회차 다시 열기</button>' : '') + '<span class="grow"></span><button class="btn danger" data-act="delrec" data-id="' + esc(r.id) + '">기록 삭제</button></div></section>'
     + '<h2 style="margin:14px 2px 8px">문제별 결과</h2>' + items
@@ -1230,8 +1240,7 @@ function dayDetailHTML() {
   return '<ul class="hist">' + list.map((r) => histRowHTML(r)).join('') + '</ul>';
 }
 function histRowHTML(r) {
-  const sess = S.sById[r.session];
-  return '<li><span class="sc t' + tierOf(r.score) + '">' + fmtNum(r.score) + '</span><span class="grow"><b>' + esc(mdLabel(r.date)) + '</b> ' + subjChip(r.s) + ' ' + esc(sess ? sessTitle(sess) : r.session)
+  return '<li><span class="sc t' + tierOf(r.score) + '">' + fmtNum(r.score) + '</span><span class="grow"><b>' + esc(mdLabel(r.date)) + '</b> ' + subjChip(r.s) + ' ' + esc(recTitle(r))
     + '<br><span class="sub">' + (r.minutes ? r.minutes + '분 · ' : '') + esc((r.summary || (r.weak[0] ? '취약: ' + r.weak.slice(0, 2).join(', ') : '')).slice(0, 60)) + '</span></span><button class="btn sm" data-act="viewrec" data-id="' + esc(r.id) + '">보기</button></li>';
 }
 function historyHTML() {
@@ -1272,7 +1281,7 @@ function renderSettings() {
     + '<section class="card"><h2>내 기록 관리</h2><p class="note">기록과 분석노트는 <b>이 브라우저에만</b> 저장돼요(약 ' + Math.max(1, Math.round(bytes / 1024)) + 'KB · ' + S.data.records.length + '개). 브라우저 데이터를 지우면 사라지니 가끔 백업 파일로 내려받아 두세요.</p>'
     + '<div class="row" style="margin-top:10px"><button class="btn" data-act="export">백업 파일 내려받기</button><label class="btn" for="importFile" style="cursor:pointer">백업 파일 불러오기</label><input id="importFile" type="file" accept="application/json,.json" hidden><span class="grow"></span><button class="btn danger" data-act="reset">모든 기록 지우기</button></div></section>'
     + '<section class="card flat"><h3>문제 은행</h3><p class="note">법규 ' + cnt('law') + '문제 · 실무 ' + cnt('practice') + '문항 · 이론 ' + cnt('theory') + '문항 → 법규 ' + S.sessOf.law.length + '회차 + 실무 ' + S.sessOf.practice.length + '회차 + 이론 ' + S.sessOf.theory.length + '회차(각 100점). 법규·실무는 원본 학습 페이지에서, 이론은 content/daily-test/theory-basics.md 에서 자동으로 만들어져요(' + esc(S.bank.sourceHash) + ').</p>'
-    + '<p class="note" style="margin-top:6px">법규는 원문 배점(문제5·9·10번은 추정)을 바탕으로 5점 단위로 100점에 맞췄어요. 실무는 종합문제집의 주제형 문항이라 답안 분량에 따라 15~25점으로 나눴어요. 이론(기본개념)은 표준 교재 목차로 새로 쓴 초안이라 본인 교재와 다른 부분은 고쳐 쓰면 돼요.</p></section>';
+    + '<p class="note" style="margin-top:6px">법규는 원문 배점(문제5·9·10번은 추정)을 바탕으로 5점 단위로 100점에 맞췄어요. 실무는 문항이 쉽고 답이 짧아서, 모범답안 글자 수(공백 제외)로 배점을 정했어요 — 90자 미만 5점 · 90~149자 10점 · 150~209자 15점 · 210자 이상 20점. 이 배점의 합이 100점이 되게 문제집 순서대로 묶어서 한 회차에 10문항 안팎(5~15문항)이 들어가고, 합이 안 맞는 회차는 구간 경계에 걸친 한두 문항을 ±5점 조정했어요. 이론(기본개념)은 표준 교재 목차로 새로 쓴 초안이라 본인 교재와 다른 부분은 고쳐 쓰면 돼요.</p></section>';
 }
 
 // ==========================================================================
@@ -1372,8 +1381,7 @@ window.addEventListener('resize', () => {
 function showChartTip(id) {
   const tip = $('#chartTip'); if (!tip) return;
   const r = S.data.records.find((x) => x.id === id); if (!r) return;
-  const sess = S.sById[r.session];
-  tip.innerHTML = '<b>' + esc(mdLabel(r.date)) + '</b> ' + subjChip(r.s) + ' ' + esc(sess ? sessTitle(sess) : r.session) + ' <b>' + fmtNum(r.score) + '점</b> <button class="btn sm" data-act="viewrec" data-id="' + esc(r.id) + '">결과</button>';
+  tip.innerHTML = '<b>' + esc(mdLabel(r.date)) + '</b> ' + subjChip(r.s) + ' ' + esc(recTitle(r)) + ' <b>' + fmtNum(r.score) + '점</b> <button class="btn sm" data-act="viewrec" data-id="' + esc(r.id) + '">결과</button>';
 }
 function updateSettings(patch) {
   S.data.settings = normalizeSettings(Object.assign({}, S.data.settings, patch));
