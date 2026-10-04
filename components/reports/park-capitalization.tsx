@@ -21,6 +21,7 @@ import {
   parkCapSpatialTable,
   parkCapSemTable,
   parkCapNorthTable,
+  parkCapSignalTable,
   parkCapGwanggyoTable,
   type RegionKey,
   type StatTable,
@@ -407,6 +408,17 @@ export function ParkCapitalizationReport() {
         민감하지만 부호와 유의성은 달라지지 않는다. 지구 밖을 어떻게 다루느냐가 광교에서 가장 큰
         연구자 재량이다.
       </p>
+
+      <p className="mt-6 max-w-3xl text-[0.92rem] leading-relaxed">
+        지금까지의 점검을 한 표로 모으면 공원 신호가 약한 곳이 드러난다.
+      </p>
+      <Table spec={parkCapSignalTable} />
+      <div className="mt-5 rounded border border-border border-l-[3px] border-l-accent bg-muted/40 px-4 py-3.5 text-[0.88rem] leading-relaxed">
+        <strong>상관이 떨어지는 곳은 동탄2 북부와 일월이다.</strong> 북부는 통제 전 상관이 강한데
+        시장 단층을 풀고 나면 유의성이 10% 수준으로 약해지고 공간모형에서 사라진다. 일월은 반대로
+        통제 전 상관이 약하고(−0.13) 건축연령 등을 통제해야 계수가 드러난다.{" "}
+        <em className="not-italic text-accent">두 구역 모두 공원이 아니라 다른 변수가 가격을 먼저 가른다.</em>
+      </div>
 
       {/* 04 결론 */}
       <SectionTitle n="05">결론</SectionTitle>
