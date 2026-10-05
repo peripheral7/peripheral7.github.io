@@ -103,6 +103,7 @@ function Table({ spec }: { spec: StatTable }) {
                     className={`border-b border-border px-4 py-2.5 text-[0.72rem] font-semibold text-muted-foreground ${
                       i === 0 ? "text-left" : "text-right"
                     }`}
+                    style={i === 0 && spec.labelWidth ? { minWidth: spec.labelWidth } : undefined}
                   >
                     {h}
                   </th>
@@ -121,7 +122,8 @@ function Table({ spec }: { spec: StatTable }) {
                       row.strong || row.fit
                         ? "font-semibold text-foreground"
                         : "text-muted-foreground"
-                    }`}
+                    } ${spec.labelWidth ? "whitespace-nowrap" : ""}`}
+                    style={spec.labelWidth ? { minWidth: spec.labelWidth } : undefined}
                   >
                     {row.label}
                   </th>
@@ -355,7 +357,7 @@ export function ParkCapitalizationReport() {
           진할수록 점포가 몰려 있다. 분석 범위(택지지구와 공원 링) 밖은 흐리게 덮고, 상권과 학교는 범위
           안의 것만 그렸다. 동탄2 남부는 상권 덩어리가 대표공원에 붙어 있어 공원 거리가 상권 지수를
           설명하는 a경로가 뚜렷하다(부분 R² 0.479). 동탄2 북부는 상권이 공원과 무관하게 동탄역을 따라
-          깔려 있다(0.022). 갈색 점은 지하철역, 자홍 점은 대표공원 진출입로, 주황 삼각형은 초등학교다.
+          깔려 있다(0.003). 갈색 점은 지하철역, 자홍 점은 대표공원 진출입로, 주황 삼각형은 초등학교다.
           동탄2 북부의 보라색 점선은 동탄순환대로 — 상권 덩어리가 공원이 아니라 역에 붙어 있는 것이 보인다.
         </p>
         <MapLightbox maps={parkCapHexMaps} />
@@ -384,7 +386,7 @@ export function ParkCapitalizationReport() {
       <Table spec={parkCapSemTable} />
       <div className="mt-5 rounded border border-border border-l-[3px] border-l-accent bg-muted/40 px-4 py-3.5 text-[0.88rem] leading-relaxed">
         <strong>공간모형을 거쳐도 결과는 그대로다.</strong> λ는 어디서도 유의하지 않고, 공원 계수는
-        남부 −0.063, 북부 −0.060, 광교 −0.085, 일월 −0.092로 OLS와 거의 같으며 모두 1% 수준이다.{" "}
+        남부 −0.063, 북부 −0.057, 광교 −0.085, 일월 −0.092로 OLS와 거의 같으며 모두 1% 수준이다.{" "}
         <em className="not-italic text-accent">이전 판에서 북부·일월에 남던 자기상관은 대표공원 정의와 표본 범위를 바로잡자 사라졌다.</em>
       </div>
 
@@ -395,9 +397,9 @@ export function ParkCapitalizationReport() {
       </p>
       <Table spec={parkCapNorthTable} />
       <p className="mt-3 max-w-3xl text-[0.88rem] leading-relaxed text-muted-foreground">
-        구역 더미는 넣든 빼든 공원 계수를 −0.049~−0.062 안에 두어 결론을 바꾸지 않는다. 경계를
-        긋는 방식이 임의적일 수 있어 본 사양에는 넣지 않았다. 결과를 가르는 것은 대표공원의 정의다 —
-        여울공원만 쓰면 +0.045로 부호가 바뀐다.
+        구역 더미를 넣으면 공원 계수가 −0.034~−0.039로 줄고 유의성이 10% 수준 이하로 약해진다.
+        경계를 긋는 방식이 임의적일 수 있어 본 사양에는 넣지 않았지만, 북부의 결과는 이 처리와 대표공원의
+        정의에 함께 민감하다 — 여울공원만 쓰면 +0.026으로 유의하지 않다.
       </p>
 
       <p className="mt-6 max-w-3xl text-[0.92rem] leading-relaxed">
@@ -417,7 +419,7 @@ export function ParkCapitalizationReport() {
       <Table spec={parkCapSignalTable} />
       <div className="mt-5 rounded border border-border border-l-[3px] border-l-accent bg-muted/40 px-4 py-3.5 text-[0.88rem] leading-relaxed">
         <strong>정의에 가장 민감한 곳은 동탄2 북부와 동탄1이다.</strong> 북부는 대표공원에 청계중앙공원을
-        넣느냐에 부호가 갈리고, 동탄1은 경계 대신 진출입로로 재야 효과가 드러난다. 일월은 반대로 통제 전
+        넣느냐와 구역 처리에 유의성이 갈리고, 동탄1은 경계 대신 진출입로로 재야 효과가 드러난다. 일월은 반대로 통제 전
         상관이 거의 없고(+0.10) 건축연령을 통제해야 계수가 드러난다.{" "}
         <em className="not-italic text-accent">공원 효과는 무엇을 대표공원으로, 어디를 입구로 보느냐는 측정의 정의 위에 서 있다.</em>
       </div>
