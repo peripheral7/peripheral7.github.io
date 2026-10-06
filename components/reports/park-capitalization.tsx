@@ -25,6 +25,8 @@ import {
   parkCapGwanggyoTable,
   parkCapFormTable,
   parkCapStructureTable,
+  parkCapQuantileTable,
+  parkCapCommerceSelTable,
   type RegionKey,
   type StatTable,
 } from "@/content/reports/park-capitalization"
@@ -326,12 +328,13 @@ export function ParkCapitalizationReport() {
       <div className="mt-5 rounded border border-border border-l-[3px] border-l-accent bg-muted/40 px-4 py-3.5 text-[0.88rem] leading-relaxed">
         <strong>공원의 면적 순위와 효과의 크기가 어긋난다.</strong> 대표공원을 큰 순서로 놓으면
         광교 132.8 → 동탄2 남부 44.5 → 동탄1 36.8 → 동탄2 북부 29.4+21.3 → 일월 28.1ha인데, 탄력성은
-        가장 작은 일월(−0.093)이 가장 크고 광교(−0.087)가 그다음이다.
+        동탄2 남부(−0.113)가 가장 크고 광교(−0.085)·동탄1(−0.082)이 그다음이며, 가장 큰 광교와 가장
+        작은 일월(−0.075)의 차이는 크지 않다.
         <br />
         <br />
         <em className="not-italic text-accent">가격을 지배하는 요인도 구역마다 다르다.</em> 동탄2
         남부는 택지지구 밖 더미(오산시 단지)와 건축연령, 동탄2 북부와 광교는 대중교통 거리,
-        동탄1과 일월은 건축연령이 1위다. 대표공원은 어느 구역에서도 1~3위에 오르지 못한다 —
+        동탄1·광교·일월은 건축연령이 1위다. 대표공원은 남부에서만 3위에 들고 나머지에서는 4~6위다 —
         공원은 가격의 주된 결정요인이 아니라 그 위에 얹히는 몫이다.
       </div>
 
@@ -354,9 +357,9 @@ export function ParkCapitalizationReport() {
         </p>
         <p className="mt-2 max-w-3xl text-[0.9rem] leading-relaxed text-muted-foreground">
           같은 도판에 생활업종 점포 밀도를 육각형으로 얹고 분석 단지를 사각점으로 함께 찍었다. 파랑이
-          진할수록 점포가 몰려 있다. 분석 범위(택지지구와 공원 링) 밖은 흐리게 덮고, 상권과 학교는 범위
+          진할수록 점포가 몰려 있다. 분석 범위(대표공원 경계 2km) 밖은 흐리게 덮고, 상권과 학교는 범위
           안의 것만 그렸다. 동탄2 남부는 상권 덩어리가 대표공원에 붙어 있어 공원 거리가 상권 지수를
-          설명하는 a경로가 뚜렷하다(부분 R² 0.479). 동탄2 북부는 상권이 공원과 무관하게 동탄역을 따라
+          설명하는 a경로가 뚜렷하다(부분 R² 0.418). 동탄2 북부는 상권이 공원과 무관하게 동탄역을 따라
           깔려 있다(0.003). 갈색 점은 지하철역, 자홍 점은 대표공원 진출입로, 주황 삼각형은 초등학교다.
           동탄2 북부의 보라색 점선은 동탄순환대로 — 상권 덩어리가 공원이 아니라 역에 붙어 있는 것이 보인다.
         </p>
@@ -365,14 +368,14 @@ export function ParkCapitalizationReport() {
 
       <Table spec={parkCapMediationTable} />
       <div className="mt-5 rounded border border-border border-l-[3px] border-l-accent bg-muted/40 px-4 py-3.5 text-[0.88rem] leading-relaxed">
-        <strong>매개는 동탄2 남부와 동탄1에서만 성립한다.</strong> Baron &amp; Kenny의 세 조건이
+        <strong>매개는 동탄1과 일월에서 성립한다.</strong> Baron &amp; Kenny의 세 조건이
         서는 곳은 다섯 중 둘이다 —{" "}
-        <em className="not-italic text-accent">동탄2 남부는 총효과 −0.134의 54%가, 동탄1은
-        −0.146의 44%가 상권을 경유하고, 상권을 통제해도 직접효과가 유의하게 남아 부분매개다.</em>{" "}
-        남부는 상권이 작아 호수공원이 상권의 위치를 정했고, 동탄1은 센트럴파크와 중심상업지구가 한 축으로
-        계획되었다. 나머지 세 구역은 끊기는 고리가 다르다 — 광교는 상권이 가격을 설명하지 못하고(b),
-        동탄2 북부와 일월은 상권이 공원이 아니라 역·구도심을 따라 생겼다(a). 공원이 상권을 만든다는
-        연결고리는 공원이 생활권 안에 있거나 상업 축과 함께 계획될 때 선다.
+        <em className="not-italic text-accent">동탄1은 총효과 −0.146의 44%가, 일월은 −0.118의 37%가 상권을
+        경유하고, 상권을 통제해도 직접효과가 유의하게 남아 부분매개다.</em>{" "}
+        동탄1은 센트럴파크와 중심상업지구가 한 축으로 계획되었고, 일월은 구도심 상권의 일부가 공원 둘레에
+        붙어 있다. 나머지 세 구역은 끊기는 고리가 다르다 — 남부는 호수공원이 상권을 끌어오지만 그 상권이
+        가격을 설명하지 못하고(b), 북부는 상권이 역을 따라 생겨 공원과 무관하며(a), 광교는 둘 다 끊긴다.
+        공원이 상권을 거쳐 가격을 올리는 연결고리는 공원과 상권이 실제로 겹칠 때만 선다.
       </div>
       <p className="mt-6 max-w-3xl text-[0.92rem] leading-relaxed">
         가까운 단지끼리 모형이 설명하지 못한 부분을 공유하면 표준오차가 실제보다 작아진다. 직접효과
@@ -380,14 +383,15 @@ export function ParkCapitalizationReport() {
       </p>
       <Table spec={parkCapSpatialTable} />
       <p className="mt-6 max-w-3xl text-[0.92rem] leading-relaxed">
-        잔차의 자기상관은 동탄2 남부의 k=3에서만 10% 수준으로 남는다. 확인 삼아 네 구역을
-        공간오차모형(SEM)으로 다시 추정했다.
+        잔차의 자기상관은 일월에서만 남는다. 일월을 공간오차모형(SEM)으로 다시 추정하고, 확인 삼아
+        나머지 세 구역도 함께 추정했다.
       </p>
       <Table spec={parkCapSemTable} />
       <div className="mt-5 rounded border border-border border-l-[3px] border-l-accent bg-muted/40 px-4 py-3.5 text-[0.88rem] leading-relaxed">
-        <strong>공간모형을 거쳐도 결과는 그대로다.</strong> λ는 어디서도 유의하지 않고, 공원 계수는
-        남부 −0.063, 북부 −0.057, 광교 −0.085, 일월 −0.092로 OLS와 거의 같으며 모두 1% 수준이다.{" "}
-        <em className="not-italic text-accent">이전 판에서 북부·일월에 남던 자기상관은 대표공원 정의와 표본 범위를 바로잡자 사라졌다.</em>
+        <strong>일월만 약해지고 나머지는 그대로다.</strong> 일월은 공원 계수가 −0.058~−0.077로 조금 작아지고
+        유의 수준이 5~10%로 내려간다. 남부(−0.110), 북부(−0.057), 광교(−0.083)는 OLS와 거의 같고 모두
+        유의하다.{" "}
+        <em className="not-italic text-accent">반경을 2km로 넓히며 들어온 일월 기성시가지 단지들이 서로 닮은 잔차를 공유한다.</em>
       </div>
 
       <p className="mt-6 max-w-3xl text-[0.92rem] leading-relaxed">
@@ -403,12 +407,12 @@ export function ParkCapitalizationReport() {
       </p>
 
       <p className="mt-6 max-w-3xl text-[0.92rem] leading-relaxed">
-        광교는 표본의 62%가 택지지구 밖이다. 지구 안(29개)과 밖(48개)의 가격 단층을 다른 구역과 같은
+        광교는 표본의 68%가 택지지구 밖이다. 지구 안(23개)과 밖(48개)의 가격 단층을 다른 구역과 같은
         더미 하나로 흡수하는데, 그 처리에 따라 계수가 얼마나 움직이는지 확인한다.
       </p>
       <Table spec={parkCapGwanggyoTable} />
       <p className="mt-3 max-w-3xl text-[0.88rem] leading-relaxed text-muted-foreground">
-        더미를 빼면 계수가 −0.100, 법정동 더미 아홉 개로 바꾸면 −0.162로 커진다. 크기는 처리에
+        더미를 빼면 계수가 −0.115, 법정동 더미 아홉 개로 바꾸면 −0.203으로 커진다. 크기는 처리에
         민감하지만 부호와 유의성은 달라지지 않는다. 지구 밖을 어떻게 다루느냐가 광교에서 가장 큰
         연구자 재량이다.
       </p>
@@ -418,10 +422,10 @@ export function ParkCapitalizationReport() {
       </p>
       <Table spec={parkCapSignalTable} />
       <div className="mt-5 rounded border border-border border-l-[3px] border-l-accent bg-muted/40 px-4 py-3.5 text-[0.88rem] leading-relaxed">
-        <strong>정의에 가장 민감한 곳은 동탄2 북부와 동탄1이다.</strong> 북부는 대표공원에 청계중앙공원을
-        넣느냐와 구역 처리에 유의성이 갈리고, 동탄1은 경계 대신 진출입로로 재야 효과가 드러난다. 일월은 반대로 통제 전
-        상관이 거의 없고(+0.10) 건축연령을 통제해야 계수가 드러난다.{" "}
-        <em className="not-italic text-accent">공원 효과는 무엇을 대표공원으로, 어디를 입구로 보느냐는 측정의 정의 위에 서 있다.</em>
+        <strong>정의와 표본에 가장 민감한 곳은 동탄2 북부와 남부다.</strong> 북부는 대표공원에 청계중앙공원을
+        넣느냐와 구역 처리에 유의성이 갈리고, 남부는 2km 안 29개 단지로 표본이 가장 작다. 동탄1은 경계 대신
+        진출입로로 재야 효과가 드러나고, 일월은 통제 전 상관이 약하며(−0.13) 공간모형에서 약해진다.{" "}
+        <em className="not-italic text-accent">공원 효과는 무엇을 대표공원으로, 어디를 입구로, 어디까지를 표본으로 보느냐는 측정의 정의 위에 서 있다.</em>
       </div>
 
       <p className="mt-6 max-w-3xl text-[0.92rem] leading-relaxed">
@@ -429,6 +433,18 @@ export function ParkCapitalizationReport() {
         거리만 로그로 둔 선형-로그를 썼다.
       </p>
       <Table spec={parkCapFormTable} />
+
+      <p className="mt-6 max-w-3xl text-[0.92rem] leading-relaxed">
+        제안서의 세 번째 단계였던 분위회귀로, 같은 공원 거리가 저가 단지와 고가 단지에서 다르게
+        자본화되는지 본다.
+      </p>
+      <Table spec={parkCapQuantileTable} />
+
+      <p className="mt-6 max-w-3xl text-[0.92rem] leading-relaxed">
+        상권 변수를 어떻게 만들지에 따라 매개 결과가 달라질 수 있다. 제안서의 '반경 500m 점포 수'를 포함한
+        여섯 후보를 같은 사양에 넣어 비교했다.
+      </p>
+      <Table spec={parkCapCommerceSelTable} />
 
       {/* 04 결론 */}
       <SectionTitle n="05">결론</SectionTitle>
