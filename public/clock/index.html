@@ -1,0 +1,431 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="robots" content="noindex">
+<title>Clock</title>
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Ccircle cx='16' cy='16' r='14' fill='%23fff' stroke='%23000' stroke-width='3'/%3E%3Cpath d='M16 7v9l6 4' fill='none' stroke='%23000' stroke-width='3'/%3E%3C/svg%3E">
+<!--
+  시험용 시계 — 아날로그 시계 + 아래 전자시계 + 공지. 흑백만 쓴다. 파일 하나로 끝나며(외부 글꼴·라이브러리 없음) 저장해서 로컬에서 열어도 된다.
+  PPT 슬라이드에 웹 페이지로 넣거나 브라우저를 전체 화면(F11 또는 F 키)으로 띄워 쓴다.
+
+  ■ 공지 바꾸는 법 (3가지)
+    1) 화면에서: E 키 또는 마우스를 움직이면 아래쪽에 나타나는 "Edit notice" 버튼 → 글을 쓰고 Save.
+       "Copy link"를 누르면 그 공지가 들어간 주소가 복사된다 — PPT의 웹 페이지 주소에 붙여 넣으면 슬라이드마다 다른 공지를 쓸 수 있다.
+    2) 주소로:   …/clock/?notice=첫째 줄\n둘째 줄\n*셋째 줄      (줄바꿈은 \n 또는 %0A, 비워 두면 공지 없이 시계만: ?notice=)
+    3) 이 파일에서: 아래 스크립트 맨 위 DEFAULT_NOTICE 를 고친다(주소에 notice 가 없을 때 보이는 기본 공지).
+  ■ 그 밖의 주소 옵션:  ?theme=dark (검은 바탕·흰 글자)   ?fmt=12 (오전/오후 12시간제, 기본은 24시간제)   ?tz=Asia/Seoul 또는 ?tz=+9 (표시 시간대, 기본은 이 기기의 시간대)
+  ■ 키:  E 공지 편집 · D 흰/검은 바탕 · F 전체 화면
+  ■ 시간 정확도: 화면은 매 초 정각에 맞춰 "지금 시각"으로 다시 그린다(누적 계산 없음 → 지연·멈춤이 쌓이지 않는다).
+    접속한 서버(GitHub Pages)의 응답 시각과도 비교해, 이 기기 시계가 2초 이상 틀렸다고 확인되면 서버 시각 기준으로 바로잡는다.
+-->
+<style>
+*{box-sizing:border-box}
+html,body{margin:0;height:100%;overflow:hidden}
+html{background:#fff;color:#000}
+html.dark{background:#000;color:#fff}
+body{position:relative;font-family:"Helvetica Neue",Helvetica,Arial,"Segoe UI","Apple SD Gothic Neo","Malgun Gothic","Noto Sans KR",sans-serif;-webkit-font-smoothing:antialiased}
+body.idle{cursor:none}
+[hidden]{display:none !important}
+::selection{background:#000;color:#fff}
+html.dark ::selection{background:#fff;color:#000}
+
+/* 무대: 16:9(넓은 화면) 또는 세로로 쌓는 배치의 논리 크기로 그린 뒤 화면에 맞춰 통째로 확대·축소한다 */
+#stage{position:absolute;left:0;top:0;-webkit-transform-origin:0 0;-ms-transform-origin:0 0;transform-origin:0 0}
+
+/* 아날로그 시계 */
+#analog{position:absolute;display:block;overflow:visible}
+#analog .ring{fill:none;stroke:currentColor}
+#analog line{stroke:currentColor}
+#analog text{fill:currentColor;font-weight:700;font-family:inherit}
+#analog .halo{stroke:#fff}
+html.dark #analog .halo{stroke:#000}
+#analog .cap{fill:currentColor}
+#analog .pin{fill:#fff}
+html.dark #analog .pin{fill:#000}
+
+/* 전자시계: 숫자마다 폭을 고정해 초가 바뀌어도 글자가 흔들리지 않게 한다 */
+#digital{position:absolute;text-align:center;white-space:nowrap;font-weight:700;line-height:1}
+#digital .d{display:inline-block;width:.6em;text-align:center}
+#digital .d.z{visibility:hidden}
+#digital .c{display:inline-block;width:.32em;text-align:center;position:relative;top:-.06em}
+#digital .ap{display:inline-block;margin-left:.22em;font-size:.3em;font-weight:700;letter-spacing:.04em;vertical-align:baseline}
+
+/* 공지 */
+#notice{position:absolute;border-left:10px solid currentColor;padding-left:40px}
+#noticeText{font-weight:500;line-height:1.3}
+#noticeText div + div{margin-top:.26em}
+#noticeText .em{font-weight:700}
+
+/* 도구줄(마우스를 움직이면 잠깐 나타난다) */
+#ui{position:fixed;right:14px;bottom:12px;left:14px;display:block;text-align:right;font-size:14px;opacity:0;pointer-events:none;-webkit-transition:opacity .25s;transition:opacity .25s}
+body.ui #ui{opacity:1;pointer-events:auto}
+#status{display:inline-block;margin-right:14px;vertical-align:middle;font-size:13px}
+button{font:inherit;color:inherit;background:transparent;border:2px solid currentColor;border-radius:0;padding:6px 14px;margin-left:6px;cursor:pointer;-webkit-appearance:none;appearance:none}
+button:hover{background:#000;color:#fff}
+html.dark button:hover{background:#fff;color:#000}
+button:focus,textarea:focus{outline:2px solid currentColor;outline-offset:2px}
+
+/* 공지 편집 창 */
+#edWrap{position:fixed;left:0;top:0;right:0;bottom:0;z-index:5;background:rgba(255,255,255,.92)}
+html.dark #edWrap{background:rgba(0,0,0,.92)}
+#editor{position:absolute;left:50%;top:50%;width:720px;max-width:92vw;-webkit-transform:translate(-50%,-50%);-ms-transform:translate(-50%,-50%);transform:translate(-50%,-50%);padding:22px 24px 20px;border:3px solid currentColor;background:#fff}
+html.dark #editor{background:#000}
+#edTitle{margin:0 0 10px;font-size:13px;font-weight:700;letter-spacing:.14em;text-transform:uppercase}
+#edText{display:block;width:100%;height:190px;padding:10px 12px;font:inherit;font-size:20px;line-height:1.35;color:inherit;background:transparent;border:2px solid currentColor;border-radius:0;resize:vertical}
+#edHint{margin:8px 0 14px;font-size:13px}
+#edRow button:first-child{margin-left:0}
+</style>
+</head>
+<body>
+<noscript>JavaScript is required.</noscript>
+
+<div id="stage">
+  <svg id="analog" viewBox="-300 -300 600 600" role="img" aria-label="Analog clock"></svg>
+  <div id="digital" aria-label="Digital clock"></div>
+  <div id="notice"><div id="noticeText"></div></div>
+</div>
+
+<div id="ui">
+  <span id="status"></span>
+  <button type="button" id="btnEdit" title="Edit notice (E)">Edit notice</button>
+  <button type="button" id="btnTheme" title="Black / white (D)">Black / white</button>
+  <button type="button" id="btnFull" title="Full screen (F)">Full screen</button>
+</div>
+
+<div id="edWrap" hidden>
+  <div id="editor" role="dialog" aria-modal="true" aria-labelledby="edTitle">
+    <div id="edTitle">Notice</div>
+    <textarea id="edText" spellcheck="false"></textarea>
+    <div id="edHint">Line breaks are kept. Leave empty to show the clock only. Ctrl+Enter = Save, Esc = Cancel.</div>
+    <div id="edRow">
+      <button type="button" id="edSave">Save</button><button type="button" id="edCancel">Cancel</button><button type="button" id="edDefault">Use default</button><button type="button" id="edCopy">Copy link</button>
+    </div>
+  </div>
+</div>
+
+<script>
+(function () {
+  'use strict';
+
+  /* ───────── 기본 공지: 주소에 notice 가 없을 때 이 글이 보인다. 줄바꿈은 \n ───────── */
+  var DEFAULT_NOTICE = 'Please put all belongings\nat the front or back of the classroom\n*phone must be turned off';
+
+  var SVGNS = 'http://www.w3.org/2000/svg';
+  var root = document.documentElement;
+  function $(id) { return document.getElementById(id); }
+  function mk(name, attrs, parent) {
+    var e = document.createElementNS(SVGNS, name), k;
+    for (k in attrs) { if (attrs.hasOwnProperty(k)) e.setAttribute(k, attrs[k]); }
+    if (parent) parent.appendChild(e);
+    return e;
+  }
+  function r2(n) { return Math.round(n * 100) / 100; }
+  function setTransform(el, v) { el.style.webkitTransform = v; el.style.msTransform = v; el.style.transform = v; }
+
+  /* ───────── 주소 옵션 ───────── */
+  function readParams() {
+    var out = {}, q = location.search.replace(/^\?/, ''), parts, i, kv, k, v;
+    if (!q) return out;
+    parts = q.split('&');
+    for (i = 0; i < parts.length; i++) {
+      kv = parts[i].split('=');
+      try {
+        k = decodeURIComponent(kv[0].replace(/\+/g, ' '));
+        v = decodeURIComponent(kv.slice(1).join('=').replace(/\+/g, ' '));
+      } catch (e) { continue; }
+      out[k] = v;
+    }
+    return out;
+  }
+  var params = readParams();
+  var state = {
+    dark: params.theme === 'dark' || params.theme === 'black',
+    h12: params.fmt === '12',
+    tz: params.tz || '',
+    notice: Object.prototype.hasOwnProperty.call(params, 'notice') ? params.notice.replace(/\r\n?/g, '\n').replace(/\\n/g, '\n') : DEFAULT_NOTICE
+  };
+
+  /* ───────── 시간대 ───────── */
+  var tzInfo = { mode: 'local' };
+  (function () {
+    var tz = state.tz.replace(/^\s+|\s+$/g, ''), m, f;
+    if (!tz) return;
+    m = /^(?:UTC|GMT)?\s*([+-]?)(\d{1,2})(?::?(\d{2}))?$/i.exec(tz);
+    if (m) {
+      tzInfo = { mode: 'offset', ms: (parseInt(m[2], 10) * 60 + (m[3] ? parseInt(m[3], 10) : 0)) * (m[1] === '-' ? -60000 : 60000) };
+      return;
+    }
+    try {
+      f = new Intl.DateTimeFormat('en-GB', { timeZone: tz, hour12: false, hour: 'numeric', minute: 'numeric', second: 'numeric' });
+      if (typeof f.formatToParts !== 'function') throw new Error('formatToParts');
+      tzInfo = { mode: 'intl', fmt: f };
+    } catch (e) { tzInfo = { mode: 'local', bad: tz }; }
+  })();
+  function timeParts(t) {
+    var d, ps, o = {}, i;
+    if (tzInfo.mode === 'offset') { d = new Date(t + tzInfo.ms); return { h: d.getUTCHours(), m: d.getUTCMinutes(), s: d.getUTCSeconds() }; }
+    if (tzInfo.mode === 'intl') {
+      ps = tzInfo.fmt.formatToParts(new Date(t));
+      for (i = 0; i < ps.length; i++) o[ps[i].type] = ps[i].value;
+      return { h: parseInt(o.hour, 10) % 24, m: parseInt(o.minute, 10), s: parseInt(o.second, 10) };
+    }
+    d = new Date(t);
+    return { h: d.getHours(), m: d.getMinutes(), s: d.getSeconds() };
+  }
+
+  /* ───────── 아날로그 시계 그리기 ───────── */
+  var gH, gM, gS;
+  (function buildAnalog() {
+    var svg = $('analog'), i, a, hour, r0, r1, t, b;
+    mk('circle', { 'class': 'ring', r: 288, 'stroke-width': 12 }, svg);
+    for (i = 0; i < 60; i++) {                                   // 눈금: 5분마다 굵고 길게
+      hour = i % 5 === 0; a = i * Math.PI / 30; r1 = 266; r0 = r1 - (hour ? 40 : 15);
+      mk('line', { x1: r2(Math.sin(a) * r0), y1: r2(-Math.cos(a) * r0), x2: r2(Math.sin(a) * r1), y2: r2(-Math.cos(a) * r1), 'stroke-width': hour ? 10 : 3 }, svg);
+    }
+    for (i = 1; i <= 12; i++) {                                  // 숫자 1~12
+      b = i * Math.PI / 6;
+      t = mk('text', { x: r2(Math.sin(b) * 192), y: r2(-Math.cos(b) * 192), 'text-anchor': 'middle', dy: '.35em', 'font-size': 64 }, svg);
+      t.textContent = i;
+    }
+    function hand(y1, y2, w, halo) {                             // 바늘: 겹치는 숫자·눈금이 가리지 않게 배경색 테두리를 한 겹 깐다
+      var g = mk('g', { transform: 'rotate(0)' }, svg);
+      mk('line', { 'class': 'halo', x1: 0, y1: y1, x2: 0, y2: y2, 'stroke-width': w + halo }, g);
+      mk('line', { x1: 0, y1: y1, x2: 0, y2: y2, 'stroke-width': w }, g);
+      return g;
+    }
+    gH = hand(24, -140, 22, 12);
+    gM = hand(30, -226, 13, 10);
+    gS = hand(62, -252, 4, 8);
+    mk('circle', { 'class': 'cap', r: 18 }, svg);
+    mk('circle', { 'class': 'pin', r: 6 }, svg);
+  })();
+
+  /* ───────── 매 초 그리기 ───────── */
+  var offset = 0;                                                // 서버 시각 − 기기 시각(ms). 기기 시계가 틀렸다고 확인될 때만 0이 아니다
+  function now() { return Date.now() + offset; }
+  var lastKey = '';
+  function dig(ch, hid) { return '<span class="d' + (hid ? ' z' : '') + '">' + ch + '</span>'; }
+  function render(t) {
+    var p = timeParts(t), h = p.h, m = p.m, s = p.s, ap = '', hs, html;
+    if (state.h12) { ap = h >= 12 ? 'PM' : 'AM'; h = h % 12; if (h === 0) h = 12; }
+    var key = h + ':' + m + ':' + s + ap;
+    if (key === lastKey) return;
+    lastKey = key;
+    gH.setAttribute('transform', 'rotate(' + r2(((p.h % 12) + m / 60 + s / 3600) * 30) + ')');
+    gM.setAttribute('transform', 'rotate(' + r2((m + s / 60) * 6) + ')');
+    gS.setAttribute('transform', 'rotate(' + (s * 6) + ')');
+    hs = state.h12 && h < 10 ? dig('0', true) + dig(h) : dig(Math.floor(h / 10)) + dig(h % 10);
+    html = hs + '<span class="c">:</span>' + dig(Math.floor(m / 10)) + dig(m % 10) + '<span class="c">:</span>' + dig(Math.floor(s / 10)) + dig(s % 10);
+    if (ap) html += '<span class="ap">' + ap + '</span>';
+    $('digital').innerHTML = html;
+  }
+  var timer;
+  function tick() {
+    var t = now();
+    render(t);
+    clearTimeout(timer);
+    timer = setTimeout(tick, 1000 - (t % 1000) + 8);             // 다음 정각 초 직후에 다시
+  }
+
+  /* ───────── 배치: 화면 비율에 맞춰 무대 크기·요소 위치를 정한다 ───────── */
+  function hasNotice() { return state.notice.replace(/\s+/g, '') !== ''; }
+  function setNotice(text) {
+    var el = $('noticeText'), lines, i, d;
+    state.notice = text;
+    while (el.firstChild) el.removeChild(el.firstChild);
+    lines = text.replace(/\r\n?/g, '\n').replace(/^\n+|\n+$/g, '').split('\n');
+    for (i = 0; i < lines.length; i++) {
+      d = document.createElement('div');
+      d.className = /^\s*\*/.test(lines[i]) ? 'em' : '';
+      d.textContent = lines[i] === '' ? ' ' : lines[i];
+      el.appendChild(d);
+    }
+    layout();
+  }
+  function fitNotice(boxW, boxH) {                               // 상자에 들어가는 가장 큰 글자 크기. 나눠 쓴 줄은 그대로 두고, 너무 길면 줄바꿈을 허용한다
+    var el = $('noticeText'), MAX = 120, MIN = 30, w, h, fs, lo, hi, mid;
+    el.style.display = 'inline-block'; el.style.width = 'auto'; el.style.whiteSpace = 'pre'; el.style.fontSize = '100px';
+    w = el.offsetWidth; h = el.offsetHeight;
+    if (!w || !h) return 0;
+    fs = Math.floor(Math.min(boxW / w, boxH / h) * 98);
+    if (fs >= MIN) { el.style.fontSize = Math.min(fs, MAX) + 'px'; return el.offsetHeight; }
+    el.style.display = 'block'; el.style.width = boxW + 'px'; el.style.whiteSpace = 'pre-wrap';
+    lo = 12; hi = MAX;
+    while (lo < hi) { mid = Math.ceil((lo + hi) / 2); el.style.fontSize = mid + 'px'; if (el.offsetHeight <= boxH) lo = mid; else hi = mid - 1; }
+    el.style.fontSize = lo + 'px';
+    return el.offsetHeight;
+  }
+  function layout() {
+    var vw = window.innerWidth || root.clientWidth, vh = window.innerHeight || root.clientHeight, aspect = vw / vh;
+    var hasN = hasNotice(), stage = $('stage'), svg = $('analog'), dg = $('digital'), nt = $('notice');
+    var W, H, D, fs, gap, dh, ty, colW, cx, nx, nw, ny, nh, th = 0, H0, M = 40, s;
+    if (aspect >= 1.45) {                                        // 넓은 화면(16:9 등): 왼쪽에 시계+전자시계, 오른쪽에 공지
+      W = 1600; H = 900;
+      colW = hasN ? 740 : W; D = 530; fs = 145; gap = 30; dh = fs;
+      ty = Math.round((H - (D + gap + dh)) / 2); cx = Math.round((colW - D) / 2);
+      nx = 780; nw = W - nx - 50; ny = 100; nh = H - 200;
+    } else {                                                     // 4:3·세로 화면: 시계, 전자시계, 공지를 위에서 아래로(남는 높이는 위아래 여백으로)
+      W = 1000; H0 = Math.max(640, Math.min(2200, Math.round(W / aspect)));
+      colW = W; gap = 24; ty = M; nx = M; nw = W - 2 * M;
+      fs = Math.min(Math.round(W * 0.16), Math.round(H0 * 0.13)); dh = fs;
+      nh = hasN ? Math.min(420, Math.max(170, Math.round(H0 * 0.27))) : 0;
+      D = Math.max(200, Math.min(W - 2 * M, H0 - 2 * M - dh - gap - nh - (hasN ? 30 : 0)));
+      cx = Math.round((W - D) / 2); ny = ty + D + gap + dh + 30;
+    }
+    nt.style.display = hasN ? 'block' : 'none';
+    if (hasN) th = fitNotice(nw - 50, nh);
+    if (aspect < 1.45) H = ny + (hasN ? th : -30) + M;           // 세로 배치의 무대 높이 = 실제 내용 높이
+    s = Math.min(vw / W, vh / H);
+    stage.style.width = W + 'px'; stage.style.height = H + 'px';
+    stage.style.left = Math.round((vw - W * s) / 2) + 'px'; stage.style.top = Math.round((vh - H * s) / 2) + 'px';
+    setTransform(stage, 'scale(' + s + ')');
+    svg.setAttribute('width', D); svg.setAttribute('height', D);
+    svg.style.left = cx + 'px'; svg.style.top = ty + 'px';
+    dg.style.left = '0px'; dg.style.width = colW + 'px'; dg.style.top = (ty + D + gap) + 'px'; dg.style.fontSize = fs + 'px'; dg.style.height = dh + 'px';
+    if (hasN) {
+      nt.style.left = nx + 'px'; nt.style.width = nw + 'px'; nt.style.height = th + 'px';
+      nt.style.top = (aspect >= 1.45 ? Math.round(ny + (nh - th) / 2) : ny) + 'px';
+    }
+  }
+
+  /* ───────── 주소·표시 상태 ───────── */
+  function baseUrl() { return location.href.split('#')[0].split('?')[0]; }
+  function buildLink(noticeText) {
+    var q = [];
+    if (noticeText !== DEFAULT_NOTICE) q.push('notice=' + encodeURIComponent(noticeText));
+    if (state.dark) q.push('theme=dark');
+    if (state.h12) q.push('fmt=12');
+    if (state.tz) q.push('tz=' + encodeURIComponent(state.tz));
+    return baseUrl() + (q.length ? '?' + q.join('&') : '');
+  }
+  function syncUrl() { try { if (window.history && history.replaceState) history.replaceState(null, '', buildLink(state.notice)); } catch (e) { /* file:// 등에서는 건너뜀 */ } }
+  function applyTheme() { if (state.dark) root.classList.add('dark'); else root.classList.remove('dark'); }
+  function toggleTheme() { state.dark = !state.dark; applyTheme(); syncUrl(); }
+  function toggleFull() {
+    var d = document, e = root, f = d.fullscreenElement || d.webkitFullscreenElement || d.msFullscreenElement, fn;
+    try {
+      if (f) { fn = d.exitFullscreen || d.webkitExitFullscreen || d.msExitFullscreen; if (fn) fn.call(d); }
+      else { fn = e.requestFullscreen || e.webkitRequestFullscreen || e.msRequestFullscreen; if (fn) fn.call(e); }
+    } catch (err) { /* 삽입된 화면에서는 전체 화면이 막힐 수 있다 */ }
+  }
+
+  /* ───────── 공지 편집 창 ───────── */
+  function editorOpen() { return !$('edWrap').hidden; }
+  function openEditor() {
+    $('edText').value = state.notice;
+    $('edWrap').hidden = false;
+    $('edText').focus();
+  }
+  function closeEditor() { $('edWrap').hidden = true; }
+  function saveEditor() { setNotice($('edText').value); syncUrl(); closeEditor(); }
+  function copyText(text, done) {
+    function fallback() {
+      var ta = document.createElement('textarea');
+      ta.value = text; ta.style.cssText = 'position:fixed;left:-999px;top:0;opacity:0';
+      document.body.appendChild(ta); ta.select();
+      try { document.execCommand('copy'); done(true); } catch (e) { window.prompt('Copy this link:', text); done(false); }
+      document.body.removeChild(ta);
+    }
+    if (navigator.clipboard && navigator.clipboard.writeText) navigator.clipboard.writeText(text).then(function () { done(true); }, fallback);
+    else fallback();
+  }
+
+  /* ───────── 도구줄: 마우스·터치·키 입력이 있으면 3초간 보인다 ───────── */
+  var uiTimer;
+  function showUi() {
+    document.body.classList.add('ui'); document.body.classList.remove('idle');
+    clearTimeout(uiTimer);
+    uiTimer = setTimeout(function () { document.body.classList.remove('ui'); if (!editorOpen()) document.body.classList.add('idle'); }, 3000);
+  }
+
+  /* ───────── 서버 시각과 비교(기기 시계가 크게 틀린 경우만 바로잡는다) ─────────
+     같은 출처에 HEAD 요청을 보내 응답의 Date 헤더(초 단위)를 읽는다. 표본 5개가 서로 어긋나지 않을 때만 믿고,
+     기기 시계와 2초 이상 차이 날 때만 적용한다 — 오차가 ±1초쯤인 측정으로 이미 맞는 시계를 오히려 흐트러뜨리지 않기 위해서다. */
+  function setStatus(txt) { $('status').textContent = txt; }
+  function sample(cb) {
+    var xhr, t0 = Date.now();
+    try {
+      xhr = new XMLHttpRequest();
+      xhr.open('HEAD', baseUrl() + '?_=' + t0 + Math.floor(Math.random() * 1e6), true);
+      xhr.timeout = 6000;
+      xhr.onreadystatechange = function () {
+        var t1, d, s;
+        if (xhr.readyState !== 4) return;
+        t1 = Date.now();
+        d = xhr.status >= 200 && xhr.status < 400 ? xhr.getResponseHeader('Date') : null;
+        s = d ? Date.parse(d) : NaN;
+        if (isNaN(s)) { cb(null); return; }
+        cb({ off: s + 500 - (t0 + t1) / 2, rtt: t1 - t0 });   // Date 는 초 단위로 잘려 있으므로 +0.5초, 응답 시각은 왕복의 한가운데로 본다
+      };
+      xhr.ontimeout = function () { cb(null); };
+      xhr.send();
+    } catch (e) { cb(null); }
+  }
+  function resync() {
+    var got = [], n = 0;
+    function next() {
+      if (n++ >= 5) { finish(); return; }
+      sample(function (s) { if (s && s.rtt < 3000) got.push(s.off); setTimeout(next, 700); });
+    }
+    function finish() {
+      var med, spread;
+      got.sort(function (a, b) { return a - b; });
+      if (got.length < 3) { setStatus('Using device clock (server time unavailable)'); return; }
+      spread = got[got.length - 1] - got[0];
+      med = got[Math.floor(got.length / 2)];
+      if (spread > 1500) { setStatus('Using device clock (server time check inconclusive)'); return; }
+      if (Math.abs(med) >= 2000) {
+        offset = Math.round(med); lastKey = '';
+        setStatus('Device clock was ' + Math.abs(med / 1000).toFixed(0) + ' s ' + (med < 0 ? 'fast' : 'slow') + ' — corrected with server time');
+        tick();
+      } else { offset = 0; setStatus('Time verified against server (within about 1 s)'); }
+    }
+    next();
+  }
+
+  /* ───────── 시작 ───────── */
+  applyTheme();
+  if (tzInfo.bad) setStatus('Unknown time zone "' + tzInfo.bad + '" — using device time zone');
+  setNotice(state.notice);
+  tick();
+  if (!tzInfo.bad) setStatus('Using device clock');
+  resync();
+  setInterval(resync, 10 * 60 * 1000);
+
+  window.addEventListener('resize', layout);
+  window.addEventListener('orientationchange', layout);
+  document.addEventListener('visibilitychange', function () { if (!document.hidden) { lastKey = ''; tick(); } });
+  window.addEventListener('focus', function () { lastKey = ''; tick(); });
+  document.addEventListener('mousemove', showUi);
+  document.addEventListener('mousedown', showUi);
+  document.addEventListener('touchstart', showUi);
+  document.addEventListener('keydown', function (e) {
+    var k = (e.key || '').toLowerCase();
+    showUi();
+    if (editorOpen()) {
+      if (k === 'escape' || k === 'esc') { closeEditor(); e.preventDefault(); }
+      else if (k === 'enter' && (e.ctrlKey || e.metaKey)) { saveEditor(); e.preventDefault(); }
+      return;
+    }
+    if (e.ctrlKey || e.metaKey || e.altKey) return;
+    if (k === 'e') { e.preventDefault(); openEditor(); }
+    else if (k === 'd') toggleTheme();
+    else if (k === 'f') toggleFull();
+  });
+  $('btnEdit').addEventListener('click', openEditor);
+  $('btnTheme').addEventListener('click', toggleTheme);
+  $('btnFull').addEventListener('click', toggleFull);
+  $('edSave').addEventListener('click', saveEditor);
+  $('edCancel').addEventListener('click', closeEditor);
+  $('edDefault').addEventListener('click', function () { $('edText').value = DEFAULT_NOTICE; $('edText').focus(); });
+  $('edCopy').addEventListener('click', function () {
+    var b = $('edCopy');
+    copyText(buildLink($('edText').value), function (ok) { b.textContent = ok ? 'Copied' : 'Copy link'; setTimeout(function () { b.textContent = 'Copy link'; }, 1600); });
+  });
+  document.body.classList.add('idle');
+})();
+</script>
+</body>
+</html>
