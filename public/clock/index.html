@@ -7,25 +7,32 @@
 <title>Clock</title>
 <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Ccircle cx='16' cy='16' r='14' fill='%23fff' stroke='%23000' stroke-width='3'/%3E%3Cpath d='M16 7v9l6 4' fill='none' stroke='%23000' stroke-width='3'/%3E%3C/svg%3E">
 <!--
-  시험용 시계 — 아날로그 시계 + 아래 전자시계 + 공지. 흑백만 쓴다. 파일 하나로 끝나며(외부 글꼴·라이브러리 없음) 저장해서 로컬에서 열어도 된다.
+  시험용 시계 — 아날로그 시계 + 아래 전자시계 + 공지. 흑백만 쓴다. 외부 라이브러리 없이 파일 하나로 돌아간다(제목 글꼴을 고를 때만 사이트의 글꼴 파일을 받는다).
   PPT 슬라이드에 웹 페이지로 넣거나 브라우저를 전체 화면(F11 또는 F 키)으로 띄워 쓴다.
 
+  ■ 주소는 늘 그대로다(바꾸지 않는다). 공지·흑/백·글꼴 선택은 이 브라우저(localStorage)에 저장돼 새로고침해도 유지된다.
+    다른 PC나 슬라이드에 같은 설정을 옮기려면 편집 창의 "Copy link"로 설정이 담긴 주소를 복사해 쓴다(복사만 하며 주소창은 그대로).
   ■ 공지 바꾸는 법 (3가지)
     1) 화면에서: E 키 또는 마우스를 움직이면 아래쪽에 나타나는 "Edit notice" 버튼 → 글을 쓰고 Save.
-       "Copy link"를 누르면 그 공지가 들어간 주소가 복사된다 — PPT의 웹 페이지 주소에 붙여 넣으면 슬라이드마다 다른 공지를 쓸 수 있다.
     2) 주소로:   …/clock/?notice=첫째 줄\n둘째 줄\n*셋째 줄      (줄바꿈은 \n 또는 %0A, 비워 두면 공지 없이 시계만: ?notice=)
-    3) 이 파일에서: 아래 스크립트 맨 위 DEFAULT_NOTICE 를 고친다(주소에 notice 가 없을 때 보이는 기본 공지).
+    3) 이 파일에서: 아래 스크립트 맨 위 DEFAULT_NOTICE 를 고친다(저장된 공지·주소 옵션이 없을 때 보이는 기본 공지).
+  ■ 글꼴: 기본은 기기에 있는 고전적인 산세리프(Bahnschrift → Helvetica Neue → Arial …).
+    "Font" 버튼(또는 T 키)을 누르면 블로그 메인 페이지 제목 글꼴(Pretendard — 사이트의 /fonts/PretendardVariable.woff2)로 바뀐다. 주소 옵션 ?font=title
   ■ 그 밖의 주소 옵션:  ?theme=dark (검은 바탕·흰 글자)   ?fmt=12 (오전/오후 12시간제, 기본은 24시간제)   ?tz=Asia/Seoul 또는 ?tz=+9 (표시 시간대, 기본은 이 기기의 시간대)
-  ■ 키:  E 공지 편집 · D 흰/검은 바탕 · F 전체 화면
+  ■ 키:  E 공지 편집 · D 흰/검은 바탕 · T 글꼴 · F 전체 화면
   ■ 시간 정확도: 화면은 매 초 정각에 맞춰 "지금 시각"으로 다시 그린다(누적 계산 없음 → 지연·멈춤이 쌓이지 않는다).
     접속한 서버(GitHub Pages)의 응답 시각과도 비교해, 이 기기 시계가 2초 이상 틀렸다고 확인되면 서버 시각 기준으로 바로잡는다.
 -->
 <style>
+/* 블로그 메인 페이지 제목("Moon")과 같은 글꼴 — 사이트에 올려 둔 가변 글꼴 파일. "Font" 버튼으로 고를 때만 내려받는다(기기에 설치돼 있으면 그것을 쓴다) */
+@font-face{font-family:"Pretendard Variable";font-weight:45 920;font-style:normal;font-display:swap;src:local("Pretendard Variable"),url("../fonts/PretendardVariable.woff2") format("woff2-variations"),url("../fonts/PretendardVariable.woff2") format("woff2")}
 *{box-sizing:border-box}
 html,body{margin:0;height:100%;overflow:hidden}
 html{background:#fff;color:#000}
 html.dark{background:#000;color:#fff}
-body{position:relative;font-family:"Palatino Linotype","Book Antiqua",Palatino,Cambria,"Times New Roman",Times,"Noto Serif KR","Nanum Myeongjo",Batang,AppleMyungjo,serif;font-variant-numeric:lining-nums tabular-nums;font-variant-ligatures:none;-webkit-font-smoothing:antialiased}
+body{position:relative;font-family:Bahnschrift,"Helvetica Neue",Helvetica,Arial,"Malgun Gothic","Apple SD Gothic Neo","Noto Sans KR",sans-serif;font-variant-numeric:lining-nums tabular-nums;text-rendering:geometricPrecision;-webkit-font-smoothing:antialiased}
+html.font-title body{font-family:"Pretendard Variable",Pretendard,Bahnschrift,"Helvetica Neue",Helvetica,Arial,"Malgun Gothic","Apple SD Gothic Neo","Noto Sans KR",sans-serif}
+html.font-title #digital,html.font-title #digital .ap{font-weight:600}   /* 제목 글꼴(Pretendard)은 같은 숫자 굵기가 기본 글꼴보다 가벼워 보여 전자시계만 한 단계 올린다 */
 body.idle{cursor:none}
 [hidden]{display:none !important}
 ::selection{background:#000;color:#fff}
@@ -38,19 +45,20 @@ html.dark ::selection{background:#fff;color:#000}
 #analog{position:absolute;display:block;overflow:visible}
 #analog .ring{fill:none;stroke:currentColor}
 #analog line{stroke:currentColor}
-#analog text{fill:currentColor;font-weight:400;font-family:inherit}
-#analog .halo{stroke:#fff}
-html.dark #analog .halo{stroke:#000}
+#analog text{fill:currentColor;font-weight:500;font-family:inherit}
+#analog .hand{fill:currentColor}
+#analog .halo{fill:#fff;stroke:#fff;stroke-linejoin:round}
+html.dark #analog .halo{fill:#000;stroke:#000}
 #analog .cap{fill:currentColor}
 #analog .pin{fill:#fff}
 html.dark #analog .pin{fill:#000}
 
 /* 전자시계: 숫자마다 폭을 고정해 초가 바뀌어도 글자가 흔들리지 않게 한다 */
-#digital{position:absolute;text-align:center;white-space:nowrap;font-weight:400;line-height:1}
+#digital{position:absolute;text-align:center;white-space:nowrap;font-weight:500;line-height:1}
 #digital .d{display:inline-block;width:.58em;text-align:center}
 #digital .d.z{visibility:hidden}
 #digital .c{display:inline-block;width:.3em;text-align:center;position:relative;top:-.06em}
-#digital .ap{display:inline-block;margin-left:.22em;font-size:.28em;font-weight:400;letter-spacing:.1em;vertical-align:baseline}
+#digital .ap{display:inline-block;margin-left:.22em;font-size:.28em;font-weight:500;letter-spacing:.08em;vertical-align:baseline}
 
 /* 공지 */
 #notice{position:absolute;border-left:4px solid currentColor;padding-left:40px}
@@ -90,6 +98,7 @@ html.dark #editor{background:#000}
   <span id="status"></span>
   <button type="button" id="btnEdit" title="Edit notice (E)">Edit notice</button>
   <button type="button" id="btnTheme" title="Black / white (D)">Black / white</button>
+  <button type="button" id="btnFont" title="Font: System = classic sans on this device, Title = the blog's main-page title font (T)">Font: System</button>
   <button type="button" id="btnFull" title="Full screen (F)">Full screen</button>
 </div>
 
@@ -97,7 +106,7 @@ html.dark #editor{background:#000}
   <div id="editor" role="dialog" aria-modal="true" aria-labelledby="edTitle">
     <div id="edTitle">Notice</div>
     <textarea id="edText" spellcheck="false"></textarea>
-    <div id="edHint">Line breaks are kept. Leave empty to show the clock only. Ctrl+Enter = Save, Esc = Cancel.</div>
+    <div id="edHint">Line breaks are kept. Leave empty to show the clock only. Ctrl+Enter = Save, Esc = Cancel. Saved in this browser; the address stays the same.</div>
     <div id="edRow">
       <button type="button" id="edSave">Save</button><button type="button" id="edCancel">Cancel</button><button type="button" id="edDefault">Use default</button><button type="button" id="edCopy">Copy link</button>
     </div>
@@ -108,7 +117,7 @@ html.dark #editor{background:#000}
 (function () {
   'use strict';
 
-  /* ───────── 기본 공지: 주소에 notice 가 없을 때 이 글이 보인다. 줄바꿈은 \n ───────── */
+  /* ───────── 기본 공지: 저장된 공지·주소 옵션이 없을 때 이 글이 보인다. 줄바꿈은 \n ───────── */
   var DEFAULT_NOTICE = 'Please put all belongings\nat the front or back of the classroom\n\n*Phone must be turned off';
 
   var SVGNS = 'http://www.w3.org/2000/svg';
@@ -139,11 +148,22 @@ html.dark #editor{background:#000}
     return out;
   }
   var params = readParams();
+  function hasParam(k) { return Object.prototype.hasOwnProperty.call(params, k); }
+
+  /* ───────── 설정 저장: 이 브라우저(localStorage)에만 저장하고 주소는 건드리지 않는다. 막혀 있으면(file://·사생활 모드·일부 뷰어) 조용히 넘어간다 ───────── */
+  var LS = {
+    get: function (k) { try { return window.localStorage.getItem('examClock.' + k); } catch (e) { return null; } },
+    set: function (k, v) { try { window.localStorage.setItem('examClock.' + k, v); } catch (e) { /* 저장 불가 */ } },
+    del: function (k) { try { window.localStorage.removeItem('examClock.' + k); } catch (e) { /* 저장 불가 */ } }
+  };
+  // 우선순위: 주소 옵션(직접 쓴 경우) > 이 브라우저에 저장된 값 > 기본값
+  var savedNotice = LS.get('notice');
   var state = {
-    dark: params.theme === 'dark' || params.theme === 'black',
+    dark: hasParam('theme') ? (params.theme === 'dark' || params.theme === 'black') : LS.get('theme') === 'dark',
+    font: (hasParam('font') ? params.font : LS.get('font')) === 'title' ? 'title' : 'system',
     h12: params.fmt === '12',
     tz: params.tz || '',
-    notice: Object.prototype.hasOwnProperty.call(params, 'notice') ? params.notice.replace(/\r\n?/g, '\n').replace(/\\n/g, '\n') : DEFAULT_NOTICE
+    notice: hasParam('notice') ? params.notice.replace(/\r\n?/g, '\n').replace(/\\n/g, '\n') : (savedNotice !== null ? savedNotice : DEFAULT_NOTICE)
   };
 
   /* ───────── 시간대 ───────── */
@@ -185,19 +205,20 @@ html.dark #editor{background:#000}
     }
     for (i = 1; i <= 12; i++) {                                  // 숫자 1~12
       b = i * Math.PI / 6;
-      t = mk('text', { x: r2(Math.sin(b) * 198), y: r2(-Math.cos(b) * 198), 'text-anchor': 'middle', dy: '.35em', 'font-size': 62 }, svg);
+      t = mk('text', { x: r2(Math.sin(b) * 198), y: r2(-Math.cos(b) * 198), 'text-anchor': 'middle', dy: '.35em', 'font-size': 60 }, svg);
       t.textContent = i;
     }
-    function hand(y1, y2, w, halo) {                             // 바늘: 겹치는 숫자·눈금이 가리지 않게 배경색 테두리를 한 겹 깐다
-      var g = mk('g', { transform: 'rotate(0)' }, svg);
-      mk('line', { 'class': 'halo', x1: 0, y1: y1, x2: 0, y2: y2, 'stroke-width': w + halo }, g);
-      mk('line', { x1: 0, y1: y1, x2: 0, y2: y2, 'stroke-width': w }, g);
+    function hand(len, tail, w, halo) {                          // 바늘: 끝이 뾰족한 가는 칼날. 겹치는 숫자·눈금이 가리지 않게 배경색 테두리를 한 겹 깐다
+      var g = mk('g', { transform: 'rotate(0)' }, svg), p = r2(len * 0.08),
+          pts = (-w / 2) + ',' + tail + ' ' + (w / 2) + ',' + tail + ' ' + (w / 2) + ',' + (-len + p) + ' 0,' + (-len) + ' ' + (-w / 2) + ',' + (-len + p);
+      mk('polygon', { 'class': 'halo', points: pts, 'stroke-width': halo }, g);
+      mk('polygon', { 'class': 'hand', points: pts }, g);
       return g;
     }
-    gH = hand(8, -150, 18, 10);                                  // 시침·분침은 다른 선의 3~10배 굵기 — 꼬리는 가운데 점 아래로 숨긴다
-    gM = hand(8, -238, 11.5, 8);
-    mk('circle', { 'class': 'cap', r: 12 }, svg);
-    mk('circle', { 'class': 'pin', r: 4 }, svg);
+    gH = hand(150, 10, 11, 8);                                   // 시침 11 · 분침 7 — 눈금(5)보다 굵어 눈에 들어오되 시계 전체의 가는 선과 어울리게. 꼬리는 가운데 점 아래로 숨긴다
+    gM = hand(238, 12, 7, 8);
+    mk('circle', { 'class': 'cap', r: 9 }, svg);
+    mk('circle', { 'class': 'pin', r: 3 }, svg);
   })();
 
   /* ───────── 매 초 그리기 ───────── */
@@ -287,19 +308,30 @@ html.dark #editor{background:#000}
     }
   }
 
-  /* ───────── 주소·표시 상태 ───────── */
+  /* ───────── 표시 상태(주소창은 바꾸지 않는다) ───────── */
   function baseUrl() { return location.href.split('#')[0].split('?')[0]; }
-  function buildLink(noticeText) {
+  function buildLink(noticeText) {                               // "Copy link" 전용 — 설정이 담긴 주소 문자열을 만들어 복사할 뿐 주소창은 그대로 둔다
     var q = [];
     if (noticeText !== DEFAULT_NOTICE) q.push('notice=' + encodeURIComponent(noticeText));
     if (state.dark) q.push('theme=dark');
+    if (state.font === 'title') q.push('font=title');
     if (state.h12) q.push('fmt=12');
     if (state.tz) q.push('tz=' + encodeURIComponent(state.tz));
     return baseUrl() + (q.length ? '?' + q.join('&') : '');
   }
-  function syncUrl() { try { if (window.history && history.replaceState) history.replaceState(null, '', buildLink(state.notice)); } catch (e) { /* file:// 등에서는 건너뜀 */ } }
+  function saveNotice() { if (state.notice === DEFAULT_NOTICE) LS.del('notice'); else LS.set('notice', state.notice); }
   function applyTheme() { if (state.dark) root.classList.add('dark'); else root.classList.remove('dark'); }
-  function toggleTheme() { state.dark = !state.dark; applyTheme(); syncUrl(); }
+  function toggleTheme() { state.dark = !state.dark; applyTheme(); if (state.dark) LS.set('theme', 'dark'); else LS.del('theme'); }
+  function applyFont() {
+    if (state.font === 'title') root.classList.add('font-title'); else root.classList.remove('font-title');
+    $('btnFont').textContent = 'Font: ' + (state.font === 'title' ? 'Title' : 'System');
+  }
+  function toggleFont() {                                        // 글꼴이 바뀌면 글자 폭이 달라지므로 공지 크기를 다시 맞춘다(글꼴 파일이 늦게 도착하는 경우는 아래 loadingdone 에서)
+    state.font = state.font === 'title' ? 'system' : 'title';
+    applyFont();
+    if (state.font === 'title') LS.set('font', 'title'); else LS.del('font');
+    layout();
+  }
   function toggleFull() {
     var d = document, e = root, f = d.fullscreenElement || d.webkitFullscreenElement || d.msFullscreenElement, fn;
     try {
@@ -316,7 +348,7 @@ html.dark #editor{background:#000}
     $('edText').focus();
   }
   function closeEditor() { $('edWrap').hidden = true; }
-  function saveEditor() { setNotice($('edText').value); syncUrl(); closeEditor(); }
+  function saveEditor() { setNotice($('edText').value); saveNotice(); closeEditor(); }
   function copyText(text, done) {
     function fallback() {
       var ta = document.createElement('textarea');
@@ -384,8 +416,10 @@ html.dark #editor{background:#000}
 
   /* ───────── 시작 ───────── */
   applyTheme();
+  applyFont();
   if (tzInfo.bad) setStatus('Unknown time zone "' + tzInfo.bad + '" — using device time zone');
   setNotice(state.notice);
+  if (document.fonts && document.fonts.addEventListener) document.fonts.addEventListener('loadingdone', layout);   // 제목 글꼴 파일이 도착하면 글자 폭이 바뀌므로 다시 맞춘다
   tick();
   if (!tzInfo.bad) setStatus('Using device clock');
   resync();
@@ -409,10 +443,12 @@ html.dark #editor{background:#000}
     if (e.ctrlKey || e.metaKey || e.altKey) return;
     if (k === 'e') { e.preventDefault(); openEditor(); }
     else if (k === 'd') toggleTheme();
+    else if (k === 't') toggleFont();
     else if (k === 'f') toggleFull();
   });
   $('btnEdit').addEventListener('click', openEditor);
   $('btnTheme').addEventListener('click', toggleTheme);
+  $('btnFont').addEventListener('click', toggleFont);
   $('btnFull').addEventListener('click', toggleFull);
   $('edSave').addEventListener('click', saveEditor);
   $('edCancel').addEventListener('click', closeEditor);
