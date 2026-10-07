@@ -176,10 +176,10 @@ html.dark #editor{background:#000}
   }
 
   /* ───────── 아날로그 시계 그리기 ───────── */
-  var gH, gM, gS;
+  var gH, gM;
   (function buildAnalog() {
     var svg = $('analog'), i, a, hour, r0, r1, t, b;
-    mk('circle', { 'class': 'ring', r: 288, 'stroke-width': 12 }, svg);
+    mk('circle', { 'class': 'ring', r: 290, 'stroke-width': 4 }, svg);
     for (i = 0; i < 60; i++) {                                   // 눈금: 5분마다 굵고 길게
       hour = i % 5 === 0; a = i * Math.PI / 30; r1 = 266; r0 = r1 - (hour ? 40 : 15);
       mk('line', { x1: r2(Math.sin(a) * r0), y1: r2(-Math.cos(a) * r0), x2: r2(Math.sin(a) * r1), y2: r2(-Math.cos(a) * r1), 'stroke-width': hour ? 10 : 3 }, svg);
@@ -197,7 +197,6 @@ html.dark #editor{background:#000}
     }
     gH = hand(24, -140, 22, 12);
     gM = hand(30, -226, 13, 10);
-    gS = hand(62, -252, 4, 8);
     mk('circle', { 'class': 'cap', r: 18 }, svg);
     mk('circle', { 'class': 'pin', r: 6 }, svg);
   })();
@@ -215,7 +214,6 @@ html.dark #editor{background:#000}
     lastKey = key;
     gH.setAttribute('transform', 'rotate(' + r2(((p.h % 12) + m / 60 + s / 3600) * 30) + ')');
     gM.setAttribute('transform', 'rotate(' + r2((m + s / 60) * 6) + ')');
-    gS.setAttribute('transform', 'rotate(' + (s * 6) + ')');
     hs = state.h12 && h < 10 ? dig('0', true) + dig(h) : dig(Math.floor(h / 10)) + dig(h % 10);
     html = hs + '<span class="c">:</span>' + dig(Math.floor(m / 10)) + dig(m % 10) + '<span class="c">:</span>' + dig(Math.floor(s / 10)) + dig(s % 10);
     if (ap) html += '<span class="ap">' + ap + '</span>';
@@ -260,12 +258,13 @@ html.dark #editor{background:#000}
   function layout() {
     var vw = window.innerWidth || root.clientWidth, vh = window.innerHeight || root.clientHeight, aspect = vw / vh;
     var hasN = hasNotice(), stage = $('stage'), svg = $('analog'), dg = $('digital'), nt = $('notice');
-    var W, H, D, fs, gap, dh, ty, colW, cx, nx, nw, ny, nh, th = 0, H0, M = 40, s;
-    if (aspect >= 1.45) {                                        // 넓은 화면(16:9 등): 왼쪽에 시계+전자시계, 오른쪽에 공지
+    var W, H, D, fs, gap, dh, ty, colX = 0, colW, cx, nx, nw, ny, nh, th = 0, H0, M = 40, s;
+    if (aspect >= 1.45) {                                        // 넓은 화면(16:9 등): 오른쪽에 시계+전자시계, 왼쪽에 공지(공지가 없으면 시계를 가운데에)
       W = 1600; H = 900;
       colW = hasN ? 740 : W; D = 530; fs = 145; gap = 30; dh = fs;
-      ty = Math.round((H - (D + gap + dh)) / 2); cx = Math.round((colW - D) / 2);
-      nx = 780; nw = W - nx - 50; ny = 100; nh = H - 200;
+      colX = W - colW;
+      ty = Math.round((H - (D + gap + dh)) / 2); cx = colX + Math.round((colW - D) / 2);
+      nx = 60; nw = 760; ny = 100; nh = H - 200;
     } else {                                                     // 4:3·세로 화면: 시계, 전자시계, 공지를 위에서 아래로(남는 높이는 위아래 여백으로)
       W = 1000; H0 = Math.max(640, Math.min(2200, Math.round(W / aspect)));
       colW = W; gap = 24; ty = M; nx = M; nw = W - 2 * M;
@@ -283,7 +282,7 @@ html.dark #editor{background:#000}
     setTransform(stage, 'scale(' + s + ')');
     svg.setAttribute('width', D); svg.setAttribute('height', D);
     svg.style.left = cx + 'px'; svg.style.top = ty + 'px';
-    dg.style.left = '0px'; dg.style.width = colW + 'px'; dg.style.top = (ty + D + gap) + 'px'; dg.style.fontSize = fs + 'px'; dg.style.height = dh + 'px';
+    dg.style.left = colX + 'px'; dg.style.width = colW + 'px'; dg.style.top = (ty + D + gap) + 'px'; dg.style.fontSize = fs + 'px'; dg.style.height = dh + 'px';
     if (hasN) {
       nt.style.left = nx + 'px'; nt.style.width = nw + 'px'; nt.style.height = th + 'px';
       nt.style.top = (aspect >= 1.45 ? Math.round(ny + (nh - th) / 2) : ny) + 'px';
