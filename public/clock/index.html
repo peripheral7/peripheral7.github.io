@@ -7,7 +7,7 @@
 <title>Clock</title>
 <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Ccircle cx='16' cy='16' r='14' fill='%23fff' stroke='%23000' stroke-width='3'/%3E%3Cpath d='M16 7v9l6 4' fill='none' stroke='%23000' stroke-width='3'/%3E%3C/svg%3E">
 <!--
-  시험용 시계 — 아날로그 시계 + 아래 전자시계 + 공지. 흑백만 쓴다. 외부 라이브러리 없이 파일 하나로 돌아간다(제목 글꼴을 고를 때만 사이트의 글꼴 파일을 받는다).
+  시험용 시계 — 아날로그 시계 + 아래 전자시계 + 공지. 흑백만 쓴다. 외부 라이브러리·글꼴 파일 없이 파일 하나로 돌아간다(글꼴은 모두 기기에 있는 것을 쓴다).
   PPT 슬라이드에 웹 페이지로 넣거나 브라우저를 전체 화면(F11 또는 F 키)으로 띄워 쓴다.
 
   ■ 주소는 늘 그대로다(바꾸지 않는다). 공지·흑/백·글꼴 선택은 이 브라우저(localStorage)에 저장돼 새로고침해도 유지된다.
@@ -17,22 +17,24 @@
     2) 주소로:   …/clock/?notice=첫째 줄\n둘째 줄\n*셋째 줄      (줄바꿈은 \n 또는 %0A, 비워 두면 공지 없이 시계만: ?notice=)
     3) 이 파일에서: 아래 스크립트 맨 위 DEFAULT_NOTICE 를 고친다(저장된 공지·주소 옵션이 없을 때 보이는 기본 공지).
   ■ 글꼴: 기본은 기기에 있는 고전적인 산세리프(Bahnschrift → Helvetica Neue → Arial …).
-    "Font" 버튼(또는 T 키)을 누르면 블로그 메인 페이지 제목 글꼴(Pretendard — 사이트의 /fonts/PretendardVariable.woff2)로 바뀐다. 주소 옵션 ?font=title
+    "Font" 버튼(또는 T 키)을 누르면 묵직하고 장식 없는 굵은 세리프(Cambria → Charter → Times New Roman …, 한글은 명조)로 바뀐다. 주소 옵션 ?font=serif
   ■ 그 밖의 주소 옵션:  ?theme=dark (검은 바탕·흰 글자)   ?fmt=12 (오전/오후 12시간제, 기본은 24시간제)   ?tz=Asia/Seoul 또는 ?tz=+9 (표시 시간대, 기본은 이 기기의 시간대)
   ■ 키:  E 공지 편집 · D 흰/검은 바탕 · T 글꼴 · F 전체 화면
   ■ 시간 정확도: 화면은 매 초 정각에 맞춰 "지금 시각"으로 다시 그린다(누적 계산 없음 → 지연·멈춤이 쌓이지 않는다).
     접속한 서버(GitHub Pages)의 응답 시각과도 비교해, 이 기기 시계가 2초 이상 틀렸다고 확인되면 서버 시각 기준으로 바로잡는다.
 -->
 <style>
-/* 블로그 메인 페이지 제목("Moon")과 같은 글꼴 — 사이트에 올려 둔 가변 글꼴 파일. "Font" 버튼으로 고를 때만 내려받는다(기기에 설치돼 있으면 그것을 쓴다) */
-@font-face{font-family:"Pretendard Variable";font-weight:45 920;font-style:normal;font-display:swap;src:local("Pretendard Variable"),url("../fonts/PretendardVariable.woff2") format("woff2-variations"),url("../fonts/PretendardVariable.woff2") format("woff2")}
 *{box-sizing:border-box}
 html,body{margin:0;height:100%;overflow:hidden}
 html{background:#fff;color:#000}
 html.dark{background:#000;color:#fff}
 body{position:relative;font-family:Bahnschrift,"Helvetica Neue",Helvetica,Arial,"Malgun Gothic","Apple SD Gothic Neo","Noto Sans KR",sans-serif;font-variant-numeric:lining-nums tabular-nums;text-rendering:geometricPrecision;-webkit-font-smoothing:antialiased}
-html.font-title body{font-family:"Pretendard Variable",Pretendard,Bahnschrift,"Helvetica Neue",Helvetica,Arial,"Malgun Gothic","Apple SD Gothic Neo","Noto Sans KR",sans-serif}
-html.font-title #digital,html.font-title #digital .ap{font-weight:600}   /* 제목 글꼴(Pretendard)은 같은 숫자 굵기가 기본 글꼴보다 가벼워 보여 전자시계만 한 단계 올린다 */
+/* "Font" 버튼의 두 번째 옵션: 묵직하고 장식 없는 세리프(굵은 글자). 기기에 있는 글꼴만 쓰므로 내려받는 파일이 없다.
+   라틴·숫자는 높이가 같은 라이닝 숫자인 Cambria(Windows 기본 내장) → Charter(맥) → Noto/DejaVu Serif(리눅스) → Times New Roman 순으로 찾고,
+   한글은 그 뒤에 굵은 글자꼴이 따로 있는 명조(Noto Serif KR → 함초롬바탕 → 나눔명조 → 바탕)를 붙인다. 올드스타일 숫자 글꼴(Georgia·Constantia·Sitka)은 시계 숫자에 맞지 않아 뺀다 */
+html.font-serif body{font-family:Cambria,Charter,"Bitstream Charter","Noto Serif","DejaVu Serif","Times New Roman","Liberation Serif","Noto Serif KR","HCR Batang",NanumMyeongjo,Batang,"Apple Myungjo",AppleMyungjo,serif}
+html.font-serif #analog text,html.font-serif #digital,html.font-serif #digital .ap,html.font-serif #noticeText{font-weight:700}
+html.font-serif #digital .d{width:.62em}   /* 굵은 세리프 숫자는 기본 글꼴보다 폭이 넓다(Cambria 굵게 = 0.59em) */
 body.idle{cursor:none}
 [hidden]{display:none !important}
 ::selection{background:#000;color:#fff}
@@ -98,7 +100,7 @@ html.dark #editor{background:#000}
   <span id="status"></span>
   <button type="button" id="btnEdit" title="Edit notice (E)">Edit notice</button>
   <button type="button" id="btnTheme" title="Black / white (D)">Black / white</button>
-  <button type="button" id="btnFont" title="Font: System = classic sans on this device, Title = the blog's main-page title font (T)">Font: System</button>
+  <button type="button" id="btnFont" title="Font: Sans = classic sans-serif (default), Serif = heavy, plain serif (T)">Font: Sans</button>
   <button type="button" id="btnFull" title="Full screen (F)">Full screen</button>
 </div>
 
@@ -158,9 +160,10 @@ html.dark #editor{background:#000}
   };
   // 우선순위: 주소 옵션(직접 쓴 경우) > 이 브라우저에 저장된 값 > 기본값
   var savedNotice = LS.get('notice');
+  if (LS.get('font') === 'title') LS.del('font');                // 예전에 있던 제목 글꼴(Pretendard) 선택은 없어졌으니 저장값도 지운다 → 기본 글꼴
   var state = {
     dark: hasParam('theme') ? (params.theme === 'dark' || params.theme === 'black') : LS.get('theme') === 'dark',
-    font: (hasParam('font') ? params.font : LS.get('font')) === 'title' ? 'title' : 'system',
+    font: (hasParam('font') ? params.font : LS.get('font')) === 'serif' ? 'serif' : 'sans',
     h12: params.fmt === '12',
     tz: params.tz || '',
     notice: hasParam('notice') ? params.notice.replace(/\r\n?/g, '\n').replace(/\\n/g, '\n') : (savedNotice !== null ? savedNotice : DEFAULT_NOTICE)
@@ -280,7 +283,8 @@ html.dark #editor{background:#000}
     var W, H, D, fs, gap, dh, ty, colX = 0, colW, cx, nx, nw, ny, nh, th = 0, H0, M = 40, s;
     if (aspect >= 1.45) {                                        // 넓은 화면(16:9 등): 오른쪽에 시계+전자시계, 왼쪽에 공지(공지가 없으면 시계를 가운데에)
       W = 1600; H = 900;
-      colW = hasN ? 740 : W; D = 530; fs = 145; gap = 30; dh = fs;
+      colW = hasN ? 740 : W; D = 530; gap = 30;
+      fs = Math.min(145, Math.floor((colW - 100) / ((state.font === 'serif' ? 4.32 : 4.08) + (state.h12 ? 0.75 : 0)))); dh = fs;   // 전자시계 폭(숫자 6칸+쌍점 2칸[+AM/PM], em)이 열 폭에서 양쪽 50px 여백을 뺀 안에 들어오게(12시간제의 AM/PM 이 화면 가장자리에 붙지 않게)
       colX = W - colW;
       ty = Math.round((H - (D + gap + dh)) / 2); cx = colX + Math.round((colW - D) / 2);
       nx = 60; nw = 760; ny = 100; nh = H - 200;
@@ -314,7 +318,7 @@ html.dark #editor{background:#000}
     var q = [];
     if (noticeText !== DEFAULT_NOTICE) q.push('notice=' + encodeURIComponent(noticeText));
     if (state.dark) q.push('theme=dark');
-    if (state.font === 'title') q.push('font=title');
+    if (state.font === 'serif') q.push('font=serif');
     if (state.h12) q.push('fmt=12');
     if (state.tz) q.push('tz=' + encodeURIComponent(state.tz));
     return baseUrl() + (q.length ? '?' + q.join('&') : '');
@@ -323,13 +327,13 @@ html.dark #editor{background:#000}
   function applyTheme() { if (state.dark) root.classList.add('dark'); else root.classList.remove('dark'); }
   function toggleTheme() { state.dark = !state.dark; applyTheme(); if (state.dark) LS.set('theme', 'dark'); else LS.del('theme'); }
   function applyFont() {
-    if (state.font === 'title') root.classList.add('font-title'); else root.classList.remove('font-title');
-    $('btnFont').textContent = 'Font: ' + (state.font === 'title' ? 'Title' : 'System');
+    if (state.font === 'serif') root.classList.add('font-serif'); else root.classList.remove('font-serif');
+    $('btnFont').textContent = 'Font: ' + (state.font === 'serif' ? 'Serif' : 'Sans');
   }
-  function toggleFont() {                                        // 글꼴이 바뀌면 글자 폭이 달라지므로 공지 크기를 다시 맞춘다(글꼴 파일이 늦게 도착하는 경우는 아래 loadingdone 에서)
-    state.font = state.font === 'title' ? 'system' : 'title';
+  function toggleFont() {                                        // 글꼴이 바뀌면 글자 폭이 달라지므로 공지 크기를 다시 맞춘다
+    state.font = state.font === 'serif' ? 'sans' : 'serif';
     applyFont();
-    if (state.font === 'title') LS.set('font', 'title'); else LS.del('font');
+    if (state.font === 'serif') LS.set('font', 'serif'); else LS.del('font');
     layout();
   }
   function toggleFull() {
@@ -419,7 +423,6 @@ html.dark #editor{background:#000}
   applyFont();
   if (tzInfo.bad) setStatus('Unknown time zone "' + tzInfo.bad + '" — using device time zone');
   setNotice(state.notice);
-  if (document.fonts && document.fonts.addEventListener) document.fonts.addEventListener('loadingdone', layout);   // 제목 글꼴 파일이 도착하면 글자 폭이 바뀌므로 다시 맞춘다
   tick();
   if (!tzInfo.bad) setStatus('Using device clock');
   resync();
