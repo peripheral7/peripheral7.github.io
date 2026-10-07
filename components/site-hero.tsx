@@ -2,7 +2,6 @@
 
 import Image from "next/image"
 import { useBoardFilter, type Filter } from "@/components/board-filter-context"
-import { SubjectProgressPanel } from "@/components/subject-progress-panel"
 
 const nav: { label: string; value: Filter }[] = [
   { label: "Research", value: "RESEARCH" },
@@ -45,11 +44,6 @@ export function SiteHero() {
 
       {/* photograph on white, centered, with the title anchored to its bottom edge */}
       <div className="relative flex min-h-[calc(100svh-72px)] flex-col items-center justify-center px-5 pb-16 md:px-10">
-        {/* wide viewports leave empty margin beside the centered figure — use it for the study-progress widget */}
-        <div className="absolute bottom-16 left-8 hidden xl:block">
-          <SubjectProgressPanel />
-        </div>
-
         <figure className="relative w-full max-w-md">
           <Image
             src="/images/hero-tree.jpg"
