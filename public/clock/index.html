@@ -25,7 +25,7 @@
 html,body{margin:0;height:100%;overflow:hidden}
 html{background:#fff;color:#000}
 html.dark{background:#000;color:#fff}
-body{position:relative;font-family:"Helvetica Neue",Helvetica,Arial,"Segoe UI","Apple SD Gothic Neo","Malgun Gothic","Noto Sans KR",sans-serif;-webkit-font-smoothing:antialiased}
+body{position:relative;font-family:"Palatino Linotype","Book Antiqua",Palatino,Cambria,"Times New Roman",Times,"Noto Serif KR","Nanum Myeongjo",Batang,AppleMyungjo,serif;font-variant-numeric:lining-nums tabular-nums;font-variant-ligatures:none;-webkit-font-smoothing:antialiased}
 body.idle{cursor:none}
 [hidden]{display:none !important}
 ::selection{background:#000;color:#fff}
@@ -38,7 +38,7 @@ html.dark ::selection{background:#fff;color:#000}
 #analog{position:absolute;display:block;overflow:visible}
 #analog .ring{fill:none;stroke:currentColor}
 #analog line{stroke:currentColor}
-#analog text{fill:currentColor;font-weight:700;font-family:inherit}
+#analog text{fill:currentColor;font-weight:400;font-family:inherit}
 #analog .halo{stroke:#fff}
 html.dark #analog .halo{stroke:#000}
 #analog .cap{fill:currentColor}
@@ -46,15 +46,15 @@ html.dark #analog .halo{stroke:#000}
 html.dark #analog .pin{fill:#000}
 
 /* 전자시계: 숫자마다 폭을 고정해 초가 바뀌어도 글자가 흔들리지 않게 한다 */
-#digital{position:absolute;text-align:center;white-space:nowrap;font-weight:700;line-height:1}
-#digital .d{display:inline-block;width:.6em;text-align:center}
+#digital{position:absolute;text-align:center;white-space:nowrap;font-weight:400;line-height:1}
+#digital .d{display:inline-block;width:.58em;text-align:center}
 #digital .d.z{visibility:hidden}
-#digital .c{display:inline-block;width:.32em;text-align:center;position:relative;top:-.06em}
-#digital .ap{display:inline-block;margin-left:.22em;font-size:.3em;font-weight:700;letter-spacing:.04em;vertical-align:baseline}
+#digital .c{display:inline-block;width:.3em;text-align:center;position:relative;top:-.06em}
+#digital .ap{display:inline-block;margin-left:.22em;font-size:.28em;font-weight:400;letter-spacing:.1em;vertical-align:baseline}
 
 /* 공지 */
-#notice{position:absolute;border-left:10px solid currentColor;padding-left:40px}
-#noticeText{font-weight:500;line-height:1.3}
+#notice{position:absolute;border-left:4px solid currentColor;padding-left:40px}
+#noticeText{font-weight:400;line-height:1.3}
 #noticeText div + div{margin-top:.26em}
 
 /* 도구줄(마우스를 움직이면 잠깐 나타난다) */
@@ -178,14 +178,14 @@ html.dark #editor{background:#000}
   var gH, gM;
   (function buildAnalog() {
     var svg = $('analog'), i, a, hour, r0, r1, t, b;
-    mk('circle', { 'class': 'ring', r: 290, 'stroke-width': 4 }, svg);
-    for (i = 0; i < 60; i++) {                                   // 눈금: 5분마다 굵고 길게
-      hour = i % 5 === 0; a = i * Math.PI / 30; r1 = 266; r0 = r1 - (hour ? 40 : 15);
-      mk('line', { x1: r2(Math.sin(a) * r0), y1: r2(-Math.cos(a) * r0), x2: r2(Math.sin(a) * r1), y2: r2(-Math.cos(a) * r1), 'stroke-width': hour ? 10 : 3 }, svg);
+    mk('circle', { 'class': 'ring', r: 292, 'stroke-width': 2.5 }, svg);   // 테두리·눈금은 가는 선, 바늘만 굵게 — 시침·분침이 가장 먼저 눈에 들어오게
+    for (i = 0; i < 60; i++) {                                   // 눈금: 5분마다 조금 굵고 길게
+      hour = i % 5 === 0; a = i * Math.PI / 30; r1 = 278; r0 = r1 - (hour ? 38 : 13);
+      mk('line', { x1: r2(Math.sin(a) * r0), y1: r2(-Math.cos(a) * r0), x2: r2(Math.sin(a) * r1), y2: r2(-Math.cos(a) * r1), 'stroke-width': hour ? 5 : 1.6 }, svg);
     }
     for (i = 1; i <= 12; i++) {                                  // 숫자 1~12
       b = i * Math.PI / 6;
-      t = mk('text', { x: r2(Math.sin(b) * 192), y: r2(-Math.cos(b) * 192), 'text-anchor': 'middle', dy: '.35em', 'font-size': 64 }, svg);
+      t = mk('text', { x: r2(Math.sin(b) * 198), y: r2(-Math.cos(b) * 198), 'text-anchor': 'middle', dy: '.35em', 'font-size': 62 }, svg);
       t.textContent = i;
     }
     function hand(y1, y2, w, halo) {                             // 바늘: 겹치는 숫자·눈금이 가리지 않게 배경색 테두리를 한 겹 깐다
@@ -194,10 +194,10 @@ html.dark #editor{background:#000}
       mk('line', { x1: 0, y1: y1, x2: 0, y2: y2, 'stroke-width': w }, g);
       return g;
     }
-    gH = hand(24, -140, 22, 12);
-    gM = hand(30, -226, 13, 10);
-    mk('circle', { 'class': 'cap', r: 18 }, svg);
-    mk('circle', { 'class': 'pin', r: 6 }, svg);
+    gH = hand(8, -150, 18, 10);                                  // 시침·분침은 다른 선의 3~10배 굵기 — 꼬리는 가운데 점 아래로 숨긴다
+    gM = hand(8, -238, 11.5, 8);
+    mk('circle', { 'class': 'cap', r: 12 }, svg);
+    mk('circle', { 'class': 'pin', r: 4 }, svg);
   })();
 
   /* ───────── 매 초 그리기 ───────── */
