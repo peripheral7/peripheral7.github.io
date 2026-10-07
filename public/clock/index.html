@@ -32,12 +32,12 @@ html,body{margin:0;height:100%;overflow:hidden}
 html{background:#fff;color:#000}
 html.dark{background:#000;color:#fff}
 body{position:relative;font-family:"Pretendard Variable",Pretendard,Bahnschrift,"Helvetica Neue",Helvetica,Arial,"Malgun Gothic","Apple SD Gothic Neo","Noto Sans KR",sans-serif;font-variant-numeric:lining-nums tabular-nums;text-rendering:geometricPrecision;-webkit-font-smoothing:antialiased}
-/* "Font" 버튼의 두 번째 옵션: 묵직하고 장식 없는 세리프(굵은 글자). 기기에 있는 글꼴만 쓰므로 내려받는 파일이 없다.
-   라틴·숫자는 높이가 같은 라이닝 숫자인 Cambria(Windows 기본 내장) → Charter(맥) → Noto/DejaVu Serif(리눅스) → Times New Roman 순으로 찾고,
-   한글은 그 뒤에 굵은 글자꼴이 따로 있는 명조(Noto Serif KR → 함초롬바탕 → 나눔명조 → 바탕)를 붙인다. 올드스타일 숫자 글꼴(Georgia·Constantia·Sitka)은 시계 숫자에 맞지 않아 뺀다 */
-html.font-serif body{font-family:Cambria,Charter,"Bitstream Charter","Noto Serif","DejaVu Serif","Times New Roman","Liberation Serif","Noto Serif KR","HCR Batang",NanumMyeongjo,Batang,"Apple Myungjo",AppleMyungjo,serif}
+/* "Font" 버튼의 두 번째 옵션: 굵은 바스커빌 세리프. 기기에 있는 글꼴만 쓰므로 내려받는 파일이 없다.
+   Libre Baskerville(굵은 글자꼴 포함) → Baskerville(맥) → 없으면 같은 결의 튼튼한 세리프 Cambria(Windows 기본 내장) → Charter(맥) → Noto/DejaVu Serif(리눅스) → Times New Roman 순으로 찾고,
+   한글은 그 뒤에 굵은 글자꼴이 따로 있는 명조(Noto Serif KR → 함초롬바탕 → 나눔명조 → 바탕)를 붙인다. 올드스타일 숫자 글꼴(Georgia·Constantia·Sitka)은 시계 숫자에 맞지 않아 뺀다.
+   Baskerville Old Face(Office)는 굵은 글자꼴이 없어 가짜 굵기가 되므로 넣지 않는다 */
+html.font-serif body{font-family:"Libre Baskerville",Baskerville,Cambria,Charter,"Bitstream Charter","Noto Serif","DejaVu Serif","Times New Roman","Liberation Serif","Noto Serif KR","HCR Batang",NanumMyeongjo,Batang,"Apple Myungjo",AppleMyungjo,serif}
 html.font-serif #analog text,html.font-serif #digital,html.font-serif #digital .ap,html.font-serif #noticeText{font-weight:700}
-html.font-serif #digital .d{width:.62em}   /* Cambria 굵게 숫자 폭 = .592em */
 body.idle{cursor:none}
 [hidden]{display:none !important}
 ::selection{background:#000;color:#fff}
@@ -60,7 +60,7 @@ html.dark #analog .pin{fill:#000}
 
 /* 전자시계: 숫자마다 폭을 고정해 초가 바뀌어도 글자가 흔들리지 않게 한다 */
 #digital{position:absolute;text-align:center;white-space:nowrap;font-weight:600;line-height:1}   /* Pretendard 는 같은 굵기 숫자가 DIN 계열보다 가벼워 보여 전자시계만 한 단계 올린다 */
-#digital .d{display:inline-block;width:.65em;text-align:center}   /* Pretendard 숫자 폭(굵기 600) = .641em */
+#digital .d{display:inline-block;width:.65em;text-align:center}   /* 스크립트가 지금 글꼴의 가장 넓은 숫자 폭으로 다시 정한다(아래 #digitStyle) — 이 값은 스크립트가 없을 때의 기본 */
 #digital .d.z{visibility:hidden}
 #digital .c{display:inline-block;width:.3em;text-align:center;position:relative;top:-.06em}
 #digital .ap{display:inline-block;margin-left:.22em;font-size:.28em;font-weight:600;letter-spacing:.08em;vertical-align:baseline}
@@ -89,6 +89,7 @@ html.dark #editor{background:#000}
 #edHint{margin:8px 0 14px;font-size:13px}
 #edRow button:first-child{margin-left:0}
 </style>
+<style id="digitStyle"></style>
 </head>
 <body>
 <noscript>JavaScript is required.</noscript>
@@ -279,21 +280,44 @@ html.dark #editor{background:#000}
     el.style.fontSize = lo + 'px';
     return el.offsetHeight;
   }
+  /* 숫자 칸 폭: 지금 글꼴에서 가장 넓은 숫자(0~9)의 폭에 맞춘다. 글꼴마다 숫자 폭이 다르고(바스커빌은 1 이 좁고 0 이 넓다),
+     칸 폭이 고정이어야 초가 바뀌어도 글자가 흔들리지 않는다. 글꼴을 바꾸거나 글꼴 파일이 늦게 도착해 layout() 이 다시 불릴 때마다 다시 잰다 */
+  var digitEm = 0.65;
+  function measureDigits() {
+    var cs, p, i, s, w, max = 0;
+    if (!window.getComputedStyle) return;
+    cs = window.getComputedStyle($('digital'), null);
+    p = document.createElement('div');
+    p.style.cssText = 'position:absolute;left:0;top:0;visibility:hidden;white-space:nowrap;font-size:100px;line-height:1';
+    p.style.fontFamily = cs.fontFamily; p.style.fontWeight = cs.fontWeight;
+    document.body.appendChild(p);                                // 무대(축소·확대되는 곳) 밖에서 재야 실제 폭이 나온다
+    for (i = 0; i < 10; i++) {
+      s = document.createElement('span'); s.textContent = i; p.appendChild(s);
+      w = s.getBoundingClientRect().width; if (w > max) max = w;
+    }
+    document.body.removeChild(p);
+    if (max > 0) {
+      digitEm = Math.round((Math.ceil(max) / 100 + 0.01) * 100) / 100;
+      $('digitStyle').textContent = '#digital .d{width:' + digitEm + 'em}';
+    }
+  }
   function layout() {
     var vw = window.innerWidth || root.clientWidth, vh = window.innerHeight || root.clientHeight, aspect = vw / vh;
     var hasN = hasNotice(), stage = $('stage'), svg = $('analog'), dg = $('digital'), nt = $('notice');
-    var W, H, D, fs, gap, dh, ty, colX = 0, colW, cx, nx, nw, ny, nh, th = 0, H0, M = 40, s;
+    var W, H, D, fs, gap, dh, ty, colX = 0, colW, cx, nx, nw, ny, nh, th = 0, H0, M = 40, s, em;
+    measureDigits();
+    em = 6 * digitEm + 0.6 + (state.h12 ? 0.75 : 0);              // 전자시계 폭(em) = 숫자 칸 6개 + 쌍점 칸 2개(.3em씩) [+ AM/PM]
     if (aspect >= 1.45) {                                        // 넓은 화면(16:9 등): 오른쪽에 시계+전자시계, 왼쪽에 공지(공지가 없으면 시계를 가운데에)
       W = 1600; H = 900;
       colW = hasN ? 740 : W; D = 530; gap = 30;
-      fs = Math.min(145, Math.floor((colW - 100) / ((state.font === 'serif' ? 4.32 : 4.5) + (state.h12 ? 0.75 : 0)))); dh = fs;   // 전자시계 폭(숫자 6칸+쌍점 2칸[+AM/PM], em)이 열 폭에서 양쪽 50px 여백을 뺀 안에 들어오게(12시간제의 AM/PM 이 화면 가장자리에 붙지 않게)
+      fs = Math.min(145, Math.floor((colW - 100) / em)); dh = fs;   // 전자시계가 열 폭에서 양쪽 50px 여백을 뺀 안에 들어오게(12시간제의 AM/PM 이 화면 가장자리에 붙지 않게)
       colX = W - colW;
       ty = Math.round((H - (D + gap + dh)) / 2); cx = colX + Math.round((colW - D) / 2);
       nx = 60; nw = 760; ny = 100; nh = H - 200;
     } else {                                                     // 4:3·세로 화면: 시계, 전자시계, 공지를 위에서 아래로(남는 높이는 위아래 여백으로)
       W = 1000; H0 = Math.max(640, Math.min(2200, Math.round(W / aspect)));
       colW = W; gap = 24; ty = M; nx = M; nw = W - 2 * M;
-      fs = Math.min(Math.round(W * 0.16), Math.round(H0 * 0.13)); dh = fs;
+      fs = Math.min(Math.round(W * 0.16), Math.round(H0 * 0.13), Math.floor((W - 2 * M) / em)); dh = fs;
       nh = hasN ? Math.min(420, Math.max(170, Math.round(H0 * 0.27))) : 0;
       D = Math.max(200, Math.min(W - 2 * M, H0 - 2 * M - dh - gap - nh - (hasN ? 30 : 0)));
       cx = Math.round((W - D) / 2); ny = ty + D + gap + dh + 30;
