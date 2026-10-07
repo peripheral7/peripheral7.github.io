@@ -68,8 +68,8 @@ export function SiteHero() {
           </figcaption>
 
           {/* title, right at the bottom of the photograph */}
-          <h1 className="mt-1 text-center font-sans text-[13vw] font-bold uppercase leading-[1] tracking-tight text-foreground sm:text-6xl md:text-7xl">
-            MoooooN
+          <h1 className="mt-1 text-center font-sans text-[13vw] font-bold leading-[1] tracking-tight text-foreground sm:text-6xl md:text-7xl">
+            Moon
           </h1>
         </figure>
 
