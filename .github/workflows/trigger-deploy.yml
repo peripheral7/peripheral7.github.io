@@ -1,0 +1,22 @@
+# 이 파일은 data 브랜치에만 존재한다(03_stock_trading/publish_data.ps1이 커밋에 함께 담아 올린다).
+# push 트리거는 "푸시된 브랜치에 있는 워크플로 파일"만 실행하므로, main의 deploy.yml에 data를 적어 두는 것만으로는
+# data 브랜치 푸시가 배포로 이어지지 않는다. 그래서 data 브랜치 푸시를 감지해 main의 배포 워크플로를
+# workflow_dispatch로 실행하는 얇은 트리거를 둔다(GITHUB_TOKEN이 만든 dispatch 이벤트는 새 실행을 만들 수 있다).
+name: Trigger deploy on data update
+
+on:
+  push:
+    branches: ["data"]
+
+permissions:
+  actions: write
+  contents: read
+
+jobs:
+  dispatch:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Run "Deploy to GitHub Pages" on main
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: gh workflow run deploy.yml --repo "$GITHUB_REPOSITORY" --ref main
