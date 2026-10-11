@@ -362,12 +362,13 @@ html.dark #editor{background:#000}
     if (state.font === 'serif') LS.set('font', 'serif'); else LS.del('font');
     layout();
   }
+  function quiet(p) { if (p && typeof p.then === 'function') p.then(null, function () { /* 거부돼도 조용히 */ }); }
   function toggleFull() {
     var d = document, e = root, f = d.fullscreenElement || d.webkitFullscreenElement || d.msFullscreenElement, fn;
     try {
-      if (f) { fn = d.exitFullscreen || d.webkitExitFullscreen || d.msExitFullscreen; if (fn) fn.call(d); }
-      else { fn = e.requestFullscreen || e.webkitRequestFullscreen || e.msRequestFullscreen; if (fn) fn.call(e); }
-    } catch (err) { /* 삽입된 화면에서는 전체 화면이 막힐 수 있다 */ }
+      if (f) { fn = d.exitFullscreen || d.webkitExitFullscreen || d.msExitFullscreen; if (fn) quiet(fn.call(d)); }
+      else { fn = e.requestFullscreen || e.webkitRequestFullscreen || e.msRequestFullscreen; if (fn) quiet(fn.call(e)); }
+    } catch (err) { /* 다른 페이지 안(iframe)에 넣어 allow="fullscreen" 이 없으면 전체 화면 요청이 거부된다 — 거부 Promise 도 조용히 넘긴다 */ }
   }
 
   /* ───────── 공지 편집 창 ───────── */
