@@ -1,0 +1,139 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="robots" content="noindex">
+<title>Slides</title>
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect x='3' y='7' width='26' height='18' fill='%23fff' stroke='%23000' stroke-width='3'/%3E%3Cpath d='M8 13h10M8 18h16' stroke='%23000' stroke-width='2.5'/%3E%3C/svg%3E">
+<link rel="stylesheet" href="/slides/deck.css">
+<!--
+  슬라이드 덱 — 웹페이지를 PPT처럼 넘기고, 슬라이드 안에 다른 페이지(iframe)를 넣는다. 이 파일이 사용법 안내를 겸한 예시 덱이다.
+  엔진은 /slides/deck.css · /slides/deck.js 에 있고, 덱 HTML 은 슬라이드 내용만 쓴다(경로는 / 로 시작하게 쓰면 폴더 깊이와 상관없다).
+
+  ■ 새 덱 만들기: 이 파일(또는 template/index.html)을 public/slides/내덱/index.html 로 복사해 내용만 고친다 → 커밋·푸시하면 …/slides/내덱/ 으로 배포된다.
+    로컬 미리보기는 개발 서버(pnpm dev)의 /slides/index.html 또는 /slides/내덱/index.html.
+
+  ■ 슬라이드: <main id="stage"> 안에 <section class="slide"> 를 쓴 만큼이 한 장씩이다(16:9, 안쪽 크기는 1600×900 기준).
+    클래스  title(표지) · section(구분 장) · center(가운데 정렬) · framed(제목 + 큰 임베드 칸 하나)
+    안쪽    h1 h2 h3 p ul ol(li) table pre code blockquote img hr · 2단 <div class="cols">(.wide-left / .wide-right) · .small .muted
+    단계    class="step" 를 붙인 요소는 → 를 누를 때마다 하나씩 나타난다(앞 장으로 돌아오면 모두 보인다).
+
+  ■ 다른 페이지 넣기: data-src="주소" 를 슬라이드(<section>) 자체에 쓰면 화면 전체, <div class="embed-box" data-src="…"> 로 쓰면 그 칸만.
+    주소  /clock/ 처럼 / 로 시작하면 이 사이트 안의 페이지, https://… 는 외부 사이트(사이트가 임베드를 허용해야 보인다).
+    선택  data-title="이름"(목록·인쇄에 표시)   data-preload="off"(바로 앞뒤 장일 때 미리 불러오지 않음)
+          data-keys="off"(같은 출처 페이지 안에서 ←→ 등을 덱이 가로채지 않음)   data-allow="…"(iframe allow 속성; 기본 fullscreen; clipboard-write)
+          data-sandbox="…"(iframe sandbox 속성; 쓰지 않으면 제한 없음)
+    현재 장과 바로 앞뒤 장의 임베드만 불러오고 그보다 먼 것은 없앤다(소리·부하 방지). 다시 오면 새로 불러온다.
+
+  ■ 키: → ↓ PageDown 스페이스 = 다음 · ← ↑ PageUp Shift+스페이스 = 이전 · Home End · 숫자+Enter = 번호로 · O 목록 · F 전체 화면 · D 흰/검은 바탕 · T 고딕/세리프 · Esc 도구줄 보이기
+  ■ 주소 옵션: ?theme=dark   ?font=serif   #5(처음부터 5번 장)    ※ 주소창은 덱이 바꾸지 않는다. 바탕·글꼴 선택은 이 브라우저에, 보던 장은 이 탭에만 저장된다.
+  ■ 인쇄: 브라우저 인쇄(Ctrl+P) → PDF 로 저장하면 한 쪽에 한 장(임베드는 이름·주소만).
+-->
+</head>
+<body>
+<noscript>JavaScript is required.</noscript>
+
+<main id="stage">
+
+  <section class="slide title" data-title="표지">
+    <h1>슬라이드 웹페이지</h1>
+    <p class="sub">PPT처럼 넘기고, 슬라이드 안에 다른 페이지를 넣는다</p>
+    <p class="hint">→ ← PageUp / PageDown 이동 &nbsp;·&nbsp; F 전체 화면 &nbsp;·&nbsp; O 목록 &nbsp;·&nbsp; 마우스를 움직이면 도구줄</p>
+  </section>
+
+  <section class="slide" data-title="할 수 있는 것">
+    <h2>할 수 있는 것</h2>
+    <ul>
+      <li class="step">키보드·리모컨(PageUp / PageDown)으로 한 장씩 넘긴다</li>
+      <li class="step">슬라이드 안에 <strong>다른 웹페이지</strong>를 넣는다 — 시험 시계 같은 우리 페이지도, 외부 사이트도</li>
+      <li class="step">항목이 한 줄씩 나타나게 한다 (지금 이 화면처럼)</li>
+      <li class="step">흰/검은 바탕, 고딕/세리프 글꼴 전환 · 인쇄하면 한 쪽에 한 장</li>
+    </ul>
+  </section>
+
+  <section class="slide" data-title="슬라이드 추가하는 법">
+    <h2>슬라이드 추가하는 법</h2>
+    <div class="cols">
+      <ol>
+        <li><code>index.html</code> 을 복사해 새 폴더에 둔다<br><span class="small muted">public/slides/내덱/index.html</span></li>
+        <li>글만 바꾸고, 장을 늘리려면 오른쪽 블록을 복사한다</li>
+        <li>커밋·푸시하면 몇 분 뒤 <code>/slides/내덱/</code> 에 올라간다</li>
+      </ol>
+      <pre><code>&lt;section class="slide"&gt;
+  &lt;h2&gt;제목&lt;/h2&gt;
+  &lt;ul&gt;
+    &lt;li&gt;내용&lt;/li&gt;
+    &lt;li class="step"&gt;추가&lt;/li&gt;
+  &lt;/ul&gt;
+&lt;/section&gt;</code></pre>
+    </div>
+  </section>
+
+  <section class="slide" data-title="다른 페이지 넣기 ① 슬라이드 전체">
+    <h2>다른 페이지 넣기 ① 슬라이드 전체</h2>
+    <div class="cols">
+      <ul>
+        <li><code>data-src</code> 에 주소를 쓰면 그 페이지가 화면을 가득 채운다</li>
+        <li>이 사이트 안은 <code>/clock/</code> 처럼 <code>/</code> 로 시작</li>
+        <li>다음 장이 임베드면 미리 불러 둔다</li>
+      </ul>
+      <pre><code>&lt;section class="slide"
+         data-src="/clock/"
+         data-title="시험 시계"&gt;
+&lt;/section&gt;</code></pre>
+    </div>
+  </section>
+
+  <!-- 임베드 예 ① — 슬라이드 전체. 같은 출처(이 사이트)의 시험 시계. 안쪽을 클릭해도 ← → PageUp PageDown 으로 넘어간다 -->
+  <section class="slide" data-src="/clock/" data-title="시험 시계 (임베드 예)"></section>
+
+  <section class="slide" data-title="다른 페이지 넣기 ② 일부 칸">
+    <h2>다른 페이지 넣기 ② 일부 칸</h2>
+    <div class="cols wide-left">
+      <div>
+        <ul>
+          <li>글과 함께 한쪽 칸에만 넣을 수 있다</li>
+          <li>오른쪽은 외부 사이트(OpenStreetMap)</li>
+        </ul>
+        <pre style="margin-top:36px"><code>&lt;div class="embed-box"
+     data-src="https://…"
+     style="height:520px"&gt;&lt;/div&gt;</code></pre>
+      </div>
+      <div class="embed-box" data-src="https://www.openstreetmap.org/export/embed.html?bbox=126.9625%2C37.5530%2C126.9935%2C37.5800&amp;layer=mapnik&amp;marker=37.5665%2C126.9780" data-title="OpenStreetMap" style="height:560px"></div>
+    </div>
+  </section>
+
+  <section class="slide" data-title="키와 단추">
+    <h2>키와 단추</h2>
+    <table>
+      <tr><th>키</th><th>동작</th></tr>
+      <tr><td>→ ↓ PageDown 스페이스</td><td>다음 (남은 항목이 있으면 한 줄 더)</td></tr>
+      <tr><td>← ↑ PageUp Shift+스페이스</td><td>이전</td></tr>
+      <tr><td>Home / End</td><td>처음 / 마지막 장</td></tr>
+      <tr><td>숫자 + Enter</td><td>그 번호의 장으로</td></tr>
+      <tr><td>O</td><td>슬라이드 목록</td></tr>
+      <tr><td>F · D · T</td><td>전체 화면 · 흰/검은 바탕 · 고딕/세리프</td></tr>
+      <tr><td>Esc</td><td>도구줄 보이기 · 목록 닫기</td></tr>
+    </table>
+  </section>
+
+  <section class="slide" data-title="임베드가 안 보이거나 키가 안 먹을 때">
+    <h2>임베드가 안 보이거나 키가 안 먹을 때</h2>
+    <ul>
+      <li>일부 사이트는 다른 페이지 안에 넣는 것을 막는다 → 도구줄의 <strong>Open</strong> 으로 새 탭에서 열거나, 그 사이트의 임베드용 주소(예: YouTube 는 <code>/embed/영상ID</code>)를 쓴다</li>
+      <li>이 사이트의 페이지는 안쪽을 클릭해도 ← → PageUp PageDown 이 그대로 먹는다</li>
+      <li>외부 사이트는 클릭하면 키가 그 페이지로 들어간다 → 그동안 도구줄(Prev / Next)이 계속 보이니 그걸 누른다</li>
+    </ul>
+  </section>
+
+  <section class="slide title" data-title="끝">
+    <h1>이 덱을 고쳐 쓰세요</h1>
+    <p class="sub">public/slides/index.html</p>
+  </section>
+
+</main>
+
+<script src="/slides/deck.js"></script>
+</body>
+</html>

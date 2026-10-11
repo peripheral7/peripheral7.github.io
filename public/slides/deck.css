@@ -1,0 +1,126 @@
+/* 슬라이드 덱 공통 스타일 — 흑백만. deck.js 와 짝.
+   무대는 1600×900(16:9)이고 화면 크기에 맞춰 통째로 확대·축소된다 → 여기 적힌 크기(px)는 모두 "무대 안" 기준이다. */
+
+/* 기본 고딕체: 블로그 메인 페이지 제목과 같은 Pretendard(사이트의 /fonts 에 올려 둔 가변 글꼴 파일, 한 번 받으면 브라우저가 보관).
+   받지 못하면(오프라인 등) 기기의 고딕체로 대신 보인다. 세리프를 고르면 이 파일은 받지 않는다. */
+@font-face{font-family:"Pretendard Variable";font-weight:45 920;font-style:normal;font-display:swap;src:local("Pretendard Variable"),url("../fonts/PretendardVariable.woff2") format("woff2-variations"),url("../fonts/PretendardVariable.woff2") format("woff2")}
+
+*{box-sizing:border-box}
+html,body{margin:0;height:100%;overflow:hidden;overscroll-behavior:none}   /* none: 좌우로 쓸어 넘길 때 브라우저의 "뒤로 가기" 스와이프·새로 고침 당기기가 끼어들지 않게 */
+html{background:#fff;color:#000}
+html.dark{background:#000;color:#fff}
+body{position:relative;font-family:"Pretendard Variable",Pretendard,Bahnschrift,"Helvetica Neue",Helvetica,Arial,"Malgun Gothic","Apple SD Gothic Neo","Noto Sans KR",sans-serif;font-variant-numeric:lining-nums;text-rendering:geometricPrecision;-webkit-font-smoothing:antialiased}
+/* 세리프 옵션: Libre Baskerville(굵은 글자꼴 포함) → Baskerville(맥) → Cambria … 기기에 있는 글꼴만 쓴다. 한글은 뒤쪽 명조 */
+html.font-serif body{font-family:"Libre Baskerville",Baskerville,Cambria,Charter,"Bitstream Charter","Noto Serif","DejaVu Serif","Times New Roman","Liberation Serif","Noto Serif KR","HCR Batang",NanumMyeongjo,Batang,"Apple Myungjo",AppleMyungjo,serif}
+body.idle{cursor:none}
+[hidden]{display:none !important}
+::selection{background:#000;color:#fff}
+html.dark ::selection{background:#fff;color:#000}
+noscript{position:fixed;left:0;top:0;right:0;padding:24px;font-size:20px}
+
+/* ───────── 무대와 슬라이드 ───────── */
+#stage{position:absolute;left:0;top:0;width:1600px;height:900px;overflow:hidden;touch-action:pan-y;-webkit-transform-origin:0 0;transform-origin:0 0}
+.slide{position:absolute;left:0;top:0;right:0;bottom:0;padding:92px 120px;display:flex;flex-direction:column;justify-content:flex-start;visibility:hidden;overflow:hidden;word-break:keep-all;overflow-wrap:break-word}   /* keep-all: 한글을 단어 중간에서 줄바꿈하지 않고 띄어쓰기에서만 */
+.slide.active{visibility:visible;animation:deckIn .2s ease-out}
+@keyframes deckIn{from{opacity:0}to{opacity:1}}
+@media (prefers-reduced-motion:reduce){.slide.active{animation:none}}
+
+/* 한 줄씩 나타나는 항목: 자리는 미리 잡혀 있어 나타나도 글이 밀리지 않는다.
+   (visibility 를 쓰면 안 된다 — 자식의 visibility:visible 이 숨겨진 슬라이드의 visibility:hidden 을 덮어써서 지난 장의 글이 남아 보인다) */
+.step{opacity:0;pointer-events:none;transition:opacity .15s}
+.step.shown{opacity:1;pointer-events:auto}
+.slide.instant .step{transition:none}   /* 장에 들어올 때 단계를 처음 상태로 맞추는 동안은 서서히 사라지는 효과를 없앤다 */
+@media (prefers-reduced-motion:reduce){.step{transition:none}}
+
+/* ───────── 글 ───────── */
+.slide h1{margin:0;font-size:132px;line-height:1.08;font-weight:700;letter-spacing:-.02em}
+.slide h2{margin:0 0 52px;padding-left:36px;border-left:7px solid currentColor;font-size:72px;line-height:1.12;font-weight:700;letter-spacing:-.01em}
+.slide h3{margin:0 0 18px;font-size:48px;line-height:1.2;font-weight:700}
+.slide p{margin:0 0 .6em;font-size:44px;line-height:1.5}
+.slide ul,.slide ol{margin:0;padding:0;list-style:none;font-size:44px;line-height:1.45}
+.slide li{position:relative;margin:.5em 0;padding-left:1.5em}
+.slide ul>li::before{content:"";position:absolute;left:0;top:.72em;width:.8em;height:3px;background:currentColor}
+.slide ol{counter-reset:deckn}
+.slide ol>li{counter-increment:deckn}
+.slide ol>li::before{content:counter(deckn);position:absolute;left:0;top:0;font-weight:700}
+.slide li ul,.slide li ol{margin-top:.2em;font-size:.84em}
+.slide strong,.slide b{font-weight:700}
+.slide a{color:inherit;text-decoration:underline;text-underline-offset:.15em}
+.slide .small{font-size:32px}
+.slide .muted{opacity:.62}
+.slide code{font-family:Consolas,"Cascadia Mono","SFMono-Regular",Menlo,"Courier New",monospace;font-size:.84em;border:2px solid currentColor;padding:.04em .28em;white-space:nowrap}
+.slide pre{margin:0;padding:26px 30px;border:3px solid currentColor;font-family:Consolas,"Cascadia Mono","SFMono-Regular",Menlo,"Courier New",monospace;font-size:29px;line-height:1.5;white-space:pre-wrap;word-break:normal;overflow:hidden}
+.slide pre code{border:0;padding:0;font-size:inherit;white-space:inherit}
+.slide blockquote{margin:0;padding-left:36px;border-left:7px solid currentColor;font-size:52px;line-height:1.4}
+.slide table{border-collapse:collapse;font-size:36px;line-height:1.3}
+.slide th,.slide td{border:2px solid currentColor;padding:10px 26px;text-align:left}
+.slide th{font-weight:700}
+.slide img{max-width:100%;max-height:100%}
+.slide hr{width:120px;margin:40px 0;border:0;border-top:3px solid currentColor}
+
+/* ───────── 배치 ───────── */
+.cols{display:grid;grid-template-columns:1fr 1fr;gap:72px;align-items:start}
+.cols.wide-left{grid-template-columns:1.25fr 1fr}
+.cols.wide-right{grid-template-columns:1fr 1.25fr}
+.cols>*{min-width:0}
+.slide.center{align-items:center;justify-content:center;text-align:center}
+.slide.title{justify-content:center;padding-left:150px}
+.slide.title h1{padding-left:48px;border-left:10px solid currentColor}
+.slide.title .sub{margin:44px 0 0 58px;font-size:50px;line-height:1.35;opacity:.72}
+.slide.title .hint{margin:72px 0 0 58px;font-size:30px;opacity:.55}
+.slide.section{justify-content:center;padding-left:150px}
+.slide.section h1{font-size:150px}
+
+/* ───────── 임베드(다른 페이지 넣기) ───────── */
+/* 슬라이드 전체: <section class="slide" data-src="주소"> — 여백 없이 화면을 꽉 채운다 */
+.slide.embed{padding:0}
+.slide.embed>iframe,.embed-box>iframe{position:absolute;left:0;top:0;width:100%;height:100%;border:0;background:#fff}
+/* 슬라이드의 일부 칸: <div class="embed-box" data-src="주소">. 높이는 style="height:…" 로 바꾼다 */
+.embed-box{position:relative;height:560px;border:3px solid currentColor;background:#fff;overflow:hidden}
+.slide.framed .embed-box{flex:1;height:auto;min-height:0}
+
+/* ───────── 도구줄(마우스·키·터치가 있으면 3초간 보인다) ─────────
+   위쪽에 둔다: 임베드한 페이지의 자체 도구줄(시험 시계)·영상 조작줄은 보통 아래쪽에 있어 겹치지 않게 */
+#ui{position:fixed;left:14px;right:14px;top:12px;z-index:20;display:flex;flex-wrap:wrap;align-items:center;gap:6px;font-size:14px;line-height:1.2;opacity:0;pointer-events:none;-webkit-transition:opacity .25s;transition:opacity .25s}
+body.ui #ui{opacity:1;pointer-events:auto}
+#counter{margin-right:auto;padding:6px 12px;border:2px solid #000;background:#fff;color:#000;font-weight:600;font-variant-numeric:tabular-nums}
+#ui button{font:inherit;color:#000;background:#fff;border:2px solid #000;border-radius:0;padding:6px 14px;cursor:pointer;-webkit-appearance:none;appearance:none}
+#ui button:hover{background:#000;color:#fff}
+#ui button:disabled{opacity:.35;cursor:default;background:#fff;color:#000}
+#ui button:focus-visible,#overview .thumb:focus-visible{outline:2px solid #888;outline-offset:2px}
+html.dark #counter,html.dark #ui button{background:#000;color:#fff;border-color:#fff}
+html.dark #ui button:hover{background:#fff;color:#000}
+html.dark #ui button:disabled{background:#000;color:#fff}
+#bar{position:fixed;left:0;top:0;z-index:21;height:4px;width:0;background:#000;opacity:0;-webkit-transition:opacity .25s,width .2s;transition:opacity .25s,width .2s}
+body.ui #bar{opacity:1}
+html.dark #bar{background:#fff}
+#sr{position:absolute;width:1px;height:1px;margin:-1px;padding:0;overflow:hidden;clip:rect(0 0 0 0);border:0}
+
+/* ───────── 목록(O 키): 슬라이드 축소판 ───────── */
+#overview{position:fixed;left:0;top:0;right:0;bottom:0;z-index:30;overflow:auto;padding:28px 28px 84px;background:#fff;color:#000;display:grid;grid-template-columns:repeat(auto-fill,minmax(300px,1fr));gap:26px;align-content:start}
+html.dark #overview{background:#000;color:#fff}
+#overview .thumb{position:relative;display:block;width:100%;aspect-ratio:16/9;padding:0;border:3px solid currentColor;background:transparent;color:inherit;cursor:pointer;overflow:hidden;opacity:.8;-webkit-appearance:none;appearance:none}
+#overview .thumb:hover,#overview .thumb.cur{opacity:1}
+#overview .thumb.cur{outline:4px solid currentColor;outline-offset:4px}
+#overview .thumb .in{position:absolute;left:0;top:0;width:1600px;height:900px;text-align:left;-webkit-transform-origin:0 0;transform-origin:0 0;pointer-events:none}
+#overview .thumb .slide{visibility:visible;animation:none}
+#overview .thumb .step{opacity:1;transition:none}
+#overview .thumb .num{position:absolute;left:0;bottom:0;padding:2px 10px;background:#000;color:#fff;font:700 14px/1.4 inherit}
+html.dark #overview .thumb .num{background:#fff;color:#000}
+/* 축소판 안의 임베드 자리: 실제 페이지 대신 이름과 주소만 */
+#overview .ph{display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;font-size:44px;line-height:1.4;white-space:pre-line}
+#overview .ph::after{content:"▶ " attr(data-title) "\A" attr(data-src);display:block;margin-top:.4em;font-size:.7em;opacity:.7;overflow-wrap:anywhere}
+#overview .embed-box.ph{border-style:dashed}
+
+/* ───────── 인쇄(PDF 저장): 슬라이드 한 장 = 한 쪽, 임베드는 이름·주소만 ───────── */
+@media print{
+  @page{size:1600px 900px;margin:0}
+  html,html.dark{height:auto;overflow:visible;background:#fff;color:#000}
+  body{height:auto;overflow:visible}
+  #stage{position:static !important;left:auto !important;top:auto !important;width:1600px;height:auto;overflow:visible;-webkit-transform:none !important;transform:none !important}
+  .slide,.slide.embed{position:relative !important;width:1600px;height:900px;visibility:visible !important;animation:none;break-after:page;page-break-after:always;overflow:hidden}
+  .step{opacity:1 !important}
+  iframe,#ui,#bar,#overview,#sr,noscript{display:none !important}
+  .slide[data-src],.embed-box{display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;font-size:44px;line-height:1.4;white-space:pre-line}
+  .slide[data-src]::after,.embed-box::after{content:"▶ " attr(data-title) "\A" attr(data-src);display:block;font-size:.7em;opacity:.7;overflow-wrap:anywhere}
+}

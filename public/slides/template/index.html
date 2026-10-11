@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="robots" content="noindex">
+<title>새 슬라이드</title>
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect x='3' y='7' width='26' height='18' fill='%23fff' stroke='%23000' stroke-width='3'/%3E%3Cpath d='M8 13h10M8 18h16' stroke='%23000' stroke-width='2.5'/%3E%3C/svg%3E">
+<link rel="stylesheet" href="/slides/deck.css">
+<!--
+  새 덱의 시작점. 이 폴더(template)를 통째로 복사해 이름을 바꾸고(public/slides/내덱/) 아래 슬라이드를 고친다.
+  <section class="slide"> 한 개 = 한 장. 모든 속성·클래스·키 설명은 /slides/ (public/slides/index.html) 맨 위 주석과 덱 안에 있다.
+-->
+</head>
+<body>
+<noscript>JavaScript is required.</noscript>
+
+<main id="stage">
+
+  <!-- 표지 -->
+  <section class="slide title">
+    <h1>제목</h1>
+    <p class="sub">부제</p>
+  </section>
+
+  <!-- 내용: .step 을 붙인 항목은 → 를 누를 때마다 하나씩 나타난다 -->
+  <section class="slide">
+    <h2>소제목</h2>
+    <ul>
+      <li>내용</li>
+      <li class="step">눌러서 나타나는 내용</li>
+    </ul>
+  </section>
+
+  <!-- 다른 페이지를 화면 전체에: data-src 에 주소(이 사이트 안은 /로 시작, 외부는 https://…) -->
+  <section class="slide" data-src="/clock/" data-title="시험 시계"></section>
+
+</main>
+
+<script src="/slides/deck.js"></script>
+</body>
+</html>
