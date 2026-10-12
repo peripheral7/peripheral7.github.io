@@ -96,8 +96,50 @@ export const searchAvailable = () => Boolean(SEARCH_URL || (MAP_KEY_ID && !authF
 /** 장소 이름(아파트·학교) 검색까지 되는지 — 아니면 주소 검색만 된다 */
 export const placeSearchAvailable = () => Boolean(SEARCH_URL)
 
-/** 검색창 하나로: 장소(Worker) + 주소(지오코더) 결과를 합친다. 같은 좌표는 하나만. */
-export async function search(query: string): Promise<{ places: Place[]; errors: string[] }> {
+// ── 띄어쓰기 너그럽게 ────────────────────────────────────────────────
+// 네이버 검색·지오코더는 띄어쓰기에 민감하다("영통로200번길124-16", "망포역 래미안"↔"망포역래미안").
+// 1) 검색 전에 공백을 하나로 줄이고, 2) 결과가 없을 때만 띄어쓰기를 고친 검색어로 한 번 더 찾는다
+//    (장소 검색은 Worker 사용량 제한이 있어서 처음부터 여러 번 부르지 않는다).
+
+/** 앞뒤 공백 제거 + 연속 공백을 하나로 */
+export const normalizeQuery = (q: string) => q.replace(/\s+/g, ' ').trim()
+
+const PROVINCE = /^((?:서울|부산|대구|인천|광주|대전|울산)(?:특별시|광역시)?|세종(?:특별자치시)?|경기도?|강원(?:특별자치)?도?|충청[남북]도|충[남북]|전라[남북]도|전[남북]|전북특별자치도|경상[남북]도|경[남북]|제주(?:특별자치)?도?)(?=[가-힣])/
+/** 주소처럼 보이나: 시도 이름으로 시작하거나, "○○로/길/번길/동" 뒤에 숫자가 붙어 있다 — 장소 이름은 건드리지 않으려고 */
+const looksLikeAddress = (q: string) => PROVINCE.test(q.replace(/\s+/g, '')) || /[가-힣](?:로|길|동|리)\s?\d/.test(q)
+
+/** 붙여 쓴 주소에 띄어쓰기 넣기: 시도·시·군·구 사이, "○○로/길" 뒤 건물번호, "○○번길" 뒤 번호, "○○동/리/가" 뒤 지번. 주소처럼 안 보이면 그대로. */
+export function spaceAddress(q: string): string {
+  if (!looksLikeAddress(q)) return q
+  return normalizeQuery(q
+    .replace(PROVINCE, '$1 ') // 경기도수원시 → 경기도 수원시
+    .replace(/([가-힣]{1,4}시)(?=[가-힣]{1,4}[구군](?![가-힣]))/g, '$1 ') // 수원시영통구 → 수원시 영통구
+    .replace(/([가-힣]{1,4}[시군구])(?=[가-힣]{1,8}(?:로|길|동|읍|면|리)(?:\d|\s|$))/g, '$1 ') // 영통구신원로 → 영통구 신원로
+    .replace(/(\d+번길)(?=\d)/g, '$1 ') // 신원로136번길16 → 신원로136번길 16
+    .replace(/([가-힣](?:로|길))(?=\d+(?:-\d+)?(?![\d-]*번길))/g, '$1 ') // 덕영대로1732 → 덕영대로 1732(번길 앞 숫자는 그대로)
+    .replace(/([가-힣](?:동|리|가))(?=\d+(?:-\d+)?(?:\s|$))/g, '$1 ')) // 영통동123-4 → 영통동 123-4
+}
+
+/** 결과가 없을 때 한 번 더 찾아볼 검색어(원래와 다를 때만, 없으면 null).
+ *  주소처럼 보이면 띄어쓰기를 넣은 주소. 장소 이름이면: 띄어 썼으면 붙여서, 붙여 썼으면 "○○역"·"○○대학교" 뒤를 띄워서. */
+export function retryQuery(q: string): string | null {
+  if (looksLikeAddress(q)) {
+    const spaced = spaceAddress(q)
+    return spaced !== q ? spaced : null
+  }
+  const other = /\s/.test(q) ? q.replace(/\s+/g, '') : normalizeQuery(q.replace(/([가-힣]{1,6}(?:역|대학교))(?=[가-힣]{2,})/g, '$1 '))
+  return other !== q && other.length >= 2 ? other : null
+}
+
+/** 검색창 하나로: 장소(Worker) + 주소(지오코더) 결과를 합친다. 같은 좌표는 하나만. 아무것도 없으면 띄어쓰기를 고쳐 한 번 더. */
+export async function search(raw: string): Promise<{ places: Place[]; errors: string[] }> {
+  const query = normalizeQuery(raw)
+  const first = await searchOnce(query)
+  const again = first.places.length ? null : retryQuery(query)
+  return again ? searchOnce(again) : first
+}
+
+async function searchOnce(query: string): Promise<{ places: Place[]; errors: string[] }> {
   const jobs: Promise<Place[]>[] = []
   if (SEARCH_URL) jobs.push(searchPlaces(query))
   if (MAP_KEY_ID && !authFailed) jobs.push(geocode(query))

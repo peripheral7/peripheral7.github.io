@@ -1,7 +1,7 @@
 import { useEffect, useRef, useState } from 'react'
 import { HUB_CATEGORIES, MAX_HUBS, MAX_TRIPS, NEW_HUB_TRIPS, type Hub, type Place } from '../data'
 import { guessHubCategory, money } from '../store'
-import { placeSearchAvailable, search, searchAvailable } from '../naver'
+import { normalizeQuery, placeSearchAvailable, search, searchAvailable } from '../naver'
 
 // 지도 위 검색창 하나: 후보지(아파트·주소)와 목적지(학교·회사 등)를 같은 창에서 찾는다.
 // - 글자를 치다 잠깐 멈추면(LIVE_DELAY) 저절로 검색해 아래에 결과를 띄운다. Enter 는 바로 검색.
@@ -56,7 +56,7 @@ export function SearchBox({ hubs, tripsOf, onCandidate, onHub, onPreview, onResu
   const reset = () => { setPicked(null); setDraft(null); onPreview(null) }
 
   const run = async (raw: string) => {
-    const query = raw.trim()
+    const query = normalizeQuery(raw) // "망포  래미안"·"망포 래미안 " 은 같은 검색어(다시 부르지 않음)
     if (!enabled) { setItems([]); setMsg('네이버 키를 넣고 빌드하면 검색할 수 있습니다(README 10절).'); return }
     if (query.length < MIN_LEN) { seq.current++; setItems([]); setMsg(''); setBusy(false); reset(); return }
     const id = ++seq.current

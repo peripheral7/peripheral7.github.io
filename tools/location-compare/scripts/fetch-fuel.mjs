@@ -9,7 +9,7 @@
 //   node scripts/fetch-fuel.mjs --dry-run  # 부를 주소만 보여 주고 부르지 않음
 //   그다음 npm run build → 커밋.
 //
-// 키: 이 폴더의 .env.local(git 제외) 또는 환경변수 OPINET_API_KEY(오피넷 무료 API 인증키, 요청 주소의 code= 값)
+// 키: 이 폴더의 .env.local(git 제외) 또는 환경변수 OPINET_API_KEY(오피넷 무료 API 인증키, 요청 주소의 certkey= 값)
 // 호출 수: 시도 목록 1 + 시도 평균 1 + 시도마다 시군구 평균 1(17개) ≈ 19회(무료 API 하루 한도 1,500회 안쪽).
 import fs from 'node:fs'
 import path from 'node:path'
@@ -34,8 +34,8 @@ if (!KEY && !dryRun) {
   process.exit(1) // 아직 아무 연결도 없으니 바로 끝내도 된다
 }
 
-const url = (api, q = {}) => `${BASE}/${api}?${new URLSearchParams({ out: 'json', code: KEY ?? '<키>', ...q })}`
-const hide = (u) => u.replace(/code=[^&]+/, 'code=***')
+const url = (api, q = {}) => `${BASE}/${api}?${new URLSearchParams({ out: 'json', certkey: KEY ?? '<키>', ...q })}`
+const hide = (u) => u.replace(/certkey=[^&]+/, 'certkey=***')
 
 async function call(api, q) {
   const u = url(api, q)
@@ -69,6 +69,7 @@ async function main() {
   }
   const out = { at: new Date().toISOString(), source: 'opinet', prodcd: PRODCD, sido: {}, sigun: {} }
   for (const o of sidoAvg) {
+    if (o.PRODCD && o.PRODCD !== PRODCD) continue
     const name = pick(o, 'SIDONM', 'AREA_NM'), p = price(o)
     if (name && p > 0 && name !== '전국') out.sido[name] = p
   }
@@ -77,8 +78,10 @@ async function main() {
     if (!cd || !sidoName) continue
     const list = await call('avgSigunPrice.do', { sido: cd, prodcd: PRODCD })
     for (const o of list) {
-      const name = pick(o, 'SIGUNNM', 'AREA_NM'), p = price(o)
-      if (name && p > 0) out.sigun[`${sidoName} ${name}`] = p
+      if (o.PRODCD && o.PRODCD !== PRODCD) continue
+      const name = String(pick(o, 'SIGUNNM', 'AREA_NM') ?? '').trim(), p = price(o)
+      // 오피넷 시군구 이름은 "경기 수원시"처럼 시도가 앞에 붙어 온다(안 붙어 오면 붙인다)
+      if (name && p > 0) out.sigun[name.startsWith(`${sidoName} `) ? name : `${sidoName} ${name}`] = p
     }
   }
   console.log(`시도 ${Object.keys(out.sido).length}곳 · 시군구 ${Object.keys(out.sigun).length}곳`)
