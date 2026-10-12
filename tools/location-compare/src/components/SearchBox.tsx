@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState } from 'react'
 import { MAX_HUBS, type Hub, type Place } from '../data'
-import { search, searchAvailable } from '../naver'
+import { placeSearchAvailable, search, searchAvailable } from '../naver'
 
 // 지도 위 검색창 하나: 부동산(아파트·주소)과 목적지(학교·회사 등)를 같은 창에서 찾고, 결과에서 바로 후보지/목적지로 넣는다.
 // API 사용량을 아끼려고 글자를 칠 때마다가 아니라 Enter·검색 단추를 누를 때만 부른다.
@@ -35,7 +35,7 @@ export function SearchBox({ hubs, onCandidate, onHub }: Props) {
       const { places, errors } = await search(query)
       last.current = query
       setItems(places)
-      setMsg(places.length ? '' : errors[0] || '검색 결과가 없습니다.')
+      setMsg(places.length ? '' : errors[0] || (placeSearchAvailable() ? '검색 결과가 없습니다.' : '결과가 없습니다. 지금은 도로명·지번 주소로만 찾을 수 있어요(아파트·학교 이름 검색은 준비 중).'))
     } catch (err) { setItems([]); setMsg((err as Error).message || '검색에 실패했습니다.') }
     finally { setBusy(false) }
   }
@@ -47,7 +47,7 @@ export function SearchBox({ hubs, onCandidate, onHub }: Props) {
       <form className="search-bar" onSubmit={run} role="search">
         <svg viewBox="0 0 20 20" aria-hidden><circle cx="9" cy="9" r="6" fill="none" stroke="currentColor" strokeWidth="1.8" /><path d="m13.5 13.5 4 4" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" /></svg>
         <input value={q} onChange={(e) => setQ(e.target.value)} onFocus={() => (items.length || msg) && setOpen(true)} onKeyDown={(e) => { if (e.key === 'Escape') setOpen(false) }}
-          placeholder={enabled ? '아파트·주소·학교·회사 검색' : '검색 준비 중 (네이버 키 필요)'} aria-label="후보지·목적지 검색" maxLength={40} />
+          placeholder={!enabled ? '검색 준비 중 (네이버 키 필요)' : placeSearchAvailable() ? '아파트·주소·학교·회사 검색' : '도로명·지번 주소 검색 (예: 영통로 200번길 124-16)'} aria-label="후보지·목적지 검색" maxLength={40} />
         <button type="submit" disabled={busy}>{busy ? '…' : '검색'}</button>
       </form>
       {open && (msg || items.length > 0) && (

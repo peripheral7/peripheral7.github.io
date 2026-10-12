@@ -49,10 +49,12 @@ async function geocode(query: string): Promise<Place[]> {
     naver.maps.Service.geocode({ query }, (status: number, response: any) => {
       if (status !== naver.maps.Service.Status.OK) return resolve([])
       const list = response?.v2?.addresses ?? []
-      resolve(list.slice(0, 5).map((a: any) => ({
-        name: a.roadAddress || a.jibunAddress, address: a.roadAddress || a.jibunAddress,
-        lat: Number(a.y), lng: Number(a.x), category: '주소',
-      })))
+      resolve(list.slice(0, 5).map((a: any) => {
+        const building = (a.addressElements ?? []).find((e: any) => e.types?.includes('BUILDING_NAME'))?.longName
+        const road = a.roadAddress || a.jibunAddress
+        const address = building && road.endsWith(building) ? road.slice(0, -building.length).trim() : road
+        return { name: building || address, address, lat: Number(a.y), lng: Number(a.x), category: '주소' }
+      }))
     })
   })
 }
@@ -91,6 +93,8 @@ async function searchPlaces(query: string): Promise<Place[]> {
 }
 
 export const searchAvailable = () => Boolean(SEARCH_URL || (MAP_KEY_ID && !authFailed))
+/** 장소 이름(아파트·학교) 검색까지 되는지 — 아니면 주소 검색만 된다 */
+export const placeSearchAvailable = () => Boolean(SEARCH_URL)
 
 /** 검색창 하나로: 장소(Worker) + 주소(지오코더) 결과를 합친다. 같은 좌표는 하나만. */
 export async function search(query: string): Promise<{ places: Place[]; errors: string[] }> {
