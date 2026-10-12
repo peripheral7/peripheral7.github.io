@@ -216,6 +216,7 @@ npx wrangler d1 create place-search                 # 나온 database_id 를 wra
 npx wrangler d1 execute place-search --remote --file=schema.sql
 npx wrangler secret put NAVER_CLIENT_ID             # API HUB Client ID
 npx wrangler secret put NAVER_CLIENT_SECRET         # API HUB Client Secret
+#    (보관용 사본: tools/location-compare/.env.local 의 NAVER_HUB_CLIENT_ID / NAVER_HUB_CLIENT_SECRET — Maps 키 NAVER_CLIENT_ID/SECRET 와 다른 키)
 npx wrangler secret put SALT                        # 아무 긴 임의 문자열
 npx wrangler secret put TURNSTILE_SECRET            # (선택) Cloudflare Turnstile 위젯의 Secret
 npx wrangler deploy                                 # → https://place-search.<계정>.workers.dev
@@ -238,8 +239,8 @@ npm run build
 ```
 하루 호출 수를 `.naver-usage.json`(git 제외)에 세고, 상한을 넘을 것 같으면 한 번도 부르지 않는다. 401·429 를 받으면 즉시 멈춘다. 검색으로 새로 넣은 후보지·목적지는 실측 대상이 아니다(기본 목록만). 네이버 클라우드에는 대중교통 길찾기가 없어 대중교통·도보는 추정값이다.
 
-### 공공데이터포털 API 키(상권·버스 — 이 PC 에서만, 준비 중)
-`tools/location-compare/.env.local`(git 제외)에 칸을 만들어 두었다. 값은 data.go.kr 마이페이지의 **일반 인증키(Decoding)**. 한 계정의 키는 승인된 API 모두에 같으므로 보통 `DATA_GO_KR_SERVICE_KEY` 하나만 채우고, 개별 칸은 비워 두면 공용 키를 쓴다. `VITE_` 를 붙이지 않는다(붙이면 공개 페이지에 들어간다). 이름에 숫자를 쓰지 않는다(스크립트의 `.env.local` 읽기가 `[A-Z_]+` 만 받는다).
+### 공공데이터포털 API 키(상권·버스 — 이 PC 에서만)
+`tools/location-compare/.env.local`(git 제외)의 `DATA_GO_KR_SERVICE_KEY` 에 넣었다(2026-10-13 상권 storeListInRadius 호출 확인). 값은 data.go.kr 마이페이지의 **일반 인증키(Decoding)**. 한 계정의 키는 승인된 API 모두에 같으므로 보통 `DATA_GO_KR_SERVICE_KEY` 하나만 채우고, 개별 칸은 비워 두면 공용 키를 쓴다. `VITE_` 를 붙이지 않는다(붙이면 공개 페이지에 들어간다). 이름에 숫자를 쓰지 않는다(스크립트의 `.env.local` 읽기가 `[A-Z_]+` 만 받는다).
 
 | 변수 | API | 엔드포인트 |
 |---|---|---|
