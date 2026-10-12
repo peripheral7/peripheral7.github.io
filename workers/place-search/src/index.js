@@ -87,23 +87,23 @@ export default {
 
       if (!(await verifyTurnstile(env, request.headers.get('X-Turnstile-Token'), ip))) return json({ error: 'turnstile' }, 403, h)
 
-      // 캐시(같은 검색어)
-      const cache = caches.default
-      const cacheKey = new Request(`https://place-search.cache/search?q=${encodeURIComponent(q.toLowerCase())}`)
-      const hit = await cache.match(cacheKey)
-      if (hit) return json(await hit.json(), 200, { ...h, 'X-Cache': 'HIT' })
+      // 캐시(같은 검색어 7일). Cache API(caches.default)는 *.workers.dev 주소에서는 저장되지 않아 D1 에 둔다.
+      const now = Math.floor(Date.now() / 1000)
+      const key = q.toLowerCase()
+      const hit = await env.DB.prepare('SELECT body FROM cache WHERE q = ?1 AND exp > ?2').bind(key, now).first()
+      if (hit) return json(JSON.parse(hit.body), 200, { ...h, 'X-Cache': 'HIT' })
 
       // 하루 전체 상한: 네이버를 부르기 직전에 센다
       const total = await bump(env, `g:${day}`, 172800)
       if (total > num(env.DAILY_LIMIT, 1000)) return json({ error: 'daily' }, 503, h)
 
-      if (Math.random() < 0.02) ctx.waitUntil(env.DB.prepare('DELETE FROM usage WHERE exp < ?1').bind(Math.floor(Date.now() / 1000)).run())
+      if (Math.random() < 0.02) ctx.waitUntil(env.DB.batch([env.DB.prepare('DELETE FROM usage WHERE exp < ?1').bind(now), env.DB.prepare('DELETE FROM cache WHERE exp < ?1').bind(now)]))
 
       const upstream = `${env.NAVER_LOCAL_URL || NAVER_LOCAL}?query=${encodeURIComponent(q)}&display=5&sort=random`
       const r = await fetch(upstream, { headers: { 'X-NCP-APIGW-API-KEY-ID': env.NAVER_CLIENT_ID || '', 'X-NCP-APIGW-API-KEY': env.NAVER_CLIENT_SECRET || '' } })
       if (!r.ok) return json({ error: 'upstream', status: r.status }, 502, h)
       const body = { items: toPlaces(await r.json()) }
-      ctx.waitUntil(cache.put(cacheKey, new Response(JSON.stringify(body), { headers: { 'Content-Type': 'application/json', 'Cache-Control': `max-age=${CACHE_TTL}` } })))
+      ctx.waitUntil(env.DB.prepare('INSERT OR REPLACE INTO cache (q, body, exp) VALUES (?1, ?2, ?3)').bind(key, JSON.stringify(body), now + CACHE_TTL).run())
       return json(body, 200, { ...h, 'X-Cache': 'MISS' })
     } catch (e) {
       return json({ error: 'server' }, 500, h)

@@ -11,4 +11,4 @@ IP_DAILY = "100"       # IP 하나가 하루에 검색할 수 있는 횟수
 [[d1_databases]]
 binding = "DB"
 database_name = "place-search"
-database_id = "00000000-0000-0000-0000-000000000000" # wrangler d1 create place-search 로 받은 값으로 바꾼다
+database_id = "905cd0d8-eb75-4a48-93e5-94e6ef2ed2f3" # wrangler d1 create place-search(2026-10-13)

@@ -4,3 +4,10 @@ CREATE TABLE IF NOT EXISTS usage (
   n   INTEGER NOT NULL,
   exp INTEGER NOT NULL
 );
+
+-- 검색 결과 캐시(같은 검색어 7일): q = 소문자 검색어, body = 화면용 JSON, exp = 만료 시각(초)
+CREATE TABLE IF NOT EXISTS cache (
+  q    TEXT    PRIMARY KEY,
+  body TEXT    NOT NULL,
+  exp  INTEGER NOT NULL
+);
