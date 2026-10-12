@@ -1,4 +1,4 @@
-// 네이버 지도·검색 연결. 키는 빌드할 때 tools/location-compare/.env.local 에서 읽는다(git 에 안 올라감, README 9절).
+// 네이버 지도·검색 연결. 키는 빌드할 때 tools/location-compare/.env.local 에서 읽는다(git 에 안 올라감, README 10절).
 //
 // - VITE_NAVER_MAP_KEY_ID   네이버 클라우드 Maps 의 Client ID. 지도 JS 는 브라우저에서 이 값으로 인증하므로 "공개될 수밖에 없는 값"이고,
 //                           네이버 콘솔에 등록한 웹 서비스 URL(peripheral7.github.io, localhost)에서만 동작한다. Secret 은 절대 넣지 않는다.

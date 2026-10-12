@@ -40,6 +40,17 @@ export const DEFAULT_PREFERENCE: Preference = {
   trips: { h1: 60, h2: 2 }, // 원본 앱에 저장돼 있던 값(학교 월 60회 · 본가 2회)
 }
 
+/** 가중치를 합 100 기준 비율(정수)로. 합이 100을 넘거나 모자라도 비율만 본다(반올림 차이는 큰 나머지 순으로 맞춤). 합 0 이면 똑같이. */
+export function weightShares(w: Weights): Weights {
+  const keys: (keyof Weights)[] = ['transit', 'car', 'walk']
+  const sum = keys.reduce((a, k) => a + Math.max(0, w[k]), 0)
+  const raw = keys.map((k) => (sum > 0 ? (Math.max(0, w[k]) * 100) / sum : 100 / 3))
+  const out = raw.map(Math.floor)
+  const order = raw.map((x, i) => ({ r: x - Math.floor(x), i })).sort((a, b) => b.r - a.r)
+  for (let k = 0; k < 100 - out.reduce((a, b) => a + b, 0); k++) out[order[k].i]++
+  return { transit: out[0], car: out[1], walk: out[2] }
+}
+
 /** 월세 비교: 보증금이 다른 매물을 "보증금 1,000만원일 때의 월세"로 맞춘다.
  *  환산 월세 = 월세 + (보증금 − 1,000) × 전월세 전환율 ÷ 12. 전환율 연 6%면 보증금 1,000만원 차이 = 월 5만원. */
 export const BASE_DEPOSIT = 1000 // 만원

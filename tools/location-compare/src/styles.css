@@ -55,12 +55,13 @@ button { cursor: pointer }
 .stage { flex: 1; display: grid; gap: 12px; min-height: 0;
   grid-template-columns: 340px minmax(0, 1fr) 300px;
   grid-template-rows: auto 1fr auto;
-  grid-template-areas: 'modes map factors' 'selected map factors' 'cards cards cards' }
+  grid-template-areas: 'modes map factors' 'selected map factors' 'sideL cards sideR' }
 .modes-area { grid-area: modes; position: relative; z-index: 30 }
-.selected-area { grid-area: selected; position: relative; z-index: 20 }
+.selected-area { grid-area: selected; position: relative; z-index: 20; min-height: 0 } /* 높이는 지도에 맞추고 넘치면 박스 안에서 스크롤 */
 .map-area { grid-area: map; position: relative; z-index: 0; isolation: isolate; border-radius: var(--radius); overflow: hidden; border: 1px solid var(--line); min-height: 520px; background: #e9eef1 }
 .factors-area { grid-area: factors; min-width: 0 }
 .cards-area { grid-area: cards; min-width: 0 }
+.side-left { grid-area: sideL } .side-right { grid-area: sideR }
 
 /* 수단별 점수: 게이지 + 눈금 막대 */
 .gauge-wrap { position: relative; padding: 6px 0 4px; text-align: center }
@@ -152,7 +153,10 @@ button { cursor: pointer }
 .ins-label .con { color: #b5532a; font-size: 11px; font-weight: 500 }
 .pin.hub.on b::before { background: var(--text) }
 /* 장단점 기준 목적지 고르기(지도 오른쪽 위) */
-.hub-switch { position: absolute; top: 16px; right: 16px; z-index: 700; display: flex; align-items: center; gap: 4px; background: #fff; border: 1px solid var(--line-2); border-radius: 999px; padding: 4px 4px 4px 12px; box-shadow: 0 4px 16px rgba(0, 0, 0, 0.1); font-size: 12px }
+.map-top { position: absolute; top: 16px; right: 16px; z-index: 700; display: flex; align-items: center; gap: 8px }
+.fit-all { background: #fff; border: 1px solid var(--line-2); border-radius: 999px; padding: 8px 14px; font-size: 12px; box-shadow: 0 4px 16px rgba(0, 0, 0, 0.1); white-space: nowrap }
+.fit-all:hover { background: var(--panel-2) }
+.hub-switch { display: flex; align-items: center; gap: 4px; background: #fff; border: 1px solid var(--line-2); border-radius: 999px; padding: 4px 4px 4px 12px; box-shadow: 0 4px 16px rgba(0, 0, 0, 0.1); font-size: 12px }
 .hub-switch > span { color: var(--muted); margin-right: 4px }
 .hub-switch button { border: 0; background: none; border-radius: 999px; padding: 5px 10px; display: flex; align-items: center; gap: 6px; color: var(--muted) }
 .hub-switch button i { font-style: normal; font-size: 10px; width: 16px; height: 16px; display: grid; place-items: center; border-radius: 4px; background: var(--panel-2) }
@@ -164,7 +168,7 @@ button { cursor: pointer }
 .map-controls button:hover { background: var(--panel-2) }
 
 /* 검색창(지도 위 왼쪽 위) */
-.search { position: absolute; top: 16px; left: 16px; z-index: 710; width: min(420px, calc(100% - 300px)) }
+.search { position: absolute; top: 16px; left: 16px; z-index: 710; width: min(420px, calc(100% - 440px)) }
 .search-bar { display: flex; align-items: center; gap: 8px; background: #fff; border: 1px solid var(--line-2); border-radius: 999px; padding: 6px 6px 6px 14px; box-shadow: 0 4px 16px rgba(0, 0, 0, 0.1) }
 .search-bar svg { width: 18px; height: 18px; flex: none; color: var(--muted) }
 .search-bar input { flex: 1; min-width: 0; border: 0; outline: 0; background: none; font-size: 14px }
@@ -254,18 +258,18 @@ button { cursor: pointer }
 /* ── 좁은 화면 ── */
 @media (max-width: 1320px) {
   .stage { grid-template-columns: 330px minmax(0, 1fr); grid-template-rows: auto 1fr auto auto;
-    grid-template-areas: 'modes map' 'selected map' 'factors factors' 'cards cards' }
+    grid-template-areas: 'modes map' 'selected map' 'factors factors' 'cards cards' 'sideL sideR' }
   .factors { height: auto }
 }
 @media (max-width: 900px) {
-  .stage { grid-template-columns: minmax(0, 1fr); grid-template-rows: none; grid-template-areas: 'map' 'modes' 'selected' 'cards' 'factors' }
+  .stage { grid-template-columns: minmax(0, 1fr); grid-template-rows: none; grid-template-areas: 'map' 'modes' 'selected' 'cards' 'factors' 'sideL' 'sideR' }
   .map-area { min-height: 0; height: 52vh }
   .popover { position: static; width: auto; margin-top: 10px; box-shadow: none }
   .popover::before { display: none }
 }
 @media (max-width: 760px) {
   .search { width: calc(100% - 32px) }
-  .hub-switch { top: auto; bottom: 16px; right: auto; left: 16px }
+  .map-top { top: auto; bottom: 16px; right: auto; left: 16px; flex-wrap: wrap }
 }
 @media (max-width: 600px) {
   .shell { padding: 10px 10px 8px }
@@ -384,3 +388,44 @@ button { cursor: pointer }
 .cat-meta { display: flex; flex-direction: column; gap: 3px; font-size: 13px }
 .cat-nav { display: flex; justify-content: space-between; align-items: center }
 .ghost:disabled, .solid:disabled { opacity: 0.4; cursor: default }
+
+/* ── 선택한 후보지: 위쪽 ‹ › (박스 테두리 포함), 아래 가운데 순위 숫자, 넘치면 스크롤(스크롤바 숨김) ── */
+@media (min-width: 901px) { .map-area { min-height: 680px } .selected-area { contain: size } .selected { height: 100% } } /* 왼쪽 박스가 지도 높이에 맞춰 줄고, 넘치는 내용은 박스 안에서 스크롤 */
+.selected { display: flex; flex-direction: column; padding: 0 !important; overflow: hidden }
+.sel-nav { display: grid; grid-template-columns: 1fr 1fr; flex: none; border-bottom: 1px solid var(--line) }
+.sel-nav button { border: 0; background: var(--panel-2); height: 32px; font-size: 22px; line-height: 1; color: var(--muted); display: flex; align-items: center; padding: 0 16px }
+.sel-nav .prev { justify-content: flex-start; border-right: 1px solid var(--line) }
+.sel-nav .next { justify-content: flex-end }
+.sel-nav button:hover:not(:disabled) { background: var(--accent); color: var(--text) }
+.sel-nav button:disabled { opacity: 0.4; cursor: default }
+.sel-body { flex: 1; min-height: 0; overflow-y: auto; scrollbar-width: none; padding: 12px 16px 10px; display: flex; flex-direction: column }
+.sel-body::-webkit-scrollbar { display: none }
+.selected .pick { margin: auto 0 0; padding-top: 8px; justify-content: center; gap: 2px }
+.selected .pick button { border: 0; background: none; width: auto; min-width: 26px; height: 26px; border-radius: 8px; color: var(--faint); font-size: 13px; font-variant-numeric: tabular-nums }
+.selected .pick button:hover { color: var(--text) }
+.selected .pick button.on { background: none; color: var(--text); font-weight: 700 }
+
+/* ── 입지 요인: 모든 지수를 같은 한 줄 모양으로, ⚙ 에서 고르기 ── */
+.factor-gear { position: relative }
+.gear { border: 0; background: none; font-size: 15px; padding: 2px 4px; border-radius: 8px; line-height: 1; font-family: 'Segoe UI Emoji', 'Apple Color Emoji', 'Noto Color Emoji', var(--font) }
+.gear:hover, .gear[aria-expanded='true'] { background: var(--panel-2) }
+.factor-menu { position: absolute; top: calc(100% + 6px); right: 0; z-index: 50; width: 220px; background: #fff; border: 1px solid var(--line-2); border-radius: 14px; padding: 6px; box-shadow: 0 12px 32px rgba(0, 0, 0, 0.16); display: flex; flex-direction: column }
+.factor-menu label { display: flex; align-items: center; gap: 8px; padding: 7px 8px; border-radius: 8px; font-size: 13px; cursor: pointer }
+.factor-menu label:hover { background: var(--panel-2) }
+.factor-menu label.off { color: var(--faint); cursor: default }
+.factor-menu label.off:hover { background: none }
+.factor-menu small { margin-left: auto; font-size: 10px; color: var(--faint) }
+.factor-menu input { accent-color: var(--good); margin: 0 }
+.factor > div { min-width: 0 }
+.factor-score { display: flex; flex-direction: column; align-items: flex-end; gap: 3px; flex: none }
+.factor-score .ticks { width: 90px; height: 10px }
+.factor-score em { font-style: normal; font-size: 16px; font-weight: 350; font-variant-numeric: tabular-nums }
+.factor-score em.soon { font-size: 10px; border: 0; padding: 0; color: var(--faint) }
+.soon-row b, .soon-row small { color: var(--faint) !important }
+.factor-links { display: flex; gap: 10px; margin-top: 2px }
+.factor-links button { border: 0; background: none; padding: 0; font-size: 11px; color: var(--good); text-decoration: underline; text-underline-offset: 2px }
+.factor-links button:disabled { color: var(--faint); text-decoration: none; cursor: default }
+
+/* ── 후보지별 비교 양옆 추천 카드(준비 중) ── */
+.side-card { min-width: 0 }
+.side-card h2 { margin: 0 0 6px; font-size: 15px; font-weight: 450 }

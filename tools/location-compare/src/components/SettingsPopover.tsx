@@ -1,15 +1,15 @@
 import { useEffect, useRef } from 'react'
-import { DEFAULT_PREFERENCE, type Hub, type Preference, type Weights } from '../data'
+import { DEFAULT_PREFERENCE, weightShares, type Hub, type Preference, type Weights } from '../data'
 
 // 칸(카드)을 누르면 그 칸 바로 오른쪽에 뜨는 작은 설정 창. 바꾸는 즉시 점수에 반영되고 이 브라우저에 저장된다.
-// 수단 가중치는 숫자로 직접 넣는다. 하나를 바꿔도 나머지는 그대로 두고, 합이 100 과 다르면 얼마나 다른지만 알려 준다
-// (계산은 합에 대한 비율로 하므로 합이 100 이 아니어도 동작한다).
+// 수단 가중치는 숫자로 직접 넣는다(0~999). 하나를 바꿔도 나머지는 그대로 두고, 합이 100 과 다르면 100 기준 비율을 보여 준다
+// (계산은 합에 대한 비율로 하므로 합이 100 을 넘어도 동작한다. 설정 창 밖의 카드에는 이 비율만 보인다).
 type Props = { kind: 'trips' | 'weights'; hubs: Hub[]; value: Preference; onChange: (p: Preference) => void; onClose: () => void }
 
 const MODES: { key: keyof Weights; label: string; note: string }[] = [
   { key: 'transit', label: '대중교통', note: '대기·도보·환승을 후보지끼리 비교' },
   { key: 'car', label: '차량', note: '출퇴근 ÷ 여유 시간을 후보지끼리 비교' },
-  { key: 'walk', label: '도보', note: '걷는 시간 · 30분 초과는 표시 안 함' },
+  { key: 'walk', label: '도보', note: '걷는 시간 · 20분까지 도보권' },
 ]
 
 const toInt = (v: string, max: number) => Math.max(0, Math.min(max, Math.round(Number(v)) || 0))
@@ -33,7 +33,8 @@ export function SettingsPopover({ kind, hubs, value, onChange, onClose }: Props)
 
   const w = value.weights
   const total = w.transit + w.car + w.walk
-  const setWeight = (key: keyof Weights, v: string) => onChange({ ...value, weights: { ...w, [key]: toInt(v, 100) } })
+  const share = weightShares(w)
+  const setWeight = (key: keyof Weights, v: string) => onChange({ ...value, weights: { ...w, [key]: toInt(v, 999) } })
   const setTrips = (id: string, v: number) => onChange({ ...value, trips: { ...value.trips, [id]: Math.max(0, Math.min(60, Math.round(v) || 0)) } })
   const reset = () => onChange(kind === 'weights' ? { ...value, weights: DEFAULT_PREFERENCE.weights } : { ...value, trips: DEFAULT_PREFERENCE.trips })
 
@@ -48,13 +49,12 @@ export function SettingsPopover({ kind, hubs, value, onChange, onClose }: Props)
           {MODES.map((m) => (
             <label className="weight-input" key={m.key}>
               <span><b>{m.label}</b><small>{m.note}</small></span>
-              <input type="number" min={0} max={100} step={1} inputMode="numeric" aria-label={`${m.label} 가중치`} value={w[m.key]}
+              <input type="number" min={0} max={999} step={1} inputMode="numeric" aria-label={`${m.label} 가중치`} value={w[m.key]}
                 onFocus={(e) => e.currentTarget.select()} onChange={(e) => setWeight(m.key, e.target.value)} />
             </label>
           ))}
-          <p className={'sum-note' + (total !== 100 ? ' warn' : '')} role="status">
-            합계 <b>{total}</b>
-            {total > 100 ? <> · 100보다 <b>{total - 100}</b> 초과</> : total < 100 ? <> · 100보다 <b>{100 - total}</b> 부족</> : ' · 딱 100'}
+          <p className="sum-note" role="status">
+            합계 <b>{total}</b>{total !== 100 && <> · 100 기준 <b>{share.transit}·{share.car}·{share.walk}</b></>}
           </p>
         </>
       ) : hubs.map((h) => (

@@ -35,7 +35,7 @@ export function SearchBox({ hubs, onCandidate, onHub }: Props) {
     e?.preventDefault()
     const query = q.trim()
     setOpen(true)
-    if (!enabled) { setItems([]); setMsg('네이버 키를 넣고 빌드하면 검색할 수 있습니다(README 9절).'); return }
+    if (!enabled) { setItems([]); setMsg('네이버 키를 넣고 빌드하면 검색할 수 있습니다(README 10절).'); return }
     if (query.length < 2) { setItems([]); setMsg('두 글자 이상 입력해 주세요.'); return }
     if (query === last.current && items.length) return // 같은 검색을 되풀이하지 않는다
     setBusy(true); setMsg('')

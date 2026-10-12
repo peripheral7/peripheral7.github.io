@@ -9,6 +9,7 @@ import { loadNaverMaps, MAP_KEY_ID, onNaverAuthFailure } from '../naver'
 // - 후보지를 고르면 "그 후보지 + 주요 목적지"가 다 들어오도록 확대·이동한다.
 // - 지도 위 "장단점 기준" 단추(또는 목적지 핀)로 고른 목적지에 대해, 후보지 옆에 장점(＋)·단점(－)을 글자로 보여 준다.
 //   평소에는 고른 후보지에만, 구역이 확실히 갈릴 만큼 확대하면(DETAIL_ZOOM 이상) 화면에 보이는 모든 후보지에.
+// - "장단점 기준" 오른쪽 "후보지 한번에 보기"는 모든 후보지가 고르게 들어오도록 확대·이동한다(목적지는 빼고).
 
 type Props = {
   candidates: Candidate[]; hubs: Hub[]; active: number; onSelect: (index: number) => void; focusKey: number
@@ -28,9 +29,12 @@ function labelHtml(name: string, ins: Insight | undefined, hub: Hub | undefined)
   const pros = ins?.pros.length ? `<span class="pro">＋ ${ins.pros.map(esc).join(' · ')}</span>` : ''
   const cons = ins?.cons.length ? `<span class="con">－ ${ins.cons.map(esc).join(' · ')}</span>` : ''
   const rank = ins?.rank ? ` ${ins.rank}위/${ins.of}` : ''
-  const head = hub ? `<small>${esc(hub.category)} 기준${rank}${pros || cons ? '' : ' · 뚜렷한 장단점 없음'}</small>` : ''
+  const head = hub ? `<small>${esc(hub.category)} 기준${rank}</small>` : ''
   return `<b>${esc(name)}</b>${head}${pros}${cons}`
 }
+
+/** 모든 후보지(한번에 보기) */
+const allCands = (candidates: Candidate[]): [number, number][] => candidates.map((c) => [c.lat, c.lng])
 
 /** 고른 후보지 + 주 목적지(없으면 모든 목적지)를 감싸는 점들 */
 function frame(candidates: Candidate[], hubs: Hub[], active: number, focusHubIds: string[]): [number, number][] {
@@ -43,26 +47,31 @@ function frame(candidates: Candidate[], hubs: Hub[], active: number, focusHubIds
 
 export function MapView(props: Props) {
   const [engine, setEngine] = useState<'naver' | 'osm'>(MAP_KEY_ID ? 'naver' : 'osm')
+  const [allKey, setAllKey] = useState(0) // "후보지 한번에 보기"를 누를 때마다 1씩
+  const p = { ...props, allKey }
   return (
     <>
-      {engine === 'naver' ? <NaverMap {...props} onFail={() => setEngine('osm')} /> : <OsmMap {...props} />}
-      {props.hubs.length > 0 && (
-        <div className="hub-switch" role="tablist" aria-label="장단점을 볼 목적지">
-          <span>장단점 기준</span>
-          {props.hubs.map((h) => (
-            <button key={h.id} role="tab" aria-selected={h.id === props.hubId} className={h.id === props.hubId ? 'on' : ''} onClick={() => props.onHub(h.id)}>
-              <i aria-hidden>{hubEmoji(h.category)}</i>{h.category}
-            </button>
-          ))}
-        </div>
-      )}
+      {engine === 'naver' ? <NaverMap {...p} onFail={() => setEngine('osm')} /> : <OsmMap {...p} />}
+      <div className="map-top">
+        {props.hubs.length > 0 && (
+          <div className="hub-switch" role="tablist" aria-label="장단점을 볼 목적지">
+            <span>장단점 기준</span>
+            {props.hubs.map((h) => (
+              <button key={h.id} role="tab" aria-selected={h.id === props.hubId} className={h.id === props.hubId ? 'on' : ''} onClick={() => props.onHub(h.id)}>
+                <i aria-hidden>{hubEmoji(h.category)}</i>{h.category}
+              </button>
+            ))}
+          </div>
+        )}
+        {props.candidates.length > 1 && <button type="button" className="fit-all" onClick={() => setAllKey((k) => k + 1)}>후보지 한번에 보기</button>}
+      </div>
     </>
   )
 }
 
 // ── 네이버 지도 ──────────────────────────────────────────────────────
 /* eslint-disable @typescript-eslint/no-explicit-any */
-function NaverMap({ candidates, hubs, active, onSelect, focusKey, hubId, onHub, insights, focusHubIds, ranks, onFail }: Props & { onFail: () => void }) {
+function NaverMap({ candidates, hubs, active, onSelect, focusKey, hubId, onHub, insights, focusHubIds, ranks, allKey, onFail }: Props & { allKey: number; onFail: () => void }) {
   const box = useRef<HTMLDivElement>(null)
   const map = useRef<any>(null)
   const layers = useRef<any[]>([])
@@ -71,9 +80,9 @@ function NaverMap({ candidates, hubs, active, onSelect, focusKey, hubId, onHub, 
   const detail = zoom >= DETAIL_ZOOM
 
   // force=false 면, 이미 그 구간이 알맞게 보이고 있을 때는 움직이지 않는다(같은 자리로 다시 맞추며 흔들리는 것 방지)
-  const fit = (force = false) => {
+  const fit = (force = false, all = false) => {
     const n = window.naver
-    const pts = frame(candidates, hubs, active, focusHubIds)
+    const pts = all ? allCands(candidates) : frame(candidates, hubs, active, focusHubIds)
     if (!n || !map.current || !pts.length) return
     const b = new n.maps.LatLngBounds(new n.maps.LatLng(pts[0][0], pts[0][1]), new n.maps.LatLng(pts[0][0], pts[0][1]))
     pts.forEach(([la, ln]) => b.extend(new n.maps.LatLng(la, ln)))
@@ -135,6 +144,7 @@ function NaverMap({ candidates, hubs, active, onSelect, focusKey, hubId, onHub, 
   }, [ready, candidates, hubs, active, onSelect, onHub, hubId, insights, detail, ranks])
 
   useEffect(() => { if (ready) fit() }, [ready, active, focusKey, focusHubIds.join()]) // eslint-disable-line react-hooks/exhaustive-deps
+  useEffect(() => { if (ready && allKey) fit(true, true) }, [allKey]) // eslint-disable-line react-hooks/exhaustive-deps
 
   const zoomBy = (d: number) => map.current?.setZoom(map.current.getZoom() + d, true)
   return (
@@ -164,9 +174,10 @@ function fitSmart(map: L.Map, pts: [number, number][], force = false) {
   map.fitBounds(b, { ...fitOptions, maxZoom: 16, animate: true }) // 확대 단계가 같으면 옮기기만 한다
 }
 
-function Framing({ pts, focusKey, active }: { pts: [number, number][]; focusKey: number; active: number }) {
+function Framing({ pts, focusKey, active, all, allKey }: { pts: [number, number][]; focusKey: number; active: number; all: [number, number][]; allKey: number }) {
   const map = useMap()
   useEffect(() => { fitSmart(map, pts) }, [map, active, focusKey, pts.join()]) // eslint-disable-line react-hooks/exhaustive-deps
+  useEffect(() => { if (allKey) fitSmart(map, all, true) }, [allKey]) // eslint-disable-line react-hooks/exhaustive-deps
   return null
 }
 
@@ -187,7 +198,7 @@ function Controls({ pts }: { pts: [number, number][] }) {
   )
 }
 
-function OsmMap({ candidates, hubs, active, onSelect, focusKey, hubId, onHub, insights, focusHubIds, ranks }: Props) {
+function OsmMap({ candidates, hubs, active, onSelect, focusKey, hubId, onHub, insights, focusHubIds, ranks, allKey }: Props & { allKey: number }) {
   const pts = useMemo(() => frame(candidates, hubs, active, focusHubIds), [candidates, hubs, active, focusHubIds])
   const [zoom, setZoom] = useState(13)
   const cur = candidates[active]
@@ -197,7 +208,7 @@ function OsmMap({ candidates, hubs, active, onSelect, focusKey, hubId, onHub, in
   return (
     <MapContainer className="map" center={start} zoom={13} zoomControl={false} attributionControl>
       <TileLayer className="tiles-base" url="https://tiles.osm.kr/hot/{z}/{x}/{y}.png" attribution="&copy; OpenStreetMap contributors" maxZoom={19} />
-      <Framing pts={pts} focusKey={focusKey} active={active} />
+      <Framing pts={pts} focusKey={focusKey} active={active} all={allCands(candidates)} allKey={allKey} />
       <ZoomWatch onZoom={setZoom} />
       {cur && hubs.map((h) => (
         <Polyline key={h.id + cur.id + (h.id === hubId)} className="route" positions={[[cur.lat, cur.lng], [h.lat, h.lng]]} pathOptions={{ color: '#2b2b26', weight: 2, dashArray: '6 7', opacity: h.id === hubId ? 0.9 : 0.35 }} />

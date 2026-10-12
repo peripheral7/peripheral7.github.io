@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useMemo, useState } from 'react'
-import { BASE_DEPOSIT, MAX_HUBS, baseRent, hubEmoji, won, type Place } from './data'
+import { BASE_DEPOSIT, MAX_HUBS, baseRent, hubEmoji, weightShares, won, type Place } from './data'
 import { evaluate, fmt, hubInsights } from './scoring'
 import { addCandidate, load, money, removeCandidate, removeHub, save, setHub, updateCandidate, type State } from './store'
 import { MapView } from './components/MapView'
@@ -52,10 +52,16 @@ export default function App() {
     onClick: (e: React.MouseEvent) => { if (!(e.target as HTMLElement).closest('.no-pop')) toggle(k) },
     onKeyDown: (e: React.KeyboardEvent) => { if ((e.key === 'Enter' || e.key === ' ') && e.target === e.currentTarget) { e.preventDefault(); toggle(k) } },
   })
-  const w = pref.weights
+  const w = weightShares(pref.weights) // 카드에는 합 100 기준 비율로
   // 번호 = 종합 순위(지도 핀·번호 단추 모두), 단추는 순위 순서로
   const ranks = useMemo(() => results.map((r) => r.rank), [results])
   const byRank = candidates.map((c, i) => ({ c, i, rank: ranks[i] ?? i + 1 })).sort((a, b) => a.rank - b.rank)
+  // 선택한 후보지 박스 위쪽 ‹ › : 순위 순서로 앞·뒤 후보지(끝에서는 처음으로 돈다)
+  const step = (d: number) => {
+    if (!byRank.length) return
+    const k = byRank.findIndex((x) => x.i === active)
+    select(byRank[(k + d + byRank.length) % byRank.length].i)
+  }
   const rename = (id: string, name: string) => setState(updateCandidate(state, id, { name }))
   const saveEdit = () => { if (editing) setState(updateCandidate(state, editing.id, { name: editing.name, deposit: money(editing.deposit), rent: money(editing.rent) })); setEditing(null) }
   const deleteEdit = () => { if (editing && confirm('이 후보지를 삭제할까요?')) { update(removeCandidate(state, editing.id)); setEditing(null) } }
@@ -91,10 +97,11 @@ export default function App() {
 
         <div className="selected-area anchor">
           <div className="panel selected">
-            <div className="panel-head"><h2>선택한 후보지</h2></div>
-            <div className="pick" role="tablist" aria-label="후보지 선택">
-              {byRank.map(({ c, i, rank }) => <button key={c.id} role="tab" aria-selected={i === active} className={i === active ? 'on' : ''} onClick={() => select(i)} title={c.name} aria-label={`${rank}위 ${c.name}`}>{rank}</button>)}
+            <div className="sel-nav">
+              <button type="button" className="prev" aria-label="앞 순위 후보지" onClick={() => step(-1)} disabled={byRank.length < 2}>‹</button>
+              <button type="button" className="next" aria-label="다음 순위 후보지" onClick={() => step(1)} disabled={byRank.length < 2}>›</button>
             </div>
+            <div className="sel-body">
             {cur && (
               editing?.id === cur.candidate.id ? (
                 <form className="cand-edit" onSubmit={(e) => { e.preventDefault(); saveEdit() }} onKeyDown={(e) => { if (e.key === 'Escape') setEditing(null) }}>
@@ -135,6 +142,10 @@ export default function App() {
               })}
               {hubs.length === 0 && <p className="muted">검색해서 목적지를 넣어 주세요(최대 {MAX_HUBS}곳).</p>}
             </div>
+            <div className="pick" role="tablist" aria-label="후보지 선택">
+              {byRank.map(({ c, i, rank }) => <button key={c.id} role="tab" aria-selected={i === active} className={i === active ? 'on' : ''} onClick={() => select(i)} title={c.name} aria-label={`${rank}위 ${c.name}`}>{rank}</button>)}
+            </div>
+            </div>
           </div>
           {pop === 'trips' && <SettingsPopover kind="trips" hubs={hubs} value={pref} onChange={(p) => setState({ ...state, pref: p })} onClose={close} />}
         </div>
@@ -145,9 +156,13 @@ export default function App() {
         </section>
 
         <aside className="factors-area">
-          <FactorsPanel cat={catIdx && cur ? catIdx[Math.min(active, catIdx.length - 1)] ?? null : null} catOn={catState.on} target={cur?.candidate.name ?? '후보지 없음'}
+          <FactorsPanel cat={catIdx && cur ? catIdx[Math.min(active, catIdx.length - 1)] ?? null : null} catOn={catState.on}
             onToggleCat={() => setCats({ ...catState, on: !catState.on })} onRegister={() => setCatDlg('register')} onGallery={() => { setGalleryIdx(null); setCatDlg('gallery') }} />
         </aside>
+
+        {/* 후보지별 비교 양옆: 추천 카드 자리(추후 광고) — 왼쪽 부동산 매물, 오른쪽 카페·식당 */}
+        <aside className="side-card side-left panel" aria-label="부동산 매물 추천(준비 중)"><h2>추천 매물</h2><p className="muted">준비 중</p></aside>
+        <aside className="side-card side-right panel" aria-label="카페·식당 추천(준비 중)"><h2>근처 카페·식당</h2><p className="muted">준비 중</p></aside>
 
         <section className="cards-area">
           {results.length > 0 && <CompareCards results={results} hubs={hubs} active={active} onSelect={select} onRename={rename} cats={catIdx ?? undefined} onCatPhotos={(i) => { setGalleryIdx(i); setCatDlg('gallery') }} />}

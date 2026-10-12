@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import { fmt, WALK_LIMIT, type CandidateResult } from '../scoring'
+import { fmt, WALK_LIMIT, WALK_ZONE, type CandidateResult } from '../scoring'
 import type { CatIndex } from '../cats'
 import { BASE_DEPOSIT, baseRent, hubEmoji, won, type Hub } from '../data'
 
@@ -34,7 +34,7 @@ export function CompareCards({ results, hubs, active, onSelect, onRename, cats, 
 
   return (
     <div className="panel compare">
-      <div className="panel-head"><h2>후보지별 비교</h2><small className="muted">점수 높은 순 · 같은 줄을 옆으로 읽으면 비교됩니다 · 카드를 누르면 그 후보지를 지도에</small></div>
+      <div className="panel-head"><h2>후보지별 비교</h2></div>
       <div className="cards-scroll">
         <div className="cards-grid" style={{ gridTemplateRows: `repeat(${rows}, auto)`, gridTemplateColumns: `112px repeat(${results.length}, minmax(232px, 1fr))` }}>
           {/* 왼쪽 줄 이름 */}
@@ -86,8 +86,10 @@ export function CompareCards({ results, hubs, active, onSelect, onRename, cats, 
                 return [
                   <div key={h.hub.id + 'h'} className="cell hub-cell"><span>{h.hub.name}</span><small>{t.km.toFixed(1)}km · 반영 {Math.round(h.share * 100)}%</small><b className={isBest(h.hubScore, best((x) => x.hubs[hi].hubScore)) ? 'best' : ''}>{fmt(h.hubScore)}<Line v={h.hubScore} kind="hub" /></b></div>,
                   <div key={h.hub.id + 't'} className="cell mode-cell">
-                    <div><b>{t.transit}분</b><small>대기 {t.wait}분 · 정류장까지 도보 {t.access}분 · 환승 {t.transfers}회</small></div>
-                    <em className={isBest(s.transit, best((x) => x.hubs[hi].scores.transit)) ? 'best' : ''}>{fmt(s.transit)}<Line v={s.transit} kind="transit" /></em>
+                    {h.transitSkipped
+                      ? <div><span className="muted">도보 {t.walk}분 · 걸어가니 대중교통 제외</span></div>
+                      : <><div><b>{t.transit}분</b><small>대기 {t.wait}분 · 정류장까지 도보 {t.access}분 · 환승 {t.transfers}회</small></div>
+                        <em className={isBest(s.transit, best((x) => (x.hubs[hi].transitSkipped ? null : x.hubs[hi].scores.transit))) ? 'best' : ''}>{fmt(s.transit)}<Line v={s.transit} kind="transit" /></em></>}
                   </div>,
                   <div key={h.hub.id + 'c'} className="cell mode-cell">
                     <div><b>출퇴근 {t.carRush}분 · 낮 {t.carFree}분</b><small>차이 +{diff}분 ({s.carRatio.toFixed(2)}배){measured}</small></div>
@@ -95,8 +97,8 @@ export function CompareCards({ results, hubs, active, onSelect, onRename, cats, 
                   </div>,
                   <div key={h.hub.id + 'w'} className="cell mode-cell">
                     {s.walk !== null
-                      ? <><div><b>{t.walk}분</b><small>걸어서</small></div><em className={isBest(s.walk, best((x) => x.hubs[hi].scores.walk)) ? 'best' : ''}>{fmt(s.walk)}<Line v={s.walk} kind="walk" /></em></>
-                      : <div><span className="muted">{WALK_LIMIT}분 초과{h.walkCounts ? ' · 0점으로 계산' : ''}</span></div>}
+                      ? <><div><b>{t.walk}분</b><small>{t.walk <= WALK_ZONE ? '도보권' : '걸어서'}</small></div><em className={isBest(s.walk, best((x) => x.hubs[hi].scores.walk)) ? 'best' : ''}>{fmt(s.walk)}<Line v={s.walk} kind="walk" /></em></>
+                      : <div><span className="muted">{WALK_LIMIT}분 초과</span></div>}
                   </div>,
                 ]
               })}
