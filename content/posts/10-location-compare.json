@@ -1,0 +1,14 @@
+{
+  "variant": "interactive",
+  "category": "RESEARCH",
+  "title": "입지 비교 리포트",
+  "meta": "후보 주택을 교통·상권·공원·공공시설 점수와 주요 거점까지의 이동 접근성으로 비교하는 웹앱",
+  "ref": "RESEARCH-LOCATION-COMPARE",
+  "image": "/images/reports/location-compare/preview.jpg",
+  "imageAlt": "입지 비교 리포트 화면 — 후보지와 주요 거점이 표시된 지도, 후보지별 이동 접근성 지수 카드, 종합 평점 비교 표",
+  "body": "후보 주택 여러 곳을 교통·상권·공원·공공시설 점수와, 학교·본가 같은 주요 거점까지의 이동 접근성(대중교통·차량·도보 시간)으로 한눈에 비교하는 웹앱. 지도에서 후보지와 거점의 위치 관계를 보고, 월 왕복 횟수와 선호 이동수단을 바꿔 접근성 지수를 다시 계산해 볼 수 있다. 후보·거점을 직접 추가·수정해도 이 브라우저에만 저장된다. 이동 시간은 좌표 거리 기반의 가상 계산이다.",
+  "href": "/location-compare/",
+  "linkLabel": "리포트 열기",
+  "date": "2026.10.12",
+  "tags": ["Location", "Mobility", "Map"]
+}

@@ -1,0 +1,6 @@
+[
+  {"id":"transport","label":"교통편의성","key":"transport","icon":"↗"},
+  {"id":"commerce","label":"상권 접근성","key":"commerce","icon":"⌂"},
+  {"id":"park","label":"공원 접근성","key":"park","icon":"♧"},
+  {"id":"public","label":"공공·편의시설","key":"public","icon":"▦"}
+]
