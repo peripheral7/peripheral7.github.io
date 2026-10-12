@@ -10,6 +10,9 @@ import { SettingsPopover } from './components/SettingsPopover'
 import { GuidePanel } from './components/GuidePanel'
 import { CatGallery, CatRegister } from './components/CatPanel'
 import { catIndex, loadCats, pruneCats, removeMyPhoto, saveCats, type CatState } from './cats'
+import { CommutePanel } from './components/CommutePanel'
+import { ListingCards, SpotCards } from './components/Recommend'
+import { loadCommute, saveCommute, type CommuteSettings } from './commute'
 
 // " · 3,000/40 (1,000 기준 월 50)" — 금액을 안 넣었으면 빈 글자
 const rentText = (c: { deposit?: number; rent?: number }) => {
@@ -27,6 +30,7 @@ export default function App() {
   const [preview, setPreview] = useState<Place | null>(null) // 검색 결과를 누르면 지도가 그 위치로
   const [editing, setEditing] = useState<{ id: string; name: string; deposit: string; rent: string } | null>(null) // 수정 중인 후보지(금액은 입력 글자 그대로)
   const [catState, setCatState] = useState<CatState>(() => pruneCats(loadCats())) // 길고양이 지수(선택 요인) — 사진은 이 브라우저에만 저장
+  const [commute, setCommute] = useState<CommuteSettings>(loadCommute) // 출퇴근 인사이트의 연비·기름값
   const [catDlg, setCatDlg] = useState<'none' | 'register' | 'gallery'>('none')
   const [galleryIdx, setGalleryIdx] = useState<number | null>(null) // 카드에서 "사진 보기"를 누른 후보지(없으면 선택한 후보지)
   const { candidates, hubs, pref } = state
@@ -159,11 +163,12 @@ export default function App() {
         <aside className="factors-area">
           <FactorsPanel cat={catIdx && cur ? catIdx[Math.min(active, catIdx.length - 1)] ?? null : null} catOn={catState.on}
             onToggleCat={() => setCats({ ...catState, on: !catState.on })} onRegister={() => setCatDlg('register')} onGallery={() => { setGalleryIdx(null); setCatDlg('gallery') }} />
+          {cur && <CommutePanel r={cur} trips={pref.trips} settings={commute} onSettings={(s) => { setCommute(s); saveCommute(s) }} />}
         </aside>
 
         {/* 후보지별 비교 양옆: 추천 카드 자리(추후 광고) — 왼쪽 부동산 매물, 오른쪽 카페·식당 */}
-        <aside className="side-card side-left panel" aria-label="부동산 매물 추천(준비 중)"><h2>추천 매물</h2><p className="muted">준비 중</p></aside>
-        <aside className="side-card side-right panel" aria-label="카페·식당 추천(준비 중)"><h2>근처 카페·식당</h2><p className="muted">준비 중</p></aside>
+        <ListingCards candidates={candidates} />
+        <SpotCards candidates={candidates} />
 
         <section className="cards-area">
           {results.length > 0 && <CompareCards results={results} hubs={hubs} active={active} onSelect={select} onRename={rename} cats={catIdx ?? undefined} onCatPhotos={(i) => { setGalleryIdx(i); setCatDlg('gallery') }} />}

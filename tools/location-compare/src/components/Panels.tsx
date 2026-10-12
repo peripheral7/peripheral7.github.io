@@ -2,7 +2,7 @@ import { useEffect, useRef, useState, type ReactNode } from 'react'
 import { fmt, type CandidateResult } from '../scoring'
 import { CAT_RADIUS_M, type CatIndex } from '../cats'
 
-// ── 고른 후보지의 수단별 점수(게이지 + 눈금 막대) ──────────────────────
+// ── 고른 후보지의 수단별 점수(게이지 + 수단별 원형 테두리 그래프) ──────────
 // 수단 점수는 목적지별 점수를 "월 왕복 비율"로 평균한 값(종합 점수와 같은 비율). 도보는 걸어갈 수 있는 목적지만,
 // 대중교통은 도보 10분 이내(transitSkipped)인 목적지를 뺀다.
 
@@ -16,9 +16,14 @@ export function modeSummary(r: CandidateResult, mode: ModeKey): number | null {
   return rows.reduce((a, h) => a + (mode === 'walk' ? h.scores.walk ?? 0 : h.scores[mode]) * h.share, 0) / w
 }
 
-const Ticks = ({ value, mode }: { value: number | null; mode: ModeKey }) => (
-  <span className={`ticks ${mode}`} aria-hidden>
-    <span style={{ width: `${value === null ? 0 : Math.max(0, Math.min(10, value)) * 10}%` }} />
+// 원 테두리만 점수(0~10)만큼 수단 색으로 채운다(12시 방향에서 시계 방향). 가운데에 점수.
+const Ring = ({ value, mode }: { value: number | null; mode: ModeKey }) => (
+  <span className={`ring ${mode}`}>
+    <svg viewBox="0 0 64 64" aria-hidden>
+      <circle className="ring-track" cx="32" cy="32" r="27" />
+      {value !== null && <circle className="ring-arc" cx="32" cy="32" r="27" pathLength={100} strokeDasharray={`${Math.max(0, Math.min(10, value)) * 10} 100`} transform="rotate(-90 32 32)" />}
+    </svg>
+    <em>{value === null ? '—' : fmt(value)}</em>
   </span>
 )
 
@@ -52,7 +57,7 @@ export function ModeScorePanel({ r, action }: { r: CandidateResult; action: Reac
         <Gauge value={r.total} />
         <p className="gauge-caption"><b>{r.candidate.name}</b> · 종합 {r.rank}위</p>
       </div>
-      <div className="mode-rows">
+      <div className="mode-rings">
         {modes.map((m) => {
           const v = modeSummary(r, m)
           // 도보는 30분 안에 걸어갈 수 있는 목적지만 적는다(30분+ 문구 없음)
@@ -60,13 +65,12 @@ export function ModeScorePanel({ r, action }: { r: CandidateResult; action: Reac
             if (m === 'transit') return h.transitSkipped ? [] : [`${h.hub.category} ${h.trip.transit}분`]
             if (m === 'car') return [`${h.hub.category} ${h.trip.carRush}/${h.trip.carFree}분`]
             return h.scores.walk !== null ? [`${h.hub.category} ${h.trip.walk}분`] : []
-          }).join(' · ')
+          })
           return (
-            <div className="mode-row" key={m}>
-              <span className={`dot ${m}`} />
-              <div className="mode-text"><b>{MODE_LABEL[m]}</b><small>{detail}</small></div>
-              <Ticks value={v} mode={m} />
-              <em>{v === null ? '—' : fmt(v)}</em>
+            <div className="mode-ring" key={m}>
+              <Ring value={v} mode={m} />
+              <b>{MODE_LABEL[m]}</b>
+              <small>{detail.map((d) => <span key={d}>{d}</span>)}</small>
             </div>
           )
         })}
