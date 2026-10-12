@@ -55,6 +55,6 @@
 
 - [ ] **10/13(화) 08:00 출퇴근 실측 결과 확인**: 작업 스케줄러 `PeripheralBlog_LocationRoutes_Rush_20261013`, 로그 `scheduled-routes.log`. 그 시각에 PC가 켜져 있고 로그인돼 있어야 한다.
 - [ ] **낮 시간 실측 다시 하기**: 지금 값은 21시에 잰 것 → 평일 11시 무렵 `scheduled-routes.ps1 -Slot free`(예약할지 결정).
-- [ ] **장소 이름 검색 켜기**: 네이버 개발자센터 검색 API 키(Client ID 약 20자·Secret 약 10자)를 `workers/place-search/.dev.vars`에 넣기 → Worker 배포(사용자 확인 후).
+- [ ] **장소 이름 검색 켜기**: NAVER API HUB 키를 `workers/place-search/.dev.vars`에 넣음(10-13), Worker 를 API HUB 주소·헤더로 바꾸고 로컬 실검색 확인 → Cloudflare 배포만 남음(사용자 "검색 배포해" 후).
 - [ ] `.env.local` 끝에 중복으로 들어간 `NAVER_CLIENT_ID`/`NAVER_CLIENT_SECRET` 두 줄 정리.
 - [ ] 입지 요인(도보 5분 상권·산책·평화로움·쾌적함) 지수 추가.

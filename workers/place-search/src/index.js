@@ -14,7 +14,9 @@
 //  GET /search?q=검색어   → { items: [{ name, address, category, lat, lng }] }
 
 const ALLOWED_ORIGINS = new Set(['https://peripheral7.github.io', 'http://localhost:5173', 'http://localhost:3001', 'http://127.0.0.1:3001'])
-const NAVER_LOCAL = 'https://openapi.naver.com/v1/search/local.json'
+// 네이버 개발자센터 검색 API(openapi.naver.com)는 2026-06-29 종료 → NAVER API HUB(네이버 클라우드) 지역 검색으로 이관.
+// 키도 API HUB 에서 새로 받은 Client ID/Secret 이어야 하고, 헤더 이름이 X-NCP-APIGW-API-KEY-ID / X-NCP-APIGW-API-KEY 로 바뀌었다.
+const NAVER_LOCAL = 'https://naverapihub.apigw.ntruss.com/search/v1/local'
 const CACHE_TTL = 7 * 24 * 3600
 
 const num = (v, d) => (Number.isFinite(Number(v)) && Number(v) > 0 ? Number(v) : d)
@@ -98,7 +100,7 @@ export default {
       if (Math.random() < 0.02) ctx.waitUntil(env.DB.prepare('DELETE FROM usage WHERE exp < ?1').bind(Math.floor(Date.now() / 1000)).run())
 
       const upstream = `${env.NAVER_LOCAL_URL || NAVER_LOCAL}?query=${encodeURIComponent(q)}&display=5&sort=random`
-      const r = await fetch(upstream, { headers: { 'X-Naver-Client-Id': env.NAVER_CLIENT_ID || '', 'X-Naver-Client-Secret': env.NAVER_CLIENT_SECRET || '' } })
+      const r = await fetch(upstream, { headers: { 'X-NCP-APIGW-API-KEY-ID': env.NAVER_CLIENT_ID || '', 'X-NCP-APIGW-API-KEY': env.NAVER_CLIENT_SECRET || '' } })
       if (!r.ok) return json({ error: 'upstream', status: r.status }, 502, h)
       const body = { items: toPlaces(await r.json()) }
       ctx.waitUntil(cache.put(cacheKey, new Response(JSON.stringify(body), { headers: { 'Content-Type': 'application/json', 'Cache-Control': `max-age=${CACHE_TTL}` } })))

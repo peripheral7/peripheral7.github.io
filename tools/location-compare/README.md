@@ -172,7 +172,7 @@ npm run dev          # http://localhost:5173/location-compare/ (글꼴은 배포
 |---|---|---|---|---|
 | 지도 화면 | 네이버 클라우드 **Maps – Dynamic Map**(JS v3) | 방문자 브라우저 | Client ID 만 | `tools/location-compare/.env.local` 의 `VITE_NAVER_MAP_KEY_ID` → 빌드 때 페이지에 들어감 |
 | 주소 검색 | 같은 Maps JS 의 지오코더(`submodules=geocoder`) | 방문자 브라우저 | 위 Client ID 로 함께 | (같음) |
-| 장소 검색(아파트·학교 이름) | 네이버 개발자센터 **검색 API – 지역** | `workers/place-search`(Cloudflare Worker) | Client ID + **Client Secret** | Worker 시크릿(`wrangler secret put`) — git·브라우저에 안 나감 |
+| 장소 검색(아파트·학교 이름) | **NAVER API HUB** 지역 검색(`naverapihub.apigw.ntruss.com/search/v1/local`, 옛 개발자센터 검색 API 는 2026-06-29 종료) | `workers/place-search`(Cloudflare Worker) | Client ID + **Client Secret** | Worker 시크릿(`wrangler secret put`) — git·브라우저에 안 나감 |
 | 차량 소요 시간 | 네이버 클라우드 **Maps – Directions 5** | 이 PC(`scripts/fetch-routes.mjs`) | Client ID + Client Secret | `tools/location-compare/.env.local`(git 제외) |
 
 - **지도용 Client ID 는 원래 공개되는 값**이다(페이지 소스에 보임). 네이버 콘솔의 Application 설정에서 **Web 서비스 URL 에 `https://peripheral7.github.io` 와 `http://localhost:5173` 만** 등록하면 다른 사이트에서는 지도가 뜨지 않는다. Secret 은 어떤 경우에도 브라우저 쪽에 넣지 않는다.
@@ -198,12 +198,12 @@ GitHub Pages 의 파일은 누구나 받을 수 있고, Origin·Referer 검사�
 #    tools/location-compare/.env.local 에
 VITE_NAVER_MAP_KEY_ID=콘솔의 Client ID
 
-# B. 장소 검색: 네이버 개발자센터(developers.naver.com) → 애플리케이션 등록(검색 API)
+# B. 장소 검색: 네이버 클라우드 콘솔 → NAVER API HUB 에서 키 발급(Client ID 10자·Secret 40자, 헤더 X-NCP-APIGW-API-KEY-ID/KEY)
 cd workers/place-search
 npx wrangler d1 create place-search                 # 나온 database_id 를 wrangler.toml 에
 npx wrangler d1 execute place-search --remote --file=schema.sql
-npx wrangler secret put NAVER_CLIENT_ID             # 개발자센터 Client ID
-npx wrangler secret put NAVER_CLIENT_SECRET         # 개발자센터 Client Secret
+npx wrangler secret put NAVER_CLIENT_ID             # API HUB Client ID
+npx wrangler secret put NAVER_CLIENT_SECRET         # API HUB Client Secret
 npx wrangler secret put SALT                        # 아무 긴 임의 문자열
 npx wrangler secret put TURNSTILE_SECRET            # (선택) Cloudflare Turnstile 위젯의 Secret
 npx wrangler deploy                                 # → https://place-search.<계정>.workers.dev
