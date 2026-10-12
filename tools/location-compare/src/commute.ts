@@ -8,19 +8,25 @@ export const FARE_STEP_KM = 5 // 넘으면 이 거리마다
 export const FARE_STEP = 100 // 이만큼 더한다(원)
 export const ROAD_FACTOR = 1.3 // 네이버 실측 거리가 없을 때 직선거리 → 도로 거리
 export const DEFAULT_KMPL = 12 // 연비 기본값(km/L)
-export const DEFAULT_FUEL = 1700 // 기름값 기본값(원/L) — 추후 실제 유가 데이터로 바꿀 자리
+export const DEFAULT_FUEL = 1700 // 오피넷 자료(src/fuel.json)가 없는 지역일 때의 기름값(원/L)
 
+/** 계산에 쓰는 값 */
 export type CommuteSettings = { kmpl: number; fuel: number }
-const KEY = 'locCompare.commute.v1'
+/** 저장하는 값: fuel 이 null 이면 "자동" = 1순위 후보지 시군구의 오피넷 평균(fuel.ts) */
+export type CommuteSaved = { kmpl: number; fuel: number | null }
+const KEY = 'locCompare.commute.v2'
+const OLD_KEY = 'locCompare.commute.v1' // 1판은 기름값도 고정 숫자로 저장했다 → 연비만 옮기고 기름값은 자동으로
 
-export function loadCommute(): CommuteSettings {
+export function loadCommute(): CommuteSaved {
   try {
     const s = JSON.parse(localStorage.getItem(KEY) || 'null')
-    if (s && s.kmpl > 0 && s.fuel > 0) return { kmpl: s.kmpl, fuel: s.fuel }
+    if (s && s.kmpl > 0) return { kmpl: s.kmpl, fuel: s.fuel > 0 ? s.fuel : null }
+    const old = JSON.parse(localStorage.getItem(OLD_KEY) || 'null')
+    if (old && old.kmpl > 0) return { kmpl: old.kmpl, fuel: null }
   } catch { /* 기본값 */ }
-  return { kmpl: DEFAULT_KMPL, fuel: DEFAULT_FUEL }
+  return { kmpl: DEFAULT_KMPL, fuel: null }
 }
-export function saveCommute(s: CommuteSettings) {
+export function saveCommute(s: CommuteSaved) {
   try { localStorage.setItem(KEY, JSON.stringify(s)) } catch { /* 저장 못 해도 화면은 동작 */ }
 }
 

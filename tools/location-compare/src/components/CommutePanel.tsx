@@ -2,21 +2,29 @@ import { useState } from 'react'
 import type { CandidateResult } from '../scoring'
 import { hubEmoji } from '../data'
 import { commuteInsight, hm, wonText, type CommuteSettings } from '../commute'
+import type { FuelPrice } from '../fuel'
 
 // 입지 요인 아래: 고른 후보지의 출퇴근 인사이트. 하루 = 월 왕복이 가장 많은 목적지 1회 왕복, 한 달 = 모든 목적지의 월 왕복 합.
 // 대중교통·차량을 나란히 둔다. 연비·기름값은 여기서 바로 고친다(이 브라우저에 저장).
-type Props = { r: CandidateResult; trips: Record<string, number>; settings: CommuteSettings; onSettings: (s: CommuteSettings) => void }
+// 기름값은 기본이 "자동" = 1순위 후보지 시군구의 오피넷 평균(fuelAuto). 직접 넣으면 그 값, "자동"을 누르면 되돌린다.
+type Props = {
+  r: CandidateResult; trips: Record<string, number>; settings: CommuteSettings
+  fuelAuto: FuelPrice | null; fuelManual: boolean; onKmpl: (n: number) => void; onFuel: (n: number | null) => void
+}
 
 const num = (v: string, max: number) => Math.max(0, Math.min(max, Number(v) || 0))
 
-export function CommutePanel({ r, trips, settings, onSettings }: Props) {
+export function CommutePanel({ r, trips, settings, fuelAuto, fuelManual, onKmpl, onFuel }: Props) {
   const ins = commuteInsight(r, trips, settings)
-  const [draft, setDraft] = useState({ kmpl: String(settings.kmpl), fuel: String(settings.fuel) }) // 입력 중인 글자 그대로
+  const [draft, setDraft] = useState<{ kmpl?: string; fuel?: string }>({}) // 입력 중인 글자(입력칸을 떠나면 비움)
   const set = (k: 'kmpl' | 'fuel', v: string) => {
     setDraft({ ...draft, [k]: v })
     const n = num(v, k === 'kmpl' ? 60 : 5000)
-    if (n > 0) onSettings({ ...settings, [k]: n })
+    if (n > 0) (k === 'kmpl' ? onKmpl : onFuel)(n)
   }
+  const done = () => setDraft({})
+  const d = fuelAuto?.at ? new Date(fuelAuto.at) : null
+  const at = d ? `${d.getMonth() + 1}/${d.getDate()}` : '' // 오피넷에서 받은 날
   if (!ins) return <div className="panel commute"><div className="panel-head"><h2>출퇴근 인사이트</h2></div><p className="muted">목적지를 넣으면 보입니다.</p></div>
   const { main, day, month } = ins
   return (
@@ -44,8 +52,11 @@ export function CommutePanel({ r, trips, settings, onSettings }: Props) {
         <em>{hm(month.carMin)}</em>
       </div>
       <div className="cm-inputs">
-        <label>연비<span className="unit-input"><input type="number" min={1} max={60} step={0.5} inputMode="decimal" value={draft.kmpl} onChange={(e) => set('kmpl', e.target.value)} /><i>km/L</i></span></label>
-        <label>기름값<span className="unit-input"><input type="number" min={1} max={5000} step={10} inputMode="numeric" value={draft.fuel} onChange={(e) => set('fuel', e.target.value)} /><i>원/L</i></span></label>
+        <label>연비<span className="unit-input"><input type="number" min={1} max={60} step={0.5} inputMode="decimal" value={draft.kmpl ?? String(settings.kmpl)} onChange={(e) => set('kmpl', e.target.value)} onBlur={done} /><i>km/L</i></span></label>
+        <label>기름값<span className="unit-input"><input type="number" min={1} max={5000} step={10} inputMode="numeric" value={draft.fuel ?? String(settings.fuel)} onChange={(e) => set('fuel', e.target.value)} onBlur={done} /><i>원/L</i></span>
+          <small className="cm-src">{fuelManual
+            ? <>직접 입력 · <button type="button" onClick={() => { done(); onFuel(null) }}>자동</button></>
+            : fuelAuto ? `오피넷 ${fuelAuto.area} 평균${at ? ` · ${at}` : ''}` : '기본값'}</small></label>
       </div>
     </div>
   )

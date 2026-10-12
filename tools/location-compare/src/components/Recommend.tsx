@@ -1,9 +1,10 @@
 import { useEffect, useState } from 'react'
+import { createPortal } from 'react-dom'
 import type { Candidate } from '../data'
 import { LISTINGS, SPOTS, meters, naverMapUrl, nearest, type Listing } from '../recommend'
 
 // 후보지별 비교 양옆의 추천 카드(추후 광고). 이미지는 정사각형 빈 칸으로 둔다.
-// 왼쪽 매물을 누르면 중개업자 소개 창이 지도 가운데에 지도 절반 크기로 열리고(배경은 20% 어둡게), 배경을 누르거나 Esc 로 닫는다.
+// 왼쪽 매물을 누르면 중개업자 소개 창이 화면 정가운데에 지도의 3/4 크기로 열리고(배경은 20% 어둡게), 배경을 누르거나 Esc 로 닫는다.
 // 오른쪽 카페·식당을 누르면 네이버지도 검색이 새 탭으로 열린다.
 
 const Thumb = ({ src, alt }: { src?: string; alt: string }) => (
@@ -55,19 +56,27 @@ export function SpotCards({ candidates }: { candidates: Candidate[] }) {
   )
 }
 
-/** 지도 가운데에, 지도 절반 크기로(좁은 화면은 화면 가운데 거의 꽉) */
+/** 화면(보이는 창) 정가운데에, 지도 크기의 3/4 로(창보다 크면 창에 맞춤). 페이지 어디서 눌러도 같은 자리.
+ *  body 에 바로 붙여서(portal) 부모의 배치·스크롤에 영향받지 않고, 열려 있는 동안 뒤 페이지는 스크롤되지 않는다. 안은 스크롤(스크롤바 숨김). */
 function AgentDialog({ x, candidates, onClose }: { x: Listing; candidates: Candidate[]; onClose: () => void }) {
-  const [box, setBox] = useState<React.CSSProperties>({})
+  const [size, setSize] = useState<React.CSSProperties>({})
   useEffect(() => {
+    const fit = () => {
+      const m = document.querySelector('.map-area')?.getBoundingClientRect()
+      if (!m) return setSize({})
+      setSize({ width: Math.min(window.innerWidth * 0.92, Math.max(340, m.width * 0.75)), height: Math.min(window.innerHeight * 0.9, Math.max(320, m.height * 0.75)) })
+    }
+    fit()
     const onKey = (e: KeyboardEvent) => { if (e.key === 'Escape') onClose() }
+    const prev = document.body.style.overflow
+    document.body.style.overflow = 'hidden'
     window.addEventListener('keydown', onKey)
-    const m = document.querySelector('.map-area')?.getBoundingClientRect()
-    if (m && window.innerWidth > 900) setBox({ left: m.left + m.width / 2, top: m.top + m.height / 2, width: Math.max(360, m.width / 2), height: Math.max(320, m.height / 2) })
-    return () => window.removeEventListener('keydown', onKey)
+    window.addEventListener('resize', fit)
+    return () => { document.body.style.overflow = prev; window.removeEventListener('keydown', onKey); window.removeEventListener('resize', fit) }
   }, [onClose])
-  return (
+  return createPortal(
     <div className="rec-overlay" onClick={onClose}>
-      <section className="rec-dialog" style={box} role="dialog" aria-modal="true" aria-label={`${x.agent.office} 소개`} onClick={(e) => e.stopPropagation()}>
+      <section className="rec-dialog" style={size} role="dialog" aria-modal="true" aria-label={`${x.agent.office} 소개`} onClick={(e) => e.stopPropagation()}>
         <div className="rec-dialog-head">
           <div><small>부동산 소개</small><h2>{x.agent.office}</h2></div>
           <button className="close" aria-label="닫기" onClick={onClose}>×</button>
@@ -84,6 +93,7 @@ function AgentDialog({ x, candidates, onClose }: { x: Listing; candidates: Candi
           </div>
         </div>
       </section>
-    </div>
+    </div>,
+    document.body,
   )
 }
