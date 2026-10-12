@@ -526,3 +526,6 @@ button { cursor: pointer }
   .search { width: calc(100% - 32px) }
   .search-side { position: static; width: auto; margin-top: 8px }
 }
+
+/* 추천 매물·카페/식당 카드: 배경·테두리 없음 */
+.side-card.panel { background: none; border: 0; box-shadow: none; padding-left: 0; padding-right: 0 }

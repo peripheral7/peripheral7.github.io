@@ -28,7 +28,7 @@ function RentCell({ c }: { c: { deposit?: number; rent?: number } }) {
 export function CompareCards({ results, hubs, active, onSelect, onRename, cats, onCatPhotos }: Props) {
   const [naming, setNaming] = useState<{ id: string; name: string } | null>(null) // 카드에서 이름 바꾸는 중
   const finish = (save: boolean) => { if (save && naming) onRename(naming.id, naming.name); setNaming(null) }
-  const rows = 2 + hubs.length * 4 + (cats ? 1 : 0) // 후보지 · 보증금/월세 · 목적지마다 4줄 · (길고양이)
+  const rows = 2 + hubs.length * 4 + (cats ? 1 : 0) + 1 // 후보지 · 보증금/월세 · 목적지마다 4줄 · (길고양이) · 상권 종합
   const best = (pick: (r: CandidateResult) => number | null) => Math.max(...results.map((r) => pick(r) ?? -1))
   const isBest = (v: number | null, b: number) => v !== null && Math.abs(v - b) < 1e-9 && results.length > 1
 
@@ -42,6 +42,7 @@ export function CompareCards({ results, hubs, active, onSelect, onRename, cats, 
             <div className="cell head-cell"><span className="muted">후보지</span></div>
             <div className="cell row-label rent-label">보증금/월세</div>
             {cats && <div className="cell row-label cat-label">🐈 길고양이</div>}
+            <div className="cell row-label">🏪 상권 종합</div>
             {hubs.map((h) => [
               <div key={h.id + 'h'} className="cell hub-cell"><span className="hub-mark" aria-hidden>{hubEmoji(h.category)}</span><span>{h.category}</span></div>,
               <div key={h.id + 't'} className="cell row-label"><span className="dot transit" />대중교통</div>,
@@ -73,11 +74,12 @@ export function CompareCards({ results, hubs, active, onSelect, onRename, cats, 
               <RentCell c={r.candidate} />
               {cats && cats[i] && (
                 <div className="cell mode-cell cat-cell">
-                  <div><b>{cats[i].n}마리 · 참여 {cats[i].users}명</b><small>반경 300m · 사진 {cats[i].photos}장</small>
+                  <div><b>{cats[i].n}마리</b>
                     {onCatPhotos && cats[i].photos > 0 && <button type="button" className="cat-link" onClick={() => onCatPhotos(i)}>사진 보기</button>}</div>
                   <em className={isBest(cats[i].score, Math.max(...cats.map((x) => x.score))) && cats[i].score > 0 ? 'best' : ''}>{cats[i].n ? fmt(cats[i].score) : '—'}<Line v={cats[i].score} kind="cat" /></em>
                 </div>
               )}
+              <div className="cell mode-cell"><div><span className="muted">준비 중</span></div></div>
               {r.hubs.map((h, hi) => {
                 const t = h.trip, s = h.scores
                 const diff = t.carRush - t.carFree

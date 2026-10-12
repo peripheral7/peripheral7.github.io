@@ -85,10 +85,10 @@ export function ModeScorePanel({ r, action }: { r: CandidateResult; action: Reac
 type FactorsProps = { cat: CatIndex | null; catOn: boolean; onToggleCat: () => void; onRegister: () => void; onGallery: () => void }
 
 const SOON = [
-  { name: '도보 5분 상권', note: '걸어서 5분 안의 생활 업종' },
-  { name: '산책', note: '공원·하천변·녹지' },
-  { name: '평화로움', note: '큰길·유흥가·소음원과의 거리' },
-  { name: '쾌적함', note: '녹지 비율·혼잡도' },
+  { name: '🏪 도보 5분 상권', note: '걸어서 5분 안의 생활 업종' },
+  { name: '🌳 산책', note: '공원·하천변·녹지' },
+  { name: '🕊️ 평화로움', note: '큰길·유흥가·소음원과의 거리' },
+  { name: '🌿 쾌적함', note: '녹지 비율·혼잡도' },
 ]
 
 export function FactorsPanel({ cat, catOn, onToggleCat, onRegister, onGallery }: FactorsProps) {
@@ -120,7 +120,6 @@ export function FactorsPanel({ cat, catOn, onToggleCat, onRegister, onGallery }:
         <div className="factor">
           <div>
             <b>🐈 길고양이 지수</b>
-            <small>반경 {CAT_RADIUS_M}m{cat ? ` · ${cat.n}마리` : ''}</small>
             <span className="factor-links">
               <button type="button" onClick={onGallery} disabled={!cat || cat.photos === 0}>사진{cat && cat.photos ? ` ${cat.photos}` : ''}</button>
               <button type="button" onClick={onRegister}>등록</button>

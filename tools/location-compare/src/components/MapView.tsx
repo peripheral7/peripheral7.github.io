@@ -9,7 +9,7 @@ import { loadNaverMaps, MAP_KEY_ID, onNaverAuthFailure } from '../naver'
 // - 후보지를 고르면 "그 후보지 + 주요 목적지"가 다 들어오도록 확대·이동한다.
 // - 지도 위 "장단점 기준" 단추(또는 목적지 핀)로 고른 목적지에 대해, 후보지 옆에 장점(＋)·단점(－)을 글자로 보여 준다.
 //   평소에는 고른 후보지에만, 구역이 확실히 갈릴 만큼 확대하면(DETAIL_ZOOM 이상) 화면에 보이는 모든 후보지에.
-// - "장단점 기준" 오른쪽 "후보지 한번에 보기"는 모든 후보지가 고르게 들어오도록 확대·이동한다(목적지는 빼고).
+// - "장단점 기준" 오른쪽 "후보지 한눈에"는 모든 후보지가 고르게 들어오도록 확대·이동한다(목적지는 빼고).
 
 type Props = {
   candidates: Candidate[]; hubs: Hub[]; active: number; onSelect: (index: number) => void; focusKey: number
@@ -21,6 +21,7 @@ type Props = {
 
 export const DETAIL_ZOOM = 14 // 이 확대 단계부터 모든 후보지에 장단점(동네 단위가 구분되는 정도)
 const PAD = 70
+const PAD_ALL = 28 // 후보지 한눈에: 가장자리 여백만 살짝
 const esc = (s: string) => s.replace(/[&<>"]/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' })[c]!)
 const candHtml = (n: number, on: boolean) => `<span class="pin cand${on ? ' on' : ''}">${n}</span>`
 const previewHtml = (name: string) => `<div class="nv-pin"><span class="pin preview"></span><span class="map-label preview-label">${esc(name)}</span></div>`
@@ -50,7 +51,7 @@ function frame(candidates: Candidate[], hubs: Hub[], active: number, focusHubIds
 
 export function MapView(props: Props) {
   const [engine, setEngine] = useState<'naver' | 'osm'>(MAP_KEY_ID ? 'naver' : 'osm')
-  const [allKey, setAllKey] = useState(0) // "후보지 한번에 보기"를 누를 때마다 1씩
+  const [allKey, setAllKey] = useState(0) // "후보지 한눈에"를 누를 때마다 1씩
   const p = { ...props, allKey }
   return (
     <>
@@ -66,7 +67,7 @@ export function MapView(props: Props) {
             ))}
           </div>
         )}
-        {props.candidates.length > 1 && <button type="button" className="fit-all" onClick={() => setAllKey((k) => k + 1)}>후보지 한번에 보기</button>}
+        {props.candidates.length > 1 && <button type="button" className="fit-all" onClick={() => setAllKey((k) => k + 1)}>후보지 한눈에</button>}
       </div>
     </>
   )
@@ -96,7 +97,8 @@ function NaverMap({ candidates, hubs, active, onSelect, focusKey, hubId, onHub, 
       const fill = Math.max((bs.lat() - bw.lat()) / (vs.lat() - vw.lat()), (bs.lng() - bw.lng()) / (vs.lng() - vw.lng()))
       if (inView && fill > 0.35) return // 이미 들어와 있고 너무 작지도 않다
     }
-    map.current.fitBounds(b, { top: PAD + 40, right: PAD, bottom: PAD, left: PAD })
+    const pad = all ? PAD_ALL : PAD
+    map.current.fitBounds(b, { top: pad + (all ? 36 : 40), right: pad, bottom: pad, left: pad })
   }
 
   useEffect(() => onNaverAuthFailure(onFail), []) // eslint-disable-line react-hooks/exhaustive-deps
@@ -181,19 +183,21 @@ const fitOptions = { paddingTopLeft: [PAD, PAD + 40] as [number, number], paddin
 
 // flyToBounds 는 가까운 곳도 한 번 축소했다 다시 확대해서 흔들려 보였다 → 목표 확대 단계가 같고 이미 다 보이면 그대로 두고,
 // 아니면 fitBounds 로 부드럽게 맞춘다.
-function fitSmart(map: L.Map, pts: [number, number][], force = false) {
+function fitSmart(map: L.Map, pts: [number, number][], force = false, all = false) {
   if (!pts.length) return
+  const pad = all ? PAD_ALL : PAD
+  const opts = { paddingTopLeft: [pad, pad + (all ? 36 : 40)] as [number, number], paddingBottomRight: [pad, pad] as [number, number] }
   const b = L.latLngBounds(pts)
-  const target = Math.min(16, map.getBoundsZoom(b, false, L.point(PAD * 2, PAD * 2 + 40)))
+  const target = Math.min(all ? 17 : 16, map.getBoundsZoom(b, false, L.point(pad * 2, pad * 2 + 40)))
   const z = map.getZoom()
   if (!force && z === target && map.getBounds().contains(b)) return
-  map.fitBounds(b, { ...fitOptions, maxZoom: 16, animate: true }) // 확대 단계가 같으면 옮기기만 한다
+  map.fitBounds(b, { ...opts, maxZoom: all ? 17 : 16, animate: true }) // 확대 단계가 같으면 옮기기만 한다
 }
 
 function Framing({ pts, focusKey, active, all, allKey }: { pts: [number, number][]; focusKey: number; active: number; all: [number, number][]; allKey: number }) {
   const map = useMap()
   useEffect(() => { fitSmart(map, pts) }, [map, active, focusKey, pts.join()]) // eslint-disable-line react-hooks/exhaustive-deps
-  useEffect(() => { if (allKey) fitSmart(map, all, true) }, [allKey]) // eslint-disable-line react-hooks/exhaustive-deps
+  useEffect(() => { if (allKey) fitSmart(map, all, true, true) }, [allKey]) // eslint-disable-line react-hooks/exhaustive-deps
   return null
 }
 

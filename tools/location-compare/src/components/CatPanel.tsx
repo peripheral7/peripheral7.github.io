@@ -16,7 +16,6 @@ export function CatRegister({ state, onChange, onClose }: { state: CatState; onC
   const [gps, setGps] = useState<'wait' | 'ok' | 'fail'>('wait')
   const [gpsMsg, setGpsMsg] = useState('')
   const [target, setTarget] = useState('new') // 'new' 또는 기존 고양이 id
-  const [name, setName] = useState('')
   const [times, setTimes] = useState<string[]>([])
   const [traits, setTraits] = useState('')
   const [photo, setPhoto] = useState<string | null>(null)
@@ -56,7 +55,7 @@ export function CatRegister({ state, onChange, onClose }: { state: CatState; onC
 
   const submit = () => {
     if (!fix || !photo) return
-    const input = { name, times, traits }
+    const input = { name: '', times, traits }
     const next = chosen ? addPhotoToCat(state, chosen.id, input, photo) : addCat(state, fix, input, photo)
     if (!next) { setErr('이 고양이에는 이미 내 사진이 있어요(고양이 한 마리당 한 사람 한 장).'); return }
     if (!onChange(next)) { setErr('저장 공간이 부족해요. 오래된 사진을 지우거나 다른 사진으로 시도해 주세요.'); return }
@@ -87,7 +86,7 @@ export function CatRegister({ state, onChange, onClose }: { state: CatState; onC
           <label className="cat-field">이 고양이는…
             <select value={target} onChange={(e) => setTarget(e.target.value)}>
               <option value="new">새로 만난 고양이</option>
-              {near.map((c) => <option key={c.id} value={c.id}>이미 등록된 {c.name || '이름 없는 고양이'} ({Math.round(metersBetween(fix!, c))}m 거리){hasMyPhoto(c, state.user, now) ? ' — 내 사진 있음' : ''}</option>)}
+              {near.map((c) => <option key={c.id} value={c.id}>이미 등록된 고양이 ({Math.round(metersBetween(fix!, c))}m 거리){hasMyPhoto(c, state.user, now) ? ' — 내 사진 있음' : ''}</option>)}
             </select>
           </label>
         )}
@@ -102,9 +101,6 @@ export function CatRegister({ state, onChange, onClose }: { state: CatState; onC
           {photo && <small className="faint">줄인 크기 약 {kb(photo)}KB</small>}
         </div>
 
-        <label className="cat-field">이름(모르면 비워 두세요)
-          <input value={name} maxLength={20} placeholder="예: 치즈, 검은 양말" onChange={(e) => setName(e.target.value)} />
-        </label>
         <div className="cat-field">출몰 시간 <small className="faint">여러 개 고를 수 있어요</small>
           <div className="chips">
             {TIME_SLOTS.map((t) => <button key={t} type="button" className={'chip' + (times.includes(t) ? ' on' : '')} aria-pressed={times.includes(t)} onClick={() => toggleTime(t)}>{t}</button>)}
@@ -145,7 +141,6 @@ export function CatGallery({ title, cats, user, onRemoveMine, onClose }: { title
           <>
             <img className="cat-big" src={cur.p.data} alt={cur.c.name || '길고양이'} />
             <div className="cat-meta">
-              <b>{cur.c.name || '이름 없는 고양이'}</b>
               <span>출몰 시간 {cur.c.times.length ? cur.c.times.join('·') : '미입력'}</span>
               <span>특징 {cur.c.traits || '미입력'}</span>
               <small className="faint">{new Date(cur.p.at).toLocaleDateString('ko-KR')} 등록 · 유효 {daysLeft(cur.p, now)}일 남음{cur.p.user === user ? ' · 내 사진' : ''}</small>
