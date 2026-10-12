@@ -308,6 +308,13 @@ node scripts/stores.mjs codes 의원      # 업종 코드표
 - 분류(카페·음식점·화장품·마트·잡화점·필수의료·약국)는 `src/commercial-categories.json` — 소분류 코드·코드 앞자리·상호 이름(다이소·올리브영 등)으로 정한다. 고친 뒤 `analyze` 만 다시 돌리면 된다.
 - 지수(점수)는 아직 정하지 않았다. `src/commercial.json` 에 개수·가장 가까운 거리만 있다.
 
+### 오피넷 유가 API 키(기름값 — 이 PC 에서만, 준비 중)
+`tools/location-compare/.env.local`(git 제외)의 `OPINET_API_KEY` 칸(지금은 비어 있음). 값은 [오피넷](https://www.opinet.co.kr) → 유가정보 API → **무료 API 이용 신청**으로 받은 인증키(요청 주소의 `code=` 값). `VITE_` 를 붙이지 않는다(공개 페이지에 들어가므로). 숫자 없는 이름 규칙은 위와 같다.
+
+| 변수 | API | 쓸 곳 |
+|---|---|---|
+| `OPINET_API_KEY` | 오피넷 시도별 평균 유가 `https://www.opinet.co.kr/api/avgSidoPrice.do?out=json&code=…` (휘발유 `prodcd=B027`) | 출퇴근 인사이트 기름값 기본값(`src/commute.ts` `DEFAULT_FUEL`, 지금 1,700원/L 고정) — 이 PC 에서 받아 빌드에 넣을 예정(공개 사이트는 오피넷을 부르지 않음) |
+
 ### 보증금 1,000 기준 월세
 
 보증금이 다른 매물을 한 기준으로 비교하려고 `월세 + (보증금 − 1,000) × 연 6% ÷ 12`(만원)로 맞춘다. 보증금 1,000만원 차이 = 월 5만원. 기준 보증금·전환율은 `src/data.ts` 의 `BASE_DEPOSIT`·`CONVERSION_RATE`.
