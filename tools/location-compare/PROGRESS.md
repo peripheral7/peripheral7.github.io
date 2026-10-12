@@ -61,6 +61,6 @@
 
 - [ ] **10/13(화) 08:00 출퇴근 실측 결과 확인**: 작업 스케줄러 `PeripheralBlog_LocationRoutes_Rush_20261013`, 로그 `scheduled-routes.log`. 그 시각에 PC가 켜져 있고 로그인돼 있어야 한다.
 - [ ] **낮 시간 실측 다시 하기**: 지금 값은 21시에 잰 것 → 평일 11시 무렵 `scheduled-routes.ps1 -Slot free`(예약할지 결정).
-- [ ] **장소 이름 검색 켜기**: NAVER API HUB 키를 `workers/place-search/.dev.vars`에 넣음(10-13), Worker 를 API HUB 주소·헤더로 바꾸고 로컬 실검색 확인 → Cloudflare 배포만 남음(사용자 "검색 배포해" 후).
+- [x] **장소 이름 검색 켜기**(10-13 배포): Worker `https://place-search.mooncg0916.workers.dev` → NAVER API HUB 지역 검색, D1 `place-search`(사용량·7일 캐시 — *.workers.dev 는 Cache API 가 안 돼 D1 에 둠), 하루 전체 1000회·IP 시간당 30/하루 100. 실제 사이트에서 "망포 래미안"·"영통역" 검색 확인.
 - [ ] `.env.local` 끝에 중복으로 들어간 `NAVER_CLIENT_ID`/`NAVER_CLIENT_SECRET` 두 줄 정리.
 - [ ] 입지 요인(도보 5분 상권·산책·평화로움·쾌적함) 지수 추가.
