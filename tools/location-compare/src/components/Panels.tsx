@@ -11,7 +11,7 @@ export type ModeKey = 'transit' | 'car' | 'walk'
 export const MODE_LABEL: Record<ModeKey, string> = { transit: '대중교통', car: '차량', walk: '도보' }
 
 export function modeSummary(r: CandidateResult, mode: ModeKey): number | null {
-  const rows = r.hubs.filter((h) => (mode === 'walk' ? h.walkCounts : mode === 'transit' ? !h.transitSkipped : !h.carMuted))
+  const rows = r.hubs.filter((h) => (mode === 'walk' ? h.walkCounts : mode === 'transit' ? !h.transitSkipped : true))
   const w = rows.reduce((a, h) => a + h.share, 0)
   if (!rows.length || w === 0) return null
   return rows.reduce((a, h) => a + (mode === 'walk' ? h.scores.walk ?? 0 : h.scores[mode]) * h.share, 0) / w

@@ -63,7 +63,7 @@ export function SettingsPopover({ kind, hubs, value, onChange, onClose }: Props)
           <span className="stepper">
             <input type="number" min={0} max={MAX_TRIPS} inputMode="numeric" aria-label={`${h.name} 월 왕복 횟수`} value={value.trips[h.id] ?? 0} onFocus={(e) => e.currentTarget.select()} onChange={(e) => setTrips(h.id, Number(e.target.value))} />
           </span>
-          <label className="transit-use" title="체크하면 주 이동수단과 상관없이 항상 대중교통을 이용하는 것으로 계산합니다(차량은 참고로만 표시)">
+          <label className="transit-use" title="체크하면 주 이동수단과 상관없이 항상 대중교통을 이용하는 것으로 계산합니다(차량은 점수에는 넣고 카드에서 회색으로 표시)">
             <input type="checkbox" checked={!!value.transitUse?.[h.id]} onChange={(e) => onChange({ ...value, transitUse: { ...value.transitUse, [h.id]: e.target.checked } })} />대중교통 이용
           </label>
         </div>

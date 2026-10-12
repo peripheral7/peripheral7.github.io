@@ -596,4 +596,11 @@ input[type=number] { -moz-appearance: textfield; appearance: textfield }
 input[type=number]::-webkit-inner-spin-button, input[type=number]::-webkit-outer-spin-button { -webkit-appearance: none; margin: 0 }
 .transit-use { display: flex; align-items: center; gap: 5px; font-size: 12px; white-space: nowrap; cursor: pointer }
 .transit-use input { width: 15px; height: 15px; accent-color: var(--transit) }
-.mode-cell.muted-mode { filter: grayscale(1); opacity: 0.55 }
+.mode-cell.muted-mode { filter: grayscale(1); opacity: 0.55 } /* 대중교통 이용 목적지의 차량: 점수에는 넣고 색만 흐리게 */
+
+/* 지도 위 지표 단추(상권·산책) */
+.layer-switch { display: flex; gap: 4px; background: rgba(255, 255, 255, 0.3); -webkit-backdrop-filter: blur(6px) saturate(1.2); backdrop-filter: blur(6px) saturate(1.2); border: 1px solid rgba(24, 39, 56, 0.22); border-radius: 999px; padding: 4px; box-shadow: 0 2px 10px rgba(0, 0, 0, 0.08) }
+.layer-switch button { border: 0; background: none; border-radius: 999px; padding: 5px 11px; font-size: 12px; color: var(--text); text-shadow: 0 0 6px rgba(255, 255, 255, 0.9) }
+.layer-switch button.on { background: var(--text); color: #fff; text-shadow: none }
+.major-pin.park-pin { border-color: #5a9a52 }
+.layer-note { position: absolute; left: 12px; bottom: 12px; z-index: 700; margin: 0; max-width: calc(100% - 100px); padding: 6px 12px; border-radius: 999px; font-size: 12px; background: rgba(255, 255, 255, 0.85); border: 1px solid var(--line-2); box-shadow: 0 2px 10px rgba(0, 0, 0, 0.08) }

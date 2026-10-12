@@ -14,6 +14,7 @@ import { CommutePanel } from './components/CommutePanel'
 import { ListingCards, SpotCards } from './components/Recommend'
 import { DEFAULT_FUEL, loadCommute, saveCommute, type CommuteSaved } from './commute'
 import { fuelPriceFor } from './fuel'
+import { loadParks, strollNear, STROLL_RADIUS, type Park } from './parks'
 import { MAJORS, commercialIndex, loadCommercial, pickedCats, saveCommercial, walk5Counts, type CommercialPrefs } from './commercial'
 
 // " · 3,000/40 (1,000 기준 월 50)" — 금액을 안 넣었으면 빈 글자
@@ -55,7 +56,24 @@ export default function App() {
   useEffect(() => { saveCommercial(comPrefs) }, [comPrefs])
   const comIdx = useMemo(() => commercialIndex(candidates, comPrefs), [candidates, comPrefs])
   // 지도에 따로 표시할 주요 매장: 필수·선호로 고른 업종의 것만(상권 지수를 껐으면 없음)
-  const majors = useMemo(() => { const on = pickedCats(comPrefs); return comPrefs.on ? MAJORS.filter((m) => on.has(m.cat)) : [] }, [comPrefs])
+  // 지도 위 지표 단추: 상권(주요 매장 표시)·산책(공원·하천 표시). 이 브라우저에 기억한다.
+  const [layers, setLayers] = useState<{ com: boolean; walk: boolean }>(() => {
+    try { const l = JSON.parse(localStorage.getItem('locCompare.layers.v1') || 'null'); if (l) return { com: l.com !== false, walk: !!l.walk } } catch { /* 기본값 */ }
+    return { com: true, walk: false }
+  })
+  const toggleLayer = (k: 'com' | 'walk') => setLayers((l) => { const n = { ...l, [k]: !l[k] }; try { localStorage.setItem('locCompare.layers.v1', JSON.stringify(n)) } catch { /* 저장 못 해도 동작 */ } return n })
+  const majors = useMemo(() => { const on = pickedCats(comPrefs); return layers.com ? (comPrefs.on ? MAJORS.filter((m) => on.has(m.cat)) : MAJORS) : [] }, [comPrefs, layers.com])
+  const [parks, setParks] = useState<Park[]>([])
+  const [parkState, setParkState] = useState<'idle' | 'loading' | 'error'>('idle')
+  const parkKey = candidates.map((c) => `${c.lat},${c.lng}`).join(';')
+  useEffect(() => {
+    if (!layers.walk || !candidates.length) { setParks([]); setParkState('idle'); return }
+    let alive = true
+    setParkState('loading')
+    loadParks(candidates).then((p) => { if (alive) { setParks(p); setParkState('idle') } }).catch(() => { if (alive) setParkState('error') })
+    return () => { alive = false }
+  }, [layers.walk, parkKey]) // eslint-disable-line react-hooks/exhaustive-deps
+  const stroll = layers.walk && candidates[active] ? strollNear(candidates[active], parks) : null
   const catIdx = useMemo(() => (catState.on ? candidates.map((c) => catIndex(c, catState.cats)) : null), [catState, candidates])
   const setCats = (next: CatState) => { const ok = saveCats(next); if (ok) setCatState(next); return ok }
   useEffect(() => { if (active > candidates.length - 1) setActive(Math.max(0, candidates.length - 1)) }, [candidates.length, active])
@@ -170,7 +188,14 @@ export default function App() {
         </div>
 
         <section className="map-area">
-          <MapView candidates={candidates} hubs={hubs} active={active} onSelect={select} focusKey={focusKey} hubId={hubId} onHub={setHubPick} insights={insights} focusHubIds={mainHubIds} ranks={ranks} preview={preview} results={found} centerRef={mapCenter} majors={majors} />
+          <MapView candidates={candidates} hubs={hubs} active={active} onSelect={select} focusKey={focusKey} hubId={hubId} onHub={setHubPick} insights={insights} focusHubIds={mainHubIds} ranks={ranks} preview={preview} results={found} centerRef={mapCenter} majors={majors} parks={parks} layers={layers} onLayer={toggleLayer} />
+          {layers.walk && (
+            <p className="layer-note" role="status">
+              {parkState === 'loading' ? '🌳 산책 — 공원·하천 찾는 중…' : parkState === 'error' ? '🌳 산책 — 공원 자료를 받지 못했어요(잠시 뒤 다시 켜 보세요)'
+                : stroll?.nearest ? `🌳 산책 — 가장 가까운 ${stroll.nearest.p.kind} ${stroll.nearest.p.name} ${Math.round(stroll.nearest.m / 10) * 10}m · 도보 10분(${STROLL_RADIUS}m) 안 ${stroll.count}곳`
+                : '🌳 산책 — 도보 10분(800m) 안에 등록된 공원·하천이 없어요'}
+            </p>
+          )}
           <SearchBox hubs={hubs} tripsOf={(id) => pref.trips[id] ?? 0} onCandidate={onCandidate} onHub={onHub} onPreview={setPreview} onResults={setFound} centerRef={mapCenter} />
         </section>
 

@@ -105,10 +105,8 @@ export type CandidateResult = { candidate: Candidate; hubs: HubResult[]; total: 
  * - 없으면: 아무도 걸어갈 수 없으니 도보를 빼고 대중교통·차량 가중치만으로 다시 나눈다.
  * skipTransit = 이 후보지에서 도보 10분 이내(WALK_ONLY) — 걸어가니 대중교통을 빼고 차량·도보 가중치만으로 다시 나눈다.
  */
-export function hubScore(s: ModeScores, w: Preference['weights'], walkCounts: boolean, skipTransit = false, carMuted = false): number {
-  const parts: [number, number][] = []
-  if (!skipTransit) parts.push([s.transit, w.transit])
-  if (!carMuted) parts.push([s.car, w.car]) // 대중교통 이용으로 정한 방문지는 차량을 점수에 넣지 않는다(참고로만 표시)
+export function hubScore(s: ModeScores, w: Preference['weights'], walkCounts: boolean, skipTransit = false): number {
+  const parts: [number, number][] = skipTransit ? [[s.car, w.car]] : [[s.transit, w.transit], [s.car, w.car]]
   if (walkCounts) parts.push([s.walk ?? 0, w.walk])
   const sumW = parts.reduce((a, [, x]) => a + Math.max(0, x), 0)
   if (sumW === 0) return parts.reduce((a, [v]) => a + v, 0) / parts.length // 가중치가 모두 0이면 단순 평균
@@ -127,9 +125,9 @@ export function evaluate(candidates: Candidate[], hubs: Hub[], pref: Preference)
       const scores = scoresByHub[hi][ci]
       const walkCounts = walkCountsByHub[hi]
       const trip = tripsByHub[hi][ci]
-      const carMuted = !!pref.transitUse?.[hub.id]
+      const carMuted = !!pref.transitUse?.[hub.id] // 차량은 점수에 그대로 넣고 카드에서 회색으로만 표시
       const transitSkipped = !carMuted && trip.walk <= WALK_ONLY // 대중교통 이용으로 정했으면 도보권이어도 대중교통을 셈
-      return { hub, trip, scores, hubScore: hubScore(scores, pref.weights, walkCounts, transitSkipped, carMuted), share: shares[hi], walkCounts, transitSkipped, carMuted }
+      return { hub, trip, scores, hubScore: hubScore(scores, pref.weights, walkCounts, transitSkipped), share: shares[hi], walkCounts, transitSkipped, carMuted }
     })
     const total = hubResults.reduce((a, r) => a + r.hubScore * r.share, 0)
     return { candidate, hubs: hubResults, total, rank: 0 }

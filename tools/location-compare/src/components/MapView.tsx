@@ -5,6 +5,7 @@ import { hubEmoji, type Candidate, type Hub, type Place } from '../data'
 import type { Insight } from '../scoring'
 import { loadNaverMaps, MAP_KEY_ID, onNaverAuthFailure } from '../naver'
 import { CATEGORIES, type Major } from '../commercial'
+import type { Park } from '../parks'
 
 // 지도: 네이버 지도 키(VITE_NAVER_MAP_KEY_ID)가 있으면 네이버 지도, 없거나 인증이 실패하면 OSM 밝은 지도.
 // - 후보지를 고르면 "그 후보지 + 주요 목적지"가 다 들어오도록 확대·이동한다.
@@ -22,6 +23,8 @@ type Props = {
   results?: Place[] // 검색 결과 전부 — 지도에 작은 점으로
   centerRef?: { current: { lat: number; lng: number } | null } // 지금 지도 가운데(검색 결과를 가까운 순으로 정렬할 때 씀)
   majors?: Major[] // 지도에 따로 표시할 주요 매장
+  parks?: Park[] // 산책 레이어: 공원·하천
+  layers?: { com: boolean; walk: boolean }; onLayer?: (k: 'com' | 'walk') => void // 지도 위 상권·산책 단추
 }
 
 export const DETAIL_ZOOM = 14 // 이 확대 단계부터 모든 후보지에 장단점(동네 단위가 구분되는 정도)
@@ -37,6 +40,8 @@ const majorTitle = (m: Major) => `${m.brand} — ${m.name}${m.addr ? ` · ${m.ad
 const catEmoji = (id: string) => CATEGORIES.find((c) => c.id === id)?.emoji ?? '🏬'
 /** 주요 매장: 이모지 원 + (확대했을 때) 브랜드 이름 */
 const majorHtml = (m: Major, named: boolean) => `<span class="major-pin${m.inferred ? ' inferred' : ''}" title="${esc(majorTitle(m))}"><i>${catEmoji(m.cat)}</i>${named ? `<b>${esc(m.brand)}</b>` : ''}</span>`
+/** 산책: 공원·하천 이모지 원 + (확대했을 때) 이름 */
+const parkHtml = (p: Park, named: boolean) => `<span class="major-pin park-pin" title="${esc(p.kind)} — ${esc(p.name)}"><i>${p.kind === '하천' ? '🌊' : '🌳'}</i>${named ? `<b>${esc(p.name)}</b>` : ''}</span>`
 const hubHtml = (h: Hub, on: boolean) => `<span class="pin hub${on ? ' on' : ''}"><b>${hubEmoji(h.category)}</b></span>`
 
 /** 후보지 옆 글자: 이름 + (목적지 기준) 장점·단점 */
@@ -78,6 +83,12 @@ export function MapView(props: Props) {
             ))}
           </div>
         )}
+        {props.layers && props.onLayer && (
+          <div className="layer-switch" role="group" aria-label="지도에 보일 지표">
+            <button type="button" aria-pressed={props.layers.com} className={props.layers.com ? 'on' : ''} onClick={() => props.onLayer!('com')}>🏪 상권</button>
+            <button type="button" aria-pressed={props.layers.walk} className={props.layers.walk ? 'on' : ''} onClick={() => props.onLayer!('walk')}>🌳 산책</button>
+          </div>
+        )}
         {props.candidates.length > 1 && <button type="button" className="fit-all" onClick={() => setAllKey((k) => k + 1)}>후보지 한눈에</button>}
       </div>
     </>
@@ -86,7 +97,7 @@ export function MapView(props: Props) {
 
 // ── 네이버 지도 ──────────────────────────────────────────────────────
 /* eslint-disable @typescript-eslint/no-explicit-any */
-function NaverMap({ candidates, hubs, active, onSelect, focusKey, hubId, onHub, insights, focusHubIds, ranks, preview, results, centerRef, majors, allKey, onFail }: Props & { allKey: number; onFail: () => void }) {
+function NaverMap({ candidates, hubs, active, onSelect, focusKey, hubId, onHub, insights, focusHubIds, ranks, preview, results, centerRef, majors, parks, allKey, onFail }: Props & { allKey: number; onFail: () => void }) {
   const box = useRef<HTMLDivElement>(null)
   const map = useRef<any>(null)
   const layers = useRef<any[]>([])
@@ -170,6 +181,18 @@ function NaverMap({ candidates, hubs, active, onSelect, focusKey, hubId, onHub, 
       icon: { content: majorHtml(m, detail), anchor: new naver.maps.Point(10, 10) },
     }))
   }, [ready, majors, detail])
+
+  // 산책(공원·하천)
+  const parkMarkers = useRef<any[]>([])
+  useEffect(() => {
+    const naver = window.naver
+    if (!ready || !naver) return
+    parkMarkers.current.forEach((m) => m.setMap(null))
+    parkMarkers.current = (parks ?? []).map((p) => new naver.maps.Marker({
+      map: map.current, position: new naver.maps.LatLng(p.lat, p.lng), zIndex: 4,
+      icon: { content: parkHtml(p, detail), anchor: new naver.maps.Point(10, 10) },
+    }))
+  }, [ready, parks, detail])
 
   // 핀·점선·장단점 글자 다시 그리기
   useEffect(() => {
@@ -265,7 +288,7 @@ function Controls({ pts }: { pts: [number, number][] }) {
   )
 }
 
-function OsmMap({ candidates, hubs, active, onSelect, focusKey, hubId, onHub, insights, focusHubIds, ranks, preview, results, centerRef, majors, allKey }: Props & { allKey: number }) {
+function OsmMap({ candidates, hubs, active, onSelect, focusKey, hubId, onHub, insights, focusHubIds, ranks, preview, results, centerRef, majors, parks, allKey }: Props & { allKey: number }) {
   const pts = useMemo(() => frame(candidates, hubs, active, focusHubIds), [candidates, hubs, active, focusHubIds])
   const [zoom, setZoom] = useState(13)
   const cur = candidates[active]
@@ -280,6 +303,10 @@ function OsmMap({ candidates, hubs, active, onSelect, focusKey, hubId, onHub, in
       {(majors ?? []).map((m) => (
         <Marker key={`m-${m.brand}-${m.lat}-${m.lng}-${detail}`} position={[m.lat, m.lng]} zIndexOffset={-500}
           icon={L.divIcon({ className: 'pin-shell', html: majorHtml(m, detail), iconSize: [20, 20], iconAnchor: [10, 10] })} />
+      ))}
+      {(parks ?? []).map((p) => (
+        <Marker key={`p-${p.id}-${detail}`} position={[p.lat, p.lng]} zIndexOffset={-500}
+          icon={L.divIcon({ className: 'pin-shell', html: parkHtml(p, detail), iconSize: [20, 20], iconAnchor: [10, 10] })} />
       ))}
       {cur && hubs.map((h) => (
         <Polyline key={h.id + cur.id + (h.id === hubId)} className="route" positions={[[cur.lat, cur.lng], [h.lat, h.lng]]} pathOptions={{ color: '#2b2b26', weight: 2, dashArray: '6 7', opacity: h.id === hubId ? 0.9 : 0.35 }} />

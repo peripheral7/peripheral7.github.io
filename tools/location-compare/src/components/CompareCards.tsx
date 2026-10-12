@@ -97,8 +97,8 @@ export function CompareCards({ results, com, hubs, active, onSelect, onRename }:
                         <em className={isBest(s.transit, best((x) => (x.hubs[hi].transitSkipped ? null : x.hubs[hi].scores.transit))) ? 'best' : ''}>{fmt(s.transit)}<Line v={s.transit} kind="transit" /></em></>}
                   </div>,
                   <div key={h.hub.id + 'c'} className={'cell mode-cell' + (h.carMuted ? ' muted-mode' : '')}>
-                    <div><b>출퇴근 {t.carRush}분 · 낮 {t.carFree}분</b><small>차이 +{diff}분 ({s.carRatio.toFixed(2)}배){measured}{h.carMuted ? ' · 대중교통 이용 — 참고용(점수 제외)' : ''}</small></div>
-                    <em className={!h.carMuted && isBest(s.car, best((x) => (x.hubs[hi].carMuted ? null : x.hubs[hi].scores.car))) ? 'best' : ''}>{fmt(s.car)}<Line v={s.car} kind="car" /></em>
+                    <div><b>출퇴근 {t.carRush}분 · 낮 {t.carFree}분</b><small>차이 +{diff}분 ({s.carRatio.toFixed(2)}배){measured}{h.carMuted ? ' · 대중교통 이용' : ''}</small></div>
+                    <em className={isBest(s.car, best((x) => x.hubs[hi].scores.car)) ? 'best' : ''}>{fmt(s.car)}<Line v={s.car} kind="car" /></em>
                   </div>,
                   <div key={h.hub.id + 'w'} className="cell mode-cell">
                     {s.walk !== null
