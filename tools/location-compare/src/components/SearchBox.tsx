@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState } from 'react'
-import { CANDIDATE_CATEGORIES, HUB_CATEGORIES, MAX_HUBS, type Hub, type Place } from '../data'
-import { guessCandidateCategory, guessHubCategory } from '../store'
+import { HUB_CATEGORIES, MAX_HUBS, NEW_HUB_TRIPS, type Hub, type Place } from '../data'
+import { guessHubCategory, money } from '../store'
 import { placeSearchAvailable, search, searchAvailable } from '../naver'
 
 // 지도 위 검색창 하나: 부동산(아파트·주소)과 목적지(학교·회사 등)를 같은 창에서 찾고, 결과에서 바로 후보지/목적지로 넣는다.
@@ -8,10 +8,11 @@ import { placeSearchAvailable, search, searchAvailable } from '../naver'
 
 type Props = {
   hubs: Hub[]
-  onCandidate: (p: Place, name: string, category: string) => void
-  onHub: (p: Place, replaceId: string | undefined, name: string, category: string) => void
+  onCandidate: (p: Place, name: string, deposit?: number, rent?: number) => void
+  onHub: (p: Place, replaceId: string | undefined, name: string, category: string, trips: number) => void
 }
-type Draft = { index: number; kind: 'candidate' | 'hub'; name: string; category: string; replaceId?: string }
+// 등록 창에서 정하는 주요 설정: 후보지 = 이름·보증금·월세, 목적지 = 이름·분류·월 왕복 횟수(·바꿀 목적지)
+type Draft = { index: number; kind: 'candidate' | 'hub'; name: string; category: string; deposit: string; rent: string; trips: string; replaceId?: string }
 
 export function SearchBox({ hubs, onCandidate, onHub }: Props) {
   const [q, setQ] = useState('')
@@ -19,7 +20,7 @@ export function SearchBox({ hubs, onCandidate, onHub }: Props) {
   const [open, setOpen] = useState(false)
   const [items, setItems] = useState<Place[]>([])
   const [msg, setMsg] = useState('')
-  const [draft, setDraft] = useState<Draft | null>(null) // 등록 전 이름·분류 정하기
+  const [draft, setDraft] = useState<Draft | null>(null) // 등록 전 주요 설정 정하기
   const box = useRef<HTMLDivElement>(null)
   const last = useRef('')
   const enabled = searchAvailable()
@@ -50,13 +51,13 @@ export function SearchBox({ hubs, onCandidate, onHub }: Props) {
   const done = (fn: () => void) => { fn(); setOpen(false); setQ(''); setItems([]); setDraft(null); last.current = '' }
   const start = (index: number, kind: Draft['kind'], replaceId?: string) => {
     const p = items[index]
-    setDraft({ index, kind, name: p.name, category: kind === 'hub' ? guessHubCategory(p) : guessCandidateCategory(p), replaceId })
+    setDraft({ index, kind, name: p.name, category: guessHubCategory(p), deposit: '', rent: '', trips: String(NEW_HUB_TRIPS), replaceId })
   }
   const commit = () => {
     if (!draft) return
     const p = items[draft.index]
     const name = draft.name.trim() || p.name
-    done(() => (draft.kind === 'candidate' ? onCandidate(p, name, draft.category) : onHub(p, draft.replaceId, name, draft.category)))
+    done(() => (draft.kind === 'candidate' ? onCandidate(p, name, money(draft.deposit), money(draft.rent)) : onHub(p, draft.replaceId, name, draft.category, money(draft.trips) ?? 0)))
   }
 
   return (
@@ -77,11 +78,17 @@ export function SearchBox({ hubs, onCandidate, onHub }: Props) {
                 <form className="register" onSubmit={(e) => { e.preventDefault(); commit() }}>
                   <span className="register-title">{draft.kind === 'candidate' ? '후보지로 등록' : '목적지로 등록'}</span>
                   <label>이름<input value={draft.name} maxLength={40} autoFocus onChange={(e) => setDraft({ ...draft, name: e.target.value })} /></label>
-                  <label>분류
-                    <select value={draft.category} onChange={(e) => setDraft({ ...draft, category: e.target.value })}>
-                      {(draft.kind === 'candidate' ? CANDIDATE_CATEGORIES : HUB_CATEGORIES).map((c) => <option key={c}>{c}</option>)}
-                    </select>
-                  </label>
+                  {draft.kind === 'candidate' ? <>
+                    <label>보증금<span className="unit-input"><input type="number" min={0} step={100} inputMode="numeric" placeholder="예: 1000" value={draft.deposit} onChange={(e) => setDraft({ ...draft, deposit: e.target.value })} /><i>만원</i></span></label>
+                    <label>월세<span className="unit-input"><input type="number" min={0} step={1} inputMode="numeric" placeholder="예: 50" value={draft.rent} onChange={(e) => setDraft({ ...draft, rent: e.target.value })} /><i>만원</i></span></label>
+                  </> : <>
+                    <label>분류
+                      <select value={draft.category} onChange={(e) => setDraft({ ...draft, category: e.target.value })}>
+                        {HUB_CATEGORIES.map((c) => <option key={c}>{c}</option>)}
+                      </select>
+                    </label>
+                    <label>월 왕복<span className="unit-input"><input type="number" min={0} max={60} step={1} inputMode="numeric" value={draft.trips} onChange={(e) => setDraft({ ...draft, trips: e.target.value })} /><i>회</i></span></label>
+                  </>}
                   {draft.kind === 'hub' && hubs.length >= MAX_HUBS && (
                     <label>바꿀 목적지
                       <select value={draft.replaceId} onChange={(e) => setDraft({ ...draft, replaceId: e.target.value })}>

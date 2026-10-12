@@ -1,7 +1,7 @@
 import { useEffect, useMemo, useRef, useState } from 'react'
 import { MapContainer, Marker, Polyline, TileLayer, Tooltip, useMap, useMapEvents } from 'react-leaflet'
 import L from 'leaflet'
-import type { Candidate, Hub } from '../data'
+import { hubEmoji, type Candidate, type Hub } from '../data'
 import type { Insight } from '../scoring'
 import { loadNaverMaps, MAP_KEY_ID, onNaverAuthFailure } from '../naver'
 
@@ -14,13 +14,14 @@ type Props = {
   candidates: Candidate[]; hubs: Hub[]; active: number; onSelect: (index: number) => void; focusKey: number
   hubId: string | null; onHub: (id: string) => void; insights: Insight[]
   focusHubIds: string[] // 후보지를 고를 때 함께 화면에 넣을 주 목적지(월 왕복 50% 이상)
+  ranks: number[] // 후보지 핀 숫자 = 종합 순위
 }
 
 export const DETAIL_ZOOM = 14 // 이 확대 단계부터 모든 후보지에 장단점(동네 단위가 구분되는 정도)
 const PAD = 70
 const esc = (s: string) => s.replace(/[&<>"]/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' })[c]!)
 const candHtml = (n: number, on: boolean) => `<span class="pin cand${on ? ' on' : ''}">${n}</span>`
-const hubHtml = (n: number, on: boolean) => `<span class="pin hub${on ? ' on' : ''}"><b>${n}</b></span>`
+const hubHtml = (h: Hub, on: boolean) => `<span class="pin hub${on ? ' on' : ''}"><b>${hubEmoji(h.category)}</b></span>`
 
 /** 후보지 옆 글자: 이름 + (목적지 기준) 장점·단점 */
 function labelHtml(name: string, ins: Insight | undefined, hub: Hub | undefined) {
@@ -48,9 +49,9 @@ export function MapView(props: Props) {
       {props.hubs.length > 0 && (
         <div className="hub-switch" role="tablist" aria-label="장단점을 볼 목적지">
           <span>장단점 기준</span>
-          {props.hubs.map((h, i) => (
+          {props.hubs.map((h) => (
             <button key={h.id} role="tab" aria-selected={h.id === props.hubId} className={h.id === props.hubId ? 'on' : ''} onClick={() => props.onHub(h.id)}>
-              <i>{i + 1}</i>{h.category}
+              <i aria-hidden>{hubEmoji(h.category)}</i>{h.category}
             </button>
           ))}
         </div>
@@ -61,7 +62,7 @@ export function MapView(props: Props) {
 
 // ── 네이버 지도 ──────────────────────────────────────────────────────
 /* eslint-disable @typescript-eslint/no-explicit-any */
-function NaverMap({ candidates, hubs, active, onSelect, focusKey, hubId, onHub, insights, focusHubIds, onFail }: Props & { onFail: () => void }) {
+function NaverMap({ candidates, hubs, active, onSelect, focusKey, hubId, onHub, insights, focusHubIds, ranks, onFail }: Props & { onFail: () => void }) {
   const box = useRef<HTMLDivElement>(null)
   const map = useRef<any>(null)
   const layers = useRef<any[]>([])
@@ -113,10 +114,10 @@ function NaverMap({ candidates, hubs, active, onSelect, focusKey, hubId, onHub, 
       map: map.current, path: [new naver.maps.LatLng(cur.lat, cur.lng), new naver.maps.LatLng(h.lat, h.lng)],
       strokeColor: '#2b2b26', strokeOpacity: h.id === hubId ? 0.9 : 0.35, strokeWeight: 2, strokeStyle: 'shortdash',
     })))
-    hubs.forEach((h, i) => {
+    hubs.forEach((h) => {
       const m = new naver.maps.Marker({
         map: map.current, position: new naver.maps.LatLng(h.lat, h.lng), title: h.name,
-        icon: { content: `<div class="nv-pin">${hubHtml(i + 1, h.id === hubId)}<span class="map-label">${esc(h.category)} · ${esc(h.name)}</span></div>`, anchor: new naver.maps.Point(15, 15) },
+        icon: { content: `<div class="nv-pin">${hubHtml(h, h.id === hubId)}<span class="map-label">${esc(h.category)} · ${esc(h.name)}</span></div>`, anchor: new naver.maps.Point(15, 15) },
       })
       naver.maps.Event.addListener(m, 'click', () => onHub(h.id))
       layers.current.push(m)
@@ -126,12 +127,12 @@ function NaverMap({ candidates, hubs, active, onSelect, focusKey, hubId, onHub, 
       const label = on || detail ? `<span class="map-label ins-label${on ? ' on' : ''}">${labelHtml(c.name, insights[i], hub)}</span>` : ''
       const m = new naver.maps.Marker({
         map: map.current, position: new naver.maps.LatLng(c.lat, c.lng), title: c.name, zIndex: on ? 100 : 10,
-        icon: { content: `<div class="nv-pin">${candHtml(i + 1, on)}${label}</div>`, anchor: new naver.maps.Point(17, 17) },
+        icon: { content: `<div class="nv-pin">${candHtml(ranks[i] ?? i + 1, on)}${label}</div>`, anchor: new naver.maps.Point(17, 17) },
       })
       naver.maps.Event.addListener(m, 'click', () => onSelect(i))
       layers.current.push(m)
     })
-  }, [ready, candidates, hubs, active, onSelect, onHub, hubId, insights, detail])
+  }, [ready, candidates, hubs, active, onSelect, onHub, hubId, insights, detail, ranks])
 
   useEffect(() => { if (ready) fit() }, [ready, active, focusKey, focusHubIds.join()]) // eslint-disable-line react-hooks/exhaustive-deps
 
@@ -186,7 +187,7 @@ function Controls({ pts }: { pts: [number, number][] }) {
   )
 }
 
-function OsmMap({ candidates, hubs, active, onSelect, focusKey, hubId, onHub, insights, focusHubIds }: Props) {
+function OsmMap({ candidates, hubs, active, onSelect, focusKey, hubId, onHub, insights, focusHubIds, ranks }: Props) {
   const pts = useMemo(() => frame(candidates, hubs, active, focusHubIds), [candidates, hubs, active, focusHubIds])
   const [zoom, setZoom] = useState(13)
   const cur = candidates[active]
@@ -201,8 +202,8 @@ function OsmMap({ candidates, hubs, active, onSelect, focusKey, hubId, onHub, in
       {cur && hubs.map((h) => (
         <Polyline key={h.id + cur.id + (h.id === hubId)} className="route" positions={[[cur.lat, cur.lng], [h.lat, h.lng]]} pathOptions={{ color: '#2b2b26', weight: 2, dashArray: '6 7', opacity: h.id === hubId ? 0.9 : 0.35 }} />
       ))}
-      {hubs.map((h, i) => (
-        <Marker key={h.id} position={[h.lat, h.lng]} icon={L.divIcon({ className: 'pin-shell', html: hubHtml(i + 1, h.id === hubId), iconSize: [30, 30], iconAnchor: [15, 15] })}
+      {hubs.map((h) => (
+        <Marker key={h.id} position={[h.lat, h.lng]} icon={L.divIcon({ className: 'pin-shell', html: hubHtml(h, h.id === hubId), iconSize: [30, 30], iconAnchor: [15, 15] })}
           eventHandlers={{ click: () => onHub(h.id) }}>
           <Tooltip permanent direction="right" offset={[14, 0]} className="map-label">{h.category} · {h.name}</Tooltip>
         </Marker>
@@ -210,7 +211,7 @@ function OsmMap({ candidates, hubs, active, onSelect, focusKey, hubId, onHub, in
       {candidates.map((c, i) => {
         const on = i === active
         return (
-          <Marker key={c.id} position={[c.lat, c.lng]} icon={L.divIcon({ className: 'pin-shell', html: candHtml(i + 1, on), iconSize: [34, 34], iconAnchor: [17, 17] })}
+          <Marker key={c.id} position={[c.lat, c.lng]} icon={L.divIcon({ className: 'pin-shell', html: candHtml(ranks[i] ?? i + 1, on), iconSize: [34, 34], iconAnchor: [17, 17] })}
             zIndexOffset={on ? 1000 : 0} eventHandlers={{ click: () => onSelect(i) }}>
             {(on || detail) && (
               <Tooltip key={`${hubId}-${detail}-${on}`} permanent direction="right" offset={[16, 0]} className={'map-label ins-label' + (on ? ' on' : '')}>

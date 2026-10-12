@@ -1,18 +1,33 @@
+import { useState } from 'react'
 import { fmt, WALK_LIMIT, type CandidateResult } from '../scoring'
-import type { Hub } from '../data'
+import { BASE_DEPOSIT, baseRent, hubEmoji, won, type Hub } from '../data'
 
 // 아래쪽: 후보지 카드를 가로로 늘어놓는다. 모든 카드가 같은 줄(행)을 공유해서(CSS subgrid)
 // "대중교통" 줄을 옆으로 읽으면 후보지끼리 대기·역까지 도보·환승을, "차량" 줄은 출퇴근/낮 차이를 바로 비교할 수 있다.
 
-type Props = { results: CandidateResult[]; hubs: Hub[]; active: number; onSelect: (index: number) => void }
+type Props = { results: CandidateResult[]; hubs: Hub[]; active: number; onSelect: (index: number) => void; onRename: (id: string, name: string) => void }
 
 // 점수(0~10)만큼 칸 아래쪽에 색 선을 채운다 — 숫자를 읽지 않아도 길이로 바로 비교된다.
 const Line = ({ v, kind }: { v: number; kind: 'total' | 'hub' | 'transit' | 'car' | 'walk' }) => (
   <i className={`score-line ${kind}`} style={{ '--v': Math.max(0, Math.min(10, v)) / 10 } as React.CSSProperties} aria-hidden />
 )
 
-export function CompareCards({ results, hubs, active, onSelect }: Props) {
-  const rows = 1 + hubs.length * 4
+// 보증금/월세(만원) + 연한 글씨로 "보증금 1,000 기준 월 ○○만원" — 보증금이 달라도 월세를 한 기준으로 비교
+function RentCell({ c }: { c: { deposit?: number; rent?: number } }) {
+  const b = baseRent(c)
+  if (b === null) return <div className="cell rent-cell"><span className="muted">미입력 · 수정에서 입력</span></div>
+  return (
+    <div className="cell rent-cell">
+      <b>{won(c.deposit ?? 0)} / {c.rent ?? 0}<small>만원</small></b>
+      <small className="faint">보증금 {won(BASE_DEPOSIT)} 기준 월 {b}만원</small>
+    </div>
+  )
+}
+
+export function CompareCards({ results, hubs, active, onSelect, onRename }: Props) {
+  const [naming, setNaming] = useState<{ id: string; name: string } | null>(null) // 카드에서 이름 바꾸는 중
+  const finish = (save: boolean) => { if (save && naming) onRename(naming.id, naming.name); setNaming(null) }
+  const rows = 2 + hubs.length * 4 // 후보지 · 보증금/월세 · 목적지마다 4줄
   const best = (pick: (r: CandidateResult) => number | null) => Math.max(...results.map((r) => pick(r) ?? -1))
   const isBest = (v: number | null, b: number) => v !== null && Math.abs(v - b) < 1e-9 && results.length > 1
 
@@ -24,8 +39,9 @@ export function CompareCards({ results, hubs, active, onSelect }: Props) {
           {/* 왼쪽 줄 이름 */}
           <div className="col labels" style={{ gridRow: `1 / span ${rows}` }}>
             <div className="cell head-cell"><span className="muted">후보지</span></div>
-            {hubs.map((h, i) => [
-              <div key={h.id + 'h'} className="cell hub-cell"><span className="hub-mark">{i + 1}</span><span>{h.category}</span></div>,
+            <div className="cell row-label rent-label">보증금/월세</div>
+            {hubs.map((h) => [
+              <div key={h.id + 'h'} className="cell hub-cell"><span className="hub-mark" aria-hidden>{hubEmoji(h.category)}</span><span>{h.category}</span></div>,
               <div key={h.id + 't'} className="cell row-label"><span className="dot transit" />대중교통</div>,
               <div key={h.id + 'c'} className="cell row-label"><span className="dot car" />차량</div>,
               <div key={h.id + 'w'} className="cell row-label"><span className="dot walk" />도보</div>,
@@ -33,12 +49,26 @@ export function CompareCards({ results, hubs, active, onSelect }: Props) {
           </div>
 
           {results.map((r, i) => ({ r, i })).sort((a, b) => a.r.rank - b.r.rank).map(({ r, i }) => (
-            <button key={r.candidate.id} className={'col card' + (i === active ? ' on' : '')} style={{ gridRow: `1 / span ${rows}` }} onClick={() => onSelect(i)}>
+            <div key={r.candidate.id} role="button" tabIndex={0} aria-pressed={i === active} className={'col card' + (i === active ? ' on' : '')} style={{ gridRow: `1 / span ${rows}` }}
+              onClick={(e) => { if (!(e.target as HTMLElement).closest('.name-edit, .pen')) onSelect(i) }}
+              onKeyDown={(e) => { if ((e.key === 'Enter' || e.key === ' ') && e.target === e.currentTarget) { e.preventDefault(); onSelect(i) } }}>
               <div className="cell head-cell">
                 <span className="rank">{r.rank}</span>
-                <div className="card-name"><b>{r.candidate.name}</b><small>{i + 1}번 핀 · {r.candidate.address}</small></div>
+                {naming?.id === r.candidate.id ? (
+                  <form className="card-name name-edit" onSubmit={(e) => { e.preventDefault(); finish(true) }}>
+                    <input value={naming.name} maxLength={40} autoFocus aria-label="후보지 이름" onChange={(e) => setNaming({ ...naming, name: e.target.value })}
+                      onKeyDown={(e) => { if (e.key === 'Escape') finish(false) }} onBlur={() => finish(true)} />
+                    <small>Enter 저장 · Esc 취소</small>
+                  </form>
+                ) : (
+                  <div className="card-name">
+                    <b><span>{r.candidate.name}</span><button type="button" className="pen" title="이름 수정" aria-label={`${r.candidate.name} 이름 수정`} onClick={() => setNaming({ id: r.candidate.id, name: r.candidate.name })}>✎</button></b>
+                    <small>{r.candidate.address}</small>
+                  </div>
+                )}
                 <strong className={isBest(r.total, best((x) => x.total)) ? 'best' : ''}>{fmt(r.total)}<Line v={r.total} kind="total" /></strong>
               </div>
+              <RentCell c={r.candidate} />
               {r.hubs.map((h, hi) => {
                 const t = h.trip, s = h.scores
                 const diff = t.carRush - t.carFree
@@ -61,7 +91,7 @@ export function CompareCards({ results, hubs, active, onSelect }: Props) {
                   </div>,
                 ]
               })}
-            </button>
+            </div>
           ))}
         </div>
       </div>

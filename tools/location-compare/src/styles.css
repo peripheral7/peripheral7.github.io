@@ -314,3 +314,34 @@ button { cursor: pointer }
 .sel-head h3 { font-size: 18px }
 .hub-line { padding: 6px 0 }
 .hub-list-head { padding: 4px 0 0 }
+
+/* 보증금/월세 줄: 위는 금액, 아래 연한 글씨로 보증금 1,000 기준 환산 월세 */
+.rent-cell { flex-direction: column; align-items: flex-start; gap: 1px }
+.rent-cell b { font-weight: 450; font-size: 14px; font-variant-numeric: tabular-nums }
+.rent-cell b small { font-size: 11px; color: var(--muted); margin-left: 2px; font-weight: 400 }
+.rent-cell .faint { color: var(--faint); font-size: 11px }
+.rent-cell .muted { font-size: 12px }
+/* 금액·횟수 입력: 숫자 칸 + 단위 */
+.unit-input { display: flex; align-items: center; gap: 6px }
+.unit-input input { flex: 1; min-width: 0 }
+.unit-input i { font-style: normal; font-size: 12px; color: var(--muted); flex: none }
+
+/* 목적지 표시: 번호 마름모 대신 분류 이모지 */
+.hub-mark { width: 22px; height: 22px; font-size: 15px; color: inherit; margin: 0 2px; font-family: 'Segoe UI Emoji', 'Apple Color Emoji', 'Noto Color Emoji', var(--font) }
+.hub-mark::before { content: none }
+.pin.hub b { width: 30px; height: 30px; margin: 0; font-size: 16px; border-radius: 50%; background: #fff; border: 2px solid var(--car); box-shadow: 0 2px 6px rgba(0, 0, 0, 0.2); font-family: 'Segoe UI Emoji', 'Apple Color Emoji', 'Noto Color Emoji', var(--font) }
+.pin.hub b::before { content: none }
+.pin.hub.on b { border-color: var(--text); box-shadow: 0 0 0 4px rgba(24, 39, 56, 0.12), 0 2px 6px rgba(0, 0, 0, 0.2) }
+.hub-switch button i, .hub-switch button.on i { width: auto; height: auto; background: none; font-size: 13px }
+
+/* 카드: 후보지 이름 크게 + 이름 옆 펜(이름 수정) */
+.card { cursor: pointer }
+.card:focus-visible { outline: 2px solid var(--transit); outline-offset: 2px }
+.card-name b { font-size: 17px; font-weight: 600; letter-spacing: -0.01em; display: flex; align-items: center; gap: 4px }
+.card-name b { white-space: normal; overflow: visible; align-items: flex-start; line-height: 1.3 }
+.card-name b > span { min-width: 0; word-break: keep-all; overflow-wrap: anywhere }
+.pen { margin-top: 2px }
+.pen { flex: none; border: 0; background: none; padding: 0 4px; font-size: 13px; line-height: 1; color: var(--faint); cursor: pointer; border-radius: 6px }
+.pen:hover, .pen:focus-visible { color: var(--text); background: var(--panel-2) }
+.name-edit input { width: 100%; font-size: 15px; font-weight: 600; padding: 4px 8px; border: 1px solid var(--line-2); border-radius: 8px; background: #fff; color: var(--text) }
+.name-edit input:focus { outline: 2px solid var(--transit); outline-offset: 0 }
