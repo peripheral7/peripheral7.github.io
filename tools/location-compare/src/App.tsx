@@ -19,7 +19,6 @@ export default function App() {
   const [editing, setEditing] = useState<{ id: string; name: string; category: string } | null>(null) // 수정 중인 후보지
   const { candidates, hubs, pref } = state
   const results = useMemo(() => (candidates.length ? evaluate(candidates, hubs, pref) : []), [candidates, hubs, pref])
-  const best = results.find((r) => r.rank === 1)
   const cur = results[Math.min(active, results.length - 1)]
   const hubId = hubs.some((h) => h.id === hubPick) ? hubPick : hubs[0]?.id ?? null
   const hubIndex = hubs.findIndex((h) => h.id === hubId)
@@ -63,12 +62,6 @@ export default function App() {
       </header>
 
       <main className="stage">
-        <div className="panel stats-line">
-          <div className="stat"><small>후보지</small><b>{candidates.length}</b></div>
-          <div className="stat"><small>주요 목적지</small><b>{hubs.length}<i>/{MAX_HUBS}</i></b></div>
-          <div className="stat best-cell"><small>최고 점수{best ? ` · ${best.candidate.name}` : ''}</small><b>{best ? fmt(best.total) : '—'}</b></div>
-        </div>
-
         <div className="modes-area anchor">
           {cur ? (
             <div className={'tappable' + (pop === 'weights' ? ' on' : '')} {...tap('weights', '수단 가중치 조정 열기')}>

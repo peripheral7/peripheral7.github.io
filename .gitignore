@@ -33,3 +33,4 @@ node_modules
 
 # 입지 비교: 네이버 API 하루 호출 수 기록(키는 tools/location-compare/.env.local — 위 .env*.local 규칙으로 제외)
 tools/location-compare/.naver-usage.json
+tools/location-compare/scheduled-routes.log

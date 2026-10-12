@@ -5,6 +5,7 @@
 
 - 주소: <https://peripheral7.github.io/location-compare/> · 게시판 카드 `content/posts/10-location-compare.json`
 - 소스: 이 폴더 → `npm run build` → `public/location-compare/`(빌드 결과도 git 에 올린다. 배포 워크플로는 복사만 한다)
+- 화면 구성·조작 정리: [UI-UX.md](UI-UX.md)
 
 ---
 
