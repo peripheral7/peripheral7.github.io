@@ -1,8 +1,9 @@
 // 이동 시간 추정과 점수 계산. 공식의 이유와 예시는 README 의 "점수 산정 방식"에 있다.
 import type { Candidate, Hub, Preference } from './data'
+import routes from './routes.json'
 
 // ── 1. 이동 시간 추정(가상) ──────────────────────────────────────────
-// 외부 길찾기 API 가 아직 없어서, 두 지점의 직선거리만으로 시간을 추정한다.
+// 두 지점의 직선거리만으로 시간을 추정한다. 단, 차량은 src/routes.json 에 네이버 실측값이 있으면 그것을 쓴다.
 // 같은 거리면 같은 시간이 나오는 단순 모델이라, 실제 노선·도로 사정은 반영되지 않는다.
 
 export type Trip = {
@@ -15,7 +16,13 @@ export type Trip = {
   transit: number // 대중교통 전체 = 도보 + 대기 + 탑승 + 환승 1회당 5분
   carFree: number // 차량: 여유 시간대(분)
   carRush: number // 차량: 출퇴근 시간대(분)
+  carSource: { free: CarSlot | null; rush: CarSlot | null } // 네이버로 잰 값이 있으면 그 기록(없으면 추정)
 }
+
+/** 네이버 Directions 로 잰 한 시간대의 기록(scripts/fetch-routes.mjs 가 src/routes.json 에 남긴다). */
+export type CarSlot = { min: number; km: number; at: string }
+type Measured = Partial<Record<'free' | 'rush', CarSlot>>
+const MEASURED = (routes as { pairs: Record<string, Measured> }).pairs
 
 const R = 6371
 const rad = (d: number) => (d * Math.PI) / 180
@@ -35,9 +42,12 @@ export function estimateTrip(from: Candidate, to: Hub): Trip {
   const transfers = km <= 3 ? 0 : km <= 12 ? 1 : 2
   const ride = Math.max(4, Math.round((km / 22) * 60)) // 버스·지하철 평균 시속 22km
   const transit = access + wait + ride + transfers * 5
-  const carFree = Math.max(5, Math.round((km / 31) * 60 + 3)) // 시속 31km + 주차·출발 3분
-  const carRush = Math.max(7, Math.round(carFree * 1.52 + 4)) // 출퇴근 정체: 1.52배 + 4분
-  return { km, walk, access, wait, transfers, ride, transit, carFree, carRush }
+  // 차량: 네이버로 잰 값이 있으면 그 값을, 없으면 추정을 쓴다(시간대마다 따로).
+  const m = MEASURED[`${from.id}:${to.id}`] ?? {}
+  const estFree = Math.max(5, Math.round((km / 31) * 60 + 3)) // 시속 31km + 주차·출발 3분
+  const carFree = m.free ? m.free.min : estFree
+  const carRush = m.rush ? m.rush.min : Math.max(7, Math.round(carFree * 1.52 + 4)) // 출퇴근 정체: 1.52배 + 4분
+  return { km, walk, access, wait, transfers, ride, transit, carFree, carRush, carSource: { free: m.free ?? null, rush: m.rush ?? null } }
 }
 
 // ── 2. 수단별 점수(10점 만점) ─────────────────────────────────────────

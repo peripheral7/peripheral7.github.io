@@ -36,9 +36,8 @@ export function MapView({ candidates, hubs, active, onSelect }: Props) {
   const cur = candidates[active] ?? candidates[0]
   return (
     <MapContainer className="map" center={[cur.lat, cur.lng]} zoom={12} zoomControl={false} attributionControl>
-      {/* 위성 사진(Esri) 위에 지명(Esri 참조 레이어)을 얹는다. 위성 사진은 CSS 로 어둡게 바꾼다 */}
-      <TileLayer className="tiles-imagery" url="https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}" attribution="Imagery &copy; Esri" maxZoom={18} />
-      <TileLayer className="tiles-labels" url="https://server.arcgisonline.com/ArcGIS/rest/services/Reference/World_Boundaries_and_Places/MapServer/tile/{z}/{y}/{x}" attribution="Labels &copy; Esri" maxZoom={18} />
+      {/* 도로·건물이 나오는 OSM 한국 타일을 CSS 로 흑백 반전해 어둡고 단순하게 보이게 한다(키 필요 없음). */}
+      <TileLayer className="tiles-base" url="https://tiles.osm.kr/hot/{z}/{x}/{y}.png" attribution="&copy; OpenStreetMap contributors" maxZoom={19} />
       <Framing points={points} focus={[cur.lat, cur.lng]} />
       {hubs.map((h) => (
         <Polyline key={h.id} className="route" positions={[[cur.lat, cur.lng], [h.lat, h.lng]]} pathOptions={{ color: '#f2f2ee', weight: 2, dashArray: '6 7', opacity: 0.9 }} />

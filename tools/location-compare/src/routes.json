@@ -1,0 +1,4 @@
+{
+  "_안내": "scripts/fetch-routes.mjs 가 네이버 Directions 5(자동차)로 잰 소요 시간. free = 여유 시간대, rush = 출퇴근 시간대. 비어 있으면 앱은 거리 추정값을 쓴다.",
+  "pairs": {}
+}
