@@ -108,8 +108,29 @@ button { cursor: pointer }
 .hub-line small { color: var(--muted); font-size: 11px }
 .hub-list { margin-bottom: 8px }
 .reset { border: 0; background: none; color: var(--muted); font-size: 12px; padding: 4px 0; text-decoration: underline; text-underline-offset: 3px }
-.adjust { border: 0; background: none; color: var(--muted); font-size: 12px; padding: 0; white-space: nowrap }
-.adjust:hover, .adjust.on { color: var(--text); text-decoration: underline; text-underline-offset: 3px }
+/* 누르면 설정 창이 열리는 카드 */
+.tappable { cursor: pointer; border-radius: var(--radius); transition: box-shadow 0.15s }
+.tappable:hover > .panel, .hub-list.tappable:hover { box-shadow: 0 0 0 1px var(--line-2), 0 6px 18px rgba(31, 31, 28, 0.08) }
+.tappable.on > .panel, .hub-list.tappable.on { box-shadow: 0 0 0 1.5px var(--text) }
+.tap-hint { color: var(--muted); font-size: 12px; white-space: nowrap }
+.tappable:hover .tap-hint, .tappable.on .tap-hint { color: var(--text) }
+.hub-list.tappable { margin: 4px -10px 8px; padding: 4px 10px; border-radius: 14px }
+.hub-list-head { display: flex; justify-content: space-between; align-items: baseline; padding: 6px 0 2px; font-size: 12px; color: var(--muted) }
+/* 후보지 이름 바꾸기 */
+.sel-text { min-width: 0; flex: 1 }
+.sel-head h3 { display: flex; align-items: center; gap: 6px }
+.rename-btn { border: 0; background: none; color: var(--faint); font-size: 14px; padding: 2px 4px; line-height: 1 }
+.rename-btn:hover { color: var(--text) }
+.rename input { width: 100%; margin: 3px 0 1px; font-size: 17px; padding: 4px 8px; border: 1px solid var(--text); border-radius: 8px; background: #fff }
+/* 가중치 숫자 입력 */
+.weight-input { display: grid; grid-template-columns: 1fr 76px; gap: 12px; align-items: center; padding: 10px 0; border-top: 1px solid var(--line) }
+.weight-input b { display: block; font-weight: 450 }
+.weight-input small { color: var(--muted); font-size: 11px }
+.weight-input input { width: 100%; text-align: right; font-size: 16px; padding: 6px 10px; border: 1px solid var(--line-2); border-radius: 10px; background: #fff; font-variant-numeric: tabular-nums }
+.sum-note { margin: 8px 0 0; padding: 7px 10px; border-radius: 10px; background: var(--panel-2); font-size: 12px; color: var(--muted) }
+.sum-note b { color: var(--text) }
+.sum-note.warn { background: #fbeee0; color: #9a4f17 }
+.sum-note.warn b { color: #9a4f17 }
 .empty { color: var(--muted) }
 
 /* 목적지 마름모 */
@@ -132,13 +153,29 @@ button { cursor: pointer }
 .map-label { background: #fff; color: var(--text); border: 1px solid var(--line-2); border-radius: 10px; box-shadow: 0 4px 14px rgba(0, 0, 0, 0.12); font-size: 12px; font-weight: 500; padding: 4px 9px; white-space: nowrap }
 .leaflet-tooltip.map-label::before { display: none }
 .nv-pin { display: flex; align-items: center; gap: 6px }
+/* 후보지 옆 장단점 글자 */
+.ins-label { line-height: 1.35; white-space: nowrap; padding: 6px 10px; opacity: 0.94 }
+.ins-label.on { opacity: 1; box-shadow: 0 0 0 1.5px var(--text), 0 6px 18px rgba(0, 0, 0, 0.16) }
+.ins-label b, .ins-label small, .ins-label .pro, .ins-label .con { display: block }
+.ins-label b { font-weight: 600; font-size: 12px }
+.ins-label small { font-size: 10px; color: var(--muted); font-weight: 400 }
+.ins-label .pro { color: var(--good); font-size: 11px; font-weight: 500 }
+.ins-label .con { color: #b5532a; font-size: 11px; font-weight: 500 }
+.pin.hub.on b::before { background: var(--text) }
+/* 장단점 기준 목적지 고르기(지도 오른쪽 위) */
+.hub-switch { position: absolute; top: 16px; right: 16px; z-index: 700; display: flex; align-items: center; gap: 4px; background: #fff; border: 1px solid var(--line-2); border-radius: 999px; padding: 4px 4px 4px 12px; box-shadow: 0 4px 16px rgba(0, 0, 0, 0.1); font-size: 12px }
+.hub-switch > span { color: var(--muted); margin-right: 4px }
+.hub-switch button { border: 0; background: none; border-radius: 999px; padding: 5px 10px; display: flex; align-items: center; gap: 6px; color: var(--muted) }
+.hub-switch button i { font-style: normal; font-size: 10px; width: 16px; height: 16px; display: grid; place-items: center; border-radius: 4px; background: var(--panel-2) }
+.hub-switch button.on { background: var(--text); color: #fff }
+.hub-switch button.on i { background: var(--car); color: #fff }
 .route { filter: drop-shadow(0 0 2px rgba(255, 255, 255, 0.9)) }
 .map-controls { position: absolute; right: 16px; bottom: 16px; z-index: 600; display: flex; flex-direction: column; gap: 8px }
 .map-controls button { width: 40px; height: 40px; border-radius: 50%; border: 1px solid var(--line-2); background: #fff; font-size: 17px; box-shadow: 0 2px 8px rgba(0, 0, 0, 0.12) }
 .map-controls button:hover { background: var(--panel-2) }
 
 /* 검색창(지도 위 왼쪽 위) */
-.search { position: absolute; top: 16px; left: 16px; z-index: 700; width: min(420px, calc(100% - 32px)) }
+.search { position: absolute; top: 16px; left: 16px; z-index: 710; width: min(420px, calc(100% - 300px)) }
 .search-bar { display: flex; align-items: center; gap: 8px; background: #fff; border: 1px solid var(--line-2); border-radius: 999px; padding: 6px 6px 6px 14px; box-shadow: 0 4px 16px rgba(0, 0, 0, 0.1) }
 .search-bar svg { width: 18px; height: 18px; flex: none; color: var(--muted) }
 .search-bar input { flex: 1; min-width: 0; border: 0; outline: 0; background: none; font-size: 14px }
@@ -203,12 +240,9 @@ button { cursor: pointer }
 .pop-head b { font-weight: 500 }
 .close { border: 1px solid var(--line-2); background: #fff; width: 30px; height: 30px; border-radius: 50%; font-size: 15px }
 .pop-foot { display: flex; justify-content: flex-end; gap: 8px; margin-top: 12px }
-.slider, .trips { display: grid; grid-template-columns: 1fr 110px 36px; gap: 12px; align-items: center; padding: 10px 0; border-top: 1px solid var(--line) }
-.trips { grid-template-columns: 1fr auto }
-.slider b, .trips b { display: block; font-weight: 450 }
-.slider small, .trips small { color: var(--muted); font-size: 11px }
-.slider em { font-style: normal; text-align: right }
-input[type='range'] { width: 100%; accent-color: var(--text) }
+.trips { display: grid; grid-template-columns: 1fr auto; gap: 12px; align-items: center; padding: 10px 0; border-top: 1px solid var(--line) }
+.trips b { display: block; font-weight: 450 }
+.trips small { color: var(--muted); font-size: 11px }
 .stepper { display: flex; align-items: center; gap: 6px }
 .stepper button { width: 30px; height: 30px; border-radius: 50%; border: 1px solid var(--line-2); background: #fff }
 .stepper input { width: 52px; text-align: center; padding: 5px; border-radius: 8px; border: 1px solid var(--line-2); background: #fff }
@@ -239,6 +273,10 @@ input[type='range'] { width: 100%; accent-color: var(--text) }
   .map-area { min-height: 0; height: 60vh }
   .popover { position: static; width: auto; margin-top: 10px; box-shadow: none }
   .popover::before { display: none }
+}
+@media (max-width: 760px) {
+  .search { width: calc(100% - 32px) }
+  .hub-switch { top: auto; bottom: 16px; right: auto; left: 16px }
 }
 @media (max-width: 600px) {
   .shell { padding: 10px 10px 8px }

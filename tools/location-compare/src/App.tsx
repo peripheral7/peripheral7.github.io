@@ -1,7 +1,7 @@
 import { useCallback, useEffect, useMemo, useState } from 'react'
 import { MAX_HUBS, type Place } from './data'
-import { evaluate, fmt } from './scoring'
-import { addCandidate, defaults, load, removeCandidate, removeHub, save, setHub, type State } from './store'
+import { evaluate, fmt, hubInsights } from './scoring'
+import { addCandidate, defaults, load, removeCandidate, removeHub, renameCandidate, save, setHub, type State } from './store'
 import { MapView } from './components/MapView'
 import { SearchBox } from './components/SearchBox'
 import { ModeScorePanel, FactorsPanel } from './components/Panels'
@@ -15,10 +15,15 @@ export default function App() {
   const [focusKey, setFocusKey] = useState(0) // 목록이 바뀌면 지도를 다시 맞춘다
   const [pop, setPop] = useState<'none' | 'trips' | 'weights'>('none')
   const [guide, setGuide] = useState(false)
+  const [hubPick, setHubPick] = useState<string | null>(null) // 지도 장단점 기준 목적지
+  const [editing, setEditing] = useState<string | null>(null) // 이름 바꾸는 중인 후보지 id
   const { candidates, hubs, pref } = state
   const results = useMemo(() => (candidates.length ? evaluate(candidates, hubs, pref) : []), [candidates, hubs, pref])
   const best = results.find((r) => r.rank === 1)
   const cur = results[Math.min(active, results.length - 1)]
+  const hubId = hubs.some((h) => h.id === hubPick) ? hubPick : hubs[0]?.id ?? null
+  const hubIndex = hubs.findIndex((h) => h.id === hubId)
+  const insights = useMemo(() => (hubIndex >= 0 ? hubInsights(results, hubIndex) : results.map(() => ({ pros: [], cons: [] }))), [results, hubIndex])
 
   useEffect(() => { save(state) }, [state])
   useEffect(() => { if (active > candidates.length - 1) setActive(Math.max(0, candidates.length - 1)) }, [candidates.length, active])
@@ -28,6 +33,14 @@ export default function App() {
   const onCandidate = (p: Place) => update(addCandidate(state, p), candidates.length)
   const onHub = (p: Place, replaceId?: string) => update(setHub(state, p, replaceId))
   const toggle = (k: 'trips' | 'weights') => setPop((p) => (p === k ? 'none' : k))
+  // 카드를 누르면(또는 Enter·Space) 설정 창이 열리게 하는 속성
+  const tap = (k: 'trips' | 'weights', label: string) => ({
+    role: 'button', tabIndex: 0, 'aria-expanded': pop === k, 'aria-label': label, 'data-pop-trigger': k,
+    onClick: (e: React.MouseEvent) => { if (!(e.target as HTMLElement).closest('.no-pop')) toggle(k) },
+    onKeyDown: (e: React.KeyboardEvent) => { if ((e.key === 'Enter' || e.key === ' ') && e.target === e.currentTarget) { e.preventDefault(); toggle(k) } },
+  })
+  const w = pref.weights
+  const commitName = (id: string, value: string) => { setState(renameCandidate(state, id, value)); setEditing(null) }
   const close = () => setPop('none')
   const tripSum = hubs.reduce((a, h) => a + (pref.trips[h.id] ?? 0), 0)
 
@@ -51,31 +64,44 @@ export default function App() {
 
         <div className="modes-area anchor">
           {cur ? (
-            <ModeScorePanel r={cur} action={<button className={'adjust' + (pop === 'weights' ? ' on' : '')} aria-expanded={pop === 'weights'} onClick={() => toggle('weights')}>가중치 조정 ↗</button>} />
+            <div className={'tappable' + (pop === 'weights' ? ' on' : '')} {...tap('weights', '수단 가중치 조정 열기')}>
+              <ModeScorePanel r={cur} action={<span className="tap-hint">가중치 {w.transit}·{w.car}·{w.walk} ↗</span>} />
+            </div>
           ) : <div className="panel empty">검색해서 후보지를 넣어 주세요.</div>}
           {pop === 'weights' && <SettingsPopover kind="weights" hubs={hubs} value={pref} onChange={(p) => setState({ ...state, pref: p })} onClose={close} />}
         </div>
 
         <div className="selected-area anchor">
           <div className="panel selected">
-            <div className="panel-head"><h2>선택한 후보지</h2><button className={'adjust' + (pop === 'trips' ? ' on' : '')} aria-expanded={pop === 'trips'} onClick={() => toggle('trips')}>방문 횟수 조정 ↗</button></div>
+            <div className="panel-head"><h2>선택한 후보지</h2></div>
             <div className="pick" role="tablist" aria-label="후보지 선택">
               {candidates.map((c, i) => <button key={c.id} role="tab" aria-selected={i === active} className={i === active ? 'on' : ''} onClick={() => select(i)} title={c.name}>{i + 1}</button>)}
             </div>
             {cur && (
               <div className="sel-head">
-                <div><span className="tag">후보 {String(active + 1).padStart(2, '0')} · 종합 {cur.rank}위</span><h3>{cur.candidate.name}</h3><p>{cur.candidate.address}</p></div>
+                <div className="sel-text">
+                  <span className="tag">후보 {String(active + 1).padStart(2, '0')} · 종합 {cur.rank}위</span>
+                  {editing === cur.candidate.id ? (
+                    <form className="rename" onSubmit={(e) => { e.preventDefault(); commitName(cur.candidate.id, (e.currentTarget.elements.namedItem('n') as HTMLInputElement).value) }}>
+                      <input name="n" defaultValue={cur.candidate.name} maxLength={40} autoFocus aria-label="후보지 이름" onKeyDown={(e) => { if (e.key === 'Escape') setEditing(null) }} onBlur={(e) => commitName(cur.candidate.id, e.target.value)} />
+                    </form>
+                  ) : (
+                    <h3><span>{cur.candidate.name}</span><button className="rename-btn" title="이름 바꾸기" aria-label={`${cur.candidate.name} 이름 바꾸기`} onClick={() => setEditing(cur.candidate.id)}>✎</button></h3>
+                  )}
+                  <p>{cur.candidate.address}</p>
+                </div>
                 <button className="x" title="이 후보지 빼기" aria-label={`${cur.candidate.name} 빼기`} onClick={() => update(removeCandidate(state, cur.candidate.id))}>×</button>
               </div>
             )}
-            <div className="hub-list">
+            <div className={'hub-list tappable' + (pop === 'trips' ? ' on' : '')} {...tap('trips', '목적지별 월 왕복 횟수 조정 열기')}>
+              <div className="hub-list-head"><span>주요 목적지</span><span className="tap-hint">월 왕복 횟수 ↗</span></div>
               {hubs.map((h, i) => {
                 const t = pref.trips[h.id] ?? 0
                 return (
                   <div className="hub-line" key={h.id}>
                     <span className="hub-mark">{i + 1}</span>
                     <div><b>{h.name}</b><small>{h.category} · 월 왕복 {t}회 · 반영 {tripSum > 0 ? Math.round((t / tripSum) * 100) : Math.round(100 / hubs.length)}%</small></div>
-                    <button className="x" title="이 목적지 빼기" aria-label={`${h.name} 빼기`} onClick={() => update(removeHub(state, h.id))}>×</button>
+                    <button className="x no-pop" title="이 목적지 빼기" aria-label={`${h.name} 빼기`} onClick={() => update(removeHub(state, h.id))}>×</button>
                   </div>
                 )
               })}
@@ -87,7 +113,7 @@ export default function App() {
         </div>
 
         <section className="map-area">
-          <MapView candidates={candidates} hubs={hubs} active={active} onSelect={select} focusKey={focusKey} />
+          <MapView candidates={candidates} hubs={hubs} active={active} onSelect={select} focusKey={focusKey} hubId={hubId} onHub={setHubPick} insights={insights} />
           <SearchBox hubs={hubs} onCandidate={onCandidate} onHub={onHub} />
         </section>
 

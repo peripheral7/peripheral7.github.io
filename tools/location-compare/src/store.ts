@@ -59,3 +59,10 @@ export function removeHub(s: State, id: string): State {
 
 // 네이버 분류 "교육,학술>대학교" → "대학교"
 const shortCategory = (c: string) => c.split('>').pop()!.trim().slice(0, 8)
+
+/** 후보지 이름 바꾸기(빈 이름이면 그대로 둔다). */
+export function renameCandidate(s: State, id: string, name: string): State {
+  const n = name.trim().slice(0, 40)
+  if (!n) return s
+  return { ...s, candidates: s.candidates.map((c) => (c.id === id ? { ...c, name: n } : c)) }
+}

@@ -132,3 +132,52 @@ export function evaluate(candidates: Candidate[], hubs: Hub[], pref: Preference)
 }
 
 export const fmt = (x: number) => (Math.round(x * 10) / 10).toFixed(1)
+
+// ── 4. 지도에 쓰는 장단점 문구 ─────────────────────────────────────────
+// 같은 목적지를 두고 후보지끼리 비교해, 눈에 띄게 좋은 점(최고)과 나쁜 점(최하·불가)을 짧게 뽑는다.
+// 모든 후보지가 같은 값이면 그 항목은 말하지 않는다(차이가 없으니 장점도 단점도 아님).
+
+export type Insight = { pros: string[]; cons: string[]; rank?: number; of?: number } // rank = 이 목적지 기준 순위
+const GAP = 1.0 // 최하를 단점으로 말하려면 최고와 이만큼(점) 이상 차이 나야 한다
+
+export function hubInsights(results: CandidateResult[], hubIndex: number): Insight[] {
+  const out: Insight[] = results.map(() => ({ pros: [], cons: [] }))
+  if (results.length < 2) return out
+  const rows = results.map((r) => r.hubs[hubIndex])
+  if (rows.some((x) => !x)) return out
+  const order = rows.map((h, i) => ({ s: h.hubScore, i })).sort((a, b) => b.s - a.s)
+  order.forEach((x, k) => { out[x.i].rank = k + 1; out[x.i].of = rows.length })
+  const pick = (f: (h: HubResult) => number | null) => rows.map(f)
+  const extremes = (vals: (number | null)[]) => {
+    const v = vals.filter((x): x is number => x !== null)
+    return { max: Math.max(...v), min: Math.min(...v), same: v.length < 2 || Math.max(...v) - Math.min(...v) < 1e-9 }
+  }
+  const near = (a: number, b: number) => Math.abs(a - b) < 1e-9
+
+  // 도보: 30분 안이면서 가장 짧은 곳 / 남들은 걸어가는데 30분을 넘는 곳
+  const walks = pick((h) => (h.scores.walk !== null ? h.trip.walk : null))
+  const walkable = walks.filter((x) => x !== null) as number[]
+  const minWalk = walkable.length ? Math.min(...walkable) : null
+  // 대중교통·차량 점수
+  const transit = extremes(pick((h) => h.scores.transit))
+  const car = extremes(pick((h) => h.scores.car))
+  const transfers = extremes(pick((h) => h.trip.transfers))
+  const waits = extremes(pick((h) => h.trip.wait))
+
+  rows.forEach((h, i) => {
+    const o = out[i]
+    if (minWalk !== null && walks[i] === minWalk && !(walkable.length === rows.length && walkable.every((x) => x === minWalk))) o.pros.push(`도보 최단 ${h.trip.walk}분`)
+    if (!transit.same && near(h.scores.transit, transit.max)) o.pros.push('대중교통 최적')
+    if (!car.same && near(h.scores.car, car.max)) o.pros.push('차량 이동 최적')
+    if (!transfers.same && h.trip.transfers === 0) o.pros.push('환승 없음')
+    if (!waits.same && near(h.trip.wait, waits.min) && o.pros.length < 2) o.pros.push(`대기 최소 ${h.trip.wait}분`)
+
+    if (h.scores.walk === null && walkable.length > 0) o.cons.push(`도보 ${WALK_LIMIT}분 초과`)
+    if (!transit.same && near(h.scores.transit, transit.min) && transit.max - transit.min >= GAP) o.cons.push('대중교통 불리')
+    if (!car.same && near(h.scores.car, car.min) && car.max - car.min >= GAP) o.cons.push(`출퇴근 정체 ${(h.trip.carRush / h.trip.carFree).toFixed(1)}배`)
+    if (!transfers.same && h.trip.transfers === transfers.max && h.trip.transfers > 0) o.cons.push(`환승 ${h.trip.transfers}회`)
+    o.pros = o.pros.slice(0, 3)
+    o.cons = o.cons.slice(0, 2)
+  })
+  return out
+}
