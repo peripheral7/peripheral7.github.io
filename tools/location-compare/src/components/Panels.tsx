@@ -1,7 +1,7 @@
 import { useEffect, useRef, useState, type ReactNode } from 'react'
 import { fmt, type CandidateResult } from '../scoring'
-import { CAT_RADIUS_M, type CatIndex } from '../cats'
-import { CATEGORIES, NEED_WEIGHT, STDR_YM, THIN, WALK5, WANT_WEIGHT, setTier, tierOf, type CommercialIndex, type CommercialPrefs, type Tier } from '../commercial'
+import { CAT_RADIUS_M, livePhotos, type CatIndex } from '../cats'
+import { CATEGORIES, ENOUGH, NEED_WEIGHT, STDR_YM, THIN, WALK5, WANT_WEIGHT, setTier, tierOf, type CommercialIndex, type CommercialPrefs, type Tier } from '../commercial'
 
 // ── 고른 후보지: 종합 점수(원형 그래프) + 수단별 점수(눈금 막대) ──────────
 // 수단 점수는 목적지별 점수를 "월 왕복 비율"로 평균한 값(종합 점수와 같은 비율). 도보는 걸어갈 수 있는 목적지만,
@@ -70,7 +70,7 @@ export function ModeScorePanel({ r, action }: { r: CandidateResult; action: Reac
 // 모든 지수를 같은 모양(이름 · 짧은 설명 · 눈금 · 점수)의 한 줄로 보여 준다. 어떤 지수를 쓸지는 카드 오른쪽 위 ⚙ 에서 고른다.
 // 지금 동작하는 지수는 도보 5분 상권(이름을 누르면 필수·선호 업종 고르기)과 길고양이, 나머지는 준비 중이라 고를 수 없다.
 type FactorsProps = {
-  cat: CatIndex | null; catOn: boolean; onToggleCat: () => void; onRegister: () => void; onGallery: () => void
+  cat: CatIndex | null; catOn: boolean; onToggleCat: () => void; onRegister: () => void; onGallery: (start?: number) => void
   com: CommercialIndex | null; comCounts: Record<string, number> | null; comPrefs: CommercialPrefs; onComPrefs: (p: CommercialPrefs) => void
 }
 
@@ -83,6 +83,7 @@ const SOON = [
 export function FactorsPanel({ cat, catOn, onToggleCat, onRegister, onGallery, com, comCounts, comPrefs, onComPrefs }: FactorsProps) {
   const [pick, setPick] = useState(false)
   const [comOpen, setComOpen] = useState(false)
+  const [catOpen, setCatOpen] = useState(false) // 길고양이 이름을 누르면 사진 썸네일
   const names = (ids: string[]) => ids.map((id) => CATEGORIES.find((c) => c.id === id)?.label ?? id).join('·')
   const box = useRef<HTMLDivElement>(null)
   useEffect(() => {
@@ -121,15 +122,16 @@ export function FactorsPanel({ cat, catOn, onToggleCat, onRegister, onGallery, c
       {catOn && (
         <div className="factor">
           <div>
-            <b>🐈 길고양이 지수</b>
+            <button type="button" className="com-open" aria-expanded={catOpen} onClick={() => setCatOpen(!catOpen)}>🐈 길고양이 지수 <i aria-hidden>{catOpen ? '▴' : '▾'}</i></button>
             <span className="factor-links">
-              <button type="button" onClick={onGallery} disabled={!cat || cat.photos === 0}>사진{cat && cat.photos ? ` ${cat.photos}` : ''}</button>
+              <button type="button" onClick={() => onGallery(0)} disabled={!cat || cat.photos === 0}>사진{cat && cat.photos ? ` ${cat.photos}` : ''}</button>
               <button type="button" onClick={onRegister}>등록</button>
             </span>
           </div>
           <span className="factor-score"><span className="ticks cat" aria-hidden><span style={{ width: `${(cat?.score ?? 0) * 10}%` }} /></span><em>{cat && cat.n ? fmt(cat.score) : '—'}</em></span>
         </div>
       )}
+      {catOn && catOpen && <CatThumbs cat={cat} onOpen={onGallery} onRegister={onRegister} />}
       {SOON.map((x) => (
         <div className="factor soon-row" key={x.name}>
           <div><b>{x.name}</b><small>{x.note}</small></div>
@@ -140,7 +142,7 @@ export function FactorsPanel({ cat, catOn, onToggleCat, onRegister, onGallery, c
   )
 }
 
-// 도보 5분 상권: 업종마다 필수 / 선호 / 안 봄. 오른쪽 숫자 = 고른 후보지의 도보 5분 안 개수
+// 도보 5분 상권: 업종마다 필수 / 선호 / 안 봄. 오른쪽 숫자 = 고른 후보지의 반경 500m 안 개수 / 기준 개수
 const TIERS: { t: Tier; label: string }[] = [{ t: 'need', label: '필수' }, { t: 'want', label: '선호' }, { t: 'off', label: '안 봄' }]
 function CommercialPicker({ prefs, onChange, counts }: { prefs: CommercialPrefs; onChange: (p: CommercialPrefs) => void; counts: Record<string, number> | null }) {
   return (
@@ -155,11 +157,27 @@ function CommercialPicker({ prefs, onChange, counts }: { prefs: CommercialPrefs;
                 <button key={x.t} type="button" role="radio" aria-checked={t === x.t} className={t === x.t ? `on ${x.t}` : ''} onClick={() => onChange(setTier(prefs, c.id, x.t))}>{x.label}</button>
               ))}
             </span>
-            <em className="com-count">{counts ? `${counts[c.id]}곳` : ''}</em>
+            <em className="com-count">{counts ? `${counts[c.id]}/${ENOUGH[c.id]}` : ''}</em>
           </div>
         )
       })}
-      <p className="com-note">필수 {NEED_WEIGHT * 100}% · 선호 {WANT_WEIGHT * 100}%, 묶음 안은 똑같이. 업종 점수 = 걸어서 5분({WALK5}m) 안 개수 ÷ 후보지 중 최다 × 10. 상가정보 {STDR_YM.slice(0, 4)}.{STDR_YM.slice(4)} 기준{Object.keys(THIN).length ? ' · * ' + Object.values(THIN)[0] : ''}.</p>
+      <p className="com-note">필수 {NEED_WEIGHT * 100}% · 선호 {WANT_WEIGHT * 100}%, 묶음 안은 똑같이. 반경 {WALK5}m 안 개수가 기준(오른쪽 /뒤 숫자)에 닿으면 9점, 그 위로는 거의 안 오름. 상가정보 {STDR_YM.slice(0, 4)}.{STDR_YM.slice(4)} 기준{Object.keys(THIN).length ? ' · * ' + Object.values(THIN)[0] : ''}.</p>
+    </div>
+  )
+}
+
+// 길고양이: 고른 후보지 반경 안의 유효한 사진을 작은 썸네일로(갤러리 창과 같은 순서). 누르면 그 사진부터 크게.
+function CatThumbs({ cat, onOpen, onRegister }: { cat: CatIndex | null; onOpen: (start: number) => void; onRegister: () => void }) {
+  const list = (cat?.cats ?? []).flatMap((c) => livePhotos(c).map((p) => ({ c, p })))
+  return (
+    <div className="cat-thumbs" role="group" aria-label="길고양이 사진">
+      {list.length === 0
+        ? <p className="com-note">반경 {CAT_RADIUS_M}m 안에 올라온 사진이 없어요. <button type="button" className="link" onClick={onRegister}>현장에서 등록</button></p>
+        : <div className="thumb-grid">{list.map(({ c, p }, i) => (
+            <button type="button" key={c.id + p.at} onClick={() => onOpen(i)} title={c.name || '길고양이'} aria-label={`${c.name || '길고양이'} 사진 크게 보기`}>
+              <img src={p.data} alt="" loading="lazy" />
+            </button>
+          ))}</div>}
     </div>
   )
 }

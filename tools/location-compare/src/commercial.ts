@@ -1,7 +1,8 @@
 // 도보 5분 상권 지수 — 이 PC 에서 만든 src/commercial.json(scripts/stores.mjs analyze)만 읽는다. 공개 사이트는 API 를 부르지 않는다.
 //
 // 방문자가 업종마다 "필수 / 선호 / 안 봄"을 고른다(이 브라우저에 저장).
-// 업종 점수 = 도보 5분(400m) 안 개수 ÷ 후보지 중 가장 많은 개수 × 10 (1등 10점, 상대 점수 — 다른 점수와 같은 방식)
+// 업종 점수 = 10 × (1 − 10^(−개수 ÷ 기준 개수)) — 반경 500m. 기준 개수("이만하면 됐다", ENOUGH)에서 9점, 2배에서 9.9점.
+//   한계효용 체감: 처음 몇 곳이 점수를 크게 올리고, 기준을 넘으면 아무리 많아도 거의 안 오른다(10점을 넘지 않음). 다른 후보지와 상관없는 절대 점수.
 // 상권 지수 = 필수 업종 점수 평균 × 0.8 + 선호 업종 점수 평균 × 0.2 (한쪽이 비면 다른 쪽이 100%, 묶음 안은 균등)
 // 자료는 기본 후보지만 있다 — 검색으로 넣은 후보지는 "자료 없음"(PC 에서 data.ts 에 넣고 analyze 를 다시 돌려야 한다).
 import data from './commercial.json'
@@ -16,7 +17,11 @@ export type CommercialIndex = { score: number; parts: CatPart[] } | null
 
 export const NEED_WEIGHT = 0.8
 export const WANT_WEIGHT = 0.2
-export const WALK5 = data.walk5 // m
+export const WALK5 = data.walk5 // m(상권 지수 반경, 500)
+/** 업종별 기준 개수(이만하면 됐다) — commercial-categories.json 의 enough */
+export const ENOUGH = data.enough as Record<string, number>
+/** 개수 → 업종 점수(0~10) */
+export const catScore = (id: string, n: number) => 10 * (1 - Math.pow(10, -n / (ENOUGH[id] || 1)))
 export const STDR_YM = data.stdrYm
 export const CATEGORIES: CatInfo[] = data.categories.map(({ id, label, emoji }) => ({ id, label, emoji }))
 export const MAJORS = data.majors as Major[]
@@ -53,12 +58,11 @@ export function walk5Counts(c: Candidate | undefined): Record<string, number> | 
 export function commercialIndex(candidates: Candidate[], p: CommercialPrefs): CommercialIndex[] {
   const rows = candidates.map(rowOf)
   const ids = [...p.need, ...p.want]
-  const max = Object.fromEntries(ids.map((id) => [id, Math.max(0, ...rows.map((r) => r?.counts[id]?.[WALK5] ?? 0))]))
   return rows.map((r) => {
     if (!r || !ids.length) return null
     const parts: CatPart[] = ids.map((id) => {
       const count = r.counts[id]?.[WALK5] ?? 0
-      return { id, tier: p.need.includes(id) ? 'need' : 'want', count, score: max[id] > 0 ? (10 * count) / max[id] : 0 }
+      return { id, tier: p.need.includes(id) ? 'need' : 'want', count, score: catScore(id, count) }
     })
     const avg = (t: CatPart['tier']) => { const x = parts.filter((q) => q.tier === t); return x.length ? x.reduce((a, q) => a + q.score, 0) / x.length : null }
     const need = avg('need'), want = avg('want')

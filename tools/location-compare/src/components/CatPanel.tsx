@@ -119,8 +119,8 @@ export function CatRegister({ state, onChange, onClose }: { state: CatState; onC
 }
 
 /** 후보지 반경 안 고양이 사진 보기. */
-export function CatGallery({ title, cats, user, onRemoveMine, onClose }: { title: string; cats: Cat[]; user: string; onRemoveMine: (id: string) => void; onClose: () => void }) {
-  const [i, setI] = useState(0)
+export function CatGallery({ title, cats, user, onRemoveMine, onClose, start = 0 }: { title: string; cats: Cat[]; user: string; onRemoveMine: (id: string) => void; onClose: () => void; start?: number }) {
+  const [i, setI] = useState(start)
   const now = Date.now()
   const list = cats.flatMap((c) => livePhotos(c, now).map((p) => ({ c, p })))
   const cur = list[Math.min(i, list.length - 1)]

@@ -38,8 +38,13 @@ function matches(rule, s) {
   if (rule.exclude?.includes(s.scls)) return false
   if (rule.exclude_names?.some((n) => s.name?.includes(n))) return false
   const byName = rule.names?.some((n) => s.name?.includes(n)) && (!rule.names_scls || rule.names_scls.includes(s.scls))
-  return Boolean(rule.scls?.includes(s.scls) || rule.prefix?.some((p) => s.scls?.startsWith(p)) || byName)
+  if (byName) return true
+  const byCode = rule.scls?.includes(s.scls) || rule.prefix?.some((p) => s.scls?.startsWith(p))
+  // indie_floor_max: 브랜드가 아닌 곳은 그 층 이하(지하·층 미상 포함)만 — 2층 위 "화장품 소매업" 은 대개 관리실
+  if (byCode && rule.indie_floor_max != null && floorNum(s.floor) > rule.indie_floor_max) return false
+  return Boolean(byCode)
 }
+const floorNum = (f) => { const n = parseInt(String(f ?? '').replace(/[^0-9-]/g, ''), 10); return /^(B|지하)/i.test(String(f ?? '')) || Number.isNaN(n) ? 0 : n }
 const catOf = (s) => CATS.filter((c) => matches(c, s)).map((c) => c.id)
 
 // ── 반경 검색(R-tree 로 네모를 고른 뒤 실제 거리로 자른다) ──
@@ -85,7 +90,9 @@ const line = (s) => `${m(s.d ?? 0).padStart(6)}  ${label(s)}  · ${upName[s.scls
 // ── 분석 ──
 function analyzePoint(lat, lng) {
   const radii = CONFIG.radii
-  const all = within(lat, lng, Math.max(...radii))
+  // 같은 상호·주소·층이 두 번 등록된 경우(예: 엔프라니 2건)는 한 곳으로
+  const seen = new Set()
+  const all = within(lat, lng, Math.max(...radii)).filter((s) => { const k = `${s.name}|${s.road_addr ?? s.lot_addr}|${s.floor ?? ''}`; return seen.has(k) ? false : (seen.add(k), true) })
   const out = { total: {}, counts: {}, sub: {}, nearest: {} }
   for (const r of radii) out.total[r] = all.filter((s) => s.d <= r).length
   for (const c of CATS) {
@@ -101,7 +108,7 @@ function analyzePoint(lat, lng) {
 }
 
 // 주요 매장(올리브영·다이소·이마트 등) — 규칙은 commercial-categories.json 의 _majors
-const PREFIX = /^(씨제이|CJ|(주)|주식회사|롯데쇼핑|이마트_|s)+/i
+const PREFIX = /^(씨제이|CJ|\(주\)|주식회사|롯데쇼핑|이마트_|\s)+/i
 const startsBrand = (m, s) => m.names.some((n) => (s.name ?? '').replace(PREFIX, '').startsWith(n)) &&
   !m.exclude_names?.some((n) => s.name?.includes(n)) && (!m.names_scls || m.names_scls.includes(s.scls))
 function majorsNear() {
@@ -138,8 +145,12 @@ function analyze() {
   const res = {}
   for (const c of CANDIDATES) res[c.id] = { name: c.name, address: c.address, lat: c.lat, lng: c.lng, ...analyzePoint(c.lat, c.lng) }
   const majors = majorsNear()
+  // 본점이 자료에 없어 입점 매장으로 추정한 대형마트는 마트 개수에 더한다
+  for (const id of Object.keys(res)) for (const r of radii) {
+    res[id].counts.mart[r] += majors.filter((x) => x.inferred && x.cat === 'mart' && x.near[id] != null && x.near[id] <= r).length
+  }
   const json = {
-    source: '소상공인시장진흥공단 상가(상권)정보', stdrYm: meta.stdr_ym, generatedAt: new Date().toISOString().slice(0, 10), radii, walk5: CONFIG.walk5,
+    source: '소상공인시장진흥공단 상가(상권)정보', stdrYm: meta.stdr_ym, generatedAt: new Date().toISOString().slice(0, 10), radii, walk5: CONFIG.walk5, enough: CONFIG.enough,
     categories: CATS.map((c) => ({ id: c.id, label: c.label, emoji: c.emoji, sub: (c.sub ?? []).map((s) => s.label) })),
     defaultPrefs: CONFIG.defaultPrefs, candidates: res, majorsRadius: CONFIG.majorsRadius, majors,
   }
@@ -160,6 +171,13 @@ function analyze() {
     }
     L.push('')
   }
+  // 상권 지수(기본 선택) — 화면(src/commercial.ts)과 같은 식
+  const W = CONFIG.walk5, E = CONFIG.enough, P = CONFIG.defaultPrefs
+  const sc = (id, k) => 10 * (1 - Math.pow(10, -res[id].counts[k][W] / E[k]))
+  const avg = (id, ks) => ks.reduce((a, k) => a + sc(id, k), 0) / ks.length
+  L.push(`## 상권 지수(기본 선택, 반경 ${W}m)`, '', `필수 ${P.need.map((k) => CATS.find((c) => c.id === k).label).join('·')} × 0.8 + 선호 ${P.want.map((k) => CATS.find((c) => c.id === k).label).join('·')} × 0.2. 업종 점수 = 10 × (1 − 10^(−개수/기준)), 기준에서 9점.`, '', head(ids.map((id) => res[id].name)))
+  for (const c of CATS) L.push(`| ${c.emoji} ${c.label} (기준 ${E[c.id]}) | ${ids.map((id) => `${res[id].counts[c.id][W]} → ${sc(id, c.id).toFixed(1)}`).join(' | ')} |`)
+  L.push(`| **지수** | ${ids.map((id) => `**${(avg(id, P.need) * 0.8 + avg(id, P.want) * 0.2).toFixed(1)}**`).join(' | ')} |`, '')
   L.push(`## 가장 가까운 곳(직선거리)`, '', head(ids.map((id) => res[id].name)))
   for (const c of CATS) L.push(`| ${c.emoji} ${c.label} | ${ids.map((id) => { const n = res[id].nearest[c.id]; return n ? `${n.dist}m ${n.name}` : '—' }).join(' | ')} |`)
   for (const c of CATS) for (const s of c.sub ?? []) {

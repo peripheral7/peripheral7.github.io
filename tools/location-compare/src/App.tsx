@@ -38,6 +38,7 @@ export default function App() {
   const [comPrefs, setComPrefs] = useState<CommercialPrefs>(loadCommercial) // 도보 5분 상권: 필수·선호 업종(이 브라우저에 저장)
   const [catDlg, setCatDlg] = useState<'none' | 'register' | 'gallery'>('none')
   const [galleryIdx, setGalleryIdx] = useState<number | null>(null) // 카드에서 "사진 보기"를 누른 후보지(없으면 선택한 후보지)
+  const [galleryStart, setGalleryStart] = useState(0) // 입지 요인 썸네일에서 누른 사진부터
   const { candidates, hubs, pref } = state
   const results = useMemo(() => (candidates.length ? evaluate(candidates, hubs, pref) : []), [candidates, hubs, pref])
   const cur = results[Math.min(active, results.length - 1)]
@@ -175,7 +176,7 @@ export default function App() {
 
         <aside className="factors-area">
           <FactorsPanel cat={catIdx && cur ? catIdx[Math.min(active, catIdx.length - 1)] ?? null : null} catOn={catState.on}
-            onToggleCat={() => setCats({ ...catState, on: !catState.on })} onRegister={() => setCatDlg('register')} onGallery={() => { setGalleryIdx(null); setCatDlg('gallery') }}
+            onToggleCat={() => setCats({ ...catState, on: !catState.on })} onRegister={() => setCatDlg('register')} onGallery={(start = 0) => { setGalleryIdx(null); setGalleryStart(start); setCatDlg('gallery') }}
             com={cur ? comIdx[Math.min(active, comIdx.length - 1)] ?? null : null} comCounts={walk5Counts(candidates[active])} comPrefs={comPrefs} onComPrefs={setComPrefs} />
           <SpotCards candidates={candidates} />
           {cur && <CommutePanel r={cur} trips={pref.trips} settings={{ kmpl: commute.kmpl, fuel: commute.fuel ?? fuelAuto?.price ?? DEFAULT_FUEL }}
@@ -195,7 +196,7 @@ export default function App() {
       {catDlg === 'register' && <CatRegister state={catState} onChange={setCats} onClose={() => setCatDlg('none')} />}
       {catDlg === 'gallery' && catIdx && (() => {
         const i = Math.min(galleryIdx ?? active, catIdx.length - 1)
-        return <CatGallery title={candidates[i]?.name ?? ''} cats={catIdx[i]?.cats ?? []} user={catState.user} onRemoveMine={(id) => setCats(removeMyPhoto(catState, id))} onClose={() => setCatDlg('none')} />
+        return <CatGallery title={candidates[i]?.name ?? ''} cats={catIdx[i]?.cats ?? []} user={catState.user} start={galleryStart} onRemoveMine={(id) => setCats(removeMyPhoto(catState, id))} onClose={() => setCatDlg('none')} />
       })()}
     </div>
   )
