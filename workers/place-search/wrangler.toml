@@ -1,0 +1,14 @@
+name = "place-search"
+main = "src/index.js"
+compatibility_date = "2026-09-01"
+
+# 상한(필요하면 여기만 고쳐 다시 배포). 키는 여기 적지 않는다 — wrangler secret put 으로(README).
+[vars]
+DAILY_LIMIT = "1000"   # 하루에 네이버를 실제로 부르는 최대 횟수(캐시 적중은 안 셈)
+IP_HOURLY = "30"       # IP 하나가 한 시간에 검색할 수 있는 횟수
+IP_DAILY = "100"       # IP 하나가 하루에 검색할 수 있는 횟수
+
+[[d1_databases]]
+binding = "DB"
+database_name = "place-search"
+database_id = "00000000-0000-0000-0000-000000000000" # wrangler d1 create place-search 로 받은 값으로 바꾼다

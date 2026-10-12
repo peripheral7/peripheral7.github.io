@@ -1,7 +1,8 @@
-// 입지 비교에 쓰는 고정 자료. 화면에서 고치는 기능은 없다 — 이 파일을 고쳐 다시 빌드한다(README 참고).
-// 주소 검색은 나중에 붙일 예정이라, 지금은 주소와 좌표를 손으로 적어 둔다.
+// 처음 열었을 때의 후보지·목적지·선호도(기본값). 방문자가 검색으로 바꾼 목록은 그 브라우저에만 저장되고(store.ts),
+// "처음 목록으로"를 누르면 여기로 돌아온다.
 
 export type Candidate = { id: string; name: string; address: string; lat: number; lng: number }
+export type Place = { name: string; address: string; lat: number; lng: number; category?: string } // 검색 결과 한 건
 export type Hub = { id: string; name: string; category: string; address: string; lat: number; lng: number }
 
 /** 후보지(임시 입력). 좌표는 도로명 주소의 대략 위치. */
@@ -12,13 +13,14 @@ export const CANDIDATES: Candidate[] = [
   { id: 'c4', name: '서천동 후보', address: '경기도 용인시 기흥구 서천동로43번길 5-5', lat: 37.2383, lng: 127.0772 },
 ]
 
-/** 주요 방문지(거점). 최대 2곳까지만 쓴다 — 3곳 이상 적어도 앞의 2곳만 계산·표시한다. */
+/** 주요 목적지(거점). 최대 2곳 — 검색으로 더하려면 기존 한 곳과 바꾼다. */
 export const MAX_HUBS = 2
 const HUB_LIST: Hub[] = [
   { id: 'h1', name: '경희대학교 국제캠퍼스', category: '학교', address: '경기도 용인시 기흥구 덕영대로 1732', lat: 37.2421, lng: 127.0804 },
   { id: 'h2', name: '성남 분당 본가', category: '본가', address: '경기도 성남시 분당구 성남대로', lat: 37.385, lng: 127.123 },
 ]
 export const HUBS: Hub[] = HUB_LIST.slice(0, MAX_HUBS)
+export const NEW_HUB_TRIPS = 8 // 검색으로 새로 넣은 목적지의 월 왕복 횟수 기본값
 
 export type Weights = { transit: number; car: number; walk: number }
 export type Preference = { weights: Weights; trips: Record<string, number> }

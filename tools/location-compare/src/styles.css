@@ -1,221 +1,254 @@
-/* 입지 비교 — 어두운 위성 지도 위의 유리 패널. 얇은 Pretendard, 라임(대중교통)·주황(차량)·회청(도보) 강조 */
+/* 여기살까? — 밝은 테마. 미색 바탕 위 흰 패널, 얇은 Pretendard, 수단 색: 대중교통(초록)·차량(주황)·도보(청회) */
 @font-face {
   font-family: 'Pretendard Variable';
-  src: url('/fonts/PretendardVariable.woff2') format('woff2'); /* 블로그 공용 글꼴(배포 후 같은 사이트에서 불러옴) */
+  src: url('/fonts/PretendardVariable.woff2') format('woff2'); /* 블로그 공용 글꼴 */
   font-weight: 100 900;
   font-display: swap;
 }
 
 :root {
-  color-scheme: dark;
-  --bg: #0b0c0b;
-  --panel: rgba(24, 25, 23, 0.78);
-  --panel-2: rgba(255, 255, 255, 0.045);
-  --line: rgba(255, 255, 255, 0.08);
-  --line-2: rgba(255, 255, 255, 0.14);
-  --text: #ecebe5;
-  --muted: #8d8f88;
-  --faint: #5d5f59;
-  --transit: #c5ec6f;
-  --car: #f0913f;
-  --walk: #9fb7c9;
-  --radius: 18px;
+  color-scheme: light;
+  --bg: #e8e6e0;
+  --panel: #f8f7f3;
+  --panel-2: #efede7;
+  --line: rgba(31, 31, 28, 0.09);
+  --line-2: rgba(31, 31, 28, 0.16);
+  --text: #1f1f1c;
+  --muted: #74736c;
+  --faint: #a3a29a;
+  --accent: #d9d6b2; /* 강조 바탕(참고 이미지의 연한 올리브) */
+  --transit: #5e8a3c;
+  --car: #d2793a;
+  --walk: #5f7f9b;
+  --good: #4f7f2f;
+  --radius: 20px;
   --font: 'Pretendard Variable', Pretendard, -apple-system, BlinkMacSystemFont, 'Apple SD Gothic Neo', 'Malgun Gothic', sans-serif;
 }
 
 * { box-sizing: border-box }
 html, body, #root { height: 100% }
-body { margin: 0; background: var(--bg); color: var(--text); font-family: var(--font); font-weight: 350; font-size: 14px; line-height: 1.5; -webkit-font-smoothing: antialiased }
+body { margin: 0; background: var(--bg); color: var(--text); font-family: var(--font); font-weight: 400; font-size: 14px; line-height: 1.5; -webkit-font-smoothing: antialiased }
 button, input { font: inherit; color: inherit }
 button { cursor: pointer }
 :focus-visible { outline: 2px solid var(--transit); outline-offset: 2px }
+.muted { color: var(--muted); font-size: 12px; margin: 0 }
 
-.glass { background: var(--panel); border: 1px solid var(--line); border-radius: var(--radius); backdrop-filter: blur(18px) saturate(120%); -webkit-backdrop-filter: blur(18px) saturate(120%) }
+.panel { background: var(--panel); border: 1px solid var(--line); border-radius: var(--radius); padding: 16px 18px; box-shadow: 0 1px 2px rgba(31, 31, 28, 0.04) }
+.panel-head { display: flex; justify-content: space-between; align-items: baseline; gap: 10px; margin-bottom: 10px }
+.panel-head h2 { margin: 0; font-size: 17px; font-weight: 450; letter-spacing: -0.01em }
 
 /* ── 상단 ── */
 .shell { min-height: 100%; display: flex; flex-direction: column; padding: 14px 16px 10px; gap: 12px }
-.topbar { display: flex; align-items: center; gap: 18px }
-.logo { width: 34px; height: 34px; display: grid; place-content: center; gap: 4px; transform: rotate(-35deg); flex: none }
+.topbar { display: flex; align-items: center; gap: 22px; padding: 4px 6px }
+.brand { display: flex; align-items: center; gap: 10px; color: var(--text); text-decoration: none; font-size: 21px; font-weight: 500; letter-spacing: -0.02em }
+.logo { width: 28px; height: 28px; display: grid; place-content: center; gap: 3px; transform: rotate(-35deg) }
 .logo span { display: block; height: 3px; border-radius: 2px; background: var(--text) }
-.logo span:nth-child(1) { width: 14px; margin-left: 8px } .logo span:nth-child(2) { width: 22px } .logo span:nth-child(3) { width: 14px }
-.pills { display: flex; gap: 4px; padding: 4px; border-radius: 999px; background: var(--panel-2); border: 1px solid var(--line) }
-.pill { border: 0; background: transparent; padding: 7px 16px; border-radius: 999px; color: var(--muted); font-size: 13px; font-weight: 400; white-space: nowrap }
+.logo span:nth-child(1) { width: 11px; margin-left: 6px } .logo span:nth-child(2) { width: 18px } .logo span:nth-child(3) { width: 11px }
+.pills { display: flex; gap: 4px }
+.pill { border: 0; background: transparent; padding: 7px 14px; border-radius: 999px; color: var(--muted); font-size: 14px; white-space: nowrap }
 .pill:hover { color: var(--text) }
-.pill.active { background: #2a2b28; color: var(--text); box-shadow: inset 0 0 0 1px var(--line-2) }
+.pill.active { color: var(--text); font-weight: 500 }
 .back { margin-left: auto; color: var(--muted); text-decoration: none; font-size: 11px; letter-spacing: 0.12em; white-space: nowrap }
 .back:hover { color: var(--text) }
 
-/* ── 본문 배치: 왼쪽 요약 | 지도 | 오른쪽 후보지 카드, 아래 전체 비교표 ── */
-.stage { flex: 1; display: grid; grid-template-columns: 300px minmax(0, 1fr) 380px; grid-template-rows: minmax(460px, 1fr) auto; grid-template-areas: 'side map card' 'side table table'; gap: 12px; min-height: 0 }
-.map-area { grid-area: map; position: relative; border-radius: var(--radius); overflow: hidden; border: 1px solid var(--line); min-height: 460px }
-.side { grid-area: side; display: flex; flex-direction: column; gap: 12px; min-width: 0; position: relative; z-index: 900 }
-.card-area { grid-area: card; min-width: 0 }
-.table-area { grid-area: table; min-width: 0 }
+/* ── 배치: 왼쪽(한 줄 요약·수단 점수·선택 후보지) | 지도 | 오른쪽(입지 요인), 아래 후보지 카드 ── */
+.stage { flex: 1; display: grid; gap: 12px; min-height: 0;
+  grid-template-columns: 340px minmax(0, 1fr) 300px;
+  grid-template-rows: auto auto 1fr auto;
+  grid-template-areas: 'stats map factors' 'modes map factors' 'selected map factors' 'cards cards cards' }
+.stats-line { grid-area: stats }
+.modes-area { grid-area: modes; position: relative; z-index: 30 }
+.selected-area { grid-area: selected; position: relative; z-index: 20 }
+.map-area { grid-area: map; position: relative; border-radius: var(--radius); overflow: hidden; border: 1px solid var(--line); min-height: 620px; background: #eceae3 }
+.factors-area { grid-area: factors; min-width: 0 }
+.cards-area { grid-area: cards; min-width: 0 }
 
-.title { position: absolute; top: 18px; left: 24px; margin: 0; z-index: 500; font-size: 40px; font-weight: 250; letter-spacing: -0.02em; line-height: 1.05; pointer-events: none; text-shadow: 0 2px 18px rgba(0, 0, 0, 0.6) }
-.title small { display: block; margin-top: 6px; font-size: 11px; font-weight: 400; letter-spacing: 0.22em; text-transform: uppercase; color: var(--muted) }
+/* 한 줄 요약 */
+.stats-line { display: flex; align-items: baseline; gap: 18px; padding: 12px 18px; white-space: nowrap; overflow: hidden }
+.stats-line span { display: flex; align-items: baseline; gap: 6px; min-width: 0 }
+.stats-line small { color: var(--muted); font-size: 12px }
+.stats-line b { font-size: 22px; font-weight: 300 }
+.stats-line b i { font-style: normal; font-size: 12px; color: var(--faint) }
+.stats-line em { font-style: normal; font-size: 12px; color: var(--muted); overflow: hidden; text-overflow: ellipsis }
+.best-cell { margin-left: auto }
+.best-cell b { color: var(--good) }
+
+/* 수단별 점수: 게이지 + 눈금 막대 */
+.gauge-wrap { position: relative; padding: 6px 0 4px; text-align: center }
+.gauge { width: 100%; height: auto; display: block }
+.gauge-end { font-size: 10px; fill: var(--faint) }
+.gauge-badge { position: absolute; left: 50%; top: 0; transform: translateX(-50%); background: #fff; border: 1px solid var(--line-2); border-radius: 999px; padding: 1px 10px; font-size: 13px; font-weight: 500 }
+.gauge-caption { margin: 4px 0 0; font-size: 12px; color: var(--muted) }
+.gauge-caption b { color: var(--text); font-weight: 500 }
+.mode-rows { margin-top: 10px }
+.mode-row { display: grid; grid-template-columns: 10px minmax(0, 1fr) 118px 30px; gap: 10px; align-items: center; padding: 9px 0; border-top: 1px solid var(--line) }
+.mode-text b { display: block; font-weight: 450; font-size: 14px }
+.mode-text small { display: block; color: var(--muted); font-size: 11px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis }
+.mode-row em { font-style: normal; text-align: right; font-variant-numeric: tabular-nums; font-size: 13px }
+.dot { display: inline-block; width: 8px; height: 8px; border-radius: 50% }
+.dot.transit { background: var(--transit) } .dot.car { background: var(--car) } .dot.walk { background: var(--walk) }
+/* 참고 이미지의 촘촘한 세로 눈금 막대: 채운 부분은 진하게, 나머지는 옅게 */
+.ticks { position: relative; display: block; height: 16px; background: repeating-linear-gradient(90deg, rgba(31, 31, 28, 0.14) 0 1.5px, transparent 1.5px 4px) }
+.ticks > span { position: absolute; inset: 0 auto 0 0; background: repeating-linear-gradient(90deg, currentColor 0 1.5px, transparent 1.5px 4px) }
+.ticks.transit { color: var(--transit) } .ticks.car { color: var(--car) } .ticks.walk { color: var(--walk) }
+.ticks.empty { width: 90px; flex: none }
+
+/* 선택한 후보지(왼쪽 아래) */
+.pick { display: flex; flex-wrap: wrap; gap: 6px; margin-bottom: 12px }
+.pick button { width: 30px; height: 30px; border-radius: 50%; border: 1px solid var(--line-2); background: #fff; font-size: 12px }
+.pick button.on { background: var(--text); color: #fff; border-color: transparent; font-weight: 600 }
+.sel-head { display: flex; justify-content: space-between; align-items: flex-start; gap: 10px; padding-bottom: 10px; border-bottom: 1px solid var(--line) }
+.tag { font-size: 11px; letter-spacing: 0.06em; color: var(--good); font-weight: 500 }
+.sel-head h3 { margin: 3px 0 1px; font-size: 19px; font-weight: 450; letter-spacing: -0.01em }
+.sel-head p { margin: 0; color: var(--muted); font-size: 12px }
+.x { border: 0; background: none; color: var(--faint); font-size: 18px; line-height: 1; padding: 2px 4px }
+.x:hover { color: #b54a2c }
+.hub-line { display: grid; grid-template-columns: auto 1fr auto; gap: 10px; align-items: center; padding: 9px 0; border-bottom: 1px solid var(--line) }
+.hub-line b { display: block; font-weight: 450; font-size: 13px }
+.hub-line small { color: var(--muted); font-size: 11px }
+.hub-list { margin-bottom: 8px }
+.reset { border: 0; background: none; color: var(--muted); font-size: 12px; padding: 4px 0; text-decoration: underline; text-underline-offset: 3px }
+.adjust { border: 0; background: none; color: var(--muted); font-size: 12px; padding: 0; white-space: nowrap }
+.adjust:hover, .adjust.on { color: var(--text); text-decoration: underline; text-underline-offset: 3px }
+.empty { color: var(--muted) }
+
+/* 목적지 마름모 */
+.hub-mark, .pin.hub b { position: relative; isolation: isolate; display: grid; place-items: center; width: 20px; height: 20px; font-size: 10px; font-weight: 700; color: #fff; line-height: 1; margin: 0 4px }
+.hub-mark::before, .pin.hub b::before { content: ''; position: absolute; inset: 1px; z-index: -1; transform: rotate(45deg); border-radius: 4px; background: var(--text) }
 
 /* ── 지도 ── */
-.map { position: absolute; inset: 0; background: #111 }
-.tiles-base { filter: grayscale(1) invert(1) brightness(0.78) contrast(0.92) }
-.leaflet-container { font-family: var(--font) }
-.leaflet-control-attribution { background: rgba(0, 0, 0, 0.55) !important; color: #888 !important; font-size: 10px }
-.leaflet-control-attribution a { color: #aaa !important }
+.map { position: absolute; inset: 0 }
+.naver-box { position: absolute; inset: 0 }
+.tiles-base { filter: saturate(0.55) sepia(0.12) brightness(1.03) contrast(0.95) }
+.leaflet-container { font-family: var(--font); background: #eceae3 }
+.leaflet-control-attribution { background: rgba(248, 247, 243, 0.85) !important; font-size: 10px }
 .pin-shell { background: none; border: 0 }
-.pin { display: grid; place-items: center; width: 34px; height: 34px; border-radius: 50%; font-size: 13px; font-weight: 600; transition: transform 0.2s }
-.pin.cand { background: rgba(20, 21, 19, 0.85); color: var(--text); border: 1.5px solid rgba(255, 255, 255, 0.55); width: 28px; height: 28px; margin: 3px }
-.pin.cand.on { width: 34px; height: 34px; margin: 0; background: var(--transit); color: #11130d; border-color: transparent; box-shadow: 0 0 0 7px rgba(197, 236, 111, 0.18), 0 0 0 18px rgba(197, 236, 111, 0.07) }
+.pin { display: grid; place-items: center; border-radius: 50%; font-size: 12px; font-weight: 600 }
+.pin.cand { width: 28px; height: 28px; margin: 3px; background: #fff; color: var(--text); border: 1.5px solid var(--text); box-shadow: 0 2px 6px rgba(0, 0, 0, 0.18) }
+.pin.cand.on { width: 34px; height: 34px; margin: 0; background: var(--text); color: #fff; box-shadow: 0 0 0 6px rgba(31, 31, 28, 0.12), 0 0 0 16px rgba(31, 31, 28, 0.06) }
 .pin.hub { width: 30px; height: 30px; background: none }
-.pin.hub b, .hub-mark { position: relative; isolation: isolate; display: grid; place-items: center; width: 20px; height: 20px; font-size: 11px; font-weight: 700; color: #1a1006; line-height: 1 }
-.pin.hub b::before, .hub-mark::before { content: ''; position: absolute; inset: 1px; z-index: -1; transform: rotate(45deg); border-radius: 4px; background: var(--car) }
-.map-label { background: rgba(16, 17, 15, 0.82); color: var(--text); border: 1px solid var(--line-2); border-radius: 8px; box-shadow: none; font-size: 12px; font-weight: 400; padding: 3px 8px }
-.map-label::before { display: none }
-.route { filter: drop-shadow(0 0 3px rgba(0, 0, 0, 0.7)) }
-.map-controls { position: absolute; left: 18px; bottom: 18px; z-index: 600; display: flex; gap: 8px }
-.map-controls button { width: 36px; height: 36px; border-radius: 50%; border: 1px solid var(--line-2); background: rgba(20, 21, 19, 0.75); color: var(--text); font-size: 16px; backdrop-filter: blur(10px) }
-.map-controls button:hover { background: rgba(40, 41, 38, 0.9) }
+.pin.hub b { width: 22px; height: 22px; margin: 4px }
+.pin.hub b::before { background: var(--car); box-shadow: 0 2px 6px rgba(0, 0, 0, 0.2) }
+.map-label { background: #fff; color: var(--text); border: 1px solid var(--line-2); border-radius: 10px; box-shadow: 0 4px 14px rgba(0, 0, 0, 0.12); font-size: 12px; font-weight: 500; padding: 4px 9px; white-space: nowrap }
+.leaflet-tooltip.map-label::before { display: none }
+.nv-pin { display: flex; align-items: center; gap: 6px }
+.route { filter: drop-shadow(0 0 2px rgba(255, 255, 255, 0.9)) }
+.map-controls { position: absolute; right: 16px; bottom: 16px; z-index: 600; display: flex; flex-direction: column; gap: 8px }
+.map-controls button { width: 40px; height: 40px; border-radius: 50%; border: 1px solid var(--line-2); background: #fff; font-size: 17px; box-shadow: 0 2px 8px rgba(0, 0, 0, 0.12) }
+.map-controls button:hover { background: var(--panel-2) }
 
-/* ── 왼쪽 요약 ── */
-.stats { display: grid; grid-template-columns: 1fr 1fr; padding: 6px }
-.stat { padding: 12px 14px; display: flex; flex-direction: column }
-.stat span { color: var(--muted); font-size: 12px }
-.stat b { font-size: 30px; font-weight: 250; line-height: 1.2 }
-.stat b i { font-style: normal; font-size: 13px; color: var(--faint); margin-left: 3px }
-.stat em { font-style: normal; font-size: 12px; color: var(--muted) }
-.stat.wide { grid-column: span 2; border-top: 1px solid var(--line) }
-.block { padding: 16px }
-.block-head { display: flex; justify-content: space-between; align-items: baseline; margin-bottom: 10px }
-.block-head h2 { margin: 0; font-size: 15px; font-weight: 400 }
-.hub-line { display: grid; grid-template-columns: auto 1fr auto; gap: 10px; align-items: center; padding: 9px 0; border-top: 1px solid var(--line) }
-.hub-line b { display: block; font-weight: 450; font-size: 13px }
-.hub-line small { color: var(--muted); font-size: 12px }
-.hub-line strong { font-weight: 300; font-size: 18px }
-.hub-mark { margin: 0 4px; font-size: 10px }
-.weight-bar { display: flex; height: 6px; border-radius: 4px; overflow: hidden; background: var(--panel-2); gap: 2px }
-.w-transit { background: var(--transit) } .w-car { background: var(--car) } .w-walk { background: var(--walk) }
-.weight-legend { display: flex; flex-wrap: wrap; gap: 6px 14px; margin-top: 10px; font-size: 12px; color: var(--muted) }
-.weight-legend i { display: inline-block; width: 8px; height: 8px; border-radius: 2px; margin-right: 6px }
+/* 검색창(지도 위 왼쪽 위) */
+.search { position: absolute; top: 16px; left: 16px; z-index: 700; width: min(420px, calc(100% - 32px)) }
+.search-bar { display: flex; align-items: center; gap: 8px; background: #fff; border: 1px solid var(--line-2); border-radius: 999px; padding: 6px 6px 6px 14px; box-shadow: 0 4px 16px rgba(0, 0, 0, 0.1) }
+.search-bar svg { width: 18px; height: 18px; flex: none; color: var(--muted) }
+.search-bar input { flex: 1; min-width: 0; border: 0; outline: 0; background: none; font-size: 14px }
+.search-bar button { border: 0; border-radius: 999px; background: var(--text); color: #fff; padding: 7px 14px; font-size: 13px }
+.search-bar button:disabled { opacity: 0.5 }
+.search-results { margin-top: 8px; background: #fff; border: 1px solid var(--line-2); border-radius: 16px; padding: 6px; box-shadow: 0 10px 30px rgba(0, 0, 0, 0.14); max-height: 360px; overflow-y: auto }
+.search-results > .muted { padding: 10px 12px }
+.result { display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: 10px; align-items: center; padding: 9px 10px; border-radius: 12px }
+.result:hover { background: var(--panel-2) }
+.result b { display: block; font-weight: 500; font-size: 14px }
+.result small { display: block; color: var(--muted); font-size: 12px }
+.result-actions { display: flex; gap: 6px; flex-wrap: wrap; justify-content: flex-end }
+.result-actions button { border: 1px solid var(--line-2); background: #fff; border-radius: 999px; padding: 5px 10px; font-size: 12px; white-space: nowrap }
+.result-actions button:first-child { background: var(--accent); border-color: transparent }
+.turnstile-box { position: fixed; right: 16px; bottom: 16px; z-index: 3000 }
 
-/* ── 후보지 카드: 좌우로 넘기면 방문지가 바뀐다 ── */
-.candidate-card { padding: 14px 16px 12px; height: 100%; display: flex; flex-direction: column }
-.pick { display: flex; gap: 6px; margin-bottom: 12px }
-.pick button { width: 30px; height: 30px; border-radius: 50%; border: 1px solid var(--line-2); background: var(--panel-2); font-size: 12px }
-.pick button.on { background: var(--transit); color: #11130d; border-color: transparent; font-weight: 600 }
-.cand-head { display: flex; justify-content: space-between; align-items: flex-end; gap: 12px; padding-bottom: 12px; border-bottom: 1px solid var(--line) }
-.tag { font-size: 11px; letter-spacing: 0.08em; color: var(--transit) }
-.cand-head h3 { margin: 4px 0 2px; font-size: 20px; font-weight: 350; letter-spacing: -0.01em }
-.cand-head p { margin: 0; color: var(--muted); font-size: 12px }
-.total { text-align: right; white-space: nowrap }
-.total b { font-size: 44px; font-weight: 200; line-height: 1 }
-.total span { color: var(--faint); font-size: 15px; margin-left: 2px }
-.slide-nav { display: flex; align-items: center; gap: 8px; margin: 12px 0 8px }
-.slide-nav > button { width: 30px; height: 30px; border-radius: 50%; border: 1px solid var(--line-2); background: var(--panel-2); font-size: 17px; line-height: 1; flex: none }
-.slide-nav > button:disabled { opacity: 0.3; cursor: default }
-.hub-tabs { flex: 1; display: flex; gap: 4px; padding: 3px; border-radius: 999px; background: var(--panel-2); border: 1px solid var(--line) }
-.hub-tabs button { flex: 1; border: 0; background: none; border-radius: 999px; padding: 5px 8px; font-size: 12px; color: var(--muted) }
-.hub-tabs button.on { background: #2a2b28; color: var(--text); box-shadow: inset 0 0 0 1px var(--line-2) }
-.track { display: flex; overflow-x: auto; scroll-snap-type: x mandatory; scrollbar-width: none; overscroll-behavior-x: contain; border-radius: 14px }
-.track::-webkit-scrollbar { display: none }
-.slide { flex: 0 0 100%; scroll-snap-align: start; background: var(--panel-2); border: 1px solid var(--line); border-radius: 14px; padding: 12px 14px 6px }
-.hub-head { display: grid; grid-template-columns: auto 1fr auto; gap: 10px; align-items: center; padding-bottom: 8px; border-bottom: 1px solid var(--line) }
-.hub-head small { display: block; color: var(--muted); font-size: 11px }
-.hub-head b { font-weight: 450 }
-.hub-head strong { font-size: 24px; font-weight: 250 }
-.mode { display: grid; grid-template-columns: 52px 1fr 54px 28px; gap: 8px; align-items: center; padding: 9px 0; border-bottom: 1px solid var(--line) }
-.mode:last-child { border-bottom: 0 }
-.mode-name { font-size: 12px; color: var(--muted) }
-.mode-main b { display: block; font-weight: 400; font-size: 15px; font-variant-numeric: tabular-nums }
-.mode-main small { color: var(--faint); font-size: 11px }
-.mode em { font-style: normal; text-align: right; font-variant-numeric: tabular-nums }
-.bar { height: 4px; border-radius: 3px; background: rgba(255, 255, 255, 0.08); overflow: hidden }
-.bar span { display: block; height: 100% }
-.mode.transit .bar span { background: var(--transit) }
-.mode.car .bar span { background: var(--car) }
-.mode.walk .bar span { background: var(--walk) }
-.walk-note { margin: 0; padding: 8px 0 6px; font-size: 11px; color: var(--faint) }
+/* 입지 요인(오른쪽, 준비 중) */
+.factors { height: 100% }
+.soon { font-size: 11px; color: var(--muted); border: 1px solid var(--line-2); border-radius: 999px; padding: 1px 8px }
+.factor { display: flex; justify-content: space-between; align-items: center; gap: 12px; padding: 12px 0; border-top: 1px solid var(--line) }
+.factor b { display: block; font-weight: 450 }
+.factor small { color: var(--muted); font-size: 11px }
+.factors > .muted { margin-bottom: 8px }
 
-/* ── 전체 비교표 ── */
-.compare { padding: 14px 16px 10px }
-.compare-head h2 { margin: 0; font-size: 15px; font-weight: 400 }
-.compare-head small { color: var(--muted); font-size: 12px }
-.table-wrap { overflow-x: auto; margin-top: 10px }
-.compare table { width: 100%; border-collapse: collapse; min-width: 860px; font-variant-numeric: tabular-nums }
-.compare th { font-weight: 400; font-size: 11px; color: var(--muted); text-align: right; padding: 6px 10px; border-bottom: 1px solid var(--line); white-space: nowrap }
-.compare th.group { text-align: center; color: var(--text); font-size: 12px; border-left: 1px solid var(--line) }
-.compare th.group .hub-mark { display: inline-grid; vertical-align: middle; margin-right: 8px }
-.compare th.left, .compare td.left { text-align: left }
-.compare td { padding: 10px; text-align: right; border-bottom: 1px solid var(--line); color: #c9c9c2; white-space: nowrap }
-.compare td i { font-style: normal; margin-left: 8px; color: var(--muted); font-size: 12px }
-.compare td.big { font-size: 20px; font-weight: 250; color: var(--text) }
-.compare td.mid { font-size: 16px; font-weight: 300; color: var(--text); border-left: 1px solid var(--line) }
-.compare td.best, .compare td.best i { color: var(--transit) }
-.compare td .none { color: var(--faint) }
-.compare td.left b { font-weight: 400; color: var(--text) }
-.compare td.left small { color: var(--faint); font-size: 11px; margin-left: 8px }
-.rank { display: inline-grid; place-items: center; width: 22px; height: 22px; border-radius: 50%; border: 1px solid var(--line-2); font-size: 11px; margin-right: 10px }
-.compare tbody tr { cursor: pointer; transition: background 0.15s }
-.compare tbody tr:hover { background: rgba(255, 255, 255, 0.03) }
-.compare tbody tr.on { background: rgba(197, 236, 111, 0.07) }
-.compare tbody tr.on .rank { background: var(--transit); color: #11130d; border-color: transparent }
-.compare tbody tr:last-child td { border-bottom: 0 }
-
-/* ── 조정 창: 누른 칸의 바로 오른쪽에 뜬다 ── */
-.anchor { position: relative }
-.adjust { border: 0; background: none; color: var(--muted); font-size: 12px; padding: 0 }
-.adjust:hover, .adjust.on { color: var(--transit) }
-.popover { position: absolute; top: 0; left: calc(100% + 12px); width: 340px; z-index: 1000; padding: 14px 16px; background: #171816; backdrop-filter: none; box-shadow: 0 18px 48px rgba(0, 0, 0, 0.55) }
-.popover::before { content: ''; position: absolute; top: 18px; left: -7px; width: 12px; height: 12px; transform: rotate(45deg); background: rgb(22, 23, 21); border-left: 1px solid var(--line); border-bottom: 1px solid var(--line) }
-.pop-head { display: flex; justify-content: space-between; align-items: center; margin-bottom: 4px }
-.pop-head b { font-weight: 450 }
-.popover .close { width: 28px; height: 28px; font-size: 15px }
-.pop-foot { display: flex; justify-content: flex-end; gap: 8px; margin-top: 12px }
+/* ── 아래: 후보지 카드(같은 줄을 옆으로 읽으면 비교) ── */
+.compare { padding: 16px 18px }
+.cards-scroll { overflow-x: auto; padding-bottom: 4px }
+.cards-grid { display: grid; column-gap: 10px }
+.col { display: grid; grid-template-rows: subgrid; min-width: 0 }
+.labels .cell { color: var(--muted); font-size: 12px }
+.card { text-align: left; border: 1px solid var(--line); background: #fff; border-radius: 16px; padding: 0 14px; transition: border-color 0.15s, box-shadow 0.15s }
+.card:hover { border-color: var(--line-2) }
+.card.on { border-color: var(--text); box-shadow: 0 0 0 1px var(--text) }
+.cell { display: flex; align-items: center; gap: 10px; padding: 10px 0; border-bottom: 1px solid var(--line); min-width: 0 }
+.col .cell:last-child { border-bottom: 0 }
+.head-cell { padding: 14px 0 12px }
+.rank { display: inline-grid; place-items: center; flex: none; width: 24px; height: 24px; border-radius: 50%; border: 1px solid var(--line-2); font-size: 11px }
+.card.on .rank { background: var(--text); color: #fff; border-color: transparent }
+.card-name { flex: 1; min-width: 0 }
+.card-name b { display: block; font-weight: 500; white-space: nowrap; overflow: hidden; text-overflow: ellipsis }
+.card-name small { display: block; color: var(--muted); font-size: 11px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis }
+.head-cell strong { font-size: 28px; font-weight: 250; font-variant-numeric: tabular-nums }
+.card .hub-cell { flex-wrap: wrap; row-gap: 0 }
+.card .hub-cell span { font-weight: 500; font-size: 13px; flex: 1; min-width: 0; white-space: nowrap; overflow: hidden; text-overflow: ellipsis }
+.card .hub-cell small { color: var(--muted); font-size: 11px; order: 3; flex-basis: 100% }
+.card .hub-cell b { font-size: 18px; font-weight: 300 }
+.labels .hub-cell { color: var(--text); font-weight: 500 }
+.row-label { gap: 8px }
+.mode-cell { justify-content: space-between; align-items: flex-start }
+.mode-cell b { display: block; font-weight: 450; font-size: 14px; font-variant-numeric: tabular-nums }
+.mode-cell small { display: block; color: var(--muted); font-size: 11px; line-height: 1.4 }
+.mode-cell em { font-style: normal; font-size: 13px; font-variant-numeric: tabular-nums }
+.best { color: var(--good) !important; font-weight: 600 !important }
 
 .foot { margin: 0; text-align: center; color: var(--faint); font-size: 11px }
 
-/* ── 설정·안내 창 ── */
-.overlay { position: fixed; inset: 0; z-index: 2000; background: rgba(0, 0, 0, 0.45); display: flex; justify-content: flex-end; padding: 14px }
-.drawer { width: min(440px, 100%); max-height: 100%; overflow-y: auto; padding: 20px 22px; background: rgba(22, 23, 21, 0.94) }
-.drawer.guide { width: min(620px, 100%) }
-.drawer-head { display: flex; justify-content: space-between; align-items: flex-start }
-.drawer-head small { font-size: 10px; letter-spacing: 0.2em; color: var(--muted) }
-.drawer-head h2 { margin: 4px 0 0; font-size: 24px; font-weight: 300 }
-.close { border: 1px solid var(--line-2); background: none; width: 34px; height: 34px; border-radius: 50%; font-size: 18px }
-.drawer h3 { font-size: 13px; font-weight: 500; color: var(--transit); margin: 22px 0 8px; letter-spacing: 0.02em }
-.drawer p, .drawer li { color: #c9c9c2; font-size: 13px }
-.drawer ul { padding-left: 18px; margin: 0 }
-.drawer li { margin-bottom: 7px }
-.drawer code { font-size: 12px; background: var(--panel-2); padding: 1px 5px; border-radius: 4px }
+/* ── 조정 창: 누른 칸 바로 오른쪽 ── */
+.anchor { position: relative }
+.popover { position: absolute; top: 0; left: calc(100% + 12px); width: 340px; z-index: 1000; background: #fff; border: 1px solid var(--line-2); border-radius: 18px; padding: 14px 16px; box-shadow: 0 18px 48px rgba(0, 0, 0, 0.18) }
+.popover::before { content: ''; position: absolute; top: 20px; left: -7px; width: 12px; height: 12px; transform: rotate(45deg); background: #fff; border-left: 1px solid var(--line-2); border-bottom: 1px solid var(--line-2) }
+.pop-head { display: flex; justify-content: space-between; align-items: center; margin-bottom: 4px }
+.pop-head b { font-weight: 500 }
+.close { border: 1px solid var(--line-2); background: #fff; width: 30px; height: 30px; border-radius: 50%; font-size: 15px }
+.pop-foot { display: flex; justify-content: flex-end; gap: 8px; margin-top: 12px }
 .slider, .trips { display: grid; grid-template-columns: 1fr 110px 36px; gap: 12px; align-items: center; padding: 10px 0; border-top: 1px solid var(--line) }
 .trips { grid-template-columns: 1fr auto }
 .slider b, .trips b { display: block; font-weight: 450 }
 .slider small, .trips small { color: var(--muted); font-size: 11px }
 .slider em { font-style: normal; text-align: right }
-input[type='range'] { width: 100%; accent-color: var(--transit) }
+input[type='range'] { width: 100%; accent-color: var(--text) }
 .stepper { display: flex; align-items: center; gap: 6px }
-.stepper button { width: 30px; height: 30px; border-radius: 50%; border: 1px solid var(--line-2); background: var(--panel-2) }
-.stepper input { width: 52px; text-align: center; padding: 5px; border-radius: 8px; border: 1px solid var(--line-2); background: rgba(0, 0, 0, 0.3) }
+.stepper button { width: 30px; height: 30px; border-radius: 50%; border: 1px solid var(--line-2); background: #fff }
+.stepper input { width: 52px; text-align: center; padding: 5px; border-radius: 8px; border: 1px solid var(--line-2); background: #fff }
 .ghost, .solid { border-radius: 999px; padding: 8px 18px; font-size: 13px }
-.ghost { background: none; border: 1px solid var(--line-2) }
-.solid { background: var(--text); color: #111; border: 0; font-weight: 500 }
+.ghost { background: #fff; border: 1px solid var(--line-2) }
+.solid { background: var(--text); color: #fff; border: 0; font-weight: 500 }
+
+/* ── 계산 방식 안내 창 ── */
+.overlay { position: fixed; inset: 0; z-index: 2000; background: rgba(31, 31, 28, 0.25); display: flex; justify-content: flex-end; padding: 14px }
+.drawer { width: min(620px, 100%); max-height: 100%; overflow-y: auto; padding: 20px 22px; background: #fff; border: 1px solid var(--line-2); border-radius: 20px }
+.drawer-head { display: flex; justify-content: space-between; align-items: flex-start }
+.drawer-head small { font-size: 10px; letter-spacing: 0.2em; color: var(--muted) }
+.drawer-head h2 { margin: 4px 0 0; font-size: 24px; font-weight: 350 }
+.drawer h3 { font-size: 13px; font-weight: 600; color: var(--good); margin: 22px 0 8px }
+.drawer p, .drawer li { color: #3d3d38; font-size: 13px }
+.drawer ul { padding-left: 18px; margin: 0 }
+.drawer li { margin-bottom: 7px }
+.drawer code { font-size: 12px; background: var(--panel-2); padding: 1px 5px; border-radius: 4px }
 
 /* ── 좁은 화면 ── */
-@media (max-width: 1240px) {
-  /* 지도·카드는 위에 나란히, 표는 아래 */
-  .stage { grid-template-columns: 280px minmax(0, 1fr); grid-template-rows: auto auto auto; grid-template-areas: 'side map' 'side card' 'side table' }
-  .map-area { height: 52vh }
+@media (max-width: 1320px) {
+  .stage { grid-template-columns: 330px minmax(0, 1fr); grid-template-rows: auto auto 1fr auto auto;
+    grid-template-areas: 'stats map' 'modes map' 'selected map' 'factors factors' 'cards cards' }
+  .factors { height: auto }
 }
-@media (max-width: 860px) {
-  /* 지도 → 후보지 카드 → 비교표 → 요약 순으로 쌓고, 조정 창은 그 칸 바로 아래에 펼친다 */
-  .stage { grid-template-columns: minmax(0, 1fr); grid-template-areas: 'map' 'card' 'table' 'side' }
-  .map-area { height: 52vh; min-height: 340px }
-  .title { font-size: 28px }
-  .popover { position: static; width: auto; margin-top: 12px; box-shadow: none }
+@media (max-width: 900px) {
+  .stage { grid-template-columns: minmax(0, 1fr); grid-template-rows: none; grid-template-areas: 'stats' 'map' 'modes' 'selected' 'cards' 'factors' }
+  .map-area { min-height: 0; height: 60vh }
+  .popover { position: static; width: auto; margin-top: 10px; box-shadow: none }
   .popover::before { display: none }
 }
 @media (max-width: 600px) {
   .shell { padding: 10px 10px 8px }
   .topbar { gap: 10px }
-  .back { font-size: 10px; letter-spacing: 0.06em }
-  .pill { padding: 6px 10px; font-size: 12px }
-  .total b { font-size: 38px }
+  .brand { font-size: 18px }
+  .back { font-size: 10px; letter-spacing: 0.05em }
+  .pills .pill.active { display: none }
+  .stats-line { gap: 12px; padding: 10px 14px }
+  .stats-line b { font-size: 18px }
+  .best-cell em { display: none }
+  .result { grid-template-columns: 1fr }
+  .result-actions { justify-content: flex-start }
 }

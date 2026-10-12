@@ -1,4 +1,4 @@
-# 입지 비교 (블로그 `/location-compare/`)
+# 여기살까? — 입지 비교 (블로그 `/location-compare/`)
 
 후보지 여러 곳을 **지도**와 **주요 방문지(최대 2곳)까지의 이동 점수**로 비교하는 한 화면짜리 도구.
 2026-10-12 처음부터 다시 만들었다(이전 판의 비교 표·상세 화면·후보/거점 관리 화면·DB 흉내는 모두 삭제).
@@ -10,19 +10,31 @@
 
 ## 1. 기능
 
-배치(넓은 화면): 왼쪽 요약 · 가운데 지도 · 오른쪽 후보지 카드 · 아래 전체 비교표. 좁은 화면에서는 지도 → 카드 → 표 → 요약 순으로 쌓인다.
+밝은 테마. 넓은 화면 배치:
+
+```
+┌ 한 줄 요약 ────┐ ┌───────────── 지도 ─────────────┐ ┌ 입지 요인 ┐
+│ 이동수단별 점수 │ │ [검색창]                         │ │ (준비 중) │
+│ 선택한 후보지   │ │                         + ◎ −  │ │           │
+└───────────────┘ └────────────────────────────────┘ └───────────┘
+┌ 후보지별 비교: 줄 이름 | 카드1 | 카드2 | …  (같은 줄을 옆으로 읽으면 비교) ┐
+```
+좁은 화면에서는 한 줄 요약 → 지도 → 수단 점수 → 선택한 후보지 → 카드 → 입지 요인 순으로 쌓인다.
 
 | 영역 | 하는 일 |
 |---|---|
-| 지도 | 도로·건물이 나오는 OSM 한국 타일(`tiles.osm.kr`)을 CSS 로 흑백 반전해 어둡고 단순하게. 번호 원 = 후보지, 주황 마름모 = 주요 방문지. 고른 후보지에서 각 방문지까지 흰 점선. 핀을 누르면 그 후보지를 고른다. 왼쪽 아래 `+` `◎`(전체 보기) `−` |
-| 후보지 카드(오른쪽) | 고른 후보지 한 곳: 순위·종합 점수·주소. **좌우로 넘기면(스와이프·`‹ ›`·학교/본가 탭) 방문지가 바뀐다** — 한 장 = 그 후보지에서 방문지 하나까지의 대중교통·차량·도보 세부와 점수. 후보지는 카드 위 번호 단추·지도 핀·아래 표에서 고르며, 후보지를 바꿔도 보던 방문지는 그대로 둔다 |
-| 모든 후보지 비교(아래 표) | 후보지 전체를 종합 순위순으로 한 표에: 종합, 방문지별(점수·대중교통 분/점·차량 출퇴근/여유 분/점·도보 분/점). 열마다 가장 높은 점수를 라임색으로. 도보 30분 초과는 `—`. 줄을 누르면 그 후보지를 고른다 |
-| 조정 | 왼쪽 "주요 방문지"·"수단 가중치" 칸의 `조정 ↗` → **그 칸 바로 오른쪽**에 설정 창(좁은 화면에서는 칸 아래로 펼침). 월 왕복 횟수(0~60) / 수단 가중치(0~100). 바꾸는 즉시 다시 계산, localStorage(`locCompare.v2`)에 저장, "기본값" 단추. 바깥 클릭·Esc·× 로 닫힘 |
-| 계산 방식 | 위쪽 "계산 방식" → 이 문서의 요약 창 |
+| 한 줄 요약(왼쪽 위) | 후보지 수 · 주요 목적지 수(/2) · 최고 점수와 그 후보지 |
+| 이동수단별 점수(왼쪽) | 고른 후보지의 종합 점수 게이지(0~10 호 위의 점) + 대중교통·차량·도보 **눈금 막대**. 막대 값 = 목적지별 수단 점수를 월 왕복 비율로 평균(도보는 걸어갈 수 있는 목적지만). 줄 아래에 목적지별 시간. "가중치 조정 ↗" → 그 칸 오른쪽에 수단 가중치 창 |
+| 선택한 후보지(왼쪽 아래) | 번호 단추로 후보지 고르기, 이름·주소·순위, 목적지별 월 왕복 횟수·반영 %. "방문 횟수 조정 ↗"(그 칸 오른쪽 창), × 로 후보지·목적지 빼기, "처음 목록으로" |
+| 지도(가운데) | 네이버 지도(키가 있을 때) 또는 밝은 OSM 지도. 번호 원 = 후보지, 주황 마름모 = 목적지. **후보지를 고르면 그 후보지와 목적지가 모두 들어오도록 확대·이동**하고 목적지까지 점선. 핀을 누르면 그 후보지 선택. `+` `◎`(다시 맞추기) `−` |
+| 검색창(지도 위) | 하나의 창으로 아파트·주소·학교·회사 검색 → 결과마다 "후보지로" / "목적지로"(목적지가 2곳이면 "학교 대신" 같은 바꿀 자리). **Enter·검색 단추를 누를 때만** 부른다(글자마다 부르지 않음) |
+| 입지 요인(오른쪽 위) | 도보 5분 상권·산책·평화로움·쾌적함 지수 자리(준비 중, 빈 눈금) |
+| 후보지별 비교(아래) | 후보지 카드를 가로로 늘어놓고 CSS subgrid 로 **모든 카드가 같은 줄 높이**를 쓴다. 줄: 후보지(순위·종합) / 목적지마다 [목적지 점수 · 대중교통(총 분, 대기·정류장까지 도보·환승) · 차량(출퇴근·낮 분, 차이 +분·배율, 네이버 실측 여부) · 도보(분 또는 30분 초과)]. 줄마다 가장 높은 점수는 초록. 카드를 누르면 그 후보지 선택 |
+| 계산 방식 | 위쪽 "계산 방식" → 요약 창 |
 
-후보지·방문지는 화면에서 고칠 수 없다(주소 검색은 추후). `src/data.ts` 를 고쳐 다시 빌드한다.
+바꾼 후보지·목적지·선호도는 `localStorage`(`locCompare.v3`)에만 저장된다(이전 판의 선호도 `locCompare.v2` 는 처음 한 번 옮겨 온다).
 
-## 2. 데이터 (`src/data.ts`)
+## 2. 데이터 (`src/data.ts` 기본값 · `src/store.ts` 방문자 저장)
 
 - `CANDIDATES` — 후보지: 이름, 도로명 주소(임시), 위도·경도(손으로 넣은 대략 위치).
 - `HUBS` — 주요 방문지. **`MAX_HUBS = 2`**: 3곳 이상 적어도 앞의 2곳만 계산·표시.
@@ -102,17 +114,21 @@
 ## 7. 파일
 
 ```
-src/data.ts                          후보지·방문지·기본 선호도
+src/data.ts                          기본 후보지·목적지·선호도
+src/store.ts                         방문자가 바꾼 목록 저장·후보지/목적지 넣고 빼기
 src/routes.json                      네이버로 잰 차량 소요 시간(비어 있으면 추정)
 src/scoring.ts                       시간 추정 · 수단 점수 · 가중치 · 종합 점수
-src/App.tsx                          배치, 선호도 저장, 조정 창 열고 닫기
-src/components/MapView.tsx           지도·핀·점선·확대 단추
-src/components/CandidateCard.tsx     후보지 카드(방문지를 좌우로 넘김)
-src/components/CompareTable.tsx      모든 후보지 비교표
+src/naver.ts                         네이버 지도 JS 불러오기 · 주소 검색(지오코더) · 장소 검색(Worker) · Turnstile
+src/App.tsx                          배치·상태
+src/components/MapView.tsx           네이버 지도 / OSM 지도, 핀·점선, 고른 구간으로 맞추기
+src/components/SearchBox.tsx         검색창과 결과(후보지로·목적지로)
+src/components/Panels.tsx            이동수단별 점수(게이지·눈금 막대), 입지 요인 자리
+src/components/CompareCards.tsx      줄 맞춘 후보지 카드
 src/components/SettingsPopover.tsx   조정 창(월 왕복 횟수 / 수단 가중치)
-src/components/GuidePanel.tsx        계산 방식 안내 창
-src/styles.css                       어두운 유리 패널 디자인
+src/components/GuidePanel.tsx        계산 방식 안내
+src/styles.css                       밝은 테마
 scripts/fetch-routes.mjs             네이버 Directions 로 차량 시간 재기(이 PC 에서만)
+../../workers/place-search/          장소 검색 중계 Worker(네이버 Secret 보관 · 사용량 제한)
 ```
 
 ## 8. 다시 만들기
@@ -128,33 +144,62 @@ npm run dev          # http://localhost:5173/location-compare/ (글꼴은 배포
 
 ## 9. 네이버 API — 키를 숨기고 사용량을 묶는 방법
 
-### 왜 브라우저에서 직접 부르지 않나
-GitHub Pages 는 정적 파일만 내보낸다. 페이지의 JS 에 키를 넣으면 **누구나 키를 볼 수 있고**, Origin·Referer 검사는 브라우저만 지키는 규칙이라 다른 서버·스크립트(curl 등)는 헤더를 마음대로 꾸며 그 키로 내 사용량을 쓸 수 있다.
-또 네이버 클라우드의 Directions·Geocoding REST 는 **Client ID + Client Secret 두 헤더**(`x-ncp-apigw-api-key-id`, `x-ncp-apigw-api-key`)가 필요해 브라우저에 둘 수 없다.
+### 한눈에
 
-### 지금 방식: 미리 재서 결과만 올린다
-후보지·방문지가 고정이므로 이 PC 에서 `scripts/fetch-routes.mjs` 로 한 번 재고, **결과(`src/routes.json`)만** 빌드·커밋한다.
-공개 사이트에는 네이버를 부르는 코드도, 키도, 중계 서버도 없다 → 다른 서버·스크래퍼가 접근할 길 자체가 없고, 사용량은 내가 스크립트를 돌린 만큼만 생긴다.
+| 쓰임 | 네이버 API | 어디서 부르나 | 필요한 키 | 키를 두는 곳 |
+|---|---|---|---|---|
+| 지도 화면 | 네이버 클라우드 **Maps – Dynamic Map**(JS v3) | 방문자 브라우저 | Client ID 만 | `tools/location-compare/.env.local` 의 `VITE_NAVER_MAP_KEY_ID` → 빌드 때 페이지에 들어감 |
+| 주소 검색 | 같은 Maps JS 의 지오코더(`submodules=geocoder`) | 방문자 브라우저 | 위 Client ID 로 함께 | (같음) |
+| 장소 검색(아파트·학교 이름) | 네이버 개발자센터 **검색 API – 지역** | `workers/place-search`(Cloudflare Worker) | Client ID + **Client Secret** | Worker 시크릿(`wrangler secret put`) — git·브라우저에 안 나감 |
+| 차량 소요 시간 | 네이버 클라우드 **Maps – Directions 5** | 이 PC(`scripts/fetch-routes.mjs`) | Client ID + Client Secret | `tools/location-compare/.env.local`(git 제외) |
 
+- **지도용 Client ID 는 원래 공개되는 값**이다(페이지 소스에 보임). 네이버 콘솔의 Application 설정에서 **Web 서비스 URL 에 `https://peripheral7.github.io` 와 `http://localhost:5173` 만** 등록하면 다른 사이트에서는 지도가 뜨지 않는다. Secret 은 어떤 경우에도 브라우저 쪽에 넣지 않는다.
+- Client ID 는 **필요하다** — 모든 네이버 API 가 Client ID 를 쓰고, 검색·길찾기 REST 는 Client Secret 까지 둘 다 필요하다.
+- 콘솔에서는 쓰는 API 만 선택(Dynamic Map·Geocoding·Directions 5)하고 나머지는 켜지 않는다. 키가 새면 콘솔에서 재발급하면 이전 키는 바로 무효.
+
+### GitHub Pages 에 올리면 다른 서버에서 접근할 수 있나 → 있다. 그래서 이렇게 막았다
+GitHub Pages 의 파일은 누구나 받을 수 있고, Origin·Referer 검사는 "브라우저만 지키는 약속"이라 서버·스크립트(curl 등)는 헤더를 꾸며 보낼 수 있다. 그래서 출처 검사 하나로는 부족하고, 공개된 검색 중계(`workers/place-search`)에 다음을 겹쳐 걸었다:
+
+1. **하루 전체 상한** `DAILY_LIMIT`(기본 1000): 네이버를 실제로 부르기 직전에 D1 에 세고, 넘으면 503 — 무슨 일이 있어도 하루 사용량이 이 선을 못 넘는다(가장 확실한 장치).
+2. **IP 당 상한** `IP_HOURLY`(30) · `IP_DAILY`(100): 넘으면 429. IP 는 소금(`SALT`)을 친 해시로만 저장.
+3. **Cloudflare Turnstile**(사람 확인): Worker 에 `TURNSTILE_SECRET`, 페이지에 `VITE_TURNSTILE_SITEKEY` 를 넣으면 토큰 없는·틀린 요청은 403 — 브라우저가 아닌 스크립트의 대량 호출을 거른다.
+4. **허용 출처만**: Origin 이 블로그·로컬 개발 주소가 아니면 403(다른 웹사이트가 방문자 브라우저로 부르는 것 차단).
+5. **7일 캐시**: 같은 검색어는 네이버를 다시 부르지 않고 전체 상한도 쓰지 않는다.
+6. **요청 검사**: `GET /search?q=` 만, 2~40자. 화면도 Enter·단추를 누를 때만 검색하고 같은 검색어를 되풀이하지 않는다.
+7. 지도 JS·지오코더는 네이버가 Web 서비스 URL 로 인증한다(위 표). 차량 시간은 이 PC 에서만 재고 결과만 올리므로 공개 사이트에는 길찾기 호출이 없다.
+
+로컬에서 가짜 네이버 서버로 확인한 것: 출처 없음·다른 출처 403, 짧은 검색어 400, 첫 검색 MISS → 같은 검색 HIT(네이버 호출 안 늘어남), 전체 상한 초과 503(네이버 호출 정확히 상한만큼), IP 시간당 초과 429, POST 404, Turnstile 실패용 키 403 / 통과용 키 200, 바다 좌표 결과 걸러짐.
+
+### 켜는 순서(키를 받은 뒤)
 ```bash
-# 1) 키: 이 폴더에 .env.local 을 만들고(.gitignore 의 .env*.local 로 git 에 안 올라감)
-NAVER_CLIENT_ID=콘솔의 Client ID
-NAVER_CLIENT_SECRET=콘솔의 Client Secret
-NAVER_DAILY_LIMIT=100          # 선택: 하루 호출 상한(기본 100, 최대 1000)
+# A. 지도·주소 검색: 네이버 클라우드 콘솔 → Application 등록(Dynamic Map, Geocoding 선택, Web 서비스 URL 등록)
+#    tools/location-compare/.env.local 에
+VITE_NAVER_MAP_KEY_ID=콘솔의 Client ID
 
-# 2) 시간대별로 한 번씩 (한 번에 후보 4 × 방문지 2 = 8회 호출)
-node scripts/fetch-routes.mjs --slot rush --dry-run   # 부를 목록·남은 한도만 확인
-node scripts/fetch-routes.mjs --slot rush             # 평일 출퇴근 시간(08~09시)에
-node scripts/fetch-routes.mjs --slot free             # 한가한 시간(11~15시)에
-npm run build   # → 커밋·푸시
+# B. 장소 검색: 네이버 개발자센터(developers.naver.com) → 애플리케이션 등록(검색 API)
+cd workers/place-search
+npx wrangler d1 create place-search                 # 나온 database_id 를 wrangler.toml 에
+npx wrangler d1 execute place-search --remote --file=schema.sql
+npx wrangler secret put NAVER_CLIENT_ID             # 개발자센터 Client ID
+npx wrangler secret put NAVER_CLIENT_SECRET         # 개발자센터 Client Secret
+npx wrangler secret put SALT                        # 아무 긴 임의 문자열
+npx wrangler secret put TURNSTILE_SECRET            # (선택) Cloudflare Turnstile 위젯의 Secret
+npx wrangler deploy                                 # → https://place-search.<계정>.workers.dev
+#    tools/location-compare/.env.local 에
+VITE_PLACE_SEARCH_URL=https://place-search.<계정>.workers.dev
+VITE_TURNSTILE_SITEKEY=Turnstile Site Key           # (선택, TURNSTILE_SECRET 을 넣었다면 필수)
+
+# C. 다시 빌드·커밋
+cd tools/location-compare && npm run build
 ```
-- **사용량 상한**: 하루 호출 수를 `.naver-usage.json`(git 제외)에 세고, 실행 전에 "오늘 사용 + 이번 호출"이 상한을 넘으면 한 번도 부르지 않고 멈춘다. 호출 사이 0.3초 간격, 401·429 를 받으면 나머지는 부르지 않는다.
-- 네이버 콘솔(Application 등록)에서는 **Directions 5 만 선택**해 두고, 쓰지 않는 API 는 켜지 않는다. 키가 새면 콘솔에서 Secret 을 재발급하면 이전 키는 바로 죽는다.
-- 네이버 클라우드 지도 API 에는 **대중교통 길찾기가 없다**(자동차 Directions 5/15, Geocoding 등). 대중교통 시간을 실측하려면 다른 API(예: ODsay)가 필요하다 — 지금 대중교통·도보는 추정값.
+키가 하나도 없으면 지도는 OSM, 검색창은 "검색 준비 중"으로 보인다(지금 상태).
 
-### 나중에 "주소 검색"처럼 방문자가 실시간으로 불러야 할 때
-그때는 키를 Cloudflare Worker(이 저장소의 `workers/` 와 같은 방식, `wrangler secret put` 으로 키 저장 — git·브라우저에 안 나감)에 두고 Worker 가 대신 부르게 한다. 공개 주소는 완전히 막을 수 없으므로 다음을 겹쳐 건다:
-1. **하루 전체 상한**(예: D1 에 날짜별 호출 수 — 넘으면 Worker 가 네이버를 부르지 않음) → 무슨 일이 있어도 사용량이 이 선을 못 넘는다(가장 확실한 장치).
-2. **IP 당 상한**(예: 시간당 30회) — 한 곳에서 긁어 가는 것을 막는다.
-3. **Cloudflare Turnstile**(사람 확인 토큰) — 브라우저가 아닌 스크립트의 호출을 거른다.
-4. **결과 캐시**(같은 주소는 다시 안 부름), **허용 Origin 만 CORS**, 요청 내용 검사(한국 좌표 범위·글자 수).
+### 차량 소요 시간 실측(이 PC 에서만)
+```bash
+# tools/location-compare/.env.local 에 NAVER_CLIENT_ID / NAVER_CLIENT_SECRET (네이버 클라우드 Maps 키), 선택 NAVER_DAILY_LIMIT=100
+node scripts/fetch-routes.mjs --slot rush --dry-run   # 부를 목록·남은 한도
+node scripts/fetch-routes.mjs --slot rush             # 평일 출퇴근(08~09시)
+node scripts/fetch-routes.mjs --slot free             # 한가한 시간(11~15시)
+npm run build
+```
+하루 호출 수를 `.naver-usage.json`(git 제외)에 세고, 상한을 넘을 것 같으면 한 번도 부르지 않는다. 401·429 를 받으면 즉시 멈춘다. 검색으로 새로 넣은 후보지·목적지는 실측 대상이 아니다(기본 목록만). 네이버 클라우드에는 대중교통 길찾기가 없어 대중교통·도보는 추정값이다.
