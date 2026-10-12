@@ -25,7 +25,7 @@ export function load(): State {
       return {
         candidates: saved.candidates.filter(isPoint).map(migrate),
         hubs: saved.hubs.filter(isPoint).slice(0, MAX_HUBS),
-        pref: { weights: { ...base.pref.weights, ...saved.pref.weights }, trips: { ...saved.pref.trips } },
+        pref: { weights: { ...base.pref.weights, ...saved.pref.weights }, trips: { ...saved.pref.trips }, transitUse: { ...saved.pref.transitUse } },
       }
     }
     const old = JSON.parse(localStorage.getItem(OLD_PREF_KEY) || 'null')
@@ -65,14 +65,18 @@ export function setHub(s: State, place: Place, replaceId?: string, name?: string
     delete trips[replaceId]
   } else if (hubs.length < MAX_HUBS) hubs = [...hubs, hub]
   else return s
-  return { ...s, hubs, pref: { ...s.pref, trips } }
+  const transitUse = { ...s.pref.transitUse }
+  if (replaceId) delete transitUse[replaceId]
+  return { ...s, hubs, pref: { ...s.pref, trips, transitUse } }
 }
 
 export const removeCandidate = (s: State, id: string): State => ({ ...s, candidates: s.candidates.filter((c) => c.id !== id) })
 export function removeHub(s: State, id: string): State {
   const trips = { ...s.pref.trips }
   delete trips[id]
-  return { ...s, hubs: s.hubs.filter((h) => h.id !== id), pref: { ...s.pref, trips } }
+  const transitUse = { ...s.pref.transitUse }
+  delete transitUse[id]
+  return { ...s, hubs: s.hubs.filter((h) => h.id !== id), pref: { ...s.pref, trips, transitUse } }
 }
 
 // 네이버 분류 "교육,학술>대학교" → "대학교"

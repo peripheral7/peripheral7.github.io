@@ -33,7 +33,8 @@ export const HUBS: Hub[] = HUB_LIST.slice(0, MAX_HUBS)
 export const NEW_HUB_TRIPS = 8 // 검색으로 새로 넣은 목적지의 월 왕복 횟수 기본값
 
 export type Weights = { transit: number; car: number; walk: number }
-export type Preference = { weights: Weights; trips: Record<string, number> }
+/** transitUse[목적지 id] = true 면 그 목적지는 주 이동수단과 상관없이 항상 대중교통을 탄다(도보권이어도 대중교통을 셈, 차량은 참고로만 보임) */
+export type Preference = { weights: Weights; trips: Record<string, number>; transitUse?: Record<string, boolean> }
 
 /** 교통 선호도 기본값: 수단별 가중치(합이 100이 아니어도 비율로 쓴다)와 거점별 월 왕복 횟수. */
 export const DEFAULT_PREFERENCE: Preference = {
