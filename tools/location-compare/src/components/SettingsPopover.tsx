@@ -1,5 +1,5 @@
 import { useEffect, useRef } from 'react'
-import { DEFAULT_PREFERENCE, weightShares, type Hub, type Preference, type Weights } from '../data'
+import { DEFAULT_PREFERENCE, MAX_TRIPS, weightShares, type Hub, type Preference, type Weights } from '../data'
 
 // 칸(카드)을 누르면 그 칸 바로 오른쪽에 뜨는 작은 설정 창. 바꾸는 즉시 점수에 반영되고 이 브라우저에 저장된다.
 // 수단 가중치는 숫자로 직접 넣는다(0~999). 하나를 바꿔도 나머지는 그대로 두고, 합이 100 과 다르면 100 기준 비율을 보여 준다
@@ -35,7 +35,7 @@ export function SettingsPopover({ kind, hubs, value, onChange, onClose }: Props)
   const total = w.transit + w.car + w.walk
   const share = weightShares(w)
   const setWeight = (key: keyof Weights, v: string) => onChange({ ...value, weights: { ...w, [key]: toInt(v, 999) } })
-  const setTrips = (id: string, v: number) => onChange({ ...value, trips: { ...value.trips, [id]: Math.max(0, Math.min(60, Math.round(v) || 0)) } })
+  const setTrips = (id: string, v: number) => onChange({ ...value, trips: { ...value.trips, [id]: Math.max(0, Math.min(MAX_TRIPS, Math.round(v) || 0)) } })
   const reset = () => onChange(kind === 'weights' ? { ...value, weights: DEFAULT_PREFERENCE.weights } : { ...value, trips: DEFAULT_PREFERENCE.trips })
 
   return (
@@ -59,10 +59,10 @@ export function SettingsPopover({ kind, hubs, value, onChange, onClose }: Props)
         </>
       ) : hubs.map((h) => (
         <div className="trips" key={h.id}>
-          <span><b>{h.name}</b><small>{h.category} · 0~60회</small></span>
+          <span><b>{h.name}</b><small>{h.category} · 0~{MAX_TRIPS}회</small></span>
           <span className="stepper">
             <button type="button" aria-label={`${h.name} 횟수 줄이기`} onClick={() => setTrips(h.id, (value.trips[h.id] ?? 0) - 1)}>−</button>
-            <input type="number" min={0} max={60} inputMode="numeric" aria-label={`${h.name} 월 왕복 횟수`} value={value.trips[h.id] ?? 0} onChange={(e) => setTrips(h.id, Number(e.target.value))} />
+            <input type="number" min={0} max={MAX_TRIPS} inputMode="numeric" aria-label={`${h.name} 월 왕복 횟수`} value={value.trips[h.id] ?? 0} onChange={(e) => setTrips(h.id, Number(e.target.value))} />
             <button type="button" aria-label={`${h.name} 횟수 늘리기`} onClick={() => setTrips(h.id, (value.trips[h.id] ?? 0) + 1)}>+</button>
           </span>
         </div>

@@ -1,7 +1,7 @@
 import { useEffect, useMemo, useRef, useState } from 'react'
 import { MapContainer, Marker, Polyline, TileLayer, Tooltip, useMap, useMapEvents } from 'react-leaflet'
 import L from 'leaflet'
-import { hubEmoji, type Candidate, type Hub } from '../data'
+import { hubEmoji, type Candidate, type Hub, type Place } from '../data'
 import type { Insight } from '../scoring'
 import { loadNaverMaps, MAP_KEY_ID, onNaverAuthFailure } from '../naver'
 
@@ -16,12 +16,15 @@ type Props = {
   hubId: string | null; onHub: (id: string) => void; insights: Insight[]
   focusHubIds: string[] // 후보지를 고를 때 함께 화면에 넣을 주 목적지(월 왕복 50% 이상)
   ranks: number[] // 후보지 핀 숫자 = 종합 순위
+  preview?: Place | null // 검색 결과를 누르면 그 위치로 옮기고 임시 표시
 }
 
 export const DETAIL_ZOOM = 14 // 이 확대 단계부터 모든 후보지에 장단점(동네 단위가 구분되는 정도)
 const PAD = 70
 const esc = (s: string) => s.replace(/[&<>"]/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' })[c]!)
 const candHtml = (n: number, on: boolean) => `<span class="pin cand${on ? ' on' : ''}">${n}</span>`
+const previewHtml = (name: string) => `<div class="nv-pin"><span class="pin preview"></span><span class="map-label preview-label">${esc(name)}</span></div>`
+export const PREVIEW_ZOOM = 16
 const hubHtml = (h: Hub, on: boolean) => `<span class="pin hub${on ? ' on' : ''}"><b>${hubEmoji(h.category)}</b></span>`
 
 /** 후보지 옆 글자: 이름 + (목적지 기준) 장점·단점 */
@@ -71,7 +74,7 @@ export function MapView(props: Props) {
 
 // ── 네이버 지도 ──────────────────────────────────────────────────────
 /* eslint-disable @typescript-eslint/no-explicit-any */
-function NaverMap({ candidates, hubs, active, onSelect, focusKey, hubId, onHub, insights, focusHubIds, ranks, allKey, onFail }: Props & { allKey: number; onFail: () => void }) {
+function NaverMap({ candidates, hubs, active, onSelect, focusKey, hubId, onHub, insights, focusHubIds, ranks, preview, allKey, onFail }: Props & { allKey: number; onFail: () => void }) {
   const box = useRef<HTMLDivElement>(null)
   const map = useRef<any>(null)
   const layers = useRef<any[]>([])
@@ -110,6 +113,19 @@ function NaverMap({ candidates, hubs, active, onSelect, focusKey, hubId, onHub, 
     }).catch(() => alive && onFail())
     return () => { alive = false; try { map.current?.destroy?.() } catch { /* 인증 실패 뒤의 정리 오류는 무시(OSM 으로 바꿀 때) */ } map.current = null }
   }, []) // eslint-disable-line react-hooks/exhaustive-deps
+
+  // 검색 결과 미리 보기: 그 위치로 옮기고 임시 핀
+  const previewMarker = useRef<any>(null)
+  useEffect(() => {
+    const naver = window.naver
+    if (!ready || !naver) return
+    previewMarker.current?.setMap(null)
+    previewMarker.current = null
+    if (!preview) return
+    const at = new naver.maps.LatLng(preview.lat, preview.lng)
+    previewMarker.current = new naver.maps.Marker({ map: map.current, position: at, zIndex: 200, icon: { content: previewHtml(preview.name), anchor: new naver.maps.Point(12, 12) } })
+    map.current.morph(at, Math.max(PREVIEW_ZOOM, map.current.getZoom()))
+  }, [ready, preview])
 
   // 핀·점선·장단점 글자 다시 그리기
   useEffect(() => {
@@ -198,7 +214,7 @@ function Controls({ pts }: { pts: [number, number][] }) {
   )
 }
 
-function OsmMap({ candidates, hubs, active, onSelect, focusKey, hubId, onHub, insights, focusHubIds, ranks, allKey }: Props & { allKey: number }) {
+function OsmMap({ candidates, hubs, active, onSelect, focusKey, hubId, onHub, insights, focusHubIds, ranks, preview, allKey }: Props & { allKey: number }) {
   const pts = useMemo(() => frame(candidates, hubs, active, focusHubIds), [candidates, hubs, active, focusHubIds])
   const [zoom, setZoom] = useState(13)
   const cur = candidates[active]
@@ -232,7 +248,20 @@ function OsmMap({ candidates, hubs, active, onSelect, focusKey, hubId, onHub, in
           </Marker>
         )
       })}
+      {preview && (
+        <Marker position={[preview.lat, preview.lng]} zIndexOffset={2000} icon={L.divIcon({ className: 'pin-shell', html: '<span class="pin preview"></span>', iconSize: [24, 24], iconAnchor: [12, 12] })}>
+          <Tooltip permanent direction="right" offset={[12, 0]} className="map-label preview-label">{preview.name}</Tooltip>
+        </Marker>
+      )}
+      <PreviewFly preview={preview ?? null} />
       <Controls pts={pts} />
     </MapContainer>
   )
+}
+
+/** OSM: 검색 결과를 누르면 그 위치로 */
+function PreviewFly({ preview }: { preview: Place | null }) {
+  const map = useMap()
+  useEffect(() => { if (preview) map.flyTo([preview.lat, preview.lng], Math.max(PREVIEW_ZOOM, map.getZoom()), { duration: 0.6 }) }, [map, preview])
+  return null
 }

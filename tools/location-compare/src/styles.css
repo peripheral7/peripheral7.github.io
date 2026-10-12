@@ -429,3 +429,40 @@ button { cursor: pointer }
 /* ── 후보지별 비교 양옆 추천 카드(준비 중) ── */
 .side-card { min-width: 0 }
 .side-card h2 { margin: 0 0 6px; font-size: 15px; font-weight: 450 }
+
+/* ── 검색창(10-13): 실시간 검색 · 짧은 폭 · 배경 90% 투명 · 결과 오른쪽 바깥에 등록 단추/창 ── */
+.search { width: min(300px, calc(100% - 440px)) }
+.search-bar { background: rgba(255, 255, 255, 0.1); -webkit-backdrop-filter: blur(6px) saturate(1.2); backdrop-filter: blur(6px) saturate(1.2); border-color: rgba(24, 39, 56, 0.25); box-shadow: 0 2px 10px rgba(0, 0, 0, 0.08); padding: 4px 12px 4px 4px; gap: 4px }
+.search-bar input { color: var(--text); font-weight: 500; text-shadow: 0 0 6px rgba(255, 255, 255, 0.9) }
+.search-bar input::placeholder { color: #3d4955 }
+.search-bar .search-go { display: grid; place-items: center; width: 30px; height: 30px; padding: 0; background: none; color: var(--text) }
+.search-bar .search-go svg { width: 18px; height: 18px; color: currentColor }
+.search-busy { flex: none; width: 14px; height: 14px; border-radius: 50%; border: 2px solid rgba(24, 39, 56, 0.2); border-top-color: var(--text); animation: spin 0.7s linear infinite }
+@keyframes spin { to { transform: rotate(360deg) } }
+.search-drop { position: relative; margin-top: 8px }
+.search-drop .search-results { margin-top: 0 }
+.result { display: block; width: 100%; text-align: left; border: 0; background: none; cursor: pointer; font: inherit; color: inherit }
+.result.on { background: var(--accent) }
+.result small { white-space: nowrap; overflow: hidden; text-overflow: ellipsis }
+.search-side { position: absolute; left: calc(100% + 8px); top: 0; width: 248px; background: #fff; border: 1px solid var(--line-2); border-radius: 14px; padding: 8px; box-shadow: 0 10px 30px rgba(0, 0, 0, 0.14) }
+.search-side:not(.form) { width: auto; padding: 6px }
+.side-actions { display: flex; gap: 6px }
+.side-actions button { border: 1px solid var(--line-2); background: #fff; border-radius: 999px; padding: 6px 12px; font-size: 12px; white-space: nowrap; color: var(--text) }
+.side-actions button.solid { background: var(--text); color: #fff; border-color: transparent }
+.register .field { display: grid; grid-template-columns: 52px 1fr; align-items: start; gap: 8px; font-size: 12px; color: var(--muted) }
+.register .field > span { padding-top: 5px }
+.cat-pick { display: flex; flex-wrap: wrap; align-items: center; gap: 4px 14px }
+.cat-pick button { border: 0; background: none; padding: 4px 0; font-size: 14px; color: var(--muted); font-weight: 400; cursor: pointer }
+.cat-pick button.on { color: var(--text); font-weight: 700 }
+.register .cat-pick .cat-custom { width: 84px; padding: 3px 6px; font-size: 13px; border: 0; border-bottom: 1px solid var(--line-2); border-radius: 0; background: none }
+.register .cat-pick .cat-custom.on { font-weight: 700; color: var(--text); border-bottom-color: var(--text) }
+.trip-input { display: grid; grid-template-columns: minmax(0, 1fr) 76px; align-items: center; gap: 8px }
+.trip-input input[type=range] { width: 100%; accent-color: var(--text); cursor: grab; padding: 0; border: 0 }
+.trip-input input[type=range]:active { cursor: grabbing }
+.register-note { margin: 0; font-size: 11px; color: var(--muted); line-height: 1.4 }
+.pin.preview { width: 20px; height: 20px; margin: 2px; background: #e5484d; border: 3px solid #fff; box-shadow: 0 0 0 6px rgba(229, 72, 77, 0.22), 0 2px 6px rgba(0, 0, 0, 0.3) }
+.preview-label { font-weight: 600 }
+@media (max-width: 760px) {
+  .search { width: calc(100% - 32px) }
+  .search-side { position: static; width: auto; margin-top: 8px }
+}

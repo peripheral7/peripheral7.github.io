@@ -4,7 +4,8 @@
 /** 후보지. 보증금·월세는 만원 단위(모르면 비워 둔다). */
 export type Candidate = { id: string; name: string; address: string; lat: number; lng: number; deposit?: number; rent?: number }
 /** 목적지 분류 목록(검색해서 넣을 때 고른다) */
-export const HUB_CATEGORIES = ['학교', '본가', '직장', '교통센터', '상업시설', '병원', '기타']
+export const HUB_CATEGORIES = ['학교', '본가', '직장', '기타'] // 등록 창의 고르기 목록(그 밖은 직접 입력)
+export const MAX_TRIPS = 80 // 목적지 월 왕복 횟수 상한
 /** 목적지 분류 이모지(번호 대신 지도·목록·카드에 쓴다) */
 const HUB_EMOJI: Record<string, string> = { 학교: '🏫', 본가: '🏠', 직장: '🏢', 교통센터: '🚉', 상업시설: '🛍️', 병원: '🏥' }
 export const hubEmoji = (category: string) => HUB_EMOJI[category] ?? '📍'

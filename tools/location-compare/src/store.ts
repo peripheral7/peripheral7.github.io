@@ -1,5 +1,5 @@
 // 방문자가 바꾼 후보지·목적지·선호도를 이 브라우저(localStorage)에 저장한다. 다른 사람에게는 안 보인다.
-import { CANDIDATES, DEFAULT_PREFERENCE, HUBS, MAX_HUBS, NEW_HUB_TRIPS, OLD_DEFAULT_NAMES, type Candidate, type Hub, type Place, type Preference } from './data'
+import { CANDIDATES, DEFAULT_PREFERENCE, HUBS, MAX_HUBS, MAX_TRIPS, NEW_HUB_TRIPS, OLD_DEFAULT_NAMES, type Candidate, type Hub, type Place, type Preference } from './data'
 
 export type State = { candidates: Candidate[]; hubs: Hub[]; pref: Preference }
 
@@ -58,7 +58,7 @@ export function setHub(s: State, place: Place, replaceId?: string, name?: string
     category: category || (place.category && place.category !== '주소' ? shortCategory(place.category) : '목적지'),
     address: place.address, lat: place.lat, lng: place.lng,
   }
-  const trips = { ...s.pref.trips, [hub.id]: Math.max(0, Math.min(60, Math.round(monthly))) }
+  const trips = { ...s.pref.trips, [hub.id]: Math.max(0, Math.min(MAX_TRIPS, Math.round(monthly))) }
   let hubs = s.hubs
   if (replaceId) {
     hubs = hubs.map((h) => (h.id === replaceId ? hub : h))
@@ -89,9 +89,6 @@ export function updateCandidate(s: State, id: string, patch: { name?: string; de
 export function guessHubCategory(place: Place): string {
   const t = `${place.category ?? ''} ${place.name}`
   if (/학교|대학|교육/.test(t)) return '학교'
-  if (/역|터미널|정류장|교통|환승/.test(t)) return '교통센터'
-  if (/병원|의원|의료/.test(t)) return '병원'
-  if (/마트|백화점|쇼핑|상가|시장/.test(t)) return '상업시설'
   if (/회사|사무|오피스|산업|공단/.test(t)) return '직장'
   return '기타'
 }

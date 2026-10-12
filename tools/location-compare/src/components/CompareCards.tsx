@@ -58,7 +58,7 @@ export function CompareCards({ results, hubs, active, onSelect, onRename, cats, 
                 <span className="rank">{r.rank}</span>
                 {naming?.id === r.candidate.id ? (
                   <form className="card-name name-edit" onSubmit={(e) => { e.preventDefault(); finish(true) }}>
-                    <input value={naming.name} maxLength={40} autoFocus aria-label="후보지 이름" onChange={(e) => setNaming({ ...naming, name: e.target.value })}
+                    <input spellCheck={false} autoComplete="off" value={naming.name} maxLength={40} autoFocus aria-label="후보지 이름" onChange={(e) => setNaming({ ...naming, name: e.target.value })}
                       onKeyDown={(e) => { if (e.key === 'Escape') finish(false) }} onBlur={() => finish(true)} />
                     <small>Enter 저장 · Esc 취소</small>
                   </form>

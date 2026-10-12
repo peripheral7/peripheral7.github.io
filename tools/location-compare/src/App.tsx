@@ -24,6 +24,7 @@ export default function App() {
   const [pop, setPop] = useState<'none' | 'trips' | 'weights'>('none')
   const [guide, setGuide] = useState(false)
   const [hubPick, setHubPick] = useState<string | null>(null) // 지도 장단점 기준 목적지
+  const [preview, setPreview] = useState<Place | null>(null) // 검색 결과를 누르면 지도가 그 위치로
   const [editing, setEditing] = useState<{ id: string; name: string; deposit: string; rent: string } | null>(null) // 수정 중인 후보지(금액은 입력 글자 그대로)
   const [catState, setCatState] = useState<CatState>(() => pruneCats(loadCats())) // 길고양이 지수(선택 요인) — 사진은 이 브라우저에만 저장
   const [catDlg, setCatDlg] = useState<'none' | 'register' | 'gallery'>('none')
@@ -106,7 +107,7 @@ export default function App() {
               editing?.id === cur.candidate.id ? (
                 <form className="cand-edit" onSubmit={(e) => { e.preventDefault(); saveEdit() }} onKeyDown={(e) => { if (e.key === 'Escape') setEditing(null) }}>
                   <span className="tag">후보지 수정</span>
-                  <label>이름<input value={editing.name} maxLength={40} autoFocus onChange={(e) => setEditing({ ...editing, name: e.target.value })} /></label>
+                  <label>이름<input spellCheck={false} autoComplete="off" value={editing.name} maxLength={40} autoFocus onChange={(e) => setEditing({ ...editing, name: e.target.value })} /></label>
                   <label>보증금<span className="unit-input"><input type="number" min={0} step={100} inputMode="numeric" placeholder="예: 1000" value={editing.deposit} onChange={(e) => setEditing({ ...editing, deposit: e.target.value })} /><i>만원</i></span></label>
                   <label>월세<span className="unit-input"><input type="number" min={0} step={1} inputMode="numeric" placeholder="예: 50" value={editing.rent} onChange={(e) => setEditing({ ...editing, rent: e.target.value })} /><i>만원</i></span></label>
                   <p className="muted">{cur.candidate.address}</p>
@@ -151,8 +152,8 @@ export default function App() {
         </div>
 
         <section className="map-area">
-          <MapView candidates={candidates} hubs={hubs} active={active} onSelect={select} focusKey={focusKey} hubId={hubId} onHub={setHubPick} insights={insights} focusHubIds={mainHubIds} ranks={ranks} />
-          <SearchBox hubs={hubs} onCandidate={onCandidate} onHub={onHub} />
+          <MapView candidates={candidates} hubs={hubs} active={active} onSelect={select} focusKey={focusKey} hubId={hubId} onHub={setHubPick} insights={insights} focusHubIds={mainHubIds} ranks={ranks} preview={preview} />
+          <SearchBox hubs={hubs} tripsOf={(id) => pref.trips[id] ?? 0} onCandidate={onCandidate} onHub={onHub} onPreview={setPreview} />
         </section>
 
         <aside className="factors-area">
