@@ -1,15 +1,14 @@
 import { useState } from 'react'
 import { fmt, WALK_LIMIT, WALK_ZONE, type CandidateResult } from '../scoring'
-import type { CatIndex } from '../cats'
 import { BASE_DEPOSIT, baseRent, hubEmoji, won, type Hub } from '../data'
 
 // 아래쪽: 후보지 카드를 가로로 늘어놓는다. 모든 카드가 같은 줄(행)을 공유해서(CSS subgrid)
 // "대중교통" 줄을 옆으로 읽으면 후보지끼리 대기·역까지 도보·환승을, "차량" 줄은 출퇴근/낮 차이를 바로 비교할 수 있다.
 
-type Props = { results: CandidateResult[]; hubs: Hub[]; active: number; onSelect: (index: number) => void; onRename: (id: string, name: string) => void; cats?: CatIndex[]; onCatPhotos?: (index: number) => void }
+type Props = { results: CandidateResult[]; hubs: Hub[]; active: number; onSelect: (index: number) => void; onRename: (id: string, name: string) => void }
 
 // 점수(0~10)만큼 칸 아래쪽에 색 선을 채운다 — 숫자를 읽지 않아도 길이로 바로 비교된다.
-const Line = ({ v, kind }: { v: number; kind: 'total' | 'hub' | 'transit' | 'car' | 'walk' | 'cat' }) => (
+const Line = ({ v, kind }: { v: number; kind: 'total' | 'hub' | 'transit' | 'car' | 'walk' }) => (
   <i className={`score-line ${kind}`} style={{ '--v': Math.max(0, Math.min(10, v)) / 10 } as React.CSSProperties} aria-hidden />
 )
 
@@ -25,10 +24,10 @@ function RentCell({ c }: { c: { deposit?: number; rent?: number } }) {
   )
 }
 
-export function CompareCards({ results, hubs, active, onSelect, onRename, cats, onCatPhotos }: Props) {
+export function CompareCards({ results, hubs, active, onSelect, onRename }: Props) {
   const [naming, setNaming] = useState<{ id: string; name: string } | null>(null) // 카드에서 이름 바꾸는 중
   const finish = (save: boolean) => { if (save && naming) onRename(naming.id, naming.name); setNaming(null) }
-  const rows = 2 + hubs.length * 4 + (cats ? 1 : 0) + 1 // 후보지 · 보증금/월세 · 목적지마다 4줄 · (길고양이) · 상권 종합
+  const rows = 2 + hubs.length * 4 + 1 // 후보지 · 보증금/월세 · 목적지마다 4줄 · 상권 종합
   const best = (pick: (r: CandidateResult) => number | null) => Math.max(...results.map((r) => pick(r) ?? -1))
   const isBest = (v: number | null, b: number) => v !== null && Math.abs(v - b) < 1e-9 && results.length > 1
 
@@ -41,7 +40,6 @@ export function CompareCards({ results, hubs, active, onSelect, onRename, cats, 
           <div className="col labels" style={{ gridRow: `1 / span ${rows}` }}>
             <div className="cell head-cell"><span className="muted">후보지</span></div>
             <div className="cell row-label rent-label">보증금/월세</div>
-            {cats && <div className="cell row-label cat-label">🐈 길고양이</div>}
             <div className="cell row-label">🏪 상권 종합</div>
             {hubs.map((h) => [
               <div key={h.id + 'h'} className="cell hub-cell"><span className="hub-mark" aria-hidden>{hubEmoji(h.category)}</span><span>{h.category}</span></div>,
@@ -72,13 +70,6 @@ export function CompareCards({ results, hubs, active, onSelect, onRename, cats, 
                 <strong className={isBest(r.total, best((x) => x.total)) ? 'best' : ''}>{fmt(r.total)}<Line v={r.total} kind="total" /></strong>
               </div>
               <RentCell c={r.candidate} />
-              {cats && cats[i] && (
-                <div className="cell mode-cell cat-cell">
-                  <div><b>{cats[i].n}마리</b>
-                    {onCatPhotos && cats[i].photos > 0 && <button type="button" className="cat-link" onClick={() => onCatPhotos(i)}>사진 보기</button>}</div>
-                  <em className={isBest(cats[i].score, Math.max(...cats.map((x) => x.score))) && cats[i].score > 0 ? 'best' : ''}>{cats[i].n ? fmt(cats[i].score) : '—'}<Line v={cats[i].score} kind="cat" /></em>
-                </div>
-              )}
               <div className="cell mode-cell"><div><span className="muted">준비 중</span></div></div>
               {r.hubs.map((h, hi) => {
                 const t = h.trip, s = h.scores

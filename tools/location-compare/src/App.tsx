@@ -179,7 +179,7 @@ export default function App() {
         <SpotCards candidates={candidates} />
 
         <section className="cards-area">
-          {results.length > 0 && <CompareCards results={results} hubs={hubs} active={active} onSelect={select} onRename={rename} cats={catIdx ?? undefined} onCatPhotos={(i) => { setGalleryIdx(i); setCatDlg('gallery') }} />}
+          {results.length > 0 && <CompareCards results={results} hubs={hubs} active={active} onSelect={select} onRename={rename} />}
         </section>
       </main>
 
