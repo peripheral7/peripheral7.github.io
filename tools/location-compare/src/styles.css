@@ -330,9 +330,8 @@ button { cursor: pointer }
 .factors-area .factors { height: auto; flex: none; padding-bottom: 8px }
 .factors-area .factor { padding: 7px 0 }
 .factors-area .panel-head { margin-bottom: 6px }
-.commute { flex: 1; min-height: 0; overflow-y: auto; scrollbar-width: none; padding-top: 14px }
-.commute::-webkit-scrollbar { display: none }
-@media (min-width: 1321px) { .factors-area { contain: size } }
+.commute { flex: none; padding-top: 14px } /* 높이를 내용만큼 — 잘라 내지 않는다(오른쪽 열이 길어지면 지도도 같이 길어진다) */
+@media (min-width: 1321px) { .factors-area { contain: none } }
 @media (min-width: 901px) and (max-width: 1320px) { .factors-area { flex-direction: row; align-items: stretch } .factors-area > .panel { flex: 1 1 0; min-width: 0 } } /* 오른쪽 열도 지도 높이(680)에 맞추고 넘치면 출퇴근 칸 안에서 스크롤 */
 .cm-grid { display: grid; grid-template-columns: minmax(0, 1fr) 80px 80px; column-gap: 8px; align-items: baseline }
 .cm-grid > * { padding: 5px 0; border-top: 1px solid var(--line) }
