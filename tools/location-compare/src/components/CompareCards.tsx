@@ -37,8 +37,7 @@ export function CompareCards({ results, hubs, active, onSelect }: Props) {
               <div className="cell head-cell">
                 <span className="rank">{r.rank}</span>
                 <div className="card-name"><b>{r.candidate.name}</b><small>{i + 1}번 핀 · {r.candidate.address}</small></div>
-                <strong className={isBest(r.total, best((x) => x.total)) ? 'best' : ''}>{fmt(r.total)}</strong>
-                <Line v={r.total} kind="total" />
+                <strong className={isBest(r.total, best((x) => x.total)) ? 'best' : ''}>{fmt(r.total)}<Line v={r.total} kind="total" /></strong>
               </div>
               {r.hubs.map((h, hi) => {
                 const t = h.trip, s = h.scores
@@ -46,20 +45,18 @@ export function CompareCards({ results, hubs, active, onSelect }: Props) {
                 const { free, rush } = t.carSource
                 const measured = free && rush ? ' · 네이버 실측' : free ? ' · 낮 실측·출퇴근 추정' : rush ? ' · 출퇴근 실측·낮 추정' : ' · 거리 추정'
                 return [
-                  <div key={h.hub.id + 'h'} className="cell hub-cell"><span>{h.hub.name}</span><small>{t.km.toFixed(1)}km · 반영 {Math.round(h.share * 100)}%</small><b className={isBest(h.hubScore, best((x) => x.hubs[hi].hubScore)) ? 'best' : ''}>{fmt(h.hubScore)}</b><Line v={h.hubScore} kind="hub" /></div>,
+                  <div key={h.hub.id + 'h'} className="cell hub-cell"><span>{h.hub.name}</span><small>{t.km.toFixed(1)}km · 반영 {Math.round(h.share * 100)}%</small><b className={isBest(h.hubScore, best((x) => x.hubs[hi].hubScore)) ? 'best' : ''}>{fmt(h.hubScore)}<Line v={h.hubScore} kind="hub" /></b></div>,
                   <div key={h.hub.id + 't'} className="cell mode-cell">
                     <div><b>{t.transit}분</b><small>대기 {t.wait}분 · 정류장까지 도보 {t.access}분 · 환승 {t.transfers}회</small></div>
-                    <em className={isBest(s.transit, best((x) => x.hubs[hi].scores.transit)) ? 'best' : ''}>{fmt(s.transit)}</em>
-                    <Line v={s.transit} kind="transit" />
+                    <em className={isBest(s.transit, best((x) => x.hubs[hi].scores.transit)) ? 'best' : ''}>{fmt(s.transit)}<Line v={s.transit} kind="transit" /></em>
                   </div>,
                   <div key={h.hub.id + 'c'} className="cell mode-cell">
                     <div><b>출퇴근 {t.carRush}분 · 낮 {t.carFree}분</b><small>차이 +{diff}분 ({s.carRatio.toFixed(2)}배){measured}</small></div>
-                    <em className={isBest(s.car, best((x) => x.hubs[hi].scores.car)) ? 'best' : ''}>{fmt(s.car)}</em>
-                    <Line v={s.car} kind="car" />
+                    <em className={isBest(s.car, best((x) => x.hubs[hi].scores.car)) ? 'best' : ''}>{fmt(s.car)}<Line v={s.car} kind="car" /></em>
                   </div>,
                   <div key={h.hub.id + 'w'} className="cell mode-cell">
                     {s.walk !== null
-                      ? <><div><b>{t.walk}분</b><small>걸어서</small></div><em className={isBest(s.walk, best((x) => x.hubs[hi].scores.walk)) ? 'best' : ''}>{fmt(s.walk)}</em><Line v={s.walk} kind="walk" /></>
+                      ? <><div><b>{t.walk}분</b><small>걸어서</small></div><em className={isBest(s.walk, best((x) => x.hubs[hi].scores.walk)) ? 'best' : ''}>{fmt(s.walk)}<Line v={s.walk} kind="walk" /></em></>
                       : <div><span className="muted">{WALK_LIMIT}분 초과{h.walkCounts ? ' · 0점으로 계산' : ''}</span></div>}
                   </div>,
                 ]

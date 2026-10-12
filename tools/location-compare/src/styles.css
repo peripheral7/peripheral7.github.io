@@ -292,25 +292,12 @@ button { cursor: pointer }
 .register { display: grid; gap: 8px; padding-top: 6px }
 .register-title { font-size: 12px; font-weight: 600; color: var(--good) }
 
-/* 카드 칸 아래 점수 선: 점수(0~10)만큼 색으로 채운다 */
-.card .cell { position: relative }
-.score-line { position: absolute; left: 0; right: 0; bottom: -1px; height: 3px; border-radius: 2px; background: rgba(24, 39, 56, 0.07); pointer-events: none }
+/* 점수 숫자 바로 아래의 작은 점수 선: 점수(0~10)만큼 색으로 채운다 */
+.card .head-cell strong, .card .hub-cell b, .card .mode-cell em { display: inline-flex; flex-direction: column; align-items: flex-end; gap: 3px }
+.score-line { position: relative; display: block; width: 36px; height: 3px; border-radius: 2px; background: rgba(24, 39, 56, 0.08); pointer-events: none }
 .score-line::after { content: ''; position: absolute; left: 0; top: 0; bottom: 0; width: calc(var(--v) * 100%); border-radius: 2px; background: var(--c, var(--text)) }
-.score-line.total { height: 6px; bottom: -3px; --c: var(--good) }
-.score-line.hub { --c: #8a96a3 }
+.score-line.total { width: 48px; height: 4px; --c: var(--good) }
+.score-line.hub { width: 40px; --c: #8a96a3 }
 .score-line.transit { --c: var(--transit) }
 .score-line.car { --c: var(--car) }
 .score-line.walk { --c: var(--walk) }
-
-/* 지도 높이 = 왼쪽 두 패널 높이이므로 왼쪽을 조금 촘촘하게 */
-.modes-area .panel, .selected { padding: 14px 16px }
-.gauge { max-height: 64px }
-.gauge-wrap { padding: 2px 0 0 }
-.mode-rows { margin-top: 6px }
-.mode-row { padding: 6px 0 }
-.pick { margin-bottom: 8px }
-.pick button { width: 28px; height: 28px }
-.sel-head { padding-bottom: 8px }
-.sel-head h3 { font-size: 18px }
-.hub-line { padding: 6px 0 }
-.hub-list-head { padding: 4px 0 0 }
