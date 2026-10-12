@@ -12,7 +12,7 @@ export type Tier = 'need' | 'want' | 'off'
 export type CommercialPrefs = { on: boolean; need: string[]; want: string[] }
 export type CatInfo = { id: string; label: string; emoji: string }
 export type Major = { brand: string; cat: string; name: string; lat: number; lng: number; addr: string; inferred?: boolean; near: Record<string, number> }
-export type CatPart = { id: string; tier: Exclude<Tier, 'off'>; count: number; score: number }
+export type CatPart = { id: string; tier: Exclude<Tier, 'off'>; count: number; brand: number; score: number }
 export type CommercialIndex = { score: number; parts: CatPart[] } | null
 
 export const NEED_WEIGHT = 0.8
@@ -21,14 +21,21 @@ export const WALK5 = data.walk5 // m(상권 지수 반경, 500)
 /** 업종별 기준 개수(이만하면 됐다) — commercial-categories.json 의 enough */
 export const ENOUGH = data.enough as Record<string, number>
 /** 개수 → 업종 점수(0~10) */
-export const catScore = (id: string, n: number) => 10 * (1 - Math.pow(10, -n / (ENOUGH[id] || 1)))
+const sat = (n: number, t: number) => 10 * (1 - Math.pow(10, -n / (t || 1)))
+/** 브랜드 몫(화장품 = 개수 50% + 올리브영 50%) — commercial-categories.json 의 brand_part */
+export const BRAND_PARTS = (data.brandParts ?? {}) as Record<string, { label: string; enough: number; weight: number }>
+/** 개수(·브랜드 매장 수) → 업종 점수(0~10) */
+export const catScore = (id: string, n: number, brand = 0) => {
+  const bp = BRAND_PARTS[id]
+  return bp ? sat(n, ENOUGH[id]) * (1 - bp.weight) + sat(brand, bp.enough) * bp.weight : sat(n, ENOUGH[id])
+}
 export const STDR_YM = data.stdrYm
 export const CATEGORIES: CatInfo[] = data.categories.map(({ id, label, emoji }) => ({ id, label, emoji }))
 export const MAJORS = data.majors as Major[]
 /** 자료가 얇아 믿기 어려운 업종(설명 문구) */
 export const THIN: Record<string, string> = { variety: '상가정보에 다이소·생활용품점 등록이 매우 적어 개수를 믿기 어렵습니다' }
 
-type Row = { lat: number; lng: number; counts: Record<string, Record<string, number>> }
+type Row = { lat: number; lng: number; counts: Record<string, Record<string, number>>; brand?: Record<string, Record<string, number>> }
 const ROWS = data.candidates as Record<string, Row>
 
 /** 그 후보지의 자료(같은 id 이고 좌표가 30m 안일 때만 — 이름만 같은 다른 곳을 막는다) */
@@ -54,6 +61,11 @@ export function walk5Counts(c: Candidate | undefined): Record<string, number> | 
   const r = c ? rowOf(c) : null
   return r ? Object.fromEntries(CATEGORIES.map((k) => [k.id, r.counts[k.id]?.[WALK5] ?? 0])) : null
 }
+/** 브랜드 몫 매장 수(예: 화장품의 올리브영) */
+export function walk5Brand(c: Candidate | undefined): Record<string, number> | null {
+  const r = c ? rowOf(c) : null
+  return r ? Object.fromEntries(Object.keys(BRAND_PARTS).map((id) => [id, r.brand?.[id]?.[WALK5] ?? 0])) : null
+}
 
 export function commercialIndex(candidates: Candidate[], p: CommercialPrefs): CommercialIndex[] {
   const rows = candidates.map(rowOf)
@@ -62,7 +74,8 @@ export function commercialIndex(candidates: Candidate[], p: CommercialPrefs): Co
     if (!r || !ids.length) return null
     const parts: CatPart[] = ids.map((id) => {
       const count = r.counts[id]?.[WALK5] ?? 0
-      return { id, tier: p.need.includes(id) ? 'need' : 'want', count, score: catScore(id, count) }
+      const brand = r.brand?.[id]?.[WALK5] ?? 0
+      return { id, tier: p.need.includes(id) ? 'need' : 'want', count, brand, score: catScore(id, count, brand) }
     })
     const avg = (t: CatPart['tier']) => { const x = parts.filter((q) => q.tier === t); return x.length ? x.reduce((a, q) => a + q.score, 0) / x.length : null }
     const need = avg('need'), want = avg('want')

@@ -1,7 +1,7 @@
 import { useEffect, useRef, useState, type ReactNode } from 'react'
 import { fmt, type CandidateResult } from '../scoring'
 import { CAT_RADIUS_M, livePhotos, type CatIndex } from '../cats'
-import { CATEGORIES, ENOUGH, NEED_WEIGHT, STDR_YM, THIN, WALK5, WANT_WEIGHT, setTier, tierOf, type CommercialIndex, type CommercialPrefs, type Tier } from '../commercial'
+import { BRAND_PARTS, CATEGORIES, ENOUGH, NEED_WEIGHT, STDR_YM, THIN, WALK5, WANT_WEIGHT, setTier, tierOf, type CommercialIndex, type CommercialPrefs, type Tier } from '../commercial'
 
 // ── 고른 후보지: 종합 점수(원형 그래프) + 수단별 점수(눈금 막대) ──────────
 // 수단 점수는 목적지별 점수를 "월 왕복 비율"로 평균한 값(종합 점수와 같은 비율). 도보는 걸어갈 수 있는 목적지만,
@@ -71,7 +71,7 @@ export function ModeScorePanel({ r, action }: { r: CandidateResult; action: Reac
 // 지금 동작하는 지수는 도보 5분 상권(이름을 누르면 필수·선호 업종 고르기)과 길고양이, 나머지는 준비 중이라 고를 수 없다.
 type FactorsProps = {
   cat: CatIndex | null; catOn: boolean; onToggleCat: () => void; onRegister: () => void; onGallery: (start?: number) => void
-  com: CommercialIndex | null; comCounts: Record<string, number> | null; comPrefs: CommercialPrefs; onComPrefs: (p: CommercialPrefs) => void
+  com: CommercialIndex | null; comCounts: Record<string, number> | null; comBrands: Record<string, number> | null; comPrefs: CommercialPrefs; onComPrefs: (p: CommercialPrefs) => void
 }
 
 const SOON = [
@@ -80,7 +80,7 @@ const SOON = [
   { name: '🌿 쾌적함', note: '녹지 비율·혼잡도' },
 ]
 
-export function FactorsPanel({ cat, catOn, onToggleCat, onRegister, onGallery, com, comCounts, comPrefs, onComPrefs }: FactorsProps) {
+export function FactorsPanel({ cat, catOn, onToggleCat, onRegister, onGallery, com, comCounts, comBrands, comPrefs, onComPrefs }: FactorsProps) {
   const [pick, setPick] = useState(false)
   const [comOpen, setComOpen] = useState(false)
   const [catOpen, setCatOpen] = useState(false) // 길고양이 이름을 누르면 사진 썸네일
@@ -118,7 +118,7 @@ export function FactorsPanel({ cat, catOn, onToggleCat, onRegister, onGallery, c
           <span className="factor-score"><span className="ticks com" aria-hidden><span style={{ width: `${(com?.score ?? 0) * 10}%` }} /></span><em title={com ? undefined : '검색으로 넣은 후보지는 상권 자료가 없습니다'}>{com ? fmt(com.score) : '—'}</em></span>
         </div>
       )}
-      {comPrefs.on && comOpen && <CommercialPicker prefs={comPrefs} onChange={onComPrefs} counts={comCounts} />}
+      {comPrefs.on && comOpen && <CommercialPicker prefs={comPrefs} onChange={onComPrefs} counts={comCounts} brands={comBrands} />}
       {catOn && (
         <div className="factor">
           <div>
@@ -144,14 +144,14 @@ export function FactorsPanel({ cat, catOn, onToggleCat, onRegister, onGallery, c
 
 // 도보 5분 상권: 업종마다 필수 / 선호 / 안 봄. 오른쪽 숫자 = 고른 후보지의 반경 500m 안 개수 / 기준 개수
 const TIERS: { t: Tier; label: string }[] = [{ t: 'need', label: '필수' }, { t: 'want', label: '선호' }, { t: 'off', label: '안 봄' }]
-function CommercialPicker({ prefs, onChange, counts }: { prefs: CommercialPrefs; onChange: (p: CommercialPrefs) => void; counts: Record<string, number> | null }) {
+function CommercialPicker({ prefs, onChange, counts, brands }: { prefs: CommercialPrefs; onChange: (p: CommercialPrefs) => void; counts: Record<string, number> | null; brands: Record<string, number> | null }) {
   return (
     <div className="com-picker" role="group" aria-label="상권 업종 고르기">
       {CATEGORIES.map((c) => {
         const t = tierOf(prefs, c.id)
         return (
           <div className="com-cat" key={c.id}>
-            <span className="com-name" title={THIN[c.id]}>{c.emoji} {c.label}{THIN[c.id] && <sup aria-label="자료 부족">*</sup>}</span>
+            <span className="com-name" title={THIN[c.id]}>{c.emoji} {c.label}{THIN[c.id] && <sup aria-label="자료 부족">*</sup>}{BRAND_PARTS[c.id] && brands && <small className="com-brand"> · {BRAND_PARTS[c.id].label} {brands[c.id]}</small>}</span>
             <span className="seg" role="radiogroup" aria-label={`${c.label} 반영`}>
               {TIERS.map((x) => (
                 <button key={x.t} type="button" role="radio" aria-checked={t === x.t} className={t === x.t ? `on ${x.t}` : ''} onClick={() => onChange(setTier(prefs, c.id, x.t))}>{x.label}</button>

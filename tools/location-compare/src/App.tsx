@@ -15,7 +15,7 @@ import { ListingCards, SpotCards } from './components/Recommend'
 import { DEFAULT_FUEL, loadCommute, saveCommute, type CommuteSaved } from './commute'
 import { fuelPriceFor } from './fuel'
 import { loadParks, strollNear, STROLL_RADIUS, type Park } from './parks'
-import { MAJORS, commercialIndex, loadCommercial, pickedCats, saveCommercial, walk5Counts, type CommercialPrefs } from './commercial'
+import { MAJORS, commercialIndex, loadCommercial, pickedCats, saveCommercial, walk5Brand, walk5Counts, type CommercialPrefs } from './commercial'
 
 // " · 3,000/40 (1,000 기준 월 50)" — 금액을 안 넣었으면 빈 글자
 const rentText = (c: { deposit?: number; rent?: number }) => {
@@ -202,7 +202,7 @@ export default function App() {
         <aside className="factors-area">
           <FactorsPanel cat={catIdx && cur ? catIdx[Math.min(active, catIdx.length - 1)] ?? null : null} catOn={catState.on}
             onToggleCat={() => setCats({ ...catState, on: !catState.on })} onRegister={() => setCatDlg('register')} onGallery={(start = 0) => { setGalleryIdx(null); setGalleryStart(start); setCatDlg('gallery') }}
-            com={cur ? comIdx[Math.min(active, comIdx.length - 1)] ?? null : null} comCounts={walk5Counts(candidates[active])} comPrefs={comPrefs} onComPrefs={setComPrefs} />
+            com={cur ? comIdx[Math.min(active, comIdx.length - 1)] ?? null : null} comCounts={walk5Counts(candidates[active])} comBrands={walk5Brand(candidates[active])} comPrefs={comPrefs} onComPrefs={setComPrefs} />
           <SpotCards candidates={candidates} />
           {cur && <CommutePanel r={cur} trips={pref.trips} settings={{ kmpl: commute.kmpl, fuel: commute.fuel ?? fuelAuto?.price ?? DEFAULT_FUEL }}
             fuelAuto={fuelAuto} fuelManual={commute.fuel !== null} onKmpl={(n) => saveC({ ...commute, kmpl: n })} onFuel={(n) => saveC({ ...commute, fuel: n })} />}

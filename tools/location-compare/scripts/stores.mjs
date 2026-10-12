@@ -88,12 +88,26 @@ const label = (s) => `${s.name}${s.branch ? ' ' + s.branch : ''}`
 const line = (s) => `${m(s.d ?? 0).padStart(6)}  ${label(s)}  · ${upName[s.scls] ?? s.scls}  · ${s.road_addr ?? s.lot_addr ?? ''}${s.floor ? ` ${s.floor}층` : ''}`
 
 // ── 분석 ──
+// 같은 상호·주소·층이 두 번 등록된 경우(예: 엔프라니 2건)는 한 곳으로
+function dedupe(list) {
+  const seen = new Set()
+  return list.filter((s) => { const k = `${s.name}|${s.road_addr ?? s.lot_addr}|${s.floor ?? ''}`; return seen.has(k) ? false : (seen.add(k), true) })
+}
+// brand_part(예: 화장품의 올리브영): 상호가 브랜드로 시작하는 매장 수(80m 안 같은 브랜드는 한 곳 — 입점 매장 중복 방지)
+function brandCount(rule, list) {
+  const got = []
+  for (const s of list) if (startsBrand(rule, s) && !got.some((g) => dist(g.lat, g.lon, s.lat, s.lon) < 80)) got.push(s)
+  return got
+}
+
 function analyzePoint(lat, lng) {
   const radii = CONFIG.radii
-  // 같은 상호·주소·층이 두 번 등록된 경우(예: 엔프라니 2건)는 한 곳으로
-  const seen = new Set()
-  const all = within(lat, lng, Math.max(...radii)).filter((s) => { const k = `${s.name}|${s.road_addr ?? s.lot_addr}|${s.floor ?? ''}`; return seen.has(k) ? false : (seen.add(k), true) })
-  const out = { total: {}, counts: {}, sub: {}, nearest: {} }
+  const all = dedupe(within(lat, lng, Math.max(...radii)))
+  const out = { total: {}, counts: {}, brand: {}, sub: {}, nearest: {} }
+  for (const c of CATS.filter((x) => x.brand_part)) {
+    const got = brandCount(c.brand_part, all).map((s) => s.d)
+    out.brand[c.id] = Object.fromEntries(radii.map((r) => [r, got.filter((d) => d <= r).length]))
+  }
   for (const r of radii) out.total[r] = all.filter((s) => s.d <= r).length
   for (const c of CATS) {
     const hit = all.filter((s) => matches(c, s))
@@ -140,6 +154,36 @@ function majorsNear() {
   return out.sort((a, b) => a.brand.localeCompare(b.brand, 'ko') || a.name.localeCompare(b.name, 'ko'))
 }
 
+/** 값이 기준 이상인 비율(%) */
+const reach = (a, t) => (a?.length ? Math.round((a.filter((x) => x >= t).length / a.length) * 100) : null)
+
+// ── 평균 비교(기준 개수를 정할 근거) ──
+// 경기·서울 전체에 약 1.1km 간격 격자점을 찍고, 500m 안 업소가 BASE_MIN 곳 이상인 점(= 사람이 사는 생활권)만 골라
+// 업종별 개수의 분포(중앙값·상위 25%·상위 10%)를 낸다. 기준월마다 data/baseline-<기준월>.json 에 저장해 두고 다시 쓴다.
+const BASE_MIN = 100
+function baseline() {
+  const file = path.join(ROOT, 'data', `baseline-${meta.stdr_ym}-${CONFIG.walk5}.json`)
+  if (fs.existsSync(file)) return JSON.parse(fs.readFileSync(file, 'utf8'))
+  console.log('생활권 평균 비교 계산 중(약 20초, 기준월마다 한 번)…')
+  const W = CONFIG.walk5
+  const b = db.prepare('SELECT MIN(lat) a, MAX(lat) b, MIN(lon) c, MAX(lon) d FROM stores WHERE lat > 33 AND lon > 124').get()
+  const vals = Object.fromEntries(CATS.map((c) => [c.id, []]))
+  const brand = Object.fromEntries(CATS.filter((c) => c.brand_part).map((c) => [c.id, []]))
+  let n = 0
+  for (let lat = b.a; lat <= b.b; lat += 0.01) for (let lng = b.c; lng <= b.d; lng += 0.0125) {
+    const list = dedupe(within(lat, lng, W))
+    if (list.length < BASE_MIN) continue
+    n++
+    for (const c of CATS) vals[c.id].push(list.filter((s) => matches(c, s)).length)
+    for (const id of Object.keys(brand)) brand[id].push(brandCount(CATS.find((c) => c.id === id).brand_part, list).length)
+  }
+  const q = (a, p) => { const s = [...a].sort((x, y) => x - y); return s[Math.min(s.length - 1, Math.floor(p * s.length))] }
+  const sum = (a) => ({ p50: q(a, 0.5), p75: q(a, 0.75), p90: q(a, 0.9), mean: Math.round(a.reduce((x, y) => x + y, 0) / a.length * 10) / 10, zero: Math.round(a.filter((x) => x === 0).length / a.length * 100) })
+  const out = { points: n, min: BASE_MIN, radius: W, cats: Object.fromEntries(Object.entries(vals).map(([k, a]) => [k, sum(a)])), brand: Object.fromEntries(Object.entries(brand).map(([k, a]) => [k, sum(a)])) }
+  fs.writeFileSync(file, JSON.stringify({ ...out, raw: vals, rawBrand: brand }))
+  return { ...out, raw: vals, rawBrand: brand }
+}
+
 function analyze() {
   const radii = CONFIG.radii
   const res = {}
@@ -149,8 +193,10 @@ function analyze() {
   for (const id of Object.keys(res)) for (const r of radii) {
     res[id].counts.mart[r] += majors.filter((x) => x.inferred && x.cat === 'mart' && x.near[id] != null && x.near[id] <= r).length
   }
+  const base = baseline()
   const json = {
-    source: '소상공인시장진흥공단 상가(상권)정보', stdrYm: meta.stdr_ym, generatedAt: new Date().toISOString().slice(0, 10), radii, walk5: CONFIG.walk5, enough: CONFIG.enough,
+    source: '소상공인시장진흥공단 상가(상권)정보', stdrYm: meta.stdr_ym, generatedAt: new Date().toISOString().slice(0, 10), radii, walk5: CONFIG.walk5, enough: CONFIG.enough, baseline: base,
+    brandParts: Object.fromEntries(CATS.filter((c) => c.brand_part).map((c) => [c.id, { label: c.brand_part.label, enough: c.brand_part.enough, weight: c.brand_part.weight }])),
     categories: CATS.map((c) => ({ id: c.id, label: c.label, emoji: c.emoji, sub: (c.sub ?? []).map((s) => s.label) })),
     defaultPrefs: CONFIG.defaultPrefs, candidates: res, majorsRadius: CONFIG.majorsRadius, majors,
   }
@@ -173,11 +219,23 @@ function analyze() {
   }
   // 상권 지수(기본 선택) — 화면(src/commercial.ts)과 같은 식
   const W = CONFIG.walk5, E = CONFIG.enough, P = CONFIG.defaultPrefs
-  const sc = (id, k) => 10 * (1 - Math.pow(10, -res[id].counts[k][W] / E[k]))
+  const f = (n, t) => 10 * (1 - Math.pow(10, -n / t))
+  const sc = (id, k) => { // brand_part 가 있으면(화장품) 개수 점수 × (1−w) + 브랜드 점수 × w
+    const bp = CATS.find((c) => c.id === k).brand_part
+    const base = f(res[id].counts[k][W], E[k])
+    return bp ? base * (1 - bp.weight) + f(res[id].brand[k][W], bp.enough) * bp.weight : base
+  }
+  const cell = (id, k) => { const bp = CATS.find((c) => c.id === k).brand_part; return `${res[id].counts[k][W]}${bp ? ` · ${bp.label} ${res[id].brand[k][W]}` : ''} → ${sc(id, k).toFixed(1)}` }
   const avg = (id, ks) => ks.reduce((a, k) => a + sc(id, k), 0) / ks.length
-  L.push(`## 상권 지수(기본 선택, 반경 ${W}m)`, '', `필수 ${P.need.map((k) => CATS.find((c) => c.id === k).label).join('·')} × 0.8 + 선호 ${P.want.map((k) => CATS.find((c) => c.id === k).label).join('·')} × 0.2. 업종 점수 = 10 × (1 − 10^(−개수/기준)), 기준에서 9점.`, '', head(ids.map((id) => res[id].name)))
-  for (const c of CATS) L.push(`| ${c.emoji} ${c.label} (기준 ${E[c.id]}) | ${ids.map((id) => `${res[id].counts[c.id][W]} → ${sc(id, c.id).toFixed(1)}`).join(' | ')} |`)
+  L.push(`## 상권 지수(기본 선택, 반경 ${W}m)`, '', `필수 ${P.need.map((k) => CATS.find((c) => c.id === k).label).join('·')} × 0.8 + 선호 ${P.want.map((k) => CATS.find((c) => c.id === k).label).join('·')} × 0.2. 업종 점수 = 10 × (1 − 10^(−개수/기준)), 기준에서 9점. 화장품 = 개수 점수 50% + 올리브영 점수 50%(기준 1곳).`, '', head(ids.map((id) => res[id].name)))
+  for (const c of CATS) L.push(`| ${c.emoji} ${c.label} (기준 ${E[c.id]}) | ${ids.map((id) => cell(id, c.id)).join(' | ')} |`)
   L.push(`| **지수** | ${ids.map((id) => `**${(avg(id, P.need) * 0.8 + avg(id, P.want) * 0.2).toFixed(1)}**`).join(' | ')} |`, '')
+  // 생활권 평균 비교 — 기준 개수의 근거
+  L.push(`## 생활권 평균 비교(기준 개수의 근거)`, '', `경기·서울에 약 1.1km 간격 격자점을 찍고, 반경 ${base.radius}m 안 업소가 ${base.min}곳 이상인 점(사람이 사는 생활권) **${base.points}곳**의 분포. "기준 이상"은 기준 개수를 채운(9점 이상) 생활권 비율.`, '',
+    '| 업종 | 중앙값 | 평균 | 상위 25% | 상위 10% | 0곳인 비율 | 기준 | 기준 이상 |', '|---|---:|---:|---:|---:|---:|---:|---:|')
+  for (const c of CATS) { const x = base.cats[c.id]; L.push(`| ${c.emoji} ${c.label} | ${x.p50} | ${x.mean} | ${x.p75} | ${x.p90} | ${x.zero}% | ${E[c.id]} | ${reach(base.raw[c.id], E[c.id])}% |`) }
+  for (const c of CATS.filter((x) => x.brand_part)) { const x = base.brand[c.id]; L.push(`| &nbsp;&nbsp;└ ${c.brand_part.label} | ${x.p50} | ${x.mean} | ${x.p75} | ${x.p90} | ${x.zero}% | ${c.brand_part.enough} | ${reach(base.rawBrand[c.id], c.brand_part.enough)}% |`) }
+  L.push('')
   L.push(`## 가장 가까운 곳(직선거리)`, '', head(ids.map((id) => res[id].name)))
   for (const c of CATS) L.push(`| ${c.emoji} ${c.label} | ${ids.map((id) => { const n = res[id].nearest[c.id]; return n ? `${n.dist}m ${n.name}` : '—' }).join(' | ')} |`)
   for (const c of CATS) for (const s of c.sub ?? []) {
@@ -240,6 +298,13 @@ switch (cmd) {
     break
   }
   case 'analyze': analyze(); break
+  case 'baseline': { // 생활권 평균 비교만 보기
+    const b = baseline()
+    console.log(`생활권 격자점 ${b.points}곳(500m 안 업소 ${b.min}곳 이상) · 반경 ${b.radius}m · 기준월 ${meta.stdr_ym}`)
+    for (const c of CATS) { const x = b.cats[c.id]; console.log(`  ${c.label.padEnd(4)} 중앙값 ${x.p50} · 상위25% ${x.p75} · 상위10% ${x.p90} · 평균 ${x.mean} · 0곳 ${x.zero}% · 기준 ${CONFIG.enough[c.id]} 이상인 생활권 ${reach(b.raw[c.id], CONFIG.enough[c.id])}%`) }
+    for (const [id, x] of Object.entries(b.brand)) console.log(`  ${CATS.find((c) => c.id === id).brand_part.label} 중앙값 ${x.p50} · 상위25% ${x.p75} · 상위10% ${x.p90} · 평균 ${x.mean} · 0곳 ${x.zero}%`)
+    break
+  }
   default:
     console.log(fs.readFileSync(fileURLToPath(import.meta.url), 'utf8').split('\n').filter((l) => l.startsWith('//')).slice(0, 13).map((l) => l.slice(3)).join('\n'))
 }
