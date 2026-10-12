@@ -57,7 +57,8 @@ export function SpotCards({ candidates }: { candidates: Candidate[] }) {
 }
 
 /** 화면(보이는 창) 정가운데에, 지도 크기의 3/4 로(창보다 크면 창에 맞춤). 페이지 어디서 눌러도 같은 자리.
- *  body 에 바로 붙여서(portal) 부모의 배치·스크롤에 영향받지 않고, 열려 있는 동안 뒤 페이지는 스크롤되지 않는다. 안은 스크롤(스크롤바 숨김). */
+ *  body 에 바로 붙여서(portal) 부모의 배치·스크롤에 영향받지 않는다. 창이 열려 있어도 뒤 페이지는 스크롤된다(창은 제자리).
+ *  창 안은 스크롤(스크롤바 숨김), 창 안에서 끝까지 굴려도 뒤 페이지로 넘어가지 않는다(overscroll-behavior: contain). */
 function AgentDialog({ x, candidates, onClose }: { x: Listing; candidates: Candidate[]; onClose: () => void }) {
   const [size, setSize] = useState<React.CSSProperties>({})
   useEffect(() => {
@@ -68,11 +69,9 @@ function AgentDialog({ x, candidates, onClose }: { x: Listing; candidates: Candi
     }
     fit()
     const onKey = (e: KeyboardEvent) => { if (e.key === 'Escape') onClose() }
-    const prev = document.body.style.overflow
-    document.body.style.overflow = 'hidden'
     window.addEventListener('keydown', onKey)
     window.addEventListener('resize', fit)
-    return () => { document.body.style.overflow = prev; window.removeEventListener('keydown', onKey); window.removeEventListener('resize', fit) }
+    return () => { window.removeEventListener('keydown', onKey); window.removeEventListener('resize', fit) }
   }, [onClose])
   return createPortal(
     <div className="rec-overlay" onClick={onClose}>
