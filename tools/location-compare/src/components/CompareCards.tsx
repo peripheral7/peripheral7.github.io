@@ -1,14 +1,15 @@
 import { useState } from 'react'
 import { fmt, WALK_LIMIT, WALK_ZONE, type CandidateResult } from '../scoring'
 import { BASE_DEPOSIT, baseRent, hubEmoji, won, type Hub } from '../data'
+import { CATEGORIES, type CommercialIndex } from '../commercial'
 
 // 아래쪽: 후보지 카드를 가로로 늘어놓는다. 모든 카드가 같은 줄(행)을 공유해서(CSS subgrid)
 // "대중교통" 줄을 옆으로 읽으면 후보지끼리 대기·역까지 도보·환승을, "차량" 줄은 출퇴근/낮 차이를 바로 비교할 수 있다.
 
-type Props = { results: CandidateResult[]; hubs: Hub[]; active: number; onSelect: (index: number) => void; onRename: (id: string, name: string) => void }
+type Props = { results: CandidateResult[]; com: CommercialIndex[] | null; hubs: Hub[]; active: number; onSelect: (index: number) => void; onRename: (id: string, name: string) => void }
 
 // 점수(0~10)만큼 칸 아래쪽에 색 선을 채운다 — 숫자를 읽지 않아도 길이로 바로 비교된다.
-const Line = ({ v, kind }: { v: number; kind: 'total' | 'hub' | 'transit' | 'car' | 'walk' }) => (
+const Line = ({ v, kind }: { v: number; kind: 'total' | 'hub' | 'transit' | 'car' | 'walk' | 'com' }) => (
   <i className={`score-line ${kind}`} style={{ '--v': Math.max(0, Math.min(10, v)) / 10 } as React.CSSProperties} aria-hidden />
 )
 
@@ -24,7 +25,20 @@ function RentCell({ c, sect }: { c: { deposit?: number; rent?: number }; sect?: 
   )
 }
 
-export function CompareCards({ results, hubs, active, onSelect, onRename }: Props) {
+// 상권 종합: 지수 + 필수 업종의 도보 5분 안 개수(선호는 연하게)
+function ComCell({ x, best }: { x: CommercialIndex | undefined; best: boolean }) {
+  if (x === undefined) return <div className="cell mode-cell"><div><span className="muted">입지 요인 ⚙ 에서 켜면 표시</span></div></div>
+  if (x === null) return <div className="cell mode-cell"><div><span className="muted">상권 자료 없음(검색으로 넣은 후보지)</span></div></div>
+  const txt = (t: 'need' | 'want') => x.parts.filter((p) => p.tier === t).map((p) => `${CATEGORIES.find((c) => c.id === p.id)?.label} ${p.count}`).join(' · ')
+  return (
+    <div className="cell mode-cell">
+      <div><b>{txt('need') || txt('want')}</b>{txt('need') && txt('want') && <small>선호 {txt('want')}</small>}</div>
+      <em className={best ? 'best' : ''}>{fmt(x.score)}<Line v={x.score} kind="com" /></em>
+    </div>
+  )
+}
+
+export function CompareCards({ results, com, hubs, active, onSelect, onRename }: Props) {
   const [naming, setNaming] = useState<{ id: string; name: string } | null>(null) // 카드에서 이름 바꾸는 중
   const finish = (save: boolean) => { if (save && naming) onRename(naming.id, naming.name); setNaming(null) }
   const rows = 2 + hubs.length * 4 + 1 // 후보지 · 보증금/월세 · 목적지마다 4줄 · 상권 종합
@@ -94,7 +108,7 @@ export function CompareCards({ results, hubs, active, onSelect, onRename }: Prop
                 ]
               })}
               <RentCell c={r.candidate} sect />
-              <div className="cell mode-cell"><div><span className="muted">준비 중</span></div></div>
+              <ComCell x={com ? com[i] : undefined} best={!!com && isBest(com[i]?.score ?? null, Math.max(...com.map((c) => c?.score ?? -1)))} />
             </div>
           ))}
         </div>

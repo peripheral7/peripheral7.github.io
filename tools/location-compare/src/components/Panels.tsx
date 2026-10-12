@@ -1,6 +1,7 @@
 import { useEffect, useRef, useState, type ReactNode } from 'react'
 import { fmt, type CandidateResult } from '../scoring'
 import { CAT_RADIUS_M, type CatIndex } from '../cats'
+import { CATEGORIES, NEED_WEIGHT, STDR_YM, THIN, WALK5, WANT_WEIGHT, setTier, tierOf, type CommercialIndex, type CommercialPrefs, type Tier } from '../commercial'
 
 // ── 고른 후보지: 종합 점수(원형 그래프) + 수단별 점수(눈금 막대) ──────────
 // 수단 점수는 목적지별 점수를 "월 왕복 비율"로 평균한 값(종합 점수와 같은 비율). 도보는 걸어갈 수 있는 목적지만,
@@ -67,18 +68,22 @@ export function ModeScorePanel({ r, action }: { r: CandidateResult; action: Reac
 
 // ── 오른쪽 위: 입지 요인(지수) ────────────────────────────────────────
 // 모든 지수를 같은 모양(이름 · 짧은 설명 · 눈금 · 점수)의 한 줄로 보여 준다. 어떤 지수를 쓸지는 카드 오른쪽 위 ⚙ 에서 고른다.
-// 지금 동작하는 지수는 길고양이뿐이고(켜면 아래 후보지 카드에도 한 줄), 나머지는 준비 중이라 고를 수 없다.
-type FactorsProps = { cat: CatIndex | null; catOn: boolean; onToggleCat: () => void; onRegister: () => void; onGallery: () => void }
+// 지금 동작하는 지수는 도보 5분 상권(이름을 누르면 필수·선호 업종 고르기)과 길고양이, 나머지는 준비 중이라 고를 수 없다.
+type FactorsProps = {
+  cat: CatIndex | null; catOn: boolean; onToggleCat: () => void; onRegister: () => void; onGallery: () => void
+  com: CommercialIndex | null; comCounts: Record<string, number> | null; comPrefs: CommercialPrefs; onComPrefs: (p: CommercialPrefs) => void
+}
 
 const SOON = [
-  { name: '🏪 도보 5분 상권', note: '걸어서 5분 안의 생활 업종' },
   { name: '🌳 산책', note: '공원·하천변·녹지' },
   { name: '🕊️ 평화로움', note: '큰길·유흥가·소음원과의 거리' },
   { name: '🌿 쾌적함', note: '녹지 비율·혼잡도' },
 ]
 
-export function FactorsPanel({ cat, catOn, onToggleCat, onRegister, onGallery }: FactorsProps) {
+export function FactorsPanel({ cat, catOn, onToggleCat, onRegister, onGallery, com, comCounts, comPrefs, onComPrefs }: FactorsProps) {
   const [pick, setPick] = useState(false)
+  const [comOpen, setComOpen] = useState(false)
+  const names = (ids: string[]) => ids.map((id) => CATEGORIES.find((c) => c.id === id)?.label ?? id).join('·')
   const box = useRef<HTMLDivElement>(null)
   useEffect(() => {
     if (!pick) return
@@ -96,12 +101,23 @@ export function FactorsPanel({ cat, catOn, onToggleCat, onRegister, onGallery }:
           <button type="button" className="gear" aria-label="입지 요인 고르기" aria-expanded={pick} onClick={() => setPick(!pick)}>⚙️</button>
           {pick && (
             <div className="factor-menu" role="dialog" aria-label="입지 요인 고르기">
+              <label><input type="checkbox" checked={comPrefs.on} onChange={() => onComPrefs({ ...comPrefs, on: !comPrefs.on })} />🏪 도보 5분 상권</label>
               <label><input type="checkbox" checked={catOn} onChange={onToggleCat} />🐈 길고양이 지수</label>
               {SOON.map((x) => <label key={x.name} className="off"><input type="checkbox" disabled />{x.name}<small>준비 중</small></label>)}
             </div>
           )}
         </div>
       </div>
+      {comPrefs.on && (
+        <div className="factor com-factor">
+          <div>
+            <button type="button" className="com-open" aria-expanded={comOpen} onClick={() => setComOpen(!comOpen)}>🏪 도보 5분 상권 <i aria-hidden>{comOpen ? '▴' : '▾'}</i></button>
+            <small>{comPrefs.need.length ? `필수 ${names(comPrefs.need)}` : ''}{comPrefs.need.length && comPrefs.want.length ? ' · ' : ''}{comPrefs.want.length ? `선호 ${names(comPrefs.want)}` : ''}{!comPrefs.need.length && !comPrefs.want.length ? '업종을 골라 주세요' : ''}</small>
+          </div>
+          <span className="factor-score"><span className="ticks com" aria-hidden><span style={{ width: `${(com?.score ?? 0) * 10}%` }} /></span><em title={com ? undefined : '검색으로 넣은 후보지는 상권 자료가 없습니다'}>{com ? fmt(com.score) : '—'}</em></span>
+        </div>
+      )}
+      {comPrefs.on && comOpen && <CommercialPicker prefs={comPrefs} onChange={onComPrefs} counts={comCounts} />}
       {catOn && (
         <div className="factor">
           <div>
@@ -120,6 +136,30 @@ export function FactorsPanel({ cat, catOn, onToggleCat, onRegister, onGallery }:
           <span className="factor-score"><span className="ticks empty" aria-hidden /><em className="soon">준비 중</em></span>
         </div>
       ))}
+    </div>
+  )
+}
+
+// 도보 5분 상권: 업종마다 필수 / 선호 / 안 봄. 오른쪽 숫자 = 고른 후보지의 도보 5분 안 개수
+const TIERS: { t: Tier; label: string }[] = [{ t: 'need', label: '필수' }, { t: 'want', label: '선호' }, { t: 'off', label: '안 봄' }]
+function CommercialPicker({ prefs, onChange, counts }: { prefs: CommercialPrefs; onChange: (p: CommercialPrefs) => void; counts: Record<string, number> | null }) {
+  return (
+    <div className="com-picker" role="group" aria-label="상권 업종 고르기">
+      {CATEGORIES.map((c) => {
+        const t = tierOf(prefs, c.id)
+        return (
+          <div className="com-cat" key={c.id}>
+            <span className="com-name" title={THIN[c.id]}>{c.emoji} {c.label}{THIN[c.id] && <sup aria-label="자료 부족">*</sup>}</span>
+            <span className="seg" role="radiogroup" aria-label={`${c.label} 반영`}>
+              {TIERS.map((x) => (
+                <button key={x.t} type="button" role="radio" aria-checked={t === x.t} className={t === x.t ? `on ${x.t}` : ''} onClick={() => onChange(setTier(prefs, c.id, x.t))}>{x.label}</button>
+              ))}
+            </span>
+            <em className="com-count">{counts ? `${counts[c.id]}곳` : ''}</em>
+          </div>
+        )
+      })}
+      <p className="com-note">필수 {NEED_WEIGHT * 100}% · 선호 {WANT_WEIGHT * 100}%, 묶음 안은 똑같이. 업종 점수 = 걸어서 5분({WALK5}m) 안 개수 ÷ 후보지 중 최다 × 10. 상가정보 {STDR_YM.slice(0, 4)}.{STDR_YM.slice(4)} 기준{Object.keys(THIN).length ? ' · * ' + Object.values(THIN)[0] : ''}.</p>
     </div>
   )
 }

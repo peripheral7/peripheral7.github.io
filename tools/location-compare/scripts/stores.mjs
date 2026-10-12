@@ -100,13 +100,48 @@ function analyzePoint(lat, lng) {
   return out
 }
 
+// 주요 매장(올리브영·다이소·이마트 등) — 규칙은 commercial-categories.json 의 _majors
+const PREFIX = /^(씨제이|CJ|(주)|주식회사|롯데쇼핑|이마트_|s)+/i
+const startsBrand = (m, s) => m.names.some((n) => (s.name ?? '').replace(PREFIX, '').startsWith(n)) &&
+  !m.exclude_names?.some((n) => s.name?.includes(n)) && (!m.names_scls || m.names_scls.includes(s.scls))
+function majorsNear() {
+  const out = []
+  const add = (b, c, x) => {
+    const d = Math.round(dist(c.lat, c.lng, x.lat, x.lng))
+    const dup = out.find((o) => o.brand === b.brand && dist(o.lat, o.lng, x.lat, x.lng) < 80)
+    if (dup) { if (!dup.near[c.id] || d < dup.near[c.id]) dup.near[c.id] = d; return }
+    out.push({ brand: b.brand, cat: b.cat, ...x, lat: +x.lat.toFixed(6), lng: +x.lng.toFixed(6), near: { [c.id]: d } })
+  }
+  for (const c of CANDIDATES) {
+    const list = within(c.lat, c.lng, CONFIG.majorsRadius)
+    for (const s of list) {
+      const b = CONFIG.majors.find((m) => startsBrand(m, s))
+      if (b) add(b, c, { name: label(s), lat: s.lat, lng: s.lon, addr: s.road_addr ?? s.lot_addr ?? '' })
+    }
+    for (const b of CONFIG.majors.filter((m) => m.infer)) { // 대형마트: 입점 매장으로 추정
+      const groups = {}
+      for (const s of list) {
+        if (!s.road_addr || !b.names.some((n) => s.name?.includes(n)) || b.infer_exclude?.some((n) => s.name?.includes(n))) continue
+        ;(groups[s.road_addr] ??= []).push(s)
+      }
+      for (const [addr, g] of Object.entries(groups)) {
+        if (g.length < b.infer) continue
+        add(b, c, { name: `${b.brand}(입점 매장 ${g.length}곳으로 추정)`, lat: g.reduce((a, s) => a + s.lat, 0) / g.length, lng: g.reduce((a, s) => a + s.lon, 0) / g.length, addr, inferred: true })
+      }
+    }
+  }
+  return out.sort((a, b) => a.brand.localeCompare(b.brand, 'ko') || a.name.localeCompare(b.name, 'ko'))
+}
+
 function analyze() {
   const radii = CONFIG.radii
   const res = {}
   for (const c of CANDIDATES) res[c.id] = { name: c.name, address: c.address, lat: c.lat, lng: c.lng, ...analyzePoint(c.lat, c.lng) }
+  const majors = majorsNear()
   const json = {
-    source: '소상공인시장진흥공단 상가(상권)정보', stdrYm: meta.stdr_ym, generatedAt: new Date().toISOString().slice(0, 10), radii,
-    categories: CATS.map((c) => ({ id: c.id, label: c.label, emoji: c.emoji, sub: (c.sub ?? []).map((s) => s.label) })), candidates: res,
+    source: '소상공인시장진흥공단 상가(상권)정보', stdrYm: meta.stdr_ym, generatedAt: new Date().toISOString().slice(0, 10), radii, walk5: CONFIG.walk5,
+    categories: CATS.map((c) => ({ id: c.id, label: c.label, emoji: c.emoji, sub: (c.sub ?? []).map((s) => s.label) })),
+    defaultPrefs: CONFIG.defaultPrefs, candidates: res, majorsRadius: CONFIG.majorsRadius, majors,
   }
   fs.writeFileSync(path.join(ROOT, 'src', 'commercial.json'), JSON.stringify(json, null, 2) + '\n')
 
@@ -130,6 +165,9 @@ function analyze() {
   for (const c of CATS) for (const s of c.sub ?? []) {
     L.push(`| &nbsp;&nbsp;└ ${s.label} | ${ids.map((id) => { const d = res[id].sub[`${c.id}:${s.label}`].nearest; return d == null ? `${Math.max(...radii)}m 밖` : `${d}m` }).join(' | ')} |`)
   }
+  L.push('', `## 주요 매장(후보지 ${CONFIG.majorsRadius.toLocaleString()}m 안, 지도에 따로 표시)`, '', '| 브랜드 | 매장 | 가까운 후보지(직선) |', '|---|---|---|')
+  for (const x of majors) L.push(`| ${x.brand} | ${x.name} | ${Object.entries(x.near).sort((a, b) => a[1] - b[1]).map(([id, d]) => `${res[id].name} ${d}m`).join(' · ')} |`)
+  if (!majors.some((x) => x.brand === '다이소')) L.push('', '다이소는 상가(상권)정보에 거의 등록돼 있지 않아(경기·서울 131곳, 영통구 0곳) 실제로 있어도 안 나올 수 있다.')
   L.push('')
   fs.writeFileSync(path.join(ROOT, 'COMMERCIAL.md'), L.join('\n'))
   console.log(L.join('\n'))

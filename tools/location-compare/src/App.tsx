@@ -14,6 +14,7 @@ import { CommutePanel } from './components/CommutePanel'
 import { ListingCards, SpotCards } from './components/Recommend'
 import { DEFAULT_FUEL, loadCommute, saveCommute, type CommuteSaved } from './commute'
 import { fuelPriceFor } from './fuel'
+import { MAJORS, commercialIndex, loadCommercial, pickedCats, saveCommercial, walk5Counts, type CommercialPrefs } from './commercial'
 
 // " · 3,000/40 (1,000 기준 월 50)" — 금액을 안 넣었으면 빈 글자
 const rentText = (c: { deposit?: number; rent?: number }) => {
@@ -34,6 +35,7 @@ export default function App() {
   const [editing, setEditing] = useState<{ id: string; name: string; deposit: string; rent: string } | null>(null) // 수정 중인 후보지(금액은 입력 글자 그대로)
   const [catState, setCatState] = useState<CatState>(() => pruneCats(loadCats())) // 길고양이 지수(선택 요인) — 사진은 이 브라우저에만 저장
   const [commute, setCommute] = useState<CommuteSaved>(loadCommute) // 출퇴근 인사이트의 연비·기름값(null = 자동)
+  const [comPrefs, setComPrefs] = useState<CommercialPrefs>(loadCommercial) // 도보 5분 상권: 필수·선호 업종(이 브라우저에 저장)
   const [catDlg, setCatDlg] = useState<'none' | 'register' | 'gallery'>('none')
   const [galleryIdx, setGalleryIdx] = useState<number | null>(null) // 카드에서 "사진 보기"를 누른 후보지(없으면 선택한 후보지)
   const { candidates, hubs, pref } = state
@@ -49,6 +51,10 @@ export default function App() {
 
   useEffect(() => { save(state) }, [state])
   useEffect(() => { saveCats(catState) }, [catState])
+  useEffect(() => { saveCommercial(comPrefs) }, [comPrefs])
+  const comIdx = useMemo(() => commercialIndex(candidates, comPrefs), [candidates, comPrefs])
+  // 지도에 따로 표시할 주요 매장: 필수·선호로 고른 업종의 것만(상권 지수를 껐으면 없음)
+  const majors = useMemo(() => { const on = pickedCats(comPrefs); return comPrefs.on ? MAJORS.filter((m) => on.has(m.cat)) : [] }, [comPrefs])
   const catIdx = useMemo(() => (catState.on ? candidates.map((c) => catIndex(c, catState.cats)) : null), [catState, candidates])
   const setCats = (next: CatState) => { const ok = saveCats(next); if (ok) setCatState(next); return ok }
   useEffect(() => { if (active > candidates.length - 1) setActive(Math.max(0, candidates.length - 1)) }, [candidates.length, active])
@@ -163,13 +169,14 @@ export default function App() {
         </div>
 
         <section className="map-area">
-          <MapView candidates={candidates} hubs={hubs} active={active} onSelect={select} focusKey={focusKey} hubId={hubId} onHub={setHubPick} insights={insights} focusHubIds={mainHubIds} ranks={ranks} preview={preview} results={found} centerRef={mapCenter} />
+          <MapView candidates={candidates} hubs={hubs} active={active} onSelect={select} focusKey={focusKey} hubId={hubId} onHub={setHubPick} insights={insights} focusHubIds={mainHubIds} ranks={ranks} preview={preview} results={found} centerRef={mapCenter} majors={majors} />
           <SearchBox hubs={hubs} tripsOf={(id) => pref.trips[id] ?? 0} onCandidate={onCandidate} onHub={onHub} onPreview={setPreview} onResults={setFound} centerRef={mapCenter} />
         </section>
 
         <aside className="factors-area">
           <FactorsPanel cat={catIdx && cur ? catIdx[Math.min(active, catIdx.length - 1)] ?? null : null} catOn={catState.on}
-            onToggleCat={() => setCats({ ...catState, on: !catState.on })} onRegister={() => setCatDlg('register')} onGallery={() => { setGalleryIdx(null); setCatDlg('gallery') }} />
+            onToggleCat={() => setCats({ ...catState, on: !catState.on })} onRegister={() => setCatDlg('register')} onGallery={() => { setGalleryIdx(null); setCatDlg('gallery') }}
+            com={cur ? comIdx[Math.min(active, comIdx.length - 1)] ?? null : null} comCounts={walk5Counts(candidates[active])} comPrefs={comPrefs} onComPrefs={setComPrefs} />
           {cur && <CommutePanel r={cur} trips={pref.trips} settings={{ kmpl: commute.kmpl, fuel: commute.fuel ?? fuelAuto?.price ?? DEFAULT_FUEL }}
             fuelAuto={fuelAuto} fuelManual={commute.fuel !== null} onKmpl={(n) => saveC({ ...commute, kmpl: n })} onFuel={(n) => saveC({ ...commute, fuel: n })} />}
         </aside>
@@ -179,7 +186,7 @@ export default function App() {
         <SpotCards candidates={candidates} />
 
         <section className="cards-area">
-          {results.length > 0 && <CompareCards results={results} hubs={hubs} active={active} onSelect={select} onRename={rename} />}
+          {results.length > 0 && <CompareCards results={results} com={comPrefs.on ? comIdx : null} hubs={hubs} active={active} onSelect={select} onRename={rename} />}
         </section>
       </main>
 

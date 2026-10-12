@@ -4,11 +4,13 @@ import L from 'leaflet'
 import { hubEmoji, type Candidate, type Hub, type Place } from '../data'
 import type { Insight } from '../scoring'
 import { loadNaverMaps, MAP_KEY_ID, onNaverAuthFailure } from '../naver'
+import { CATEGORIES, type Major } from '../commercial'
 
 // 지도: 네이버 지도 키(VITE_NAVER_MAP_KEY_ID)가 있으면 네이버 지도, 없거나 인증이 실패하면 OSM 밝은 지도.
 // - 후보지를 고르면 "그 후보지 + 주요 목적지"가 다 들어오도록 확대·이동한다.
 // - 지도 위 "장단점 기준" 단추(또는 목적지 핀)로 고른 목적지에 대해, 후보지 옆에 장점(＋)·단점(－)을 글자로 보여 준다.
 //   평소에는 고른 후보지에만, 구역이 확실히 갈릴 만큼 확대하면(DETAIL_ZOOM 이상) 화면에 보이는 모든 후보지에.
+// - 주요 매장(올리브영·이마트·홈플러스 등, 상권 지수에서 필수·선호로 고른 업종만)은 작은 이모지 원으로, 확대하면 브랜드 이름도.
 // - "장단점 기준" 오른쪽 "후보지 한눈에"는 모든 후보지가 고르게 들어오도록 확대·이동한다(목적지는 빼고).
 
 type Props = {
@@ -19,6 +21,7 @@ type Props = {
   preview?: Place | null // 검색 결과를 누르면 그 위치로 옮기고 임시 표시
   results?: Place[] // 검색 결과 전부 — 지도에 작은 점으로
   centerRef?: { current: { lat: number; lng: number } | null } // 지금 지도 가운데(검색 결과를 가까운 순으로 정렬할 때 씀)
+  majors?: Major[] // 지도에 따로 표시할 주요 매장
 }
 
 export const DETAIL_ZOOM = 14 // 이 확대 단계부터 모든 후보지에 장단점(동네 단위가 구분되는 정도)
@@ -30,6 +33,10 @@ const previewHtml = (name: string) => `<div class="nv-pin"><span class="pin prev
 const RESULT_DOT = '<span class="pin result-dot"></span>'
 const same = (a: Place, b: Place | null | undefined) => !!b && Math.abs(a.lat - b.lat) < 1e-7 && Math.abs(a.lng - b.lng) < 1e-7
 export const PREVIEW_ZOOM = 16
+const majorTitle = (m: Major) => `${m.brand} — ${m.name}${m.addr ? ` · ${m.addr}` : ''}`
+const catEmoji = (id: string) => CATEGORIES.find((c) => c.id === id)?.emoji ?? '🏬'
+/** 주요 매장: 이모지 원 + (확대했을 때) 브랜드 이름 */
+const majorHtml = (m: Major, named: boolean) => `<span class="major-pin${m.inferred ? ' inferred' : ''}" title="${esc(majorTitle(m))}"><i>${catEmoji(m.cat)}</i>${named ? `<b>${esc(m.brand)}</b>` : ''}</span>`
 const hubHtml = (h: Hub, on: boolean) => `<span class="pin hub${on ? ' on' : ''}"><b>${hubEmoji(h.category)}</b></span>`
 
 /** 후보지 옆 글자: 이름 + (목적지 기준) 장점·단점 */
@@ -79,7 +86,7 @@ export function MapView(props: Props) {
 
 // ── 네이버 지도 ──────────────────────────────────────────────────────
 /* eslint-disable @typescript-eslint/no-explicit-any */
-function NaverMap({ candidates, hubs, active, onSelect, focusKey, hubId, onHub, insights, focusHubIds, ranks, preview, results, centerRef, allKey, onFail }: Props & { allKey: number; onFail: () => void }) {
+function NaverMap({ candidates, hubs, active, onSelect, focusKey, hubId, onHub, insights, focusHubIds, ranks, preview, results, centerRef, majors, allKey, onFail }: Props & { allKey: number; onFail: () => void }) {
   const box = useRef<HTMLDivElement>(null)
   const map = useRef<any>(null)
   const layers = useRef<any[]>([])
@@ -147,6 +154,18 @@ function NaverMap({ candidates, hubs, active, onSelect, focusKey, hubId, onHub, 
       icon: { content: RESULT_DOT, anchor: new naver.maps.Point(6, 6) },
     }))
   }, [ready, results, preview])
+
+  // 주요 매장
+  const majorMarkers = useRef<any[]>([])
+  useEffect(() => {
+    const naver = window.naver
+    if (!ready || !naver) return
+    majorMarkers.current.forEach((m) => m.setMap(null))
+    majorMarkers.current = (majors ?? []).map((m) => new naver.maps.Marker({
+      map: map.current, position: new naver.maps.LatLng(m.lat, m.lng), zIndex: 5,
+      icon: { content: majorHtml(m, detail), anchor: new naver.maps.Point(10, 10) },
+    }))
+  }, [ready, majors, detail])
 
   // 핀·점선·장단점 글자 다시 그리기
   useEffect(() => {
@@ -237,7 +256,7 @@ function Controls({ pts }: { pts: [number, number][] }) {
   )
 }
 
-function OsmMap({ candidates, hubs, active, onSelect, focusKey, hubId, onHub, insights, focusHubIds, ranks, preview, results, centerRef, allKey }: Props & { allKey: number }) {
+function OsmMap({ candidates, hubs, active, onSelect, focusKey, hubId, onHub, insights, focusHubIds, ranks, preview, results, centerRef, majors, allKey }: Props & { allKey: number }) {
   const pts = useMemo(() => frame(candidates, hubs, active, focusHubIds), [candidates, hubs, active, focusHubIds])
   const [zoom, setZoom] = useState(13)
   const cur = candidates[active]
@@ -249,6 +268,10 @@ function OsmMap({ candidates, hubs, active, onSelect, focusKey, hubId, onHub, in
       <TileLayer className="tiles-base" url="https://tiles.osm.kr/hot/{z}/{x}/{y}.png" attribution="&copy; OpenStreetMap contributors" maxZoom={19} />
       <Framing pts={pts} focusKey={focusKey} active={active} all={allCands(candidates)} allKey={allKey} />
       <ZoomWatch onZoom={setZoom} />
+      {(majors ?? []).map((m) => (
+        <Marker key={`m-${m.brand}-${m.lat}-${m.lng}-${detail}`} position={[m.lat, m.lng]} zIndexOffset={-500}
+          icon={L.divIcon({ className: 'pin-shell', html: majorHtml(m, detail), iconSize: [20, 20], iconAnchor: [10, 10] })} />
+      ))}
       {cur && hubs.map((h) => (
         <Polyline key={h.id + cur.id + (h.id === hubId)} className="route" positions={[[cur.lat, cur.lng], [h.lat, h.lng]]} pathOptions={{ color: '#2b2b26', weight: 2, dashArray: '6 7', opacity: h.id === hubId ? 0.9 : 0.35 }} />
       ))}
