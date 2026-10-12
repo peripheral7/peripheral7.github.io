@@ -1,0 +1,189 @@
+/* 입지 비교 — 어두운 위성 지도 위의 유리 패널. 얇은 Pretendard, 라임(대중교통)·주황(차량)·회청(도보) 강조 */
+@font-face {
+  font-family: 'Pretendard Variable';
+  src: url('/fonts/PretendardVariable.woff2') format('woff2'); /* 블로그 공용 글꼴(배포 후 같은 사이트에서 불러옴) */
+  font-weight: 100 900;
+  font-display: swap;
+}
+
+:root {
+  color-scheme: dark;
+  --bg: #0b0c0b;
+  --panel: rgba(24, 25, 23, 0.78);
+  --panel-2: rgba(255, 255, 255, 0.045);
+  --line: rgba(255, 255, 255, 0.08);
+  --line-2: rgba(255, 255, 255, 0.14);
+  --text: #ecebe5;
+  --muted: #8d8f88;
+  --faint: #5d5f59;
+  --transit: #c5ec6f;
+  --car: #f0913f;
+  --walk: #9fb7c9;
+  --radius: 18px;
+  --font: 'Pretendard Variable', Pretendard, -apple-system, BlinkMacSystemFont, 'Apple SD Gothic Neo', 'Malgun Gothic', sans-serif;
+}
+
+* { box-sizing: border-box }
+html, body, #root { height: 100% }
+body { margin: 0; background: var(--bg); color: var(--text); font-family: var(--font); font-weight: 350; font-size: 14px; line-height: 1.5; -webkit-font-smoothing: antialiased }
+button, input { font: inherit; color: inherit }
+button { cursor: pointer }
+:focus-visible { outline: 2px solid var(--transit); outline-offset: 2px }
+
+.glass { background: var(--panel); border: 1px solid var(--line); border-radius: var(--radius); backdrop-filter: blur(18px) saturate(120%); -webkit-backdrop-filter: blur(18px) saturate(120%) }
+
+/* ── 상단 ── */
+.shell { min-height: 100%; display: flex; flex-direction: column; padding: 14px 16px 10px; gap: 12px }
+.topbar { display: flex; align-items: center; gap: 18px }
+.logo { width: 34px; height: 34px; display: grid; place-content: center; gap: 4px; transform: rotate(-35deg); flex: none }
+.logo span { display: block; height: 3px; border-radius: 2px; background: var(--text) }
+.logo span:nth-child(1) { width: 14px; margin-left: 8px } .logo span:nth-child(2) { width: 22px } .logo span:nth-child(3) { width: 14px }
+.pills { display: flex; gap: 4px; padding: 4px; border-radius: 999px; background: var(--panel-2); border: 1px solid var(--line) }
+.pill { border: 0; background: transparent; padding: 7px 16px; border-radius: 999px; color: var(--muted); font-size: 13px; font-weight: 400; white-space: nowrap }
+.pill:hover { color: var(--text) }
+.pill.active { background: #2a2b28; color: var(--text); box-shadow: inset 0 0 0 1px var(--line-2) }
+.back { margin-left: auto; color: var(--muted); text-decoration: none; font-size: 11px; letter-spacing: 0.12em; white-space: nowrap }
+.back:hover { color: var(--text) }
+
+/* ── 본문 배치: 왼쪽 요약 / 오른쪽 지도 + 아래 카드 ── */
+.stage { flex: 1; display: grid; grid-template-columns: 320px minmax(0, 1fr); grid-template-rows: minmax(420px, 1fr) auto; grid-template-areas: 'side map' 'side cards'; gap: 12px; min-height: 0 }
+.map-area { grid-area: map; position: relative; border-radius: var(--radius); overflow: hidden; border: 1px solid var(--line); min-height: 420px }
+.side { grid-area: side; display: flex; flex-direction: column; gap: 12px; min-width: 0 }
+.cards { grid-area: cards; min-width: 0 }
+
+.title { position: absolute; top: 18px; left: 24px; margin: 0; z-index: 500; font-size: 40px; font-weight: 250; letter-spacing: -0.02em; line-height: 1.05; pointer-events: none; text-shadow: 0 2px 18px rgba(0, 0, 0, 0.6) }
+.title small { display: block; margin-top: 6px; font-size: 11px; font-weight: 400; letter-spacing: 0.22em; text-transform: uppercase; color: var(--muted) }
+
+/* ── 지도 ── */
+.map { position: absolute; inset: 0; background: #111 }
+.tiles-imagery { filter: grayscale(0.82) brightness(0.58) contrast(1.18) }
+.leaflet-container { font-family: var(--font) }
+.leaflet-control-attribution { background: rgba(0, 0, 0, 0.55) !important; color: #888 !important; font-size: 10px }
+.leaflet-control-attribution a { color: #aaa !important }
+.pin-shell { background: none; border: 0 }
+.pin { display: grid; place-items: center; width: 34px; height: 34px; border-radius: 50%; font-size: 13px; font-weight: 600; transition: transform 0.2s }
+.pin.cand { background: rgba(20, 21, 19, 0.85); color: var(--text); border: 1.5px solid rgba(255, 255, 255, 0.55); width: 28px; height: 28px; margin: 3px }
+.pin.cand.on { width: 34px; height: 34px; margin: 0; background: var(--transit); color: #11130d; border-color: transparent; box-shadow: 0 0 0 7px rgba(197, 236, 111, 0.18), 0 0 0 18px rgba(197, 236, 111, 0.07) }
+.pin.hub { width: 30px; height: 30px; background: none }
+.pin.hub b, .hub-mark { position: relative; isolation: isolate; display: grid; place-items: center; width: 20px; height: 20px; font-size: 11px; font-weight: 700; color: #1a1006; line-height: 1 }
+.pin.hub b::before, .hub-mark::before { content: ''; position: absolute; inset: 1px; z-index: -1; transform: rotate(45deg); border-radius: 4px; background: var(--car) }
+.tiles-labels { opacity: 0.75 }
+.map-label { background: rgba(16, 17, 15, 0.82); color: var(--text); border: 1px solid var(--line-2); border-radius: 8px; box-shadow: none; font-size: 12px; font-weight: 400; padding: 3px 8px }
+.map-label::before { display: none }
+.route { filter: drop-shadow(0 0 3px rgba(0, 0, 0, 0.7)) }
+.map-controls { position: absolute; left: 18px; bottom: 18px; z-index: 600; display: flex; gap: 8px }
+.map-controls button { width: 36px; height: 36px; border-radius: 50%; border: 1px solid var(--line-2); background: rgba(20, 21, 19, 0.75); color: var(--text); font-size: 16px; backdrop-filter: blur(10px) }
+.map-controls button:hover { background: rgba(40, 41, 38, 0.9) }
+
+/* ── 왼쪽 요약 ── */
+.stats { display: grid; grid-template-columns: 1fr 1fr; padding: 6px }
+.stat { padding: 12px 14px; display: flex; flex-direction: column }
+.stat span { color: var(--muted); font-size: 12px }
+.stat b { font-size: 30px; font-weight: 250; line-height: 1.2 }
+.stat b i { font-style: normal; font-size: 13px; color: var(--faint); margin-left: 3px }
+.stat em { font-style: normal; font-size: 12px; color: var(--muted) }
+.stat.wide { grid-column: span 2; border-top: 1px solid var(--line) }
+.block { padding: 16px }
+.block-head { display: flex; justify-content: space-between; align-items: baseline; margin-bottom: 10px }
+.block-head h2, .carousel-head h2 { margin: 0; font-size: 15px; font-weight: 400 }
+.link { border: 0; background: none; color: var(--muted); font-size: 12px; padding: 0 }
+.link:hover { color: var(--text) }
+.hub-line { display: grid; grid-template-columns: auto 1fr auto; gap: 10px; align-items: center; padding: 9px 0; border-top: 1px solid var(--line) }
+.hub-line b { display: block; font-weight: 450; font-size: 13px }
+.hub-line small { color: var(--muted); font-size: 12px }
+.hub-line strong { font-weight: 300; font-size: 18px }
+.hub-mark { margin: 0 4px; font-size: 10px }
+.weight-bar { display: flex; height: 6px; border-radius: 4px; overflow: hidden; background: var(--panel-2); gap: 2px }
+.w-transit { background: var(--transit) } .w-car { background: var(--car) } .w-walk { background: var(--walk) }
+.weight-legend { display: flex; flex-wrap: wrap; gap: 6px 14px; margin-top: 10px; font-size: 12px; color: var(--muted) }
+.weight-legend i { display: inline-block; width: 8px; height: 8px; border-radius: 2px; margin-right: 6px }
+
+/* ── 후보지 카드(좌우로 넘김) ── */
+.carousel { padding: 16px 16px 12px }
+.carousel-head { display: flex; justify-content: space-between; align-items: center; gap: 12px; margin-bottom: 12px }
+.carousel-head small { color: var(--muted); font-size: 12px }
+.arrows { display: flex; align-items: center; gap: 8px }
+.arrows button { width: 34px; height: 34px; border-radius: 50%; border: 1px solid var(--line-2); background: var(--panel-2); font-size: 18px; line-height: 1 }
+.arrows button:hover { background: rgba(255, 255, 255, 0.1) }
+.count { font-size: 12px; color: var(--muted); min-width: 36px; text-align: center; font-variant-numeric: tabular-nums }
+.track { display: flex; overflow-x: auto; scroll-snap-type: x mandatory; scrollbar-width: none; overscroll-behavior-x: contain; border-radius: 14px }
+.track::-webkit-scrollbar { display: none }
+.slide { flex: 0 0 100%; scroll-snap-align: start; padding: 2px }
+.slide-head { display: flex; justify-content: space-between; align-items: flex-end; gap: 16px; padding: 4px 4px 14px }
+.tag { font-size: 11px; letter-spacing: 0.08em; color: var(--transit) }
+.slide-head h3 { margin: 4px 0 2px; font-size: 22px; font-weight: 350; letter-spacing: -0.01em }
+.slide-head p { margin: 0; color: var(--muted); font-size: 12px }
+.total { text-align: right; white-space: nowrap }
+.total b { font-size: 48px; font-weight: 200; line-height: 1 }
+.total span { color: var(--faint); font-size: 16px; margin-left: 2px }
+.hub-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 10px }
+.hub-block { background: var(--panel-2); border: 1px solid var(--line); border-radius: 14px; padding: 12px 14px 6px }
+.hub-head { display: grid; grid-template-columns: auto 1fr auto; gap: 10px; align-items: center; padding-bottom: 8px; border-bottom: 1px solid var(--line) }
+.hub-head small { display: block; color: var(--muted); font-size: 11px }
+.hub-head b { font-weight: 450 }
+.hub-head strong { font-size: 24px; font-weight: 250 }
+.mode { display: grid; grid-template-columns: 58px 1fr 70px 30px; gap: 10px; align-items: center; padding: 9px 0; border-bottom: 1px solid var(--line) }
+.mode:last-child { border-bottom: 0 }
+.mode-name { font-size: 12px; color: var(--muted) }
+.mode-main b { display: block; font-weight: 400; font-size: 15px; font-variant-numeric: tabular-nums }
+.mode-main small { color: var(--faint); font-size: 11px }
+.mode em { font-style: normal; text-align: right; font-variant-numeric: tabular-nums }
+.bar { height: 4px; border-radius: 3px; background: rgba(255, 255, 255, 0.08); overflow: hidden }
+.bar span { display: block; height: 100% }
+.mode:nth-child(2) .bar span { background: var(--transit) }
+.mode:nth-child(3) .bar span { background: var(--car) }
+.mode:nth-child(4) .bar span { background: var(--walk) }
+.walk-note { margin: 0; padding: 8px 0 6px; font-size: 11px; color: var(--faint) }
+.dots { display: flex; justify-content: center; gap: 6px; margin-top: 12px }
+.dots button { width: 6px; height: 6px; padding: 0; border: 0; border-radius: 3px; background: var(--faint); transition: width 0.2s, background 0.2s }
+.dots button.on { width: 22px; background: var(--transit) }
+
+.foot { margin: 0; text-align: center; color: var(--faint); font-size: 11px }
+
+/* ── 설정·안내 창 ── */
+.overlay { position: fixed; inset: 0; z-index: 2000; background: rgba(0, 0, 0, 0.45); display: flex; justify-content: flex-end; padding: 14px }
+.drawer { width: min(440px, 100%); max-height: 100%; overflow-y: auto; padding: 20px 22px; background: rgba(22, 23, 21, 0.94) }
+.drawer.guide { width: min(620px, 100%) }
+.drawer-head { display: flex; justify-content: space-between; align-items: flex-start }
+.drawer-head small { font-size: 10px; letter-spacing: 0.2em; color: var(--muted) }
+.drawer-head h2 { margin: 4px 0 0; font-size: 24px; font-weight: 300 }
+.close { border: 1px solid var(--line-2); background: none; width: 34px; height: 34px; border-radius: 50%; font-size: 18px }
+.hint { color: var(--muted); font-size: 12px; margin: 8px 0 4px }
+.drawer h3 { font-size: 13px; font-weight: 500; color: var(--transit); margin: 22px 0 8px; letter-spacing: 0.02em }
+.drawer p, .drawer li { color: #c9c9c2; font-size: 13px }
+.drawer ul { padding-left: 18px; margin: 0 }
+.drawer li { margin-bottom: 7px }
+.drawer code { font-size: 12px; background: var(--panel-2); padding: 1px 5px; border-radius: 4px }
+.slider, .trips { display: grid; grid-template-columns: 1fr 140px 40px; gap: 12px; align-items: center; padding: 10px 0; border-top: 1px solid var(--line) }
+.trips { grid-template-columns: 1fr auto }
+.slider b, .trips b { display: block; font-weight: 450 }
+.slider small, .trips small { color: var(--muted); font-size: 11px }
+.slider em { font-style: normal; text-align: right }
+input[type='range'] { width: 100%; accent-color: var(--transit) }
+.stepper { display: flex; align-items: center; gap: 6px }
+.stepper button { width: 30px; height: 30px; border-radius: 50%; border: 1px solid var(--line-2); background: var(--panel-2) }
+.stepper input { width: 52px; text-align: center; padding: 5px; border-radius: 8px; border: 1px solid var(--line-2); background: rgba(0, 0, 0, 0.3) }
+.drawer-foot { display: flex; justify-content: flex-end; gap: 8px; margin-top: 22px }
+.ghost, .solid { border-radius: 999px; padding: 8px 18px; font-size: 13px }
+.ghost { background: none; border: 1px solid var(--line-2) }
+.solid { background: var(--text); color: #111; border: 0; font-weight: 500 }
+
+/* ── 좁은 화면: 지도 → 카드 → 요약 순으로 쌓는다 ── */
+@media (max-width: 960px) {
+  .stage { grid-template-columns: minmax(0, 1fr); grid-template-rows: auto; grid-template-areas: 'map' 'cards' 'side' }
+  .map-area { height: 56vh; min-height: 340px }
+  .title { font-size: 28px }
+}
+@media (max-width: 600px) {
+  .shell { padding: 10px 10px 8px }
+  .topbar { gap: 10px }
+  .back { font-size: 10px; letter-spacing: 0.06em }
+  .pill { padding: 6px 10px; font-size: 12px }
+  .pills .pill.active { display: none }
+  .slide-head { flex-direction: column; align-items: flex-start; gap: 6px }
+  .total { text-align: left }
+  .total b { font-size: 40px }
+  .hub-grid { grid-template-columns: minmax(0, 1fr) }
+  .mode { grid-template-columns: 52px 1fr 44px 28px; gap: 8px }
+  .slider { grid-template-columns: 1fr 110px 36px }
+}
