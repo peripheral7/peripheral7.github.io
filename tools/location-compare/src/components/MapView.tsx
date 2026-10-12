@@ -13,6 +13,7 @@ import { loadNaverMaps, MAP_KEY_ID, onNaverAuthFailure } from '../naver'
 type Props = {
   candidates: Candidate[]; hubs: Hub[]; active: number; onSelect: (index: number) => void; focusKey: number
   hubId: string | null; onHub: (id: string) => void; insights: Insight[]
+  focusHubIds: string[] // 후보지를 고를 때 함께 화면에 넣을 주 목적지(월 왕복 50% 이상)
 }
 
 export const DETAIL_ZOOM = 14 // 이 확대 단계부터 모든 후보지에 장단점(동네 단위가 구분되는 정도)
@@ -30,9 +31,12 @@ function labelHtml(name: string, ins: Insight | undefined, hub: Hub | undefined)
   return `<b>${esc(name)}</b>${head}${pros}${cons}`
 }
 
-function frame(candidates: Candidate[], hubs: Hub[], active: number): [number, number][] {
+/** 고른 후보지 + 주 목적지(없으면 모든 목적지)를 감싸는 점들 */
+function frame(candidates: Candidate[], hubs: Hub[], active: number, focusHubIds: string[]): [number, number][] {
   const cur = candidates[active]
-  const pts = cur ? [cur, ...hubs] : [...candidates, ...hubs]
+  const main = hubs.filter((h) => focusHubIds.includes(h.id))
+  const targets = main.length ? main : hubs
+  const pts = cur ? [cur, ...targets] : [...candidates, ...targets]
   return pts.map((p) => [p.lat, p.lng])
 }
 
@@ -57,7 +61,7 @@ export function MapView(props: Props) {
 
 // ── 네이버 지도 ──────────────────────────────────────────────────────
 /* eslint-disable @typescript-eslint/no-explicit-any */
-function NaverMap({ candidates, hubs, active, onSelect, focusKey, hubId, onHub, insights, onFail }: Props & { onFail: () => void }) {
+function NaverMap({ candidates, hubs, active, onSelect, focusKey, hubId, onHub, insights, focusHubIds, onFail }: Props & { onFail: () => void }) {
   const box = useRef<HTMLDivElement>(null)
   const map = useRef<any>(null)
   const layers = useRef<any[]>([])
@@ -65,12 +69,20 @@ function NaverMap({ candidates, hubs, active, onSelect, focusKey, hubId, onHub, 
   const [zoom, setZoom] = useState(12)
   const detail = zoom >= DETAIL_ZOOM
 
-  const fit = () => {
+  // force=false 면, 이미 그 구간이 알맞게 보이고 있을 때는 움직이지 않는다(같은 자리로 다시 맞추며 흔들리는 것 방지)
+  const fit = (force = false) => {
     const n = window.naver
-    const pts = frame(candidates, hubs, active)
+    const pts = frame(candidates, hubs, active, focusHubIds)
     if (!n || !map.current || !pts.length) return
     const b = new n.maps.LatLngBounds(new n.maps.LatLng(pts[0][0], pts[0][1]), new n.maps.LatLng(pts[0][0], pts[0][1]))
     pts.forEach(([la, ln]) => b.extend(new n.maps.LatLng(la, ln)))
+    if (!force) {
+      const view = map.current.getBounds()
+      const inView = pts.every(([la, ln]) => view.hasLatLng(new n.maps.LatLng(la, ln)))
+      const vs = view.getNE(), vw = view.getSW(), bs = b.getNE(), bw = b.getSW()
+      const fill = Math.max((bs.lat() - bw.lat()) / (vs.lat() - vw.lat()), (bs.lng() - bw.lng()) / (vs.lng() - vw.lng()))
+      if (inView && fill > 0.35) return // 이미 들어와 있고 너무 작지도 않다
+    }
     map.current.fitBounds(b, { top: PAD + 40, right: PAD, bottom: PAD, left: PAD })
   }
 
@@ -121,7 +133,7 @@ function NaverMap({ candidates, hubs, active, onSelect, focusKey, hubId, onHub, 
     })
   }, [ready, candidates, hubs, active, onSelect, onHub, hubId, insights, detail])
 
-  useEffect(() => { if (ready) fit() }, [ready, active, focusKey]) // eslint-disable-line react-hooks/exhaustive-deps
+  useEffect(() => { if (ready) fit() }, [ready, active, focusKey, focusHubIds.join()]) // eslint-disable-line react-hooks/exhaustive-deps
 
   const zoomBy = (d: number) => map.current?.setZoom(map.current.getZoom() + d, true)
   return (
@@ -129,7 +141,7 @@ function NaverMap({ candidates, hubs, active, onSelect, focusKey, hubId, onHub, 
       <div ref={box} className="naver-box" />
       <div className="map-controls">
         <button aria-label="확대" onClick={() => zoomBy(1)}>+</button>
-        <button aria-label="고른 후보지와 목적지 보기" onClick={fit}>◎</button>
+        <button aria-label="고른 후보지와 목적지 보기" onClick={() => fit(true)}>◎</button>
         <button aria-label="축소" onClick={() => zoomBy(-1)}>−</button>
       </div>
     </div>
@@ -140,11 +152,20 @@ function NaverMap({ candidates, hubs, active, onSelect, focusKey, hubId, onHub, 
 // ── OSM(네이버 키가 없을 때) ─────────────────────────────────────────
 const fitOptions = { paddingTopLeft: [PAD, PAD + 40] as [number, number], paddingBottomRight: [PAD, PAD] as [number, number] }
 
+// flyToBounds 는 가까운 곳도 한 번 축소했다 다시 확대해서 흔들려 보였다 → 목표 확대 단계가 같고 이미 다 보이면 그대로 두고,
+// 아니면 fitBounds 로 부드럽게 맞춘다.
+function fitSmart(map: L.Map, pts: [number, number][], force = false) {
+  if (!pts.length) return
+  const b = L.latLngBounds(pts)
+  const target = Math.min(16, map.getBoundsZoom(b, false, L.point(PAD * 2, PAD * 2 + 40)))
+  const z = map.getZoom()
+  if (!force && z === target && map.getBounds().contains(b)) return
+  map.fitBounds(b, { ...fitOptions, maxZoom: 16, animate: true }) // 확대 단계가 같으면 옮기기만 한다
+}
+
 function Framing({ pts, focusKey, active }: { pts: [number, number][]; focusKey: number; active: number }) {
   const map = useMap()
-  useEffect(() => {
-    if (pts.length) map.flyToBounds(L.latLngBounds(pts), { ...fitOptions, duration: 0.6, maxZoom: 16 })
-  }, [map, active, focusKey]) // eslint-disable-line react-hooks/exhaustive-deps
+  useEffect(() => { fitSmart(map, pts) }, [map, active, focusKey, pts.join()]) // eslint-disable-line react-hooks/exhaustive-deps
   return null
 }
 
@@ -159,14 +180,14 @@ function Controls({ pts }: { pts: [number, number][] }) {
   return (
     <div className="map-controls" ref={(el) => { if (el) { L.DomEvent.disableClickPropagation(el); L.DomEvent.disableScrollPropagation(el) } }}>
       <button aria-label="확대" onClick={() => map.zoomIn()}>+</button>
-      <button aria-label="고른 후보지와 목적지 보기" onClick={() => { if (pts.length) map.fitBounds(L.latLngBounds(pts), { ...fitOptions, maxZoom: 16 }) }}>◎</button>
+      <button aria-label="고른 후보지와 목적지 보기" onClick={() => fitSmart(map, pts, true)}>◎</button>
       <button aria-label="축소" onClick={() => map.zoomOut()}>−</button>
     </div>
   )
 }
 
-function OsmMap({ candidates, hubs, active, onSelect, focusKey, hubId, onHub, insights }: Props) {
-  const pts = useMemo(() => frame(candidates, hubs, active), [candidates, hubs, active])
+function OsmMap({ candidates, hubs, active, onSelect, focusKey, hubId, onHub, insights, focusHubIds }: Props) {
+  const pts = useMemo(() => frame(candidates, hubs, active, focusHubIds), [candidates, hubs, active, focusHubIds])
   const [zoom, setZoom] = useState(13)
   const cur = candidates[active]
   const hub = hubs.find((h) => h.id === hubId)

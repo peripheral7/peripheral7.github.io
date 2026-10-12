@@ -1,7 +1,10 @@
 // 처음 열었을 때의 후보지·목적지·선호도(기본값). 방문자가 검색으로 바꾼 목록은 그 브라우저에만 저장되고(store.ts),
 // "처음 목록으로"를 누르면 여기로 돌아온다.
 
-export type Candidate = { id: string; name: string; address: string; lat: number; lng: number }
+export type Candidate = { id: string; name: string; address: string; lat: number; lng: number; category?: string }
+/** 분류 목록(검색해서 넣을 때·후보지를 수정할 때 고른다) */
+export const CANDIDATE_CATEGORIES = ['아파트', '오피스텔', '빌라·다세대', '단독주택', '원룸·기숙사', '기타']
+export const HUB_CATEGORIES = ['학교', '본가', '직장', '교통센터', '상업시설', '병원', '기타']
 export type Place = { name: string; address: string; lat: number; lng: number; category?: string } // 검색 결과 한 건
 export type Hub = { id: string; name: string; category: string; address: string; lat: number; lng: number }
 

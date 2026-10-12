@@ -33,13 +33,18 @@ export function save(state: State) {
 
 const newId = (p: string) => `${p}${Date.now().toString(36)}${Math.random().toString(36).slice(2, 5)}`
 
-export function addCandidate(s: State, place: Place): State {
-  return { ...s, candidates: [...s.candidates, { id: newId('c'), name: place.name, address: place.address, lat: place.lat, lng: place.lng }] }
+export function addCandidate(s: State, place: Place, name?: string, category?: string): State {
+  const c: Candidate = { id: newId('c'), name: (name || place.name).trim().slice(0, 40), address: place.address, lat: place.lat, lng: place.lng, category }
+  return { ...s, candidates: [...s.candidates, c] }
 }
 
 /** 목적지로 넣기. 이미 2곳이면 replaceId 자리를 바꾼다. */
-export function setHub(s: State, place: Place, replaceId?: string): State {
-  const hub: Hub = { id: newId('h'), name: place.name, category: place.category && place.category !== '주소' ? shortCategory(place.category) : '목적지', address: place.address, lat: place.lat, lng: place.lng }
+export function setHub(s: State, place: Place, replaceId?: string, name?: string, category?: string): State {
+  const hub: Hub = {
+    id: newId('h'), name: (name || place.name).trim().slice(0, 40),
+    category: category || (place.category && place.category !== '주소' ? shortCategory(place.category) : '목적지'),
+    address: place.address, lat: place.lat, lng: place.lng,
+  }
   const trips = { ...s.pref.trips, [hub.id]: NEW_HUB_TRIPS }
   let hubs = s.hubs
   if (replaceId) {
@@ -60,9 +65,26 @@ export function removeHub(s: State, id: string): State {
 // 네이버 분류 "교육,학술>대학교" → "대학교"
 const shortCategory = (c: string) => c.split('>').pop()!.trim().slice(0, 8)
 
-/** 후보지 이름 바꾸기(빈 이름이면 그대로 둔다). */
-export function renameCandidate(s: State, id: string, name: string): State {
-  const n = name.trim().slice(0, 40)
-  if (!n) return s
-  return { ...s, candidates: s.candidates.map((c) => (c.id === id ? { ...c, name: n } : c)) }
+/** 후보지 이름·분류 고치기(빈 이름이면 이름은 그대로 둔다). */
+export function updateCandidate(s: State, id: string, patch: { name?: string; category?: string }): State {
+  const name = patch.name?.trim().slice(0, 40)
+  return { ...s, candidates: s.candidates.map((c) => (c.id === id ? { ...c, ...(name ? { name } : {}), ...(patch.category !== undefined ? { category: patch.category || undefined } : {}) } : c)) }
+}
+
+/** 검색 결과의 네이버 분류로 목적지 분류를 짐작한다(등록 창의 기본값). */
+export function guessHubCategory(place: Place): string {
+  const t = `${place.category ?? ''} ${place.name}`
+  if (/학교|대학|교육/.test(t)) return '학교'
+  if (/역|터미널|정류장|교통|환승/.test(t)) return '교통센터'
+  if (/병원|의원|의료/.test(t)) return '병원'
+  if (/마트|백화점|쇼핑|상가|시장/.test(t)) return '상업시설'
+  if (/회사|사무|오피스|산업|공단/.test(t)) return '직장'
+  return '기타'
+}
+export function guessCandidateCategory(place: Place): string {
+  const t = `${place.category ?? ''} ${place.name}`
+  if (/아파트|자이|래미안|힐스테이트|푸르지오|e편한|아이파크|더샵|롯데캐슬/.test(t)) return '아파트'
+  if (/오피스텔/.test(t)) return '오피스텔'
+  if (/빌라|다세대|연립/.test(t)) return '빌라·다세대'
+  return '기타'
 }

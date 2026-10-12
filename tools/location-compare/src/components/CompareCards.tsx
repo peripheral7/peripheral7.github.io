@@ -13,7 +13,7 @@ export function CompareCards({ results, hubs, active, onSelect }: Props) {
 
   return (
     <div className="panel compare">
-      <div className="panel-head"><h2>후보지별 비교</h2><small className="muted">같은 줄을 옆으로 읽으면 비교됩니다 · 카드를 누르면 그 후보지를 지도에</small></div>
+      <div className="panel-head"><h2>후보지별 비교</h2><small className="muted">점수 높은 순 · 같은 줄을 옆으로 읽으면 비교됩니다 · 카드를 누르면 그 후보지를 지도에</small></div>
       <div className="cards-scroll">
         <div className="cards-grid" style={{ gridTemplateRows: `repeat(${rows}, auto)`, gridTemplateColumns: `112px repeat(${results.length}, minmax(232px, 1fr))` }}>
           {/* 왼쪽 줄 이름 */}
@@ -27,7 +27,7 @@ export function CompareCards({ results, hubs, active, onSelect }: Props) {
             ])}
           </div>
 
-          {results.map((r, i) => (
+          {results.map((r, i) => ({ r, i })).sort((a, b) => a.r.rank - b.r.rank).map(({ r, i }) => (
             <button key={r.candidate.id} className={'col card' + (i === active ? ' on' : '')} style={{ gridRow: `1 / span ${rows}` }} onClick={() => onSelect(i)}>
               <div className="cell head-cell">
                 <span className="rank">{r.rank}</span>

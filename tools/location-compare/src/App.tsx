@@ -1,7 +1,7 @@
 import { useCallback, useEffect, useMemo, useState } from 'react'
-import { MAX_HUBS, type Place } from './data'
+import { CANDIDATE_CATEGORIES, MAX_HUBS, type Place } from './data'
 import { evaluate, fmt, hubInsights } from './scoring'
-import { addCandidate, defaults, load, removeCandidate, removeHub, renameCandidate, save, setHub, type State } from './store'
+import { addCandidate, defaults, load, removeCandidate, removeHub, save, setHub, updateCandidate, type State } from './store'
 import { MapView } from './components/MapView'
 import { SearchBox } from './components/SearchBox'
 import { ModeScorePanel, FactorsPanel } from './components/Panels'
@@ -16,7 +16,7 @@ export default function App() {
   const [pop, setPop] = useState<'none' | 'trips' | 'weights'>('none')
   const [guide, setGuide] = useState(false)
   const [hubPick, setHubPick] = useState<string | null>(null) // 지도 장단점 기준 목적지
-  const [editing, setEditing] = useState<string | null>(null) // 이름 바꾸는 중인 후보지 id
+  const [editing, setEditing] = useState<{ id: string; name: string; category: string } | null>(null) // 수정 중인 후보지
   const { candidates, hubs, pref } = state
   const results = useMemo(() => (candidates.length ? evaluate(candidates, hubs, pref) : []), [candidates, hubs, pref])
   const best = results.find((r) => r.rank === 1)
@@ -30,8 +30,8 @@ export default function App() {
 
   const select = useCallback((i: number) => setActive(i), [])
   const update = (next: State, nextActive?: number) => { setState(next); if (nextActive !== undefined) setActive(nextActive); setFocusKey((k) => k + 1) }
-  const onCandidate = (p: Place) => update(addCandidate(state, p), candidates.length)
-  const onHub = (p: Place, replaceId?: string) => update(setHub(state, p, replaceId))
+  const onCandidate = (p: Place, name: string, category: string) => update(addCandidate(state, p, name, category), candidates.length)
+  const onHub = (p: Place, replaceId: string | undefined, name: string, category: string) => update(setHub(state, p, replaceId, name, category))
   const toggle = (k: 'trips' | 'weights') => setPop((p) => (p === k ? 'none' : k))
   // 카드를 누르면(또는 Enter·Space) 설정 창이 열리게 하는 속성
   const tap = (k: 'trips' | 'weights', label: string) => ({
@@ -40,9 +40,16 @@ export default function App() {
     onKeyDown: (e: React.KeyboardEvent) => { if ((e.key === 'Enter' || e.key === ' ') && e.target === e.currentTarget) { e.preventDefault(); toggle(k) } },
   })
   const w = pref.weights
-  const commitName = (id: string, value: string) => { setState(renameCandidate(state, id, value)); setEditing(null) }
+  const saveEdit = () => { if (editing) setState(updateCandidate(state, editing.id, { name: editing.name, category: editing.category })); setEditing(null) }
+  const deleteEdit = () => { if (editing && confirm('이 후보지를 삭제할까요?')) { update(removeCandidate(state, editing.id)); setEditing(null) } }
   const close = () => setPop('none')
   const tripSum = hubs.reduce((a, h) => a + (pref.trips[h.id] ?? 0), 0)
+  // 주 목적지 = 월 왕복 비율 50% 이상(보통 1곳, 반반이면 2곳). 횟수가 모두 0이면 전부.
+  const mainHubIds = useMemo(() => {
+    const total = hubs.reduce((a, h) => a + (pref.trips[h.id] ?? 0), 0)
+    const main = total > 0 ? hubs.filter((h) => (pref.trips[h.id] ?? 0) / total >= 0.5) : hubs
+    return (main.length ? main : hubs).map((h) => h.id)
+  }, [hubs, pref.trips])
 
   return (
     <div className="shell">
@@ -57,9 +64,9 @@ export default function App() {
 
       <main className="stage">
         <div className="panel stats-line">
-          <span><small>후보지</small><b>{candidates.length}</b></span>
-          <span><small>주요 목적지</small><b>{hubs.length}<i>/{MAX_HUBS}</i></b></span>
-          <span className="best-cell"><small>최고 점수</small><b>{best ? fmt(best.total) : '—'}</b><em>{best?.candidate.name}</em></span>
+          <div className="stat"><small>후보지</small><b>{candidates.length}</b></div>
+          <div className="stat"><small>주요 목적지</small><b>{hubs.length}<i>/{MAX_HUBS}</i></b></div>
+          <div className="stat best-cell"><small>최고 점수{best ? ` · ${best.candidate.name}` : ''}</small><b>{best ? fmt(best.total) : '—'}</b></div>
         </div>
 
         <div className="modes-area anchor">
@@ -78,20 +85,34 @@ export default function App() {
               {candidates.map((c, i) => <button key={c.id} role="tab" aria-selected={i === active} className={i === active ? 'on' : ''} onClick={() => select(i)} title={c.name}>{i + 1}</button>)}
             </div>
             {cur && (
-              <div className="sel-head">
-                <div className="sel-text">
-                  <span className="tag">후보 {String(active + 1).padStart(2, '0')} · 종합 {cur.rank}위</span>
-                  {editing === cur.candidate.id ? (
-                    <form className="rename" onSubmit={(e) => { e.preventDefault(); commitName(cur.candidate.id, (e.currentTarget.elements.namedItem('n') as HTMLInputElement).value) }}>
-                      <input name="n" defaultValue={cur.candidate.name} maxLength={40} autoFocus aria-label="후보지 이름" onKeyDown={(e) => { if (e.key === 'Escape') setEditing(null) }} onBlur={(e) => commitName(cur.candidate.id, e.target.value)} />
-                    </form>
-                  ) : (
-                    <h3><span>{cur.candidate.name}</span><button className="rename-btn" title="이름 바꾸기" aria-label={`${cur.candidate.name} 이름 바꾸기`} onClick={() => setEditing(cur.candidate.id)}>✎</button></h3>
-                  )}
-                  <p>{cur.candidate.address}</p>
+              editing?.id === cur.candidate.id ? (
+                <form className="cand-edit" onSubmit={(e) => { e.preventDefault(); saveEdit() }} onKeyDown={(e) => { if (e.key === 'Escape') setEditing(null) }}>
+                  <span className="tag">후보 {String(active + 1).padStart(2, '0')} 수정</span>
+                  <label>이름<input value={editing.name} maxLength={40} autoFocus onChange={(e) => setEditing({ ...editing, name: e.target.value })} /></label>
+                  <label>분류
+                    <select value={editing.category} onChange={(e) => setEditing({ ...editing, category: e.target.value })}>
+                      <option value="">(없음)</option>
+                      {CANDIDATE_CATEGORIES.map((c) => <option key={c}>{c}</option>)}
+                    </select>
+                  </label>
+                  <p className="muted">{cur.candidate.address}</p>
+                  <div className="edit-actions">
+                    <button type="button" className="danger" onClick={deleteEdit}>삭제</button>
+                    <span />
+                    <button type="button" className="ghost" onClick={() => setEditing(null)}>취소</button>
+                    <button type="submit" className="solid">저장</button>
+                  </div>
+                </form>
+              ) : (
+                <div className="sel-head">
+                  <div className="sel-text">
+                    <span className="tag">후보 {String(active + 1).padStart(2, '0')} · 종합 {cur.rank}위{cur.candidate.category ? ` · ${cur.candidate.category}` : ''}</span>
+                    <h3>{cur.candidate.name}</h3>
+                    <p>{cur.candidate.address}</p>
+                  </div>
+                  <button className="edit-btn" aria-label={`${cur.candidate.name} 수정`} onClick={() => setEditing({ id: cur.candidate.id, name: cur.candidate.name, category: cur.candidate.category ?? '' })}>수정</button>
                 </div>
-                <button className="x" title="이 후보지 빼기" aria-label={`${cur.candidate.name} 빼기`} onClick={() => update(removeCandidate(state, cur.candidate.id))}>×</button>
-              </div>
+              )
             )}
             <div className={'hub-list tappable' + (pop === 'trips' ? ' on' : '')} {...tap('trips', '목적지별 월 왕복 횟수 조정 열기')}>
               <div className="hub-list-head"><span>주요 목적지</span><span className="tap-hint">월 왕복 횟수 ↗</span></div>
@@ -113,7 +134,7 @@ export default function App() {
         </div>
 
         <section className="map-area">
-          <MapView candidates={candidates} hubs={hubs} active={active} onSelect={select} focusKey={focusKey} hubId={hubId} onHub={setHubPick} insights={insights} />
+          <MapView candidates={candidates} hubs={hubs} active={active} onSelect={select} focusKey={focusKey} hubId={hubId} onHub={setHubPick} insights={insights} focusHubIds={mainHubIds} />
           <SearchBox hubs={hubs} onCandidate={onCandidate} onHub={onHub} />
         </section>
 
