@@ -1,6 +1,6 @@
 {
   "_설명": "상권 분석 분류. 상가(상권)정보 소분류 코드(scls) 또는 코드 앞자리(prefix), 상호 이름(names, 포함 검색)으로 고른다. 셋 중 하나라도 맞으면 그 분류. names 는 names_scls(있으면) 소분류 안에서만 본다 — 예: 홈플러스 안 옷가게·카페, 노브랜드 버거가 마트로 잡히지 않게. exclude 는 빼는 소분류. 코드 목록은 node scripts/stores.mjs codes 로 본다.",
-  "radii": [500, 1000],
+  "radii": [400, 500, 1000],
   "categories": [
     {
       "id": "cafe",
@@ -89,5 +89,26 @@
       "emoji": "💊",
       "scls": ["G21501"]
     }
-  ]
+  ],
+  "walk5": 400,
+  "_walk5": "도보 5분 = 400m(화면의 도보 속도 시속 4.7km × 5분 ≈ 390m). 상권 지수는 이 반경의 개수로 계산",
+  "defaultPrefs": {
+    "need": ["mart", "pharmacy", "clinic"],
+    "want": ["cafe", "food", "beauty"]
+  },
+  "majorsRadius": 1000,
+  "majors": [
+    {"brand": "올리브영", "cat": "beauty", "names": ["올리브영"], "names_scls": ["G20404", "G20499", "G22199", "G21503", "G21202"]},
+    {"brand": "다이소", "cat": "variety", "names": ["다이소"], "names_scls": ["G20404", "G20499", "G22199", "G21503", "G21202"]},
+    {"brand": "노브랜드", "cat": "mart", "names": ["노브랜드"], "names_scls": ["G20404", "G20499", "G22199", "G21503", "G21202"]},
+    {"brand": "트레이더스", "cat": "mart", "names": ["트레이더스"], "names_scls": ["G20404", "G20499", "G22199", "G21503", "G21202"]},
+    {"brand": "이마트", "cat": "mart", "names": ["이마트"], "exclude_names": ["이마트24", "이마트에브리데이"], "names_scls": ["G20404", "G20499", "G22199"]},
+    {"brand": "이마트에브리데이", "cat": "mart", "names": ["이마트에브리데이"], "names_scls": ["G20404", "G20499", "G22199"]},
+    {"brand": "홈플러스", "cat": "mart", "names": ["홈플러스"], "names_scls": ["G20404", "G20499", "G22199"]},
+    {"brand": "롯데마트", "cat": "mart", "names": ["롯데마트", "롯데슈퍼"], "names_scls": ["G20404", "G20499", "G22199"]},
+    {"brand": "코스트코", "cat": "mart", "names": ["코스트코"], "names_scls": ["G20404", "G20499", "G22199"]},
+    {"brand": "킴스클럽", "cat": "mart", "names": ["킴스클럽"], "names_scls": ["G20404", "G20499", "G22199"]},
+    {"brand": "스타벅스", "cat": "cafe", "names": ["스타벅스"], "names_scls": ["I21201"]}
+  ],
+  "_majors": "지도에 따로 표시하는 주요 매장. 위에서부터 먼저 맞는 브랜드 하나만(예: 이마트_노브랜드 → 노브랜드). 후보지 majorsRadius 안, 같은 브랜드가 80m 안에 겹치면 하나로"
 }

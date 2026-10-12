@@ -555,3 +555,6 @@ button { cursor: pointer }
 .trip-input .unit-input { gap: 4px }
 /* 목적지가 3곳이면 오른쪽 위 단추가 길어져 검색창과 겹친다 → "후보지 한눈에"는 아래 줄로 */
 @media (min-width: 761px) { .map-top { flex-direction: column; align-items: flex-end; gap: 6px } }
+
+/* 구역 구분선(학교·본가·그 외 정보) — 진하게 */
+.cell.sect { border-top: 2px solid rgba(24, 39, 56, 0.4); margin-top: -1px }

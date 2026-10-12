@@ -13,11 +13,11 @@ const Line = ({ v, kind }: { v: number; kind: 'total' | 'hub' | 'transit' | 'car
 )
 
 // 보증금/월세(만원) + 연한 글씨로 "보증금 1,000 기준 월 ○○만원" — 보증금이 달라도 월세를 한 기준으로 비교
-function RentCell({ c }: { c: { deposit?: number; rent?: number } }) {
+function RentCell({ c, sect }: { c: { deposit?: number; rent?: number }; sect?: boolean }) {
   const b = baseRent(c)
-  if (b === null) return <div className="cell rent-cell"><span className="muted">미입력 · 수정에서 입력</span></div>
+  if (b === null) return <div className={"cell rent-cell" + (sect ? " sect" : "")}><span className="muted">미입력 · 수정에서 입력</span></div>
   return (
-    <div className="cell rent-cell">
+    <div className={"cell rent-cell" + (sect ? " sect" : "")}>
       <b>{won(c.deposit ?? 0)} / {c.rent ?? 0}<small>만원</small></b>
       <small className="faint">보증금 {won(BASE_DEPOSIT)} 기준 월 {b}만원</small>
     </div>
@@ -39,14 +39,14 @@ export function CompareCards({ results, hubs, active, onSelect, onRename }: Prop
           {/* 왼쪽 줄 이름 */}
           <div className="col labels" style={{ gridRow: `1 / span ${rows}` }}>
             <div className="cell head-cell"><span className="muted">후보지</span></div>
-            <div className="cell row-label rent-label">보증금/월세</div>
-            <div className="cell row-label">🏪 상권 종합</div>
             {hubs.map((h) => [
-              <div key={h.id + 'h'} className="cell hub-cell"><span className="hub-mark" aria-hidden>{hubEmoji(h.category)}</span><span>{h.category}</span></div>,
+              <div key={h.id + 'h'} className="cell hub-cell sect"><span className="hub-mark" aria-hidden>{hubEmoji(h.category)}</span><span>{h.category}</span></div>,
               <div key={h.id + 't'} className="cell row-label"><span className="dot transit" />대중교통</div>,
               <div key={h.id + 'c'} className="cell row-label"><span className="dot car" />차량</div>,
               <div key={h.id + 'w'} className="cell row-label"><span className="dot walk" />도보</div>,
             ])}
+            <div className="cell row-label rent-label sect">보증금/월세</div>
+            <div className="cell row-label">🏪 상권 종합</div>
           </div>
 
           {results.map((r, i) => ({ r, i })).sort((a, b) => a.r.rank - b.r.rank).map(({ r, i }) => (
@@ -69,15 +69,13 @@ export function CompareCards({ results, hubs, active, onSelect, onRename }: Prop
                 )}
                 <strong className={isBest(r.total, best((x) => x.total)) ? 'best' : ''}>{fmt(r.total)}<Line v={r.total} kind="total" /></strong>
               </div>
-              <RentCell c={r.candidate} />
-              <div className="cell mode-cell"><div><span className="muted">준비 중</span></div></div>
               {r.hubs.map((h, hi) => {
                 const t = h.trip, s = h.scores
                 const diff = t.carRush - t.carFree
                 const { free, rush } = t.carSource
                 const measured = free && rush ? ' · 네이버 실측' : free ? ' · 낮 실측·출퇴근 추정' : rush ? ' · 출퇴근 실측·낮 추정' : ' · 거리 추정'
                 return [
-                  <div key={h.hub.id + 'h'} className="cell hub-cell"><span>{h.hub.name}</span><small>{t.km.toFixed(1)}km · 반영 {Math.round(h.share * 100)}%</small><b className={isBest(h.hubScore, best((x) => x.hubs[hi].hubScore)) ? 'best' : ''}>{fmt(h.hubScore)}<Line v={h.hubScore} kind="hub" /></b></div>,
+                  <div key={h.hub.id + 'h'} className="cell hub-cell sect"><span>{h.hub.name}</span><small>{t.km.toFixed(1)}km · 반영 {Math.round(h.share * 100)}%</small><b className={isBest(h.hubScore, best((x) => x.hubs[hi].hubScore)) ? 'best' : ''}>{fmt(h.hubScore)}<Line v={h.hubScore} kind="hub" /></b></div>,
                   <div key={h.hub.id + 't'} className="cell mode-cell">
                     {h.transitSkipped
                       ? <div><span className="muted">도보 {t.walk}분 · 걸어가니 대중교통 제외</span></div>
@@ -95,6 +93,8 @@ export function CompareCards({ results, hubs, active, onSelect, onRename }: Prop
                   </div>,
                 ]
               })}
+              <RentCell c={r.candidate} sect />
+              <div className="cell mode-cell"><div><span className="muted">준비 중</span></div></div>
             </div>
           ))}
         </div>
