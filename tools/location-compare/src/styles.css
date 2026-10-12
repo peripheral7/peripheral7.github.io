@@ -301,3 +301,16 @@ button { cursor: pointer }
 .score-line.transit { --c: var(--transit) }
 .score-line.car { --c: var(--car) }
 .score-line.walk { --c: var(--walk) }
+
+/* 지도 높이 = 왼쪽 두 패널 높이이므로 왼쪽을 조금 촘촘하게 */
+.modes-area .panel, .selected { padding: 14px 16px }
+.gauge { max-height: 64px }
+.gauge-wrap { padding: 2px 0 0 }
+.mode-rows { margin-top: 6px }
+.mode-row { padding: 6px 0 }
+.pick { margin-bottom: 8px }
+.pick button { width: 28px; height: 28px }
+.sel-head { padding-bottom: 8px }
+.sel-head h3 { font-size: 18px }
+.hub-line { padding: 6px 0 }
+.hub-list-head { padding: 4px 0 0 }
