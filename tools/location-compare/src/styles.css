@@ -345,3 +345,42 @@ button { cursor: pointer }
 .pen:hover, .pen:focus-visible { color: var(--text); background: var(--panel-2) }
 .name-edit input { width: 100%; font-size: 15px; font-weight: 600; padding: 4px 8px; border: 1px solid var(--line-2); border-radius: 8px; background: #fff; color: var(--text) }
 .name-edit input:focus { outline: 2px solid var(--transit); outline-offset: 0 }
+
+/* ── 길고양이 지수 ── */
+.soon-head { margin: 14px 0 0 !important; font-size: 11px !important; color: var(--faint) !important }
+.cat-factor { display: block; padding: 12px 12px; margin: 8px 0 4px; border: 1px solid var(--line-2); border-radius: 14px; background: var(--panel-2, #f6f8f9) }
+.cat-factor.on { background: var(--accent); border-color: transparent }
+.factor-pick { display: flex; gap: 10px; align-items: flex-start; cursor: pointer }
+.factor-pick input { margin-top: 4px; width: 16px; height: 16px; accent-color: var(--good) }
+.factor-pick small { display: block }
+.cat-notes { margin: 8px 0 0; padding-left: 18px; color: var(--muted); font-size: 11px }
+.cat-notes li { margin-bottom: 3px }
+.cat-now { margin-top: 10px; padding-top: 10px; border-top: 1px solid var(--line-2) }
+.cat-now-line { display: flex; justify-content: space-between; align-items: center; gap: 10px; font-size: 13px }
+.cat-now-line em { font-style: normal; font-size: 20px; font-weight: 350; display: inline-flex; flex-direction: column; align-items: flex-end; gap: 3px }
+.cat-now-line em .ticks { width: 80px; height: 8px; color: #b9772f }
+.ticks.cat { color: #b9772f }
+.cat-actions { display: flex; gap: 8px; justify-content: flex-end; margin-top: 10px }
+.cat-actions button { padding: 6px 14px; font-size: 12px }
+.score-line.cat { --c: #b9772f }
+.cat-cell small { display: block }
+.cat-link { margin-top: 4px; padding: 0; border: 0; background: none; color: var(--good); font-size: 11px; text-decoration: underline; cursor: pointer }
+.cat-dlg { display: flex; flex-direction: column; gap: 12px; align-self: center; margin: auto }
+.overlay:has(.cat-dlg) { justify-content: center }
+.cat-rules { background: var(--panel-2, #f6f8f9); border-radius: 12px; padding: 10px 12px 4px 28px !important }
+.cat-gps { display: flex; justify-content: space-between; align-items: center; gap: 10px; font-size: 12px; padding: 8px 12px; border-radius: 10px; background: #eef2f4 }
+.cat-gps.ok { background: var(--accent) } .cat-gps.fail { background: #fbeee0; color: #9a4f17 }
+.cat-gps button { padding: 4px 12px; font-size: 12px }
+.cat-field { display: flex; flex-direction: column; gap: 6px; font-size: 12px; color: var(--muted) }
+.cat-field input:not([hidden]), .cat-field select { font-size: 14px; padding: 7px 10px; border: 1px solid var(--line-2); border-radius: 10px; background: #fff; color: var(--text) }
+.cat-photo { display: flex; align-items: center; gap: 12px }
+.cat-photo img { width: 112px; height: 112px; object-fit: cover; border-radius: 12px; border: 1px solid var(--line-2) }
+.chips { display: flex; gap: 6px; flex-wrap: wrap }
+.chip { border: 1px solid var(--line-2); background: #fff; border-radius: 999px; padding: 5px 14px; font-size: 13px }
+.chip.on { background: var(--text); color: #fff; border-color: var(--text) }
+.warn-line { margin: 0; padding: 8px 12px; border-radius: 10px; background: #fbeee0; color: #9a4f17 !important }
+.upload-off { margin: 0 }
+.cat-big { width: 100%; max-height: 52vh; object-fit: contain; background: #111; border-radius: 12px }
+.cat-meta { display: flex; flex-direction: column; gap: 3px; font-size: 13px }
+.cat-nav { display: flex; justify-content: space-between; align-items: center }
+.ghost:disabled, .solid:disabled { opacity: 0.4; cursor: default }

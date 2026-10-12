@@ -8,6 +8,8 @@ import { ModeScorePanel, FactorsPanel } from './components/Panels'
 import { CompareCards } from './components/CompareCards'
 import { SettingsPopover } from './components/SettingsPopover'
 import { GuidePanel } from './components/GuidePanel'
+import { CatGallery, CatRegister } from './components/CatPanel'
+import { catIndex, loadCats, pruneCats, removeMyPhoto, saveCats, type CatState } from './cats'
 
 // " · 3,000/40 (1,000 기준 월 50)" — 금액을 안 넣었으면 빈 글자
 const rentText = (c: { deposit?: number; rent?: number }) => {
@@ -23,6 +25,9 @@ export default function App() {
   const [guide, setGuide] = useState(false)
   const [hubPick, setHubPick] = useState<string | null>(null) // 지도 장단점 기준 목적지
   const [editing, setEditing] = useState<{ id: string; name: string; deposit: string; rent: string } | null>(null) // 수정 중인 후보지(금액은 입력 글자 그대로)
+  const [catState, setCatState] = useState<CatState>(() => pruneCats(loadCats())) // 길고양이 지수(선택 요인) — 사진은 이 브라우저에만 저장
+  const [catDlg, setCatDlg] = useState<'none' | 'register' | 'gallery'>('none')
+  const [galleryIdx, setGalleryIdx] = useState<number | null>(null) // 카드에서 "사진 보기"를 누른 후보지(없으면 선택한 후보지)
   const { candidates, hubs, pref } = state
   const results = useMemo(() => (candidates.length ? evaluate(candidates, hubs, pref) : []), [candidates, hubs, pref])
   const cur = results[Math.min(active, results.length - 1)]
@@ -31,6 +36,9 @@ export default function App() {
   const insights = useMemo(() => (hubIndex >= 0 ? hubInsights(results, hubIndex) : results.map(() => ({ pros: [], cons: [] }))), [results, hubIndex])
 
   useEffect(() => { save(state) }, [state])
+  useEffect(() => { saveCats(catState) }, [catState])
+  const catIdx = useMemo(() => (catState.on ? candidates.map((c) => catIndex(c, catState.cats)) : null), [catState, candidates])
+  const setCats = (next: CatState) => { const ok = saveCats(next); if (ok) setCatState(next); return ok }
   useEffect(() => { if (active > candidates.length - 1) setActive(Math.max(0, candidates.length - 1)) }, [candidates.length, active])
 
   const select = useCallback((i: number) => setActive(i), [])
@@ -136,15 +144,23 @@ export default function App() {
           <SearchBox hubs={hubs} onCandidate={onCandidate} onHub={onHub} />
         </section>
 
-        <aside className="factors-area"><FactorsPanel /></aside>
+        <aside className="factors-area">
+          <FactorsPanel cat={catIdx && cur ? catIdx[Math.min(active, catIdx.length - 1)] ?? null : null} catOn={catState.on} target={cur?.candidate.name ?? '후보지 없음'}
+            onToggleCat={() => setCats({ ...catState, on: !catState.on })} onRegister={() => setCatDlg('register')} onGallery={() => { setGalleryIdx(null); setCatDlg('gallery') }} />
+        </aside>
 
         <section className="cards-area">
-          {results.length > 0 && <CompareCards results={results} hubs={hubs} active={active} onSelect={select} onRename={rename} />}
+          {results.length > 0 && <CompareCards results={results} hubs={hubs} active={active} onSelect={select} onRename={rename} cats={catIdx ?? undefined} onCatPhotos={(i) => { setGalleryIdx(i); setCatDlg('gallery') }} />}
         </section>
       </main>
 
       <p className="foot">이동 시간은 좌표 거리로 추정한 값입니다(차량은 네이버 실측이 있으면 그 값) · 바꾼 후보지·목적지·선호도는 이 브라우저에만 저장됩니다</p>
       {guide && <GuidePanel onClose={() => setGuide(false)} />}
+      {catDlg === 'register' && <CatRegister state={catState} onChange={setCats} onClose={() => setCatDlg('none')} />}
+      {catDlg === 'gallery' && catIdx && (() => {
+        const i = Math.min(galleryIdx ?? active, catIdx.length - 1)
+        return <CatGallery title={candidates[i]?.name ?? ''} cats={catIdx[i]?.cats ?? []} user={catState.user} onRemoveMine={(id) => setCats(removeMyPhoto(catState, id))} onClose={() => setCatDlg('none')} />
+      })()}
     </div>
   )
 }

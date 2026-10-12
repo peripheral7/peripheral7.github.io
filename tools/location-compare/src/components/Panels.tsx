@@ -1,5 +1,6 @@
 import type { ReactNode } from 'react'
 import { fmt, type CandidateResult } from '../scoring'
+import { CAT_BASE, CAT_FOUR, CAT_MAX, CAT_RADIUS_M, PHOTO_VALID_DAYS, type CatIndex } from '../cats'
 
 // ── 고른 후보지의 수단별 점수(게이지 + 눈금 막대) ──────────────────────
 // 수단 점수는 목적지별 점수를 "월 왕복 비율"로 평균한 값(종합 점수와 같은 비율). 도보는 걸어갈 수 있는 목적지만.
@@ -72,9 +73,12 @@ export function ModeScorePanel({ r, action }: { r: CandidateResult; action: Reac
   )
 }
 
-// ── 오른쪽 위: 앞으로 넣을 입지 요인 자리 ─────────────────────────────
-export function FactorsPanel() {
-  const items = [
+// ── 오른쪽 위: 입지 요인(지수) ────────────────────────────────────────
+// 길고양이 지수는 선택해서 목록에 넣는다(넣으면 아래 후보지 카드에 한 줄이 생긴다). 나머지는 준비 중.
+type FactorsProps = { cat: CatIndex | null; catOn: boolean; target: string; onToggleCat: () => void; onRegister: () => void; onGallery: () => void }
+
+export function FactorsPanel({ cat, catOn, target, onToggleCat, onRegister, onGallery }: FactorsProps) {
+  const soon = [
     { name: '도보 5분 상권', note: '편의점·마트·카페·병원 등 걸어서 5분 안의 생활 업종' },
     { name: '산책', note: '공원·하천변·녹지까지의 거리와 넓이' },
     { name: '평화로움', note: '큰길·유흥가·소음원과의 거리' },
@@ -82,9 +86,36 @@ export function FactorsPanel() {
   ]
   return (
     <div className="panel factors">
-      <div className="panel-head"><h2>입지 요인</h2><span className="soon">준비 중</span></div>
-      <p className="muted">후보지별로 아래 지수를 더할 예정입니다.</p>
-      {items.map((x) => (
+      <div className="panel-head"><h2>입지 요인</h2><span className="soon">선택해서 추가</span></div>
+      <div className={'factor cat-factor' + (catOn ? ' on' : '')}>
+        <div className="factor-top">
+          <label className="factor-pick">
+            <input type="checkbox" checked={catOn} onChange={onToggleCat} aria-label="길고양이 지수를 목록에 추가" />
+            <span><b>🐈 길고양이 지수</b><small>반경 {CAT_RADIUS_M}m 안에서 마주칠 수 있는 고양이가 많을수록 높아짐</small></span>
+          </label>
+        </div>
+        <ul className="cat-notes">
+          <li>사진 {PHOTO_VALID_DAYS}일(약 2달)간 유효</li>
+          <li>한 사람이 고양이 한 마리에 사진 한 장</li>
+          <li>현장에서만 등록 · 서버 업로드는 준비 중(이 브라우저에만 저장)</li>
+          <li>1마리 {CAT_BASE}점 · 4마리 {CAT_FOUR}점 · 다양한 사용자 참여 시 최대 {CAT_MAX}점</li>
+        </ul>
+        {catOn && (
+          <div className="cat-now">
+            <div className="cat-now-line">
+              <span><b>{target}</b>{cat ? <> · 고양이 {cat.n}마리 · 참여 {cat.users}명</> : null}</span>
+              <em>{cat ? fmt(cat.score) : '—'}<span className="ticks cat" aria-hidden><span style={{ width: `${(cat?.score ?? 0) * 10}%` }} /></span></em>
+            </div>
+            {cat && cat.nextHint && <small className="faint">다음 단계: {cat.nextHint}</small>}
+            <div className="cat-actions">
+              <button type="button" className="ghost" onClick={onGallery} disabled={!cat || cat.photos === 0}>사진 보기{cat && cat.photos ? ` (${cat.photos})` : ''}</button>
+              <button type="button" className="solid" onClick={onRegister}>현장에서 등록</button>
+            </div>
+          </div>
+        )}
+      </div>
+      <p className="muted soon-head">준비 중인 지수</p>
+      {soon.map((x) => (
         <div className="factor" key={x.name}>
           <div><b>{x.name}</b><small>{x.note}</small></div>
           <span className="ticks empty" aria-hidden />
