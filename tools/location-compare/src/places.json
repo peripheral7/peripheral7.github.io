@@ -1,0 +1,479 @@
+{
+  "source": "OpenStreetMap(Overpass) · 소상공인시장진흥공단 상가(상권)정보",
+  "osmAt": "2026-10-12",
+  "generatedAt": "2026-10-12",
+  "candidates": {
+    "c1": {
+      "name": "망포역 신원로",
+      "lat": 37.24858,
+      "lng": 127.05555,
+      "peace": {
+        "score": 9.8,
+        "food": 2,
+        "foodScore": 9.6,
+        "road": {
+          "name": "덕영대로",
+          "dist": 304
+        },
+        "roadScore": 10
+      },
+      "park": {
+        "score": 4,
+        "green": 4,
+        "greenBonus": 0,
+        "parks": [
+          {
+            "name": "방죽공원",
+            "dist": 477,
+            "value": 3.8,
+            "eff": 3.8,
+            "areaHa": 2.01,
+            "walkM": 588,
+            "waterside": false,
+            "linked": false
+          },
+          {
+            "name": "이름 없는 공원",
+            "dist": 595,
+            "value": 2.1,
+            "eff": 1.9,
+            "areaHa": 0.53,
+            "walkM": 413,
+            "waterside": false,
+            "linked": false
+          },
+          {
+            "name": "한울어린이공원",
+            "dist": 423,
+            "value": 1,
+            "eff": 1,
+            "areaHa": 0.58,
+            "walkM": 0,
+            "waterside": false,
+            "linked": false
+          },
+          {
+            "name": "이름 없는 공원",
+            "dist": 375,
+            "value": 1,
+            "eff": 1,
+            "areaHa": 0.38,
+            "walkM": 0,
+            "waterside": false,
+            "linked": false
+          },
+          {
+            "name": "벽적공원",
+            "dist": 535,
+            "value": 1,
+            "eff": 1,
+            "areaHa": 1.38,
+            "walkM": 0,
+            "waterside": false,
+            "linked": false
+          }
+        ]
+      },
+      "public": {
+        "score": 7.2,
+        "facilities": [
+          {
+            "id": "library",
+            "label": "도서관",
+            "emoji": "📚",
+            "count": 0,
+            "nearest": null,
+            "score": 0
+          },
+          {
+            "id": "soccer",
+            "label": "축구장",
+            "emoji": "⚽",
+            "count": 2,
+            "nearest": {
+              "name": "",
+              "dist": 702
+            },
+            "score": 9.9
+          },
+          {
+            "id": "basketball",
+            "label": "농구장",
+            "emoji": "🏀",
+            "count": 2,
+            "nearest": {
+              "name": "",
+              "dist": 769
+            },
+            "score": 9.9
+          },
+          {
+            "id": "gym",
+            "label": "체육관·수영장",
+            "emoji": "🏊",
+            "count": 1,
+            "nearest": {
+              "name": "",
+              "dist": 965
+            },
+            "score": 9
+          }
+        ]
+      }
+    },
+    "c2": {
+      "name": "망포역 영통로",
+      "lat": 37.24314,
+      "lng": 127.06314,
+      "peace": {
+        "score": 10,
+        "food": 0,
+        "foodScore": 10,
+        "road": {
+          "name": "봉영로",
+          "dist": 78
+        },
+        "roadScore": 10
+      },
+      "park": {
+        "score": 8.1,
+        "green": 5,
+        "greenBonus": 0,
+        "parks": [
+          {
+            "name": "서천 생태공원",
+            "dist": 518,
+            "value": 7.7,
+            "eff": 7.6,
+            "areaHa": 2.19,
+            "walkM": 1381,
+            "waterside": false,
+            "linked": false
+          },
+          {
+            "name": "서천레스피아",
+            "dist": 636,
+            "value": 6,
+            "eff": 5.2,
+            "areaHa": 2.61,
+            "walkM": 954,
+            "waterside": false,
+            "linked": false
+          },
+          {
+            "name": "서천근린공원",
+            "dist": 812,
+            "value": 5.5,
+            "eff": 3.8,
+            "areaHa": 2.67,
+            "walkM": 854,
+            "waterside": false,
+            "linked": false
+          },
+          {
+            "name": "반달중앙공원",
+            "dist": 769,
+            "value": 5,
+            "eff": 3.7,
+            "areaHa": 1.03,
+            "walkM": 775,
+            "waterside": false,
+            "linked": false
+          },
+          {
+            "name": "방죽공원",
+            "dist": 915,
+            "value": 3.8,
+            "eff": 2.2,
+            "areaHa": 2.01,
+            "walkM": 588,
+            "waterside": false,
+            "linked": false
+          }
+        ]
+      },
+      "public": {
+        "score": 4.7,
+        "facilities": [
+          {
+            "id": "library",
+            "label": "도서관",
+            "emoji": "📚",
+            "count": 2,
+            "nearest": {
+              "name": "달빛나래 어린이도서관",
+              "dist": 621
+            },
+            "score": 9.9
+          },
+          {
+            "id": "soccer",
+            "label": "축구장",
+            "emoji": "⚽",
+            "count": 0,
+            "nearest": null,
+            "score": 0
+          },
+          {
+            "id": "basketball",
+            "label": "농구장",
+            "emoji": "🏀",
+            "count": 0,
+            "nearest": null,
+            "score": 0
+          },
+          {
+            "id": "gym",
+            "label": "체육관·수영장",
+            "emoji": "🏊",
+            "count": 1,
+            "nearest": {
+              "name": "",
+              "dist": 743
+            },
+            "score": 9
+          }
+        ]
+      }
+    },
+    "c3": {
+      "name": "영통역 청명남로",
+      "lat": 37.25342,
+      "lng": 127.07778,
+      "peace": {
+        "score": 5.6,
+        "food": 27,
+        "foodScore": 1.2,
+        "road": {
+          "name": "봉영로",
+          "dist": 310
+        },
+        "roadScore": 10
+      },
+      "park": {
+        "score": 10,
+        "green": 33,
+        "greenBonus": 1,
+        "parks": [
+          {
+            "name": "영통중앙공원",
+            "dist": 487,
+            "value": 9.1,
+            "eff": 9.1,
+            "areaHa": 12.06,
+            "walkM": 1861,
+            "waterside": false,
+            "linked": false
+          },
+          {
+            "name": "영흥자연공원",
+            "dist": 749,
+            "value": 10,
+            "eff": 7.5,
+            "areaHa": 50,
+            "walkM": 6784,
+            "waterside": false,
+            "linked": true
+          },
+          {
+            "name": "반달공원",
+            "dist": 221,
+            "value": 2,
+            "eff": 2,
+            "areaHa": 1.69,
+            "walkM": 398,
+            "waterside": false,
+            "linked": false
+          },
+          {
+            "name": "단오어린이공원",
+            "dist": 246,
+            "value": 2,
+            "eff": 2,
+            "areaHa": 0.84,
+            "walkM": 401,
+            "waterside": false,
+            "linked": false
+          },
+          {
+            "name": "샛별공원",
+            "dist": 422,
+            "value": 1,
+            "eff": 1,
+            "areaHa": 1.01,
+            "walkM": 0,
+            "waterside": false,
+            "linked": false
+          }
+        ]
+      },
+      "public": {
+        "score": 9.8,
+        "facilities": [
+          {
+            "id": "library",
+            "label": "도서관",
+            "emoji": "📚",
+            "count": 1,
+            "nearest": {
+              "name": "영통시립도서관",
+              "dist": 659
+            },
+            "score": 9
+          },
+          {
+            "id": "soccer",
+            "label": "축구장",
+            "emoji": "⚽",
+            "count": 4,
+            "nearest": {
+              "name": "외환은행 열린교육원 운동장",
+              "dist": 725
+            },
+            "score": 10
+          },
+          {
+            "id": "basketball",
+            "label": "농구장",
+            "emoji": "🏀",
+            "count": 7,
+            "nearest": {
+              "name": "",
+              "dist": 358
+            },
+            "score": 10
+          },
+          {
+            "id": "gym",
+            "label": "체육관·수영장",
+            "emoji": "🏊",
+            "count": 4,
+            "nearest": {
+              "name": "보보스 스포렉스 (Bobos Sporex)",
+              "dist": 483
+            },
+            "score": 10
+          }
+        ]
+      }
+    },
+    "c4": {
+      "name": "경희대 서천동로",
+      "lat": 37.23672,
+      "lng": 127.07713,
+      "peace": {
+        "score": 9.7,
+        "food": 3,
+        "foodScore": 9.4,
+        "road": {
+          "name": "영통로",
+          "dist": 1161
+        },
+        "roadScore": 10
+      },
+      "park": {
+        "score": 7.1,
+        "green": 11,
+        "greenBonus": 0,
+        "parks": [
+          {
+            "name": "서천 생태공원",
+            "dist": 661,
+            "value": 7.7,
+            "eff": 6.5,
+            "areaHa": 2.19,
+            "walkM": 1381,
+            "waterside": false,
+            "linked": false
+          },
+          {
+            "name": "남산근린공원",
+            "dist": 341,
+            "value": 6.2,
+            "eff": 6.2,
+            "areaHa": 2.25,
+            "walkM": 1009,
+            "waterside": false,
+            "linked": false
+          },
+          {
+            "name": "서천근린공원",
+            "dist": 498,
+            "value": 5.5,
+            "eff": 5.5,
+            "areaHa": 2.67,
+            "walkM": 854,
+            "waterside": false,
+            "linked": false
+          },
+          {
+            "name": "서천레스피아",
+            "dist": 655,
+            "value": 6,
+            "eff": 5.1,
+            "areaHa": 2.61,
+            "walkM": 954,
+            "waterside": false,
+            "linked": false
+          },
+          {
+            "name": "당굴공원",
+            "dist": 842,
+            "value": 4.8,
+            "eff": 3.2,
+            "areaHa": 0.98,
+            "walkM": 737,
+            "waterside": false,
+            "linked": false
+          }
+        ]
+      },
+      "public": {
+        "score": 7.3,
+        "facilities": [
+          {
+            "id": "library",
+            "label": "도서관",
+            "emoji": "📚",
+            "count": 1,
+            "nearest": {
+              "name": "서농도서관",
+              "dist": 732
+            },
+            "score": 9
+          },
+          {
+            "id": "soccer",
+            "label": "축구장",
+            "emoji": "⚽",
+            "count": 4,
+            "nearest": {
+              "name": "",
+              "dist": 234
+            },
+            "score": 10
+          },
+          {
+            "id": "basketball",
+            "label": "농구장",
+            "emoji": "🏀",
+            "count": 3,
+            "nearest": {
+              "name": "",
+              "dist": 712
+            },
+            "score": 10
+          },
+          {
+            "id": "gym",
+            "label": "체육관·수영장",
+            "emoji": "🏊",
+            "count": 0,
+            "nearest": null,
+            "score": 0
+          }
+        ]
+      }
+    }
+  }
+}

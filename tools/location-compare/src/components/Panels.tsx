@@ -1,6 +1,7 @@
 import { useEffect, useRef, useState, type ReactNode } from 'react'
 import { fmt, type CandidateResult } from '../scoring'
 import { CAT_RADIUS_M, livePhotos, type CatIndex } from '../cats'
+import { OSM_AT, PLACE_KEYS, PLACE_LABEL, PLACE_NOTE, placeSummary, type PlaceKey, type PlaceOn, type PlaceRow } from '../places'
 import { BRAND_PARTS, CATEGORIES, ENOUGH, NEED_WEIGHT, STDR_YM, THIN, WALK5, WANT_WEIGHT, setTier, tierOf, type CommercialIndex, type CommercialPrefs, type Tier } from '../commercial'
 
 // ── 고른 후보지: 종합 점수(원형 그래프) + 수단별 점수(눈금 막대) ──────────
@@ -72,15 +73,13 @@ export function ModeScorePanel({ r, action }: { r: CandidateResult; action: Reac
 type FactorsProps = {
   cat: CatIndex | null; catOn: boolean; onToggleCat: () => void; onRegister: () => void; onGallery: (start?: number) => void
   com: CommercialIndex | null; comCounts: Record<string, number> | null; comBrands: Record<string, number> | null; comPrefs: CommercialPrefs; onComPrefs: (p: CommercialPrefs) => void
+  place: PlaceRow | null; placeOn: PlaceOn; onPlaceOn: (v: PlaceOn) => void
 }
 
-const SOON = [
-  { name: '🌳 산책', note: '공원·하천변·녹지' },
-  { name: '🕊️ 평화로움', note: '큰길·유흥가·소음원과의 거리' },
-  { name: '🌿 쾌적함', note: '녹지 비율·혼잡도' },
-]
+const SOON: { name: string; note: string }[] = [] // 준비 중인 지수(지금은 없음 — 쾌적함은 삭제)
 
-export function FactorsPanel({ cat, catOn, onToggleCat, onRegister, onGallery, com, comCounts, comBrands, comPrefs, onComPrefs }: FactorsProps) {
+export function FactorsPanel({ cat, catOn, onToggleCat, onRegister, onGallery, com, comCounts, comBrands, comPrefs, onComPrefs, place, placeOn, onPlaceOn }: FactorsProps) {
+  const [placeOpen, setPlaceOpen] = useState<PlaceKey | null>(null)
   const [pick, setPick] = useState(false)
   const [comOpen, setComOpen] = useState(false)
   const [catOpen, setCatOpen] = useState(false) // 길고양이 이름을 누르면 사진 썸네일
@@ -103,6 +102,7 @@ export function FactorsPanel({ cat, catOn, onToggleCat, onRegister, onGallery, c
           {pick && (
             <div className="factor-menu" role="dialog" aria-label="입지 요인 고르기">
               <label><input type="checkbox" checked={comPrefs.on} onChange={() => onComPrefs({ ...comPrefs, on: !comPrefs.on })} />🏪 도보 5분 상권</label>
+              {PLACE_KEYS.map((k) => <label key={k}><input type="checkbox" checked={placeOn[k]} onChange={() => onPlaceOn({ ...placeOn, [k]: !placeOn[k] })} />{PLACE_LABEL[k]}</label>)}
               <label><input type="checkbox" checked={catOn} onChange={onToggleCat} />🐈 길고양이 지수</label>
               {SOON.map((x) => <label key={x.name} className="off"><input type="checkbox" disabled />{x.name}<small>준비 중</small></label>)}
             </div>
@@ -119,6 +119,19 @@ export function FactorsPanel({ cat, catOn, onToggleCat, onRegister, onGallery, c
         </div>
       )}
       {comPrefs.on && comOpen && <CommercialPicker prefs={comPrefs} onChange={onComPrefs} counts={comCounts} brands={comBrands} />}
+      {PLACE_KEYS.filter((k) => placeOn[k]).map((k) => {
+        const s = place?.[k].score ?? null
+        return [
+          <div className="factor place-factor" key={k}>
+            <div>
+              <button type="button" className="com-open" aria-expanded={placeOpen === k} onClick={() => setPlaceOpen(placeOpen === k ? null : k)}>{PLACE_LABEL[k]} <i aria-hidden>{placeOpen === k ? '▴' : '▾'}</i></button>
+              <small>{place ? placeSummary(k, place) : PLACE_NOTE[k] + ' — 검색으로 넣은 후보지는 자료 없음'}</small>
+            </div>
+            <span className="factor-score"><span className={`ticks ${k}`} aria-hidden><span style={{ width: `${(s ?? 0) * 10}%` }} /></span><em>{s === null ? '—' : fmt(s)}</em></span>
+          </div>,
+          placeOpen === k && place ? <PlaceDetail key={k + 'd'} k={k} r={place} /> : null,
+        ]
+      })}
       {catOn && (
         <div className="factor">
           <div>
@@ -178,6 +191,47 @@ function CatThumbs({ cat, onOpen, onRegister }: { cat: CatIndex | null; onOpen: 
               <img src={p.data} alt="" loading="lazy" />
             </button>
           ))}</div>}
+    </div>
+  )
+}
+
+// 평화로움·공원·공공시설: 이름을 누르면 나오는 계산 내역
+function PlaceDetail({ k, r }: { k: PlaceKey; r: PlaceRow }) {
+  if (k === 'peace') {
+    const p = r.peace
+    return (
+      <div className="com-picker place-detail">
+        <div className="place-line"><span>🍽️ 60m 안 음식점·주점 {p.food}곳</span><em>{fmt(p.foodScore)}</em></div>
+        <div className="place-line"><span>🛣️ {p.road ? `큰길 ${p.road.name} ${p.road.dist}m` : '가까운 큰길 없음'}</span><em>{fmt(p.roadScore)}</em></div>
+        <p className="com-note">평화로움 = 음식점 점수 × 0.5 + 큰길 점수 × 0.5. 음식점은 5곳까지 1곳당 0.2점만 깎고, 6곳부터 크게 깎이며 30곳 넘으면 거의 0점에서 큰 차이 없음. 큰길(간선도로·○○대로·6차로 이상)이 30m 안이면 0점, 60m 안이면 5점, 그 밖이면 10점.</p>
+      </div>
+    )
+  }
+  if (k === 'park') {
+    const p = r.park
+    return (
+      <div className="com-picker place-detail">
+        {p.parks.length === 0 && <p className="com-note">1km 안에 공원이 없어요.</p>}
+        {p.parks.map((x, i) => (
+          <div className="place-line" key={x.name + i}>
+            <span>{x.waterside ? '🌊' : '🌳'} {x.name} <small>{x.dist}m · 산책로 {x.walkM ? `${(x.walkM / 1000).toFixed(1)}km` : '자료 없음'} · {x.areaHa}ha{x.linked ? ' · 길게 연결 ×1.8' : ''}</small></span>
+            <em title={`공원 점수 ${x.value} → 거리 반영 ${x.eff}`}>{fmt(x.eff)}</em>
+          </div>
+        ))}
+        <div className="place-line"><span>🌿 1km 안 녹지 비율 {p.green}%</span><em>+{p.greenBonus}</em></div>
+        <p className="com-note">더하기 방식. 공원마다 점수 = 공원 안 산책로 길이로(반달공원 0.4km ≈ 2점 · 신동수변공원 1.3km ≈ 7.6 · 글빛누리공원 1.5km ≈ 8 · 광교호수공원 32km = 10), 길게 이어져 양 끝이 상권에 닿으면 ×1.8. 후보지 점수 = 가장 좋은 공원(500m 넘으면 1km 에서 절반까지 줄임) + 두 번째 공원 10% + 녹지 15% 이상 +0.5 · 30% 이상 +1, 최대 10. OSM {OSM_AT} 기준.</p>
+      </div>
+    )
+  }
+  return (
+    <div className="com-picker place-detail">
+      {r.public.facilities.map((f) => (
+        <div className="place-line" key={f.id}>
+          <span>{f.emoji} {f.label} <small>{f.count ? `${f.count}곳 · 가장 가까운 ${f.nearest?.name ? f.nearest.name + ' ' : ''}${f.nearest?.dist}m` : '1km 안 없음'}</small></span>
+          <em>{fmt(f.score)}</em>
+        </div>
+      ))}
+      <p className="com-note">1km 안 시설 종류별로 1곳이면 9점(많으면 10점), 공공시설 = 종류별 점수 평균. 독서실·스터디카페·사유 시설은 뺌. OSM {OSM_AT} 기준.</p>
     </div>
   )
 }
