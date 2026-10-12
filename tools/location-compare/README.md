@@ -187,6 +187,10 @@ src/components/SettingsPopover.tsx   조정 창(월 왕복 횟수 / 수단 가�
 src/components/GuidePanel.tsx        계산 방식 안내
 src/styles.css                       밝은 테마
 scripts/fetch-routes.mjs             네이버 Directions 로 차량 시간 재기(이 PC 에서만)
+scripts/stores-sync.mjs              상가(상권)정보 경기·서울 전체 받기 → data/stores.sqlite(git 제외, 매달)
+scripts/stores.mjs                   받아 둔 상가 찾기(반경·분류·상호)·후보지 분석
+src/commercial-categories.json       상권 분류 정의(소분류 코드·상호 이름)
+src/commercial.json · COMMERCIAL.md  후보지별 상권 분석 결과(analyze 가 만듦)
 ../../workers/place-search/          장소 검색 중계 Worker(네이버 Secret 보관 · 사용량 제한)
 ```
 
