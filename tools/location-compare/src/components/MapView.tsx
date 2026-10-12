@@ -17,6 +17,8 @@ type Props = {
   focusHubIds: string[] // 후보지를 고를 때 함께 화면에 넣을 주 목적지(월 왕복 50% 이상)
   ranks: number[] // 후보지 핀 숫자 = 종합 순위
   preview?: Place | null // 검색 결과를 누르면 그 위치로 옮기고 임시 표시
+  results?: Place[] // 검색 결과 전부 — 지도에 작은 점으로
+  centerRef?: { current: { lat: number; lng: number } | null } // 지금 지도 가운데(검색 결과를 가까운 순으로 정렬할 때 씀)
 }
 
 export const DETAIL_ZOOM = 14 // 이 확대 단계부터 모든 후보지에 장단점(동네 단위가 구분되는 정도)
@@ -25,6 +27,8 @@ const PAD_ALL = 28 // 후보지 한눈에: 가장자리 여백만 살짝
 const esc = (s: string) => s.replace(/[&<>"]/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' })[c]!)
 const candHtml = (n: number, on: boolean) => `<span class="pin cand${on ? ' on' : ''}">${n}</span>`
 const previewHtml = (name: string) => `<div class="nv-pin"><span class="pin preview"></span><span class="map-label preview-label">${esc(name)}</span></div>`
+const RESULT_DOT = '<span class="pin result-dot"></span>'
+const same = (a: Place, b: Place | null | undefined) => !!b && Math.abs(a.lat - b.lat) < 1e-7 && Math.abs(a.lng - b.lng) < 1e-7
 export const PREVIEW_ZOOM = 16
 const hubHtml = (h: Hub, on: boolean) => `<span class="pin hub${on ? ' on' : ''}"><b>${hubEmoji(h.category)}</b></span>`
 
@@ -75,7 +79,7 @@ export function MapView(props: Props) {
 
 // ── 네이버 지도 ──────────────────────────────────────────────────────
 /* eslint-disable @typescript-eslint/no-explicit-any */
-function NaverMap({ candidates, hubs, active, onSelect, focusKey, hubId, onHub, insights, focusHubIds, ranks, preview, allKey, onFail }: Props & { allKey: number; onFail: () => void }) {
+function NaverMap({ candidates, hubs, active, onSelect, focusKey, hubId, onHub, insights, focusHubIds, ranks, preview, results, centerRef, allKey, onFail }: Props & { allKey: number; onFail: () => void }) {
   const box = useRef<HTMLDivElement>(null)
   const map = useRef<any>(null)
   const layers = useRef<any[]>([])
@@ -111,6 +115,9 @@ function NaverMap({ candidates, hubs, active, onSelect, focusKey, hubId, onHub, 
         scaleControl: false, mapDataControl: false, zoomControl: false,
       })
       naver.maps.Event.addListener(map.current, 'zoom_changed', (z: number) => setZoom(z))
+      const keepCenter = () => { const c = map.current?.getCenter(); if (c && centerRef) centerRef.current = { lat: c.lat(), lng: c.lng() } }
+      naver.maps.Event.addListener(map.current, 'idle', keepCenter)
+      keepCenter()
       setReady(true)
     }).catch(() => alive && onFail())
     return () => { alive = false; try { map.current?.destroy?.() } catch { /* 인증 실패 뒤의 정리 오류는 무시(OSM 으로 바꿀 때) */ } map.current = null }
@@ -125,9 +132,21 @@ function NaverMap({ candidates, hubs, active, onSelect, focusKey, hubId, onHub, 
     previewMarker.current = null
     if (!preview) return
     const at = new naver.maps.LatLng(preview.lat, preview.lng)
-    previewMarker.current = new naver.maps.Marker({ map: map.current, position: at, zIndex: 200, icon: { content: previewHtml(preview.name), anchor: new naver.maps.Point(12, 12) } })
+    previewMarker.current = new naver.maps.Marker({ map: map.current, position: at, zIndex: 200, icon: { content: previewHtml(preview.name), anchor: new naver.maps.Point(8, 8) } })
     map.current.morph(at, Math.max(PREVIEW_ZOOM, map.current.getZoom()))
   }, [ready, preview])
+
+  // 검색 결과 전부: 작은 점(누른 결과는 위의 빨간 점이 대신한다)
+  const resultMarkers = useRef<any[]>([])
+  useEffect(() => {
+    const naver = window.naver
+    if (!ready || !naver) return
+    resultMarkers.current.forEach((m) => m.setMap(null))
+    resultMarkers.current = (results ?? []).filter((r) => !same(r, preview)).map((r) => new naver.maps.Marker({
+      map: map.current, position: new naver.maps.LatLng(r.lat, r.lng), title: r.name, zIndex: 150, clickable: false,
+      icon: { content: RESULT_DOT, anchor: new naver.maps.Point(6, 6) },
+    }))
+  }, [ready, results, preview])
 
   // 핀·점선·장단점 글자 다시 그리기
   useEffect(() => {
@@ -218,7 +237,7 @@ function Controls({ pts }: { pts: [number, number][] }) {
   )
 }
 
-function OsmMap({ candidates, hubs, active, onSelect, focusKey, hubId, onHub, insights, focusHubIds, ranks, preview, allKey }: Props & { allKey: number }) {
+function OsmMap({ candidates, hubs, active, onSelect, focusKey, hubId, onHub, insights, focusHubIds, ranks, preview, results, centerRef, allKey }: Props & { allKey: number }) {
   const pts = useMemo(() => frame(candidates, hubs, active, focusHubIds), [candidates, hubs, active, focusHubIds])
   const [zoom, setZoom] = useState(13)
   const cur = candidates[active]
@@ -253,11 +272,16 @@ function OsmMap({ candidates, hubs, active, onSelect, focusKey, hubId, onHub, in
         )
       })}
       {preview && (
-        <Marker position={[preview.lat, preview.lng]} zIndexOffset={2000} icon={L.divIcon({ className: 'pin-shell', html: '<span class="pin preview"></span>', iconSize: [24, 24], iconAnchor: [12, 12] })}>
-          <Tooltip permanent direction="right" offset={[12, 0]} className="map-label preview-label">{preview.name}</Tooltip>
+        <Marker position={[preview.lat, preview.lng]} zIndexOffset={2000} icon={L.divIcon({ className: 'pin-shell', html: '<span class="pin preview"></span>', iconSize: [16, 16], iconAnchor: [8, 8] })}>
+          <Tooltip permanent direction="right" offset={[8, 0]} className="map-label preview-label">{preview.name}</Tooltip>
         </Marker>
       )}
+      {(results ?? []).filter((r) => !same(r, preview)).map((r, i) => (
+        <Marker key={`r${i}-${r.lat}-${r.lng}`} position={[r.lat, r.lng]} zIndexOffset={1500} interactive={false} title={r.name}
+          icon={L.divIcon({ className: 'pin-shell', html: RESULT_DOT, iconSize: [12, 12], iconAnchor: [6, 6] })} />
+      ))}
       <PreviewFly preview={preview ?? null} />
+      {centerRef && <CenterWatch centerRef={centerRef} />}
       <Controls pts={pts} />
     </MapContainer>
   )
@@ -267,5 +291,13 @@ function OsmMap({ candidates, hubs, active, onSelect, focusKey, hubId, onHub, in
 function PreviewFly({ preview }: { preview: Place | null }) {
   const map = useMap()
   useEffect(() => { if (preview) map.flyTo([preview.lat, preview.lng], Math.max(PREVIEW_ZOOM, map.getZoom()), { duration: 0.6 }) }, [map, preview])
+  return null
+}
+
+/** OSM: 지도 가운데를 기억(검색 결과를 가까운 순으로) */
+function CenterWatch({ centerRef }: { centerRef: NonNullable<Props['centerRef']> }) {
+  const keep = () => { const c = map.getCenter(); centerRef.current = { lat: c.lat, lng: c.lng } }
+  const map = useMapEvents({ moveend: keep })
+  useEffect(keep, [map]) // eslint-disable-line react-hooks/exhaustive-deps
   return null
 }

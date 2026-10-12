@@ -531,3 +531,27 @@ button { cursor: pointer }
 
 /* 추천 매물·카페/식당 카드: 배경·테두리 없음 */
 .side-card.panel { background: none; border: 0; box-shadow: none; padding-left: 0; padding-right: 0 }
+
+/* ── 검색·지도 위 단추(10-13 2차): 배경 70% 투명, 연한 안내 문구, 작은 빨간 점, 결과 점, 단추 세로 ── */
+.search-bar, .hub-switch, .fit-all { background: rgba(255, 255, 255, 0.3); -webkit-backdrop-filter: blur(6px) saturate(1.2); backdrop-filter: blur(6px) saturate(1.2); border-color: rgba(24, 39, 56, 0.22); box-shadow: 0 2px 10px rgba(0, 0, 0, 0.08) }
+.fit-all:hover { background: rgba(255, 255, 255, 0.6) }
+.hub-switch > span, .hub-switch button:not(.on), .fit-all { color: var(--text); text-shadow: 0 0 6px rgba(255, 255, 255, 0.9) }
+.search-bar input::placeholder { color: #8f9aa5; font-weight: 400 }
+.pin.preview { width: 12px; height: 12px; margin: 2px; border-width: 2px; box-shadow: 0 0 0 4px rgba(229, 72, 77, 0.22), 0 1px 4px rgba(0, 0, 0, 0.3) }
+.pin.result-dot { width: 8px; height: 8px; margin: 2px; border-radius: 50%; background: #2c4a6b; border: 1.5px solid #fff; box-shadow: 0 1px 3px rgba(0, 0, 0, 0.35) }
+.result b { display: flex; align-items: baseline; gap: 8px }
+.result-km { margin-left: auto; flex: none; font-style: normal; font-weight: 400; font-size: 11px; color: var(--muted) }
+.search-side:not(.form) { background: none; border: 0; box-shadow: none; padding: 0; width: auto }
+.side-actions { flex-direction: column; align-items: flex-start; gap: 6px }
+.side-actions button { box-shadow: 0 2px 8px rgba(0, 0, 0, 0.14) }
+.search-side.form { width: 320px; padding: 16px 16px 14px }
+.search-side .register { gap: 14px; padding-top: 2px }
+.search-side .register label, .search-side .register .field { grid-template-columns: 60px 1fr; gap: 10px }
+.search-side .register-title { font-size: 13px }
+.search-side .cat-pick { gap: 6px 16px }
+.search-side .register-actions { padding-top: 4px }
+.trip-input { grid-template-columns: minmax(0, 1fr) auto; gap: 12px }
+.register .trip-input .unit-input input { width: 3.4em; padding: 6px 4px; text-align: center; flex: none }
+.trip-input .unit-input { gap: 4px }
+/* 목적지가 3곳이면 오른쪽 위 단추가 길어져 검색창과 겹친다 → "후보지 한눈에"는 아래 줄로 */
+@media (min-width: 761px) { .map-top { flex-direction: column; align-items: flex-end; gap: 6px } }

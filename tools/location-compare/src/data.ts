@@ -23,8 +23,8 @@ export const CANDIDATES: Candidate[] = [
 /** 예전 기본 이름(이름을 안 바꾼 저장 목록은 새 이름·좌표로 옮긴다 — store.ts) */
 export const OLD_DEFAULT_NAMES: Record<string, string> = { c1: '망포역 인근 후보 1', c2: '망포역 인근 후보 2', c3: '망포역 인근 후보 3', c4: '서천동 후보' }
 
-/** 주요 목적지(거점). 최대 2곳 — 검색으로 더하려면 기존 한 곳과 바꾼다. */
-export const MAX_HUBS = 2
+/** 주요 목적지(거점). 최대 3곳 — 꽉 찬 뒤 검색으로 더하면 월 왕복이 가장 적은 곳과 바꾼다. */
+export const MAX_HUBS = 3
 const HUB_LIST: Hub[] = [
   { id: 'h1', name: '경희대학교 국제캠퍼스', category: '학교', address: '경기도 용인시 기흥구 덕영대로 1732', lat: 37.2421, lng: 127.0804 },
   { id: 'h2', name: '성남 분당 본가', category: '본가', address: '경기도 성남시 분당구 성남대로', lat: 37.385, lng: 127.123 },

@@ -6,6 +6,7 @@ import { placeSearchAvailable, search, searchAvailable } from '../naver'
 // 지도 위 검색창 하나: 후보지(아파트·주소)와 목적지(학교·회사 등)를 같은 창에서 찾는다.
 // - 글자를 치다 잠깐 멈추면(LIVE_DELAY) 저절로 검색해 아래에 결과를 띄운다. Enter 는 바로 검색.
 //   같은 검색어는 이 화면에서 다시 부르지 않고(cache), 늦게 온 옛 검색 결과는 버린다(seq).
+// - 결과는 지금 지도 가운데에서 가까운 순으로 늘어놓고(거리 표시), 지도에도 작은 점으로 찍는다.
 // - 결과를 누르면 지도가 그 위치로 가고, 결과 목록 바로 오른쪽에 "후보지로 / 목적지로" 단추 → 그 자리에서 등록 창.
 
 const LIVE_DELAY = 450 // ms — 타자를 멈춘 뒤 이만큼 지나면 검색
@@ -17,6 +18,8 @@ type Props = {
   onCandidate: (p: Place, name: string, deposit?: number, rent?: number) => void
   onHub: (p: Place, replaceId: string | undefined, name: string, category: string, trips: number) => void
   onPreview: (p: Place | null) => void // 결과를 누르면 지도를 그 위치로
+  onResults: (list: Place[]) => void // 결과 전부(지도에 작은 점)
+  centerRef: { current: { lat: number; lng: number } | null } // 지금 지도 가운데
 }
 // 등록 창에서 정하는 주요 설정: 후보지 = 이름·보증금·월세, 목적지 = 이름·분류·월 왕복 횟수
 type Draft = { kind: 'candidate' | 'hub'; name: string; category: string; deposit: string; rent: string; trips: string }
@@ -24,11 +27,16 @@ type Draft = { kind: 'candidate' | 'hub'; name: string; category: string; deposi
 // 맞춤법 검사·자동 고침을 끈 입력칸 속성
 const plain = { spellCheck: false, autoComplete: 'off', autoCorrect: 'off', autoCapitalize: 'off' } as const
 
-export function SearchBox({ hubs, tripsOf, onCandidate, onHub, onPreview }: Props) {
+// 두 점 사이 거리(km, 짧은 거리라 평면 근사)
+const km = (a: { lat: number; lng: number }, b: { lat: number; lng: number }) => Math.hypot((a.lat - b.lat) * 111, (a.lng - b.lng) * 111 * Math.cos((a.lat * Math.PI) / 180))
+const kmText = (d: number) => (d < 1 ? `${Math.round(d * 1000 / 10) * 10}m` : `${d < 10 ? d.toFixed(1) : Math.round(d)}km`)
+
+export function SearchBox({ hubs, tripsOf, onCandidate, onHub, onPreview, onResults, centerRef }: Props) {
   const [q, setQ] = useState('')
   const [busy, setBusy] = useState(false)
   const [open, setOpen] = useState(false)
-  const [items, setItems] = useState<Place[]>([])
+  const [items, setItemsRaw] = useState<Place[]>([])
+  const setItems = (list: Place[]) => { setItemsRaw(list); onResults(list) }
   const [msg, setMsg] = useState('')
   const [picked, setPicked] = useState<number | null>(null) // 누른 결과
   const [draft, setDraft] = useState<Draft | null>(null) // 등록 전 주요 설정
@@ -64,7 +72,9 @@ export function SearchBox({ hubs, tripsOf, onCandidate, onHub, onPreview }: Prop
     }
     if (id !== seq.current) return // 그사이 다른 검색어를 쳤다
     setBusy(false); setOpen(true); reset()
-    setItems(res.places)
+    // 지금 지도 가운데에서 가까운 순(네이버 지역 검색에는 위치 조건이 없어, 받은 결과를 여기서 줄 세운다)
+    const c = centerRef.current
+    setItems(c ? [...res.places].sort((a, b) => km(a, c) - km(b, c)) : res.places)
     setMsg(res.places.length ? '' : res.error || (placeSearchAvailable() ? '검색 결과가 없습니다.' : '결과가 없습니다. 지금은 도로명·지번 주소로만 찾을 수 있어요.'))
   }
 
@@ -114,7 +124,7 @@ export function SearchBox({ hubs, tripsOf, onCandidate, onHub, onPreview }: Prop
             {msg && <p className="muted">{msg}</p>}
             {items.map((p, i) => (
               <button type="button" role="option" aria-selected={picked === i} className={'result' + (picked === i ? ' on' : '')} key={i} onClick={(e) => pick(i, e.currentTarget)}>
-                <b>{p.name}</b><small>{p.category ? `${p.category} · ` : ''}{p.address}</small>
+                <b>{p.name}{centerRef.current && <em className="result-km">{kmText(km(p, centerRef.current))}</em>}</b><small>{p.category ? `${p.category} · ` : ''}{p.address}</small>
               </button>
             ))}
           </div>
@@ -122,7 +132,7 @@ export function SearchBox({ hubs, tripsOf, onCandidate, onHub, onPreview }: Prop
             <div className={'search-side' + (draft ? ' form' : '')} style={{ top: draft ? 0 : Math.max(0, sideTop) }}>
               {!draft ? (
                 <div className="side-actions">
-                  <button type="button" className="solid" onClick={() => start('candidate')}>후보지로</button>
+                  <button type="button" onClick={() => start('candidate')}>후보지로</button>
                   <button type="button" onClick={() => start('hub')}>목적지로</button>
                 </div>
               ) : (
@@ -147,7 +157,7 @@ export function SearchBox({ hubs, tripsOf, onCandidate, onHub, onPreview }: Prop
                       <span>월 왕복</span>
                       <div className="trip-input">
                         <input type="range" min={0} max={MAX_TRIPS} step={1} value={trips} aria-label="월 왕복 횟수(끌어서)" onChange={(e) => setDraft({ ...draft, trips: e.target.value })} />
-                        <span className="unit-input"><input {...plain} type="number" min={0} max={MAX_TRIPS} step={1} inputMode="numeric" value={draft.trips} aria-label="월 왕복 횟수(직접 입력)" onChange={(e) => setDraft({ ...draft, trips: e.target.value })} /><i>회</i></span>
+                        <span className="unit-input"><input {...plain} type="text" inputMode="numeric" maxLength={3} value={draft.trips} aria-label="월 왕복 횟수(직접 입력)" onChange={(e) => setDraft({ ...draft, trips: e.target.value.replace(/\D/g, '') })} /><i>회</i></span>
                       </div>
                     </div>
                     {replaceHub && <p className="register-note">목적지는 최대 {MAX_HUBS}곳 — 월 왕복이 가장 적은 「{replaceHub.name}」 자리에 들어갑니다.</p>}

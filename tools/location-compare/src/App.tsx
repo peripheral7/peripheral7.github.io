@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useMemo, useState } from 'react'
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { BASE_DEPOSIT, MAX_HUBS, baseRent, hubEmoji, weightShares, won, type Place } from './data'
 import { evaluate, fmt, hubInsights } from './scoring'
 import { addCandidate, load, money, removeCandidate, removeHub, save, setHub, updateCandidate, type State } from './store'
@@ -29,6 +29,8 @@ export default function App() {
   const [guide, setGuide] = useState(false)
   const [hubPick, setHubPick] = useState<string | null>(null) // 지도 장단점 기준 목적지
   const [preview, setPreview] = useState<Place | null>(null) // 검색 결과를 누르면 지도가 그 위치로
+  const [found, setFound] = useState<Place[]>([]) // 검색 결과 전부(지도에 작은 점)
+  const mapCenter = useRef<{ lat: number; lng: number } | null>(null) // 지금 지도 가운데(검색 결과 정렬)
   const [editing, setEditing] = useState<{ id: string; name: string; deposit: string; rent: string } | null>(null) // 수정 중인 후보지(금액은 입력 글자 그대로)
   const [catState, setCatState] = useState<CatState>(() => pruneCats(loadCats())) // 길고양이 지수(선택 요인) — 사진은 이 브라우저에만 저장
   const [commute, setCommute] = useState<CommuteSaved>(loadCommute) // 출퇴근 인사이트의 연비·기름값(null = 자동)
@@ -161,8 +163,8 @@ export default function App() {
         </div>
 
         <section className="map-area">
-          <MapView candidates={candidates} hubs={hubs} active={active} onSelect={select} focusKey={focusKey} hubId={hubId} onHub={setHubPick} insights={insights} focusHubIds={mainHubIds} ranks={ranks} preview={preview} />
-          <SearchBox hubs={hubs} tripsOf={(id) => pref.trips[id] ?? 0} onCandidate={onCandidate} onHub={onHub} onPreview={setPreview} />
+          <MapView candidates={candidates} hubs={hubs} active={active} onSelect={select} focusKey={focusKey} hubId={hubId} onHub={setHubPick} insights={insights} focusHubIds={mainHubIds} ranks={ranks} preview={preview} results={found} centerRef={mapCenter} />
+          <SearchBox hubs={hubs} tripsOf={(id) => pref.trips[id] ?? 0} onCandidate={onCandidate} onHub={onHub} onPreview={setPreview} onResults={setFound} centerRef={mapCenter} />
         </section>
 
         <aside className="factors-area">

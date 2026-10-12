@@ -51,7 +51,7 @@ export function addCandidate(s: State, place: Place, name?: string, deposit?: nu
   return { ...s, candidates: [...s.candidates, c] }
 }
 
-/** 목적지로 넣기. 이미 2곳이면 replaceId 자리를 바꾼다. */
+/** 목적지로 넣기. 이미 꽉 찼으면(MAX_HUBS) replaceId 자리를 바꾼다. */
 export function setHub(s: State, place: Place, replaceId?: string, name?: string, category?: string, monthly = NEW_HUB_TRIPS): State {
   const hub: Hub = {
     id: newId('h'), name: (name || place.name).trim().slice(0, 40),
