@@ -360,10 +360,19 @@ def create_stock_package(df, code, stock_name, sector, status, message, trendlin
     json_data = {"name": stock_name, "sector": sector, "status": status, "message": message, "weekly": json.loads(pio.to_json(weekly_fig)), "daily": json.loads(pio.to_json(daily_fig))}
     return card_html, json_data
 
+def build_stock_lists_html(strict_names, relaxed_names, sector_str):
+    # 요약 상자의 "매수 종목 / 관심 종목 / 주요 섹터" 줄.
+    # 색은 "매수 종목:"(빨강)·"관심 종목:"(초록) 머리글에만 주고, 종목 이름은 검은색으로 나열한다.
+    # 세부 매수 요인(VCP/JDL:매수 · 눌림목:관심 등)은 화면에 내지 않는다 — 종목별 근거는 각 카드의 설명 줄에 있다.
+    str_strict = ", ".join(strict_names) if strict_names else "없음(조건미달)"
+    str_relaxed = ", ".join(relaxed_names) if relaxed_names else "없음(조건미달)"
+    return f"""<div class="stock-lists">
+                        <b style="color:#B71C1C;">매수 종목:</b> <span style="color:#111111; font-weight:bold;">{str_strict}</span><br>
+                        <b style="color:#2E7D32;">관심 종목:</b> <span style="color:#111111; font-weight:bold;">{str_relaxed}</span><br>
+                        <b>주요 섹터:</b> <span style="color:#111111; font-weight:bold;">{sector_str}</span>
+                    </div>"""
+
 def generate_dashboard_html(div_list_current, div_list_past, div_list_none, strict_list, relaxed_list, valid_sectors, kospi_html, filename=HTML_OUTPUT_PATH):
-    str_strict = ", ".join(strict_list) if strict_list else "없음(조건미달)"
-    str_relaxed = ", ".join(relaxed_list) if relaxed_list else "없음(조건미달)"
-    
     sector_str = "없음(조건미달)"
     if valid_sectors:
         total_valid = len(valid_sectors)
@@ -379,7 +388,10 @@ def generate_dashboard_html(div_list_current, div_list_past, div_list_none, stri
         # 30% 넘는 섹터가 존재할 때만 문자열로 합치고, 없으면 기본값인 "없음" 유지
         if filtered_sectors:
             sector_str = ", ".join(filtered_sectors)
-    
+
+    # 요약 상자에는 종목 이름만 낸다(세부 요인은 strict_list/relaxed_list 의 두 번째 값으로 남겨 두고 화면에는 쓰지 않는다).
+    stock_lists_html = build_stock_lists_html([name for name, _ in strict_list], [name for name, _ in relaxed_list], sector_str)
+
     past_section = f"""
     <div style="margin: 60px 0 30px 0; border-bottom: 1px dashed #555555;"></div>
     <h2 style="text-align: center; color: #aaaaaa; margin-bottom: 30px; font-size: 20px;">과거 10일 내 포착 (현재 기준 이탈)</h2>
@@ -631,11 +643,7 @@ def generate_dashboard_html(div_list_current, div_list_past, div_list_none, stri
                         - <b>VCP (변동성 축소):</b> 주가가 횡보하며 우측으로 갈수록 하락 파동이 얕아지는 패턴. 돌파 직전 최근 5일 평균 거래량이 50일 평균 대비 <b>60% 이하로 극도로 메말라야</b> 매수 타점 인정.<br>
                         - <b>Pullback (눌림목):</b> 상승 추세 중 이격도를 좁히며 핵심 이평선에 저거래량으로 안착한 기술적 반등 타점.
                     </div>
-                    <div class="stock-lists">
-                        <b>매수 종목:</b> <span style="color:#B71C1C; font-weight:bold;">{str_strict}</span><br>
-                        <b>관심 종목:</b> <span style="color:#2E7D32; font-weight:bold;">{str_relaxed}</span><br>
-                        <b>주요 섹터:</b> <span style="color:#111111; font-weight:bold;">{sector_str}</span>
-                    </div>
+                    {stock_lists_html}
                     <div class="footnotes">
                         * <b><span style="color:#B71C1C;">매수 타점</span></b> : 변동성/이격도 완벽 충족 및 거래량 고갈/폭발 기준 도달<br>
                         * <b><span style="color:#2E7D32;">관심 주시</span></b> : 변동성/이격도 완화 충족 및 50일 평균대비 거래량 80% 이하 고갈
@@ -674,7 +682,8 @@ def generate_dashboard_html(div_list_current, div_list_past, div_list_none, stri
     shutil.copyfile(filename, BLOG_HTML_PATH)
 
 def generate_dashboard_json(stock_data_list, strict_list, relaxed_list, filename=JSON_OUTPUT_PATH):
-    output = {"date": datetime.today().strftime("%Y.%m.%d"), "strict": strict_list, "relaxed": relaxed_list, "stocks": stock_data_list}
+    # data.json 의 목록에는 예전처럼 "이름 (세부 요인)" 문자열을 그대로 둔다 — 화면(대시보드)에는 이름만 나간다(build_stock_lists_html).
+    output = {"date": datetime.today().strftime("%Y.%m.%d"), "strict": [f"{n} ({p})" for n, p in strict_list], "relaxed": [f"{n} ({p})" for n, p in relaxed_list], "stocks": stock_data_list}
     os.makedirs(os.path.dirname(filename), exist_ok=True)
     with open(filename, 'w', encoding='utf-8') as f: json.dump(output, f, ensure_ascii=False)
 
@@ -783,8 +792,8 @@ if __name__ == "__main__":
             if "PAST" in final_status:
                 past_results.append({"status": final_status, "card_html": card_html, "json_data": json_data})
             elif final_status in ["STRICT", "RELAXED"]:
-                if final_status == "STRICT": strict_list.append(f"{name} ({pattern_name})")
-                elif final_status == "RELAXED": relaxed_list.append(f"{name} ({pattern_name})")
+                if final_status == "STRICT": strict_list.append((name, pattern_name))
+                elif final_status == "RELAXED": relaxed_list.append((name, pattern_name))
                 
                 valid_sectors.append(sector_name)
                 current_results.append({"status": final_status, "card_html": card_html, "json_data": json_data})
