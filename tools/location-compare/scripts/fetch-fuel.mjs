@@ -31,7 +31,7 @@ if (fs.existsSync(envFile)) {
 const KEY = process.env.OPINET_API_KEY
 if (!KEY && !dryRun) {
   console.error('OPINET_API_KEY 가 비어 있습니다 — tools/location-compare/.env.local 에 넣고 저장한 뒤 다시 실행하세요.')
-  process.exit(1)
+  process.exit(1) // 아직 아무 연결도 없으니 바로 끝내도 된다
 }
 
 const url = (api, q = {}) => `${BASE}/${api}?${new URLSearchParams({ out: 'json', code: KEY ?? '<키>', ...q })}`
@@ -56,29 +56,36 @@ const price = (o) => Math.round(Number(pick(o, 'PRICE')) * 10) / 10
 
 const areas = await call('areaCode.do') // 시도 목록
 const sidoAvg = await call('avgSidoPrice.do', { prodcd: PRODCD })
-if (dryRun) {
-  console.log('   + 시도마다 avgSigunPrice.do?sido=XX&prodcd=B027')
-  process.exit(0)
-}
-console.log('시도 목록 예:', JSON.stringify(areas[0]), '· 시도 평균 예:', JSON.stringify(sidoAvg[0]))
+if (dryRun) console.log('   + 시도마다 avgSigunPrice.do?sido=XX&prodcd=B027')
+else process.exitCode = await main()
 
-const out = { at: new Date().toISOString(), source: 'opinet', prodcd: PRODCD, sido: {}, sigun: {} }
-for (const o of sidoAvg) {
-  const name = pick(o, 'SIDONM', 'AREA_NM'), p = price(o)
-  if (name && p > 0 && name !== '전국') out.sido[name] = p
-}
-for (const a of areas) {
-  const cd = pick(a, 'AREA_CD', 'SIDOCD'), sidoName = pick(a, 'AREA_NM', 'SIDONM')
-  if (!cd || !sidoName) continue
-  const list = await call('avgSigunPrice.do', { sido: cd, prodcd: PRODCD })
-  for (const o of list) {
-    const name = pick(o, 'SIGUNNM', 'AREA_NM'), p = price(o)
-    if (name && p > 0) out.sigun[`${sidoName} ${name}`] = p
+// process.exit() 는 Windows 에서 fetch 연결이 닫히는 중이면 libuv 단언 오류를 낸다 → exitCode 만 정하고 자연스럽게 끝낸다
+async function main() {
+  console.log('시도 목록 예:', JSON.stringify(areas[0]), '· 시도 평균 예:', JSON.stringify(sidoAvg[0]))
+  if (!areas.length && !sidoAvg.length) {
+    // 오피넷은 키가 틀리거나 아직 승인 전이어도 HTTP 200 + 빈 목록({"RESULT":{"OIL":[]}})을 돌려준다
+    console.error('오피넷이 빈 목록만 돌려줍니다 — 인증키가 받아들여지지 않았습니다(키 값·무료 API 승인 여부 확인). 파일은 바꾸지 않습니다.')
+    return 1
   }
+  const out = { at: new Date().toISOString(), source: 'opinet', prodcd: PRODCD, sido: {}, sigun: {} }
+  for (const o of sidoAvg) {
+    const name = pick(o, 'SIDONM', 'AREA_NM'), p = price(o)
+    if (name && p > 0 && name !== '전국') out.sido[name] = p
+  }
+  for (const a of areas) {
+    const cd = pick(a, 'AREA_CD', 'SIDOCD'), sidoName = pick(a, 'AREA_NM', 'SIDONM')
+    if (!cd || !sidoName) continue
+    const list = await call('avgSigunPrice.do', { sido: cd, prodcd: PRODCD })
+    for (const o of list) {
+      const name = pick(o, 'SIGUNNM', 'AREA_NM'), p = price(o)
+      if (name && p > 0) out.sigun[`${sidoName} ${name}`] = p
+    }
+  }
+  console.log(`시도 ${Object.keys(out.sido).length}곳 · 시군구 ${Object.keys(out.sigun).length}곳`)
+  const sample = Object.entries(out.sigun).filter(([k]) => /수원|용인|성남/.test(k))
+  console.log('예:', sample.map(([k, v]) => `${k} ${v}원`).join(' · ') || '(수원·용인·성남 없음 — 이름 확인 필요)')
+  if (!Object.keys(out.sigun).length) { console.error('시군구 가격을 하나도 못 받았습니다 — 파일을 바꾸지 않습니다.'); return 1 }
+  fs.writeFileSync(OUT, JSON.stringify(out, null, 2) + '\n')
+  console.log('→', path.relative(ROOT, OUT))
+  return 0
 }
-console.log(`시도 ${Object.keys(out.sido).length}곳 · 시군구 ${Object.keys(out.sigun).length}곳`)
-const sample = Object.entries(out.sigun).filter(([k]) => /수원|용인|성남/.test(k))
-console.log('예:', sample.map(([k, v]) => `${k} ${v}원`).join(' · ') || '(수원·용인·성남 없음 — 이름 확인 필요)')
-if (!Object.keys(out.sigun).length) { console.error('시군구 가격을 하나도 못 받았습니다 — 파일을 바꾸지 않습니다.'); process.exit(1) }
-fs.writeFileSync(OUT, JSON.stringify(out, null, 2) + '\n')
-console.log('→', path.relative(ROOT, OUT))
