@@ -98,7 +98,7 @@ function NaverMap({ candidates, hubs, active, onSelect, focusKey, hubId, onHub, 
   const fit = (force = false, all = false) => {
     const n = window.naver
     const pts = all ? allCands(candidates) : frame(candidates, hubs, active, focusHubIds)
-    if (!n || !map.current || !pts.length) return
+    if (!n?.maps || !map.current || !pts.length) return
     const b = new n.maps.LatLngBounds(new n.maps.LatLng(pts[0][0], pts[0][1]), new n.maps.LatLng(pts[0][0], pts[0][1]))
     pts.forEach(([la, ln]) => b.extend(new n.maps.LatLng(la, ln)))
     if (!force) {
@@ -109,7 +109,11 @@ function NaverMap({ candidates, hubs, active, onSelect, focusKey, hubId, onHub, 
       if (inView && fill > 0.35) return // 이미 들어와 있고 너무 작지도 않다
     }
     const pad = all ? PAD_ALL : PAD
-    map.current.fitBounds(b, { top: pad + (all ? 36 : 40), right: pad, bottom: pad, left: pad })
+    if (all) { // 후보지 한눈에: 네 변 여백을 같게 두어 후보지들의 중앙(최소 사각형의 가운데)이 지도 중심이 되게 한다
+      map.current.fitBounds(b, { top: pad, right: pad, bottom: pad, left: pad })
+      return
+    }
+    map.current.fitBounds(b, { top: pad + 40, right: pad, bottom: pad, left: pad })
   }
 
   useEffect(() => onNaverAuthFailure(onFail), []) // eslint-disable-line react-hooks/exhaustive-deps
@@ -226,6 +230,11 @@ function fitSmart(map: L.Map, pts: [number, number][], force = false, all = fals
   const pad = all ? PAD_ALL : PAD
   const opts = { paddingTopLeft: [pad, pad + (all ? 36 : 40)] as [number, number], paddingBottomRight: [pad, pad] as [number, number] }
   const b = L.latLngBounds(pts)
+  if (all) { // 후보지 한눈에: 여백을 네 변 같게 두고 중심을 후보지들의 중앙(최소 사각형의 가운데)에 둔다
+    const z = Math.min(17, map.getBoundsZoom(b, false, L.point(pad * 2, pad * 2))) // zoomSnap 0.25 라서 여백이 남아도 최대 1/4 단계
+    map.setView(b.getCenter(), z, { animate: false })
+    return
+  }
   const target = Math.min(all ? 17 : 16, map.getBoundsZoom(b, false, L.point(pad * 2, pad * 2 + 40)))
   const z = map.getZoom()
   if (!force && z === target && map.getBounds().contains(b)) return
@@ -264,7 +273,7 @@ function OsmMap({ candidates, hubs, active, onSelect, focusKey, hubId, onHub, in
   const start = pts[0] ?? [37.27, 127.07]
   const detail = zoom >= DETAIL_ZOOM
   return (
-    <MapContainer className="map" center={start} zoom={13} zoomControl={false} attributionControl>
+    <MapContainer className="map" center={start} zoom={13} zoomSnap={0.25} zoomControl={false} attributionControl>
       <TileLayer className="tiles-base" url="https://tiles.osm.kr/hot/{z}/{x}/{y}.png" attribution="&copy; OpenStreetMap contributors" maxZoom={19} />
       <Framing pts={pts} focusKey={focusKey} active={active} all={allCands(candidates)} allKey={allKey} />
       <ZoomWatch onZoom={setZoom} />
