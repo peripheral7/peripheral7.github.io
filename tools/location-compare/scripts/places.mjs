@@ -262,7 +262,16 @@ async function main() {
     const road = roads.map((r) => ({ name: r.name, d: r.rings ? polyDist(p, r.rings) : lineDist(p, r.line) })).sort((a, b) => a.d - b.d)[0] ?? null
     const foodScore = food <= PC.foodFree ? 10 - PC.foodSmallPenalty * food : (10 - PC.foodSmallPenalty * PC.foodFree) * Math.pow(10, -(food - PC.foodFree) / PC.foodDecay)
     const roadScore = !road || road.d > PC.roadFarM ? 10 : road.d > PC.roadNearM ? PC.roadMidScore : 0
-    const peace = foodScore * PC.wFood + roadScore * PC.wRoad
+    // 반경 greenRadiusM 안 녹지 비율(공원 쪽 녹지 비율과 같은 격자 방식)
+    let gIn = 0, gAll = 0
+    for (let dx = -PC.greenRadiusM; dx <= PC.greenRadiusM; dx += PK.greenGridM) for (let dy = -PC.greenRadiusM; dy <= PC.greenRadiusM; dy += PK.greenGridM) {
+      if (dx * dx + dy * dy > PC.greenRadiusM ** 2) continue
+      gAll++; const q = [p[0] + dx, p[1] + dy]
+      if (greens.some((r) => inside(q, r))) gIn++
+    }
+    const green300 = gIn / gAll
+    const greenScore300 = Math.min(10, (10 * green300) / PC.greenFullRatio)
+    const peace = foodScore * PC.wFood + roadScore * PC.wRoad + greenScore300 * PC.wGreen
     // 공원
     const near = parks.map((k) => ({ k, d: polyDist(p, k.rings) })).filter((x) => x.d <= PK.radiusM)
       .map((x) => ({ ...x, eff: x.k.value * (x.d <= PK.fullM ? 1 : 1 - (1 - PK.farFactor) * (x.d - PK.fullM) / (PK.radiusM - PK.fullM)) }))
@@ -285,7 +294,7 @@ async function main() {
 
     out[c.id] = {
       name: c.name, lat: c.lat, lng: c.lng,
-      peace: { score: +peace.toFixed(1), food, foodScore: +foodScore.toFixed(1), road: road ? { name: road.name, dist: Math.round(road.d) } : null, roadScore },
+      peace: { score: +peace.toFixed(1), food, foodScore: +foodScore.toFixed(1), road: road ? { name: road.name, dist: Math.round(road.d) } : null, roadScore, green: +(green300 * 100).toFixed(0), greenScore: +greenScore300.toFixed(1) },
       park: {
         score: +parkScore.toFixed(1), green: +(green * 100).toFixed(0), greenBonus,
         parks: near.slice(0, 5).map((x) => ({ name: x.k.name, type: x.k.type, dist: Math.round(x.d), value: x.k.value, eff: +x.eff.toFixed(1), areaHa: x.k.areaHa, walkM: x.k.walkM, waterside: x.k.waterside, linked: x.k.linked })),
@@ -307,6 +316,7 @@ async function main() {
     '## 자료 출처', '', ...CFG.sources.list.map((s) => `- ${s}`), `- OSM 받은 날 ${json.osmAt} · 도서관 데이터기준일자 ${json.libraryAt}`, '',
     '## 🕊️ 평화로움', '', head,
     `| 60m 안 음식점·주점 | ${ids.map((id) => `${out[id].peace.food} → ${out[id].peace.foodScore}`).join(' | ')} |`,
+    `| ${PC.greenRadiusM}m 안 녹지 비율 | ${ids.map((id) => `${out[id].peace.green}% → ${out[id].peace.greenScore}`).join(' | ')} |`,
     `| 가장 가까운 큰길 | ${ids.map((id) => { const r = out[id].peace.road; return r ? `${r.dist}m ${r.name} → ${out[id].peace.roadScore}` : '없음 → 10' }).join(' | ')} |`,
     `| **평화로움** | ${ids.map((id) => `**${out[id].peace.score}**`).join(' | ')} |`, '',
     '## 🌳 공원', '', head,

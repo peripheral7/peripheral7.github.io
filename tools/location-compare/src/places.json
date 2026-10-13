@@ -15,14 +15,16 @@
       "lat": 37.24858,
       "lng": 127.05555,
       "peace": {
-        "score": 9.8,
+        "score": 7.9,
         "food": 2,
         "foodScore": 9.6,
         "road": {
           "name": "대로3-34 · 대로3류(폭 25~30m)",
           "dist": 136
         },
-        "roadScore": 10
+        "roadScore": 10,
+        "green": 1,
+        "greenScore": 0.3
       },
       "park": {
         "score": 7.2,
@@ -115,14 +117,16 @@
       "lat": 37.24314,
       "lng": 127.06314,
       "peace": {
-        "score": 7.5,
+        "score": 6.6,
         "food": 0,
         "foodScore": 10,
         "road": {
           "name": "봉영로 · 광로3류(폭 40~50m)",
           "dist": 57
         },
-        "roadScore": 5
+        "roadScore": 5,
+        "green": 10,
+        "greenScore": 3.2
       },
       "park": {
         "score": 8.6,
@@ -215,14 +219,16 @@
       "lat": 37.25342,
       "lng": 127.07778,
       "peace": {
-        "score": 5.6,
+        "score": 4.9,
         "food": 27,
         "foodScore": 1.2,
         "road": {
           "name": "대로3-39 · 대로3류(폭 25~30m)",
           "dist": 87
         },
-        "roadScore": 10
+        "roadScore": 10,
+        "green": 7,
+        "greenScore": 2.4
       },
       "park": {
         "score": 10,
@@ -315,14 +321,16 @@
       "lat": 37.23672,
       "lng": 127.07713,
       "peace": {
-        "score": 9.7,
+        "score": 8.8,
         "food": 3,
         "foodScore": 9.4,
         "road": {
           "name": "대로2류폭 30m~35m · 대로2류(폭 30~35m)",
           "dist": 355
         },
-        "roadScore": 10
+        "roadScore": 10,
+        "green": 16,
+        "greenScore": 5.3
       },
       "park": {
         "score": 10,

@@ -2,7 +2,7 @@
   "_설명": "입지 요인(평화로움·공원·도서관) 계산 규칙. 숫자를 고친 뒤 node scripts/places.mjs → 빌드. 설명은 README 4-5절.",
   "fetchMargin": 1300,
   "peace": {
-    "_설명": "평화로움 = 음식점 점수 × wFood + 큰길 점수 × wRoad (각 0~10). 음식점은 반경 foodRadiusM 안 음식점·주점 수 n: n ≤ foodFree 이면 1곳당 foodSmallPenalty 만 깎고, 그 위로는 크게 깎되(10^(−(n−foodFree)/foodDecay)) 30곳쯤부터는 거의 0 근처에서 큰 차이 없음. 큰길은 roadNearM 안이면 0, roadFarM 안이면 roadMidScore, 그 밖이면 10",
+    "_설명": "평화로움 = 음식점 점수 × wFood + 큰길 점수 × wRoad + 녹지 점수 × wGreen (각 0~10). 음식점은 반경 foodRadiusM 안 음식점·주점 수 n: n ≤ foodFree 이면 1곳당 foodSmallPenalty 만 깎고, 그 위로는 크게 깎되(10^(−(n−foodFree)/foodDecay)) 30곳쯤부터는 거의 0 근처에서 큰 차이 없음. 큰길은 roadNearM 안이면 0, roadFarM 안이면 roadMidScore, 그 밖이면 10. 녹지 = 반경 greenRadiusM(300m) 안 녹지(공원·녹지 시설·숲·풀밭) 비율이 greenFullRatio(30%) 이상이면 10점, 그 아래는 비율에 비례. 합계 = 음식점×wFood + 큰길×wRoad + 녹지×wGreen",
     "foodRadiusM": 60,
     "foodPrefix": [
       "I201",
@@ -24,8 +24,11 @@
     "roadNearM": 30,
     "roadFarM": 60,
     "roadMidScore": 5,
-    "wFood": 0.5,
-    "wRoad": 0.5,
+    "greenRadiusM": 300,
+    "greenFullRatio": 0.3,
+    "wFood": 0.4,
+    "wRoad": 0.4,
+    "wGreen": 0.2,
     "bigRoadGrades": ["광로", "대로"]
   },
   "park": {

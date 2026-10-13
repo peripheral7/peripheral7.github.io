@@ -8,7 +8,7 @@ export type PlaceKey = 'peace' | 'park' | 'library'
 export type ParkRow = { name: string; type: string; dist: number; value: number; eff: number; areaHa: number; walkM: number; waterside: boolean; linked: boolean }
 export type LibraryRow = { name: string; dist: number; seats: number; books: number }
 export type PlaceRow = {
-  peace: { score: number; food: number; foodScore: number; road: { name: string; dist: number } | null; roadScore: number }
+  peace: { score: number; food: number; foodScore: number; road: { name: string; dist: number } | null; roadScore: number; green: number; greenScore: number }
   park: { score: number; green: number; greenBonus: number; parks: ParkRow[] }
   library: { score: number; near: LibraryRow[] }
 }

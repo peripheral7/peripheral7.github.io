@@ -209,8 +209,9 @@ function PlaceDetail({ k, r }: { k: PlaceKey; r: PlaceRow }) {
     return (
       <div className="com-picker place-detail">
         <div className="place-line"><span>🍽️ 60m 안 음식점·주점 {p.food}곳</span><em>{fmt(p.foodScore)}</em></div>
+        <div className="place-line"><span>🌿 300m 안 녹지 비율 {p.green}%</span><em>{fmt(p.greenScore)}</em></div>
         <div className="place-line"><span>🛣️ {p.road ? `큰길 ${p.road.name} ${p.road.dist}m` : '가까운 큰길 없음'}</span><em>{fmt(p.roadScore)}</em></div>
-        <p className="com-note">평화로움 = 음식점 점수 × 0.5 + 큰길 점수 × 0.5. 음식점은 5곳까지 1곳당 0.2점만 깎고, 6곳부터 크게 깎이며 30곳 넘으면 거의 0점에서 큰 차이 없음. 큰길(도시계획 도로 광로·대로 = 폭 25m 이상, 브이월드)의 가장자리가 30m 안이면 0점, 60m 안이면 5점, 그 밖이면 10점.</p>
+        <p className="com-note">평화로움 = 음식점 점수 × 0.4 + 큰길 점수 × 0.4 + 녹지 점수 × 0.2. 녹지는 반경 300m 안 녹지(공원·숲·풀밭) 비율이 30% 이상이면 10점, 그 아래는 비율에 비례. 음식점은 5곳까지 1곳당 0.2점만 깎고, 6곳부터 크게 깎이며 30곳 넘으면 거의 0점에서 큰 차이 없음. 큰길(도시계획 도로 광로·대로 = 폭 25m 이상, 브이월드)의 가장자리가 30m 안이면 0점, 60m 안이면 5점, 그 밖이면 10점.</p>
       </div>
     )
   }
