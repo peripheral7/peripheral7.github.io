@@ -13,7 +13,7 @@ export type PlaceRow = {
   library: { score: number; near: LibraryRow[] }
 }
 export const PLACE_LABEL: Record<PlaceKey, string> = { peace: '🕊️ 평화로움', park: '🌳 공원', library: '📚 도서관' }
-export const PLACE_NOTE: Record<PlaceKey, string> = { peace: '60m 안 음식점 · 큰길과의 거리', park: '1km 안 공원 · 녹지 비율', library: '가장 가까운 공공도서관' }
+export const PLACE_NOTE: Record<PlaceKey, string> = { peace: '음식점 · 큰길', park: '공원 · 녹지 비율', library: '가까운 공공도서관' }
 export const PLACE_KEYS: PlaceKey[] = ['peace', 'park', 'library']
 export const OSM_AT = data.osmAt
 export const LIBRARY_AT = data.libraryAt
@@ -51,8 +51,9 @@ export function savePlaceOn(v: PlaceOn) { try { localStorage.setItem(KEY, JSON.s
 
 /** 이름 아래 한 줄 요약 */
 export function placeSummary(k: PlaceKey, r: PlaceRow): string {
-  if (k === 'peace') return `60m 안 음식점 ${r.peace.food}곳 · ${r.peace.road ? `큰길(${r.peace.road.name}) ${r.peace.road.dist}m` : '가까운 큰길 없음'}`
-  if (k === 'park') { const p = r.park.parks[0]; return p ? `${p.name} ${p.dist}m${p.linked ? ' · 길게 연결' : ''} · 녹지 ${r.park.green}%` : `1km 안 공원 없음 · 녹지 ${r.park.green}%` }
+  // 거리(m)·음식점 수 같은 규칙 숫자는 적지 않는다 — 이름만(계산 내역은 이름을 눌렀을 때)
+  if (k === 'peace') return r.peace.road ? `큰길(${r.peace.road.name})` : '가까운 큰길 없음'
+  if (k === 'park') { const p = r.park.parks[0]; return p ? `${p.name}${p.linked ? ' · 길게 연결' : ''} · 녹지 ${r.park.green}%` : `가까운 공원 없음 · 녹지 ${r.park.green}%` }
   const l = r.library.near[0]
-  return l ? `${l.name} ${l.dist}m` : '공공도서관 자료 없음'
+  return l ? l.name : '공공도서관 자료 없음'
 }
