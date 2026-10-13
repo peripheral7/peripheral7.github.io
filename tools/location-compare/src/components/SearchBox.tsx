@@ -1,7 +1,7 @@
 import { useEffect, useRef, useState } from 'react'
 import { HUB_CATEGORIES, MAX_HUBS, MAX_TRIPS, NEW_HUB_TRIPS, type Hub, type Place } from '../data'
 import { guessHubCategory, money } from '../store'
-import { normalizeQuery, placeSearchAvailable, search, searchAvailable } from '../naver'
+import { normalizeQuery, placeSearchAvailable, reverseGeocode, search, searchAvailable } from '../naver'
 
 // 지도 위 검색창 하나: 후보지(아파트·주소)와 목적지(학교·회사 등)를 같은 창에서 찾는다.
 // - 글자를 치다 잠깐 멈추면(LIVE_DELAY) 저절로 검색해 아래에 결과를 띄운다. Enter 는 바로 검색.
@@ -9,6 +9,7 @@ import { normalizeQuery, placeSearchAvailable, search, searchAvailable } from '.
 // - 결과는 지금 지도 가운데에서 가까운 순으로 늘어놓고(거리 표시), 지도에도 작은 점으로 찍는다.
 // - 결과를 누르면 지도가 그 위치로 가고, 결과 목록 바로 오른쪽에 "후보지로 / 목적지로" 단추 → 그 자리에서 등록 창.
 
+const MAP_PICK_NAME = '지도에서 고른 곳' // 지도 우클릭으로 고른 곳의 임시 이름(주소를 받으면 바뀜)
 const LIVE_DELAY = 450 // ms — 타자를 멈춘 뒤 이만큼 지나면 검색
 const MIN_LEN = 2
 
@@ -86,13 +87,23 @@ export function SearchBox({ hubs, tripsOf, onCandidate, onHub, onPreview, onResu
   }, [q]) // eslint-disable-line react-hooks/exhaustive-deps
 
   // 지도 우클릭 "후보지로/목적지로": 그 한 곳을 결과로 놓고 등록 창을 바로 연다(지도는 움직이지 않음)
+  // 좌표 → 주소를 바로 받아 결과 줄·등록 창에 채운다(이름은 사용자가 아직 안 고쳤을 때만 주소로 바꿈)
   useEffect(() => {
     if (!external) return
-    const p = external.place
-    seq.current++ // 진행 중인 검색 결과는 버린다
+    const { lat, lng } = external.place
+    const id = ++seq.current // 진행 중인 검색 결과는 버린다
+    const coord = `${lat.toFixed(5)}, ${lng.toFixed(5)}`
+    const p: Place = { ...external.place, name: MAP_PICK_NAME, address: '주소 찾는 중…' }
     setBusy(false); setItems([p]); setMsg(''); setOpen(true); setPicked(0); setSideTop(0)
-    setDraft({ kind: external.kind, name: p.name, category: guessHubCategory(p), deposit: '', rent: '', maint: '', trips: String(NEW_HUB_TRIPS) })
+    setDraft({ kind: external.kind, name: MAP_PICK_NAME, category: '기타', deposit: '', rent: '', maint: '', trips: String(NEW_HUB_TRIPS) })
     onPreview(p, false)
+    void reverseGeocode(lat, lng).then((a) => {
+      if (id !== seq.current) return // 그사이 다른 곳을 고르거나 검색했다
+      const name = a ? a.building || (a.rough ? MAP_PICK_NAME : a.address.split(' ').slice(2).join(' ') || a.address) : MAP_PICK_NAME
+      const q: Place = { ...p, name, address: a?.address ?? coord }
+      setItems([q])
+      setDraft((d) => (d && d.name === MAP_PICK_NAME ? { ...d, name } : d))
+    })
   }, [external?.n]) // eslint-disable-line react-hooks/exhaustive-deps
 
   const pick = (i: number, row: HTMLElement) => {
@@ -149,6 +160,7 @@ export function SearchBox({ hubs, tripsOf, onCandidate, onHub, onPreview, onResu
               ) : (
                 <form className="register" onSubmit={(e) => { e.preventDefault(); commit() }} onKeyDown={(e) => { if (e.key === 'Escape') { e.stopPropagation(); setDraft(null) } }}>
                   <span className="register-title">{draft.kind === 'candidate' ? '후보지로 등록' : '목적지로 등록'}</span>
+                  <p className="register-addr">📍 {items[picked].address}</p>
                   <label>이름<input {...plain} value={draft.name} maxLength={40} autoFocus onChange={(e) => setDraft({ ...draft, name: e.target.value })} /></label>
                   {draft.kind === 'candidate' ? <>
                     <label>보증금<span className="unit-input"><input {...plain} type="number" min={0} step={100} inputMode="numeric" placeholder="예: 1000" value={draft.deposit} onChange={(e) => setDraft({ ...draft, deposit: e.target.value })} /><i>만원</i></span></label>

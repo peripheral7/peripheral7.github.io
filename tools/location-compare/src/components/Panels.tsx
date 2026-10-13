@@ -219,15 +219,15 @@ function PlaceDetail({ k, r }: { k: PlaceKey; r: PlaceRow }) {
     const p = r.park
     return (
       <div className="com-picker place-detail">
-        {p.parks.length === 0 && <p className="com-note">1km 안에 공원이 없어요.</p>}
+        {p.parks.length === 0 && <p className="com-note">500m 안에 공원이 없어요.</p>}
         {p.parks.map((x, i) => (
           <div className="place-line" key={x.name + i}>
-            <span>{x.waterside ? '🌊' : '🌳'} {x.name} <small>{x.type} · {x.dist}m · 산책로 {x.walkM ? `${(x.walkM / 1000).toFixed(1)}km` : '자료 없음'} · {x.areaHa}ha{x.linked ? ' · 길게 연결 ×1.8' : ''}</small></span>
+            <span>{x.waterside ? '🌊' : '🌳'} {x.name} <small>{x.type} · {x.dist}m · 산책로 {x.walkM ? `${(x.walkM / 1000).toFixed(1)}km` : '자료 없음'} · {x.areaHa}ha{x.linked ? ' · 길게 연결 ×1.8' : ''}{x.steep !== undefined && x.steep < 1 ? ` · 산길(고저차 ${x.relief}m) ×${x.steep}` : ''}</small></span>
             <em title={`공원 점수 ${x.value} → 거리 반영 ${x.eff}`}>{fmt(x.eff)}</em>
           </div>
         ))}
-        <div className="place-line"><span>🌿 1km 안 녹지 비율 {p.green}%</span><em>+{p.greenBonus}</em></div>
-        <p className="com-note">더하기 방식. 공원마다 점수 = 공원 안 산책로 길이로(반달공원 0.4km ≈ 2점 · 신동수변공원 1.3km ≈ 7.6 · 글빛누리공원 1.5km ≈ 8 · 광교호수공원 32km = 10), 길게 이어져 양 끝이 상권에 닿으면 ×1.8. 후보지 점수 = 가장 좋은 공원(500m 넘으면 1km 에서 절반까지 줄임) + 두 번째 공원 10% + 녹지 15% 이상 +0.5 · 30% 이상 +1, 최대 10. 공원 경계·유형은 국토교통부 도시계획시설(공간시설), 산책로·이름은 OSM {OSM_AT}.</p>
+        <div className="place-line"><span>🌿 500m 안 녹지 비율 {p.green}%</span><em>+{p.greenBonus}</em></div>
+        <p className="com-note">더하기 방식. 공원마다 점수 = 공원 안 산책로 길이로(반달공원 0.4km ≈ 2점 · 신동수변공원 1.3km ≈ 7.6 · 글빛누리공원 1.5km ≈ 8 · 광교호수공원 32km = 10), 길게 이어져 양 끝이 상권에 닿으면 ×1.8, 산길(공원 안 고저차 10m 초과)이면 깎아 40m 이상에서 ×0.4. 후보지 점수 = 500m 안 가장 좋은 공원 + 두 번째 공원 10% + 녹지 15% 이상 +0.5 · 30% 이상 +1, 최대 10. 공원 경계·유형은 국토교통부 도시계획시설(공간시설), 산책로·이름은 OSM {OSM_AT}, 고도는 Copernicus DEM(30m).</p>
       </div>
     )
   }

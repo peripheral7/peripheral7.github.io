@@ -156,8 +156,34 @@ async function searchOnce(query: string): Promise<{ places: Place[]; errors: str
   return { places, errors }
 }
 
-/** 지도에서 우클릭한 곳의 주소(네이버 지도 JS 의 역지오코더). 키가 없거나 Reverse Geocoding 이 꺼져 있으면 null(2.5초 넘으면 포기). */
-export async function reverseGeocode(lat: number, lng: number): Promise<{ address: string; building?: string } | null> {
+// ── 좌표 → 주소(지도 우클릭 등록) ─────────────────────────────────────
+// 1) 네이버 지도 JS 역지오코더 — 도로명 주소·건물 이름까지. NCP 앱에서 "Reverse Geocoding" 을 켜야 동작(2026-10-13 지금은 꺼져 있어 403).
+// 2) 안 되면 OpenStreetMap Nominatim(키 없음, 브라우저에서 바로) — 동·구 정도만 나와 "부근"으로 표시(rough).
+//    브이월드 주소 API 는 정확하지만 키가 브라우저에 드러나고, Cloudflare Worker 에서 부르면 브이월드가 막는다(520).
+// 3) 둘 다 안 되면 null(위경도로 표시). 같은 좌표(약 1m)는 한 번만 묻는다.
+export type RevAddr = { address: string; building?: string; rough?: boolean }
+const revCache = new Map<string, Promise<RevAddr | null>>()
+export function reverseGeocode(lat: number, lng: number): Promise<RevAddr | null> {
+  const k = `${lat.toFixed(5)},${lng.toFixed(5)}`
+  let p = revCache.get(k)
+  if (!p) {
+    p = naverReverse(lat, lng).then((a) => a ?? osmReverse(lat, lng))
+    revCache.set(k, p)
+  }
+  return p
+}
+async function osmReverse(lat: number, lng: number): Promise<RevAddr | null> {
+  try {
+    const ctl = new AbortController(), t = setTimeout(() => ctl.abort(), 4000)
+    const r = await fetch(`https://nominatim.openstreetmap.org/reverse?lat=${lat}&lon=${lng}&format=jsonv2&accept-language=ko&zoom=18&addressdetails=1`, { signal: ctl.signal })
+    clearTimeout(t)
+    if (!r.ok) return null
+    const a = (await r.json()).address ?? {}
+    const parts = [a.province, a.city, a.borough, a.quarter || a.suburb || a.neighbourhood || a.village, a.road, a.house_number].filter(Boolean)
+    return parts.length >= 2 ? { address: `${parts.join(' ')}${a.house_number ? '' : ' 부근'}`, rough: !a.house_number } : null
+  } catch { return null }
+}
+async function naverReverse(lat: number, lng: number): Promise<RevAddr | null> {
   try {
     const naver = await loadNaverMaps()
     return await new Promise((resolve) => {

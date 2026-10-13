@@ -24,7 +24,7 @@ export const radiusOf = (bike?: boolean) => (bike ? WALK5 * 2 : WALK5)
 export const ENOUGH = data.enough as Record<string, number>
 /** 개수 → 업종 점수(0~10) */
 const sat = (n: number, t: number) => 10 * (1 - Math.pow(10, -n / (t || 1)))
-/** 브랜드 몫(화장품 = 개수 50% + 올리브영 50%) — commercial-categories.json 의 brand_part */
+/** 브랜드 몫(잡화 = 개수 50% + 올리브영·다이소 50%) — commercial-categories.json 의 brand_part */
 export const BRAND_PARTS = (data.brandParts ?? {}) as Record<string, { label: string; enough: number; weight: number }>
 /** 개수(·브랜드 매장 수) → 업종 점수(0~10) */
 export const catScore = (id: string, n: number, brand = 0) => {
@@ -35,7 +35,7 @@ export const STDR_YM = data.stdrYm
 export const CATEGORIES: CatInfo[] = data.categories.map(({ id, label, emoji }) => ({ id, label, emoji }))
 export const MAJORS = data.majors as Major[]
 /** 자료가 얇아 믿기 어려운 업종(설명 문구) */
-export const THIN: Record<string, string> = { variety: '상가정보에 다이소·생활용품점 등록이 매우 적어 개수를 믿기 어렵습니다' }
+export const THIN: Record<string, string> = { goods: '다이소·생활용품점은 상가정보에 등록이 매우 적어 실제보다 적게 셀 수 있습니다' }
 
 type Row = { lat: number; lng: number; counts: Record<string, Record<string, number>>; brand?: Record<string, Record<string, number>> }
 const ROWS = data.candidates as Record<string, Row>
@@ -63,7 +63,7 @@ export function walk5Counts(c: Candidate | undefined, bike?: boolean): Record<st
   const r = c ? rowOf(c) : null
   return r ? Object.fromEntries(CATEGORIES.map((k) => [k.id, r.counts[k.id]?.[radiusOf(bike)] ?? 0])) : null
 }
-/** 브랜드 몫 매장 수(예: 화장품의 올리브영) */
+/** 브랜드 몫 매장 수(예: 잡화의 올리브영·다이소) */
 export function walk5Brand(c: Candidate | undefined, bike?: boolean): Record<string, number> | null {
   const r = c ? rowOf(c) : null
   return r ? Object.fromEntries(Object.keys(BRAND_PARTS).map((id) => [id, r.brand?.[id]?.[radiusOf(bike)] ?? 0])) : null
@@ -87,7 +87,7 @@ export function commercialIndex(candidates: Candidate[], p: CommercialPrefs, bik
   })
 }
 
-const KEY = 'locCompare.commercial.v1'
+const KEY = 'locCompare.commercial.v2' // v2(10-13): 업종 정리(잡화 묶음·음식점 삭제)로 기본 선택을 새로 — 옛 v1 은 무시
 export function loadCommercial(): CommercialPrefs {
   const d = data.defaultPrefs
   try {

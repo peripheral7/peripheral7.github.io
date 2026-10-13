@@ -5,7 +5,7 @@ import config from './places-config.json'
 import type { Candidate } from './data'
 
 export type PlaceKey = 'peace' | 'park' | 'library'
-export type ParkRow = { name: string; type: string; dist: number; value: number; eff: number; areaHa: number; walkM: number; waterside: boolean; linked: boolean }
+export type ParkRow = { name: string; type: string; dist: number; value: number; eff: number; areaHa: number; walkM: number; waterside: boolean; linked: boolean; relief?: number; steep?: number }
 export type LibraryRow = { name: string; dist: number; seats: number; books: number }
 export type PlaceRow = {
   peace: { score: number; food: number; foodScore: number; road: { name: string; dist: number } | null; roadScore: number; green: number; greenScore: number }

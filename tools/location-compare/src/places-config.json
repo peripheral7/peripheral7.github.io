@@ -18,7 +18,11 @@
     "foodFree": 5,
     "foodSmallPenalty": 0.2,
     "foodDecay": 25,
-    "roadClasses": ["motorway", "trunk", "primary"],
+    "roadClasses": [
+      "motorway",
+      "trunk",
+      "primary"
+    ],
     "roadMinLanes": 6,
     "_road": "큰길 = 브이월드 도시계획(교통시설) 도로 중 규모가 bigRoadGrades(광로·대로 = 폭 25m 이상)인 도로 면, 가장자리까지 거리. 키가 없으면 OSM: highway 가 roadClasses 이거나 이름이 …대로 이거나 차로 수 roadMinLanes 이상",
     "roadNearM": 30,
@@ -29,12 +33,15 @@
     "wFood": 0.4,
     "wRoad": 0.4,
     "wGreen": 0.2,
-    "bigRoadGrades": ["광로", "대로"]
+    "bigRoadGrades": [
+      "광로",
+      "대로"
+    ]
   },
   "park": {
-    "_설명": "더하기 방식(감점 없음). 공원 = 공간시설(UQ162) 공원 경계(어린이·근린·소·문화·역사·수변·체육·도시농업 공원, 도시자연공원구역). 공원 점수(공원마다) = logA × log10(산책로 길이 ÷ logL0), 최소 minPoints · 최대 10 (예시 맞춤: 반달공원 398m → 2, 신동수변공원 1,340m → 7.6, 글빛누리공원 1,473m → 8, 광교호수공원 31.8km → 10). 물가면 +watersideBonus. 길게 이어져 양 끝이 상권에 닿으면 × link.mult. 후보지 점수 = 1km 안 가장 좋은 공원(거리 반영: fullM 까지 그대로, radiusM 에서 farFactor 배) + 두 번째 공원 × secondShare + 녹지 비율 가산, 최대 10",
+    "_설명": "더하기 방식(감점 없음). 공원 = 공간시설(UQ162) 공원 경계(어린이·근린·소·문화·역사·수변·체육·도시농업 공원, 도시자연공원구역). 공원 점수(공원마다) = logA × log10(산책로 길이 ÷ logL0), 최소 minPoints · 최대 10 (예시 맞춤: 반달공원 398m → 2, 신동수변공원 1,340m → 7.6, 글빛누리공원 1,473m → 8, 광교호수공원 31.8km → 10). 물가면 +watersideBonus. 산길(고저차 큼)이면 × slope 배율. 길게 이어져 양 끝이 상권에 닿으면 × link.mult. 후보지 점수 = radiusM(500m) 안 가장 좋은 공원(500m 안은 거리 감점 없음) + 두 번째 공원 × secondShare + 녹지 비율 가산, 최대 10",
     "minAreaM2": 1000,
-    "radiusM": 1000,
+    "radiusM": 500,
     "fullM": 500,
     "farFactor": 0.5,
     "logA": 10.6,
@@ -45,8 +52,14 @@
     "secondShare": 0.1,
     "greenGridM": 50,
     "greenBonus": [
-      { "min": 0.3, "add": 1 },
-      { "min": 0.15, "add": 0.5 }
+      {
+        "min": 0.3,
+        "add": 1
+      },
+      {
+        "min": 0.15,
+        "add": 0.5
+      }
     ],
     "link": {
       "_설명": "막다른 공원이 아니라 길게 이어져 다른 상권까지 연결 = 가장 먼 두 점 거리 ≥ minSpanM, 길쭉함(둘레²/(4π·면적)) ≥ minCompact, 양 끝 각각 endRadiusM 안 업소 ≥ minShops",
@@ -56,11 +69,20 @@
       "minShops": 10,
       "mult": 1.8
     },
-    "excludeTypes": ["묘지공원"],
+    "excludeTypes": [
+      "묘지공원"
+    ],
     "mapMinValue": 5,
     "mapSimplifyM": 4,
     "_map": "지도 '산책'을 켜면 공원 점수(위 공원마다 점수, 거리 반영 전)가 mapMinValue 이상인 공원 경계를 색칠한다 — src/park-areas.json(경계는 mapSimplifyM 오차로 단순화)",
-    "_exclude": "묘지공원은 산책 공원으로 보지 않음. 유형은 공간시설 시설 코드(MNUM 안 UQTxxxx) — places.mjs 의 PARK_TYPES"
+    "_exclude": "묘지공원은 산책 공원으로 보지 않음. 유형은 공간시설 시설 코드(MNUM 안 UQTxxxx) — places.mjs 의 PARK_TYPES",
+    "slope": {
+      "_설명": "산길 감점(2026-10-13, 사용자: 영통중앙공원은 산길이라 효용이 낮다). 고도 = Copernicus DEM GLO-30(30m, 표면 높이 DSM — 나무·건물 높이가 섞임, data/copdem30-N37E127.tif). 공원 안 30m 격자 고도의 상위 10% − 하위 10% = 고저차. flatM 이하는 감점 없음, steepM 이상은 공원 점수 × minMult, 사이는 직선. 평지 공원 1~7m · 영통중앙공원 39m. 산책로 평균 경사(stepM 간격)는 보고서에만.",
+      "stepM": 30,
+      "flatM": 10,
+      "steepM": 40,
+      "minMult": 0.4
+    }
   },
   "sources": {
     "parkShp": "국토계획공간시설(경기)/LSMD_CONT_UQ162_5174_41_202608.shp",
@@ -75,7 +97,9 @@
   },
   "library": {
     "_설명": "공공데이터포털 전국도서관표준데이터 중 도서관유형이 types 인 것. 가장 가까운 곳까지 직선거리 d: fullM 안 10점, halfM 에서 5점, zeroM 에서 0점(사이는 직선)",
-    "types": ["공공도서관"],
+    "types": [
+      "공공도서관"
+    ],
     "fullM": 500,
     "halfM": 1000,
     "zeroM": 2000

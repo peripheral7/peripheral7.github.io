@@ -27,21 +27,10 @@
         "greenScore": 0.3
       },
       "park": {
-        "score": 7.2,
-        "green": 5,
+        "score": 4.9,
+        "green": 3,
         "greenBonus": 0,
         "parks": [
-          {
-            "name": "수원어린이교통공원",
-            "type": "근린공원",
-            "dist": 679,
-            "value": 8.2,
-            "eff": 6.7,
-            "areaHa": 3.16,
-            "walkM": 1541,
-            "waterside": false,
-            "linked": false
-          },
           {
             "name": "방죽공원",
             "type": "근린공원",
@@ -51,7 +40,9 @@
             "areaHa": 2.07,
             "walkM": 733,
             "waterside": false,
-            "linked": false
+            "linked": false,
+            "relief": 1,
+            "steep": 1
           },
           {
             "name": "이름 없는 어린이공원",
@@ -62,7 +53,9 @@
             "areaHa": 0.19,
             "walkM": 0,
             "waterside": false,
-            "linked": false
+            "linked": false,
+            "relief": 0,
+            "steep": 1
           },
           {
             "name": "한울어린이공원",
@@ -73,18 +66,9 @@
             "areaHa": 0.59,
             "walkM": 0,
             "waterside": false,
-            "linked": false
-          },
-          {
-            "name": "벽적공원",
-            "type": "근린공원",
-            "dist": 538,
-            "value": 1,
-            "eff": 1,
-            "areaHa": 1.34,
-            "walkM": 0,
-            "waterside": false,
-            "linked": false
+            "linked": false,
+            "relief": 6,
+            "steep": 1
           }
         ]
       },
@@ -129,8 +113,8 @@
         "greenScore": 3.2
       },
       "park": {
-        "score": 8.6,
-        "green": 11,
+        "score": 8.3,
+        "green": 9,
         "greenBonus": 0,
         "parks": [
           {
@@ -142,40 +126,9 @@
             "areaHa": 3.16,
             "walkM": 1541,
             "waterside": false,
-            "linked": false
-          },
-          {
-            "name": "서천근린공원",
-            "type": "근린공원",
-            "dist": 805,
-            "value": 5.5,
-            "eff": 3.8,
-            "areaHa": 2.78,
-            "walkM": 854,
-            "waterside": false,
-            "linked": false
-          },
-          {
-            "name": "반달중앙공원",
-            "type": "근린공원",
-            "dist": 767,
-            "value": 5,
-            "eff": 3.7,
-            "areaHa": 1.02,
-            "walkM": 775,
-            "waterside": false,
-            "linked": false
-          },
-          {
-            "name": "방죽공원",
-            "type": "근린공원",
-            "dist": 914,
-            "value": 4.8,
-            "eff": 2.8,
-            "areaHa": 2.07,
-            "walkM": 733,
-            "waterside": false,
-            "linked": false
+            "linked": false,
+            "relief": 3,
+            "steep": 1
           },
           {
             "name": "이름 없는 어린이공원",
@@ -186,7 +139,48 @@
             "areaHa": 0.15,
             "walkM": 0,
             "waterside": false,
-            "linked": false
+            "linked": false,
+            "relief": 0,
+            "steep": 1
+          },
+          {
+            "name": "이름 없는 어린이공원",
+            "type": "어린이공원",
+            "dist": 133,
+            "value": 1,
+            "eff": 1,
+            "areaHa": 0.16,
+            "walkM": 0,
+            "waterside": false,
+            "linked": false,
+            "relief": 0,
+            "steep": 1
+          },
+          {
+            "name": "망포공원",
+            "type": "근린공원",
+            "dist": 458,
+            "value": 1,
+            "eff": 1,
+            "areaHa": 1.6,
+            "walkM": 0,
+            "waterside": false,
+            "linked": false,
+            "relief": 5,
+            "steep": 1
+          },
+          {
+            "name": "17호 소공원",
+            "type": "공원(유형 미상)",
+            "dist": 116,
+            "value": 1,
+            "eff": 1,
+            "areaHa": 0.11,
+            "walkM": 0,
+            "waterside": false,
+            "linked": false,
+            "relief": 0,
+            "steep": 1
           }
         ]
       },
@@ -231,42 +225,35 @@
         "greenScore": 2.4
       },
       "park": {
-        "score": 10,
-        "green": 37,
-        "greenBonus": 1,
+        "score": 4.4,
+        "green": 15,
+        "greenBonus": 0,
         "parks": [
           {
             "name": "영통중앙공원",
             "type": "근린공원",
             "dist": 487,
-            "value": 9.8,
-            "eff": 9.8,
+            "value": 4.1,
+            "eff": 4.1,
             "areaHa": 13.64,
             "walkM": 2163,
             "waterside": false,
-            "linked": false
-          },
-          {
-            "name": "영흥자연공원",
-            "type": "근린공원",
-            "dist": 742,
-            "value": 10,
-            "eff": 7.6,
-            "areaHa": 71.08,
-            "walkM": 7655,
-            "waterside": false,
-            "linked": true
+            "linked": false,
+            "relief": 39,
+            "steep": 0.42
           },
           {
             "name": "이름 없는 근린공원",
             "type": "근린공원",
             "dist": 460,
-            "value": 6.7,
-            "eff": 6.7,
+            "value": 2.7,
+            "eff": 2.7,
             "areaHa": 7.95,
             "walkM": 1113,
             "waterside": false,
-            "linked": false
+            "linked": false,
+            "relief": 77,
+            "steep": 0.4
           },
           {
             "name": "반달공원",
@@ -277,7 +264,9 @@
             "areaHa": 1.59,
             "walkM": 398,
             "waterside": false,
-            "linked": false
+            "linked": false,
+            "relief": 3,
+            "steep": 1
           },
           {
             "name": "단오어린이공원",
@@ -288,7 +277,22 @@
             "areaHa": 0.61,
             "walkM": 349,
             "waterside": false,
-            "linked": false
+            "linked": false,
+            "relief": 4,
+            "steep": 1
+          },
+          {
+            "name": "샛별공원",
+            "type": "근린공원",
+            "dist": 418,
+            "value": 1,
+            "eff": 1,
+            "areaHa": 0.96,
+            "walkM": 0,
+            "waterside": false,
+            "linked": false,
+            "relief": 3,
+            "steep": 1
           }
         ]
       },
@@ -333,20 +337,22 @@
         "greenScore": 5.3
       },
       "park": {
-        "score": 10,
-        "green": 16,
+        "score": 9.4,
+        "green": 22,
         "greenBonus": 0.5,
         "parks": [
           {
             "name": "이름 없는 근린공원",
             "type": "근린공원",
             "dist": 335,
-            "value": 10,
-            "eff": 10,
+            "value": 8.3,
+            "eff": 8.3,
             "areaHa": 11.21,
             "walkM": 2647,
             "waterside": false,
-            "linked": false
+            "linked": false,
+            "relief": 19,
+            "steep": 0.83
           },
           {
             "name": "남산근린공원",
@@ -357,40 +363,48 @@
             "areaHa": 2.3,
             "walkM": 1052,
             "waterside": false,
-            "linked": false
+            "linked": false,
+            "relief": 7,
+            "steep": 1
           },
           {
             "name": "서천근린공원",
             "type": "근린공원",
             "dist": 485,
-            "value": 5.5,
-            "eff": 5.5,
+            "value": 5.3,
+            "eff": 5.3,
             "areaHa": 2.78,
             "walkM": 854,
             "waterside": false,
-            "linked": false
+            "linked": false,
+            "relief": 12,
+            "steep": 0.96
           },
           {
             "name": "이름 없는 근린공원",
             "type": "근린공원",
             "dist": 63,
-            "value": 5.3,
-            "eff": 5.3,
+            "value": 5,
+            "eff": 5,
             "areaHa": 5.16,
             "walkM": 823,
             "waterside": false,
-            "linked": false
+            "linked": false,
+            "relief": 13,
+            "steep": 0.95
           },
           {
-            "name": "당굴공원",
+            "name": "이름 없는 어린이공원",
             "type": "어린이공원",
-            "dist": 845,
-            "value": 4.8,
-            "eff": 3.1,
-            "areaHa": 0.92,
-            "walkM": 736,
+            "dist": 53,
+            "value": 1,
+            "eff": 1,
+            "areaHa": 0.21,
+            "walkM": 0,
             "waterside": false,
-            "linked": false
+            "linked": false,
+            "relief": 0,
+            "steep": 1
           }
         ]
       },

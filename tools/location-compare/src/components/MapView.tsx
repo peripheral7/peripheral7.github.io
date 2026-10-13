@@ -1,9 +1,9 @@
-import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
+import { useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState } from 'react'
 import { MapContainer, Marker, Polygon, Polyline, TileLayer, Tooltip, useMap, useMapEvents } from 'react-leaflet'
 import L from 'leaflet'
 import { hubEmoji, type Candidate, type Hub, type Place } from '../data'
 import type { Insight } from '../scoring'
-import { loadNaverMaps, MAP_KEY_ID, onNaverAuthFailure, reverseGeocode } from '../naver'
+import { loadNaverMaps, MAP_KEY_ID, onNaverAuthFailure, reverseGeocode, type RevAddr } from '../naver'
 import { CATEGORIES, type Major } from '../commercial'
 import { naverMapUrl, type Spot } from '../recommend'
 import { parkAreaAlpha, type Park, type ParkArea } from '../parks'
@@ -116,7 +116,8 @@ export function MapView(props: Props) {
 /** 우클릭 메뉴: 주소를 (되면) 찾아 보여 주고, 후보지로 / 목적지로 */
 function MapMenu({ ctx, onPick, onClose }: { ctx: Ctx; onPick: NonNullable<Props['onMapPick']>; onClose: () => void }) {
   const ref = useRef<HTMLDivElement>(null)
-  const [addr, setAddr] = useState<{ address: string; building?: string } | null | undefined>(undefined) // undefined = 찾는 중
+  const [addr, setAddr] = useState<RevAddr | null | undefined>(undefined) // undefined = 찾는 중
+  const [pos, setPos] = useState<{ left: number; top: number } | null>(null)
   useEffect(() => {
     let alive = true
     setAddr(undefined)
@@ -129,18 +130,22 @@ function MapMenu({ ctx, onPick, onClose }: { ctx: Ctx; onPick: NonNullable<Props
     window.addEventListener('pointerdown', down, true); window.addEventListener('keydown', key)
     return () => { window.removeEventListener('pointerdown', down, true); window.removeEventListener('keydown', key) }
   }, [onClose])
+  // 자리: 누른 곳의 오른쪽 아래 → 넘치면 오른쪽 위 → 왼쪽 위 → 왼쪽 아래, 다 넘치면 지도 안으로 밀어 넣는다
+  useLayoutEffect(() => {
+    const el = ref.current
+    if (!el) return
+    const W = el.offsetWidth, H = el.offsetHeight, M = 6, G = 4 // 지도 가장자리 여백 · 누른 점과 간격
+    const fits = (l: number, t: number) => l >= M && t >= M && l + W <= ctx.w - M && t + H <= ctx.h - M
+    const tries = [[ctx.x + G, ctx.y + G], [ctx.x + G, ctx.y - H - G], [ctx.x - W - G, ctx.y - H - G], [ctx.x - W - G, ctx.y + G]]
+    const [l, t] = tries.find(([a, b]) => fits(a, b)) ?? tries[0]
+    setPos({ left: Math.max(M, Math.min(l, ctx.w - W - M)), top: Math.max(M, Math.min(t, ctx.h - H - M)) })
+  }, [ctx, addr])
   const coord = `${ctx.lat.toFixed(5)}, ${ctx.lng.toFixed(5)}`
-  const pick = (kind: 'candidate' | 'hub') => {
-    const address = addr?.address || coord
-    // 이름 기본값: 건물 이름 → 주소에서 시도·시군구를 뺀 부분 → "지도에서 고른 곳"(등록 창에서 고칠 수 있다)
-    const short = addr ? address.split(' ').slice(2).join(' ') || address : '지도에서 고른 곳'
-    onPick({ name: addr?.building || short, address, lat: ctx.lat, lng: ctx.lng, category: '지도' }, kind)
-    onClose()
-  }
-  const W = 200, H = 116
+  // 주소는 검색창 등록 창이 다시 받아 채운다(같은 좌표는 한 번만 물음) — 여기서는 좌표만 넘긴다
+  const pick = (kind: 'candidate' | 'hub') => { onPick({ name: '', address: '', lat: ctx.lat, lng: ctx.lng, category: '지도' }, kind); onClose() }
   return (
     <div ref={ref} className="map-ctx" role="menu" aria-label="이 위치 추가" onContextMenu={(e) => e.preventDefault()}
-      style={{ left: Math.max(8, Math.min(ctx.x, ctx.w - W - 8)), top: Math.max(8, Math.min(ctx.y, ctx.h - H - 8)) }}>
+      style={pos ?? { left: ctx.x, top: ctx.y, visibility: 'hidden' }}>
       <small>{addr === undefined ? '주소 찾는 중…' : addr ? (addr.building ? `${addr.building} · ${addr.address}` : addr.address) : coord}</small>
       <button type="button" role="menuitem" autoFocus onClick={() => pick('candidate')}>📍 후보지로 추가</button>
       <button type="button" role="menuitem" onClick={() => pick('hub')}>🎯 목적지로 추가</button>

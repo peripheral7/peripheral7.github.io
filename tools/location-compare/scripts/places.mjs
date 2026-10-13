@@ -22,6 +22,7 @@ import { execFileSync } from 'node:child_process'
 import { fileURLToPath } from 'node:url'
 import { DatabaseSync } from 'node:sqlite'
 import proj4 from 'proj4'
+import { fromFile } from 'geotiff'
 import { CANDIDATES } from '../src/data.ts'
 
 const ROOT = path.dirname(path.dirname(fileURLToPath(import.meta.url)))
@@ -66,6 +67,24 @@ function segDist(p, a, b) {
 const lineDist = (p, line) => { let d = Infinity; for (let i = 1; i < line.length; i++) d = Math.min(d, segDist(p, line[i - 1], line[i])); return d }
 const polyDist = (p, rings) => (rings.some((r) => inside(p, r)) ? 0 : Math.min(...rings.map((r) => lineDist(p, [...r, r[0]]))))
 const centroid = (r) => [r.reduce((a, p) => a + p[0], 0) / r.length, r.reduce((a, p) => a + p[1], 0) / r.length]
+
+// ── 고도: Copernicus DEM GLO-30(30m, 표면 높이 DSM) — data/copdem30-N37E127.tif(없으면 고도 보정 안 함) ──
+// 받기: curl -o data/copdem30-N37E127.tif https://copernicus-dem-30m.s3.amazonaws.com/Copernicus_DSM_COG_10_N37_00_E127_00_DEM/Copernicus_DSM_COG_10_N37_00_E127_00_DEM.tif
+const DEM_FILE = path.join(ROOT, 'data', 'copdem30-N37E127.tif')
+async function loadDem() {
+  if (!fs.existsSync(DEM_FILE)) { console.warn('data/copdem30-N37E127.tif 없음 — 공원 경사 보정 안 함'); return null }
+  const img = await (await fromFile(DEM_FILE)).getImage()
+  const [ox, oy] = img.getOrigin(), [rx, ry] = img.getResolution() // ry < 0
+  const x0 = Math.floor((BOX.w - ox) / rx), x1 = Math.ceil((BOX.e - ox) / rx), y0 = Math.floor((BOX.n - oy) / ry), y1 = Math.ceil((BOX.s - oy) / ry)
+  const [r] = await img.readRasters({ window: [x0, y0, x1, y1] })
+  const W = x1 - x0, H = y1 - y0
+  const at = (i, j) => r[Math.max(0, Math.min(H - 1, j)) * W + Math.max(0, Math.min(W - 1, i))]
+  return (lat, lng) => { // 쌍선형 보간(m)
+    const fx = (lng - ox) / rx - x0 - 0.5, fy = (lat - oy) / ry - y0 - 0.5
+    const i = Math.floor(fx), j = Math.floor(fy), u = fx - i, v = fy - j
+    return at(i, j) * (1 - u) * (1 - v) + at(i + 1, j) * u * (1 - v) + at(i, j + 1) * (1 - u) * v + at(i + 1, j + 1) * u * v
+  }
+}
 
 // 계산할 네모(후보지 + 여유)
 const M = CFG.fetchMargin / 111320
@@ -193,6 +212,10 @@ async function main() {
 
   // 공원 경계(공간시설) + OSM 이름
   const PK = CFG.park
+  const elev = await loadDem()
+  // 산길 감점: 공원 안 고저차(30m 격자 고도 상위 10% − 하위 10%)가 slope.flatM 이하면 그대로, slope.steepM 이상이면 slope.minMult 배(사이는 직선)
+  // 산책로 경사(오르내림 합 ÷ 길이)도 재지만 숲 높이·30m 격자 잡음이 커서(평지 공원도 6~10%) 보고서에만 적는다
+  const slopeMult = (h) => (!elev || h <= PK.slope.flatM ? 1 : Math.max(PK.slope.minMult, 1 - ((h - PK.slope.flatM) / (PK.slope.steepM - PK.slope.flatM)) * (1 - PK.slope.minMult)))
   const uq = readShp(SHP)
   const osmParks = els.filter((e) => e.tags?.leisure === 'park' && e.tags.name).map((e) => ({
     name: e.tags.name, rings: e.type === 'way' ? [ring(e.geometry)] : (e.members ?? []).filter((m) => m.role === 'outer' && m.geometry?.length > 3).map((m) => ring(m.geometry)),
@@ -211,11 +234,34 @@ async function main() {
     const name = (generic && osmIn[0]?.name) || p.alias || osmIn[0]?.name || `이름 없는 ${p.type}`
     const per = p.rings.reduce((s, r) => s + perim(r), 0)
     const pts = p.rings.flat()
-    let walk = 0
-    for (const w of paths) for (let i = 1; i < w.length; i++) {
-      const mid = [(w[i][0] + w[i - 1][0]) / 2, (w[i][1] + w[i - 1][1]) / 2]
-      if (p.rings.some((r) => inside(mid, r))) walk += Math.hypot(w[i][0] - w[i - 1][0], w[i][1] - w[i - 1][1])
+    let walk = 0, rise = 0, run = 0 // rise·run: 공원 안 산책로를 slopeStepM 마다 잰 오르내림 합·길이
+    const st = PK.slope.stepM
+    for (const w of paths) {
+      let h0 = null
+      for (let i = 1; i < w.length; i++) {
+        const mid = [(w[i][0] + w[i - 1][0]) / 2, (w[i][1] + w[i - 1][1]) / 2]
+        const len = Math.hypot(w[i][0] - w[i - 1][0], w[i][1] - w[i - 1][1])
+        if (!p.rings.some((r) => inside(mid, r))) { h0 = null; continue }
+        walk += len
+        if (!elev) continue
+        const n = Math.max(1, Math.round(len / st))
+        for (let k = h0 === null ? 0 : 1; k <= n; k++) {
+          const q = [w[i - 1][0] + ((w[i][0] - w[i - 1][0]) * k) / n, w[i - 1][1] + ((w[i][1] - w[i - 1][1]) * k) / n]
+          const h = elev(...toLL(q))
+          if (h0 !== null) { rise += Math.abs(h - h0); run += len / n }
+          h0 = h
+        }
+      }
     }
+    // 고저차: 공원 안 격자(30m)의 고도 상위 10% − 하위 10%
+    let relief = 0
+    if (elev) {
+      const xs = pts.map((q) => q[0]), ys = pts.map((q) => q[1]), hs = []
+      for (let x = Math.min(...xs); x <= Math.max(...xs); x += 30) for (let y = Math.min(...ys); y <= Math.max(...ys); y += 30) if (p.rings.some((r) => inside([x, y], r))) hs.push(elev(...toLL([x, y])))
+      hs.sort((a, b) => a - b)
+      if (hs.length >= 3) relief = hs[Math.floor(hs.length * 0.9)] - hs[Math.floor(hs.length * 0.1)]
+    }
+    const grade = run > 0 ? (rise / run) * 100 : 0 // 산책로 평균 경사(%)
     const walkUsed = walk > 0 ? walk : per * 0.5
     let ends = [pts[0], pts[0]], span = 0
     const step = Math.max(1, Math.floor(pts.length / 200))
@@ -227,8 +273,9 @@ async function main() {
     const endShops = ends.map((q) => { const [la, ln] = toLL(q); return storesNear(la, ln, PK.link.endRadiusM).length })
     const linked = span >= PK.link.minSpanM && compact >= PK.link.minCompact && endShops.every((n) => n >= PK.link.minShops)
     const base = Math.max(PK.minPoints, Math.min(10, PK.logA * Math.log10(walkUsed / PK.logL0)))
-    const value = Math.min(10, (base + (waterside ? PK.watersideBonus : 0)) * (linked ? PK.link.mult : 1))
-    return { name, type: p.type, code: p.code, mnum: p.mnum, rings: p.rings, areaHa: +(a / 10000).toFixed(2), walkM: Math.round(walk), spanM: Math.round(span), compact: +compact.toFixed(1), waterside, endShops, linked, base: +base.toFixed(1), value: +value.toFixed(1) }
+    const steep = slopeMult(relief)
+    const value = Math.min(10, (base + (waterside ? PK.watersideBonus : 0)) * (linked ? PK.link.mult : 1)) * steep
+    return { name, type: p.type, code: p.code, mnum: p.mnum, rings: p.rings, areaHa: +(a / 10000).toFixed(2), walkM: Math.round(walk), spanM: Math.round(span), compact: +compact.toFixed(1), waterside, endShops, linked, base: +base.toFixed(1), grade: +grade.toFixed(1), relief: Math.round(relief), steep: +steep.toFixed(2), value: +value.toFixed(1) }
   }).filter(Boolean)
 
   // 녹지(비율 계산용 면): 공간시설 공원·녹지 + OSM 숲·풀밭
@@ -297,7 +344,7 @@ async function main() {
       peace: { score: +peace.toFixed(1), food, foodScore: +foodScore.toFixed(1), road: road ? { name: road.name, dist: Math.round(road.d) } : null, roadScore, green: +(green300 * 100).toFixed(0), greenScore: +greenScore300.toFixed(1) },
       park: {
         score: +parkScore.toFixed(1), green: +(green * 100).toFixed(0), greenBonus,
-        parks: near.slice(0, 5).map((x) => ({ name: x.k.name, type: x.k.type, dist: Math.round(x.d), value: x.k.value, eff: +x.eff.toFixed(1), areaHa: x.k.areaHa, walkM: x.k.walkM, waterside: x.k.waterside, linked: x.k.linked })),
+        parks: near.slice(0, 5).map((x) => ({ name: x.k.name, type: x.k.type, dist: Math.round(x.d), value: x.k.value, eff: +x.eff.toFixed(1), areaHa: x.k.areaHa, walkM: x.k.walkM, waterside: x.k.waterside, linked: x.k.linked, relief: x.k.relief, steep: x.k.steep })),
       },
       library: { score: +libScore.toFixed(1), near: libNear.map((l) => ({ name: l.name, dist: Math.round(l.d), seats: l.seats, books: l.books })) },
     }
@@ -339,14 +386,14 @@ async function main() {
     `| 가장 가까운 큰길 | ${ids.map((id) => { const r = out[id].peace.road; return r ? `${r.dist}m ${r.name} → ${out[id].peace.roadScore}` : '없음 → 10' }).join(' | ')} |`,
     `| **평화로움** | ${ids.map((id) => `**${out[id].peace.score}**`).join(' | ')} |`, '',
     '## 🌳 공원', '', head,
-    `| 가장 좋은 공원(거리 반영) | ${ids.map((id) => { const k = out[id].park.parks[0]; return k ? `${k.name}(${k.type}) ${k.dist}m · ${k.value}점${k.linked ? '(연결 ×1.8)' : ''} → ${k.eff}` : '1km 안 없음' }).join(' | ')} |`,
+    `| 가장 좋은 공원(거리 반영) | ${ids.map((id) => { const k = out[id].park.parks[0]; return k ? `${k.name}(${k.type}) ${k.dist}m · ${k.value}점${k.linked ? '(연결 ×1.8)' : ''}${k.steep < 1 ? `(산길 ×${k.steep})` : ''} → ${k.eff}` : `${PK.radiusM}m 안 없음` }).join(' | ')} |`,
     `| 두 번째 공원 | ${ids.map((id) => { const k = out[id].park.parks[1]; return k ? `${k.name} ${k.dist}m → ${k.eff}` : '—' }).join(' | ')} |`,
-    `| 1km 안 녹지 비율 | ${ids.map((id) => `${out[id].park.green}% → +${out[id].park.greenBonus}`).join(' | ')} |`,
+    `| ${PK.radiusM}m 안 녹지 비율 | ${ids.map((id) => `${out[id].park.green}% → +${out[id].park.greenBonus}`).join(' | ')} |`,
     `| **공원** | ${ids.map((id) => `**${out[id].park.score}**`).join(' | ')} |`, '',
     `### 계산 범위 안 공원 유형(공간시설, ${PK.minAreaM2 / 10000}ha 이상, 제외 유형: ${PK.excludeTypes.join('·') || '없음'})`, '', Object.entries(typeCount).sort((a, b) => b[1] - a[1]).map(([k, v]) => `${k} ${v}`).join(' · '), '',
-    '### 공원별 점수(후보지 1km 안)', '', '| 공원 | 유형 | 면적 | 산책로 | 길이 | 물가 | 양 끝 상권 | 연결 | 점수 |', '|---|---|---:|---:|---:|:---:|---:|:---:|---:|',
+    `### 공원별 점수(후보지 ${PK.radiusM}m 안)`, '', '| 공원 | 유형 | 면적 | 산책로 | 길이 | 물가 | 양 끝 상권 | 연결 | 산책로 경사 | 고저차 | 경사 배율 | 점수 |', '|---|---|---:|---:|---:|:---:|---:|:---:|---:|---:|---:|---:|',
     ...parks.filter((k) => CANDIDATES.some((c) => polyDist(xy(c.lat, c.lng), k.rings) <= PK.radiusM)).sort((a, b) => b.value - a.value)
-      .map((k) => `| ${k.name} | ${k.type} | ${k.areaHa}ha | ${k.walkM}m | ${k.spanM}m | ${k.waterside ? '○' : ''} | ${k.endShops.join('·')} | ${k.linked ? '×1.8' : ''} | ${k.value} |`), '',
+      .map((k) => `| ${k.name} | ${k.type} | ${k.areaHa}ha | ${k.walkM}m | ${k.spanM}m | ${k.waterside ? '○' : ''} | ${k.endShops.join('·')} | ${k.linked ? '×1.8' : ''} | ${k.grade}% | ${k.relief}m | ×${k.steep} | ${k.value} |`), '',
     '## 📚 도서관(공공도서관)', '', head,
     ...[0, 1, 2].map((i) => `| ${i + 1}번째로 가까운 곳 | ${ids.map((id) => { const l = out[id].library.near[i]; return l ? `${l.name} ${l.dist}m` : '—' }).join(' | ')} |`),
     `| **도서관** | ${ids.map((id) => `**${out[id].library.score}**`).join(' | ')} |`, '',

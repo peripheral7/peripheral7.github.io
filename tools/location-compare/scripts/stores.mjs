@@ -10,7 +10,7 @@
 //   node scripts/stores.mjs find 다이소 [--near 37.24,127.06] [--r 3000]   상호 검색(이름·지점·건물명)
 //   node scripts/stores.mjs analyze                               후보지별 분석 → src/commercial.json · COMMERCIAL.md
 //
-// 분류(카페·음식점·화장품·마트·잡화점·필수의료·약국)는 src/commercial-categories.json 에서 고친다.
+// 분류(카페·잡화(화장품+생활용품)·마트·의료)는 src/commercial-categories.json 에서 고친다.
 import fs from 'node:fs'
 import path from 'node:path'
 import { fileURLToPath } from 'node:url'
@@ -35,6 +35,7 @@ const upName = Object.fromEntries(db.prepare('SELECT code, name FROM upjong').al
 
 // ── 분류 맞추기 ──
 function matches(rule, s) {
+  if (rule.any_of) return rule.any_of.some((r) => matches(r, s)) // 묶음 업종(예: 잡화 = 화장품 + 생활용품)
   if (rule.exclude?.includes(s.scls)) return false
   if (rule.exclude_names?.some((n) => s.name?.includes(n))) return false
   const byName = rule.names?.some((n) => s.name?.includes(n)) && (!rule.names_scls || rule.names_scls.includes(s.scls))
@@ -163,7 +164,10 @@ const reach = (a, t) => (a?.length ? Math.round((a.filter((x) => x >= t).length 
 const BASE_MIN = 100
 function baseline() {
   const file = path.join(ROOT, 'data', `baseline-${meta.stdr_ym}-${CONFIG.walk5}.json`)
-  if (fs.existsSync(file)) return JSON.parse(fs.readFileSync(file, 'utf8'))
+  if (fs.existsSync(file)) {
+    const old = JSON.parse(fs.readFileSync(file, 'utf8'))
+    if (CATS.every((c) => old.cats[c.id] && (!c.brand_part || old.brand[c.id]))) return old // 업종이 바뀌었으면 다시 계산
+  }
   console.log('생활권 평균 비교 계산 중(약 20초, 기준월마다 한 번)…')
   const W = CONFIG.walk5
   const b = db.prepare('SELECT MIN(lat) a, MAX(lat) b, MIN(lon) c, MAX(lon) d FROM stores WHERE lat > 33 AND lon > 124').get()
