@@ -4,7 +4,7 @@ import { evaluate, fmt, hubInsights } from './scoring'
 import { addCandidate, load, money, removeCandidate, removeHub, save, setHub, updateCandidate, type State } from './store'
 import { MapView } from './components/MapView'
 import { SearchBox } from './components/SearchBox'
-import { ModeScorePanel, FactorsPanel } from './components/Panels'
+import { ModeScorePanel, FactorsPanel, type FactorBest } from './components/Panels'
 import { CompareCards } from './components/CompareCards'
 import { SettingsPopover } from './components/SettingsPopover'
 import { GuidePanel } from './components/GuidePanel'
@@ -15,7 +15,7 @@ import { ListingCards, SpotCards } from './components/Recommend'
 import { DEFAULT_FUEL, loadCommute, saveCommute, type CommuteSaved } from './commute'
 import { fuelPriceFor } from './fuel'
 import { loadParks, strollNear, STROLL_RADIUS, type Park } from './parks'
-import { loadPlaceOn, placeOf, savePlaceOn, type PlaceOn } from './places'
+import { PLACE_KEYS, loadPlaceOn, placeFor, placeSummary, savePlaceOn, type PlaceOn } from './places'
 import { MAJORS, commercialIndex, loadCommercial, pickedCats, saveCommercial, walk5Brand, walk5Counts, type CommercialPrefs } from './commercial'
 
 // " · 3,000/40 (1,000 기준 월 50)" — 금액을 안 넣었으면 빈 글자
@@ -57,7 +57,7 @@ export default function App() {
   useEffect(() => { saveCats(catState) }, [catState])
   useEffect(() => { saveCommercial(comPrefs) }, [comPrefs])
   useEffect(() => { savePlaceOn(placeOn) }, [placeOn])
-  const comIdx = useMemo(() => commercialIndex(candidates, comPrefs), [candidates, comPrefs])
+  const comIdx = useMemo(() => commercialIndex(candidates, comPrefs, !!pref.bike), [candidates, comPrefs, pref.bike])
   // 지도에 따로 표시할 주요 매장: 필수·선호로 고른 업종의 것만(상권 지수를 껐으면 없음)
   // 지도 위 지표 단추: 상권(주요 매장 표시)·산책(공원·하천 표시). 이 브라우저에 기억한다.
   const [layers, setLayers] = useState<{ com: boolean; walk: boolean }>(() => {
@@ -78,6 +78,21 @@ export default function App() {
   }, [layers.walk, parkKey]) // eslint-disable-line react-hooks/exhaustive-deps
   const stroll = layers.walk && candidates[active] ? strollNear(candidates[active], parks) : null
   const catIdx = useMemo(() => (catState.on ? candidates.map((c) => catIndex(c, catState.cats)) : null), [catState, candidates])
+  // 입지 요인마다 후보지 중 최고점(이름 옆 작은 글씨). 세부 내역은 최고점 후보지가 고른 후보지와 다를 때만 그 아래에 보인다
+  const best = useMemo(() => {
+    const top = (vals: (number | null)[], detail?: (i: number) => string | undefined): FactorBest | null => {
+      let bi = -1
+      vals.forEach((v, i) => { if (v !== null && (bi < 0 || v > vals[bi]!)) bi = i })
+      return bi < 0 ? null : { score: vals[bi]!, name: candidates[bi].name, self: bi === Math.min(active, candidates.length - 1), detail: detail?.(bi) }
+    }
+    const rows = candidates.map((c) => placeFor(c, !!pref.bike))
+    const out: Record<string, FactorBest | null> = {
+      com: top(comIdx.map((x) => x?.score ?? null)),
+      cat: catIdx ? top(catIdx.map((x) => (x.n ? x.score : null))) : null,
+    }
+    for (const k of PLACE_KEYS) out[k] = top(rows.map((r) => r?.[k].score ?? null), (i) => placeSummary(k, rows[i]!))
+    return out
+  }, [candidates, comIdx, catIdx, pref.bike, active])
   const setCats = (next: CatState) => { const ok = saveCats(next); if (ok) setCatState(next); return ok }
   useEffect(() => { if (active > candidates.length - 1) setActive(Math.max(0, candidates.length - 1)) }, [candidates.length, active])
 
@@ -205,8 +220,8 @@ export default function App() {
         <aside className="factors-area">
           <FactorsPanel cat={catIdx && cur ? catIdx[Math.min(active, catIdx.length - 1)] ?? null : null} catOn={catState.on}
             onToggleCat={() => setCats({ ...catState, on: !catState.on })} onRegister={() => setCatDlg('register')} onGallery={(start = 0) => { setGalleryIdx(null); setGalleryStart(start); setCatDlg('gallery') }}
-            com={cur ? comIdx[Math.min(active, comIdx.length - 1)] ?? null : null} comCounts={walk5Counts(candidates[active])} comBrands={walk5Brand(candidates[active])} comPrefs={comPrefs} onComPrefs={setComPrefs}
-            place={placeOf(candidates[active])} placeOn={placeOn} onPlaceOn={setPlaceOn} />
+            com={cur ? comIdx[Math.min(active, comIdx.length - 1)] ?? null : null} comCounts={walk5Counts(candidates[active], !!pref.bike)} comBrands={walk5Brand(candidates[active], !!pref.bike)} bike={!!pref.bike} best={best} comPrefs={comPrefs} onComPrefs={setComPrefs}
+            place={placeFor(candidates[active], !!pref.bike)} placeOn={placeOn} onPlaceOn={setPlaceOn} />
           <SpotCards candidates={candidates} />
         </aside>
 

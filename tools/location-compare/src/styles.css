@@ -605,10 +605,19 @@ input[type=number]::-webkit-inner-spin-button, input[type=number]::-webkit-outer
 .layer-note { position: absolute; left: 12px; bottom: 12px; z-index: 700; margin: 0; max-width: calc(100% - 100px); padding: 6px 12px; border-radius: 999px; font-size: 12px; background: rgba(255, 255, 255, 0.85); border: 1px solid var(--line-2); box-shadow: 0 2px 10px rgba(0, 0, 0, 0.08) }
 .com-brand { color: var(--muted); font-size: 11px }
 /* 평화로움·공원·공공시설 */
-.ticks.peace { color: #6b7fa8 } .ticks.park { color: #4f8a4a } .ticks.public { color: #a07a3c }
+.ticks.peace { color: #6b7fa8 } .ticks.park { color: #4f8a4a } .ticks.library { color: #a07a3c }
 .place-detail { gap: 6px }
 .place-line { display: flex; justify-content: space-between; align-items: baseline; gap: 10px; font-size: 13px }
 .place-line small { color: var(--muted); font-size: 11px }
 .place-line em { font-style: normal; font-variant-numeric: tabular-nums; color: var(--text); flex: none }
 
 .commute-area { min-width: 0; align-self: start }
+
+/* 자전거 선택(수단 가중치 도보 아래) */
+.bike-toggle { display: flex; align-items: center; justify-content: space-between; gap: 8px; width: 100%; margin: 2px 0 6px; padding: 7px 12px; border: 1px solid var(--line-2); border-radius: 999px; background: #fff; font-size: 13px; text-align: left }
+.bike-toggle small { color: var(--muted); font-size: 11px }
+.bike-toggle.on { background: var(--accent); border-color: transparent; font-weight: 500 }
+/* 입지 요인: 후보지 최고점 */
+.factor .best-tag { margin-left: 6px; font-size: 11px; color: var(--good); white-space: nowrap }
+.factor .best-detail { display: block; color: var(--faint); font-size: 10.5px }
+.factor > div > small:not(.best-tag) { display: block }

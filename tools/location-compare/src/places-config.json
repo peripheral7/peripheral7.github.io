@@ -1,11 +1,20 @@
 {
-  "_설명": "입지 요인(평화로움·공원·공공시설) 계산 규칙. 숫자를 고친 뒤 node scripts/places.mjs → 빌드. 설명은 README 4-5절.",
+  "_설명": "입지 요인(평화로움·공원·도서관) 계산 규칙. 숫자를 고친 뒤 node scripts/places.mjs → 빌드. 설명은 README 4-5절.",
   "fetchMargin": 1300,
-
   "peace": {
     "_설명": "평화로움 = 음식점 점수 × wFood + 큰길 점수 × wRoad (각 0~10). 음식점은 반경 foodRadiusM 안 음식점·주점 수 n: n ≤ foodFree 이면 1곳당 foodSmallPenalty 만 깎고, 그 위로는 크게 깎되(10^(−(n−foodFree)/foodDecay)) 30곳쯤부터는 거의 0 근처에서 큰 차이 없음. 큰길은 roadNearM 안이면 0, roadFarM 안이면 roadMidScore, 그 밖이면 10",
     "foodRadiusM": 60,
-    "foodPrefix": ["I201", "I202", "I203", "I204", "I205", "I206", "I207", "I210", "I211"],
+    "foodPrefix": [
+      "I201",
+      "I202",
+      "I203",
+      "I204",
+      "I205",
+      "I206",
+      "I207",
+      "I210",
+      "I211"
+    ],
     "foodFree": 5,
     "foodSmallPenalty": 0.2,
     "foodDecay": 25,
@@ -18,12 +27,9 @@
     "wFood": 0.5,
     "wRoad": 0.5
   },
-
   "park": {
-    "_설명": "더하기 방식(감점 없음). 공원 점수(공원마다) = logA × log10(산책로 길이 ÷ logL0), 최소 minPoints · 최대 10 (예시 맞춤: 반달공원 398m → 2, 신동수변공원 1,340m → 7.6, 글빛누리공원 1,473m → 8, 광교호수공원 31.8km → 10). 물가면 +watersideBonus. 길게 이어져 양 끝이 상권에 닿으면 × link.mult. 후보지 점수 = 1km 안 가장 좋은 공원(거리 반영: fullM 까지 그대로, radiusM 에서 farFactor 배) + 두 번째 공원 × secondShare + 녹지 비율 가산, 최대 10",
+    "_설명": "더하기 방식(감점 없음). 공원 = 공간시설(UQ162) 공원 경계(어린이·근린·소·문화·역사·수변·체육·도시농업 공원, 도시자연공원구역). 공원 점수(공원마다) = logA × log10(산책로 길이 ÷ logL0), 최소 minPoints · 최대 10 (예시 맞춤: 반달공원 398m → 2, 신동수변공원 1,340m → 7.6, 글빛누리공원 1,473m → 8, 광교호수공원 31.8km → 10). 물가면 +watersideBonus. 길게 이어져 양 끝이 상권에 닿으면 × link.mult. 후보지 점수 = 1km 안 가장 좋은 공원(거리 반영: fullM 까지 그대로, radiusM 에서 farFactor 배) + 두 번째 공원 × secondShare + 녹지 비율 가산, 최대 10",
     "minAreaM2": 1000,
-    "excludeNames": ["삼성 센트럴파크", "교통공원", "단지 내 공원"],
-    "_exclude": "아무나 쓸 수 없거나(사내·단지 안) 산책용이 아닌 곳(어린이 교통교육장)",
     "radiusM": 1000,
     "fullM": 500,
     "farFactor": 0.5,
@@ -34,7 +40,10 @@
     "watersideBonus": 0,
     "secondShare": 0.1,
     "greenGridM": 50,
-    "greenBonus": [{ "min": 0.3, "add": 1 }, { "min": 0.15, "add": 0.5 }],
+    "greenBonus": [
+      { "min": 0.3, "add": 1 },
+      { "min": 0.15, "add": 0.5 }
+    ],
     "link": {
       "_설명": "막다른 공원이 아니라 길게 이어져 다른 상권까지 연결 = 가장 먼 두 점 거리 ≥ minSpanM, 길쭉함(둘레²/(4π·면적)) ≥ minCompact, 양 끝 각각 endRadiusM 안 업소 ≥ minShops",
       "minSpanM": 600,
@@ -42,20 +51,25 @@
       "endRadiusM": 150,
       "minShops": 10,
       "mult": 1.8
-    }
+    },
+    "excludeTypes": ["묘지공원"],
+    "_exclude": "묘지공원은 산책 공원으로 보지 않음. 유형은 공간시설 시설 코드(MNUM 안 UQTxxxx) — places.mjs 의 PARK_TYPES"
   },
-
-  "public": {
-    "_설명": "반경 radiusM 안 시설 수 → 종류별 점수 10 × (1 − 10^(−개수/enough)), 공공시설 = 종류별 점수 평균",
-    "radiusM": 1000,
-    "excludeAccess": ["private", "no", "customers"],
-    "types": [
-      { "id": "library", "label": "도서관", "emoji": "📚", "match": { "amenity": "library" }, "nameMust": "도서관", "nameExclude": ["독서실", "스터디"], "nameExcludeExact": ["중앙도서관"], "_메모": "OSM 의 amenity=library 에 독서실·스터디카페·대학 중앙도서관이 섞여 있어 이름으로 거른다", "enough": 1 },
-      { "id": "soccer", "label": "축구장", "emoji": "⚽", "match": { "leisure": "pitch", "sport": ["soccer", "futsal"] }, "enough": 1 },
-      { "id": "basketball", "label": "농구장", "emoji": "🏀", "match": { "leisure": "pitch", "sport": ["basketball"] }, "enough": 1 },
-      { "id": "gym", "label": "체육관·수영장", "emoji": "🏊", "match": { "leisure": ["sports_centre", "swimming_pool"] }, "enough": 1 }
+  "sources": {
+    "parkShp": "국토계획공간시설(경기)/LSMD_CONT_UQ162_5174_41_202608.shp",
+    "libraryXls": "전국도서관표준데이터-20261013.xls",
+    "list": [
+      "공원 경계·유형: 국토교통부 도시계획시설(공간시설) UQ162, 경기도(41), 2026-08 기준 Shapefile(EPSG:5174) — 저장소 맨 위 「국토계획공간시설(경기)」 폴더",
+      "도서관: 공공데이터포털 「전국도서관표준데이터」(2026-10-13 내려받음, xls) — 공공도서관만",
+      "공원 이름(공간시설에 이름이 없을 때)·공원 안 산책로·물가·숲/풀밭·큰길: OpenStreetMap 기여자(Overpass API, ODbL)",
+      "60m 안 음식점·공원 양 끝 상권: 소상공인시장진흥공단 상가(상권)정보(공공데이터포털 B553077 sdsc2)"
     ]
   },
-
-  "_futureFactors": "나중에 개인 취향(다른 답변)으로 가중치를 바꿀 요인 목록 — 지금은 계산에 안 씀: 고저차(경사), 수변, 규모, 상권, 연결성, 편의시설(도서관·축구장·농구장 등), 자연 보존 여부, 도로 폭, 조성 정도, 유동인구, 안전"
+  "library": {
+    "_설명": "공공데이터포털 전국도서관표준데이터 중 도서관유형이 types 인 것. 가장 가까운 곳까지 직선거리 d: fullM 안 10점, halfM 에서 5점, zeroM 에서 0점(사이는 직선)",
+    "types": ["공공도서관"],
+    "fullM": 500,
+    "halfM": 1000,
+    "zeroM": 2000
+  }
 }

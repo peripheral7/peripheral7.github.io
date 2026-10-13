@@ -1,7 +1,7 @@
 import { useEffect, useRef, useState, type ReactNode } from 'react'
 import { fmt, type CandidateResult } from '../scoring'
 import { CAT_RADIUS_M, livePhotos, type CatIndex } from '../cats'
-import { OSM_AT, PLACE_KEYS, PLACE_LABEL, PLACE_NOTE, placeSummary, type PlaceKey, type PlaceOn, type PlaceRow } from '../places'
+import { LIBRARY_AT, OSM_AT, PLACE_KEYS, PLACE_LABEL, PLACE_NOTE, placeSummary, type PlaceKey, type PlaceOn, type PlaceRow } from '../places'
 import { BRAND_PARTS, CATEGORIES, ENOUGH, NEED_WEIGHT, STDR_YM, THIN, WALK5, WANT_WEIGHT, setTier, tierOf, type CommercialIndex, type CommercialPrefs, type Tier } from '../commercial'
 
 // ── 고른 후보지: 종합 점수(원형 그래프) + 수단별 점수(눈금 막대) ──────────
@@ -70,15 +70,21 @@ export function ModeScorePanel({ r, action }: { r: CandidateResult; action: Reac
 // ── 오른쪽 위: 입지 요인(지수) ────────────────────────────────────────
 // 모든 지수를 같은 모양(이름 · 짧은 설명 · 눈금 · 점수)의 한 줄로 보여 준다. 어떤 지수를 쓸지는 카드 오른쪽 위 ⚙ 에서 고른다.
 // 지금 동작하는 지수는 도보 5분 상권(이름을 누르면 필수·선호 업종 고르기)과 길고양이, 나머지는 준비 중이라 고를 수 없다.
+/** 후보지 중 최고점(이름 옆 작은 글씨) — self = 그 후보지가 지금 고른 후보지, detail = 세부 내역(고른 후보지가 아닐 때만 아래에 보임) */
+export type FactorBest = { score: number; name: string; self: boolean; detail?: string }
 type FactorsProps = {
+  best: Record<string, FactorBest | null>; bike: boolean
   cat: CatIndex | null; catOn: boolean; onToggleCat: () => void; onRegister: () => void; onGallery: (start?: number) => void
   com: CommercialIndex | null; comCounts: Record<string, number> | null; comBrands: Record<string, number> | null; comPrefs: CommercialPrefs; onComPrefs: (p: CommercialPrefs) => void
   place: PlaceRow | null; placeOn: PlaceOn; onPlaceOn: (v: PlaceOn) => void
 }
 
+const BestTag = ({ b }: { b: FactorBest | null | undefined }) => (b ? <small className="best-tag" title="후보지 중 가장 높은 점수">최고 {fmt(b.score)} · {b.name}</small> : null)
+const BestDetail = ({ b }: { b: FactorBest | null | undefined }) => (b && !b.self && b.detail ? <small className="best-detail">{b.name}: {b.detail}</small> : null)
+
 const SOON: { name: string; note: string }[] = [] // 준비 중인 지수(지금은 없음 — 쾌적함은 삭제)
 
-export function FactorsPanel({ cat, catOn, onToggleCat, onRegister, onGallery, com, comCounts, comBrands, comPrefs, onComPrefs, place, placeOn, onPlaceOn }: FactorsProps) {
+export function FactorsPanel({ cat, catOn, onToggleCat, onRegister, onGallery, com, comCounts, comBrands, comPrefs, onComPrefs, place, placeOn, onPlaceOn, best, bike }: FactorsProps) {
   const [placeOpen, setPlaceOpen] = useState<PlaceKey | null>(null)
   const [pick, setPick] = useState(false)
   const [comOpen, setComOpen] = useState(false)
@@ -112,20 +118,21 @@ export function FactorsPanel({ cat, catOn, onToggleCat, onRegister, onGallery, c
       {comPrefs.on && (
         <div className="factor com-factor">
           <div>
-            <button type="button" className="com-open" aria-expanded={comOpen} onClick={() => setComOpen(!comOpen)}>🏪 도보 5분 상권 <i aria-hidden>{comOpen ? '▴' : '▾'}</i></button>
+            <button type="button" className="com-open" aria-expanded={comOpen} onClick={() => setComOpen(!comOpen)}>🏪 {bike ? '자전거 상권(1km)' : '도보 5분 상권'} <i aria-hidden>{comOpen ? '▴' : '▾'}</i></button><BestTag b={best.com} />
             <small>{comPrefs.need.length ? `필수 ${names(comPrefs.need)}` : ''}{comPrefs.need.length && comPrefs.want.length ? ' · ' : ''}{comPrefs.want.length ? `선호 ${names(comPrefs.want)}` : ''}{!comPrefs.need.length && !comPrefs.want.length ? '업종을 골라 주세요' : ''}</small>
           </div>
           <span className="factor-score"><span className="ticks com" aria-hidden><span style={{ width: `${(com?.score ?? 0) * 10}%` }} /></span><em title={com ? undefined : '검색으로 넣은 후보지는 상권 자료가 없습니다'}>{com ? fmt(com.score) : '—'}</em></span>
         </div>
       )}
-      {comPrefs.on && comOpen && <CommercialPicker prefs={comPrefs} onChange={onComPrefs} counts={comCounts} brands={comBrands} />}
+      {comPrefs.on && comOpen && <CommercialPicker prefs={comPrefs} onChange={onComPrefs} counts={comCounts} brands={comBrands} bike={bike} />}
       {PLACE_KEYS.filter((k) => placeOn[k]).map((k) => {
         const s = place?.[k].score ?? null
         return [
           <div className="factor place-factor" key={k}>
             <div>
-              <button type="button" className="com-open" aria-expanded={placeOpen === k} onClick={() => setPlaceOpen(placeOpen === k ? null : k)}>{PLACE_LABEL[k]} <i aria-hidden>{placeOpen === k ? '▴' : '▾'}</i></button>
+              <button type="button" className="com-open" aria-expanded={placeOpen === k} onClick={() => setPlaceOpen(placeOpen === k ? null : k)}>{PLACE_LABEL[k]} <i aria-hidden>{placeOpen === k ? '▴' : '▾'}</i></button><BestTag b={best[k]} />
               <small>{place ? placeSummary(k, place) : PLACE_NOTE[k] + ' — 검색으로 넣은 후보지는 자료 없음'}</small>
+              <BestDetail b={best[k]} />
             </div>
             <span className="factor-score"><span className={`ticks ${k}`} aria-hidden><span style={{ width: `${(s ?? 0) * 10}%` }} /></span><em>{s === null ? '—' : fmt(s)}</em></span>
           </div>,
@@ -135,7 +142,7 @@ export function FactorsPanel({ cat, catOn, onToggleCat, onRegister, onGallery, c
       {catOn && (
         <div className="factor">
           <div>
-            <button type="button" className="com-open" aria-expanded={catOpen} onClick={() => setCatOpen(!catOpen)}>🐈 길고양이 지수 <i aria-hidden>{catOpen ? '▴' : '▾'}</i></button>
+            <button type="button" className="com-open" aria-expanded={catOpen} onClick={() => setCatOpen(!catOpen)}>🐈 길고양이 지수 <i aria-hidden>{catOpen ? '▴' : '▾'}</i></button><BestTag b={best.cat} />
             <span className="factor-links">
               <button type="button" onClick={() => onGallery(0)} disabled={!cat || cat.photos === 0}>사진{cat && cat.photos ? ` ${cat.photos}` : ''}</button>
               <button type="button" onClick={onRegister}>등록</button>
@@ -157,7 +164,7 @@ export function FactorsPanel({ cat, catOn, onToggleCat, onRegister, onGallery, c
 
 // 도보 5분 상권: 업종마다 필수 / 선호 / 안 봄. 오른쪽 숫자 = 고른 후보지의 반경 500m 안 개수 / 기준 개수
 const TIERS: { t: Tier; label: string }[] = [{ t: 'need', label: '필수' }, { t: 'want', label: '선호' }, { t: 'off', label: '안 봄' }]
-function CommercialPicker({ prefs, onChange, counts, brands }: { prefs: CommercialPrefs; onChange: (p: CommercialPrefs) => void; counts: Record<string, number> | null; brands: Record<string, number> | null }) {
+function CommercialPicker({ prefs, onChange, counts, brands, bike }: { prefs: CommercialPrefs; onChange: (p: CommercialPrefs) => void; counts: Record<string, number> | null; brands: Record<string, number> | null; bike: boolean }) {
   return (
     <div className="com-picker" role="group" aria-label="상권 업종 고르기">
       {CATEGORIES.map((c) => {
@@ -174,7 +181,7 @@ function CommercialPicker({ prefs, onChange, counts, brands }: { prefs: Commerci
           </div>
         )
       })}
-      <p className="com-note">필수 {NEED_WEIGHT * 100}% · 선호 {WANT_WEIGHT * 100}%, 묶음 안은 똑같이. 반경 {WALK5}m 안 개수가 기준(오른쪽 /뒤 숫자)에 닿으면 9점, 그 위로는 거의 안 오름. 상가정보 {STDR_YM.slice(0, 4)}.{STDR_YM.slice(4)} 기준{Object.keys(THIN).length ? ' · * ' + Object.values(THIN)[0] : ''}.</p>
+      <p className="com-note">필수 {NEED_WEIGHT * 100}% · 선호 {WANT_WEIGHT * 100}%, 묶음 안은 똑같이. 반경 {bike ? WALK5 * 2 : WALK5}m{bike ? '(자전거)' : ''} 안 개수가 기준(오른쪽 /뒤 숫자)에 닿으면 9점, 그 위로는 거의 안 오름. 상가정보 {STDR_YM.slice(0, 4)}.{STDR_YM.slice(4)} 기준{Object.keys(THIN).length ? ' · * ' + Object.values(THIN)[0] : ''}.</p>
     </div>
   )
 }
@@ -214,24 +221,24 @@ function PlaceDetail({ k, r }: { k: PlaceKey; r: PlaceRow }) {
         {p.parks.length === 0 && <p className="com-note">1km 안에 공원이 없어요.</p>}
         {p.parks.map((x, i) => (
           <div className="place-line" key={x.name + i}>
-            <span>{x.waterside ? '🌊' : '🌳'} {x.name} <small>{x.dist}m · 산책로 {x.walkM ? `${(x.walkM / 1000).toFixed(1)}km` : '자료 없음'} · {x.areaHa}ha{x.linked ? ' · 길게 연결 ×1.8' : ''}</small></span>
+            <span>{x.waterside ? '🌊' : '🌳'} {x.name} <small>{x.type} · {x.dist}m · 산책로 {x.walkM ? `${(x.walkM / 1000).toFixed(1)}km` : '자료 없음'} · {x.areaHa}ha{x.linked ? ' · 길게 연결 ×1.8' : ''}</small></span>
             <em title={`공원 점수 ${x.value} → 거리 반영 ${x.eff}`}>{fmt(x.eff)}</em>
           </div>
         ))}
         <div className="place-line"><span>🌿 1km 안 녹지 비율 {p.green}%</span><em>+{p.greenBonus}</em></div>
-        <p className="com-note">더하기 방식. 공원마다 점수 = 공원 안 산책로 길이로(반달공원 0.4km ≈ 2점 · 신동수변공원 1.3km ≈ 7.6 · 글빛누리공원 1.5km ≈ 8 · 광교호수공원 32km = 10), 길게 이어져 양 끝이 상권에 닿으면 ×1.8. 후보지 점수 = 가장 좋은 공원(500m 넘으면 1km 에서 절반까지 줄임) + 두 번째 공원 10% + 녹지 15% 이상 +0.5 · 30% 이상 +1, 최대 10. OSM {OSM_AT} 기준.</p>
+        <p className="com-note">더하기 방식. 공원마다 점수 = 공원 안 산책로 길이로(반달공원 0.4km ≈ 2점 · 신동수변공원 1.3km ≈ 7.6 · 글빛누리공원 1.5km ≈ 8 · 광교호수공원 32km = 10), 길게 이어져 양 끝이 상권에 닿으면 ×1.8. 후보지 점수 = 가장 좋은 공원(500m 넘으면 1km 에서 절반까지 줄임) + 두 번째 공원 10% + 녹지 15% 이상 +0.5 · 30% 이상 +1, 최대 10. 공원 경계·유형은 국토교통부 도시계획시설(공간시설), 산책로·이름은 OSM {OSM_AT}.</p>
       </div>
     )
   }
   return (
     <div className="com-picker place-detail">
-      {r.public.facilities.map((f) => (
-        <div className="place-line" key={f.id}>
-          <span>{f.emoji} {f.label} <small>{f.count ? `${f.count}곳 · 가장 가까운 ${f.nearest?.name ? f.nearest.name + ' ' : ''}${f.nearest?.dist}m` : '1km 안 없음'}</small></span>
-          <em>{fmt(f.score)}</em>
+      {r.library.near.map((l, i) => (
+        <div className="place-line" key={l.name}>
+          <span>📚 {l.name} <small>{l.dist}m{l.seats ? ` · 좌석 ${l.seats.toLocaleString()}` : ''}{l.books ? ` · 책 ${l.books.toLocaleString()}권` : ''}</small></span>
+          {i === 0 && <em>{fmt(r.library.score)}</em>}
         </div>
       ))}
-      <p className="com-note">1km 안 시설 종류별로 1곳이면 9점(많으면 10점), 공공시설 = 종류별 점수 평균. 독서실·스터디카페·사유 시설은 뺌. OSM {OSM_AT} 기준.</p>
+      <p className="com-note">가장 가까운 공공도서관까지 직선거리: 500m 안 10점 → 1km 5점 → 2km 0점(사이는 직선). 작은도서관·어린이·학교·대학·전문 도서관은 뺌. 공공데이터포털 전국도서관표준데이터(기준일 {LIBRARY_AT}).</p>
     </div>
   )
 }

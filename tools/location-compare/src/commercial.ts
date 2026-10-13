@@ -18,6 +18,8 @@ export type CommercialIndex = { score: number; parts: CatPart[] } | null
 export const NEED_WEIGHT = 0.8
 export const WANT_WEIGHT = 0.2
 export const WALK5 = data.walk5 // m(상권 지수 반경, 500)
+/** 자전거를 고르면 반경 2배(commercial.json 에 1,000m 개수가 같이 들어 있다) */
+export const radiusOf = (bike?: boolean) => (bike ? WALK5 * 2 : WALK5)
 /** 업종별 기준 개수(이만하면 됐다) — commercial-categories.json 의 enough */
 export const ENOUGH = data.enough as Record<string, number>
 /** 개수 → 업종 점수(0~10) */
@@ -57,24 +59,25 @@ export function setTier(p: CommercialPrefs, id: string, t: Tier): CommercialPref
 export const pickedCats = (p: CommercialPrefs) => new Set([...p.need, ...p.want])
 
 /** 업종별 도보 5분 안 개수(자료 없는 후보지는 null) */
-export function walk5Counts(c: Candidate | undefined): Record<string, number> | null {
+export function walk5Counts(c: Candidate | undefined, bike?: boolean): Record<string, number> | null {
   const r = c ? rowOf(c) : null
-  return r ? Object.fromEntries(CATEGORIES.map((k) => [k.id, r.counts[k.id]?.[WALK5] ?? 0])) : null
+  return r ? Object.fromEntries(CATEGORIES.map((k) => [k.id, r.counts[k.id]?.[radiusOf(bike)] ?? 0])) : null
 }
 /** 브랜드 몫 매장 수(예: 화장품의 올리브영) */
-export function walk5Brand(c: Candidate | undefined): Record<string, number> | null {
+export function walk5Brand(c: Candidate | undefined, bike?: boolean): Record<string, number> | null {
   const r = c ? rowOf(c) : null
-  return r ? Object.fromEntries(Object.keys(BRAND_PARTS).map((id) => [id, r.brand?.[id]?.[WALK5] ?? 0])) : null
+  return r ? Object.fromEntries(Object.keys(BRAND_PARTS).map((id) => [id, r.brand?.[id]?.[radiusOf(bike)] ?? 0])) : null
 }
 
-export function commercialIndex(candidates: Candidate[], p: CommercialPrefs): CommercialIndex[] {
+export function commercialIndex(candidates: Candidate[], p: CommercialPrefs, bike?: boolean): CommercialIndex[] {
+  const R = radiusOf(bike)
   const rows = candidates.map(rowOf)
   const ids = [...p.need, ...p.want]
   return rows.map((r) => {
     if (!r || !ids.length) return null
     const parts: CatPart[] = ids.map((id) => {
-      const count = r.counts[id]?.[WALK5] ?? 0
-      const brand = r.brand?.[id]?.[WALK5] ?? 0
+      const count = r.counts[id]?.[R] ?? 0
+      const brand = r.brand?.[id]?.[R] ?? 0
       return { id, tier: p.need.includes(id) ? 'need' : 'want', count, brand, score: catScore(id, count, brand) }
     })
     const avg = (t: CatPart['tier']) => { const x = parts.filter((q) => q.tier === t); return x.length ? x.reduce((a, q) => a + q.score, 0) / x.length : null }

@@ -25,7 +25,7 @@ export function load(): State {
       return {
         candidates: saved.candidates.filter(isPoint).map(migrate),
         hubs: saved.hubs.filter(isPoint).slice(0, MAX_HUBS),
-        pref: { weights: { ...base.pref.weights, ...saved.pref.weights }, trips: { ...saved.pref.trips }, transitUse: { ...saved.pref.transitUse } },
+        pref: { weights: { ...base.pref.weights, ...saved.pref.weights }, trips: { ...saved.pref.trips }, transitUse: { ...saved.pref.transitUse }, bike: !!saved.pref.bike },
       }
     }
     const old = JSON.parse(localStorage.getItem(OLD_PREF_KEY) || 'null')

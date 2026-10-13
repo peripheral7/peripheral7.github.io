@@ -46,13 +46,18 @@ export function SettingsPopover({ kind, hubs, value, onChange, onClose }: Props)
       </div>
       {kind === 'weights' ? (
         <>
-          {MODES.map((m) => (
+          {MODES.map((m) => [
             <label className="weight-input" key={m.key}>
               <span><b>{m.label}</b><small>{m.note}</small></span>
               <input type="number" min={0} max={999} step={1} inputMode="numeric" aria-label={`${m.label} 가중치`} value={w[m.key]}
                 onFocus={(e) => e.currentTarget.select()} onChange={(e) => setWeight(m.key, e.target.value)} />
-            </label>
-          ))}
+            </label>,
+            m.key === 'walk' ? (
+              <button type="button" key="bike" className={'bike-toggle' + (value.bike ? ' on' : '')} aria-pressed={!!value.bike} onClick={() => onChange({ ...value, bike: !value.bike })}>
+                🚲 자전거 이용<small>{value.bike ? '상권·공공시설을 반경 2배로 계산 중' : '켜면 상권·공공시설 반경 2배'}</small>
+              </button>
+            ) : null,
+          ])}
           <p className="sum-note" role="status">
             합계 <b>{total}</b>{total !== 100 && <> · 100 기준 <b>{share.transit}·{share.car}·{share.walk}</b></>}
           </p>

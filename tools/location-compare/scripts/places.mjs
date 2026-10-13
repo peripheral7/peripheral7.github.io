@@ -1,27 +1,47 @@
-// 입지 요인 — 평화로움 · 공원 · 공공시설을 후보지마다 계산해 src/places.json · PLACES.md 에 쓴다(이 PC 에서만).
+// 입지 요인 — 평화로움 · 공원 · 도서관을 후보지마다 계산해 src/places.json · PLACES.md 에 쓴다(이 PC 에서만).
 // 공개 사이트는 이 결과 파일만 읽는다(외부 API 를 부르지 않는다).
 //
 // 사용(이 폴더에서):
-//   node scripts/places.mjs            OSM 을 받아(하루 안에 받은 게 있으면 그것을 씀) 계산 → src/places.json · PLACES.md
+//   node scripts/places.mjs            계산 → src/places.json · PLACES.md (OSM 은 하루 안에 받은 게 있으면 그것을 씀)
 //   node scripts/places.mjs --refresh  OSM 을 새로 받기
 //
-// 자료
-//   - OpenStreetMap(Overpass API): 공원 경계·산책로·물가·녹지·큰길·도서관·운동장 — 후보지 주변 네모 한 번에 받아 data/osm-places.json 에 저장
-//   - 상가(상권)정보 data/stores.sqlite(scripts/stores-sync.mjs): 60m 안 음식점, 공원 양 끝의 상권
-//   공원 경계는 나중에 국토교통부 도시계획(공간시설) — 브이월드 키가 생기면 — 로 바꿀 수 있게 parkSource 한 곳에서만 읽는다.
+// 자료(출처는 README 4-5절 "자료 출처"에도 같은 내용)
+//   - 공원 경계: 국토교통부 도시계획시설(공간시설) UQ162, 경기도(41), 2026-08 — 저장소 맨 위 「국토계획공간시설(경기)/LSMD_CONT_UQ162_5174_41_202608.shp」
+//     (좌표계 EPSG:5174 → proj4 로 WGS84). 공원 유형은 관리번호(MNUM)의 시설 코드 UQTxxxx 로 가른다(PARK_TYPES).
+//   - 공원 이름(공간시설에 이름이 없을 때)·공원 안 산책로·물가·숲/풀밭·큰길: OpenStreetMap(Overpass API) — data/osm-places.json 에 저장
+//   - 도서관: 공공데이터포털 전국도서관표준데이터(2026-10-13 내려받음) — 저장소 맨 위 「전국도서관표준데이터-20261013.xls」,
+//     도서관유형 = 공공도서관만(작은도서관·어린이·학교·대학·전문·장애인 도서관 제외). xls 는 이 PC 의 Excel 로 data/libraries.csv 로 바꿔 읽는다.
+//   - 60m 안 음식점·공원 양 끝 상권: 소상공인시장진흥공단 상가(상권)정보 data/stores.sqlite(scripts/stores-sync.mjs)
 //
-// 계산 규칙·숫자는 src/places-config.json(사람이 고치는 곳), 설명은 README 4-5절.
+// 계산 규칙·숫자는 src/places-config.json, 설명은 README 4-5절.
 import fs from 'node:fs'
 import path from 'node:path'
+import { execFileSync } from 'node:child_process'
 import { fileURLToPath } from 'node:url'
 import { DatabaseSync } from 'node:sqlite'
+import proj4 from 'proj4'
 import { CANDIDATES } from '../src/data.ts'
 
 const ROOT = path.dirname(path.dirname(fileURLToPath(import.meta.url)))
+const REPO = path.dirname(path.dirname(ROOT))
 const CFG = JSON.parse(fs.readFileSync(path.join(ROOT, 'src', 'places-config.json'), 'utf8'))
 const OSM_FILE = path.join(ROOT, 'data', 'osm-places.json')
 const DB_FILE = path.join(ROOT, 'data', 'stores.sqlite')
+const SHP = path.join(REPO, CFG.sources.parkShp)
+const LIB_XLS = path.join(REPO, CFG.sources.libraryXls)
+const LIB_CSV = path.join(ROOT, 'data', 'libraries.csv')
 const refresh = process.argv.includes('--refresh')
+const EPSG5174 = '+proj=tmerc +lat_0=38 +lon_0=127.0028902777778 +k=1 +x_0=200000 +y_0=500000 +ellps=bessel +units=m +no_defs +towgs84=-115.80,474.99,674.11,1.16,-2.31,-1.63,6.43'
+const toWgs = proj4(EPSG5174, 'WGS84')
+
+// 공간시설 시설 코드(MNUM 안 UQT + 4자리) → 공원 유형. 앞자리가 길게 맞는 것부터.
+const PARK_TYPES = [
+  ['2100', '어린이공원'], ['2101', '어린이공원'], ['2102', '어린이공원'], ['2103', '어린이공원'],
+  ['220', '근린공원'], ['221', '문화공원'], ['222', '역사공원'], ['23', '도시농업공원'], ['24', '묘지공원'],
+  ['250', '체육공원'], ['251', '수변공원'], ['26', '소공원'], ['29', '기타 공원(수변 등)'], ['20', '공원(유형 미상)'], ['6000', '도시자연공원구역'],
+]
+const GREEN_TYPES = [['30', '연결녹지'], ['31', '완충녹지'], ['32', '경관녹지'], ['33', '연결녹지'], ['39', '녹지']]
+const typeOf = (code, table) => table.filter(([p]) => code.startsWith(p)).sort((a, b) => b[0].length - a[0].length)[0]?.[1] ?? null
 
 // ── 좌표: 후보지 둘레 평면(m) ──
 const LAT0 = CANDIDATES.reduce((a, c) => a + c.lat, 0) / CANDIDATES.length
@@ -37,23 +57,26 @@ function segDist(p, a, b) {
   return Math.hypot(p[0] - a[0] - t * dx, p[1] - a[1] - t * dy)
 }
 const lineDist = (p, line) => { let d = Infinity; for (let i = 1; i < line.length; i++) d = Math.min(d, segDist(p, line[i - 1], line[i])); return d }
-/** 점에서 면까지(안이면 0) */
 const polyDist = (p, rings) => (rings.some((r) => inside(p, r)) ? 0 : Math.min(...rings.map((r) => lineDist(p, [...r, r[0]]))))
+const centroid = (r) => [r.reduce((a, p) => a + p[0], 0) / r.length, r.reduce((a, p) => a + p[1], 0) / r.length]
+
+// 계산할 네모(후보지 + 여유)
+const M = CFG.fetchMargin / 111320
+const BOX = {
+  s: Math.min(...CANDIDATES.map((c) => c.lat)) - M, n: Math.max(...CANDIDATES.map((c) => c.lat)) + M,
+  w: Math.min(...CANDIDATES.map((c) => c.lng)) - M * 1.3, e: Math.max(...CANDIDATES.map((c) => c.lng)) + M * 1.3,
+}
 
 // ── OSM 받기 ──
 async function osm() {
   if (!refresh && fs.existsSync(OSM_FILE) && Date.now() - fs.statSync(OSM_FILE).mtimeMs < 86_400_000) return JSON.parse(fs.readFileSync(OSM_FILE, 'utf8'))
-  const m = CFG.fetchMargin / 111320
-  const s = Math.min(...CANDIDATES.map((c) => c.lat)) - m, n = Math.max(...CANDIDATES.map((c) => c.lat)) + m
-  const w = Math.min(...CANDIDATES.map((c) => c.lng)) - m * 1.3, e = Math.max(...CANDIDATES.map((c) => c.lng)) + m * 1.3
-  const b = `(${s},${w},${n},${e})`
+  const b = `(${BOX.s},${BOX.w},${BOX.n},${BOX.e})`
   const q = `[out:json][timeout:120];
 (way["leisure"="park"]${b};relation["leisure"="park"]${b};)->.parks; .parks out geom tags;
 (way["highway"~"^(footway|path|pedestrian|cycleway|track|steps)$"]${b};)->.paths; .paths out geom tags;
 (way["natural"="water"]${b};relation["natural"="water"]${b};way["waterway"~"^(river|stream|canal)$"]${b};)->.water; .water out geom tags;
 (way["landuse"~"^(forest|grass|meadow|recreation_ground|village_green)$"]${b};way["natural"~"^(wood|scrub|grassland)$"]${b};relation["landuse"="forest"]${b};relation["natural"="wood"]${b};)->.green; .green out geom tags;
-(way["highway"~"^(motorway|trunk|primary|secondary)$"]${b};way["highway"]["name"~"대로$"]${b};)->.roads; .roads out geom tags;
-(nwr["amenity"="library"]${b};nwr["leisure"="pitch"]${b};nwr["leisure"="sports_centre"]${b};nwr["amenity"="community_centre"]${b};nwr["leisure"="swimming_pool"]["access"!="private"]${b};)->.pub; .pub out center tags;`
+(way["highway"~"^(motorway|trunk|primary|secondary)$"]${b};way["highway"]["name"~"대로$"]${b};)->.roads; .roads out geom tags;`
   console.log('OSM 받는 중…')
   const r = await fetch('https://overpass-api.de/api/interpreter', { method: 'POST', body: 'data=' + encodeURIComponent(q), headers: { 'Content-Type': 'application/x-www-form-urlencoded', 'User-Agent': 'peripheral7-location-compare/1.0' } })
   const t = await r.text()
@@ -63,75 +86,136 @@ async function osm() {
   return JSON.parse(t)
 }
 
-// ── 공원 경계(지금은 OSM leisure=park) ──
-function parkSource(els) {
-  return els.filter((e) => e.tags?.leisure === 'park').map((e) => {
-    const rings = e.type === 'way' ? [ring(e.geometry)] : (e.members ?? []).filter((m) => m.role === 'outer' && m.geometry?.length > 3).map((m) => ring(m.geometry))
-    return { id: `${e.type}${e.id}`, name: e.tags.name ?? '', rings: rings.filter((r) => r.length > 3) }
-  }).filter((p) => p.rings.length)
+// ── 공간시설 Shapefile(폴리곤) + DBF ──
+function readShp(shpFile) {
+  const shp = fs.readFileSync(shpFile), dbf = fs.readFileSync(shpFile.replace(/\.shp$/i, '.dbf'))
+  // DBF 필드
+  const n = dbf.readUInt32LE(4), hlen = dbf.readUInt16LE(8), rlen = dbf.readUInt16LE(10)
+  const fields = []
+  for (let o = 32; dbf[o] !== 0x0d; o += 32) fields.push({ name: dbf.slice(o, o + 11).toString('latin1').replace(/\0.*$/, ''), len: dbf[o + 16] })
+  const dec = new TextDecoder('euc-kr')
+  const rec = (i) => { let o = hlen + i * rlen + 1; const r = {}; for (const f of fields) { r[f.name] = dec.decode(dbf.slice(o, o + f.len)).trim(); o += f.len } return r }
+  // 네모 안에 드는 것만(레코드 bbox 를 5174 로 비교 — 네모 네 귀를 5174 로 바꿔 둔다)
+  const from = proj4('WGS84', EPSG5174)
+  const corners = [[BOX.w, BOX.s], [BOX.e, BOX.s], [BOX.w, BOX.n], [BOX.e, BOX.n]].map((p) => from.forward(p))
+  const bx = { x1: Math.min(...corners.map((p) => p[0])), x2: Math.max(...corners.map((p) => p[0])), y1: Math.min(...corners.map((p) => p[1])), y2: Math.max(...corners.map((p) => p[1])) }
+  const out = []
+  let off = 100, i = 0
+  while (off < shp.length) {
+    const len = shp.readInt32BE(off + 4) * 2, c = off + 8
+    const type = shp.readInt32LE(c)
+    if (type === 5) {
+      const x1 = shp.readDoubleLE(c + 4), y1 = shp.readDoubleLE(c + 12), x2 = shp.readDoubleLE(c + 20), y2 = shp.readDoubleLE(c + 28)
+      if (x2 >= bx.x1 && x1 <= bx.x2 && y2 >= bx.y1 && y1 <= bx.y2) {
+        const np = shp.readInt32LE(c + 36), npt = shp.readInt32LE(c + 40)
+        const parts = Array.from({ length: np }, (_, k) => shp.readInt32LE(c + 44 + k * 4))
+        const p0 = c + 44 + np * 4
+        const rings = parts.map((s, k) => {
+          const e = k + 1 < np ? parts[k + 1] : npt
+          const r = []
+          for (let j = s; j < e; j++) { const [lng, lat] = toWgs.forward([shp.readDoubleLE(p0 + j * 16), shp.readDoubleLE(p0 + j * 16 + 8)]); r.push(xy(lat, lng)) }
+          return r
+        })
+        const d = rec(i)
+        out.push({ code: d.MNUM.match(/UQT(\d{4})/)?.[1] ?? '', alias: d.ALIAS, mnum: d.MNUM, rings })
+      }
+    }
+    off = c + len; i++
+  }
+  return out
+}
+
+// ── 도서관(표준데이터 xls → csv) ──
+function libraries() {
+  if (!fs.existsSync(LIB_CSV) || fs.statSync(LIB_CSV).mtimeMs < fs.statSync(LIB_XLS).mtimeMs) {
+    console.log('도서관 xls → csv(Excel)…')
+    const ps = `$x=New-Object -ComObject Excel.Application;$x.DisplayAlerts=$false;$w=$x.Workbooks.Open('${LIB_XLS.replace(/'/g, "''")}',0,$true);$w.SaveAs('${LIB_CSV.replace(/'/g, "''")}',62);$w.Close($false);$x.Quit()`
+    execFileSync('powershell.exe', ['-NoProfile', '-Command', ps], { stdio: 'inherit' })
+  }
+  const t = fs.readFileSync(LIB_CSV, 'utf8').replace(/^﻿/, '')
+  const rows = []; let row = [], cur = '', q = false
+  for (let i = 0; i < t.length; i++) {
+    const ch = t[i]
+    if (q) { if (ch === '"') { if (t[i + 1] === '"') { cur += '"'; i++ } else q = false } else cur += ch }
+    else if (ch === '"') q = true
+    else if (ch === ',') { row.push(cur); cur = '' }
+    else if (ch === '\n') { row.push(cur.replace(/\r$/, '')); rows.push(row); row = []; cur = '' }
+    else cur += ch
+  }
+  const h = rows[0], col = (name) => h.indexOf(name)
+  const [iN, iT, iLat, iLng, iA, iSeat, iBook, iDate] = ['도서관명', '도서관유형', '위도', '경도', '소재지도로명주소', '열람좌석수', '자료수(도서)', '데이터기준일자'].map(col)
+  return rows.slice(1).filter((r) => CFG.library.types.includes(r[iT])).map((r) => ({ name: r[iN], type: r[iT], lat: +r[iLat], lng: +r[iLng], addr: r[iA], seats: +r[iSeat] || 0, books: +r[iBook] || 0, date: r[iDate] }))
+    .filter((l) => l.lat > 33 && l.lng > 124)
 }
 
 async function main() {
-  const j = await osm()
-  const els = j.elements
+  const els = (await osm()).elements
   const db = fs.existsSync(DB_FILE) ? new DatabaseSync(DB_FILE, { readOnly: true }) : null
   if (!db) console.warn('data/stores.sqlite 없음 — 60m 음식점·공원 연결성은 0 으로 본다(먼저 stores-sync.mjs)')
   const qBox = db?.prepare(`SELECT s.name, s.scls, s.lat, s.lon FROM stores_rtree r JOIN stores s ON s.id = r.id WHERE r.max_lon >= ? AND r.min_lon <= ? AND r.max_lat >= ? AND r.min_lat <= ?`)
   const storesNear = (lat, lng, rad) => {
     if (!qBox) return []
-    const dLat = rad / 110540, dLng = rad / KX
-    const p = xy(lat, lng)
+    const dLat = rad / KY, dLng = rad / KX, p = xy(lat, lng)
     return qBox.all(lng - dLng, lng + dLng, lat - dLat, lat + dLat).filter((s) => { const q = xy(s.lat, s.lon); return Math.hypot(q[0] - p[0], q[1] - p[1]) <= rad })
   }
   const isFood = (s) => CFG.peace.foodPrefix.some((p) => s.scls?.startsWith(p))
 
-  // 공원 지표(공원마다 한 번)
+  // 공원 경계(공간시설) + OSM 이름
+  const PK = CFG.park
+  const uq = readShp(SHP)
+  const osmParks = els.filter((e) => e.tags?.leisure === 'park' && e.tags.name).map((e) => ({
+    name: e.tags.name, rings: e.type === 'way' ? [ring(e.geometry)] : (e.members ?? []).filter((m) => m.role === 'outer' && m.geometry?.length > 3).map((m) => ring(m.geometry)),
+  })).filter((p) => p.rings.length)
   const paths = els.filter((e) => e.tags?.highway && /^(footway|path|pedestrian|cycleway|track|steps)$/.test(e.tags.highway)).map((e) => ring(e.geometry))
   const waters = els.filter((e) => e.tags?.natural === 'water' || e.tags?.waterway).flatMap((e) => (e.geometry ? [ring(e.geometry)] : (e.members ?? []).filter((m) => m.geometry).map((m) => ring(m.geometry))))
-  const PK = CFG.park
-  const parks = parkSource(els).map((p) => {
+  const toLL = (q) => [q[1] / KY, q[0] / KX]
+  const parks = uq.map((u) => ({ ...u, type: typeOf(u.code, PARK_TYPES) })).filter((u) => u.type && !PK.excludeTypes.includes(u.type)).map((p) => {
     const a = p.rings.reduce((s, r) => s + area(r), 0)
-    if (a < PK.minAreaM2 || PK.excludeNames?.some((n) => p.name.includes(n))) return null
+    if (a < PK.minAreaM2) return null
+    // 이름: 공간시설 별칭(ALIAS)이 "근린공원1"처럼 번호뿐이면 OSM 공원 이름(가운데가 이 경계 안에 드는 것 중 가장 큰 것)
+    // OSM 공원의 가운데가 이 경계 안이거나, 꼭짓점 절반 이상이 이 경계 안이면 같은 공원으로 본다
+    const share = (o) => { const v = o.rings.flat(); return v.filter((q) => p.rings.some((pr) => inside(q, pr))).length / v.length }
+    const osmIn = osmParks.filter((o) => o.rings.some((r) => p.rings.some((pr) => inside(centroid(r), pr))) || share(o) >= 0.5).sort((x, y) => area(y.rings[0]) - area(x.rings[0]))
+    const generic = !p.alias || /^(제?\d+호?\s*)?(근린|어린이|소|문화|수변|체육|역사|도시농업)?공원[\s\d\-()호]*$/.test(p.alias) || /^[A-Za-z0-9\-\s]+$/.test(p.alias)
+    const name = (generic && osmIn[0]?.name) || p.alias || osmIn[0]?.name || `이름 없는 ${p.type}`
     const per = p.rings.reduce((s, r) => s + perim(r), 0)
     const pts = p.rings.flat()
-    // 산책로: 공원 안을 지나는 보행로 길이(조각 가운데가 공원 안이면 셈). 없으면 둘레의 절반으로 본다
     let walk = 0
     for (const w of paths) for (let i = 1; i < w.length; i++) {
       const mid = [(w[i][0] + w[i - 1][0]) / 2, (w[i][1] + w[i - 1][1]) / 2]
       if (p.rings.some((r) => inside(mid, r))) walk += Math.hypot(w[i][0] - w[i - 1][0], w[i][1] - w[i - 1][1])
     }
     const walkUsed = walk > 0 ? walk : per * 0.5
-    // 가장 먼 두 점(공원의 양 끝)
     let ends = [pts[0], pts[0]], span = 0
     const step = Math.max(1, Math.floor(pts.length / 200))
     for (let i = 0; i < pts.length; i += step) for (let k = i + step; k < pts.length; k += step) {
       const d = Math.hypot(pts[i][0] - pts[k][0], pts[i][1] - pts[k][1]); if (d > span) { span = d; ends = [pts[i], pts[k]] }
     }
-    const compact = (per * per) / (4 * Math.PI * a) // 1 = 원, 클수록 길쭉
-    const waterside = waters.some((w) => w.some((q) => p.rings.some((r) => inside(q, r))) || p.rings.some((r) => r.some((q) => lineDist(q, w) < PK.watersideM))) || /수변|호수|천변|강변/.test(p.name)
-    // 연결성: 길게 이어진 공원이 양 끝에서 각각 상권에 닿으면 1.8배
-    const toLL = (q) => [q[1] / KY, q[0] / KX]
+    const compact = (per * per) / (4 * Math.PI * a)
+    const waterside = p.type === '수변공원' || waters.some((w) => w.some((q) => p.rings.some((r) => inside(q, r)))) || /수변|호수|천변|강변/.test(name)
     const endShops = ends.map((q) => { const [la, ln] = toLL(q); return storesNear(la, ln, PK.link.endRadiusM).length })
     const linked = span >= PK.link.minSpanM && compact >= PK.link.minCompact && endShops.every((n) => n >= PK.link.minShops)
     const base = Math.max(PK.minPoints, Math.min(10, PK.logA * Math.log10(walkUsed / PK.logL0)))
     const value = Math.min(10, (base + (waterside ? PK.watersideBonus : 0)) * (linked ? PK.link.mult : 1))
-    return { id: p.id, name: p.name || '이름 없는 공원', rings: p.rings, areaHa: +(a / 10000).toFixed(2), walkM: Math.round(walk), spanM: Math.round(span), compact: +compact.toFixed(1), waterside, endShops, linked, base: +base.toFixed(1), value: +value.toFixed(1) }
+    return { name, type: p.type, code: p.code, mnum: p.mnum, rings: p.rings, areaHa: +(a / 10000).toFixed(2), walkM: Math.round(walk), spanM: Math.round(span), compact: +compact.toFixed(1), waterside, endShops, linked, base: +base.toFixed(1), value: +value.toFixed(1) }
   }).filter(Boolean)
 
-  // 녹지(비율 계산용 면): 공원 + 숲·풀밭
-  const greens = [...parks.flatMap((p) => p.rings), ...els.filter((e) => (e.tags?.landuse || e.tags?.natural) && !e.tags?.waterway && e.tags?.natural !== 'water')
-    .flatMap((e) => (e.geometry ? [ring(e.geometry)] : (e.members ?? []).filter((m) => m.role === 'outer' && m.geometry?.length > 3).map((m) => ring(m.geometry))))].filter((r) => r.length > 3)
-  const roads = els.filter((e) => e.tags?.highway && (/^(motorway|trunk|primary|secondary)$/.test(e.tags.highway) || /대로$/.test(e.tags.name ?? '')))
-    .filter((e) => CFG.peace.roadClasses.includes(e.tags.highway) || /대로$/.test(e.tags.name ?? '') || Number(e.tags.lanes) >= CFG.peace.roadMinLanes)
+  // 녹지(비율 계산용 면): 공간시설 공원·녹지 + OSM 숲·풀밭
+  const greens = [
+    ...parks.flatMap((p) => p.rings),
+    ...uq.filter((u) => typeOf(u.code, GREEN_TYPES)).flatMap((u) => u.rings),
+    ...els.filter((e) => (e.tags?.landuse || e.tags?.natural) && !e.tags?.waterway && e.tags?.natural !== 'water')
+      .flatMap((e) => (e.geometry ? [ring(e.geometry)] : (e.members ?? []).filter((m) => m.role === 'outer' && m.geometry?.length > 3).map((m) => ring(m.geometry)))),
+  ].filter((r) => r.length > 3)
+  const PC = CFG.peace
+  const roads = els.filter((e) => e.tags?.highway && (PC.roadClasses.includes(e.tags.highway) || /대로$/.test(e.tags.name ?? '') || Number(e.tags.lanes) >= PC.roadMinLanes))
     .map((e) => ({ name: e.tags.name ?? e.tags.ref ?? e.tags.highway, line: ring(e.geometry) }))
-  const pubs = els.filter((e) => e.tags && (e.tags.amenity === 'library' || e.tags.leisure === 'pitch' || e.tags.leisure === 'sports_centre' || e.tags.amenity === 'community_centre' || e.tags.leisure === 'swimming_pool'))
-    .map((e) => ({ tags: e.tags, p: xy(e.lat ?? e.center?.lat, e.lon ?? e.center?.lon) })).filter((x) => !Number.isNaN(x.p[0]))
+  const libs = libraries()
 
   const out = {}
   for (const c of CANDIDATES) {
     const p = xy(c.lat, c.lng)
     // 평화로움
-    const PC = CFG.peace
     const food = storesNear(c.lat, c.lng, PC.foodRadiusM).filter(isFood).length
     const road = roads.map((r) => ({ name: r.name, d: lineDist(p, r.line) })).sort((a, b) => a.d - b.d)[0] ?? null
     const foodScore = food <= PC.foodFree ? 10 - PC.foodSmallPenalty * food : (10 - PC.foodSmallPenalty * PC.foodFree) * Math.pow(10, -(food - PC.foodFree) / PC.foodDecay)
@@ -151,50 +235,50 @@ async function main() {
     const greenBonus = PK.greenBonus.find((g) => green >= g.min)?.add ?? 0
     const second = near[1] ? near[1].eff * PK.secondShare : 0
     const parkScore = Math.min(10, (near[0]?.eff ?? 0) + second + greenBonus)
-    // 공공시설
-    const PB = CFG.public
-    const facil = PB.types.map((t) => {
-      const nm = (x) => x.tags.name ?? ''
-      const hits = pubs.filter((x) => Object.entries(t.match).every(([k, v]) => (Array.isArray(v) ? v.some((vv) => (x.tags[k] ?? '').split(';').includes(vv)) : x.tags[k] === v)))
-        .filter((x) => !PB.excludeAccess?.includes(x.tags.access) && (!t.nameMust || nm(x).includes(t.nameMust)) && !t.nameExclude?.some((n) => nm(x).includes(n)) && !t.nameExcludeExact?.includes(nm(x)))
-        .map((x) => ({ name: x.tags.name ?? '', d: Math.hypot(x.p[0] - p[0], x.p[1] - p[1]) })).filter((x) => x.d <= PB.radiusM).sort((a, b) => a.d - b.d)
-      const score = 10 * (1 - Math.pow(10, -hits.length / t.enough))
-      return { id: t.id, label: t.label, emoji: t.emoji, count: hits.length, nearest: hits[0] ? { name: hits[0].name, dist: Math.round(hits[0].d) } : null, score: +score.toFixed(1) }
-    })
-    const pubScore = facil.reduce((a, f) => a + f.score, 0) / facil.length
+    // 도서관(공공도서관): 가장 가까운 곳까지 거리
+    const LB = CFG.library
+    const libNear = libs.map((l) => ({ ...l, d: Math.hypot(...((q) => [q[0] - p[0], q[1] - p[1]])(xy(l.lat, l.lng))) })).sort((a, b) => a.d - b.d).slice(0, 3)
+    const d0 = libNear[0]?.d ?? Infinity
+    const libScore = d0 <= LB.fullM ? 10 : d0 <= LB.halfM ? 10 - 5 * (d0 - LB.fullM) / (LB.halfM - LB.fullM) : d0 <= LB.zeroM ? 5 - 5 * (d0 - LB.halfM) / (LB.zeroM - LB.halfM) : 0
 
     out[c.id] = {
       name: c.name, lat: c.lat, lng: c.lng,
       peace: { score: +peace.toFixed(1), food, foodScore: +foodScore.toFixed(1), road: road ? { name: road.name, dist: Math.round(road.d) } : null, roadScore },
       park: {
         score: +parkScore.toFixed(1), green: +(green * 100).toFixed(0), greenBonus,
-        parks: near.slice(0, 5).map((x) => ({ name: x.k.name, dist: Math.round(x.d), value: x.k.value, eff: +x.eff.toFixed(1), areaHa: x.k.areaHa, walkM: x.k.walkM, waterside: x.k.waterside, linked: x.k.linked })),
+        parks: near.slice(0, 5).map((x) => ({ name: x.k.name, type: x.k.type, dist: Math.round(x.d), value: x.k.value, eff: +x.eff.toFixed(1), areaHa: x.k.areaHa, walkM: x.k.walkM, waterside: x.k.waterside, linked: x.k.linked })),
       },
-      public: { score: +pubScore.toFixed(1), facilities: facil },
+      library: { score: +libScore.toFixed(1), near: libNear.map((l) => ({ name: l.name, dist: Math.round(l.d), seats: l.seats, books: l.books })) },
     }
   }
-  const json = { source: 'OpenStreetMap(Overpass) · 소상공인시장진흥공단 상가(상권)정보', osmAt: new Date(fs.statSync(OSM_FILE).mtimeMs).toISOString().slice(0, 10), generatedAt: new Date().toISOString().slice(0, 10), candidates: out }
+  const json = {
+    sources: CFG.sources.list, osmAt: new Date(fs.statSync(OSM_FILE).mtimeMs).toISOString().slice(0, 10), libraryAt: libs[0]?.date ?? '', generatedAt: new Date().toISOString().slice(0, 10), candidates: out,
+  }
   fs.writeFileSync(path.join(ROOT, 'src', 'places.json'), JSON.stringify(json, null, 2) + '\n')
 
   // 보고서
   const ids = CANDIDATES.map((c) => c.id)
   const head = `| | ${ids.map((id) => out[id].name).join(' | ')} |\n|---|${ids.map(() => '---:').join('|')}|`
-  const L = [`# 입지 요인 — 평화로움 · 공원 · 공공시설`, '', `\`node scripts/places.mjs\` 가 만든다(손으로 고치지 말 것). OSM ${json.osmAt} · 만든 날 ${json.generatedAt}. 규칙은 \`src/places-config.json\`, 설명은 README 4-5절.`, '',
+  const typeCount = {}
+  for (const k of parks) typeCount[k.type] = (typeCount[k.type] ?? 0) + 1
+  const L = [`# 입지 요인 — 평화로움 · 공원 · 도서관`, '', `\`node scripts/places.mjs\` 가 만든다(손으로 고치지 말 것). 만든 날 ${json.generatedAt}. 규칙은 \`src/places-config.json\`, 설명은 README 4-5절.`, '',
+    '## 자료 출처', '', ...CFG.sources.list.map((s) => `- ${s}`), `- OSM 받은 날 ${json.osmAt} · 도서관 데이터기준일자 ${json.libraryAt}`, '',
     '## 🕊️ 평화로움', '', head,
     `| 60m 안 음식점·주점 | ${ids.map((id) => `${out[id].peace.food} → ${out[id].peace.foodScore}`).join(' | ')} |`,
     `| 가장 가까운 큰길 | ${ids.map((id) => { const r = out[id].peace.road; return r ? `${r.dist}m ${r.name} → ${out[id].peace.roadScore}` : '없음 → 10' }).join(' | ')} |`,
     `| **평화로움** | ${ids.map((id) => `**${out[id].peace.score}**`).join(' | ')} |`, '',
     '## 🌳 공원', '', head,
-    `| 가장 좋은 공원(거리 반영) | ${ids.map((id) => { const k = out[id].park.parks[0]; return k ? `${k.name} ${k.dist}m · ${k.value}점${k.linked ? '(연결 ×1.8)' : ''} → ${k.eff}` : '1km 안 없음' }).join(' | ')} |`,
+    `| 가장 좋은 공원(거리 반영) | ${ids.map((id) => { const k = out[id].park.parks[0]; return k ? `${k.name}(${k.type}) ${k.dist}m · ${k.value}점${k.linked ? '(연결 ×1.8)' : ''} → ${k.eff}` : '1km 안 없음' }).join(' | ')} |`,
     `| 두 번째 공원 | ${ids.map((id) => { const k = out[id].park.parks[1]; return k ? `${k.name} ${k.dist}m → ${k.eff}` : '—' }).join(' | ')} |`,
     `| 1km 안 녹지 비율 | ${ids.map((id) => `${out[id].park.green}% → +${out[id].park.greenBonus}`).join(' | ')} |`,
     `| **공원** | ${ids.map((id) => `**${out[id].park.score}**`).join(' | ')} |`, '',
-    '### 공원별 점수(후보지 1km 안)', '', '| 공원 | 면적 | 산책로 | 길이 | 물가 | 양 끝 상권 | 연결 | 점수 |', '|---|---:|---:|---:|:---:|---:|:---:|---:|',
+    `### 계산 범위 안 공원 유형(공간시설, ${PK.minAreaM2 / 10000}ha 이상, 제외 유형: ${PK.excludeTypes.join('·') || '없음'})`, '', Object.entries(typeCount).sort((a, b) => b[1] - a[1]).map(([k, v]) => `${k} ${v}`).join(' · '), '',
+    '### 공원별 점수(후보지 1km 안)', '', '| 공원 | 유형 | 면적 | 산책로 | 길이 | 물가 | 양 끝 상권 | 연결 | 점수 |', '|---|---|---:|---:|---:|:---:|---:|:---:|---:|',
     ...parks.filter((k) => CANDIDATES.some((c) => polyDist(xy(c.lat, c.lng), k.rings) <= PK.radiusM)).sort((a, b) => b.value - a.value)
-      .map((k) => `| ${k.name} | ${k.areaHa}ha | ${k.walkM}m | ${k.spanM}m | ${k.waterside ? '○' : ''} | ${k.endShops.join('·')} | ${k.linked ? '×1.8' : ''} | ${k.value} |`), '',
-    '## 🏛️ 공공시설(1km 안)', '', head,
-    ...CFG.public.types.map((t) => `| ${t.emoji} ${t.label} | ${ids.map((id) => { const f = out[id].public.facilities.find((x) => x.id === t.id); return f.count ? `${f.count}곳 · ${f.nearest.dist}m${f.nearest.name ? ' ' + f.nearest.name : ''} → ${f.score}` : '없음 → 0' }).join(' | ')} |`),
-    `| **공공시설** | ${ids.map((id) => `**${out[id].public.score}**`).join(' | ')} |`, '',
+      .map((k) => `| ${k.name} | ${k.type} | ${k.areaHa}ha | ${k.walkM}m | ${k.spanM}m | ${k.waterside ? '○' : ''} | ${k.endShops.join('·')} | ${k.linked ? '×1.8' : ''} | ${k.value} |`), '',
+    '## 📚 도서관(공공도서관)', '', head,
+    ...[0, 1, 2].map((i) => `| ${i + 1}번째로 가까운 곳 | ${ids.map((id) => { const l = out[id].library.near[i]; return l ? `${l.name} ${l.dist}m` : '—' }).join(' | ')} |`),
+    `| **도서관** | ${ids.map((id) => `**${out[id].library.score}**`).join(' | ')} |`, '',
   ]
   fs.writeFileSync(path.join(ROOT, 'PLACES.md'), L.join('\n'))
   console.log(L.join('\n'))

@@ -51,15 +51,25 @@ export function estimateTrip(from: Candidate, to: Hub): Trip {
 }
 
 // ── 2. 수단별 점수(10점 만점) ─────────────────────────────────────────
-// 대중교통·차량은 "같은 거점을 두고 후보지끼리 비교한 상대 점수": 가장 좋은 후보지가 10점,
-// 나머지는 가장 좋은 값과의 비율만큼 깎인다. 도보는 비교 없이 시간만 본다.
+// 대중교통·차량은 "목적지마다 고정된 기준값"에 대한 비율: 점수 = 10 × 기준값 ÷ 내 값(최대 10).
+// 후보지를 더하거나 빼도 점수가 바뀌지 않는다(예전에는 후보지 중 가장 좋은 값이 기준 — 상대 점수였다).
+// 기준값은 지금 모든 목적지에 같은 기본값(DEFAULT_REF)이고, 나중에 주 목적지 권역(대학교 입구·업무지구 등)마다
+// 미리 계산한 값을 HUB_REF 에 넣는다. 도보는 비교 없이 시간만 본다.
 
 export const WALK_LIMIT = 30 // 도보 30분 초과는 표시도 계산도 하지 않는다
 export const WALK_ZONE = 20 // 도보 20분까지는 "도보권"(지도·카드에 표시)
 export const WALK_ONLY = 10 // 도보 10분 이내면 걸어가니 그 방문지 점수에서 대중교통을 뺀다
 export const TRANSIT_PARTS = { wait: 0.4, access: 0.4, transfers: 0.2 } // 대중교통 점수 안의 비중
 
-const ratioScore = (best: number, value: number) => (value <= 0 ? 10 : (10 * best) / value)
+const ratioScore = (ref: number, value: number) => (value <= 0 ? 10 : Math.min(10, (10 * ref) / value))
+
+/** 목적지 기준값: 대기(분)·정류장까지 도보(분)·환승(회)·차량 정체 배율(출퇴근 ÷ 여유). 이 값이면 10점. */
+export type HubRef = { wait: number; access: number; transfers: number; carRatio: number }
+/** 기본값 — 대기 5분·도보 3분은 이동 시간 추정의 최솟값, 환승 0회, 정체 배율 1.5(출퇴근이 한가할 때의 1.5배면 막힘이 적은 편) */
+export const DEFAULT_REF: HubRef = { wait: 5, access: 3, transfers: 0, carRatio: 1.5 }
+/** 주 목적지 권역별 기준값(나중에 미리 계산해 넣는다. 목적지 id → 기준값 일부) — 비어 있으면 DEFAULT_REF */
+export const HUB_REF: Record<string, Partial<HubRef>> = {}
+export const refOf = (hubId: string): HubRef => ({ ...DEFAULT_REF, ...HUB_REF[hubId] })
 
 export type ModeScores = {
   transit: number
@@ -75,20 +85,16 @@ export function walkScore(minutes: number): number | null {
 }
 
 /** 한 거점에 대해 모든 후보지의 수단별 점수(후보지 순서대로). */
-export function modeScoresForHub(trips: Trip[]): ModeScores[] {
-  const bestWait = Math.min(...trips.map((t) => t.wait))
-  const bestAccess = Math.min(...trips.map((t) => t.access))
-  const bestTransfers = Math.min(...trips.map((t) => t.transfers))
-  const ratios = trips.map((t) => t.carRush / t.carFree)
-  const bestRatio = Math.min(...ratios)
-  return trips.map((t, i) => {
+export function modeScoresForHub(trips: Trip[], ref: HubRef = DEFAULT_REF): ModeScores[] {
+  return trips.map((t) => {
     const parts = {
-      wait: ratioScore(bestWait, t.wait),
-      access: ratioScore(bestAccess, t.access),
-      transfers: ratioScore(bestTransfers + 1, t.transfers + 1), // 0회가 있어도 나눌 수 있게 +1
+      wait: ratioScore(ref.wait, t.wait),
+      access: ratioScore(ref.access, t.access),
+      transfers: ratioScore(ref.transfers + 1, t.transfers + 1), // 0회도 나눌 수 있게 +1 (0회 10 · 1회 5 · 2회 3.3)
     }
     const transit = parts.wait * TRANSIT_PARTS.wait + parts.access * TRANSIT_PARTS.access + parts.transfers * TRANSIT_PARTS.transfers
-    return { transit, transitParts: parts, car: ratioScore(bestRatio, ratios[i]), carRatio: ratios[i], walk: walkScore(t.walk) }
+    const carRatio = t.carRush / t.carFree
+    return { transit, transitParts: parts, car: ratioScore(ref.carRatio, carRatio), carRatio, walk: walkScore(t.walk) }
   })
 }
 
@@ -115,7 +121,7 @@ export function hubScore(s: ModeScores, w: Preference['weights'], walkCounts: bo
 
 export function evaluate(candidates: Candidate[], hubs: Hub[], pref: Preference): CandidateResult[] {
   const tripsByHub = hubs.map((hub) => candidates.map((c) => estimateTrip(c, hub)))
-  const scoresByHub = tripsByHub.map(modeScoresForHub)
+  const scoresByHub = tripsByHub.map((trips, hi) => modeScoresForHub(trips, refOf(hubs[hi].id)))
   const walkCountsByHub = scoresByHub.map((list) => list.some((x) => x.walk !== null))
   const rawTrips = hubs.map((h) => Math.max(0, pref.trips[h.id] ?? 0))
   const tripSum = rawTrips.reduce((a, b) => a + b, 0)
