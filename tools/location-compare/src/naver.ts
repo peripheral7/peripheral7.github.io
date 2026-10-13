@@ -155,3 +155,22 @@ async function searchOnce(query: string): Promise<{ places: Place[]; errors: str
   }
   return { places, errors }
 }
+
+/** 지도에서 우클릭한 곳의 주소(네이버 지도 JS 의 역지오코더). 키가 없거나 Reverse Geocoding 이 꺼져 있으면 null(2.5초 넘으면 포기). */
+export async function reverseGeocode(lat: number, lng: number): Promise<{ address: string; building?: string } | null> {
+  try {
+    const naver = await loadNaverMaps()
+    return await new Promise((resolve) => {
+      const t = setTimeout(() => resolve(null), 2500)
+      naver.maps.Service.reverseGeocode({ coords: new naver.maps.LatLng(lat, lng), orders: 'roadaddr,addr' }, (status: number, response: any) => {
+        clearTimeout(t)
+        if (status !== naver.maps.Service.Status.OK) return resolve(null)
+        const v2 = response?.v2
+        const road = v2?.results?.find((r: any) => r.name === 'roadaddr')
+        const building = road?.land?.addition0?.value || undefined
+        const address = v2?.address?.roadAddress || v2?.address?.jibunAddress || ''
+        resolve(address ? { address, building } : null)
+      })
+    })
+  } catch { return null }
+}

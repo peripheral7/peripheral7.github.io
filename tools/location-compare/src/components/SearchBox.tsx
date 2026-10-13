@@ -17,9 +17,10 @@ type Props = {
   tripsOf: (id: string) => number
   onCandidate: (p: Place, name: string, deposit?: number, rent?: number, maint?: number) => void
   onHub: (p: Place, replaceId: string | undefined, name: string, category: string, trips: number) => void
-  onPreview: (p: Place | null) => void // 결과를 누르면 지도를 그 위치로
+  onPreview: (p: Place | null, fly?: boolean) => void // 결과를 누르면 지도를 그 위치로(fly=false 면 임시 핀만)
   onResults: (list: Place[]) => void // 결과 전부(지도에 작은 점)
   centerRef: { current: { lat: number; lng: number } | null } // 지금 지도 가운데
+  external?: { place: Place; kind: 'candidate' | 'hub'; n: number } | null // 지도 우클릭으로 고른 곳 → 바로 등록 창
 }
 // 등록 창에서 정하는 주요 설정: 후보지 = 이름·보증금·월세, 목적지 = 이름·분류·월 왕복 횟수
 type Draft = { kind: 'candidate' | 'hub'; name: string; category: string; deposit: string; rent: string; maint: string; trips: string }
@@ -31,7 +32,7 @@ const plain = { spellCheck: false, autoComplete: 'off', autoCorrect: 'off', auto
 const km = (a: { lat: number; lng: number }, b: { lat: number; lng: number }) => Math.hypot((a.lat - b.lat) * 111, (a.lng - b.lng) * 111 * Math.cos((a.lat * Math.PI) / 180))
 const kmText = (d: number) => (d < 1 ? `${Math.round(d * 1000 / 10) * 10}m` : `${d < 10 ? d.toFixed(1) : Math.round(d)}km`)
 
-export function SearchBox({ hubs, tripsOf, onCandidate, onHub, onPreview, onResults, centerRef }: Props) {
+export function SearchBox({ hubs, tripsOf, onCandidate, onHub, onPreview, onResults, centerRef, external }: Props) {
   const [q, setQ] = useState('')
   const [busy, setBusy] = useState(false)
   const [open, setOpen] = useState(false)
@@ -83,6 +84,16 @@ export function SearchBox({ hubs, tripsOf, onCandidate, onHub, onPreview, onResu
     const t = setTimeout(() => { void run(q) }, LIVE_DELAY)
     return () => clearTimeout(t)
   }, [q]) // eslint-disable-line react-hooks/exhaustive-deps
+
+  // 지도 우클릭 "후보지로/목적지로": 그 한 곳을 결과로 놓고 등록 창을 바로 연다(지도는 움직이지 않음)
+  useEffect(() => {
+    if (!external) return
+    const p = external.place
+    seq.current++ // 진행 중인 검색 결과는 버린다
+    setBusy(false); setItems([p]); setMsg(''); setOpen(true); setPicked(0); setSideTop(0)
+    setDraft({ kind: external.kind, name: p.name, category: guessHubCategory(p), deposit: '', rent: '', maint: '', trips: String(NEW_HUB_TRIPS) })
+    onPreview(p, false)
+  }, [external?.n]) // eslint-disable-line react-hooks/exhaustive-deps
 
   const pick = (i: number, row: HTMLElement) => {
     setPicked(i); setDraft(null)

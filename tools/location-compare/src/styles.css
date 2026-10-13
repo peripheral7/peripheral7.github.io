@@ -647,3 +647,23 @@ input[type=number]::-webkit-inner-spin-button, input[type=number]::-webkit-outer
 .cards-grid > .col.labels { position: sticky; left: 0; z-index: 3; background: var(--panel, #fff); box-shadow: 8px 0 8px -8px rgba(24, 39, 56, 0.18); padding-right: 6px }
 
 .com-ok { color: var(--good) }
+
+/* 지도 위 단추 통일: 검색창·장단점 기준·지표·후보지 한눈에·확대(+ − ◎)·산책 안내 모두 같은 반투명 유리(배경 흰색 30% + 흐림) */
+.search-bar, .hub-switch, .layer-switch, .fit-all, .map-controls button, .layer-note {
+  background: rgba(255, 255, 255, 0.3); -webkit-backdrop-filter: blur(6px) saturate(1.2); backdrop-filter: blur(6px) saturate(1.2);
+  border: 1px solid rgba(24, 39, 56, 0.22); box-shadow: 0 2px 10px rgba(0, 0, 0, 0.08); color: var(--text); text-shadow: 0 0 6px rgba(255, 255, 255, 0.9)
+}
+.fit-all:hover, .map-controls button:hover, .layer-switch button:not(.on):hover, .hub-switch button:not(.on):hover { background: rgba(255, 255, 255, 0.6) }
+.map-controls button { font-weight: 600 }
+.layer-note { display: flex; flex-wrap: wrap; align-items: center; gap: 4px 10px }
+.layer-legend { display: inline-flex; align-items: center; gap: 5px; color: var(--muted) }
+.layer-legend i { width: 14px; height: 10px; border-radius: 3px; background: linear-gradient(90deg, rgba(63, 154, 82, 0.25), rgba(63, 154, 82, 0.6)); border: 1px solid #2f7d40 }
+
+/* 지도 우클릭 메뉴: 그 자리를 후보지로 / 목적지로 */
+.map-ctx { position: absolute; z-index: 800; width: 200px; display: flex; flex-direction: column; gap: 2px; padding: 6px; border-radius: 12px;
+  background: rgba(255, 255, 255, 0.85); -webkit-backdrop-filter: blur(8px) saturate(1.2); backdrop-filter: blur(8px) saturate(1.2);
+  border: 1px solid rgba(24, 39, 56, 0.22); box-shadow: 0 6px 20px rgba(0, 0, 0, 0.16) }
+.map-ctx small { padding: 4px 8px 6px; font-size: 11px; color: var(--muted); line-height: 1.35; word-break: keep-all; border-bottom: 1px solid var(--line-2); margin-bottom: 2px }
+.map-ctx button { border: 0; background: none; text-align: left; padding: 7px 8px; border-radius: 8px; font-size: 13px; color: var(--text) }
+.map-ctx button:hover, .map-ctx button:focus-visible { background: rgba(24, 39, 56, 0.08); outline: 0 }
+.spot-pin { cursor: pointer }

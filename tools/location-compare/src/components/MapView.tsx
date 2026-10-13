@@ -1,12 +1,12 @@
-import { useEffect, useMemo, useRef, useState } from 'react'
-import { MapContainer, Marker, Polyline, TileLayer, Tooltip, useMap, useMapEvents } from 'react-leaflet'
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
+import { MapContainer, Marker, Polygon, Polyline, TileLayer, Tooltip, useMap, useMapEvents } from 'react-leaflet'
 import L from 'leaflet'
 import { hubEmoji, type Candidate, type Hub, type Place } from '../data'
 import type { Insight } from '../scoring'
-import { loadNaverMaps, MAP_KEY_ID, onNaverAuthFailure } from '../naver'
+import { loadNaverMaps, MAP_KEY_ID, onNaverAuthFailure, reverseGeocode } from '../naver'
 import { CATEGORIES, type Major } from '../commercial'
-import type { Spot } from '../recommend'
-import type { Park } from '../parks'
+import { naverMapUrl, type Spot } from '../recommend'
+import { parkAreaAlpha, type Park, type ParkArea } from '../parks'
 
 // 지도: 네이버 지도 키(VITE_NAVER_MAP_KEY_ID)가 있으면 네이버 지도, 없거나 인증이 실패하면 OSM 밝은 지도.
 // - 후보지를 고르면 "그 후보지 + 주요 목적지"가 다 들어오도록 확대·이동한다.
@@ -14,6 +14,9 @@ import type { Park } from '../parks'
 //   평소에는 고른 후보지에만, 구역이 확실히 갈릴 만큼 확대하면(DETAIL_ZOOM 이상) 화면에 보이는 모든 후보지에.
 // - 주요 매장(올리브영·이마트·홈플러스 등, 상권 지수에서 필수·선호로 고른 업종만)은 작은 이모지 원으로, 확대하면 브랜드 이름도.
 // - "장단점 기준" 오른쪽 "후보지 한눈에"는 모든 후보지가 고르게 들어오도록 확대·이동한다(목적지는 빼고).
+// - 지도를 우클릭(휴대폰은 길게 누르기)하면 그 자리를 "후보지로 / 목적지로" 추가하는 작은 메뉴 → 검색창의 등록 창으로 이어진다.
+// - 추천 카페·식당(광고) 핀을 누르면 그 가게의 네이버지도 페이지가 새 탭으로 열린다.
+// - "산책"을 켜면 공원 점수가 일정 이상인 공원 경계(parkAreas)를 점수만큼 진한 초록으로 칠한다.
 
 type Props = {
   candidates: Candidate[]; hubs: Hub[]; active: number; onSelect: (index: number) => void; focusKey: number
@@ -26,8 +29,14 @@ type Props = {
   majors?: Major[] // 지도에 따로 표시할 주요 매장
   spots?: Spot[] // 추천 카페·식당(오른쪽 카드와 같은 목록) — ☕ 핀, 확대하면 이름
   parks?: Park[] // 산책 레이어: 공원·하천
+  parkAreas?: ParkArea[] // 산책 레이어: 점수 높은 공원 경계(색칠)
   layers?: { com: boolean; walk: boolean }; onLayer?: (k: 'com' | 'walk') => void // 지도 위 상권·산책 단추
+  onMapPick?: (p: Place, kind: 'candidate' | 'hub') => void // 우클릭 메뉴로 고른 곳
+  previewFly?: boolean // false 면 임시 핀만 찍고 지도는 움직이지 않는다(우클릭으로 고른 곳)
 }
+/** 우클릭 메뉴 자리: 지도 안 위치(px)·지도 크기·좌표 */
+type Ctx = { x: number; y: number; w: number; h: number; lat: number; lng: number }
+type Inner = Props & { allKey: number; onContext: (c: Ctx | null) => void }
 
 export const DETAIL_ZOOM = 14 // 이 확대 단계부터 모든 후보지에 장단점(동네 단위가 구분되는 정도)
 const PAD = 70
@@ -42,10 +51,12 @@ const majorTitle = (m: Major) => `${m.brand} — ${m.name}${m.addr ? ` · ${m.ad
 const catEmoji = (id: string) => CATEGORIES.find((c) => c.id === id)?.emoji ?? '🏬'
 /** 주요 매장: 이모지 원 + (확대했을 때) 브랜드 이름 */
 /** 추천 카페·식당: ☕/🍽️ 원 + 이름(확대했을 때). 주요 매장 핀과 같은 모양, 테두리 색만 다르다. */
-const spotHtml = (s: Spot, named: boolean) => `<span class="major-pin spot-pin" title="${esc(s.name)} — ${esc(s.address)}"><i>${s.kind === '카페' ? '☕' : '🍽️'}</i>${named ? `<b>${esc(s.name)}</b>` : ''}</span>`
+const spotHtml = (s: Spot, named: boolean) => `<span class="major-pin spot-pin" title="${esc(s.name)} — ${esc(s.address)} (누르면 네이버지도)"><i>${s.kind === '카페' ? '☕' : '🍽️'}</i>${named ? `<b>${esc(s.name)}</b>` : ''}</span>`
 const majorHtml = (m: Major, named: boolean) => `<span class="major-pin${m.inferred ? ' inferred' : ''}" title="${esc(majorTitle(m))}"><i>${catEmoji(m.cat)}</i>${named ? `<b>${esc(m.brand)}</b>` : ''}</span>`
 /** 산책: 공원·하천 이모지 원 + (확대했을 때) 이름 */
 const parkHtml = (p: Park, named: boolean) => `<span class="major-pin park-pin" title="${esc(p.kind)} — ${esc(p.name)}"><i>${p.kind === '하천' ? '🌊' : '🌳'}</i>${named ? `<b>${esc(p.name)}</b>` : ''}</span>`
+const openSpot = (s: Spot) => window.open(naverMapUrl(s.query), '_blank', 'noopener,noreferrer')
+const parkAreaTitle = (a: ParkArea) => `${a.name} · 공원 점수 ${a.value}`
 const hubHtml = (h: Hub, on: boolean) => `<span class="pin hub${on ? ' on' : ''}"><b>${hubEmoji(h.category)}</b></span>`
 
 /** 후보지 옆 글자: 이름 + (목적지 기준) 장점·단점 */
@@ -72,10 +83,13 @@ function frame(candidates: Candidate[], hubs: Hub[], active: number, focusHubIds
 export function MapView(props: Props) {
   const [engine, setEngine] = useState<'naver' | 'osm'>(MAP_KEY_ID ? 'naver' : 'osm')
   const [allKey, setAllKey] = useState(0) // "후보지 한눈에"를 누를 때마다 1씩
-  const p = { ...props, allKey }
+  const [ctx, setCtx] = useState<Ctx | null>(null)
+  const closeCtx = useCallback(() => setCtx(null), [])
+  const p = { ...props, allKey, onContext: props.onMapPick ? setCtx : () => {} }
   return (
     <>
       {engine === 'naver' ? <NaverMap {...p} onFail={() => setEngine('osm')} /> : <OsmMap {...p} />}
+      {ctx && props.onMapPick && <MapMenu ctx={ctx} onPick={props.onMapPick} onClose={closeCtx} />}
       <div className="map-top">
         {props.hubs.length > 0 && (
           <div className="hub-switch" role="tablist" aria-label="장단점을 볼 목적지">
@@ -99,9 +113,44 @@ export function MapView(props: Props) {
   )
 }
 
+/** 우클릭 메뉴: 주소를 (되면) 찾아 보여 주고, 후보지로 / 목적지로 */
+function MapMenu({ ctx, onPick, onClose }: { ctx: Ctx; onPick: NonNullable<Props['onMapPick']>; onClose: () => void }) {
+  const ref = useRef<HTMLDivElement>(null)
+  const [addr, setAddr] = useState<{ address: string; building?: string } | null | undefined>(undefined) // undefined = 찾는 중
+  useEffect(() => {
+    let alive = true
+    setAddr(undefined)
+    reverseGeocode(ctx.lat, ctx.lng).then((a) => alive && setAddr(a))
+    return () => { alive = false }
+  }, [ctx.lat, ctx.lng])
+  useEffect(() => {
+    const down = (e: PointerEvent) => { if (ref.current && !ref.current.contains(e.target as Node)) onClose() }
+    const key = (e: KeyboardEvent) => { if (e.key === 'Escape') onClose() }
+    window.addEventListener('pointerdown', down, true); window.addEventListener('keydown', key)
+    return () => { window.removeEventListener('pointerdown', down, true); window.removeEventListener('keydown', key) }
+  }, [onClose])
+  const coord = `${ctx.lat.toFixed(5)}, ${ctx.lng.toFixed(5)}`
+  const pick = (kind: 'candidate' | 'hub') => {
+    const address = addr?.address || coord
+    // 이름 기본값: 건물 이름 → 주소에서 시도·시군구를 뺀 부분 → "지도에서 고른 곳"(등록 창에서 고칠 수 있다)
+    const short = addr ? address.split(' ').slice(2).join(' ') || address : '지도에서 고른 곳'
+    onPick({ name: addr?.building || short, address, lat: ctx.lat, lng: ctx.lng, category: '지도' }, kind)
+    onClose()
+  }
+  const W = 200, H = 116
+  return (
+    <div ref={ref} className="map-ctx" role="menu" aria-label="이 위치 추가" onContextMenu={(e) => e.preventDefault()}
+      style={{ left: Math.max(8, Math.min(ctx.x, ctx.w - W - 8)), top: Math.max(8, Math.min(ctx.y, ctx.h - H - 8)) }}>
+      <small>{addr === undefined ? '주소 찾는 중…' : addr ? (addr.building ? `${addr.building} · ${addr.address}` : addr.address) : coord}</small>
+      <button type="button" role="menuitem" autoFocus onClick={() => pick('candidate')}>📍 후보지로 추가</button>
+      <button type="button" role="menuitem" onClick={() => pick('hub')}>🎯 목적지로 추가</button>
+    </div>
+  )
+}
+
 // ── 네이버 지도 ──────────────────────────────────────────────────────
 /* eslint-disable @typescript-eslint/no-explicit-any */
-function NaverMap({ candidates, hubs, active, onSelect, focusKey, hubId, onHub, insights, focusHubIds, ranks, preview, results, centerRef, majors, parks, spots, allKey, onFail }: Props & { allKey: number; onFail: () => void }) {
+function NaverMap({ candidates, hubs, active, onSelect, focusKey, hubId, onHub, insights, focusHubIds, ranks, preview, previewFly, results, centerRef, majors, parks, parkAreas, spots, allKey, onContext, onFail }: Inner & { onFail: () => void }) {
   const box = useRef<HTMLDivElement>(null)
   const map = useRef<any>(null)
   const layers = useRef<any[]>([])
@@ -144,6 +193,12 @@ function NaverMap({ candidates, hubs, active, onSelect, focusKey, hubId, onHub, 
       const keepCenter = () => { const c = map.current?.getCenter(); if (c && centerRef) centerRef.current = { lat: c.lat(), lng: c.lng() } }
       naver.maps.Event.addListener(map.current, 'idle', keepCenter)
       keepCenter()
+      // 우클릭 → 그 자리 추가 메뉴. 지도를 누르거나 움직이면 닫는다.
+      naver.maps.Event.addListener(map.current, 'rightclick', (e: any) => {
+        const s = map.current.getSize()
+        onContext({ x: e.offset.x, y: e.offset.y, w: s.width, h: s.height, lat: e.coord.lat(), lng: e.coord.lng() })
+      })
+      for (const ev of ['click', 'dragstart', 'zoom_changed']) naver.maps.Event.addListener(map.current, ev, () => onContext(null))
       setReady(true)
     }).catch(() => alive && onFail())
     return () => { alive = false; try { map.current?.destroy?.() } catch { /* 인증 실패 뒤의 정리 오류는 무시(OSM 으로 바꿀 때) */ } map.current = null }
@@ -159,8 +214,8 @@ function NaverMap({ candidates, hubs, active, onSelect, focusKey, hubId, onHub, 
     if (!preview) return
     const at = new naver.maps.LatLng(preview.lat, preview.lng)
     previewMarker.current = new naver.maps.Marker({ map: map.current, position: at, zIndex: 200, icon: { content: previewHtml(preview.name), anchor: new naver.maps.Point(8, 8) } })
-    map.current.morph(at, Math.max(PREVIEW_ZOOM, map.current.getZoom()))
-  }, [ready, preview])
+    if (previewFly !== false) map.current.morph(at, Math.max(PREVIEW_ZOOM, map.current.getZoom()))
+  }, [ready, preview]) // eslint-disable-line react-hooks/exhaustive-deps
 
   // 검색 결과 전부: 작은 점(누른 결과는 위의 빨간 점이 대신한다)
   const resultMarkers = useRef<any[]>([])
@@ -192,11 +247,27 @@ function NaverMap({ candidates, hubs, active, onSelect, focusKey, hubId, onHub, 
     const naver = window.naver
     if (!ready || !naver) return
     spotMarkers.current.forEach((m) => m.setMap(null))
-    spotMarkers.current = (spots ?? []).map((s) => new naver.maps.Marker({
-      map: map.current, position: new naver.maps.LatLng(s.lat, s.lng), zIndex: 6,
-      icon: { content: spotHtml(s, detail), anchor: new naver.maps.Point(10, 10) },
-    }))
+    spotMarkers.current = (spots ?? []).map((s) => {
+      const m = new naver.maps.Marker({
+        map: map.current, position: new naver.maps.LatLng(s.lat, s.lng), zIndex: 6, cursor: 'pointer',
+        icon: { content: spotHtml(s, detail), anchor: new naver.maps.Point(10, 10) },
+      })
+      naver.maps.Event.addListener(m, 'click', () => openSpot(s))
+      return m
+    })
   }, [ready, spots, detail])
+
+  // 산책: 점수 높은 공원 경계 색칠(점수가 높을수록 진하게)
+  const areaShapes = useRef<any[]>([])
+  useEffect(() => {
+    const naver = window.naver
+    if (!ready || !naver) return
+    areaShapes.current.forEach((m) => m.setMap(null))
+    areaShapes.current = (parkAreas ?? []).map((a) => new naver.maps.Polygon({
+      map: map.current, paths: a.rings.map((r) => r.map(([la, ln]) => new naver.maps.LatLng(la, ln))), clickable: false, zIndex: 1,
+      fillColor: '#3f9a52', fillOpacity: parkAreaAlpha(a.value), strokeColor: '#2f7d40', strokeOpacity: 0.7, strokeWeight: 1,
+    }))
+  }, [ready, parkAreas])
 
   // 산책(공원·하천)
   const parkMarkers = useRef<any[]>([])
@@ -247,7 +318,7 @@ function NaverMap({ candidates, hubs, active, onSelect, focusKey, hubId, onHub, 
 
   const zoomBy = (d: number) => map.current?.setZoom(map.current.getZoom() + d, true)
   return (
-    <div className="map naver-map">
+    <div className="map naver-map" onContextMenu={(e) => e.preventDefault()}>
       <div ref={box} className="naver-box" />
       <div className="map-controls">
         <button aria-label="확대" onClick={() => zoomBy(1)}>+</button>
@@ -304,7 +375,7 @@ function Controls({ pts }: { pts: [number, number][] }) {
   )
 }
 
-function OsmMap({ candidates, hubs, active, onSelect, focusKey, hubId, onHub, insights, focusHubIds, ranks, preview, results, centerRef, majors, parks, spots, allKey }: Props & { allKey: number }) {
+function OsmMap({ candidates, hubs, active, onSelect, focusKey, hubId, onHub, insights, focusHubIds, ranks, preview, previewFly, results, centerRef, majors, parks, parkAreas, spots, allKey, onContext }: Inner) {
   const pts = useMemo(() => frame(candidates, hubs, active, focusHubIds), [candidates, hubs, active, focusHubIds])
   const [zoom, setZoom] = useState(13)
   const cur = candidates[active]
@@ -316,12 +387,19 @@ function OsmMap({ candidates, hubs, active, onSelect, focusKey, hubId, onHub, in
       <TileLayer className="tiles-base" url="https://tiles.osm.kr/hot/{z}/{x}/{y}.png" attribution="&copy; OpenStreetMap contributors" maxZoom={19} />
       <Framing pts={pts} focusKey={focusKey} active={active} all={allCands(candidates)} allKey={allKey} />
       <ZoomWatch onZoom={setZoom} />
+      <ContextWatch onContext={onContext} />
+      {(parkAreas ?? []).map((a, i) => (
+        <Polygon key={`pa${i}-${a.name}`} positions={a.rings}
+          pathOptions={{ color: '#2f7d40', weight: 1, opacity: 0.7, fillColor: '#3f9a52', fillOpacity: parkAreaAlpha(a.value) }}>
+          <Tooltip sticky>{parkAreaTitle(a)}</Tooltip>
+        </Polygon>
+      ))}
       {(majors ?? []).map((m) => (
         <Marker key={`m-${m.brand}-${m.lat}-${m.lng}-${detail}`} position={[m.lat, m.lng]} zIndexOffset={-500}
           icon={L.divIcon({ className: 'pin-shell', html: majorHtml(m, detail), iconSize: [20, 20], iconAnchor: [10, 10] })} />
       ))}
       {(spots ?? []).map((s) => (
-        <Marker key={`s-${s.id}-${detail}`} position={[s.lat, s.lng]} zIndexOffset={-400}
+        <Marker key={`s-${s.id}-${detail}`} position={[s.lat, s.lng]} zIndexOffset={-400} eventHandlers={{ click: () => openSpot(s) }}
           icon={L.divIcon({ className: 'pin-shell', html: spotHtml(s, detail), iconSize: [20, 20], iconAnchor: [10, 10] })} />
       ))}
       {(parks ?? []).map((p) => (
@@ -359,7 +437,7 @@ function OsmMap({ candidates, hubs, active, onSelect, focusKey, hubId, onHub, in
         <Marker key={`r${i}-${r.lat}-${r.lng}`} position={[r.lat, r.lng]} zIndexOffset={1500} interactive={false} title={r.name}
           icon={L.divIcon({ className: 'pin-shell', html: RESULT_DOT, iconSize: [12, 12], iconAnchor: [6, 6] })} />
       ))}
-      <PreviewFly preview={preview ?? null} />
+      <PreviewFly preview={previewFly === false ? null : preview ?? null} />
       {centerRef && <CenterWatch centerRef={centerRef} />}
       <Controls pts={pts} />
     </MapContainer>
@@ -370,6 +448,15 @@ function OsmMap({ candidates, hubs, active, onSelect, focusKey, hubId, onHub, in
 function PreviewFly({ preview }: { preview: Place | null }) {
   const map = useMap()
   useEffect(() => { if (preview) map.flyTo([preview.lat, preview.lng], Math.max(PREVIEW_ZOOM, map.getZoom()), { duration: 0.6 }) }, [map, preview])
+  return null
+}
+
+/** OSM: 우클릭(휴대폰은 길게 누르기) → 추가 메뉴, 지도를 누르거나 움직이면 닫기 */
+function ContextWatch({ onContext }: { onContext: Inner['onContext'] }) {
+  const map = useMapEvents({
+    contextmenu: (e) => { const s = map.getSize(); onContext({ x: e.containerPoint.x, y: e.containerPoint.y, w: s.x, h: s.y, lat: e.latlng.lat, lng: e.latlng.lng }) },
+    click: () => onContext(null), movestart: () => onContext(null), zoomstart: () => onContext(null),
+  })
   return null
 }
 

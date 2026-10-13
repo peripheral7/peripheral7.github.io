@@ -307,6 +307,25 @@ async function main() {
   }
   fs.writeFileSync(path.join(ROOT, 'src', 'places.json'), JSON.stringify(json, null, 2) + '\n')
 
+  // 지도 "산책" 레이어: 공원 점수가 mapMinValue 이상인 공원 경계(단순화한 위경도) → src/park-areas.json
+  const simplify = (r, tol) => { // Douglas–Peucker(평면 m)
+    if (r.length < 4) return r
+    const keep = new Uint8Array(r.length); keep[0] = keep[r.length - 1] = 1
+    const st = [[0, r.length - 1]]
+    while (st.length) {
+      const [a, b] = st.pop(); let md = 0, mi = -1
+      for (let i = a + 1; i < b; i++) { const d = segDist(r[i], r[a], r[b]); if (d > md) { md = d; mi = i } }
+      if (md > tol) { keep[mi] = 1; st.push([a, mi], [mi, b]) }
+    }
+    return r.filter((_, i) => keep[i])
+  }
+  const areas = parks.filter((k) => k.value >= PK.mapMinValue).sort((a, b) => b.value - a.value).map((k) => ({
+    name: k.name, type: k.type, value: k.value,
+    rings: k.rings.map((r) => simplify(r, PK.mapSimplifyM)).filter((r) => r.length >= 3).map((r) => r.map((q) => { const [la, ln] = toLL(q); return [+la.toFixed(5), +ln.toFixed(5)] })),
+  })).filter((k) => k.rings.length)
+  fs.writeFileSync(path.join(ROOT, 'src', 'park-areas.json'), JSON.stringify({ minValue: PK.mapMinValue, parks: areas }) + '\n')
+  console.log(`park-areas.json: 공원 ${areas.length}곳(점수 ${PK.mapMinValue} 이상), 꼭짓점 ${areas.reduce((a, k) => a + k.rings.flat().length, 0)}`)
+
   // 보고서
   const ids = CANDIDATES.map((c) => c.id)
   const head = `| | ${ids.map((id) => out[id].name).join(' | ')} |\n|---|${ids.map(() => '---:').join('|')}|`

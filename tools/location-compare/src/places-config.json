@@ -57,6 +57,9 @@
       "mult": 1.8
     },
     "excludeTypes": ["묘지공원"],
+    "mapMinValue": 5,
+    "mapSimplifyM": 4,
+    "_map": "지도 '산책'을 켜면 공원 점수(위 공원마다 점수, 거리 반영 전)가 mapMinValue 이상인 공원 경계를 색칠한다 — src/park-areas.json(경계는 mapSimplifyM 오차로 단순화)",
     "_exclude": "묘지공원은 산책 공원으로 보지 않음. 유형은 공간시설 시설 코드(MNUM 안 UQTxxxx) — places.mjs 의 PARK_TYPES"
   },
   "sources": {
