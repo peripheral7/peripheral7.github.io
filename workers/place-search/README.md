@@ -1,6 +1,6 @@
 # place-search — 장소 검색 중계 Worker
 
-"여기살까?"(`/location-compare/`) 검색창이 부르는 네이버 **지역 검색** 중계. 네이버 Client Secret 을 브라우저·GitHub 에 두지 않으려고 이 Worker 의 시크릿에만 둔다.
+"여기살까?"(`/WhereTo/`) 검색창이 부르는 네이버 **지역 검색** 중계. 네이버 Client Secret 을 브라우저·GitHub 에 두지 않으려고 이 Worker 의 시크릿에만 둔다.
 
 - `GET /search?q=검색어` → `{ items: [{ name, address, category, lat, lng }] }` (최대 5건, 한국 좌표 밖 결과는 버림)
 - 막는 장치: 하루 전체 상한(`DAILY_LIMIT`) · IP 당 상한(`IP_HOURLY`, `IP_DAILY`) · Turnstile(`TURNSTILE_SECRET` 이 있으면 필수) · 허용 출처 · 7일 캐시 · 검색어 2~40자. 자세한 이유는 `tools/location-compare/README.md` 9절.

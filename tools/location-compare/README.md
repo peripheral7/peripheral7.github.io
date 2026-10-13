@@ -1,10 +1,10 @@
-# 여기살까? — 입지 비교 (블로그 `/location-compare/`)
+# 여기살까? — 입지 비교 (블로그 `/WhereTo/`)
 
 후보지 여러 곳을 **지도**와 **주요 방문지(최대 3곳)까지의 이동 점수**로 비교하는 한 화면짜리 도구.
 2026-10-12 처음부터 다시 만들었다(이전 판의 비교 표·상세 화면·후보/거점 관리 화면·DB 흉내는 모두 삭제).
 
-- 주소: <https://peripheral7.github.io/location-compare/> · 게시판 카드 `content/posts/10-location-compare.json`
-- 소스: 이 폴더 → `npm run build` → `public/location-compare/`(빌드 결과도 git 에 올린다. 배포 워크플로는 복사만 한다)
+- 주소: <https://peripheral7.github.io/WhereTo/> · 게시판 카드 `content/posts/10-location-compare.json`
+- 소스: 이 폴더 → `npm run build` → `public/WhereTo/`(빌드 결과도 git 에 올린다. 배포 워크플로는 복사만 한다)
 - 화면 구성·조작 정리: [UI-UX.md](UI-UX.md) · 진행 기록·남은 일: [PROGRESS.md](PROGRESS.md)
 
 ---
@@ -293,7 +293,7 @@ src/places-config.json               그 규칙·숫자 · src/places.ts 화면 
 - **창(모달)**: 페이지 위에 뜨는 창은 `createPortal(…, document.body)` 로 붙이고 `position: fixed` + `left/top 50%` + `translate(-50%, -50%)` 로 보이는 화면 정가운데에 둔다. 부모 요소 기준 좌표(getBoundingClientRect 로 위치 계산)로 띄우면 페이지를 내린 상태에서 화면 밖으로 나간다(실제로 있었던 버그). 뒤 페이지 스크롤은 막지 않는다(사용자 요청) — 창 안 스크롤이 뒤로 번지지 않게 `overscroll-behavior: contain`.
 - **새 입지 요인**: `Panels.tsx` 의 ⚙ 목록(`SOON`)에서 빼고 켜기/점수 줄을 만든 뒤, 켜짐 상태를 저장(길고양이는 `locCompare.cats.v1` 의 `on`), 카드 줄은 `CompareCards` 의 `rows` 계산에 더한다. 종합 점수에 섞을지는 따로 정한다(지금은 안 섞음).
 - **확인**: `npm run typecheck` 후 개발 서버(아래)로 넓은 화면(1600)·1200·휴대폰(375) 폭에서 겹침·가로 스크롤이 없는지 본다. 데스크톱 앱의 미리보기는 저장소 루트 `.claude/launch.json` 의 `location-compare` 설정(5173 포트). 개발 중 `/fonts/` 404 는 정상(배포 사이트 글꼴).
-- **배포**: `npm run build` 결과(`public/location-compare/`)까지 커밋한다. 빌드할 때마다 `assets/index-*.js` 이름이 바뀌니 옛 파일 삭제도 함께 커밋.
+- **배포**: `npm run build` 결과(`public/WhereTo/`)까지 커밋한다. 빌드할 때마다 `assets/index-*.js` 이름이 바뀌니 옛 파일 삭제도 함께 커밋.
 
 ## 9. 다시 만들기
 
@@ -301,8 +301,8 @@ src/places-config.json               그 규칙·숫자 · src/places.ts 화면 
 cd tools/location-compare
 npm install
 npm run typecheck
-npm run build        # → ../../public/location-compare/
-npm run dev          # http://localhost:5173/location-compare/ (글꼴은 배포된 사이트의 /fonts/ 를 쓰므로 개발 중엔 기본 글꼴)
+npm run build        # → ../../public/WhereTo/
+npm run dev          # http://localhost:5173/WhereTo/ (글꼴은 배포된 사이트의 /fonts/ 를 쓰므로 개발 중엔 기본 글꼴)
 ```
 외부 호출: 지도 타일(`tiles.osm.kr`)뿐. 글꼴은 블로그 공용 `/fonts/PretendardVariable.woff2`. **공개 사이트는 네이버 API 를 전혀 부르지 않는다.**
 
@@ -403,7 +403,7 @@ node scripts/stores.mjs codes 의원      # 업종 코드표
 
 1. `node scripts/stores-sync.mjs` — 공단에 기준월을 먼저 물어본다(호출 2회). 받아 둔 `data/stores.sqlite` 와 기준월·지역이 같으면 여기서 끝(공단 자료는 분기마다 바뀌어서 대부분의 달은 이 단계에서 끝난다). 다르면 시도별로 1,000건씩 전부 받아 `stores.next.sqlite` 에 쌓고, 지역별 개수가 공단 totalCount 와 맞는지 출력한 뒤 색인(R-tree·FTS)을 만들고 `stores.sqlite` 로 바꿔 끼운다.
 2. `node scripts/stores.mjs analyze` — 새 DB 로 후보지 분석을 다시 만든다(`src/commercial.json`·`COMMERCIAL.md`). 후보지나 분류(`commercial-categories.json`)를 바꿨을 때도 이것만 다시.
-3. `npm run build` → 결과 파일(`src/commercial.json`·`COMMERCIAL.md`·`public/location-compare`)만 커밋·푸시. DB 파일은 올리지 않는다(git 제외, 490MB).
+3. `npm run build` → 결과 파일(`src/commercial.json`·`COMMERCIAL.md`·`public/WhereTo`)만 커밋·푸시. DB 파일은 올리지 않는다(git 제외, 490MB).
 - 나중에 자동으로 돌리려면 `scripts/scheduled-routes.ps1` 처럼 위 3단계를 묶은 ps1 을 만들고 Windows 작업 스케줄러에 월 1회로 등록하면 된다(PC 가 켜져 있어야 함).
 
 **자료의 함정**(`analyze` 결과를 볼 때)

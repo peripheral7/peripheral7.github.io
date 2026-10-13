@@ -1,4 +1,4 @@
-// place-search — "여기살까?"(/location-compare/) 검색창이 부르는 네이버 지역 검색 중계.
+// place-search — "여기살까?"(/WhereTo/) 검색창이 부르는 네이버 지역 검색 중계.
 //
 // 왜 중계하나: 네이버 검색 API 는 Client ID + Client Secret 이 필요하고 브라우저(CORS)에서 직접 부를 수 없다.
 // Secret 은 이 Worker 의 시크릿에만 있고(wrangler secret put), GitHub·브라우저에는 나가지 않는다.

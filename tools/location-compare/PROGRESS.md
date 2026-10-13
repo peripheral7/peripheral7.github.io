@@ -6,7 +6,7 @@
 
 ## 2026-10-12
 
-### 여기살까? (입지 비교) — `/location-compare/`
+### 여기살까? (입지 비교) — `/WhereTo/`
 
 후보 주택 여러 곳을 지도 위에서 비교하는 도구. 게시판 카드 제목은 "여기살까?".
 
@@ -26,7 +26,7 @@
 - 이동 시간은 직선거리 기반 추정. 차량은 네이버 실측값이 있으면 그 값을 쓴다(지금 낮 시간대만 실측).
 
 **핵심 기술**
-- Vite + React + TypeScript로 만든 정적 페이지. 소스 `tools/location-compare/` → 빌드 `public/location-compare/`(GitHub Pages).
+- Vite + React + TypeScript로 만든 정적 페이지. 소스 `tools/location-compare/` → 빌드 `public/WhereTo/`(GitHub Pages).
 - 지도: 네이버 지도 JS v3. 키가 없거나 인증이 실패하면 밝은 OSM 지도(Leaflet)로 자동 전환.
 - 주소 검색: 네이버 Geocoding(지도 JS 지오코더, 브라우저에서 Client ID로 동작).
 - 차량 실측: 네이버 Directions 5를 이 PC에서만 호출(`scripts/fetch-routes.mjs`, 하루 호출 상한) → 결과만 `src/routes.json`으로 올린다. 공개 사이트는 길찾기 API를 부르지 않는다.

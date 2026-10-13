@@ -1,7 +1,7 @@
 # 여기살까? — UI·UX 최종 반영 사항
 
 2026-10-13 기준. 계산 방식은 `README.md`(4·4-1·5절), 이 문서는 **화면 구성과 조작**을 정리한다.
-주소: <https://peripheral7.github.io/location-compare/> · 게시판 카드 제목 "여기살까?"
+주소: <https://peripheral7.github.io/WhereTo/> · 게시판 카드 제목 "여기살까?"
 
 ---
 

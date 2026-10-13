@@ -47,7 +47,7 @@ try {
     if ($LASTEXITCODE -ne 0) { throw "빌드 실패: $($build.Trim())" }
 
     Set-Location $Repo
-    $paths = @('tools/location-compare/src/routes.json', 'public/location-compare')
+    $paths = @('tools/location-compare/src/routes.json', 'public/WhereTo')
     & $Git add -A -- $paths
     & $Git diff --cached --quiet -- $paths
     if ($LASTEXITCODE -eq 0) { Write-Log '바뀐 내용 없음 - 커밋 생략'; exit 0 }

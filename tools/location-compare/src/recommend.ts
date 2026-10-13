@@ -4,7 +4,7 @@ import { distanceKm } from './scoring'
 import type { Candidate } from './data'
 import type { Deal, PropertyUse } from './brokerage'
 
-/** 사진 주소(배포 경로 /location-compare/ 아래) */
+/** 사진 주소(배포 경로 /WhereTo/ 아래) */
 export const recImg = (file: string) => `${import.meta.env.BASE_URL}rec/${file}`
 
 /** 왼쪽: 부동산 매물. 누르면 중개업자 소개 창이 화면 가운데에 열린다. 금액은 만원. */
