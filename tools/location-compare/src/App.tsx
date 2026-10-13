@@ -208,8 +208,12 @@ export default function App() {
             com={cur ? comIdx[Math.min(active, comIdx.length - 1)] ?? null : null} comCounts={walk5Counts(candidates[active])} comBrands={walk5Brand(candidates[active])} comPrefs={comPrefs} onComPrefs={setComPrefs}
             place={placeOf(candidates[active])} placeOn={placeOn} onPlaceOn={setPlaceOn} />
           <SpotCards candidates={candidates} />
-          {cur && <CommutePanel r={cur} trips={pref.trips} settings={{ kmpl: commute.kmpl, fuel: commute.fuel ?? fuelAuto?.price ?? DEFAULT_FUEL }}
-            fuelAuto={fuelAuto} fuelManual={commute.fuel !== null} onKmpl={(n) => saveC({ ...commute, kmpl: n })} onFuel={(n) => saveC({ ...commute, fuel: n })} />}
+        </aside>
+
+        {/* 출퇴근 인사이트: 지도 높이에 맞춘 오른쪽 열 아래(후보지별 비교 오른쪽 옆)에 내용만큼 */}
+        <aside className="side-right commute-area">
+            {cur && <CommutePanel r={cur} trips={pref.trips} settings={{ kmpl: commute.kmpl, fuel: commute.fuel ?? fuelAuto?.price ?? DEFAULT_FUEL }}
+      fuelAuto={fuelAuto} fuelManual={commute.fuel !== null} onKmpl={(n) => saveC({ ...commute, kmpl: n })} onFuel={(n) => saveC({ ...commute, fuel: n })} />}
         </aside>
 
         {/* 후보지별 비교 양옆: 추천 카드 자리(추후 광고) — 왼쪽 부동산 매물(카페·식당은 오른쪽 입지 요인 아래) */}
