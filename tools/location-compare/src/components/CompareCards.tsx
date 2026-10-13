@@ -1,6 +1,7 @@
 import { useState } from 'react'
 import { fmt, WALK_LIMIT, WALK_ZONE, type CandidateResult } from '../scoring'
-import { BASE_DEPOSIT, baseRent, hubEmoji, won, type Hub } from '../data'
+import { BASE_DEPOSIT, baseRent, hubEmoji, won, type Candidate, type Hub } from '../data'
+import { brokerageFee, feeText, useGroup } from '../brokerage'
 import { CATEGORIES, type CommercialIndex } from '../commercial'
 
 // 아래쪽: 후보지 카드를 가로로 늘어놓는다. 모든 카드가 같은 줄(행)을 공유해서(CSS subgrid)
@@ -14,13 +15,17 @@ const Line = ({ v, kind }: { v: number; kind: 'total' | 'hub' | 'transit' | 'car
 )
 
 // 보증금/월세(만원) + 연한 글씨로 "보증금 1,000 기준 월 ○○만원" — 보증금이 달라도 월세를 한 기준으로 비교
-function RentCell({ c, sect }: { c: { deposit?: number; rent?: number }; sect?: boolean }) {
+// + 관리비 · 월 합계(월세 + 관리비) · 예상 중개수수료(법정 상한, 한쪽 몫, 부가세 별도 — brokerage.ts)
+function RentCell({ c, sect }: { c: Candidate; sect?: boolean }) {
   const b = baseRent(c)
   if (b === null) return <div className={"cell rent-cell" + (sect ? " sect" : "")}><span className="muted">미입력 · 수정에서 입력</span></div>
+  const use = c.use ?? 'home'
+  const f = brokerageFee(use, 'lease', c)
   return (
     <div className={"cell rent-cell" + (sect ? " sect" : "")}>
-      <b>{won(c.deposit ?? 0)} / {c.rent ?? 0}<small>만원</small></b>
-      <small className="faint">보증금 {won(BASE_DEPOSIT)} 기준 월 {b}만원</small>
+      <b>{won(c.deposit ?? 0)} / {c.rent ?? 0}<small>만원</small>{c.maint ? <small> · 관리비 {c.maint}</small> : null}</b>
+      <small className="faint">보증금 {won(BASE_DEPOSIT)} 기준 월 {b}만원{c.maint ? ` · 월 합계 ${(c.rent ?? 0) + c.maint}만원` : ''}</small>
+      <small className="faint" title={`${f.formula} · ${f.basis} · 부가세 별도`}>{useGroup(use)} · 중개수수료 최대 {feeText(f.fee)}</small>
     </div>
   )
 }

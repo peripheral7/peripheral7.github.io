@@ -1,8 +1,10 @@
+import type { PropertyUse } from './brokerage'
+
 // 처음 열었을 때의 후보지·목적지·선호도(기본값). 방문자가 검색으로 바꾼 목록은 그 브라우저에만 저장되고(store.ts),
 // "처음 목록으로"를 누르면 여기로 돌아온다.
 
-/** 후보지. 보증금·월세는 만원 단위(모르면 비워 둔다). */
-export type Candidate = { id: string; name: string; address: string; lat: number; lng: number; deposit?: number; rent?: number }
+/** 후보지. 보증금·월세·관리비(월)는 만원 단위(모르면 비워 둔다). use = 용도(주택·주거용 오피스텔·상가·기타, 없으면 주택) — 예상 중개수수료 요율(brokerage.ts) */
+export type Candidate = { id: string; name: string; address: string; lat: number; lng: number; deposit?: number; rent?: number; maint?: number; use?: PropertyUse }
 /** 목적지 분류 목록(검색해서 넣을 때 고른다) */
 export const HUB_CATEGORIES = ['학교', '본가', '직장', '기타'] // 등록 창의 고르기 목록(그 밖은 직접 입력)
 export const MAX_TRIPS = 80 // 목적지 월 왕복 횟수 상한

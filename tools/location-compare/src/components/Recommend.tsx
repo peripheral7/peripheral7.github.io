@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react'
 import { createPortal } from 'react-dom'
-import type { Candidate } from '../data'
+import { won, type Candidate } from '../data'
+import { brokerageFee, feeText, useGroup, USE_LABEL } from '../brokerage'
 import { LISTINGS, SPOTS, meters, naverMapUrl, nearest, type Listing } from '../recommend'
 
 // 후보지별 비교 양옆의 추천 카드(추후 광고). 이미지는 정사각형 빈 칸으로 둔다.
@@ -16,6 +17,13 @@ const Near = ({ p, candidates }: { p: { lat: number; lng: number }; candidates: 
   return n ? <small className="rec-near">📍 {n.name} {meters(n.m)}</small> : null
 }
 
+// 보증금/월세 · 관리비 한 줄(만원)
+const money = (x: Listing) => `${won(x.deposit)} / ${x.rent}`
+const Fee = ({ x }: { x: Listing }) => {
+  const f = brokerageFee(x.use, x.deal, x)
+  return <small className="rec-fee" title={`${f.formula} · ${f.basis} · 부가세 별도`}>중개수수료 최대 {feeText(f.fee)}</small>
+}
+
 export function ListingCards({ candidates }: { candidates: Candidate[] }) {
   const [open, setOpen] = useState<Listing | null>(null)
   return (
@@ -25,8 +33,9 @@ export function ListingCards({ candidates }: { candidates: Candidate[] }) {
         <button type="button" key={x.id} className="rec-item" onClick={() => setOpen(x)}>
           <Thumb src={x.image} alt={x.title} />
           <span className="rec-text">
-            <b>{x.title}</b>
-            <span className="rec-price">{x.price}<small>만원</small></span>
+            <b>{x.title} <em className={`rec-use ${x.use === 'other' ? 'shop' : ''}`}>{useGroup(x.use)}</em></b>
+            <span className="rec-price">{money(x)}<small>만원</small>{x.maint ? <small> · 관리비 {x.maint}</small> : null}</span>
+            <Fee x={x} />
             <Near p={x} candidates={candidates} />
             <span className="rec-tags">{x.points.map((t) => <i key={t}>{t}</i>)}</span>
           </span>
@@ -46,7 +55,7 @@ export function SpotCards({ candidates }: { candidates: Candidate[] }) {
           <Thumb src={x.image} alt={x.name} />
           <span className="rec-text">
             <b>{x.name}</b>
-            <small className="rec-kind">{x.kind}</small>
+            <small className="rec-kind">{x.kind} · {x.address}</small>
             <Near p={x} candidates={candidates} />
             <span className="rec-tags">{x.keywords.map((t) => <i key={t}>{t}</i>)}</span>
           </span>
@@ -83,10 +92,11 @@ function AgentDialog({ x, candidates, onClose }: { x: Listing; candidates: Candi
         <div className="rec-dialog-body">
           <Thumb src={x.image} alt={x.title} />
           <div className="rec-text">
-            <b>{x.title}</b>
-            <span className="rec-price">{x.price}<small>만원</small></span>
+            <b>{x.title} <em className={`rec-use ${x.use === 'other' ? 'shop' : ''}`}>{useGroup(x.use)}</em></b>
+            <p className="rec-desc">{x.desc}</p>
             <Near p={x} candidates={candidates} />
             <span className="rec-tags">{x.points.map((t) => <i key={t}>{t}</i>)}</span>
+            <FeeTable x={x} />
             <p>{x.agent.intro}</p>
             {x.agent.phone && <a className="solid rec-call" href={`tel:${x.agent.phone}`}>전화 {x.agent.phone}</a>}
           </div>
@@ -94,5 +104,19 @@ function AgentDialog({ x, candidates, onClose }: { x: Listing; candidates: Candi
       </section>
     </div>,
     document.body,
+  )
+}
+
+/** 소개 창의 금액표: 용도 · 보증금/월세 · 관리비 · 월 부담 · 예상 중개수수료(상한, 한쪽 몫) */
+function FeeTable({ x }: { x: Listing }) {
+  const f = brokerageFee(x.use, x.deal, x)
+  return (
+    <dl className="rec-money">
+      <dt>용도</dt><dd>{USE_LABEL[x.use]}({useGroup(x.use)})</dd>
+      <dt>보증금 / 월세</dt><dd>{money(x)}만원</dd>
+      <dt>관리비</dt><dd>{x.maint ? `월 ${x.maint}만원` : '없음·미입력'}</dd>
+      <dt>월 부담</dt><dd>월세 + 관리비 = {x.rent + (x.maint ?? 0)}만원</dd>
+      <dt>예상 중개수수료</dt><dd><b>최대 {feeText(f.fee)}</b> <small>(부가세 별도 {feeText(f.vat)})</small><small className="rec-formula">{f.formula} · {f.basis}</small></dd>
+    </dl>
   )
 }

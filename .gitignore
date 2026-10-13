@@ -41,3 +41,6 @@ tools/location-compare/data/
 # 입지 비교: 원본 자료(scripts/places.mjs 가 읽음, 용량이 커서 이 PC 에만 — 출처는 tools/location-compare/README 4-5절)
 /국토계획공간시설(경기)/
 /전국도서관표준데이터-*.xls
+/매물예시 (*).jpg
+/*커피*.JPG
+/신동 AQUI.JPG

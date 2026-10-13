@@ -15,14 +15,14 @@ const MIN_LEN = 2
 type Props = {
   hubs: Hub[]
   tripsOf: (id: string) => number
-  onCandidate: (p: Place, name: string, deposit?: number, rent?: number) => void
+  onCandidate: (p: Place, name: string, deposit?: number, rent?: number, maint?: number) => void
   onHub: (p: Place, replaceId: string | undefined, name: string, category: string, trips: number) => void
   onPreview: (p: Place | null) => void // 결과를 누르면 지도를 그 위치로
   onResults: (list: Place[]) => void // 결과 전부(지도에 작은 점)
   centerRef: { current: { lat: number; lng: number } | null } // 지금 지도 가운데
 }
 // 등록 창에서 정하는 주요 설정: 후보지 = 이름·보증금·월세, 목적지 = 이름·분류·월 왕복 횟수
-type Draft = { kind: 'candidate' | 'hub'; name: string; category: string; deposit: string; rent: string; trips: string }
+type Draft = { kind: 'candidate' | 'hub'; name: string; category: string; deposit: string; rent: string; maint: string; trips: string }
 
 // 맞춤법 검사·자동 고침을 끈 입력칸 속성
 const plain = { spellCheck: false, autoComplete: 'off', autoCorrect: 'off', autoCapitalize: 'off' } as const
@@ -91,7 +91,7 @@ export function SearchBox({ hubs, tripsOf, onCandidate, onHub, onPreview, onResu
   }
   const start = (kind: Draft['kind']) => {
     const p = items[picked!]
-    setDraft({ kind, name: p.name, category: guessHubCategory(p), deposit: '', rent: '', trips: String(NEW_HUB_TRIPS) })
+    setDraft({ kind, name: p.name, category: guessHubCategory(p), deposit: '', rent: '', maint: '', trips: String(NEW_HUB_TRIPS) })
   }
   // 목적지가 이미 꽉 찼으면 월 왕복이 가장 적은 목적지 자리에 넣는다(바꿀 목적지를 따로 고르지 않음)
   const replaceHub = hubs.length >= MAX_HUBS ? hubs.reduce((a, h) => (tripsOf(h.id) < tripsOf(a.id) ? h : a)) : undefined
@@ -99,7 +99,7 @@ export function SearchBox({ hubs, tripsOf, onCandidate, onHub, onPreview, onResu
     if (!draft || picked === null) return
     const p = items[picked]
     const name = draft.name.trim() || p.name
-    if (draft.kind === 'candidate') onCandidate(p, name, money(draft.deposit), money(draft.rent))
+    if (draft.kind === 'candidate') onCandidate(p, name, money(draft.deposit), money(draft.rent), money(draft.maint))
     else onHub(p, replaceHub?.id, name, draft.category.trim() || '기타', Math.min(MAX_TRIPS, money(draft.trips) ?? 0))
     setOpen(false); setQ(''); setItems([]); setMsg(''); reset(); seq.current++
   }
@@ -142,6 +142,7 @@ export function SearchBox({ hubs, tripsOf, onCandidate, onHub, onPreview, onResu
                   {draft.kind === 'candidate' ? <>
                     <label>보증금<span className="unit-input"><input {...plain} type="number" min={0} step={100} inputMode="numeric" placeholder="예: 1000" value={draft.deposit} onChange={(e) => setDraft({ ...draft, deposit: e.target.value })} /><i>만원</i></span></label>
                     <label>월세<span className="unit-input"><input {...plain} type="number" min={0} step={1} inputMode="numeric" placeholder="예: 50" value={draft.rent} onChange={(e) => setDraft({ ...draft, rent: e.target.value })} /><i>만원</i></span></label>
+                    <label>관리비<span className="unit-input"><input {...plain} type="number" min={0} step={1} inputMode="numeric" placeholder="예: 7" value={draft.maint} onChange={(e) => setDraft({ ...draft, maint: e.target.value })} /><i>만원</i></span></label>
                   </> : <>
                     <div className="field">
                       <span>분류</span>

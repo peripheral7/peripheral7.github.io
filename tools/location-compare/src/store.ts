@@ -46,8 +46,8 @@ export const money = (v: unknown): number | undefined => {
   return String(v ?? '').trim() !== '' && Number.isFinite(n) && n >= 0 ? Math.round(n) : undefined
 }
 
-export function addCandidate(s: State, place: Place, name?: string, deposit?: number, rent?: number): State {
-  const c: Candidate = { id: newId('c'), name: (name || place.name).trim().slice(0, 40), address: place.address, lat: place.lat, lng: place.lng, deposit, rent }
+export function addCandidate(s: State, place: Place, name?: string, deposit?: number, rent?: number, maint?: number): State {
+  const c: Candidate = { id: newId('c'), name: (name || place.name).trim().slice(0, 40), address: place.address, lat: place.lat, lng: place.lng, deposit, rent, maint }
   return { ...s, candidates: [...s.candidates, c] }
 }
 
@@ -82,10 +82,10 @@ export function removeHub(s: State, id: string): State {
 // 네이버 분류 "교육,학술>대학교" → "대학교"
 const shortCategory = (c: string) => c.split('>').pop()!.trim().slice(0, 8)
 
-/** 후보지 이름·보증금·월세 고치기. 넘긴 칸만 바꾼다(빈 이름이면 이름은 그대로, 금액 칸을 undefined 로 넘기면 지운다). */
-export function updateCandidate(s: State, id: string, patch: { name?: string; deposit?: number; rent?: number }): State {
+/** 후보지 이름·보증금·월세·관리비·용도 고치기. 넘긴 칸만 바꾼다(빈 이름이면 이름은 그대로, 금액 칸을 undefined 로 넘기면 지운다). */
+export function updateCandidate(s: State, id: string, patch: { name?: string; deposit?: number; rent?: number; maint?: number; use?: Candidate['use'] }): State {
   const name = patch.name?.trim().slice(0, 40)
-  const money = { ...('deposit' in patch ? { deposit: patch.deposit } : {}), ...('rent' in patch ? { rent: patch.rent } : {}) }
+  const money = { ...('deposit' in patch ? { deposit: patch.deposit } : {}), ...('rent' in patch ? { rent: patch.rent } : {}), ...('maint' in patch ? { maint: patch.maint } : {}), ...(patch.use ? { use: patch.use } : {}) }
   return { ...s, candidates: s.candidates.map((c) => (c.id === id ? { ...c, ...(name ? { name } : {}), ...money } : c)) }
 }
 

@@ -5,6 +5,7 @@ import { hubEmoji, type Candidate, type Hub, type Place } from '../data'
 import type { Insight } from '../scoring'
 import { loadNaverMaps, MAP_KEY_ID, onNaverAuthFailure } from '../naver'
 import { CATEGORIES, type Major } from '../commercial'
+import type { Spot } from '../recommend'
 import type { Park } from '../parks'
 
 // 지도: 네이버 지도 키(VITE_NAVER_MAP_KEY_ID)가 있으면 네이버 지도, 없거나 인증이 실패하면 OSM 밝은 지도.
@@ -23,6 +24,7 @@ type Props = {
   results?: Place[] // 검색 결과 전부 — 지도에 작은 점으로
   centerRef?: { current: { lat: number; lng: number } | null } // 지금 지도 가운데(검색 결과를 가까운 순으로 정렬할 때 씀)
   majors?: Major[] // 지도에 따로 표시할 주요 매장
+  spots?: Spot[] // 추천 카페·식당(오른쪽 카드와 같은 목록) — ☕ 핀, 확대하면 이름
   parks?: Park[] // 산책 레이어: 공원·하천
   layers?: { com: boolean; walk: boolean }; onLayer?: (k: 'com' | 'walk') => void // 지도 위 상권·산책 단추
 }
@@ -39,6 +41,8 @@ export const PREVIEW_ZOOM = 16
 const majorTitle = (m: Major) => `${m.brand} — ${m.name}${m.addr ? ` · ${m.addr}` : ''}`
 const catEmoji = (id: string) => CATEGORIES.find((c) => c.id === id)?.emoji ?? '🏬'
 /** 주요 매장: 이모지 원 + (확대했을 때) 브랜드 이름 */
+/** 추천 카페·식당: ☕/🍽️ 원 + 이름(확대했을 때). 주요 매장 핀과 같은 모양, 테두리 색만 다르다. */
+const spotHtml = (s: Spot, named: boolean) => `<span class="major-pin spot-pin" title="${esc(s.name)} — ${esc(s.address)}"><i>${s.kind === '카페' ? '☕' : '🍽️'}</i>${named ? `<b>${esc(s.name)}</b>` : ''}</span>`
 const majorHtml = (m: Major, named: boolean) => `<span class="major-pin${m.inferred ? ' inferred' : ''}" title="${esc(majorTitle(m))}"><i>${catEmoji(m.cat)}</i>${named ? `<b>${esc(m.brand)}</b>` : ''}</span>`
 /** 산책: 공원·하천 이모지 원 + (확대했을 때) 이름 */
 const parkHtml = (p: Park, named: boolean) => `<span class="major-pin park-pin" title="${esc(p.kind)} — ${esc(p.name)}"><i>${p.kind === '하천' ? '🌊' : '🌳'}</i>${named ? `<b>${esc(p.name)}</b>` : ''}</span>`
@@ -97,7 +101,7 @@ export function MapView(props: Props) {
 
 // ── 네이버 지도 ──────────────────────────────────────────────────────
 /* eslint-disable @typescript-eslint/no-explicit-any */
-function NaverMap({ candidates, hubs, active, onSelect, focusKey, hubId, onHub, insights, focusHubIds, ranks, preview, results, centerRef, majors, parks, allKey, onFail }: Props & { allKey: number; onFail: () => void }) {
+function NaverMap({ candidates, hubs, active, onSelect, focusKey, hubId, onHub, insights, focusHubIds, ranks, preview, results, centerRef, majors, parks, spots, allKey, onFail }: Props & { allKey: number; onFail: () => void }) {
   const box = useRef<HTMLDivElement>(null)
   const map = useRef<any>(null)
   const layers = useRef<any[]>([])
@@ -181,6 +185,18 @@ function NaverMap({ candidates, hubs, active, onSelect, focusKey, hubId, onHub, 
       icon: { content: majorHtml(m, detail), anchor: new naver.maps.Point(10, 10) },
     }))
   }, [ready, majors, detail])
+
+  // 추천 카페·식당
+  const spotMarkers = useRef<any[]>([])
+  useEffect(() => {
+    const naver = window.naver
+    if (!ready || !naver) return
+    spotMarkers.current.forEach((m) => m.setMap(null))
+    spotMarkers.current = (spots ?? []).map((s) => new naver.maps.Marker({
+      map: map.current, position: new naver.maps.LatLng(s.lat, s.lng), zIndex: 6,
+      icon: { content: spotHtml(s, detail), anchor: new naver.maps.Point(10, 10) },
+    }))
+  }, [ready, spots, detail])
 
   // 산책(공원·하천)
   const parkMarkers = useRef<any[]>([])
@@ -288,7 +304,7 @@ function Controls({ pts }: { pts: [number, number][] }) {
   )
 }
 
-function OsmMap({ candidates, hubs, active, onSelect, focusKey, hubId, onHub, insights, focusHubIds, ranks, preview, results, centerRef, majors, parks, allKey }: Props & { allKey: number }) {
+function OsmMap({ candidates, hubs, active, onSelect, focusKey, hubId, onHub, insights, focusHubIds, ranks, preview, results, centerRef, majors, parks, spots, allKey }: Props & { allKey: number }) {
   const pts = useMemo(() => frame(candidates, hubs, active, focusHubIds), [candidates, hubs, active, focusHubIds])
   const [zoom, setZoom] = useState(13)
   const cur = candidates[active]
@@ -303,6 +319,10 @@ function OsmMap({ candidates, hubs, active, onSelect, focusKey, hubId, onHub, in
       {(majors ?? []).map((m) => (
         <Marker key={`m-${m.brand}-${m.lat}-${m.lng}-${detail}`} position={[m.lat, m.lng]} zIndexOffset={-500}
           icon={L.divIcon({ className: 'pin-shell', html: majorHtml(m, detail), iconSize: [20, 20], iconAnchor: [10, 10] })} />
+      ))}
+      {(spots ?? []).map((s) => (
+        <Marker key={`s-${s.id}-${detail}`} position={[s.lat, s.lng]} zIndexOffset={-400}
+          icon={L.divIcon({ className: 'pin-shell', html: spotHtml(s, detail), iconSize: [20, 20], iconAnchor: [10, 10] })} />
       ))}
       {(parks ?? []).map((p) => (
         <Marker key={`p-${p.id}-${detail}`} position={[p.lat, p.lng]} zIndexOffset={-500}

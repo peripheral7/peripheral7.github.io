@@ -12,8 +12,10 @@ import { CatGallery, CatRegister } from './components/CatPanel'
 import { catIndex, loadCats, pruneCats, removeMyPhoto, saveCats, type CatState } from './cats'
 import { CommutePanel } from './components/CommutePanel'
 import { ListingCards, SpotCards } from './components/Recommend'
+import { SPOTS } from './recommend'
 import { DEFAULT_FUEL, loadCommute, saveCommute, type CommuteSaved } from './commute'
 import { fuelPriceFor } from './fuel'
+import { USE_LABEL, type PropertyUse } from './brokerage'
 import { loadParks, strollNear, STROLL_RADIUS, type Park } from './parks'
 import { PLACE_KEYS, loadPlaceOn, placeFor, placeSummary, savePlaceOn, type PlaceOn } from './places'
 import { MAJORS, commercialIndex, loadCommercial, pickedCats, saveCommercial, walk5Brand, walk5Counts, type CommercialPrefs } from './commercial'
@@ -34,7 +36,7 @@ export default function App() {
   const [preview, setPreview] = useState<Place | null>(null) // 검색 결과를 누르면 지도가 그 위치로
   const [found, setFound] = useState<Place[]>([]) // 검색 결과 전부(지도에 작은 점)
   const mapCenter = useRef<{ lat: number; lng: number } | null>(null) // 지금 지도 가운데(검색 결과 정렬)
-  const [editing, setEditing] = useState<{ id: string; name: string; deposit: string; rent: string } | null>(null) // 수정 중인 후보지(금액은 입력 글자 그대로)
+  const [editing, setEditing] = useState<{ id: string; name: string; deposit: string; rent: string; maint: string; use: PropertyUse } | null>(null) // 수정 중인 후보지(금액은 입력 글자 그대로)
   const [catState, setCatState] = useState<CatState>(() => pruneCats(loadCats())) // 길고양이 지수(선택 요인) — 사진은 이 브라우저에만 저장
   const [commute, setCommute] = useState<CommuteSaved>(loadCommute) // 출퇴근 인사이트의 연비·기름값(null = 자동)
   const [placeOn, setPlaceOn] = useState<PlaceOn>(loadPlaceOn) // 평화로움·공원·공공시설 켜고 끄기
@@ -98,7 +100,7 @@ export default function App() {
 
   const select = useCallback((i: number) => setActive(i), [])
   const update = (next: State, nextActive?: number) => { setState(next); if (nextActive !== undefined) setActive(nextActive); setFocusKey((k) => k + 1) }
-  const onCandidate = (p: Place, name: string, deposit?: number, rent?: number) => update(addCandidate(state, p, name, deposit, rent), candidates.length)
+  const onCandidate = (p: Place, name: string, deposit?: number, rent?: number, maint?: number) => update(addCandidate(state, p, name, deposit, rent, maint), candidates.length)
   const onHub = (p: Place, replaceId: string | undefined, name: string, category: string, trips: number) => update(setHub(state, p, replaceId, name, category, trips))
   const toggle = (k: 'trips' | 'weights') => setPop((p) => (p === k ? 'none' : k))
   // 카드를 누르면(또는 Enter·Space) 설정 창이 열리게 하는 속성
@@ -118,7 +120,7 @@ export default function App() {
     select(byRank[(k + d + byRank.length) % byRank.length].i)
   }
   const rename = (id: string, name: string) => setState(updateCandidate(state, id, { name }))
-  const saveEdit = () => { if (editing) setState(updateCandidate(state, editing.id, { name: editing.name, deposit: money(editing.deposit), rent: money(editing.rent) })); setEditing(null) }
+  const saveEdit = () => { if (editing) setState(updateCandidate(state, editing.id, { name: editing.name, deposit: money(editing.deposit), rent: money(editing.rent), maint: money(editing.maint), use: editing.use })); setEditing(null) }
   const deleteEdit = () => { if (editing && confirm('이 후보지를 삭제할까요?')) { update(removeCandidate(state, editing.id)); setEditing(null) } }
   const close = () => setPop('none')
   const tripSum = hubs.reduce((a, h) => a + (pref.trips[h.id] ?? 0), 0)
@@ -164,6 +166,8 @@ export default function App() {
                   <label>이름<input spellCheck={false} autoComplete="off" value={editing.name} maxLength={40} autoFocus onChange={(e) => setEditing({ ...editing, name: e.target.value })} /></label>
                   <label>보증금<span className="unit-input"><input type="number" min={0} step={100} inputMode="numeric" placeholder="예: 1000" value={editing.deposit} onChange={(e) => setEditing({ ...editing, deposit: e.target.value })} /><i>만원</i></span></label>
                   <label>월세<span className="unit-input"><input type="number" min={0} step={1} inputMode="numeric" placeholder="예: 50" value={editing.rent} onChange={(e) => setEditing({ ...editing, rent: e.target.value })} /><i>만원</i></span></label>
+                  <label>관리비<span className="unit-input"><input type="number" min={0} step={1} inputMode="numeric" placeholder="예: 7" value={editing.maint} onChange={(e) => setEditing({ ...editing, maint: e.target.value })} /><i>만원</i></span></label>
+                  <label>용도<select value={editing.use} onChange={(e) => setEditing({ ...editing, use: e.target.value as PropertyUse })}>{(Object.keys(USE_LABEL) as PropertyUse[]).map((u) => <option key={u} value={u}>{USE_LABEL[u]}{u === 'officetel' ? '(85㎡ 이하·부엌·욕실)' : ''}</option>)}</select></label>
                   <p className="muted">{cur.candidate.address}</p>
                   <div className="edit-actions">
                     <button type="button" className="danger" onClick={deleteEdit}>삭제</button>
@@ -179,7 +183,7 @@ export default function App() {
                     <h3>{cur.candidate.name}</h3>
                     <p>{cur.candidate.address}</p>
                   </div>
-                  <button className="edit-btn" aria-label={`${cur.candidate.name} 수정`} onClick={() => setEditing({ id: cur.candidate.id, name: cur.candidate.name, deposit: cur.candidate.deposit?.toString() ?? '', rent: cur.candidate.rent?.toString() ?? '' })}>수정</button>
+                  <button className="edit-btn" aria-label={`${cur.candidate.name} 수정`} onClick={() => setEditing({ id: cur.candidate.id, name: cur.candidate.name, deposit: cur.candidate.deposit?.toString() ?? '', rent: cur.candidate.rent?.toString() ?? '', maint: cur.candidate.maint?.toString() ?? '', use: cur.candidate.use ?? 'home' })}>수정</button>
                 </div>
               )
             )}
@@ -206,7 +210,7 @@ export default function App() {
         </div>
 
         <section className="map-area">
-          <MapView candidates={candidates} hubs={hubs} active={active} onSelect={select} focusKey={focusKey} hubId={hubId} onHub={setHubPick} insights={insights} focusHubIds={mainHubIds} ranks={ranks} preview={preview} results={found} centerRef={mapCenter} majors={majors} parks={parks} layers={layers} onLayer={toggleLayer} />
+          <MapView candidates={candidates} hubs={hubs} active={active} onSelect={select} focusKey={focusKey} hubId={hubId} onHub={setHubPick} insights={insights} focusHubIds={mainHubIds} ranks={ranks} preview={preview} results={found} centerRef={mapCenter} majors={majors} spots={SPOTS} parks={parks} layers={layers} onLayer={toggleLayer} />
           {layers.walk && (
             <p className="layer-note" role="status">
               {parkState === 'loading' ? '🌳 산책 — 공원·하천 찾는 중…' : parkState === 'error' ? '🌳 산책 — 공원 자료를 받지 못했어요(잠시 뒤 다시 켜 보세요)'
