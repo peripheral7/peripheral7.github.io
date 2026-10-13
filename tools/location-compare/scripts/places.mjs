@@ -11,6 +11,8 @@
 //   - 공원 이름(공간시설에 이름이 없을 때)·공원 안 산책로·물가·숲/풀밭·큰길: OpenStreetMap(Overpass API) — data/osm-places.json 에 저장
 //   - 도서관: 공공데이터포털 전국도서관표준데이터(2026-10-13 내려받음) — 저장소 맨 위 「전국도서관표준데이터-20261013.xls」,
 //     도서관유형 = 공공도서관만(작은도서관·어린이·학교·대학·전문·장애인 도서관 제외). xls 는 이 PC 의 Excel 로 data/libraries.csv 로 바꿔 읽는다.
+//   - 큰길(도로 폭): 브이월드 2D 데이터 API 2.0 「도시계획(교통시설) 도로」 LT_C_UPISUQ151 — 도로 규모(광로·대로·중로·소로)와 1~3류로 법정 폭 구간을 안다.
+//     .env.local 의 VWORLD_API_KEY(키에 등록한 서비스 URL 을 domain 으로: https://peripheral7.github.io). data/vworld-roads.json 에 저장. 키가 없으면 OSM 도로 등급으로.
 //   - 60m 안 음식점·공원 양 끝 상권: 소상공인시장진흥공단 상가(상권)정보 data/stores.sqlite(scripts/stores-sync.mjs)
 //
 // 계산 규칙·숫자는 src/places-config.json, 설명은 README 4-5절.
@@ -26,6 +28,11 @@ const ROOT = path.dirname(path.dirname(fileURLToPath(import.meta.url)))
 const REPO = path.dirname(path.dirname(ROOT))
 const CFG = JSON.parse(fs.readFileSync(path.join(ROOT, 'src', 'places-config.json'), 'utf8'))
 const OSM_FILE = path.join(ROOT, 'data', 'osm-places.json')
+const VW_FILE = path.join(ROOT, 'data', 'vworld-roads.json')
+const ENV = {}
+for (const l of (fs.existsSync(path.join(ROOT, '.env.local')) ? fs.readFileSync(path.join(ROOT, '.env.local'), 'utf8') : '').split(/\r?\n/)) { const m = l.match(/^\s*([A-Z_]+)\s*=\s*(.*?)\s*$/); if (m && m[2]) ENV[m[1]] = m[2] }
+/** 도시·군계획시설 도로 규모별 폭(m) — 「도시·군계획시설의 결정·구조 및 설치기준에 관한 규칙」 제9조 */
+const ROAD_WIDTH = { 광로: { 1: '70m 이상', 2: '50~70m', 3: '40~50m' }, 대로: { 1: '35~40m', 2: '30~35m', 3: '25~30m' }, 중로: { 1: '20~25m', 2: '15~20m', 3: '12~15m' }, 소로: { 1: '10~12m', 2: '8~10m', 3: '8m 미만' } }
 const DB_FILE = path.join(ROOT, 'data', 'stores.sqlite')
 const SHP = path.join(REPO, CFG.sources.parkShp)
 const LIB_XLS = path.join(REPO, CFG.sources.libraryXls)
@@ -84,6 +91,30 @@ async function osm() {
   fs.mkdirSync(path.dirname(OSM_FILE), { recursive: true })
   fs.writeFileSync(OSM_FILE, t)
   return JSON.parse(t)
+}
+
+// ── 브이월드: 도시계획(교통시설) 도로 면 ──
+async function vworldRoads() {
+  const key = process.env.VWORLD_API_KEY || ENV.VWORLD_API_KEY
+  if (!key) return null
+  if (!refresh && fs.existsSync(VW_FILE) && Date.now() - fs.statSync(VW_FILE).mtimeMs < 86_400_000) return JSON.parse(fs.readFileSync(VW_FILE, 'utf8'))
+  console.log('브이월드 도시계획 도로 받는 중…')
+  const feats = []
+  for (let page = 1; page < 50; page++) {
+    const u = new URL('https://api.vworld.kr/req/data')
+    u.search = new URLSearchParams({ service: 'data', request: 'GetFeature', data: 'LT_C_UPISUQ151', key, domain: process.env.VWORLD_DOMAIN || ENV.VWORLD_DOMAIN || 'https://peripheral7.github.io',
+      geomFilter: `BOX(${BOX.w},${BOX.s},${BOX.e},${BOX.n})`, crs: 'EPSG:4326', format: 'json', size: '1000', page: String(page), geometry: 'true', attribute: 'true' })
+    const j = await (await fetch(u)).json()
+    if (j.response?.status === 'NOT_FOUND') break
+    if (j.response?.status !== 'OK') throw new Error('브이월드 실패: ' + JSON.stringify(j.response?.error ?? j.response))
+    feats.push(...j.response.result.featureCollection.features)
+    if (page >= Number(j.response.page?.total ?? 1)) break
+  }
+  const out = feats.map((f) => ({ name: f.properties.dgm_nm, grade: f.properties.grad_se, ty: Number(f.properties.road_ty), exec: f.properties.exc_nam,
+    polys: (f.geometry.type === 'MultiPolygon' ? f.geometry.coordinates : [f.geometry.coordinates]).map((poly) => poly[0]) }))
+  fs.mkdirSync(path.dirname(VW_FILE), { recursive: true })
+  fs.writeFileSync(VW_FILE, JSON.stringify(out))
+  return out
 }
 
 // ── 공간시설 Shapefile(폴리곤) + DBF ──
@@ -208,8 +239,19 @@ async function main() {
       .flatMap((e) => (e.geometry ? [ring(e.geometry)] : (e.members ?? []).filter((m) => m.role === 'outer' && m.geometry?.length > 3).map((m) => ring(m.geometry)))),
   ].filter((r) => r.length > 3)
   const PC = CFG.peace
-  const roads = els.filter((e) => e.tags?.highway && (PC.roadClasses.includes(e.tags.highway) || /대로$/.test(e.tags.name ?? '') || Number(e.tags.lanes) >= PC.roadMinLanes))
-    .map((e) => ({ name: e.tags.name ?? e.tags.ref ?? e.tags.highway, line: ring(e.geometry) }))
+  // 큰길: 브이월드 도시계획 도로(대로 이상 = 폭 25m 이상)가 있으면 그것, 없으면 OSM 도로 등급
+  const vw = await vworldRoads()
+  const osmRoads = els.filter((e) => e.tags?.highway && /^(motorway|trunk|primary|secondary|tertiary)$/.test(e.tags.highway) && e.tags.name).map((e) => ({ name: e.tags.name, line: ring(e.geometry) }))
+  const roadSource = vw ? 'vworld' : 'osm'
+  const roads = vw
+    ? vw.filter((r) => PC.bigRoadGrades.includes(r.grade)).map((r) => {
+        const rings = r.polys.map((poly) => poly.map(([lng, lat]) => xy(lat, lng)))
+        // 도로 이름: 이 도로 면 안을 지나는 OSM 길 이름(없으면 도시계획 도로 번호)
+        const nm = osmRoads.find((o) => o.line.some((q) => rings.some((rr) => inside(q, rr))))?.name
+        return { name: `${nm ?? r.name.split('/').pop().replace(/[()]/g, '')} · ${r.grade}${r.ty}류(폭 ${ROAD_WIDTH[r.grade]?.[r.ty] ?? '?'})`, rings }
+      })
+    : els.filter((e) => e.tags?.highway && (PC.roadClasses.includes(e.tags.highway) || /대로$/.test(e.tags.name ?? '') || Number(e.tags.lanes) >= PC.roadMinLanes))
+      .map((e) => ({ name: e.tags.name ?? e.tags.ref ?? e.tags.highway, line: ring(e.geometry) }))
   const libs = libraries()
 
   const out = {}
@@ -217,7 +259,7 @@ async function main() {
     const p = xy(c.lat, c.lng)
     // 평화로움
     const food = storesNear(c.lat, c.lng, PC.foodRadiusM).filter(isFood).length
-    const road = roads.map((r) => ({ name: r.name, d: lineDist(p, r.line) })).sort((a, b) => a.d - b.d)[0] ?? null
+    const road = roads.map((r) => ({ name: r.name, d: r.rings ? polyDist(p, r.rings) : lineDist(p, r.line) })).sort((a, b) => a.d - b.d)[0] ?? null
     const foodScore = food <= PC.foodFree ? 10 - PC.foodSmallPenalty * food : (10 - PC.foodSmallPenalty * PC.foodFree) * Math.pow(10, -(food - PC.foodFree) / PC.foodDecay)
     const roadScore = !road || road.d > PC.roadFarM ? 10 : road.d > PC.roadNearM ? PC.roadMidScore : 0
     const peace = foodScore * PC.wFood + roadScore * PC.wRoad

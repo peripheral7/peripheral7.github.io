@@ -3,7 +3,7 @@
 //   (2) 도시계획(공간시설) — 공원 경계·도형 소분류명(경기 밖 후보지, 또는 Shapefile 대신 API 로 받을 때)
 //
 // 사용(이 폴더에서): node scripts/vworld-probe.mjs        — 첫 후보지 둘레 300m 네모로 두 레이어를 몇 건씩 받아 속성을 출력
-// 키: .env.local 의 VWORLD_API_KEY (브이월드 오픈API 인증키, 서비스 URL 은 http://localhost 로 등록)
+// 키: .env.local 의 VWORLD_API_KEY (브이월드 오픈API 인증키) — 키에 등록한 서비스 URL 을 domain 으로 보내야 한다(지금 https://peripheral7.github.io, 다르면 VWORLD_DOMAIN)
 // 요청: https://api.vworld.kr/req/data?service=data&request=GetFeature&data=<서비스ID>&key=…&geomFilter=BOX(…)&crs=EPSG:4326&format=json
 // 서비스 ID 는 레퍼런스 주소(…s003.do?svcIde=upisuq153 등)에서 짐작한 값이라, 틀리면 아래 LAYERS 만 고친다.
 import fs from 'node:fs'
@@ -26,7 +26,7 @@ const box = `BOX(${c.lng - d * 1.3},${c.lat - d},${c.lng + d * 1.3},${c.lat + d}
 
 for (const L of LAYERS) {
   const u = new URL('https://api.vworld.kr/req/data')
-  u.search = new URLSearchParams({ service: 'data', request: 'GetFeature', data: L.id, key: KEY, domain: 'http://localhost', geomFilter: box, crs: 'EPSG:4326', format: 'json', size: '5', page: '1', geometry: 'false', attribute: 'true' })
+  u.search = new URLSearchParams({ service: 'data', request: 'GetFeature', data: L.id, key: KEY, domain: process.env.VWORLD_DOMAIN || env.VWORLD_DOMAIN || 'https://peripheral7.github.io', geomFilter: box, crs: 'EPSG:4326', format: 'json', size: '5', page: '1', geometry: 'false', attribute: 'true' })
   const r = await fetch(u)
   const t = await r.text()
   let j; try { j = JSON.parse(t) } catch { console.log(L.label, r.status, t.slice(0, 300)); continue }
