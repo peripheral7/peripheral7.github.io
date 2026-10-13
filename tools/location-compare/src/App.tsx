@@ -17,7 +17,7 @@ import { SPOTS } from './recommend'
 import { DEFAULT_FUEL, loadCommute, saveCommute, type CommuteSaved } from './commute'
 import { fuelPriceFor } from './fuel'
 import { USE_LABEL, type PropertyUse } from './brokerage'
-import { loadParks, strollNear, PARK_AREAS, PARK_AREA_MIN, STROLL_RADIUS, type Park } from './parks'
+import { loadParks, parkAreaPin, strollNear, PARK_AREAS, PARK_AREA_MIN, STROLL_RADIUS, type Park } from './parks'
 import { PLACE_KEYS, loadPlaceOn, placeFor, placeSummary, savePlaceOn, type PlaceOn } from './places'
 import { liveMajors, liveNote, requestLive } from './live'
 import { MAJORS, commercialIndex, loadCommercial, pickedCats, saveCommercial, walk5Brand, walk5Counts, type CommercialPrefs } from './commercial'
@@ -101,6 +101,7 @@ export default function App() {
     loadParks(candidates).then((p) => { if (alive) { setParks(p); setParkState('idle') } }).catch(() => { if (alive) setParkState('error') })
     return () => { alive = false }
   }, [layers.walk, parkKey]) // eslint-disable-line react-hooks/exhaustive-deps
+  const areaPins = useMemo(() => PARK_AREAS.filter((a) => !a.name.startsWith('이름 없는')).map(parkAreaPin), []) // 이름이 없는 공원은 칠만 하고 핀은 없다
   const stroll = layers.walk && candidates[active] ? strollNear(candidates[active], parks) : null
   const catIdx = useMemo(() => (catState.on ? candidates.map((c) => catIndex(c, catState.cats)) : null), [catState, candidates])
   // 입지 요인마다 후보지 중 최고점(이름 옆 작은 글씨). 세부 내역은 최고점 후보지가 고른 후보지와 다를 때만 그 아래에 보인다
@@ -240,7 +241,7 @@ export default function App() {
         </div>
 
         <section className="map-area">
-          <MapView candidates={candidates} hubs={hubs} active={active} onSelect={select} focusKey={focusKey} hubId={hubId} onHub={setHubPick} insights={insights} focusHubIds={mainHubIds} ranks={ranks} preview={preview} results={found} centerRef={mapCenter} majors={majors} spots={SPOTS} parks={[]} layers={layers} onLayer={toggleLayer}
+          <MapView candidates={candidates} hubs={hubs} active={active} onSelect={select} focusKey={focusKey} hubId={hubId} onHub={setHubPick} insights={insights} focusHubIds={mainHubIds} ranks={ranks} preview={preview} results={found} centerRef={mapCenter} majors={majors} spots={SPOTS} parks={layers.walk ? areaPins : []} layers={layers} onLayer={toggleLayer}
             parkAreas={layers.walk ? PARK_AREAS : undefined} previewFly={previewFly} onMapPick={(place, kind, at) => setMapPick({ place, kind, at, n: Date.now() })} />
           {layers.walk && (
             <p className="layer-note" role="status">

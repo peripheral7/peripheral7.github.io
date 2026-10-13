@@ -18,7 +18,7 @@ import { placeNear, type MapPoint } from '../placeNear'
 // - 지도를 우클릭(휴대폰은 길게 누르기)하면 그 자리를 "후보지로 / 목적지로" 추가하는 작은 메뉴 → 검색창의 등록 창으로 이어진다.
 // - 추천 카페·식당(광고) 핀을 누르면 그 가게의 네이버지도 페이지가 새 탭으로 열린다.
 // - "산책"을 켜면 공원 점수가 일정 이상인 공원 경계(parkAreas)를 점수만큼 진한 초록으로 칠한다.
-//   효용이 낮은 공원은 이름 핀도 그리지 않는다(테두리 없이 칠만 한다).
+//   효용이 높은 공원(칠한 공원)만 이름 핀을 항상 보이고, 낮은 공원은 색도 이름도 그리지 않는다(테두리 없이 칠만 한다).
 
 type Props = {
   candidates: Candidate[]; hubs: Hub[]; active: number; onSelect: (index: number) => void; focusKey: number
@@ -280,9 +280,9 @@ function NaverMap({ candidates, hubs, active, onSelect, focusKey, hubId, onHub, 
     parkMarkers.current.forEach((m) => m.setMap(null))
     parkMarkers.current = (parks ?? []).map((p) => new naver.maps.Marker({
       map: map.current, position: new naver.maps.LatLng(p.lat, p.lng), zIndex: 4,
-      icon: { content: parkHtml(p, detail), anchor: new naver.maps.Point(10, 10) },
+      icon: { content: parkHtml(p, true), anchor: new naver.maps.Point(10, 10) },
     }))
-  }, [ready, parks, detail])
+  }, [ready, parks])
 
   // 핀·점선·장단점 글자 다시 그리기
   useEffect(() => {
@@ -406,8 +406,8 @@ function OsmMap({ candidates, hubs, active, onSelect, focusKey, hubId, onHub, in
           icon={L.divIcon({ className: 'pin-shell', html: spotHtml(s, detail), iconSize: [20, 20], iconAnchor: [10, 10] })} />
       ))}
       {(parks ?? []).map((p) => (
-        <Marker key={`p-${p.id}-${detail}`} position={[p.lat, p.lng]} zIndexOffset={-500}
-          icon={L.divIcon({ className: 'pin-shell', html: parkHtml(p, detail), iconSize: [20, 20], iconAnchor: [10, 10] })} />
+        <Marker key={`p-${p.id}`} position={[p.lat, p.lng]} zIndexOffset={-500}
+          icon={L.divIcon({ className: 'pin-shell', html: parkHtml(p, true), iconSize: [20, 20], iconAnchor: [10, 10] })} />
       ))}
       {cur && hubs.map((h) => (
         <Polyline key={h.id + cur.id + (h.id === hubId)} className="route" positions={[[cur.lat, cur.lng], [h.lat, h.lng]]} pathOptions={{ color: '#2b2b26', weight: 2, dashArray: '6 7', opacity: h.id === hubId ? 0.9 : 0.35 }} />

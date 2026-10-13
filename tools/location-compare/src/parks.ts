@@ -50,3 +50,10 @@ export const PARK_AREAS = areas.parks as unknown as ParkArea[]
 export const PARK_AREA_MIN = areas.minValue
 /** 점수가 높을수록 진하게(최소 점수 → 옅게, 10점 → 진하게) */
 export const parkAreaAlpha = (v: number) => 0.18 + (0.3 * Math.max(0, v - PARK_AREA_MIN)) / Math.max(1, 10 - PARK_AREA_MIN)
+
+/** 효용 높은 공원의 이름 핀 자리(경계 꼭짓점 평균 — 가장 큰 고리 기준) */
+export function parkAreaPin(a: ParkArea, i: number): Park {
+  const ring = a.rings.reduce((m, r) => (r.length > m.length ? r : m), a.rings[0] ?? [])
+  const n = Math.max(1, ring.length)
+  return { id: `area${i}`, name: a.name, kind: '공원', lat: ring.reduce((s, q) => s + q[0], 0) / n, lng: ring.reduce((s, q) => s + q[1], 0) / n }
+}
