@@ -18,6 +18,7 @@ import { placeNear, type MapPoint } from '../placeNear'
 // - 지도를 우클릭(휴대폰은 길게 누르기)하면 그 자리를 "후보지로 / 목적지로" 추가하는 작은 메뉴 → 검색창의 등록 창으로 이어진다.
 // - 추천 카페·식당(광고) 핀을 누르면 그 가게의 네이버지도 페이지가 새 탭으로 열린다.
 // - "산책"을 켜면 공원 점수가 일정 이상인 공원 경계(parkAreas)를 점수만큼 진한 초록으로 칠한다.
+//   효용이 낮은 공원은 이름 핀도 그리지 않는다(테두리 없이 칠만 한다).
 
 type Props = {
   candidates: Candidate[]; hubs: Hub[]; active: number; onSelect: (index: number) => void; focusKey: number
@@ -267,7 +268,7 @@ function NaverMap({ candidates, hubs, active, onSelect, focusKey, hubId, onHub, 
     areaShapes.current.forEach((m) => m.setMap(null))
     areaShapes.current = (parkAreas ?? []).map((a) => new naver.maps.Polygon({
       map: map.current, paths: a.rings.map((r) => r.map(([la, ln]) => new naver.maps.LatLng(la, ln))), clickable: false, zIndex: 1,
-      fillColor: '#3f9a52', fillOpacity: parkAreaAlpha(a.value), strokeColor: '#2f7d40', strokeOpacity: 0.7, strokeWeight: 1,
+      fillColor: '#3f9a52', fillOpacity: parkAreaAlpha(a.value), strokeOpacity: 0, strokeWeight: 0, // 테두리 없이 칠만
     }))
   }, [ready, parkAreas])
 
@@ -392,7 +393,7 @@ function OsmMap({ candidates, hubs, active, onSelect, focusKey, hubId, onHub, in
       <ContextWatch onContext={onContext} />
       {(parkAreas ?? []).map((a, i) => (
         <Polygon key={`pa${i}-${a.name}`} positions={a.rings}
-          pathOptions={{ color: '#2f7d40', weight: 1, opacity: 0.7, fillColor: '#3f9a52', fillOpacity: parkAreaAlpha(a.value) }}>
+          pathOptions={{ stroke: false, fillColor: '#3f9a52', fillOpacity: parkAreaAlpha(a.value) }}>
           <Tooltip sticky>{parkAreaTitle(a)}</Tooltip>
         </Polygon>
       ))}

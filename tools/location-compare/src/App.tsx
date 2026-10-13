@@ -236,7 +236,7 @@ export default function App() {
         </div>
 
         <section className="map-area">
-          <MapView candidates={candidates} hubs={hubs} active={active} onSelect={select} focusKey={focusKey} hubId={hubId} onHub={setHubPick} insights={insights} focusHubIds={mainHubIds} ranks={ranks} preview={preview} results={found} centerRef={mapCenter} majors={majors} spots={SPOTS} parks={parks} layers={layers} onLayer={toggleLayer}
+          <MapView candidates={candidates} hubs={hubs} active={active} onSelect={select} focusKey={focusKey} hubId={hubId} onHub={setHubPick} insights={insights} focusHubIds={mainHubIds} ranks={ranks} preview={preview} results={found} centerRef={mapCenter} majors={majors} spots={SPOTS} parks={[]} layers={layers} onLayer={toggleLayer}
             parkAreas={layers.walk ? PARK_AREAS : undefined} previewFly={previewFly} onMapPick={(place, kind, at) => setMapPick({ place, kind, at, n: Date.now() })} />
           {layers.walk && (
             <p className="layer-note" role="status">
