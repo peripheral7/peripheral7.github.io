@@ -31,14 +31,14 @@ const AGENT = { office: '예시 공인중개사사무소', intro: '광고 준비
 
 export const LISTINGS: Listing[] = [
   {
-    id: 'l1', title: '예시 매물 · 원룸', lat: 37.2489, lng: 127.0571, use: 'home', deal: 'lease', deposit: 1000, rent: 50, maint: 7,
+    id: 'l1', title: '예시 매물 · 원룸', lat: 37.2489, lng: 127.0571, use: 'other', deal: 'lease', deposit: 1000, rent: 50, maint: 7,
     desc: '창이 넓어 볕이 잘 드는 원룸. 창가에 화분과 작은 테이블을 두기 좋다.', points: ['채광 좋음', '역 가까움', '풀옵션'],
     image: recImg('listing-1.jpg'), agent: AGENT,
   },
   {
     id: 'l2', title: '예시 매물 · 분리형 원룸', lat: 37.2372, lng: 127.0756, use: 'home', deal: 'lease', deposit: 3000, rent: 45, maint: 10,
     desc: '창가 테이블 자리와 잠자리가 나뉘는 분리형. 학교까지 걸어서 다닐 수 있다.', points: ['학교 도보권', '분리형', '주차 가능'],
-    image: recImg('listing-2.jpg'), agent: AGENT,
+    agent: AGENT,
   },
   {
     id: 'l3', title: '예시 매물 · 원룸', lat: 37.2431, lng: 127.0631, use: 'home', deal: 'lease', deposit: 500, rent: 55, maint: 5,

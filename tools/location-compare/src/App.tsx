@@ -114,6 +114,14 @@ export default function App() {
   const setCats = (next: CatState) => { const ok = saveCats(next); if (ok) setCatState(next); return ok }
   useEffect(() => { if (active > candidates.length - 1) setActive(Math.max(0, candidates.length - 1)) }, [candidates.length, active])
 
+  // 처음 열 때 선택 = 종합 1순위 후보지(그 뒤로는 사용자가 고른 대로)
+  const firstPick = useRef(false)
+  useEffect(() => {
+    if (firstPick.current || !results.length) return
+    firstPick.current = true
+    const top = results.findIndex((r) => r.rank === 1)
+    if (top > 0) setActive(top)
+  }, [results])
   const select = useCallback((i: number) => setActive(i), [])
   const update = (next: State, nextActive?: number) => { setState(next); if (nextActive !== undefined) setActive(nextActive); setFocusKey((k) => k + 1) }
   const onCandidate = (p: Place, name: string, deposit?: number, rent?: number, maint?: number) => update(addCandidate(state, p, name, deposit, rent, maint), candidates.length)
