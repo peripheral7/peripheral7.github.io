@@ -131,7 +131,7 @@ export function FactorsPanel({ cat, catOn, onToggleCat, onRegister, onGallery, c
           <div className="factor place-factor" key={k}>
             <div>
               <button type="button" className="com-open" aria-expanded={placeOpen === k} onClick={() => setPlaceOpen(placeOpen === k ? null : k)}>{PLACE_LABEL[k]} <i aria-hidden>{placeOpen === k ? '▴' : '▾'}</i></button><BestTag b={best[k]} />
-              <small>{place ? placeSummary(k, place) : PLACE_NOTE[k] + ' — 검색으로 넣은 후보지는 자료 없음'}</small>
+              {(!place || placeSummary(k, place)) && <small>{place ? placeSummary(k, place) : PLACE_NOTE[k] + ' — 검색으로 넣은 후보지는 자료 없음'}</small>}
               <BestDetail b={best[k]} />
             </div>
             <span className="factor-score"><span className={`ticks ${k}`} aria-hidden><span style={{ width: `${(s ?? 0) * 10}%` }} /></span><em>{s === null ? '—' : fmt(s)}</em></span>

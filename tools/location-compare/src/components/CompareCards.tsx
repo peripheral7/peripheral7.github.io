@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useState, type ReactNode } from 'react'
 import { fmt, WALK_LIMIT, WALK_ZONE, type CandidateResult } from '../scoring'
 import { BASE_DEPOSIT, baseRent, hubEmoji, won, type Candidate, type Hub } from '../data'
 import { brokerageFee, feeText, useGroup } from '../brokerage'
@@ -34,10 +34,15 @@ function RentCell({ c, sect }: { c: Candidate; sect?: boolean }) {
 function ComCell({ x, best }: { x: CommercialIndex | undefined; best: boolean }) {
   if (x === undefined) return <div className="cell mode-cell"><div><span className="muted">입지 요인 ⚙ 에서 켜면 표시</span></div></div>
   if (x === null) return <div className="cell mode-cell"><div><span className="muted">상권 자료 없음(검색으로 넣은 후보지)</span></div></div>
-  const txt = (t: 'need' | 'want') => x.parts.filter((p) => p.tier === t).map((p) => `${CATEGORIES.find((c) => c.id === p.id)?.label} ${p.count}`).join(' · ')
+  // 고른 업종(필수 → 선호)을 이름·개수로 보이고, 업종 점수가 5점 이상이면 초록색
+  const items = (t: 'need' | 'want') => x.parts.filter((p) => p.tier === t).map((p) => (
+    <span key={p.id} className={p.score >= 5 ? 'com-ok' : undefined}>{CATEGORIES.find((c) => c.id === p.id)?.label} {p.count}</span>
+  ))
+  const join = (a: ReactNode[]) => a.flatMap((e, i) => (i ? [' · ', e] : [e]))
+  const need = items('need'), want = items('want')
   return (
     <div className="cell mode-cell">
-      <div><b>{txt('need') || txt('want')}</b>{txt('need') && txt('want') && <small>선호 {txt('want')}</small>}</div>
+      <div><b>{join(need.length ? need : want)}</b>{need.length > 0 && want.length > 0 && <small>선호 {join(want)}</small>}</div>
       <em className={best ? 'best' : ''}>{fmt(x.score)}<Line v={x.score} kind="com" /></em>
     </div>
   )

@@ -150,12 +150,11 @@ export default function App() {
   return (
     <div className="shell">
       <header className="topbar">
-        <a className="brand" href="/" aria-label="게시판으로 돌아가기"><span className="logo"><span /><span /><span /></span>여기살까?</a>
+        <span className="brand"><span className="logo"><span /><span /><span /></span>여기살까?</span>
         <nav className="pills">
           <span className="pill active">입지 지도</span>
           <button className="pill" onClick={() => setGuide(true)}>계산 방식</button>
         </nav>
-        <a className="back" href="/">← BACK TO BOARD</a>
       </header>
 
       <main className="stage" ref={stageRef}>

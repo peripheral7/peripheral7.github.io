@@ -52,7 +52,7 @@ export function savePlaceOn(v: PlaceOn) { try { localStorage.setItem(KEY, JSON.s
 /** 이름 아래 한 줄 요약 */
 export function placeSummary(k: PlaceKey, r: PlaceRow): string {
   // 거리(m)·음식점 수 같은 규칙 숫자는 적지 않는다 — 이름만(계산 내역은 이름을 눌렀을 때)
-  if (k === 'peace') return r.peace.road ? '큰길 가까이' : '가까운 큰길 없음'
+  if (k === 'peace') return ''
   if (k === 'park') { const p = r.park.parks[0]; return p ? `${p.name}${p.linked ? ' · 길게 연결' : ''} · 녹지 ${r.park.green}%` : `가까운 공원 없음 · 녹지 ${r.park.green}%` }
   const l = r.library.near[0]
   return l ? l.name : '공공도서관 자료 없음'
