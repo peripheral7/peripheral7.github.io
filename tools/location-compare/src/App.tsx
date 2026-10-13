@@ -39,6 +39,22 @@ export default function App() {
   const [editing, setEditing] = useState<{ id: string; name: string; deposit: string; rent: string; maint: string; use: PropertyUse } | null>(null) // 수정 중인 후보지(금액은 입력 글자 그대로)
   const [catState, setCatState] = useState<CatState>(() => pruneCats(loadCats())) // 길고양이 지수(선택 요인) — 사진은 이 브라우저에만 저장
   const [commute, setCommute] = useState<CommuteSaved>(loadCommute) // 출퇴근 인사이트의 연비·기름값(null = 자동)
+  // 넓은 화면의 오른쪽 열(.right-col, contain: size)이 왼쪽·가운데보다 길면 넘친 만큼 .stage 아래 여백(--right-extra)으로 자리를 만든다
+  const stageRef = useRef<HTMLElement>(null)
+  useEffect(() => {
+    const stage = stageRef.current, col = stage?.querySelector<HTMLElement>('.right-col')
+    if (!stage || !col) return
+    const fit = () => {
+      if (getComputedStyle(col).display !== 'flex') { stage.style.removeProperty('--right-extra'); return }
+      const need = [...col.children].reduce((a, el) => a + (el as HTMLElement).offsetHeight, 0) + 12 * Math.max(0, col.children.length - 1)
+      stage.style.setProperty('--right-extra', `${Math.max(0, Math.ceil(need - col.offsetHeight))}px`)
+    }
+    const ro = new ResizeObserver(fit)
+    ro.observe(col); for (const el of col.children) ro.observe(el)
+    window.addEventListener('resize', fit)
+    fit()
+    return () => { ro.disconnect(); window.removeEventListener('resize', fit) }
+  }, [])
   const [placeOn, setPlaceOn] = useState<PlaceOn>(loadPlaceOn) // 평화로움·공원·공공시설 켜고 끄기
   const [comPrefs, setComPrefs] = useState<CommercialPrefs>(loadCommercial) // 도보 5분 상권: 필수·선호 업종(이 브라우저에 저장)
   const [catDlg, setCatDlg] = useState<'none' | 'register' | 'gallery'>('none')
@@ -142,7 +158,7 @@ export default function App() {
         <a className="back" href="/">← BACK TO BOARD</a>
       </header>
 
-      <main className="stage">
+      <main className="stage" ref={stageRef}>
         <div className="modes-area anchor">
           {cur ? (
             <div className={'tappable' + (pop === 'weights' ? ' on' : '')} {...tap('weights', '수단 가중치 조정 열기')}>
@@ -221,6 +237,8 @@ export default function App() {
           <SearchBox hubs={hubs} tripsOf={(id) => pref.trips[id] ?? 0} onCandidate={onCandidate} onHub={onHub} onPreview={setPreview} onResults={setFound} centerRef={mapCenter} />
         </section>
 
+        {/* 오른쪽 열(넓은 화면): 입지 요인 → 카페·식당 → 출퇴근 인사이트를 위에서부터 빈틈없이 쌓는다. 좁은 화면에서는 이 묶음이 없는 것처럼(display: contents) 각자 칸에 */}
+        <div className="right-col">
         <aside className="factors-area">
           <FactorsPanel cat={catIdx && cur ? catIdx[Math.min(active, catIdx.length - 1)] ?? null : null} catOn={catState.on}
             onToggleCat={() => setCats({ ...catState, on: !catState.on })} onRegister={() => setCatDlg('register')} onGallery={(start = 0) => { setGalleryIdx(null); setGalleryStart(start); setCatDlg('gallery') }}
@@ -234,6 +252,7 @@ export default function App() {
             {cur && <CommutePanel r={cur} trips={pref.trips} settings={{ kmpl: commute.kmpl, fuel: commute.fuel ?? fuelAuto?.price ?? DEFAULT_FUEL }}
       fuelAuto={fuelAuto} fuelManual={commute.fuel !== null} onKmpl={(n) => saveC({ ...commute, kmpl: n })} onFuel={(n) => saveC({ ...commute, fuel: n })} />}
         </aside>
+        </div>
 
         {/* 후보지별 비교 양옆: 추천 카드 자리(추후 광고) — 왼쪽 부동산 매물(카페·식당은 오른쪽 입지 요인 아래) */}
         <ListingCards candidates={candidates} />

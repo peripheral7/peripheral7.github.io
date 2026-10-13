@@ -331,7 +331,15 @@ button { cursor: pointer }
 .factors-area .factor { padding: 7px 0 }
 .factors-area .panel-head { margin-bottom: 6px }
 .commute { flex: none; padding-top: 14px } /* 높이를 내용만큼 — 잘라 내지 않는다(오른쪽 열이 길어지면 지도도 같이 길어진다) */
-@media (min-width: 1321px) { .factors-area { contain: size } }
+/* 넓은 화면: 오른쪽 열은 한 덩어리(.right-col)로 세 줄을 모두 차지하고 내용을 위에서부터 쌓는다 — 입지 요인 바로 아래 카페·식당, 그 아래 출퇴근 인사이트.
+   예전에는 입지 요인이 지도 높이(680) 칸을 통째로 차지해 그 아래가 비었다.
+   contain: size — 오른쪽 열 길이가 줄 높이(지도 680 등)를 바꾸지 않게. 왼쪽·가운데보다 길어지면 넘친 만큼 .stage 아래 여백(--right-extra, App 의 ResizeObserver)을 더해 발밑 글과 겹치지 않게 한다. */
+.right-col { display: contents }
+@media (min-width: 1321px) {
+  .stage { grid-template-areas: 'modes map right' 'selected map right' 'sideL cards right'; margin-bottom: var(--right-extra, 0px) }
+  .right-col { grid-area: right; display: flex; flex-direction: column; gap: 12px; min-width: 0; contain: size }
+  .right-col > * { flex: none }
+}
 @media (min-width: 901px) and (max-width: 1320px) { .factors-area { flex-direction: row; align-items: stretch } .factors-area > .panel { flex: 1 1 0; min-width: 0 } } /* 오른쪽 열도 지도 높이(680)에 맞추고 넘치면 출퇴근 칸 안에서 스크롤 */
 .cm-grid { display: grid; grid-template-columns: minmax(0, 1fr) 80px 80px; column-gap: 8px; align-items: baseline }
 .cm-grid > * { padding: 5px 0; border-top: 1px solid var(--line) }
