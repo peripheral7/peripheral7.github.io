@@ -467,7 +467,7 @@ npm run build                           # 그다음 커밋
 
 - **켜기**: `server/start.cmd` 더블클릭(또는 이 폴더에서 `node server/analyze-server.mjs --tunnel`). 터널 주소는 켤 때마다 바뀌고 Worker 에 자동 등록(10분마다 다시 알림, 25분 소식 없으면 꺼진 것으로 봄). 끌 때 Ctrl+C → 등록 해제. 기록 `server/server.log`.
 - **분석(`/analyze`)**: `server/runner.mjs` 가 `server/.work/` 에 저장소 모양 사본을 만들고 `src/data.ts` 만 "후보지 = 이 좌표"로 바꿔 `scripts/stores.mjs analyze` · `scripts/places.mjs --refresh` 를 **그대로** 실행 → 그 후보지 줄만 돌려준다. 스크립트·규칙 파일은 **git HEAD** 에서 꺼낸다(배포 번들과 같은 규칙, 미커밋 변경은 안 섞임). 약 30초, 한 번에 하나(대기열 20), 화면은 4초마다 다시 묻는다. Overpass 주 서버가 바쁘면 사본에서만 미러(z./lz4.overpass-api.de)를 차례로 쓴다.
-- **차량(`/route`)**: 네이버 Directions 5(.env.local 의 NAVER_CLIENT_ID/SECRET) 지금 교통 1회. 평일 07~10·17~20시 = 출퇴근(rush), 그 밖 = 낮(free) — 없는 시간대는 기존 추정식.
+- **차량(`/route`)**: 네이버 Directions 5(.env.local 의 NAVER_CLIENT_ID/SECRET)는 "지금 교통"만 잰다 → **실측 시간대 = 출퇴근 평일 07:30~09:30 · 낮 평일 10:30~16:00**(밤·주말에 잰 값은 한가해서 안 씀). 시간대 안에 물으면 바로 재고, 밖이면 저장된 값만 준다. 물어본 길은 모두 `server/cache/r_*.json` 에 기억 → 서버가 10분마다 시간대 안이면 빠진 값·30일 지난 값을 자동으로 잰다(최근 60일 안에 물어본 길만). 기본 후보지도 routes.json 에 빠진 길은 같은 방식. 실측이 없는 시간대는 추정식(낮 = 직선거리 ÷ 31km/h + 3분, 출퇴근 = 낮 × 1.52 + 4분)을 쓰고 카드에 "(추정) · 실측 예정: 출퇴근 평일 07:30~09:30"처럼 적는다.
 - **대중교통**: 아직 개발 중 — 검색으로 넣은 후보지(`isDefaultCandidate` 가 아닌 곳)는 대중교통 칸을 "개발 중"으로 비우고 점수에서도 뺀다(`scoring.ts` transitPending — 걸어가는 transitSkipped 와 같은 계산).
 - **범위·상한**: 서울·경기 네모 밖이면 "서울·경기 밖이라 자료 없음"(공원 경계는 경기만, 고도 보정은 위도 37~38·경도 127~128만). 하루 새 계산 상한 = 분석 150 · 길찾기 300(`.env.local` 의 LIVE_ANALYZE_LIMIT · LIVE_ROUTE_LIMIT, 사용량 `server/.usage.json`). 결과 캐시 `server/cache/`(좌표 30일 · 길·시간대 7일), 브라우저도 `locCompare.live.v1` 에 저장.
 - **개인정보**: 서버에는 좌표(소수 5자리)만 오고, 캐시 파일 이름에 좌표가 남는다. 주소·이름은 보내지 않는다.

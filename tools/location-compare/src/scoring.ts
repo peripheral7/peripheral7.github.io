@@ -1,7 +1,7 @@
 // 이동 시간 추정과 점수 계산. 공식의 이유와 예시는 README 의 "점수 산정 방식"에 있다.
 import type { Candidate, Hub, Preference } from './data'
 import routes from './routes.json'
-import { isDefaultCandidate, liveRoute } from './live'
+import { isDefaultCandidate, liveRoute, setStaticCheck } from './live'
 
 // ── 1. 이동 시간 추정(가상) ──────────────────────────────────────────
 // 두 지점의 직선거리만으로 시간을 추정한다. 단, 차량은 네이버 실측값이 있으면 그것을 쓴다
@@ -25,6 +25,8 @@ export type Trip = {
 export type CarSlot = { min: number; km: number; at: string }
 type Measured = Partial<Record<'free' | 'rush', CarSlot>>
 const MEASURED = (routes as { pairs: Record<string, Measured> }).pairs
+setStaticCheck((cid, hid) => !!(MEASURED[`${cid}:${hid}`]?.free && MEASURED[`${cid}:${hid}`]?.rush))
+const newer = (a?: CarSlot, b?: CarSlot) => (!a ? b : !b ? a : a.at >= b.at ? a : b) // 미리 잰 값과 서버 값 중 최근 것
 
 const R = 6371
 const rad = (d: number) => (d * Math.PI) / 180
@@ -44,8 +46,10 @@ export function estimateTrip(from: Candidate, to: Hub): Trip {
   const transfers = km <= 3 ? 0 : km <= 12 ? 1 : 2
   const ride = Math.max(4, Math.round((km / 22) * 60)) // 버스·지하철 평균 시속 22km
   const transit = access + wait + ride + transfers * 5
-  // 차량: 네이버로 잰 값이 있으면 그 값을, 없으면 추정을 쓴다(시간대마다 따로).
-  const m = (isDefaultCandidate(from) ? MEASURED[`${from.id}:${to.id}`] : null) ?? liveRoute(from, to) ?? {}
+  // 차량: 네이버로 잰 값이 있으면 그 값을, 없으면 추정을 쓴다(시간대마다 따로). 추정식(직선거리만 봄):
+  //   낮 = 직선거리 ÷ 시속 31km + 3분(최소 5분), 출퇴근 = 낮 × 1.52 + 4분(최소 7분)
+  const st = (isDefaultCandidate(from) ? MEASURED[`${from.id}:${to.id}`] : null) ?? {}, lv = liveRoute(from, to) ?? {}
+  const m: Measured = { free: newer(st.free, lv.free), rush: newer(st.rush, lv.rush) }
   const estFree = Math.max(5, Math.round((km / 31) * 60 + 3)) // 시속 31km + 주차·출발 3분
   const carFree = m.free ? m.free.min : estFree
   const carRush = m.rush ? m.rush.min : Math.max(7, Math.round(carFree * 1.52 + 4)) // 출퇴근 정체: 1.52배 + 4분

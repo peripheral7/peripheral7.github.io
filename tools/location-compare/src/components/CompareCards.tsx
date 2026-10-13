@@ -3,7 +3,7 @@ import { fmt, WALK_LIMIT, WALK_ZONE, type CandidateResult } from '../scoring'
 import { BASE_DEPOSIT, baseRent, hubEmoji, won, type Candidate, type Hub } from '../data'
 import { brokerageFee, feeText, useGroup } from '../brokerage'
 import { CATEGORIES, type CommercialIndex } from '../commercial'
-import { liveNote } from '../live'
+import { SLOT_TEXT, liveNote } from '../live'
 
 // 아래쪽: 후보지 카드를 가로로 늘어놓는다. 모든 카드가 같은 줄(행)을 공유해서(CSS subgrid)
 // "대중교통" 줄을 옆으로 읽으면 후보지끼리 대기·역까지 도보·환승을, "차량" 줄은 출퇴근/낮 차이를 바로 비교할 수 있다.
@@ -109,7 +109,8 @@ export function CompareCards({ results, com, hubs, active, onSelect, onRename }:
                 const t = h.trip, s = h.scores
                 const diff = t.carRush - t.carFree
                 const { free, rush } = t.carSource
-                const measured = free && rush ? ' · 네이버 실측' : free ? ' · 낮 실측·출퇴근 추정' : rush ? ' · 출퇴근 실측·낮 추정' : ' · 거리 추정'
+                // 추정치면 "추정"이라 적고, 언제 실측되는지(서버가 그 시간대에 자동으로 잰다) 짧게 남긴다
+                const estNote = [!rush && `출퇴근 ${SLOT_TEXT.rush}`, !free && `낮 ${SLOT_TEXT.free}`].filter(Boolean).join(' · ')
                 return [
                   <div key={h.hub.id + 'h'} className="cell hub-cell sect"><span>{h.hub.name}</span><small>{t.km.toFixed(1)}km · 반영 {Math.round(h.share * 100)}%</small><b className={isBest(h.hubScore, best((x) => x.hubs[hi].hubScore)) ? 'best' : ''}>{fmt(h.hubScore)}<Line v={h.hubScore} kind="hub" /></b></div>,
                   <div key={h.hub.id + 't'} className="cell mode-cell">
@@ -121,7 +122,7 @@ export function CompareCards({ results, com, hubs, active, onSelect, onRename }:
                         <em className={isBest(s.transit, best((x) => (x.hubs[hi].transitSkipped || x.hubs[hi].transitPending ? null : x.hubs[hi].scores.transit))) ? 'best' : ''}>{fmt(s.transit)}<Line v={s.transit} kind="transit" /></em></>}
                   </div>,
                   <div key={h.hub.id + 'c'} className={'cell mode-cell' + (h.carMuted ? ' muted-mode' : '')}>
-                    <div><b>출퇴근 {t.carRush}분 · 낮 {t.carFree}분</b><small>차이 +{diff}분 ({s.carRatio.toFixed(2)}배){measured}{h.carMuted ? ' · 대중교통 이용' : ''}</small></div>
+                    <div><b>출퇴근 {t.carRush}분{rush ? '' : '(추정)'} · 낮 {t.carFree}분{free ? '' : '(추정)'}</b><small>차이 {diff >= 0 ? '+' : ''}{diff}분 ({s.carRatio.toFixed(2)}배){free && rush ? ' · 네이버 실측' : ` · 실측 예정: ${estNote}`}{h.carMuted ? ' · 대중교통 이용' : ''}</small></div>
                     <em className={isBest(s.car, best((x) => x.hubs[hi].scores.car)) ? 'best' : ''}>{fmt(s.car)}<Line v={s.car} kind="car" /></em>
                   </div>,
                   <div key={h.hub.id + 'w'} className="cell mode-cell">

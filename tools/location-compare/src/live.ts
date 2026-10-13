@@ -1,5 +1,7 @@
 // 새 후보지(검색·지도로 넣은 곳) 계산 — place-search Worker 를 거쳐 사용자 PC 의 계산 서버(server/analyze-server.mjs)가 낸다.
 // 상권·평화로움·공원·도서관 = /analyze(scripts 를 그대로 실행, 약 30초), 차량 시간 = /route(네이버 Directions, 지금 교통).
+// 차량은 시간대 안(SLOT_TEXT)에서만 잰다 — 밖이면 추정식(scoring.ts)으로 "추정"이라 표시하고, 서버가 물어본 길을 기억했다가
+// 그 시간대가 오면 자동으로 잰다. 그래서 값이 빠진 길은 페이지를 열 때마다 한 번씩 다시 묻는다.
 // 대중교통은 아직 개발 중 — 새 후보지는 대중교통을 비워 두고 점수에서도 뺀다(scoring.ts transitPending).
 // 받은 결과는 이 브라우저에 저장해 다시 열어도 그대로 쓴다. 계산 서버가 꺼져 있으면 "계산 서버 꺼짐"으로 보인다.
 import { CANDIDATES, type Candidate, type Hub } from './data'
@@ -13,6 +15,8 @@ export type LiveAnalysis = {
   stdrYm?: string; osmAt?: string; at: string
 }
 type Slot = { min: number; km: number; at: string }
+/** 실측 시간대(server/analyze-server.mjs SLOT_WINDOWS 와 같게) */
+export const SLOT_TEXT = { rush: '평일 07:30~09:30', free: '평일 10:30~16:00' }
 export type LiveRoute = Partial<Record<'free' | 'rush', Slot>>
 
 const KEY = 'locCompare.live.v1'
@@ -68,10 +72,11 @@ async function fetchAnalysis(c: Candidate) {
   } catch { status[k] = 'offline' } finally { inflight.delete('a' + k); notify() }
 }
 
+const asked = new Set<string>() // 이 화면에서 이미 물어본 길(빠진 시간대가 있어도 페이지당 한 번만)
 async function fetchRoute(c: Candidate, h: Hub) {
   const k = `${pkey(c)}>${pkey(h)}`
-  if (inflight.has('r' + k) || store.r[k]) return
-  inflight.add('r' + k)
+  if (inflight.has('r' + k) || asked.has(k) || (store.r[k]?.free && store.r[k]?.rush)) return
+  inflight.add('r' + k); asked.add(k)
   try {
     const { status: s, body } = await get(`/route?from=${c.lat},${c.lng}&to=${h.lat},${h.lng}`)
     if (s === 200 && (body.free || body.rush)) { store.r[k] = body; persist(); notify() }
@@ -83,11 +88,15 @@ export function requestLive(cands: Candidate[], hubs: Hub[], onChange: () => voi
   if (!SEARCH_URL) return
   notify = onChange
   for (const c of cands) {
-    if (isDefaultCandidate(c)) continue
-    if (!store.a[pkey(c)] && status[pkey(c)] !== 'outside') void fetchAnalysis(c)
-    for (const h of hubs) void fetchRoute(c, h)
+    const def = isDefaultCandidate(c)
+    if (!def && !store.a[pkey(c)] && status[pkey(c)] !== 'outside') void fetchAnalysis(c)
+    for (const h of hubs) if (!(def && hasStatic(c.id, h.id))) void fetchRoute(c, h) // 기본 후보지도 미리 잰 값(routes.json)이 빠진 길은 서버에
   }
 }
+
+let hasStatic: (cid: string, hid: string) => boolean = () => false
+/** scoring.ts 가 routes.json(미리 잰 값)에 두 시간대가 다 있는지 알려 준다(순환 import 피하려고 주입) */
+export const setStaticCheck = (f: typeof hasStatic) => { hasStatic = f }
 
 /** 꺼져 있었던 것 다시 시도 */
 export function retryLive(cands: Candidate[], hubs: Hub[]) {
