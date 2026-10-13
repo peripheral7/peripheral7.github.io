@@ -171,7 +171,7 @@ function CommercialPicker({ prefs, onChange, counts, brands, bike }: { prefs: Co
         const t = tierOf(prefs, c.id)
         return (
           <div className="com-cat" key={c.id}>
-            <span className="com-name" title={THIN[c.id]}>{c.emoji} {c.label}{THIN[c.id] && <sup aria-label="자료 부족">*</sup>}{BRAND_PARTS[c.id] && brands && <small className="com-brand"> · {BRAND_PARTS[c.id].label} {brands[c.id]}</small>}</span>
+            <span className="com-name" title={THIN[c.id]}>{c.emoji} {c.label}{THIN[c.id] && <sup aria-label="자료 부족">*</sup>}</span>
             <span className="seg" role="radiogroup" aria-label={`${c.label} 반영`}>
               {TIERS.map((x) => (
                 <button key={x.t} type="button" role="radio" aria-checked={t === x.t} className={t === x.t ? `on ${x.t}` : ''} onClick={() => onChange(setTier(prefs, c.id, x.t))}>{x.label}</button>
