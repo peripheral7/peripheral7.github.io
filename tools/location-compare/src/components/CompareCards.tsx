@@ -48,7 +48,9 @@ function reveal(card: HTMLElement) {
   const box = card.closest<HTMLElement>('.cards-scroll')
   if (!box) return
   const c = card.getBoundingClientRect(), b = box.getBoundingClientRect()
-  const dx = c.left < b.left ? c.left - b.left : c.right > b.right ? c.right - b.right : 0
+  const lw = box.querySelector('.labels')?.getBoundingClientRect().width ?? 0 // 왼쪽 고정 열에 가려지는 폭
+  const left = b.left + lw + 10
+  const dx = c.left < left ? c.left - left : c.right > b.right ? c.right - b.right : 0
   if (dx) box.scrollBy({ left: dx, behavior: 'smooth' })
 }
 

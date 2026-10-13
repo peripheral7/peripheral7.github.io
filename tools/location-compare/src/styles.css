@@ -642,3 +642,6 @@ input[type=number]::-webkit-inner-spin-button, input[type=number]::-webkit-outer
 .major-pin.spot-pin { border-color: #8a5a2b }
 .commute-area { display: flex; flex-direction: column; gap: 12px }
 .commute-area > .side-card { grid-area: auto }
+
+/* 후보지별 비교: 왼쪽 첫 열(변수 설명)은 가로로 스크롤해도 고정 */
+.cards-grid > .col.labels { position: sticky; left: 0; z-index: 3; background: var(--panel, #fff); box-shadow: 8px 0 8px -8px rgba(24, 39, 56, 0.18); padding-right: 6px }
