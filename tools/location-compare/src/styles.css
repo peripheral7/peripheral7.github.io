@@ -632,3 +632,5 @@ input[type=number]::-webkit-inner-spin-button, input[type=number]::-webkit-outer
 .rec-money small { color: var(--muted); font-size: 11px }
 .rec-formula { display: block; color: var(--faint) !important; font-size: 10.5px !important }
 .major-pin.spot-pin { border-color: #8a5a2b }
+.commute-area { display: flex; flex-direction: column; gap: 12px }
+.commute-area > .side-card { grid-area: auto }

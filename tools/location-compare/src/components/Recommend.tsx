@@ -48,7 +48,7 @@ export function ListingCards({ candidates }: { candidates: Candidate[] }) {
 
 export function SpotCards({ candidates }: { candidates: Candidate[] }) {
   return (
-    <aside className="side-card side-right panel" aria-label="근처 카페·식당">
+    <aside className="side-card panel" aria-label="근처 카페·식당">
       <div className="panel-head"><h2>근처 카페·식당</h2><span className="soon">광고</span></div>
       {SPOTS.map((x) => (
         <a key={x.id} className="rec-item" href={naverMapUrl(x.query)} target="_blank" rel="noopener noreferrer">

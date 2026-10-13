@@ -226,11 +226,11 @@ export default function App() {
             onToggleCat={() => setCats({ ...catState, on: !catState.on })} onRegister={() => setCatDlg('register')} onGallery={(start = 0) => { setGalleryIdx(null); setGalleryStart(start); setCatDlg('gallery') }}
             com={cur ? comIdx[Math.min(active, comIdx.length - 1)] ?? null : null} comCounts={walk5Counts(candidates[active], !!pref.bike)} comBrands={walk5Brand(candidates[active], !!pref.bike)} bike={!!pref.bike} best={best} comPrefs={comPrefs} onComPrefs={setComPrefs}
             place={placeFor(candidates[active], !!pref.bike)} placeOn={placeOn} onPlaceOn={setPlaceOn} />
-          <SpotCards candidates={candidates} />
         </aside>
 
-        {/* 출퇴근 인사이트: 지도 높이에 맞춘 오른쪽 열 아래(후보지별 비교 오른쪽 옆)에 내용만큼 */}
+        {/* 카페·식당 광고 → 출퇴근 인사이트: 지도 높이에 맞춘 입지 요인 아래(후보지별 비교 오른쪽 옆)에 내용만큼 쌓는다(입지 요인이 길어져도 서로 가리지 않음) */}
         <aside className="side-right commute-area">
+          <SpotCards candidates={candidates} />
             {cur && <CommutePanel r={cur} trips={pref.trips} settings={{ kmpl: commute.kmpl, fuel: commute.fuel ?? fuelAuto?.price ?? DEFAULT_FUEL }}
       fuelAuto={fuelAuto} fuelManual={commute.fuel !== null} onKmpl={(n) => saveC({ ...commute, kmpl: n })} onFuel={(n) => saveC({ ...commute, fuel: n })} />}
         </aside>
