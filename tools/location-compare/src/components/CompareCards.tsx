@@ -43,6 +43,15 @@ function ComCell({ x, best }: { x: CommercialIndex | undefined; best: boolean })
   )
 }
 
+// 카드가 일부라도 가려져 있으면, 카드 전체가 보이도록 가로 스크롤을 가장 가까운 끝까지만 움직인다
+function reveal(card: HTMLElement) {
+  const box = card.closest<HTMLElement>('.cards-scroll')
+  if (!box) return
+  const c = card.getBoundingClientRect(), b = box.getBoundingClientRect()
+  const dx = c.left < b.left ? c.left - b.left : c.right > b.right ? c.right - b.right : 0
+  if (dx) box.scrollBy({ left: dx, behavior: 'smooth' })
+}
+
 export function CompareCards({ results, com, hubs, active, onSelect, onRename }: Props) {
   const [naming, setNaming] = useState<{ id: string; name: string } | null>(null) // 카드에서 이름 바꾸는 중
   const finish = (save: boolean) => { if (save && naming) onRename(naming.id, naming.name); setNaming(null) }
@@ -70,8 +79,8 @@ export function CompareCards({ results, com, hubs, active, onSelect, onRename }:
 
           {results.map((r, i) => ({ r, i })).sort((a, b) => a.r.rank - b.r.rank).map(({ r, i }) => (
             <div key={r.candidate.id} role="button" tabIndex={0} aria-pressed={i === active} className={'col card' + (i === active ? ' on' : '')} style={{ gridRow: `1 / span ${rows}` }}
-              onClick={(e) => { if (!(e.target as HTMLElement).closest('.name-edit, .pen')) onSelect(i) }}
-              onKeyDown={(e) => { if ((e.key === 'Enter' || e.key === ' ') && e.target === e.currentTarget) { e.preventDefault(); onSelect(i) } }}>
+              onClick={(e) => { if (!(e.target as HTMLElement).closest('.name-edit, .pen')) { onSelect(i); reveal(e.currentTarget) } }}
+              onKeyDown={(e) => { if ((e.key === 'Enter' || e.key === ' ') && e.target === e.currentTarget) { e.preventDefault(); onSelect(i); reveal(e.currentTarget) } }}>
               <div className="cell head-cell">
                 <span className="rank">{r.rank}</span>
                 {naming?.id === r.candidate.id ? (
