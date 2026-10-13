@@ -11,3 +11,10 @@ CREATE TABLE IF NOT EXISTS cache (
   body TEXT    NOT NULL,
   exp  INTEGER NOT NULL
 );
+
+-- 계산 서버(사용자 PC, cloudflared 빠른 터널) 주소: k = 'compute', url = https://….trycloudflare.com, at = 마지막 알림 시각(초)
+CREATE TABLE IF NOT EXISTS relay (
+  k   TEXT    PRIMARY KEY,
+  url TEXT    NOT NULL,
+  at  INTEGER NOT NULL
+);

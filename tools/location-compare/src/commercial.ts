@@ -4,9 +4,10 @@
 // 업종 점수 = 10 × (1 − 10^(−개수 ÷ 기준 개수)) — 반경 500m. 기준 개수("이만하면 됐다", ENOUGH)에서 9점, 2배에서 9.9점.
 //   한계효용 체감: 처음 몇 곳이 점수를 크게 올리고, 기준을 넘으면 아무리 많아도 거의 안 오른다(10점을 넘지 않음). 다른 후보지와 상관없는 절대 점수.
 // 상권 지수 = 필수 업종 점수 평균 × 0.8 + 선호 업종 점수 평균 × 0.2 (한쪽이 비면 다른 쪽이 100%, 묶음 안은 균등)
-// 자료는 기본 후보지만 있다 — 검색으로 넣은 후보지는 "자료 없음"(PC 에서 data.ts 에 넣고 analyze 를 다시 돌려야 한다).
+// 자료: 기본 후보지 = 이 파일(commercial.json), 검색으로 넣은 후보지 = 계산 서버가 같은 스크립트로 낸 결과(live.ts).
 import data from './commercial.json'
 import type { Candidate } from './data'
+import { isDefaultCandidate, liveAnalysis } from './live'
 
 export type Tier = 'need' | 'want' | 'off'
 export type CommercialPrefs = { on: boolean; need: string[]; want: string[] }
@@ -43,7 +44,7 @@ const ROWS = data.candidates as Record<string, Row>
 /** 그 후보지의 자료(같은 id 이고 좌표가 30m 안일 때만 — 이름만 같은 다른 곳을 막는다) */
 function rowOf(c: Candidate): Row | null {
   const r = ROWS[c.id]
-  if (!r) return null
+  if (!r || !isDefaultCandidate(c)) return (liveAnalysis(c)?.commercial as Row | undefined) ?? null
   const dy = (r.lat - c.lat) * 111320, dx = (r.lng - c.lng) * 111320 * Math.cos((c.lat * Math.PI) / 180)
   return Math.hypot(dx, dy) <= 30 ? r : null
 }

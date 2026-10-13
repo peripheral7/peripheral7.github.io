@@ -1,8 +1,9 @@
 // 입지 요인 — 평화로움 · 공원 · 도서관. 이 PC 에서 만든 src/places.json(scripts/places.mjs)만 읽는다.
-// 계산 규칙은 src/places-config.json, 설명은 README 4-5절. 자료는 기본 후보지만(검색으로 넣은 후보지는 "자료 없음").
+// 계산 규칙은 src/places-config.json, 설명은 README 4-5절. 자료: 기본 후보지 = places.json, 검색으로 넣은 후보지 = 계산 서버(live.ts).
 import data from './places.json'
 import config from './places-config.json'
 import type { Candidate } from './data'
+import { isDefaultCandidate, liveAnalysis } from './live'
 
 export type PlaceKey = 'peace' | 'park' | 'library'
 export type ParkRow = { name: string; type: string; dist: number; value: number; eff: number; areaHa: number; walkM: number; waterside: boolean; linked: boolean; relief?: number; steep?: number }
@@ -25,8 +26,9 @@ const ROWS = data.candidates as unknown as Record<string, Raw>
 
 /** 그 후보지의 자료(같은 id 이고 좌표가 30m 안일 때만) */
 export function placeOf(c: Candidate | undefined): PlaceRow | null {
-  const r = c ? ROWS[c.id] : null
-  if (!r || !c) return null
+  if (!c) return null
+  const r = ROWS[c.id]
+  if (!r || !isDefaultCandidate(c)) return (liveAnalysis(c)?.places as unknown as PlaceRow | undefined) ?? null // 검색으로 넣은 후보지 = 계산 서버(live.ts)
   const dy = (r.lat - c.lat) * 111320, dx = (r.lng - c.lng) * 111320 * Math.cos((c.lat * Math.PI) / 180)
   return Math.hypot(dx, dy) <= 30 ? r : null
 }

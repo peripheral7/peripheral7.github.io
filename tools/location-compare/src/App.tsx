@@ -19,6 +19,7 @@ import { fuelPriceFor } from './fuel'
 import { USE_LABEL, type PropertyUse } from './brokerage'
 import { loadParks, strollNear, PARK_AREAS, PARK_AREA_MIN, STROLL_RADIUS, type Park } from './parks'
 import { PLACE_KEYS, loadPlaceOn, placeFor, placeSummary, savePlaceOn, type PlaceOn } from './places'
+import { liveMajors, liveNote, requestLive } from './live'
 import { MAJORS, commercialIndex, loadCommercial, pickedCats, saveCommercial, walk5Brand, walk5Counts, type CommercialPrefs } from './commercial'
 
 // " · 3,000/40 (1,000 기준 월 50)" — 금액을 안 넣었으면 빈 글자
@@ -64,7 +65,10 @@ export default function App() {
   const [galleryIdx, setGalleryIdx] = useState<number | null>(null) // 카드에서 "사진 보기"를 누른 후보지(없으면 선택한 후보지)
   const [galleryStart, setGalleryStart] = useState(0) // 입지 요인 썸네일에서 누른 사진부터
   const { candidates, hubs, pref } = state
-  const results = useMemo(() => (candidates.length ? evaluate(candidates, hubs, pref) : []), [candidates, hubs, pref])
+  // 검색으로 넣은 후보지: 계산 서버(live.ts)에 상권·입지 요인·차량 시간을 요청하고, 결과가 들어올 때마다 liveVer 를 올려 다시 계산
+  const [liveVer, setLiveVer] = useState(0)
+  useEffect(() => { requestLive(candidates, hubs, () => setLiveVer((v) => v + 1)) }, [candidates, hubs])
+  const results = useMemo(() => (candidates.length ? evaluate(candidates, hubs, pref) : []), [candidates, hubs, pref, liveVer]) // eslint-disable-line react-hooks/exhaustive-deps
   const cur = results[Math.min(active, results.length - 1)]
   const hubId = hubs.some((h) => h.id === hubPick) ? hubPick : hubs[0]?.id ?? null
   const hubIndex = hubs.findIndex((h) => h.id === hubId)
@@ -78,7 +82,7 @@ export default function App() {
   useEffect(() => { saveCats(catState) }, [catState])
   useEffect(() => { saveCommercial(comPrefs) }, [comPrefs])
   useEffect(() => { savePlaceOn(placeOn) }, [placeOn])
-  const comIdx = useMemo(() => commercialIndex(candidates, comPrefs, !!pref.bike), [candidates, comPrefs, pref.bike])
+  const comIdx = useMemo(() => commercialIndex(candidates, comPrefs, !!pref.bike), [candidates, comPrefs, pref.bike, liveVer]) // eslint-disable-line react-hooks/exhaustive-deps
   // 지도에 따로 표시할 주요 매장: 필수·선호로 고른 업종의 것만(상권 지수를 껐으면 없음)
   // 지도 위 지표 단추: 상권(주요 매장 표시)·산책(공원·하천 표시). 이 브라우저에 기억한다.
   const [layers, setLayers] = useState<{ com: boolean; walk: boolean }>(() => {
@@ -86,7 +90,7 @@ export default function App() {
     return { com: true, walk: false }
   })
   const toggleLayer = (k: 'com' | 'walk') => setLayers((l) => { const n = { ...l, [k]: !l[k] }; try { localStorage.setItem('locCompare.layers.v1', JSON.stringify(n)) } catch { /* 저장 못 해도 동작 */ } return n })
-  const majors = useMemo(() => { const on = pickedCats(comPrefs); return layers.com ? (comPrefs.on ? MAJORS.filter((m) => on.has(m.cat)) : MAJORS) : [] }, [comPrefs, layers.com])
+  const majors = useMemo(() => { const all = [...MAJORS, ...liveMajors(candidates)], on = pickedCats(comPrefs); return layers.com ? (comPrefs.on ? all.filter((m) => on.has(m.cat)) : all) : [] }, [comPrefs, layers.com, candidates, liveVer]) // eslint-disable-line react-hooks/exhaustive-deps
   const [parks, setParks] = useState<Park[]>([])
   const [parkState, setParkState] = useState<'idle' | 'loading' | 'error'>('idle')
   const parkKey = candidates.map((c) => `${c.lat},${c.lng}`).join(';')
@@ -255,7 +259,7 @@ export default function App() {
           <FactorsPanel cat={catIdx && cur ? catIdx[Math.min(active, catIdx.length - 1)] ?? null : null} catOn={catState.on}
             onToggleCat={() => setCats({ ...catState, on: !catState.on })} onRegister={() => setCatDlg('register')} onGallery={(start = 0) => { setGalleryIdx(null); setGalleryStart(start); setCatDlg('gallery') }}
             com={cur ? comIdx[Math.min(active, comIdx.length - 1)] ?? null : null} comCounts={walk5Counts(candidates[active], !!pref.bike)} comBrands={walk5Brand(candidates[active], !!pref.bike)} bike={!!pref.bike} best={best} comPrefs={comPrefs} onComPrefs={setComPrefs}
-            place={placeFor(candidates[active], !!pref.bike)} placeOn={placeOn} onPlaceOn={setPlaceOn} />
+            place={placeFor(candidates[active], !!pref.bike)} placeOn={placeOn} onPlaceOn={setPlaceOn} missing={liveNote(candidates[active])} />
         </aside>
 
         {/* 카페·식당 광고 → 출퇴근 인사이트: 지도 높이에 맞춘 입지 요인 아래(후보지별 비교 오른쪽 옆)에 내용만큼 쌓는다(입지 요인이 길어져도 서로 가리지 않음) */}

@@ -27,6 +27,9 @@ export function CommutePanel({ r, trips, settings, fuelAuto, fuelManual, onKmpl,
   const at = d ? `${d.getMonth() + 1}/${d.getDate()}` : '' // 오피넷에서 받은 날
   if (!ins) return <div className="panel commute"><div className="panel-head"><h2>출퇴근 인사이트</h2></div><p className="muted">목적지를 넣으면 보입니다.</p></div>
   const { main, day, month } = ins
+  // 대중교통 자료가 아직 없는 후보지(검색으로 넣은 곳)는 대중교통 칸을 비운다 — 걸어가는 경우(도보 10분 이내)는 그대로
+  const tp = main.transitPending
+  const dev = <em className="muted">개발 중</em>
   return (
     <div className="panel commute">
       <div className="panel-head"><h2>출퇴근 인사이트</h2></div>
@@ -36,19 +39,19 @@ export function CommutePanel({ r, trips, settings, fuelAuto, fuelManual, onKmpl,
         <b className="cm-col"><i className="dot car" />차량</b>
 
         <span className="cm-label">하루 시간<small>{hubEmoji(main.hub.category)} {main.hub.category} 왕복</small></span>
-        <em>{hm(day.transitMin)}{day.walked && <small>도보</small>}</em>
+        {tp && !day.walked ? dev : <em>{hm(day.transitMin)}{day.walked && <small>도보</small>}</em>}
         <em>{hm(day.carMin)}</em>
 
         <span className="cm-label">하루 교통비</span>
-        <em>{wonText(day.transitWon)}</em>
+        {tp && !day.walked ? dev : <em>{wonText(day.transitWon)}</em>}
         <em>{wonText(day.carWon)}<small>{day.carKm.toFixed(1)}km</small></em>
 
         <span className="cm-label">월 교통비<small>월 왕복 {month.trips}회</small></span>
-        <em className="strong">{wonText(month.transitWon)}</em>
+        {tp ? dev : <em className="strong">{wonText(month.transitWon)}</em>}
         <em className="strong">{wonText(month.carWon)}</em>
 
         <span className="cm-label">월 이동 시간</span>
-        <em>{hm(month.transitMin)}</em>
+        {tp ? dev : <em>{hm(month.transitMin)}</em>}
         <em>{hm(month.carMin)}</em>
       </div>
       <div className="cm-inputs">

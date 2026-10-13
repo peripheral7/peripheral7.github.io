@@ -3,6 +3,7 @@ import { fmt, WALK_LIMIT, WALK_ZONE, type CandidateResult } from '../scoring'
 import { BASE_DEPOSIT, baseRent, hubEmoji, won, type Candidate, type Hub } from '../data'
 import { brokerageFee, feeText, useGroup } from '../brokerage'
 import { CATEGORIES, type CommercialIndex } from '../commercial'
+import { liveNote } from '../live'
 
 // 아래쪽: 후보지 카드를 가로로 늘어놓는다. 모든 카드가 같은 줄(행)을 공유해서(CSS subgrid)
 // "대중교통" 줄을 옆으로 읽으면 후보지끼리 대기·역까지 도보·환승을, "차량" 줄은 출퇴근/낮 차이를 바로 비교할 수 있다.
@@ -31,9 +32,9 @@ function RentCell({ c, sect }: { c: Candidate; sect?: boolean }) {
 }
 
 // 상권 종합: 지수 + 필수 업종의 도보 5분 안 개수(선호는 연하게)
-function ComCell({ x, best }: { x: CommercialIndex | undefined; best: boolean }) {
+function ComCell({ x, best, c }: { x: CommercialIndex | undefined; best: boolean; c: Candidate }) {
   if (x === undefined) return <div className="cell mode-cell"><div><span className="muted">입지 요인 ⚙ 에서 켜면 표시</span></div></div>
-  if (x === null) return <div className="cell mode-cell"><div><span className="muted">상권 자료 없음(검색으로 넣은 후보지)</span></div></div>
+  if (x === null) return <div className="cell mode-cell"><div><span className="muted">상권 {liveNote(c)}</span></div></div>
   // 고른 업종(필수 → 선호)을 이름·개수로 보이고, 업종 점수가 5점 이상이면 초록색
   const items = (t: 'need' | 'want') => x.parts.filter((p) => p.tier === t).map((p) => (
     <span key={p.id} className={p.score >= 5 ? 'com-ok' : undefined}>{CATEGORIES.find((c) => c.id === p.id)?.label} {p.count}</span>
@@ -112,10 +113,12 @@ export function CompareCards({ results, com, hubs, active, onSelect, onRename }:
                 return [
                   <div key={h.hub.id + 'h'} className="cell hub-cell sect"><span>{h.hub.name}</span><small>{t.km.toFixed(1)}km · 반영 {Math.round(h.share * 100)}%</small><b className={isBest(h.hubScore, best((x) => x.hubs[hi].hubScore)) ? 'best' : ''}>{fmt(h.hubScore)}<Line v={h.hubScore} kind="hub" /></b></div>,
                   <div key={h.hub.id + 't'} className="cell mode-cell">
-                    {h.transitSkipped
+                    {h.transitPending && !h.transitSkipped
+                      ? <div><span className="muted">대중교통 자료 개발 중</span></div>
+                      : h.transitSkipped
                       ? <div><span className="muted">도보 {t.walk}분 · 걸어가니 대중교통 제외</span></div>
                       : <><div><b>{t.transit}분</b><small>대기 {t.wait}분 · 정류장까지 도보 {t.access}분 · 환승 {t.transfers}회</small></div>
-                        <em className={isBest(s.transit, best((x) => (x.hubs[hi].transitSkipped ? null : x.hubs[hi].scores.transit))) ? 'best' : ''}>{fmt(s.transit)}<Line v={s.transit} kind="transit" /></em></>}
+                        <em className={isBest(s.transit, best((x) => (x.hubs[hi].transitSkipped || x.hubs[hi].transitPending ? null : x.hubs[hi].scores.transit))) ? 'best' : ''}>{fmt(s.transit)}<Line v={s.transit} kind="transit" /></em></>}
                   </div>,
                   <div key={h.hub.id + 'c'} className={'cell mode-cell' + (h.carMuted ? ' muted-mode' : '')}>
                     <div><b>출퇴근 {t.carRush}분 · 낮 {t.carFree}분</b><small>차이 +{diff}분 ({s.carRatio.toFixed(2)}배){measured}{h.carMuted ? ' · 대중교통 이용' : ''}</small></div>
@@ -129,7 +132,7 @@ export function CompareCards({ results, com, hubs, active, onSelect, onRename }:
                 ]
               })}
               <RentCell c={r.candidate} sect />
-              <ComCell x={com ? com[i] : undefined} best={!!com && isBest(com[i]?.score ?? null, Math.max(...com.map((c) => c?.score ?? -1)))} />
+              <ComCell c={r.candidate} x={com ? com[i] : undefined} best={!!com && isBest(com[i]?.score ?? null, Math.max(...com.map((c) => c?.score ?? -1)))} />
             </div>
           ))}
         </div>

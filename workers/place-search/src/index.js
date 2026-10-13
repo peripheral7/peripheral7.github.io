@@ -12,8 +12,13 @@
 //  6) 요청 검사: GET /search?q= 만, 검색어 2~40자.
 //
 //  GET /search?q=검색어   → { items: [{ name, address, category, lat, lng }] }
+//
+// 계산 중계(10-14): 새 후보지의 상권·입지 요인·차량 시간은 사용자 PC 의 계산 서버(tools/location-compare/server)가 낸다.
+//  그 서버가 cloudflared 빠른 터널 주소를 POST /relay/register 로 알려 오면(X-Relay-Key = 시크릿 RELAY_SECRET) D1 relay 표에 둔다.
+//  GET /analyze?lat=&lng=  · GET /route?from=lat,lng&to=lat,lng → 출처·IP 상한을 거쳐 그 주소로 넘긴다(키는 Worker 가 붙임).
+//  등록이 없거나 25분 넘게 소식이 없거나 연결이 안 되면 503 { error: 'offline' } — 화면은 "계산 서버 꺼짐"으로 보인다.
 
-const ALLOWED_ORIGINS = new Set(['https://peripheral7.github.io', 'http://localhost:5173', 'http://localhost:3001', 'http://127.0.0.1:3001'])
+const ALLOWED_ORIGINS = new Set(['https://peripheral7.github.io', 'http://localhost:5173', 'http://localhost:5174', 'http://localhost:5175', 'http://localhost:3001', 'http://127.0.0.1:3001'])
 // 네이버 개발자센터 검색 API(openapi.naver.com)는 2026-06-29 종료 → NAVER API HUB(네이버 클라우드) 지역 검색으로 이관.
 // 키도 API HUB 에서 새로 받은 Client ID/Secret 이어야 하고, 헤더 이름이 X-NCP-APIGW-API-KEY-ID / X-NCP-APIGW-API-KEY 로 바뀌었다.
 const NAVER_LOCAL = 'https://naverapihub.apigw.ntruss.com/search/v1/local'
@@ -22,7 +27,7 @@ const CACHE_TTL = 7 * 24 * 3600
 const num = (v, d) => (Number.isFinite(Number(v)) && Number(v) > 0 ? Number(v) : d)
 
 function cors(origin) {
-  const h = { 'Access-Control-Allow-Methods': 'GET, OPTIONS', 'Access-Control-Allow-Headers': 'X-Turnstile-Token', 'Access-Control-Max-Age': '86400', Vary: 'Origin' }
+  const h = { 'Access-Control-Allow-Methods': 'GET, OPTIONS', 'Access-Control-Expose-Headers': 'Retry-After', 'Access-Control-Allow-Headers': 'X-Turnstile-Token', 'Access-Control-Max-Age': '86400', Vary: 'Origin' }
   if (origin && ALLOWED_ORIGINS.has(origin)) h['Access-Control-Allow-Origin'] = origin
   return h
 }
@@ -62,12 +67,61 @@ function toPlaces(body) {
   })).filter((p) => p.name && Number.isFinite(p.lat) && Number.isFinite(p.lng) && p.lat > 33 && p.lat < 39 && p.lng > 124 && p.lng < 132)
 }
 
+const RELAY_STALE = 25 * 60 // 계산 서버는 10분마다 다시 알린다 — 25분 소식이 없으면 꺼진 것으로 본다
+const sameKey = (a, b) => typeof a === 'string' && typeof b === 'string' && a.length === b.length && a.length > 0 && [...a].reduce((x, c, i) => x | (c.charCodeAt(0) ^ b.charCodeAt(i)), 0) === 0
+
+async function relayRegister(request, env) {
+  if (!sameKey(request.headers.get('X-Relay-Key'), env.RELAY_SECRET)) return json({ error: 'key' }, 403, {})
+  const body = await request.json().catch(() => ({}))
+  const u = body.url === null ? null : String(body.url || '')
+  if (u !== null && !/^https:\/\/[a-z0-9-]+\.trycloudflare\.com$/.test(u)) return json({ error: 'url' }, 400, {})
+  if (u === null) await env.DB.prepare("DELETE FROM relay WHERE k = 'compute'").run()
+  else await env.DB.prepare("INSERT OR REPLACE INTO relay (k, url, at) VALUES ('compute', ?1, ?2)").bind(u, Math.floor(Date.now() / 1000)).run()
+  return json({ ok: true }, 200, {})
+}
+
+// /analyze · /route → 계산 서버. 매개변수는 숫자 좌표만 다시 만들어 넘긴다(다른 글자는 안 넘김).
+async function relay(env, h, url, who, hour) {
+  const coord = (s) => { const [a, b] = String(s || '').split(',').map(Number); return Number.isFinite(a) && Number.isFinite(b) && a > 33 && a < 39 && b > 124 && b < 132 ? `${a.toFixed(5)},${b.toFixed(5)}` : null }
+  let path
+  if (url.pathname === '/analyze') {
+    const c = coord(`${url.searchParams.get('lat')},${url.searchParams.get('lng')}`)
+    if (!c) return json({ error: 'query' }, 400, h)
+    const [lat, lng] = c.split(',')
+    path = `/analyze?lat=${lat}&lng=${lng}`
+  } else {
+    const f = coord(url.searchParams.get('from')), t = coord(url.searchParams.get('to'))
+    if (!f || !t) return json({ error: 'query' }, 400, h)
+    path = `/route?from=${f}&to=${t}`
+  }
+  // IP 당 상한(분석은 결과가 나올 때까지 몇 초마다 다시 묻기 때문에 넉넉히)
+  const n = await bump(env, `rl:${who}:${hour}`, 7200)
+  if (n > num(env.RELAY_IP_HOURLY, 600)) return json({ error: 'rate' }, 429, { ...h, 'Retry-After': '3600' })
+  const row = await env.DB.prepare("SELECT url, at FROM relay WHERE k = 'compute'").first()
+  if (!row || Math.floor(Date.now() / 1000) - row.at > RELAY_STALE) return json({ error: 'offline' }, 503, h)
+  try {
+    const r = await fetch(row.url + path, { headers: { 'X-Relay-Key': env.RELAY_SECRET }, signal: AbortSignal.timeout(25000) })
+    const text = await r.text()
+    if (!text.startsWith('{')) return json({ error: 'offline' }, 503, h) // 터널은 살아 있는데 서버가 꺼진 경우 등
+    return new Response(text, { status: r.status, headers: { 'Content-Type': 'application/json; charset=utf-8', 'Cache-Control': 'no-store', ...h } })
+  } catch {
+    return json({ error: 'offline' }, 503, h)
+  }
+}
+
 export default {
   async fetch(request, env, ctx) {
     const origin = request.headers.get('Origin')
     const h = cors(origin)
     const url = new URL(request.url)
     if (request.method === 'OPTIONS') return new Response(null, { status: 204, headers: h })
+    if (request.method === 'POST' && url.pathname === '/relay/register') return relayRegister(request, env)
+    if (request.method === 'GET' && (url.pathname === '/analyze' || url.pathname === '/route')) {
+      if (!origin || !ALLOWED_ORIGINS.has(origin)) return json({ error: 'origin' }, 403, h)
+      const now = new Date()
+      const who = await sha256((env.SALT || 'place-search') + (request.headers.get('CF-Connecting-IP') || ''))
+      try { return await relay(env, h, url, who, now.toISOString().slice(0, 13)) } catch { return json({ error: 'server' }, 500, h) }
+    }
     if (request.method !== 'GET' || url.pathname !== '/search') return json({ error: 'not_found' }, 404, h)
     if (!origin || !ALLOWED_ORIGINS.has(origin)) return json({ error: 'origin' }, 403, h)
 

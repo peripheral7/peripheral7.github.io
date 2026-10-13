@@ -454,3 +454,21 @@ npm run build                           # 그다음 커밋
 ### 보증금 1,000 기준 월세
 
 보증금이 다른 매물을 한 기준으로 비교하려고 `월세 + (보증금 − 1,000) × 연 6% ÷ 12`(만원)로 맞춘다. 보증금 1,000만원 차이 = 월 5만원. 기준 보증금·전환율은 `src/data.ts` 의 `BASE_DEPOSIT`·`CONVERSION_RATE`.
+
+## 11. 새 후보지 계산 서버 (`server/`, 사용자 테스트 기간용)
+
+검색·지도로 넣은 후보지도 상권·평화로움·공원·도서관·차량 시간이 나오게 하는 서버. **이 PC 에서 돌리고 Cloudflare 빠른 터널로 내보낸다** — PC 가 꺼져 있으면 화면에 "계산 서버 꺼짐"(기본 후보지는 그대로 동작).
+
+```
+공개 페이지(src/live.ts) → place-search Worker /analyze · /route (허용 출처 · IP 시간당 RELAY_IP_HOURLY)
+  → D1 relay 표의 터널 주소(https://….trycloudflare.com, X-Relay-Key = 시크릿 RELAY_SECRET)
+  → server/analyze-server.mjs (127.0.0.1:8790, 키가 맞을 때만)
+```
+
+- **켜기**: `server/start.cmd` 더블클릭(또는 이 폴더에서 `node server/analyze-server.mjs --tunnel`). 터널 주소는 켤 때마다 바뀌고 Worker 에 자동 등록(10분마다 다시 알림, 25분 소식 없으면 꺼진 것으로 봄). 끌 때 Ctrl+C → 등록 해제. 기록 `server/server.log`.
+- **분석(`/analyze`)**: `server/runner.mjs` 가 `server/.work/` 에 저장소 모양 사본을 만들고 `src/data.ts` 만 "후보지 = 이 좌표"로 바꿔 `scripts/stores.mjs analyze` · `scripts/places.mjs --refresh` 를 **그대로** 실행 → 그 후보지 줄만 돌려준다. 스크립트·규칙 파일은 **git HEAD** 에서 꺼낸다(배포 번들과 같은 규칙, 미커밋 변경은 안 섞임). 약 30초, 한 번에 하나(대기열 20), 화면은 4초마다 다시 묻는다. Overpass 주 서버가 바쁘면 사본에서만 미러(z./lz4.overpass-api.de)를 차례로 쓴다.
+- **차량(`/route`)**: 네이버 Directions 5(.env.local 의 NAVER_CLIENT_ID/SECRET) 지금 교통 1회. 평일 07~10·17~20시 = 출퇴근(rush), 그 밖 = 낮(free) — 없는 시간대는 기존 추정식.
+- **대중교통**: 아직 개발 중 — 검색으로 넣은 후보지(`isDefaultCandidate` 가 아닌 곳)는 대중교통 칸을 "개발 중"으로 비우고 점수에서도 뺀다(`scoring.ts` transitPending — 걸어가는 transitSkipped 와 같은 계산).
+- **범위·상한**: 서울·경기 네모 밖이면 "서울·경기 밖이라 자료 없음"(공원 경계는 경기만, 고도 보정은 위도 37~38·경도 127~128만). 하루 새 계산 상한 = 분석 150 · 길찾기 300(`.env.local` 의 LIVE_ANALYZE_LIMIT · LIVE_ROUTE_LIMIT, 사용량 `server/.usage.json`). 결과 캐시 `server/cache/`(좌표 30일 · 길·시간대 7일), 브라우저도 `locCompare.live.v1` 에 저장.
+- **개인정보**: 서버에는 좌표(소수 5자리)만 오고, 캐시 파일 이름에 좌표가 남는다. 주소·이름은 보내지 않는다.
+

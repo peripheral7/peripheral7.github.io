@@ -44,3 +44,8 @@ tools/location-compare/data/
 /매물예시 (*).jpg
 /*커피*.JPG
 /신동 AQUI.JPG
+# 입지 비교: 계산 서버(tools/location-compare/server) 작업 폴더·결과 캐시·하루 사용량
+tools/location-compare/server/.work/
+tools/location-compare/server/cache/
+tools/location-compare/server/.usage.json
+tools/location-compare/server/server.log

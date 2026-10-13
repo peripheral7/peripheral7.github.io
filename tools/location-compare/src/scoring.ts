@@ -1,9 +1,11 @@
 // 이동 시간 추정과 점수 계산. 공식의 이유와 예시는 README 의 "점수 산정 방식"에 있다.
 import type { Candidate, Hub, Preference } from './data'
 import routes from './routes.json'
+import { isDefaultCandidate, liveRoute } from './live'
 
 // ── 1. 이동 시간 추정(가상) ──────────────────────────────────────────
-// 두 지점의 직선거리만으로 시간을 추정한다. 단, 차량은 src/routes.json 에 네이버 실측값이 있으면 그것을 쓴다.
+// 두 지점의 직선거리만으로 시간을 추정한다. 단, 차량은 네이버 실측값이 있으면 그것을 쓴다
+// (기본 후보지 = src/routes.json, 검색으로 넣은 후보지 = 계산 서버가 잰 값 live.ts).
 // 같은 거리면 같은 시간이 나오는 단순 모델이라, 실제 노선·도로 사정은 반영되지 않는다.
 
 export type Trip = {
@@ -43,7 +45,7 @@ export function estimateTrip(from: Candidate, to: Hub): Trip {
   const ride = Math.max(4, Math.round((km / 22) * 60)) // 버스·지하철 평균 시속 22km
   const transit = access + wait + ride + transfers * 5
   // 차량: 네이버로 잰 값이 있으면 그 값을, 없으면 추정을 쓴다(시간대마다 따로).
-  const m = MEASURED[`${from.id}:${to.id}`] ?? {}
+  const m = (isDefaultCandidate(from) ? MEASURED[`${from.id}:${to.id}`] : null) ?? liveRoute(from, to) ?? {}
   const estFree = Math.max(5, Math.round((km / 31) * 60 + 3)) // 시속 31km + 주차·출발 3분
   const carFree = m.free ? m.free.min : estFree
   const carRush = m.rush ? m.rush.min : Math.max(7, Math.round(carFree * 1.52 + 4)) // 출퇴근 정체: 1.52배 + 4분
@@ -102,7 +104,8 @@ export function modeScoresForHub(trips: Trip[], ref: HubRef = DEFAULT_REF): Mode
 // 거점 점수 = 수단별 점수의 가중 평균(교통 선호도의 수단 가중치). 도보는 아래 hubScore 설명 참고.
 // 종합 점수 = 거점 점수를 월 왕복 횟수로 가중 평균. 모든 횟수가 0이면 거점을 똑같이 본다.
 
-export type HubResult = { hub: Hub; trip: Trip; scores: ModeScores; hubScore: number; share: number; walkCounts: boolean; transitSkipped: boolean; carMuted: boolean }
+// transitPending = 대중교통 자료 개발 중(검색으로 넣은 후보지) — 비워 두고 점수에서도 뺀다(걸어가는 transitSkipped 와 같은 계산)
+export type HubResult = { hub: Hub; trip: Trip; scores: ModeScores; hubScore: number; share: number; walkCounts: boolean; transitSkipped: boolean; transitPending: boolean; carMuted: boolean }
 export type CandidateResult = { candidate: Candidate; hubs: HubResult[]; total: number; rank: number }
 
 /**
@@ -127,13 +130,14 @@ export function evaluate(candidates: Candidate[], hubs: Hub[], pref: Preference)
   const tripSum = rawTrips.reduce((a, b) => a + b, 0)
   const shares = rawTrips.map((t) => (tripSum > 0 ? t / tripSum : 1 / hubs.length))
   const results = candidates.map((candidate, ci) => {
+    const transitPending = !isDefaultCandidate(candidate)
     const hubResults = hubs.map((hub, hi) => {
       const scores = scoresByHub[hi][ci]
       const walkCounts = walkCountsByHub[hi]
       const trip = tripsByHub[hi][ci]
       const carMuted = !!pref.transitUse?.[hub.id] // 차량은 점수에 그대로 넣고 카드에서 회색으로만 표시
       const transitSkipped = !carMuted && trip.walk <= WALK_ONLY // 대중교통 이용으로 정했으면 도보권이어도 대중교통을 셈
-      return { hub, trip, scores, hubScore: hubScore(scores, pref.weights, walkCounts, transitSkipped), share: shares[hi], walkCounts, transitSkipped, carMuted }
+      return { hub, trip, scores, hubScore: hubScore(scores, pref.weights, walkCounts, transitSkipped || transitPending), share: shares[hi], walkCounts, transitSkipped, transitPending, carMuted }
     })
     const total = hubResults.reduce((a, r) => a + r.hubScore * r.share, 0)
     return { candidate, hubs: hubResults, total, rank: 0 }
@@ -169,24 +173,24 @@ export function hubInsights(results: CandidateResult[], hubIndex: number): Insig
   // 도보: 20분 안이면 "도보권" / 남들은 걸어가는데 30분을 넘는 곳
   const walkable = pick((h) => (h.scores.walk !== null ? h.trip.walk : null)).filter((x) => x !== null)
   // 대중교통·차량 점수
-  const transit = extremes(pick((h) => h.scores.transit))
+  const transit = extremes(pick((h) => (h.transitPending ? null : h.scores.transit)))
   const car = extremes(pick((h) => h.scores.car))
-  const transfers = extremes(pick((h) => h.trip.transfers))
-  const waits = extremes(pick((h) => h.trip.wait))
+  const transfers = extremes(pick((h) => (h.transitPending ? null : h.trip.transfers)))
+  const waits = extremes(pick((h) => (h.transitPending ? null : h.trip.wait)))
 
   rows.forEach((h, i) => {
     const o = out[i]
     if (h.trip.walk <= WALK_ZONE) o.pros.push(`도보권 ${h.trip.walk}분`)
     // 도보 10분 이내면 대중교통은 따지지 않는다(점수에서도 뺌)
-    if (!h.transitSkipped && !transit.same && near(h.scores.transit, transit.max)) o.pros.push('대중교통 최적')
+    if (!(h.transitSkipped || h.transitPending) && !transit.same && near(h.scores.transit, transit.max)) o.pros.push('대중교통 최적')
     if (!car.same && near(h.scores.car, car.max)) o.pros.push('차량 이동 최적')
-    if (!h.transitSkipped && !transfers.same && h.trip.transfers === 0) o.pros.push('환승 없음')
-    if (!h.transitSkipped && !waits.same && near(h.trip.wait, waits.min) && o.pros.length < 2) o.pros.push(`대기 최소 ${h.trip.wait}분`)
+    if (!(h.transitSkipped || h.transitPending) && !transfers.same && h.trip.transfers === 0) o.pros.push('환승 없음')
+    if (!(h.transitSkipped || h.transitPending) && !waits.same && near(h.trip.wait, waits.min) && o.pros.length < 2) o.pros.push(`대기 최소 ${h.trip.wait}분`)
 
     if (h.scores.walk === null && walkable.length > 0) o.cons.push(`도보 ${WALK_LIMIT}분 초과`)
-    if (!h.transitSkipped && !transit.same && near(h.scores.transit, transit.min) && transit.max - transit.min >= GAP) o.cons.push('대중교통 불리')
+    if (!(h.transitSkipped || h.transitPending) && !transit.same && near(h.scores.transit, transit.min) && transit.max - transit.min >= GAP) o.cons.push('대중교통 불리')
     if (!car.same && near(h.scores.car, car.min) && car.max - car.min >= GAP) o.cons.push(`출퇴근 정체 ${(h.trip.carRush / h.trip.carFree).toFixed(1)}배`)
-    if (!h.transitSkipped && !transfers.same && h.trip.transfers === transfers.max && h.trip.transfers > 0) o.cons.push(`환승 ${h.trip.transfers}회`)
+    if (!(h.transitSkipped || h.transitPending) && !transfers.same && h.trip.transfers === transfers.max && h.trip.transfers > 0) o.cons.push(`환승 ${h.trip.transfers}회`)
     o.pros = o.pros.slice(0, 3)
     o.cons = o.cons.slice(0, 2)
   })
