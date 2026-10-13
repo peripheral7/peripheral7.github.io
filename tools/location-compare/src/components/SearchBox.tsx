@@ -1,4 +1,5 @@
-import { useEffect, useRef, useState } from 'react'
+import { useEffect, useLayoutEffect, useRef, useState, type ReactNode } from 'react'
+import { placeNear, type MapPoint } from '../placeNear'
 import { HUB_CATEGORIES, MAX_HUBS, MAX_TRIPS, NEW_HUB_TRIPS, type Hub, type Place } from '../data'
 import { guessHubCategory, money } from '../store'
 import { normalizeQuery, placeSearchAvailable, reverseGeocode, search, searchAvailable } from '../naver'
@@ -21,7 +22,7 @@ type Props = {
   onPreview: (p: Place | null, fly?: boolean) => void // 결과를 누르면 지도를 그 위치로(fly=false 면 임시 핀만)
   onResults: (list: Place[]) => void // 결과 전부(지도에 작은 점)
   centerRef: { current: { lat: number; lng: number } | null } // 지금 지도 가운데
-  external?: { place: Place; kind: 'candidate' | 'hub'; n: number } | null // 지도 우클릭으로 고른 곳 → 바로 등록 창
+  external?: { place: Place; kind: 'candidate' | 'hub'; at: MapPoint; n: number } | null // 지도 우클릭으로 고른 곳 → 누른 점 옆에 바로 등록 창
 }
 // 등록 창에서 정하는 주요 설정: 후보지 = 이름·보증금·월세, 목적지 = 이름·분류·월 왕복 횟수
 type Draft = { kind: 'candidate' | 'hub'; name: string; category: string; deposit: string; rent: string; maint: string; trips: string }
@@ -43,6 +44,7 @@ export function SearchBox({ hubs, tripsOf, onCandidate, onHub, onPreview, onResu
   const [picked, setPicked] = useState<number | null>(null) // 누른 결과
   const [draft, setDraft] = useState<Draft | null>(null) // 등록 전 주요 설정
   const [sideTop, setSideTop] = useState(0) // 오른쪽 단추 칸을 누른 결과 줄 높이에 맞춘다
+  const [floatAt, setFloatAt] = useState<MapPoint | null>(null) // 지도 우클릭 등록: 등록 창을 검색창 아래가 아니라 누른 점 옆에
   const box = useRef<HTMLDivElement>(null)
   const list = useRef<HTMLDivElement>(null)
   const cache = useRef(new Map<string, { places: Place[]; error: string }>())
@@ -55,7 +57,7 @@ export function SearchBox({ hubs, tripsOf, onCandidate, onHub, onPreview, onResu
     return () => window.removeEventListener('pointerdown', onDown)
   }, [])
 
-  const reset = () => { setPicked(null); setDraft(null); onPreview(null) }
+  const reset = () => { setPicked(null); setDraft(null); setFloatAt(null); onPreview(null) }
 
   const run = async (raw: string) => {
     const query = normalizeQuery(raw) // "망포  래미안"·"망포 래미안 " 은 같은 검색어(다시 부르지 않음)
@@ -94,7 +96,7 @@ export function SearchBox({ hubs, tripsOf, onCandidate, onHub, onPreview, onResu
     const id = ++seq.current // 진행 중인 검색 결과는 버린다
     const coord = `${lat.toFixed(5)}, ${lng.toFixed(5)}`
     const p: Place = { ...external.place, name: MAP_PICK_NAME, address: '주소 찾는 중…' }
-    setBusy(false); setItems([p]); setMsg(''); setOpen(true); setPicked(0); setSideTop(0)
+    setBusy(false); setItems([p]); setMsg(''); setOpen(false); setPicked(0); setSideTop(0); setFloatAt(external.at)
     setDraft({ kind: external.kind, name: MAP_PICK_NAME, category: '기타', deposit: '', rent: '', maint: '', trips: String(NEW_HUB_TRIPS) })
     onPreview(p, false)
     void reverseGeocode(lat, lng).then((a) => {
@@ -125,11 +127,47 @@ export function SearchBox({ hubs, tripsOf, onCandidate, onHub, onPreview, onResu
     else onHub(p, replaceHub?.id, name, draft.category.trim() || '기타', Math.min(MAX_TRIPS, money(draft.trips) ?? 0))
     setOpen(false); setQ(''); setItems([]); setMsg(''); reset(); seq.current++
   }
+  // 등록 창에서 취소: 지도 우클릭으로 연 창이면 통째로 닫고, 검색 결과에서 연 창이면 "후보지로/목적지로" 단추로 돌아간다
+  const cancel = () => { if (floatAt) { setItems([]); reset(); seq.current++ } else setDraft(null) }
 
   const trips = Math.min(MAX_TRIPS, money(draft?.trips ?? '') ?? 0)
   const custom = draft && !HUB_CATEGORIES.includes(draft.category) ? draft.category : ''
 
+  const form = draft && picked !== null && items[picked] ? (
+    <form className="register" onSubmit={(e) => { e.preventDefault(); commit() }} onKeyDown={(e) => { if (e.key === 'Escape') { e.stopPropagation(); cancel() } }}>
+      <span className="register-title">{draft.kind === 'candidate' ? '후보지로 등록' : '목적지로 등록'}</span>
+      <p className="register-addr">📍 {items[picked].address}</p>
+      <label>이름<input {...plain} value={draft.name} maxLength={40} autoFocus onChange={(e) => setDraft({ ...draft, name: e.target.value })} /></label>
+      {draft.kind === 'candidate' ? <>
+        <label>보증금<span className="unit-input"><input {...plain} type="number" min={0} step={100} inputMode="numeric" placeholder="예: 1000" value={draft.deposit} onChange={(e) => setDraft({ ...draft, deposit: e.target.value })} /><i>만원</i></span></label>
+        <label>월세<span className="unit-input"><input {...plain} type="number" min={0} step={1} inputMode="numeric" placeholder="예: 50" value={draft.rent} onChange={(e) => setDraft({ ...draft, rent: e.target.value })} /><i>만원</i></span></label>
+        <label>관리비<span className="unit-input"><input {...plain} type="number" min={0} step={1} inputMode="numeric" placeholder="예: 7" value={draft.maint} onChange={(e) => setDraft({ ...draft, maint: e.target.value })} /><i>만원</i></span></label>
+      </> : <>
+        <div className="field">
+          <span>분류</span>
+          <div className="cat-pick" role="radiogroup" aria-label="분류">
+            {HUB_CATEGORIES.map((c) => (
+              <button type="button" key={c} role="radio" aria-checked={draft.category === c} className={draft.category === c ? 'on' : ''} onClick={() => setDraft({ ...draft, category: c })}>{c}</button>
+            ))}
+            <input {...plain} className={'cat-custom' + (custom ? ' on' : '')} value={custom} maxLength={8} placeholder="직접 입력" aria-label="분류 직접 입력"
+              onChange={(e) => setDraft({ ...draft, category: e.target.value })} />
+          </div>
+        </div>
+        <div className="field">
+          <span>월 왕복</span>
+          <div className="trip-input">
+            <input type="range" min={0} max={MAX_TRIPS} step={1} value={trips} aria-label="월 왕복 횟수(끌어서)" onChange={(e) => setDraft({ ...draft, trips: e.target.value })} />
+            <span className="unit-input"><input {...plain} type="text" inputMode="numeric" maxLength={3} value={draft.trips} aria-label="월 왕복 횟수(직접 입력)" onChange={(e) => setDraft({ ...draft, trips: e.target.value.replace(/\D/g, '') })} /><i>회</i></span>
+          </div>
+        </div>
+        {replaceHub && <p className="register-note">목적지는 최대 {MAX_HUBS}곳 — 월 왕복이 가장 적은 「{replaceHub.name}」 자리에 들어갑니다.</p>}
+      </>}
+      <div className="register-actions"><button type="button" className="ghost" onClick={cancel}>취소</button><button type="submit" className="solid">등록</button></div>
+    </form>
+  ) : null
+
   return (
+    <>
     <div className="search" ref={box}>
       <form className="search-bar" role="search" onSubmit={(e) => { e.preventDefault(); void run(q) }}>
         <button type="submit" className="search-go" aria-label="검색" disabled={busy}>
@@ -151,48 +189,49 @@ export function SearchBox({ hubs, tripsOf, onCandidate, onHub, onPreview, onResu
             ))}
           </div>
           {picked !== null && items[picked] && (
-            <div className={'search-side' + (draft ? ' form' : '')} style={{ top: draft ? 0 : Math.max(0, sideTop) }}>
-              {!draft ? (
+            <div className={'search-side' + (draft && !floatAt ? ' form' : '')} style={{ top: draft ? 0 : Math.max(0, sideTop) }}>
+              {!draft || floatAt ? (
                 <div className="side-actions">
                   <button type="button" onClick={() => start('candidate')}>후보지로</button>
                   <button type="button" onClick={() => start('hub')}>목적지로</button>
                 </div>
               ) : (
-                <form className="register" onSubmit={(e) => { e.preventDefault(); commit() }} onKeyDown={(e) => { if (e.key === 'Escape') { e.stopPropagation(); setDraft(null) } }}>
-                  <span className="register-title">{draft.kind === 'candidate' ? '후보지로 등록' : '목적지로 등록'}</span>
-                  <p className="register-addr">📍 {items[picked].address}</p>
-                  <label>이름<input {...plain} value={draft.name} maxLength={40} autoFocus onChange={(e) => setDraft({ ...draft, name: e.target.value })} /></label>
-                  {draft.kind === 'candidate' ? <>
-                    <label>보증금<span className="unit-input"><input {...plain} type="number" min={0} step={100} inputMode="numeric" placeholder="예: 1000" value={draft.deposit} onChange={(e) => setDraft({ ...draft, deposit: e.target.value })} /><i>만원</i></span></label>
-                    <label>월세<span className="unit-input"><input {...plain} type="number" min={0} step={1} inputMode="numeric" placeholder="예: 50" value={draft.rent} onChange={(e) => setDraft({ ...draft, rent: e.target.value })} /><i>만원</i></span></label>
-                    <label>관리비<span className="unit-input"><input {...plain} type="number" min={0} step={1} inputMode="numeric" placeholder="예: 7" value={draft.maint} onChange={(e) => setDraft({ ...draft, maint: e.target.value })} /><i>만원</i></span></label>
-                  </> : <>
-                    <div className="field">
-                      <span>분류</span>
-                      <div className="cat-pick" role="radiogroup" aria-label="분류">
-                        {HUB_CATEGORIES.map((c) => (
-                          <button type="button" key={c} role="radio" aria-checked={draft.category === c} className={draft.category === c ? 'on' : ''} onClick={() => setDraft({ ...draft, category: c })}>{c}</button>
-                        ))}
-                        <input {...plain} className={'cat-custom' + (custom ? ' on' : '')} value={custom} maxLength={8} placeholder="직접 입력" aria-label="분류 직접 입력"
-                          onChange={(e) => setDraft({ ...draft, category: e.target.value })} />
-                      </div>
-                    </div>
-                    <div className="field">
-                      <span>월 왕복</span>
-                      <div className="trip-input">
-                        <input type="range" min={0} max={MAX_TRIPS} step={1} value={trips} aria-label="월 왕복 횟수(끌어서)" onChange={(e) => setDraft({ ...draft, trips: e.target.value })} />
-                        <span className="unit-input"><input {...plain} type="text" inputMode="numeric" maxLength={3} value={draft.trips} aria-label="월 왕복 횟수(직접 입력)" onChange={(e) => setDraft({ ...draft, trips: e.target.value.replace(/\D/g, '') })} /><i>회</i></span>
-                      </div>
-                    </div>
-                    {replaceHub && <p className="register-note">목적지는 최대 {MAX_HUBS}곳 — 월 왕복이 가장 적은 「{replaceHub.name}」 자리에 들어갑니다.</p>}
-                  </>}
-                  <div className="register-actions"><button type="button" className="ghost" onClick={() => setDraft(null)}>취소</button><button type="submit" className="solid">등록</button></div>
-                </form>
+                form
               )}
             </div>
           )}
         </div>
       )}
+    </div>
+    {floatAt && form && <FloatBox at={floatAt} onClose={cancel}>{form}</FloatBox>}
+    </>
+  )
+}
+
+/** 지도 위 누른 점 옆에 뜨는 등록 창. 내용 크기가 바뀌면(주소가 들어오는 등) 자리를 다시 잡고, 바깥을 누르면 닫는다. */
+function FloatBox({ at, onClose, children }: { at: MapPoint; onClose: () => void; children: ReactNode }) {
+  const ref = useRef<HTMLDivElement>(null)
+  const [pos, setPos] = useState<{ left: number; top: number } | null>(null)
+  useLayoutEffect(() => {
+    const el = ref.current
+    if (!el) return
+    const fit = () => setPos(placeNear(at, el.offsetWidth, el.offsetHeight))
+    fit()
+    const ro = new ResizeObserver(fit)
+    ro.observe(el)
+    return () => ro.disconnect()
+  }, [at])
+  const close = useRef(onClose)
+  close.current = onClose
+  useEffect(() => {
+    const down = (e: PointerEvent) => { if (ref.current && !ref.current.contains(e.target as Node)) close.current() }
+    window.addEventListener('pointerdown', down, true)
+    return () => window.removeEventListener('pointerdown', down, true)
+  }, [])
+  return (
+    <div ref={ref} className="search-side form map-register" role="dialog" aria-label="지도에서 고른 곳 등록" onContextMenu={(e) => e.preventDefault()}
+      style={pos ?? { left: at.x, top: at.y, visibility: 'hidden' }}>
+      {children}
     </div>
   )
 }

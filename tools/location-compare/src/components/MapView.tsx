@@ -7,6 +7,7 @@ import { loadNaverMaps, MAP_KEY_ID, onNaverAuthFailure, reverseGeocode, type Rev
 import { CATEGORIES, type Major } from '../commercial'
 import { naverMapUrl, type Spot } from '../recommend'
 import { parkAreaAlpha, type Park, type ParkArea } from '../parks'
+import { placeNear, type MapPoint } from '../placeNear'
 
 // 지도: 네이버 지도 키(VITE_NAVER_MAP_KEY_ID)가 있으면 네이버 지도, 없거나 인증이 실패하면 OSM 밝은 지도.
 // - 후보지를 고르면 "그 후보지 + 주요 목적지"가 다 들어오도록 확대·이동한다.
@@ -31,7 +32,7 @@ type Props = {
   parks?: Park[] // 산책 레이어: 공원·하천
   parkAreas?: ParkArea[] // 산책 레이어: 점수 높은 공원 경계(색칠)
   layers?: { com: boolean; walk: boolean }; onLayer?: (k: 'com' | 'walk') => void // 지도 위 상권·산책 단추
-  onMapPick?: (p: Place, kind: 'candidate' | 'hub') => void // 우클릭 메뉴로 고른 곳
+  onMapPick?: (p: Place, kind: 'candidate' | 'hub', at: MapPoint) => void // 우클릭 메뉴로 고른 곳(at = 누른 점, 등록 창을 그 옆에)
   previewFly?: boolean // false 면 임시 핀만 찍고 지도는 움직이지 않는다(우클릭으로 고른 곳)
 }
 /** 우클릭 메뉴 자리: 지도 안 위치(px)·지도 크기·좌표 */
@@ -130,19 +131,15 @@ function MapMenu({ ctx, onPick, onClose }: { ctx: Ctx; onPick: NonNullable<Props
     window.addEventListener('pointerdown', down, true); window.addEventListener('keydown', key)
     return () => { window.removeEventListener('pointerdown', down, true); window.removeEventListener('keydown', key) }
   }, [onClose])
-  // 자리: 누른 곳의 오른쪽 아래 → 넘치면 오른쪽 위 → 왼쪽 위 → 왼쪽 아래, 다 넘치면 지도 안으로 밀어 넣는다
+  // 자리: 누른 곳의 오른쪽 아래 → 넘치면 오른쪽 위 → 왼쪽 위 → 왼쪽 아래(placeNear)
   useLayoutEffect(() => {
     const el = ref.current
     if (!el) return
-    const W = el.offsetWidth, H = el.offsetHeight, M = 6, G = 4 // 지도 가장자리 여백 · 누른 점과 간격
-    const fits = (l: number, t: number) => l >= M && t >= M && l + W <= ctx.w - M && t + H <= ctx.h - M
-    const tries = [[ctx.x + G, ctx.y + G], [ctx.x + G, ctx.y - H - G], [ctx.x - W - G, ctx.y - H - G], [ctx.x - W - G, ctx.y + G]]
-    const [l, t] = tries.find(([a, b]) => fits(a, b)) ?? tries[0]
-    setPos({ left: Math.max(M, Math.min(l, ctx.w - W - M)), top: Math.max(M, Math.min(t, ctx.h - H - M)) })
+    setPos(placeNear(ctx, el.offsetWidth, el.offsetHeight))
   }, [ctx, addr])
   const coord = `${ctx.lat.toFixed(5)}, ${ctx.lng.toFixed(5)}`
-  // 주소는 검색창 등록 창이 다시 받아 채운다(같은 좌표는 한 번만 물음) — 여기서는 좌표만 넘긴다
-  const pick = (kind: 'candidate' | 'hub') => { onPick({ name: '', address: '', lat: ctx.lat, lng: ctx.lng, category: '지도' }, kind); onClose() }
+  // 주소는 등록 창이 다시 받아 채운다(같은 좌표는 한 번만 물음) — 여기서는 좌표와 누른 점만 넘긴다(등록 창도 누른 점 옆에)
+  const pick = (kind: 'candidate' | 'hub') => { onPick({ name: '', address: '', lat: ctx.lat, lng: ctx.lng, category: '지도' }, kind, { x: ctx.x, y: ctx.y, w: ctx.w, h: ctx.h }); onClose() }
   return (
     <div ref={ref} className="map-ctx" role="menu" aria-label="이 위치 추가" onContextMenu={(e) => e.preventDefault()}
       style={pos ?? { left: ctx.x, top: ctx.y, visibility: 'hidden' }}>

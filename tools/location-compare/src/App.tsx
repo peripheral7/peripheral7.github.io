@@ -3,6 +3,7 @@ import { BASE_DEPOSIT, MAX_HUBS, baseRent, hubEmoji, weightShares, won, type Pla
 import { evaluate, fmt, hubInsights } from './scoring'
 import { addCandidate, load, money, removeCandidate, removeHub, save, setHub, updateCandidate, type State } from './store'
 import { MapView } from './components/MapView'
+import type { MapPoint } from './placeNear'
 import { SearchBox } from './components/SearchBox'
 import { ModeScorePanel, FactorsPanel, type FactorBest } from './components/Panels'
 import { CompareCards } from './components/CompareCards'
@@ -35,7 +36,7 @@ export default function App() {
   const [hubPick, setHubPick] = useState<string | null>(null) // 지도 장단점 기준 목적지
   const [preview, setPreview] = useState<Place | null>(null) // 검색 결과를 누르면 지도가 그 위치로
   const [previewFly, setPreviewFly] = useState(true) // 우클릭으로 고른 곳은 지도를 움직이지 않고 임시 핀만
-  const [mapPick, setMapPick] = useState<{ place: Place; kind: 'candidate' | 'hub'; n: number } | null>(null) // 지도 우클릭 → 검색창 등록 창
+  const [mapPick, setMapPick] = useState<{ place: Place; kind: 'candidate' | 'hub'; at: MapPoint; n: number } | null>(null) // 지도 우클릭 → 검색창 등록 창
   const [found, setFound] = useState<Place[]>([]) // 검색 결과 전부(지도에 작은 점)
   const mapCenter = useRef<{ lat: number; lng: number } | null>(null) // 지금 지도 가운데(검색 결과 정렬)
   const [editing, setEditing] = useState<{ id: string; name: string; deposit: string; rent: string; maint: string; use: PropertyUse } | null>(null) // 수정 중인 후보지(금액은 입력 글자 그대로)
@@ -236,7 +237,7 @@ export default function App() {
 
         <section className="map-area">
           <MapView candidates={candidates} hubs={hubs} active={active} onSelect={select} focusKey={focusKey} hubId={hubId} onHub={setHubPick} insights={insights} focusHubIds={mainHubIds} ranks={ranks} preview={preview} results={found} centerRef={mapCenter} majors={majors} spots={SPOTS} parks={parks} layers={layers} onLayer={toggleLayer}
-            parkAreas={layers.walk ? PARK_AREAS : undefined} previewFly={previewFly} onMapPick={(place, kind) => setMapPick({ place, kind, n: Date.now() })} />
+            parkAreas={layers.walk ? PARK_AREAS : undefined} previewFly={previewFly} onMapPick={(place, kind, at) => setMapPick({ place, kind, at, n: Date.now() })} />
           {layers.walk && (
             <p className="layer-note" role="status">
               {parkState === 'loading' ? '🌳 산책 — 공원·하천 찾는 중…' : parkState === 'error' ? '🌳 산책 — 공원 자료를 받지 못했어요(잠시 뒤 다시 켜 보세요)'
