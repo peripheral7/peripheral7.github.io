@@ -39,9 +39,9 @@ export function SettingsPopover({ kind, hubs, value, onChange, onClose }: Props)
   const detailKeys: ModeKey[] = value.bike ? ['transit', 'car', 'walk', 'bike'] : ['transit', 'car', 'walk']
   const setW = (k: ModeKey, v: number) => onChange(setLifestyleWeights(value, { ...value.weights, [k]: Math.max(0, Math.min(100, Math.round(v || 0))) }))
   const wSum = detailKeys.reduce((a, k) => a + (value.weights[k] ?? 0), 0)
-  // 기본값 = 라이프스타일 "골고루" + 세부설정에서 바꾼 비율 모두 지움
+  // 기본값 = 기본 라이프스타일(대중교통 출퇴근) + 세부설정에서 바꾼 비율 모두 지움
   const reset = () => onChange(kind === 'weights'
-    ? applyLifestyle({ ...value, lifeCustom: {}, weights: { ...DEFAULT_PREFERENCE.weights } }, 'balanced')
+    ? applyLifestyle({ ...value, lifeCustom: {}, weights: { ...DEFAULT_PREFERENCE.weights } }, DEFAULT_PREFERENCE.lifestyle!)
     : { ...value, weekly: Object.fromEntries(hubs.map((h) => [h.id, defaultWeekly(h.category)])), hubMode: {} })
 
   return (

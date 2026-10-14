@@ -22,7 +22,9 @@ function migrate({ category: _c, ...c }: any): Candidate { // eslint-disable-lin
 function loadPref(sp: any, base: Preference, weekly: Record<string, number>, hubMode: Record<string, HubMode>): Preference { // eslint-disable-line @typescript-eslint/no-explicit-any
   const lifeCustom: Record<string, Weights> = {}
   for (const [id, w] of Object.entries(sp.lifeCustom ?? {})) if (w && typeof w === 'object') lifeCustom[id] = { transit: 0, car: 0, walk: 0, bike: 0, ...(w as Weights) }
-  const p: Preference = { weights: { ...base.weights, ...sp.weights }, weekly, hubMode, bike: !!sp.bike, lifestyle: typeof sp.lifestyle === 'string' ? sp.lifestyle : undefined, lifeCustom }
+  // 10-14: 없어진 "골고루"(balanced)를 골라 둔 저장값은 기본 라이프스타일로
+  const life = sp.lifestyle === 'balanced' ? base.lifestyle : typeof sp.lifestyle === 'string' ? sp.lifestyle : undefined
+  const p: Preference = { weights: { ...base.weights, ...sp.weights }, weekly, hubMode, bike: !!sp.bike, lifestyle: life, lifeCustom }
   return p.lifestyle && LIFESTYLES.some((l) => l.id === p.lifestyle) ? applyLifestyle(p, p.lifestyle) : p
 }
 

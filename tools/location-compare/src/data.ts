@@ -48,7 +48,6 @@ export type Preference = { weights: Weights; weekly: Record<string, number>; hub
  *  비율은 설정 창 "세부설정"에서 라이프스타일마다 바꿀 수 있다(pref.lifeCustom[id], 기본값 단추로 되돌림). */
 export type Lifestyle = { id: string; emoji: string; label: string; note: string; weights: Weights; bike: boolean }
 export const LIFESTYLES: Lifestyle[] = [
-  { id: 'balanced', emoji: '⚖️', label: '골고루', note: '대중교통·차·걷기를 두루 씀', weights: { transit: 50, car: 30, walk: 20, bike: 0 }, bike: false },
   { id: 'transit', emoji: '🚇', label: '대중교통 출퇴근', note: '차 없이 버스·지하철로 다님', weights: { transit: 95, car: 5, walk: 0, bike: 0 }, bike: false },
   { id: 'car', emoji: '🚗', label: '자차 출퇴근', note: '주로 내 차로 다님', weights: { transit: 5, car: 90, walk: 5, bike: 0 }, bike: false },
   { id: 'walk', emoji: '🚶', label: '걸어서 동네 생활', note: '가까운 곳은 걸어감, 먼 곳만 대중교통', weights: { transit: 20, car: 0, walk: 80, bike: 0 }, bike: false },
@@ -69,9 +68,9 @@ export const setLifestyleWeights = (p: Preference, w: Weights): Preference => {
 
 /** 교통 선호도 기본값: 수단별 가중치(합이 100이 아니어도 비율로 쓴다)와 목적지별 주 방문 횟수(학교 주 5회 · 본가 월 4회 = 주 1회). */
 export const DEFAULT_PREFERENCE: Preference = {
-  weights: { transit: 50, car: 30, walk: 20, bike: 0 }, // = 라이프스타일 "골고루"
+  weights: { transit: 95, car: 5, walk: 0, bike: 0 }, // = 라이프스타일 "대중교통 출퇴근"(첫 항목, 10-14 골고루 삭제)
   weekly: { h1: 5, h2: 1 },
-  lifestyle: 'balanced',
+  lifestyle: 'transit',
 }
 export const MODE_KEYS: ModeKey[] = ['transit', 'car', 'walk', 'bike']
 /** 지금 쓰는 수단(자전거는 켰을 때만) */
