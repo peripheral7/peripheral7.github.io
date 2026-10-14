@@ -807,6 +807,7 @@ input[type=number]::-webkit-inner-spin-button, input[type=number]::-webkit-outer
 .hr-svg .ring-track { stroke: rgba(24, 39, 56, 0.08) }
 .hr-svg .ring-arc { stroke: var(--good); stroke-linecap: round; transition: stroke-dasharray 0.6s ease }
 .hr-circle .house3d { width: 146px; height: 134px; margin-top: 6px }
+.hr-circle .house3d-box { position: relative; width: 146px; height: 134px; margin-top: 6px }
 .hr-score { margin: 2px 0 0; display: flex; align-items: baseline; gap: 4px }
 .hr-score b { font-size: 34px; font-weight: 250; line-height: 1; font-variant-numeric: tabular-nums }
 .hr-score small { font-size: 12px; color: var(--faint) }

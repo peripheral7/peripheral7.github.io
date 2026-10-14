@@ -1,6 +1,7 @@
-import { useEffect, useLayoutEffect, useRef, useState, type ReactNode } from 'react'
+import { Component, lazy, Suspense, useEffect, useLayoutEffect, useRef, useState, type ReactNode } from 'react'
 import { fmt, type CandidateResult, type HubResult } from '../scoring'
-import { hubEmoji, type ModeKey } from '../data'
+import { hubEmoji, type Candidate, type ModeKey } from '../data'
+import { houseKind, roofColor } from '../house3d/colors'
 import { MODE_INFO } from './SettingsPopover'
 import { catName, mins, pn, rankText, t } from '../i18n'
 
@@ -27,9 +28,10 @@ const Ticks = ({ value, mode }: { value: number | null; mode: ModeKey }) => (
 
 /** 카드 가운데: 큰 3D 집을 얇은 원이 둘러싸고, 원 테두리를 종합 점수 비율(0~100%)만큼 채운다(12시 방향부터 시계 방향, 숫자 꼬리표 없음).
  *  원 아래에 점수. */
-export function HouseRing({ value, rank }: { value: number; rank: number }) {
+export function HouseRing({ value, rank, candidate }: { value: number; rank: number; candidate: Candidate }) {
   const pct = Math.max(0, Math.min(10, value)) * 10
   const R = 47.5
+  const svg = <House3D rank={rank} />
   return (
     <div className="house-ring">
       <div className="hr-circle">
@@ -37,7 +39,15 @@ export function HouseRing({ value, rank }: { value: number; rank: number }) {
           <circle className="ring-track" cx="50" cy="50" r={R} />
           <circle className="ring-arc" cx="50" cy="50" r={R} pathLength={100} strokeDasharray={`${pct} 100`} transform="rotate(-90 50 50)" />
         </svg>
-        <House3D rank={rank} />
+        {canWebGL() ? (
+          <GLBoundary fallback={svg}>
+            <Suspense fallback={svg}>
+              <div className="house3d-box" aria-hidden>
+                <House3DView kind={houseKind(candidate.use)} roof={roofColor(rank)} tree={rank === 1} animKey={candidate.id} />
+              </div>
+            </Suspense>
+          </GLBoundary>
+        ) : svg}
       </div>
       <p className="hr-score"><b>{fmt(value)}</b><small>/ 10</small></p>
       <p className="hr-rank">{t('종합', 'Overall')} {rankText(rank)}</p>
@@ -45,9 +55,24 @@ export function HouseRing({ value, rank }: { value: number; rank: number }) {
   )
 }
 
-/** 3D 집(아이소메트릭) — 지붕 색은 순위(1위 초록 → 아래로 갈수록 회색빛) */
+/** 진짜 3D 집(R3F, HOUSE3D.md) — 따로 묶어 늦게 불러온다(three 가 첫 화면 묶음에 들어가지 않게). 불러오는 동안·WebGL 이 없을 때·오류 때는 아래 SVG 집. */
+const House3DView = lazy(() => import('../house3d/House3DView'))
+let glOk: boolean | undefined
+const canWebGL = () => {
+  if (glOk === undefined) {
+    try { const c = document.createElement('canvas'); glOk = !!(c.getContext('webgl2') || c.getContext('webgl')) } catch { glOk = false }
+  }
+  return glOk
+}
+class GLBoundary extends Component<{ fallback: ReactNode; children: ReactNode }, { failed: boolean }> {
+  state = { failed: false }
+  static getDerivedStateFromError() { return { failed: true } }
+  render() { return this.state.failed ? this.props.fallback : this.props.children }
+}
+
+/** SVG 집(아이소메트릭) — 3D 대체 화면. 지붕 색은 순위(1위 초록 → 아래로 갈수록 회색빛) */
 export function House3D({ rank }: { rank: number }) {
-  const roof = ['#3f9a62', '#5e8f9e', '#8a7fa8', '#a08868'][Math.min(3, Math.max(0, rank - 1))]
+  const roof = roofColor(rank)
   return (
     <svg className="house3d" viewBox="0 0 120 110" aria-hidden>
       <defs>
@@ -181,7 +206,7 @@ export function MainMode({ r }: { r: CandidateResult }) {
 export function ScoreBlock({ r, modes }: { r: CandidateResult; modes: ModeKey[] }) {
   return (
     <div className="score-block">
-      <HouseRing value={r.total} rank={r.rank} />
+      <HouseRing value={r.total} rank={r.rank} candidate={r.candidate} />
       <MainMode r={r} />
       <div className="mode-rows">
         {modes.map((m) => {
