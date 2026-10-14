@@ -1,7 +1,7 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
-import { BASE_DEPOSIT, MAX_HUBS, activeModes, lifestyleOf, baseRent, hubEmoji, weeklyText, won, type Place } from './data'
+import { BASE_DEPOSIT, MAX_HUBS, PROFILES, activeModes, profileOf, lifestyleOf, baseRent, hubEmoji, weeklyText, won, type Place } from './data'
 import { evaluate, hubInsights, shareOf } from './scoring'
-import { addCandidate, load, removeCandidate, removeHub, save, setHub, updateCandidate, type State } from './store'
+import { addCandidate, load, loadUser, removeCandidate, removeHub, save, saveUser, setHub, updateCandidate, type State } from './store'
 import { MapView } from './components/MapView'
 import type { MapPoint } from './placeNear'
 import { SearchBox } from './components/SearchBox'
@@ -31,7 +31,9 @@ const rentText = (c: { deposit?: number; rent?: number }) => {
 }
 
 export default function App() {
-  const [state, setState] = useState<State>(load)
+  // 사용자(위쪽 탭): 후보지·목적지·선호도를 사용자마다 따로 저장한다(data.ts PROFILES — '나' + 시험용 대학교 4곳)
+  const [user, setUser] = useState(loadUser)
+  const [state, setState] = useState<State>(() => load(user))
   const [active, setActive] = useState(0)
   const [focusKey, setFocusKey] = useState(0) // 목록이 바뀌면 지도를 다시 맞춘다
   const [pop, setPop] = useState<'none' | 'weekly' | 'weights'>('none')
@@ -81,7 +83,7 @@ export default function App() {
   const saveC = (s: CommuteSaved) => { setCommute(s); saveCommute(s) }
   const insights = useMemo(() => (hubIndex >= 0 ? hubInsights(results, hubIndex) : results.map(() => ({ pros: [], cons: [] }))), [results, hubIndex])
 
-  useEffect(() => { save(state) }, [state])
+  useEffect(() => { save(state, user) }, [state]) // eslint-disable-line react-hooks/exhaustive-deps -- 사용자를 바꾸면 state 도 같이 바뀐다
   useEffect(() => { saveCats(catState) }, [catState])
   useEffect(() => { saveCommercial(comPrefs) }, [comPrefs])
   useEffect(() => { savePlaceOn(placeOn) }, [placeOn])
@@ -134,6 +136,12 @@ export default function App() {
     if (top > 0) setActive(top)
   }, [results])
   const select = useCallback((i: number) => setActive(i), [])
+  const switchUser = (id: string) => {
+    if (id === user) return
+    saveUser(id); setUser(id); setState(load(id))
+    firstPick.current = false // 새 사용자도 처음엔 종합 1순위 후보지
+    setActive(0); setHubPick(null); setPop('none'); setFactorOpen(null); setPreview(null); setFound([]); setFocusKey((k) => k + 1)
+  }
   const onSpot = useCallback((id: string) => setSpotFlash({ id, n: Date.now() }), [])
   const update = (next: State, nextActive?: number) => { setState(next); if (nextActive !== undefined) setActive(nextActive); setFocusKey((k) => k + 1) }
   const onCandidate = (p: Place, name: string, deposit?: number, rent?: number, maint?: number) => update(addCandidate(state, p, name, deposit, rent, maint), candidates.length)
@@ -192,6 +200,13 @@ export default function App() {
     <div className="shell">
       <header className="topbar">
         <span className="brand"><span className="logo"><span /><span /><span /></span>여기살까?</span>
+        <nav className="users" role="tablist" aria-label="사용자 바꾸기">
+          {PROFILES.map((p) => (
+            <button key={p.id} type="button" role="tab" aria-selected={p.id === user} className={'user-tab' + (p.id === user ? ' on' : '') + (p.id === 'me' ? '' : ' test')} title={p.note} onClick={() => switchUser(p.id)}>
+              <span aria-hidden>{p.emoji}</span>{p.label}{p.id !== 'me' && <small>시험</small>}
+            </button>
+          ))}
+        </nav>
         <nav className="pills">
           <span className="pill active">입지 지도</span>
           <button className="pill" onClick={() => setGuide(true)}>계산 방식</button>
@@ -290,7 +305,7 @@ export default function App() {
         </section>
       </main>
 
-      <p className="foot">도보·자전거는 OSM 길 거리, 대중교통은 서울시 환승경로, 차량은 네이버 실측(없으면 "추정") · 바꾼 후보지·목적지·선호도는 이 브라우저에만 저장됩니다</p>
+      <p className="foot">{user !== 'me' && `시험용 사용자 「${profileOf(user).label}」(${profileOf(user).note}) · `}도보·자전거는 OSM 길 거리, 대중교통은 서울시 환승경로, 차량은 네이버 실측(없으면 "추정") · 바꾼 후보지·목적지·선호도는 이 브라우저에만 저장됩니다</p>
       {guide && <GuidePanel onClose={() => setGuide(false)} />}
       {catDlg === 'register' && <CatRegister state={catState} onChange={setCats} onClose={() => setCatDlg('none')} />}
       {catDlg === 'gallery' && catIdx && (() => {

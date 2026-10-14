@@ -1,12 +1,26 @@
 // 방문자가 바꾼 후보지·목적지·선호도를 이 브라우저(localStorage)에 저장한다. 다른 사람에게는 안 보인다.
-import { CANDIDATES, DEFAULT_PREFERENCE, HUBS, LIFESTYLES, MAX_HUBS, MAX_WEEKLY, OLD_DEFAULT_NAMES, applyLifestyle, defaultWeekly, type Candidate, type Hub, type HubMode, type Place, type Preference, type Weights } from './data'
+import { CANDIDATES, DEFAULT_PREFERENCE, LIFESTYLES, MAX_HUBS, MAX_WEEKLY, OLD_DEFAULT_NAMES, PROFILES, applyLifestyle, defaultWeekly, profileOf, type Candidate, type Hub, type HubMode, type Place, type Preference, type Weights } from './data'
 
 export type State = { candidates: Candidate[]; hubs: Hub[]; pref: Preference }
 
 const KEY = 'locCompare.v3'
 const OLD_PREF_KEY = 'locCompare.v2' // 2판은 선호도만 저장했다
 
-export const defaults = (): State => ({ candidates: CANDIDATES.map((c) => ({ ...c })), hubs: HUBS.map((h) => ({ ...h })), pref: structuredClone(DEFAULT_PREFERENCE) })
+// 사용자(위쪽 탭, data.ts PROFILES)마다 따로 저장한다. 'me' 는 예전 열쇠 그대로(locCompare.v3), 시험용은 locCompare.v3.<id>
+const keyOf = (user: string) => (user === 'me' ? KEY : `${KEY}.${user}`)
+const USER_KEY = 'locCompare.user'
+export function loadUser(): string {
+  try { const u = localStorage.getItem(USER_KEY); if (u && PROFILES.some((p) => p.id === u)) return u } catch { /* 기본 */ }
+  return 'me'
+}
+export function saveUser(user: string) { try { localStorage.setItem(USER_KEY, user) } catch { /* 저장 못 해도 동작 */ } }
+
+export const defaults = (user = 'me'): State => {
+  const p = profileOf(user)
+  const pref = structuredClone(DEFAULT_PREFERENCE)
+  if (p.id !== 'me') pref.weekly = Object.fromEntries(p.hubs.map((h) => [h.id, defaultWeekly(h.category)]))
+  return { candidates: p.candidates.map((c) => ({ ...c })), hubs: p.hubs.map((h) => ({ ...h })), pref }
+}
 
 const isPoint = (x: any) => x && typeof x.id === 'string' && typeof x.name === 'string' && Number.isFinite(x.lat) && Number.isFinite(x.lng) // eslint-disable-line @typescript-eslint/no-explicit-any
 
@@ -28,10 +42,10 @@ function loadPref(sp: any, base: Preference, weekly: Record<string, number>, hub
   return p.lifestyle && LIFESTYLES.some((l) => l.id === p.lifestyle) ? applyLifestyle(p, p.lifestyle) : p
 }
 
-export function load(): State {
-  const base = defaults()
+export function load(user = 'me'): State {
+  const base = defaults(user)
   try {
-    const saved = JSON.parse(localStorage.getItem(KEY) || 'null')
+    const saved = JSON.parse(localStorage.getItem(keyOf(user)) || 'null')
     if (saved && Array.isArray(saved.candidates) && Array.isArray(saved.hubs) && saved.pref?.weights) {
       const hubs: Hub[] = saved.hubs.filter(isPoint).slice(0, MAX_HUBS)
       // 10-14: 월 왕복 → 주 방문 횟수. 옛 저장값(trips)은 단위가 달라 옮기지 않고 분류별 기본값(학교·직장 주 5 · 본가 주 1)으로
@@ -45,14 +59,14 @@ export function load(): State {
         pref: loadPref(saved.pref, base.pref, weekly, hubMode),
       }
     }
-    const old = JSON.parse(localStorage.getItem(OLD_PREF_KEY) || 'null')
+    const old = user === 'me' ? JSON.parse(localStorage.getItem(OLD_PREF_KEY) || 'null') : null
     if (old?.weights) base.pref = { ...base.pref, weights: { ...base.pref.weights, ...old.weights } }
   } catch { /* 저장소를 못 쓰거나 깨졌으면 기본값 */ }
   return base
 }
 
-export function save(state: State) {
-  try { localStorage.setItem(KEY, JSON.stringify(state)) } catch { /* 저장 못 해도 화면은 동작 */ }
+export function save(state: State, user = 'me') {
+  try { localStorage.setItem(keyOf(user), JSON.stringify(state)) } catch { /* 저장 못 해도 화면은 동작 */ }
 }
 
 const newId = (p: string) => `${p}${Date.now().toString(36)}${Math.random().toString(36).slice(2, 5)}`

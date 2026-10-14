@@ -40,6 +40,7 @@
 ## 2. 데이터 (`src/data.ts` 기본값 · `src/store.ts` 방문자 저장)
 
 - `CANDIDATES` — 후보지: 이름, 도로명 주소(임시), 위도·경도(손으로 넣은 대략 위치).
+- `PROFILES` — **사용자**(위쪽 탭, 10-14 시험용). `me`(나) = `CANDIDATES`·`HUBS`, 그 밖 = 대학교 하나 + 자취 상권 4곳(성균관대 자연과학캠퍼스·아주대·경기대 수원캠퍼스·연세대 신촌). 자취 상권은 상가정보(`data/stores.sqlite`)에서 학교 2km 안을 100m 격자로 훑어 반경 250m 음식점 수가 많은 곳(서로 500m 이상) 중 원룸촌으로 알려진 곳을 고르고, 그 자리 건물의 도로명 주소를 네이버 Geocoding 한 좌표. 사용자마다 저장이 따로(`locCompare.v3` = 나, `locCompare.v3.<id>` = 시험용, 고른 사용자 `locCompare.user`). 시험용 후보지는 검색으로 넣은 후보지와 같은 계산(live.ts)을 쓰되, 자료를 `scripts/bake-profiles.mjs` 로 미리 계산해 `src/profiles-live.json` 에 싣는다(계산 서버가 꺼져 있어도 보임, 같은 값을 `server/cache` 에도 넣어 서버를 켜면 빠진 출퇴근·낮 차량 시간을 기준 시각에 잼). 상권·입지 요인 규칙(`places-config.json` 등)을 바꾸면 `profiles-live.json` 의 `a` 를 지우고 다시 돌린다.
 - `HUBS` — 주요 방문지. **`MAX_HUBS = 3`**: 4곳 이상 적어도 앞의 3곳만 계산·표시.
 - `DEFAULT_PREFERENCE` — 가중치 대중교통 50 · 차량 30 · 도보 20 · 자전거 20(자전거는 켰을 때만), **주 방문** 학교 5회 · 본가 1회(= 월 4회). `WEEKS_PER_MONTH = 4`(월 4회 = 주 1회, 사용자 지정). 10-14 전의 "월 왕복"(trips) 저장값은 단위가 달라 옮기지 않고 분류별 기본값(`defaultWeekly`)으로 바꾼다. "대중교통 이용" 체크(transitUse)는 목적지 이동수단 🚌(hubMode)로 옮긴다.
 

@@ -8,6 +8,7 @@
 import { CANDIDATES, type Candidate, type Hub } from './data'
 import { SEARCH_URL } from './naver'
 import type { TransitRow } from './scoring'
+import BAKED from './profiles-live.json' // 시험용 사용자(data.ts PROFILES) 후보지 — 미리 계산(scripts/bake-profiles.mjs)
 
 export type LiveStatus = 'loading' | 'ok' | 'offline' | 'outside' | 'error'
 export type LiveAnalysis = {
@@ -40,8 +41,13 @@ export function isDefaultCandidate(c: Pick<Candidate, 'id' | 'lat' | 'lng'>): bo
   return Math.hypot(dx, dy) <= 30
 }
 
-export const liveAnalysis = (c: { lat: number; lng: number }): LiveAnalysis | null => store.a[pkey(c)] ?? null
-export const liveRoute = (from: { lat: number; lng: number }, to: { lat: number; lng: number }): LiveRoute | null => store.r[`${pkey(from)}>${pkey(to)}`] ?? null
+const baked = BAKED as unknown as { a: Record<string, LiveAnalysis>; r: Record<string, LiveRoute> }
+export const liveAnalysis = (c: { lat: number; lng: number }): LiveAnalysis | null => store.a[pkey(c)] ?? baked.a[pkey(c)] ?? null
+/** 이 브라우저가 받은 값 + 미리 계산한 값(받은 값이 앞선다) */
+export const liveRoute = (from: { lat: number; lng: number }, to: { lat: number; lng: number }): LiveRoute | null => {
+  const k = `${pkey(from)}>${pkey(to)}`
+  return store.r[k] || baked.r[k] ? { ...baked.r[k], ...store.r[k] } : null
+}
 /** 도보·자전거·대중교통 길(서버가 답했으면 — 대중교통 경로가 없으면 transit 은 null) */
 export const livePaths = (from: { lat: number; lng: number }, to: { lat: number; lng: number }): Paths | null => liveRoute(from, to)?.paths ?? null
 /** 지도에 보일 새 후보지 주변 주요 매장 */
@@ -63,7 +69,7 @@ const sleep = (ms: number) => new Promise((r) => setTimeout(r, ms))
 
 async function fetchAnalysis(c: Candidate) {
   const k = pkey(c)
-  if (inflight.has('a' + k) || store.a[k]) return
+  if (inflight.has('a' + k) || liveAnalysis(c)) return
   inflight.add('a' + k)
   status[k] = 'loading'; notify()
   try {
@@ -82,7 +88,8 @@ const asked = new Set<string>() // 이 화면에서 이미 물어본 길(빠진 
 async function fetchRoute(c: Candidate, h: Hub) {
   const k = `${pkey(c)}>${pkey(h)}`
   const done = (x?: Slot) => !!(x?.samples?.am && x?.samples?.pm)
-  if (inflight.has('r' + k) || asked.has(k) || (done(store.r[k]?.free) && done(store.r[k]?.rush) && store.r[k]?.paths)) return
+  const cur = liveRoute(c, h)
+  if (inflight.has('r' + k) || asked.has(k) || (done(cur?.free) && done(cur?.rush) && cur?.paths)) return
   inflight.add('r' + k); asked.add(k)
   try {
     const { status: s, body } = await get(`/route?from=${c.lat},${c.lng}&to=${h.lat},${h.lng}`)
@@ -96,7 +103,7 @@ export function requestLive(cands: Candidate[], hubs: Hub[], onChange: () => voi
   notify = onChange
   for (const c of cands) {
     const def = isDefaultCandidate(c)
-    if (!def && !store.a[pkey(c)] && status[pkey(c)] !== 'outside') void fetchAnalysis(c)
+    if (!def && !liveAnalysis(c) && status[pkey(c)] !== 'outside') void fetchAnalysis(c)
     for (const h of hubs) if (!(def && hasStatic(c.id, h.id))) void fetchRoute(c, h) // 기본 후보지도 미리 잰 값(routes.json)이 빠진 길은 서버에
   }
 }

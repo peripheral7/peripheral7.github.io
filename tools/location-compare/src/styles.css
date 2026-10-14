@@ -44,6 +44,14 @@ button { cursor: pointer }
 .logo { width: 28px; height: 28px; display: grid; place-content: center; gap: 3px; transform: rotate(-35deg) }
 .logo span { display: block; height: 3px; border-radius: 2px; background: var(--text) }
 .logo span:nth-child(1) { width: 11px; margin-left: 6px } .logo span:nth-child(2) { width: 18px } .logo span:nth-child(3) { width: 11px }
+/* 사용자 탭(10-14 시험용): '나' + 대학교 4곳 — 누르면 그 사용자의 후보지·목적지·선호도로 바뀐다 */
+.users { display: flex; gap: 4px; padding: 3px; border-radius: 999px; background: var(--panel); border: 1px solid var(--line); overflow-x: auto; scrollbar-width: none; min-width: 0 }
+.users::-webkit-scrollbar { display: none }
+.user-tab { display: inline-flex; align-items: center; gap: 5px; border: 0; background: transparent; padding: 6px 12px; border-radius: 999px; color: var(--muted); font-size: 13.5px; white-space: nowrap; cursor: pointer }
+.user-tab:hover { color: var(--text); background: var(--panel-2) }
+.user-tab.on { color: var(--text); background: var(--accent); font-weight: 600 }
+.user-tab small { font-size: 10px; color: var(--faint); font-weight: 500; border: 1px solid var(--line-2); border-radius: 999px; padding: 0 5px; line-height: 15px }
+.user-tab.on small { color: var(--good); border-color: rgba(47, 138, 85, 0.35) }
 .pills { display: flex; gap: 4px }
 .pill { border: 0; background: transparent; padding: 7px 14px; border-radius: 999px; color: var(--muted); font-size: 14px; white-space: nowrap }
 .pill:hover { color: var(--text) }
@@ -277,6 +285,9 @@ button { cursor: pointer }
   .brand { font-size: 18px }
   .back { font-size: 10px; letter-spacing: 0.05em }
   .pills .pill.active { display: none }
+  .topbar { flex-wrap: wrap }
+  .users { order: 3; width: 100% }
+  .user-tab { padding: 6px 10px; font-size: 13px }
   .result { grid-template-columns: 1fr }
   .result-actions { justify-content: flex-start }
 }

@@ -427,6 +427,9 @@ function fitSmart(map: L.Map, pts: [number, number][], _force = false, all = fal
   const target = Math.min(all ? 17 : 16, map.getBoundsZoom(b, false, all ? L.point(pad * 2, pad * 2) : L.point(pad * 2 + 40, pad * 2 + 80)))
   const c = b.getCenter()
   const z = map.getZoom()
+  // 지도 칸 크기가 0(숨긴 창·배치 전)이면 확대 값이 NaN — 그때는 가운데만 옮긴다. 사용자를 바꿔 먼 곳(수원 → 신촌)으로 가면 날아가지 않고 바로
+  if (!Number.isFinite(target)) { map.setView(c, Number.isFinite(z) ? z : 14, { animate: false }); return }
+  if (!map.getBounds().pad(1).contains(c)) { map.setView(c, target, { animate: false }); return }
   if (Math.abs(z - target) < 0.01) map.panTo(c, { animate: true, duration: 0.6, easeLinearity: 0.25 })
   else if (Math.abs(z - target) <= 3) map.flyTo(c, target, { duration: 0.8, easeLinearity: 0.25 })
   else map.setView(c, target, { animate: true })

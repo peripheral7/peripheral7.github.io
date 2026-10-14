@@ -33,6 +33,57 @@ const HUB_LIST: Hub[] = [
   { id: 'h2', name: '성남 분당 본가', category: '본가', address: '경기도 성남시 분당구 성남대로', lat: 37.385, lng: 127.123 },
 ]
 export const HUBS: Hub[] = HUB_LIST.slice(0, MAX_HUBS)
+
+/** 사용자(위쪽 탭에서 바꾼다). 'me' = 위 기본 후보지·목적지, 나머지 = 시험용(10-14): 대학교 하나 + 그 근처 자취 상권 4곳.
+ *  자취 상권 고른 법: 상가정보(data/stores.sqlite)에서 학교 2km 안을 100m 격자로 훑어 반경 250m 음식점 수가 많은 곳(서로 500m 이상) 중
+ *  원룸촌으로 알려진 곳을 골랐고, 좌표는 그 자리 건물의 도로명 주소를 네이버 Geocoding 한 값. 시험용 후보지는 미리 계산한 자료를
+ *  src/profiles-live.json(scripts/bake-profiles.mjs)으로 실어 검색으로 넣은 후보지와 같은 길(live.ts)로 계산한다. */
+export type Profile = { id: string; label: string; emoji: string; note: string; candidates: Candidate[]; hubs: Hub[] }
+const school = (id: string, name: string, address: string, lat: number, lng: number): Hub => ({ id, name, category: '학교', address, lat, lng })
+export const PROFILES: Profile[] = [
+  { id: 'me', label: '나', emoji: '🙂', note: '경희대 국제캠퍼스 · 분당 본가', candidates: CANDIDATES, hubs: HUBS },
+  {
+    id: 'skku', label: '성균관대', emoji: '🧪', note: '시험용 · 자연과학캠퍼스(수원 율전동)',
+    hubs: [school('hk', '성균관대학교 자연과학캠퍼스', '경기도 수원시 장안구 서부로 2066', 37.29336, 126.97465)],
+    candidates: [
+      { id: 'k1', name: '성균관대역 서부로', address: '경기도 수원시 장안구 서부로 2119', lat: 37.29787, lng: 126.9708 },
+      { id: 'k2', name: '율전동 서부로2181번길', address: '경기도 수원시 장안구 서부로2181번길 16', lat: 37.30307, lng: 126.97208 },
+      { id: 'k3', name: '정자동 덕영대로', address: '경기도 수원시 장안구 덕영대로511번길 29-2', lat: 37.29916, lng: 126.98027 },
+      { id: 'k4', name: '구운동 일월천로', address: '경기도 수원시 권선구 일월천로4번길 2', lat: 37.28258, lng: 126.97255 },
+    ],
+  },
+  {
+    id: 'ajou', label: '아주대', emoji: '🧪', note: '시험용 · 수원 원천동',
+    hubs: [school('ha', '아주대학교', '경기도 수원시 영통구 월드컵로 206', 37.28338, 127.04607)],
+    candidates: [
+      { id: 'a1', name: '아주대 정문 아주로', address: '경기도 수원시 팔달구 아주로 25', lat: 37.27708, lng: 127.04369 },
+      { id: 'a2', name: '광교중앙역 센트럴타운로', address: '경기도 수원시 영통구 센트럴타운로 107', lat: 37.29203, lng: 127.04834 },
+      { id: 'a3', name: '매탄동 매영로', address: '경기도 수원시 영통구 매영로 9', lat: 37.27179, lng: 127.04459 },
+      { id: 'a4', name: '우만동 월드컵로', address: '경기도 수원시 팔달구 월드컵로311번길 34-7', lat: 37.28522, lng: 127.03271 },
+    ],
+  },
+  {
+    id: 'kgu', label: '경기대', emoji: '🧪', note: '시험용 · 수원캠퍼스(연무동·광교)',
+    hubs: [school('hg', '경기대학교 수원캠퍼스', '경기도 수원시 영통구 광교산로 154-42', 37.30056, 127.03474)],
+    candidates: [
+      { id: 'g1', name: '경기대 정문 광교산로', address: '경기도 수원시 장안구 광교산로140번길 3', lat: 37.29998, lng: 127.0305 },
+      { id: 'g2', name: '연무동 연무로', address: '경기도 수원시 장안구 연무로 28', lat: 37.29436, lng: 127.0283 },
+      { id: 'g3', name: '경기대 후문 대학로', address: '경기도 수원시 영통구 대학로 40', lat: 37.29963, lng: 127.04402 },
+      { id: 'g4', name: '광교중앙역 센트럴타운로', address: '경기도 수원시 영통구 센트럴타운로 85', lat: 37.29082, lng: 127.05059 },
+    ],
+  },
+  {
+    id: 'yonsei', label: '연세대', emoji: '🧪', note: '시험용 · 신촌캠퍼스',
+    hubs: [school('hy', '연세대학교 신촌캠퍼스', '서울특별시 서대문구 연세로 50', 37.56711, 126.93903)],
+    candidates: [
+      { id: 'y1', name: '신촌역 연세로', address: '서울특별시 서대문구 연세로9길 7', lat: 37.55846, lng: 126.93646 },
+      { id: 'y2', name: '연희동 연희맛로', address: '서울특별시 서대문구 연희맛로 22', lat: 37.56694, lng: 126.93017 },
+      { id: 'y3', name: '연대 동문 성산로', address: '서울특별시 서대문구 성산로 547', lat: 37.56515, lng: 126.94551 },
+      { id: 'y4', name: '연남동 동교로', address: '서울특별시 마포구 동교로34길 20', lat: 37.56078, lng: 126.92535 },
+    ],
+  },
+]
+export const profileOf = (id: string) => PROFILES.find((p) => p.id === id) ?? PROFILES[0]
 /** 목적지 분류별 주 방문 횟수 기본값: 학교·직장 주 5회(출퇴근), 본가 월 4회 = 주 1회, 그 밖 주 2회 */
 export const defaultWeekly = (category: string) => (category === '학교' || category === '직장' ? 5 : category === '본가' ? 1 : 2)
 
