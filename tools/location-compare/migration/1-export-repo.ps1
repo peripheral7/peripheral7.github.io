@@ -13,7 +13,8 @@ param(
     [string]$Dest = '',
     [switch]$Push
 )
-$ErrorActionPreference = 'Stop'
+# PowerShell 5.1 은 'Stop' 이면 git·npm 이 stderr 에 쓰는 안내만으로 멈춘다 → 종료 코드로 판단
+$ErrorActionPreference = 'Continue'
 $Tool = Split-Path -Parent (Split-Path -Parent $MyInvocation.MyCommand.Path)   # tools/location-compare
 $Repo = Split-Path -Parent (Split-Path -Parent $Tool)                         # 블로그 저장소
 if (-not $Dest) { $Dest = Join-Path (Split-Path -Parent $Repo) 'whereto' }
@@ -33,7 +34,7 @@ $dirty = git status --porcelain -- tools/location-compare workers/place-search
 if ($dirty) { throw "tools/location-compare 또는 workers/place-search 에 커밋 안 된 변경이 있습니다 — 먼저 커밋하세요:`n$dirty" }
 
 Write-Host '1) 이력 떼어 내기(git subtree split) — 몇 분 걸릴 수 있음'
-git branch -D whereto-export 2>$null | Out-Null
+if (git branch --list whereto-export) { git branch -D whereto-export | Out-Null }
 git subtree split --prefix=tools/location-compare -b whereto-export
 if ($LASTEXITCODE -ne 0) { throw 'subtree split 실패' }
 

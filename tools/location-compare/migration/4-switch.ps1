@@ -15,7 +15,8 @@ param(
     [switch]$Deploy,
     [switch]$Push
 )
-$ErrorActionPreference = 'Stop'
+# PowerShell 5.1 은 'Stop' 이면 git·npm 이 stderr 에 쓰는 안내만으로 멈춘다 → 종료 코드로 판단
+$ErrorActionPreference = 'Continue'
 $Tool = Split-Path -Parent (Split-Path -Parent $MyInvocation.MyCommand.Path)
 $Repo = Split-Path -Parent (Split-Path -Parent $Tool)
 $NewUrl = $NewUrl.TrimEnd('/')
