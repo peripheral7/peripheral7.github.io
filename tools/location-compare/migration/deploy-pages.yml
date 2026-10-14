@@ -10,6 +10,8 @@ on:
   workflow_dispatch:
 jobs:
   deploy:
+    # Cloudflare 설정(변수 PAGES_PROJECT)을 넣기 전에는 건너뜀 — 첫 push 가 실패로 보이지 않게
+    if: ${{ vars.PAGES_PROJECT != '' }}
     runs-on: ubuntu-latest
     permissions:
       contents: read
