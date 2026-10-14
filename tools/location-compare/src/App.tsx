@@ -1,12 +1,12 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
-import { BASE_DEPOSIT, MAX_HUBS, activeModes, baseRent, hubEmoji, weeklyText, won, type Place } from './data'
+import { BASE_DEPOSIT, MAX_HUBS, activeModes, lifestyleOf, baseRent, hubEmoji, weeklyText, won, type Place } from './data'
 import { evaluate, hubInsights, shareOf } from './scoring'
 import { addCandidate, load, money, removeCandidate, removeHub, save, setHub, updateCandidate, type State } from './store'
 import { MapView } from './components/MapView'
 import type { MapPoint } from './placeNear'
 import { SearchBox } from './components/SearchBox'
 import { FactorsPanel, type FactorBest, type FactorOpen } from './components/Panels'
-import { EdgeNav, House3D, MainMode, ScoreBlock } from './components/TransportCard'
+import { EdgeNav, ScoreBlock } from './components/TransportCard'
 import { MODE_INFO } from './components/SettingsPopover'
 import { CompareCards } from './components/CompareCards'
 import { SettingsPopover } from './components/SettingsPopover'
@@ -149,6 +149,7 @@ export default function App() {
   })
   const modes = activeModes(pref)
   const w = shareOf(pref) // 카드에는 합 100 기준 비율로
+  const life = lifestyleOf(pref)
   // 번호 = 종합 순위(지도 핀·번호 단추 모두), 단추는 순위 순서로
   const ranks = useMemo(() => results.map((r) => r.rank), [results])
   const byRank = candidates.map((c, i) => ({ c, i, rank: ranks[i] ?? i + 1 })).sort((a, b) => a.rank - b.rank)
@@ -224,20 +225,18 @@ export default function App() {
                 </form>
               ) : (
                 <div className="sel-head house-head">
-                  <House3D rank={cur.rank} />
                   <div className="sel-text">
                     <span className="tag">종합 {cur.rank}위{rentText(cur.candidate)}</span>
                     <h3>{cur.candidate.name}</h3>
                     <p>{cur.candidate.address}</p>
-                    <MainMode r={cur} />
                   </div>
                   <button className="edit-btn" aria-label={`${cur.candidate.name} 수정`} onClick={() => setEditing({ id: cur.candidate.id, name: cur.candidate.name, deposit: cur.candidate.deposit?.toString() ?? '', rent: cur.candidate.rent?.toString() ?? '', maint: cur.candidate.maint?.toString() ?? '', use: cur.candidate.use ?? 'home' })}>수정</button>
                 </div>
               )
             ) : <p className="empty">검색해서 후보지를 넣어 주세요.</p>}
             {cur && (
-              <div className={'tappable score-tap' + (pop === 'weights' ? ' on' : '')} {...tap('weights', '수단 가중치 조정 열기')}>
-                <ScoreBlock r={cur} modes={modes} action={<span className="tap-hint">가중치 {modes.map((m) => w[m]).join('·')} ↗</span>} />
+              <div className={'tappable score-tap' + (pop === 'weights' ? ' on' : '')} {...tap('weights', '라이프스타일 고르기 열기')}>
+                <ScoreBlock r={cur} modes={modes} action={<span className="tap-hint">{life ? `${life.emoji} ${life.label}` : `직접 정한 비율 ${modes.map((m) => w[m]).join('·')}`} ↗</span>} />
               </div>
             )}
             <div className="pick" role="tablist" aria-label="후보지 선택">

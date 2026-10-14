@@ -31,7 +31,7 @@ export function load(): State {
       return {
         candidates: saved.candidates.filter(isPoint).map(migrate),
         hubs,
-        pref: { weights: { ...base.pref.weights, ...saved.pref.weights }, weekly, hubMode, bike: !!saved.pref.bike },
+        pref: { weights: { ...base.pref.weights, ...saved.pref.weights }, weekly, hubMode, bike: !!saved.pref.bike, lifestyle: typeof saved.pref.lifestyle === 'string' ? saved.pref.lifestyle : undefined }, // 라이프스타일 이전(숫자로 정한) 가중치는 그대로 두고 '직접 정한 값'으로
       }
     }
     const old = JSON.parse(localStorage.getItem(OLD_PREF_KEY) || 'null')

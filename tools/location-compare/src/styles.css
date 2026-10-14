@@ -769,3 +769,34 @@ input[type=number]::-webkit-inner-spin-button, input[type=number]::-webkit-outer
 .cat-box img.on { opacity: 1 }
 .cat-box b { position: absolute; right: 2px; bottom: 2px; font-size: 10px; line-height: 1; color: #fff; background: rgba(0, 0, 0, 0.55); border-radius: 6px; padding: 2px 4px }
 .cat-callout:hover .cat-box { box-shadow: 0 0 0 2px #1c2733, 0 3px 10px rgba(0, 0, 0, 0.3) }
+
+/* ══ 10-14 2차: 교통평점 카드 가운데 큰 집 + 원형 퍼센트 · 라이프스타일 고르기 ══ */
+.house-head { justify-content: center; text-align: center; position: relative; padding-bottom: 8px }
+.house-head .sel-text { flex: none; max-width: calc(100% - 64px) }
+.house-head h3 { justify-content: center }
+.house-head .edit-btn { position: absolute; right: 0; top: 0 }
+.score-block .panel-head { margin: 4px 0 0 }
+.house-ring { display: flex; flex-direction: column; align-items: center; padding: 4px 0 2px }
+.hr-circle { position: relative; width: 172px; height: 172px; display: grid; place-items: center }
+.hr-svg { position: absolute; inset: 0; width: 100%; height: 100% }
+.hr-svg circle { fill: none; stroke-width: 3.6 }
+.hr-svg .ring-track { stroke: rgba(24, 39, 56, 0.08) }
+.hr-svg .ring-arc { stroke: var(--good); stroke-linecap: round; transition: stroke-dasharray 0.6s ease }
+.hr-circle .house3d { width: 112px; height: 103px; margin-top: 4px }
+.hr-pct { position: absolute; transform: translate(-50%, -50%); background: var(--good); color: #fff; font-size: 10.5px; font-weight: 600; line-height: 1; padding: 3px 6px; border-radius: 999px; box-shadow: 0 1px 4px rgba(0, 0, 0, 0.18); font-variant-numeric: tabular-nums; pointer-events: none }
+.hr-score { margin: 2px 0 0; display: flex; align-items: baseline; gap: 4px }
+.hr-score b { font-size: 34px; font-weight: 250; line-height: 1; font-variant-numeric: tabular-nums }
+.hr-score small { font-size: 12px; color: var(--faint) }
+.hr-rank { margin: 2px 0 0; font-size: 12px; color: var(--muted) }
+.score-block .main-mode { justify-content: center; margin: 6px 0 4px }
+/* 라이프스타일 */
+.life-list { display: flex; flex-direction: column; gap: 6px; margin-top: 6px }
+.life-card { display: grid; grid-template-columns: 34px minmax(0, 1fr); gap: 10px; align-items: center; width: 100%; text-align: left; padding: 9px 12px; border: 1px solid var(--line-2); border-radius: 14px; background: #fff; transition: border-color 0.15s, background 0.15s }
+.life-card:hover { border-color: var(--text) }
+.life-card.on { border-color: var(--text); background: var(--accent); box-shadow: 0 0 0 1px var(--text) }
+.life-emoji { font-size: 22px; text-align: center; font-family: "Segoe UI Emoji", "Apple Color Emoji", var(--font) }
+.life-text b { display: block; font-weight: 500; font-size: 14px }
+.life-text small { display: block; color: var(--muted); font-size: 11px }
+.life-bar { display: flex; height: 5px; margin-top: 5px; border-radius: 3px; overflow: hidden; background: rgba(24, 39, 56, 0.06) }
+.life-bar i { display: block; height: 100% }
+.life-bar i.transit { background: var(--transit) } .life-bar i.car { background: var(--car) } .life-bar i.walk { background: var(--walk) } .life-bar i.bike { background: var(--bike) }

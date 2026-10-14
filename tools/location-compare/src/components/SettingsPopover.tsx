@@ -1,10 +1,9 @@
 import { useEffect, useRef } from 'react'
-import { DEFAULT_PREFERENCE, MAX_WEEKLY, WEEKS_PER_MONTH, activeModes, defaultWeekly, weightShares, type Hub, type HubMode, type ModeKey, type Preference } from '../data'
+import { LIFESTYLES, MAX_WEEKLY, WEEKS_PER_MONTH, applyLifestyle, defaultWeekly, weightShares, type Hub, type HubMode, type ModeKey, type Preference } from '../data'
 
 // 칸(카드)을 누르면 그 칸 바로 오른쪽에 뜨는 작은 설정 창. 바꾸는 즉시 점수에 반영되고 이 브라우저에 저장된다.
-// 수단 가중치는 숫자로 직접 넣는다(0~999). 하나를 바꿔도 나머지는 그대로 두고, 합이 100 과 다르면 100 기준 비율을 보여 준다
-// (계산은 합에 대한 비율로 하므로 합이 100 을 넘어도 동작한다. 설정 창 밖의 카드에는 이 비율만 보인다).
-// 자전거는 따로 켜는 이동수단 — 켜면 가중치 칸이 생긴다(상권·공공시설 반경도 2배).
+// 교통평점 창(10-14): 수단 가중치 숫자 대신 **라이프스타일**을 고른다(data.ts LIFESTYLES — 고르면 가중치·자전거 사용이 정해짐).
+// 각 카드에 그 라이프스타일의 수단 비율을 작은 막대로 보인다.
 // 목적지 창: 주 방문(왕복) 횟수(0.5 단위, 월 4회 = 주 1회)와 그 목적지에 갈 때 쓰는 이동수단(자동 = 가중치로 섞음).
 type Props = { kind: 'weekly' | 'weights'; hubs: Hub[]; value: Preference; onChange: (p: Preference) => void; onClose: () => void }
 
@@ -15,8 +14,6 @@ export const MODE_INFO: Record<ModeKey, { label: string; emoji: string; note: st
   bike: { label: '자전거', emoji: '🚲', note: '자전거 길 시간 · 40분까지' },
 }
 const HUB_MODES: { m: HubMode; label: string }[] = [{ m: 'auto', label: '자동' }, { m: 'transit', label: '🚌' }, { m: 'car', label: '🚗' }, { m: 'walk', label: '🚶' }, { m: 'bike', label: '🚲' }]
-
-const toInt = (v: string, max: number) => Math.max(0, Math.min(max, Math.round(Number(v)) || 0))
 
 export function SettingsPopover({ kind, hubs, value, onChange, onClose }: Props) {
   const box = useRef<HTMLDivElement>(null)
@@ -35,39 +32,37 @@ export function SettingsPopover({ kind, hubs, value, onChange, onClose }: Props)
     return () => { window.removeEventListener('keydown', onKey); window.removeEventListener('pointerdown', onDown) }
   }, [])
 
-  const w = value.weights
-  const modes = activeModes(value)
-  const total = modes.reduce((a, k) => a + (w[k] ?? 0), 0)
-  const share = weightShares(w, modes)
-  const setWeight = (key: ModeKey, v: string) => onChange({ ...value, weights: { ...w, [key]: toInt(v, 999) } })
   const setWeekly = (id: string, v: number) => onChange({ ...value, weekly: { ...value.weekly, [id]: Math.max(0, Math.min(MAX_WEEKLY, Math.round((v || 0) * 2) / 2)) } })
   const setMode = (id: string, m: HubMode) => onChange({ ...value, hubMode: { ...value.hubMode, [id]: m } })
   const reset = () => onChange(kind === 'weights'
-    ? { ...value, weights: DEFAULT_PREFERENCE.weights }
+    ? applyLifestyle(value, 'balanced')
     : { ...value, weekly: Object.fromEntries(hubs.map((h) => [h.id, defaultWeekly(h.category)])), hubMode: {} })
 
   return (
-    <div className="popover" ref={box} role="dialog" aria-label={kind === 'weights' ? '수단 가중치 조정' : '목적지 방문 횟수·이동수단 조정'}>
+    <div className="popover" ref={box} role="dialog" aria-label={kind === 'weights' ? '라이프스타일 고르기' : '목적지 방문 횟수·이동수단 조정'}>
       <div className="pop-head">
-        <b>{kind === 'weights' ? '수단 가중치' : '주 방문 횟수 · 이동수단'}</b>
+        <b>{kind === 'weights' ? '라이프스타일' : '주 방문 횟수 · 이동수단'}</b>
         <button className="close" aria-label="닫기" onClick={onClose}>×</button>
       </div>
       {kind === 'weights' ? (
-        <>
-          {modes.map((k) => (
-            <label className="weight-input" key={k}>
-              <span><b>{MODE_INFO[k].emoji} {MODE_INFO[k].label}</b><small>{MODE_INFO[k].note}</small></span>
-              <input type="number" min={0} max={999} step={1} inputMode="numeric" aria-label={`${MODE_INFO[k].label} 가중치`} value={w[k] ?? 0}
-                onFocus={(e) => e.currentTarget.select()} onChange={(e) => setWeight(k, e.target.value)} />
-            </label>
-          ))}
-          <button type="button" className={'bike-toggle' + (value.bike ? ' on' : '')} aria-pressed={!!value.bike} onClick={() => onChange({ ...value, bike: !value.bike })}>
-            🚲 자전거 {value.bike ? '이용 중' : '이용'}<small>{value.bike ? '독립 이동수단으로 계산 · 상권·공공시설 반경 2배' : '켜면 자전거를 이동수단으로 따로 계산(상권·공공시설 반경도 2배)'}</small>
-          </button>
-          <p className="sum-note" role="status">
-            합계 <b>{total}</b>{total !== 100 && <> · 100 기준 <b>{modes.map((k) => share[k]).join('·')}</b></>}
-          </p>
-        </>
+        <div className="life-list" role="radiogroup" aria-label="라이프스타일">
+          {LIFESTYLES.map((l) => {
+            const keys: ModeKey[] = l.bike ? ['transit', 'car', 'walk', 'bike'] : ['transit', 'car', 'walk']
+            const sh = weightShares(l.weights, keys)
+            const on = value.lifestyle === l.id
+            return (
+              <button type="button" key={l.id} role="radio" aria-checked={on} className={'life-card' + (on ? ' on' : '')} onClick={() => onChange(applyLifestyle(value, l.id))}>
+                <span className="life-emoji" aria-hidden>{l.emoji}</span>
+                <span className="life-text"><b>{l.label}</b><small>{l.note}</small>
+                  <span className="life-bar" aria-label={keys.map((k) => `${MODE_INFO[k].label} ${sh[k]}%`).join(' · ')}>
+                    {keys.map((k) => <i key={k} className={k} style={{ width: `${sh[k]}%` }} />)}
+                  </span>
+                </span>
+              </button>
+            )
+          })}
+          {!value.lifestyle && <p className="sum-note">지금은 예전에 숫자로 정한 비율을 쓰는 중 — 하나를 고르면 바뀝니다.</p>}
+        </div>
       ) : hubs.map((h) => {
         const n = value.weekly[h.id] ?? 0
         const mode = value.hubMode?.[h.id] ?? 'auto'

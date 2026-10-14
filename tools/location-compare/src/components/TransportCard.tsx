@@ -21,16 +21,27 @@ const Ticks = ({ value, mode }: { value: number | null; mode: ModeKey }) => (
   </span>
 )
 
-// 종합 점수: 원 테두리만 점수(0~10)만큼 채운다(12시 방향에서 시계 방향). 가운데에 점수.
-const TotalRing = ({ value }: { value: number }) => (
-  <span className="total-ring">
-    <svg viewBox="0 0 100 100" aria-hidden>
-      <circle className="ring-track" cx="50" cy="50" r="44" />
-      <circle className="ring-arc" cx="50" cy="50" r="44" pathLength={100} strokeDasharray={`${Math.max(0, Math.min(10, value)) * 10} 100`} transform="rotate(-90 50 50)" />
-    </svg>
-    <em>{fmt(value)}<small>/ 10</small></em>
-  </span>
-)
+/** 카드 가운데: 큰 3D 집을 원이 둘러싸고, 원 테두리를 종합 점수 비율(0~100%)만큼 채운다(12시 방향부터 시계 방향).
+ *  채운 끝에 작은 퍼센트 꼬리표, 원 아래에 점수. */
+export function HouseRing({ value, rank }: { value: number; rank: number }) {
+  const pct = Math.max(0, Math.min(10, value)) * 10
+  const a = ((pct / 100) * 360 - 90) * (Math.PI / 180) // 채운 끝 각도
+  const R = 46, cx = 50 + R * Math.cos(a), cy = 50 + R * Math.sin(a)
+  return (
+    <div className="house-ring">
+      <div className="hr-circle">
+        <svg viewBox="0 0 100 100" className="hr-svg" aria-hidden>
+          <circle className="ring-track" cx="50" cy="50" r={R} />
+          <circle className="ring-arc" cx="50" cy="50" r={R} pathLength={100} strokeDasharray={`${pct} 100`} transform="rotate(-90 50 50)" />
+        </svg>
+        <House3D rank={rank} />
+        <span className="hr-pct" style={{ left: `${cx}%`, top: `${cy}%` }}>{Math.round(pct)}%</span>
+      </div>
+      <p className="hr-score"><b>{fmt(value)}</b><small>/ 10</small></p>
+      <p className="hr-rank">종합 {rank}위</p>
+    </div>
+  )
+}
 
 /** 3D 집(아이소메트릭) — 지붕 색은 순위(1위 초록 → 아래로 갈수록 회색빛) */
 export function House3D({ rank }: { rank: number }) {
@@ -93,10 +104,8 @@ export function ScoreBlock({ r, modes, action }: { r: CandidateResult; modes: Mo
   return (
     <div className="score-block">
       <div className="panel-head"><h2>교통평점</h2>{action}</div>
-      <div className="total-wrap">
-        <TotalRing value={r.total} />
-        <p className="gauge-caption">종합 <b>{r.rank}위</b><br /><small>목적지 점수를 주 방문 횟수 비율로 평균</small></p>
-      </div>
+      <HouseRing value={r.total} rank={r.rank} />
+      <MainMode r={r} />
       <div className="mode-rows">
         {modes.map((m) => {
           const v = modeSummary(r, m)
