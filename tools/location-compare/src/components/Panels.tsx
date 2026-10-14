@@ -1,7 +1,7 @@
 import { useEffect, useRef, useState } from 'react'
 import { fmt } from '../scoring'
 import { CAT_RADIUS_M, livePhotos, type CatIndex } from '../cats'
-import { PEACE, PLACE_KEYS, PLACE_LABEL, PLACE_NOTE, placeSummary, type PlaceKey, type PlaceOn, type PlaceRow } from '../places'
+import { PEACE, PLACE_KEYS, biggestPark, PLACE_LABEL, PLACE_NOTE, placeSummary, type PlaceKey, type PlaceOn, type PlaceRow } from '../places'
 import { CATEGORIES, ENOUGH, NEED_WEIGHT, STDR_YM, WALK5, WANT_WEIGHT, setTier, tierOf, type CommercialIndex, type CommercialPrefs, type Tier } from '../commercial'
 import { pn, t } from '../i18n'
 
@@ -194,10 +194,11 @@ function PlaceDetail({ k, r }: { k: PlaceKey; r: PlaceRow }) {
     return (
       <div className="com-picker place-detail">
         {p.parks.length === 0 && <p className="com-note">{t('500m 안에 공원이 없어요.', 'No parks within 500 m.')}</p>}
-        {p.parks.map((x, i) => (
-          <div className="place-line" key={x.name + i}>
-            <span>{x.waterside ? '🌊' : '🌳'} {pn(x.name)} <small>{pn(x.type)} · {x.dist}m</small></span>
-            <em>{fmt(x.eff)}</em>
+        {/* 공원 이름은 전부 늘어놓지 않고 가장 큰 공원 하나만(사용자 지정 10-14) */}
+        {biggestPark(p.parks).map((x) => (
+          <div className="place-line" key={x.name}>
+            <span>{x.waterside ? '🌊' : '🌳'} {pn(x.name)} <small>{pn(x.type)} · {x.areaHa}ha · {x.dist}m</small></span>
+            <em>{fmt(p.score)}</em>
           </div>
         ))}
         <div className="place-line"><span>🌿 {t('녹지', 'Green space')} {p.green}%</span><em>+{p.greenBonus}</em></div>
