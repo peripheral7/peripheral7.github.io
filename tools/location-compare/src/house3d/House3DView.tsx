@@ -120,8 +120,8 @@ export default function House3DView(props: ViewProps) {
         shadow-camera-bottom={-12}
         shadow-bias={-0.0005}
       />
-      {/* 땅 밑·바로 위로는 못 돌게(0.2~1.35 rad), 옆으로 끌기(이동)는 끔 */}
-      {big && <OrbitControls makeDefault enablePan={false} enableDamping dampingFactor={0.12} minPolarAngle={0.2} maxPolarAngle={1.35} />}
+      {/* 땅 밑·바로 위로는 못 돌게(0.2~1.35 rad), 옆으로 끌기(이동)는 끔, 휠은 마우스가 가리킨 곳으로 확대(고양이·카페 같은 작은 장식 보기) */}
+      {big && <OrbitControls makeDefault zoomToCursor enablePan={false} enableDamping dampingFactor={0.12} minPolarAngle={0.2} maxPolarAngle={1.35} />}
       <Scene {...props} />
     </Canvas>
   )
