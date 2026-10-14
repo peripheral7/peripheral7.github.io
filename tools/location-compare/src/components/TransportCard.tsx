@@ -1,7 +1,8 @@
 import { Component, lazy, Suspense, useEffect, useLayoutEffect, useRef, useState, type ReactNode } from 'react'
 import { fmt, type CandidateResult, type HubResult } from '../scoring'
 import { hubEmoji, type Candidate, type ModeKey } from '../data'
-import { houseKind, roofColor } from '../house3d/colors'
+import { roofColor } from '../house3d/colors'
+import { houseSpec } from '../house3d/spec'
 import { MODE_INFO } from './SettingsPopover'
 import { catName, mins, pn, rankText, t } from '../i18n'
 import { useNarrow } from '../mobile'
@@ -46,7 +47,7 @@ export function HouseRing({ value, rank, candidate }: { value: number; rank: num
           <GLBoundary fallback={svg}>
             <Suspense fallback={svg}>
               <div className="house3d-box" aria-hidden>
-                <House3DView kind={houseKind(candidate.use)} roof={roofColor(rank)} tree={rank === 1} animKey={candidate.id} />
+                <House3DView {...houseSpec(candidate, rank)} />
               </div>
             </Suspense>
           </GLBoundary>

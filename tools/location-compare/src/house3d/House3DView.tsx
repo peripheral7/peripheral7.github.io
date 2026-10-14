@@ -3,8 +3,9 @@
 import { useLayoutEffect, useRef } from 'react'
 import { Canvas, useFrame, useThree } from '@react-three/fiber'
 import * as THREE from 'three'
-import type { House3DProps } from './colors'
-import { Ground, Home, Officetel, Shop, Tree } from './models'
+import type { House3DProps } from './spec'
+import { BrickHouse, FlatHouse, Ground, Home, Officetel } from './models'
+import { groundRadius, Options } from './options'
 
 /** 카메라가 바라보는 방향(집 쪽에서 본 카메라 위치) — 왼쪽 앞 위, SVG 집과 같은 아이소메트릭 느낌 */
 const VIEW = new THREE.Vector3(1, 0.8, 1).normalize()
@@ -12,7 +13,9 @@ const POP_S = 0.3 // 후보지 바뀔 때 커지는 시간(초)
 const reduced = () => typeof matchMedia === 'function' && matchMedia('(prefers-reduced-motion: reduce)').matches
 
 /** 장면 전체: 모양을 그리고, 카메라를 모양에 맞추고, 후보지가 바뀌면 살짝 작았다 커진다 */
-function Scene({ kind, roof, tree, animKey }: House3DProps) {
+function Scene({ kind, roof, options, animKey }: House3DProps) {
+  const r = groundRadius(options)
+  const optKey = options.join()
   const outer = useRef<THREE.Group>(null) // 커지기 애니메이션용(크기만 바꾼다)
   const inner = useRef<THREE.Group>(null) // 화면 맞춤 기준
   const { camera, size, invalidate } = useThree()
@@ -47,7 +50,7 @@ function Scene({ kind, roof, tree, animKey }: House3DProps) {
     camera.updateProjectionMatrix()
     o.scale.setScalar(keep)
     invalidate()
-  }, [kind, tree, size.width, size.height, camera, invalidate])
+  }, [kind, optKey, size.width, size.height, camera, invalidate])
 
   // 후보지가 바뀌면 0.9 → 1 로 커진다(움직임 줄이기 설정이면 생략)
   useLayoutEffect(() => {
@@ -67,9 +70,9 @@ function Scene({ kind, roof, tree, animKey }: House3DProps) {
   return (
     <group ref={outer}>
       <group ref={inner}>
-        <Ground />
-        {kind === 'officetel' ? <Officetel roof={roof} /> : kind === 'shop' ? <Shop roof={roof} /> : <Home roof={roof} />}
-        {tree && <Tree />}
+        <Ground r={r} />
+        {kind === 'officetel' ? <Officetel roof={roof} /> : kind === 'brick' ? <BrickHouse roof={roof} /> : kind === 'flat' ? <FlatHouse roof={roof} /> : <Home roof={roof} />}
+        <Options options={options} r={r} />
       </group>
     </group>
   )
@@ -95,11 +98,11 @@ export default function House3DView(props: House3DProps) {
         position={[-5, 12, 9]}
         intensity={2.2}
         castShadow
-        shadow-mapSize={[512, 512]}
-        shadow-camera-left={-10}
-        shadow-camera-right={10}
-        shadow-camera-top={12}
-        shadow-camera-bottom={-10}
+        shadow-mapSize={[1024, 1024]}
+        shadow-camera-left={-12}
+        shadow-camera-right={12}
+        shadow-camera-top={14}
+        shadow-camera-bottom={-12}
         shadow-bias={-0.0005}
       />
       <Scene {...props} />
