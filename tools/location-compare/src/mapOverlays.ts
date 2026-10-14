@@ -2,7 +2,7 @@
 import type { ZoneCell } from './places'
 
 // ── 평화로움 구분도 ──
-// places.mjs 가 후보지 반경 100m 를 10m 칸으로 나눠 단계(1~6)를 매긴다. 칸을 위경도 네모로 바꿔 단계 색으로 칠한다(테두리 없음).
+// places.mjs 가 후보지 반경 50m 를 5m 칸으로(places-config.json peace.zones) 나눠 단계(1~6)를 매긴다. 칸을 위경도 네모로 바꿔 단계 색으로 칠한다(테두리 없음).
 export const ZONE_STYLE: Record<number, { color: string; alpha: number; label: string }> = {
   // 도로 색은 차로 수(사용자 지정 10-14): 8차선 이상 빨강 · 6차선 주황 · 4차선(중로) 노랑. 상가는 보라
   1: { color: '#d63b2f', alpha: 0.42, label: '8차선 이상 바로 옆' },
@@ -14,7 +14,8 @@ export const ZONE_STYLE: Record<number, { color: string; alpha: number; label: s
   7: { color: '#8f6cc4', alpha: 0.3, label: '상가 밀집' },
   8: { color: '#8f6cc4', alpha: 0.13, label: '상가 있음' },
 }
-export type Zones = { lat: number; lng: number; step: number; cells: ZoneCell[] }
+/** radiusM = 칠하는 반경(점선 원), calcM = 평화로움 계산 반경(실선 원) */
+export type Zones = { lat: number; lng: number; step: number; cells: ZoneCell[]; radiusM: number; calcM: number }
 export type ZoneRect = { s: number; w: number; n: number; e: number; k: number }
 export function zoneRects(z: Zones): ZoneRect[] {
   const dLat = z.step / 110540, dLng = z.step / (111320 * Math.cos((z.lat * Math.PI) / 180))

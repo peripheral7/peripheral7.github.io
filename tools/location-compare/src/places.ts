@@ -18,7 +18,7 @@ export type PlaceRow = {
   library: { score: number; near: LibraryRow[] }
 }
 export const PLACE_LABEL: Record<PlaceKey, string> = { peace: '🕊️ 평화로움', park: '🌳 공원', library: '📚 도서관' }
-export const PLACE_NOTE: Record<PlaceKey, string> = { peace: '음식점 · 업소 · 도로 소음', park: '공원 · 녹지 비율', library: '가까운 공공도서관' }
+export const PLACE_NOTE: Record<PlaceKey, string> = { peace: '음식점 · 상업시설 · 도로 소음', park: '공원 · 녹지 비율', library: '가까운 공공도서관' }
 /** 평화로움 규칙(화면 한 줄 설명·구분도 범례용) */
 export const PEACE = config.peace
 export const PLACE_KEYS: PlaceKey[] = ['peace', 'park', 'library']

@@ -20,7 +20,7 @@ import { SPOTS } from './recommend'
 import { DEFAULT_FUEL, loadCommute, saveCommute, type CommuteSaved } from './commute'
 import { fuelPriceFor } from './fuel'
 import { loadParks, parkAreaPin, strollNear, PARK_AREAS, PARK_AREA_MIN, STROLL_RADIUS, type Park } from './parks'
-import { PLACE_KEYS, loadPlaceOn, placeFor, placeSummary, savePlaceOn, type PlaceOn } from './places'
+import { PEACE, PLACE_KEYS, loadPlaceOn, placeFor, placeSummary, savePlaceOn, type PlaceOn } from './places'
 import { liveMajors, liveNote, requestLive } from './live'
 import { MAJORS, commercialIndex, loadCommercial, pickedCats, saveCommercial, walk5Counts, type CommercialPrefs } from './commercial'
 
@@ -168,13 +168,14 @@ export default function App() {
   // 펼친 입지 요인을 지도에: 도서관 위치 · 평화로움 구분도 · 길고양이 사진
   const curPlace = placeFor(candidates[active], !!pref.bike)
   const mapLibraries = useMemo(() => (factorOpen === 'library' && curPlace ? curPlace.library.near.filter((l) => l.lat && l.lng).map((l) => ({ name: l.name, lat: l.lat!, lng: l.lng!, dist: l.dist })) : undefined), [factorOpen, curPlace])
-  const mapZones = useMemo(() => (factorOpen === 'peace' && curPlace?.peace.zones && candidates[active] ? { lat: candidates[active].lat, lng: candidates[active].lng, ...curPlace.peace.zones } : null), [factorOpen, curPlace, candidates, active])
-  // 펼친 요인 범위로 지도 맞춤: 평화로움 = 반경 150m, 도서관 = 후보지 + 도서관, 길고양이 = 후보지 + 고양이
+  const mapZones = useMemo(() => (factorOpen === 'peace' && curPlace?.peace.zones && candidates[active] ? { lat: candidates[active].lat, lng: candidates[active].lng, ...curPlace.peace.zones, radiusM: PEACE.zones.radiusM, calcM: PEACE.foodRadiusM } : null), [factorOpen, curPlace, candidates, active])
+  // 펼친 요인 범위로 지도 맞춤: 평화로움 = 반경 75m(구분도 50m + 여유), 도서관 = 후보지 + 도서관, 길고양이 = 후보지 + 고양이
   const overlayFit = useMemo(() => {
     const c = candidates[active]
     if (!c || !factorOpen) return null
     const d = 150 / 110540, e = 150 / (111320 * Math.cos((c.lat * Math.PI) / 180))
-    const pts: [number, number][] = factorOpen === 'peace' ? [[c.lat - d, c.lng - e], [c.lat + d, c.lng + e]]
+    const pd = 75 / 110540, pe = 75 / (111320 * Math.cos((c.lat * Math.PI) / 180))
+    const pts: [number, number][] = factorOpen === 'peace' ? [[c.lat - pd, c.lng - pe], [c.lat + pd, c.lng + pe]]
       : factorOpen === 'library' ? [[c.lat, c.lng], ...(curPlace?.library.near ?? []).filter((l) => l.lat).slice(0, 2).map((l): [number, number] => [l.lat!, l.lng!])]
       : factorOpen === 'cat' ? [[c.lat - d, c.lng - e], [c.lat + d, c.lng + e], ...(catIdx?.[active]?.cats ?? []).map((x): [number, number] => [x.lat, x.lng])]
       : []

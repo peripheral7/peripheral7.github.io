@@ -490,7 +490,7 @@
       ],
       "_메모": "한식·중식·일식·서양식·동남아·기타 외국·구내식당/뷔페·간이(분식·치킨·버거·빵 등). 카페(I212)·주점(I211)은 뺌",
       "enough": 80,
-      "_삭제": "2026-10-13 사용자 요청으로 상권 지수에서 뺐다(나중에 다시 넣을 수 있게 정의를 남김). 되살리기: 이 객체를 categories 에 다시 넣고(enough 는 위 enough 표로 옮김), node scripts/stores.mjs analyze → 빌드. 작동 방식: 500m 안 음식점 수 n 으로 업종 점수 10×(1−10^(−n/80)), 기준 80곳(생활권 분포 근거는 COMMERCIAL.md 옛판·git 기록 f65efbd). 평화로움의 \"60m 안 음식점\"(places-config.json peace)은 별개라 그대로 있다."
+      "_삭제": "2026-10-13 사용자 요청으로 상권 지수에서 뺐다(나중에 다시 넣을 수 있게 정의를 남김). 되살리기: 이 객체를 categories 에 다시 넣고(enough 는 위 enough 표로 옮김), node scripts/stores.mjs analyze → 빌드. 작동 방식: 500m 안 음식점 수 n 으로 업종 점수 10×(1−10^(−n/80)), 기준 80곳(생활권 분포 근거는 COMMERCIAL.md 옛판·git 기록 f65efbd). 평화로움의 \"30m 안 음식점\"(places-config.json peace)은 별개라 그대로 있다."
     }
   ],
   "_defaultPrefs": "기본: 잡화 필수 · 마트·카페 선호 · 의료 안 봄(2026-10-13 사용자 지정)"

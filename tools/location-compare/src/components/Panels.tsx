@@ -180,9 +180,9 @@ function PlaceDetail({ k, r }: { k: PlaceKey; r: PlaceRow }) {
     return (
       <div className="com-picker place-detail">
         <div className="place-line"><span>🍽️ {PEACE.foodRadiusM}m 안 음식점 {p.food}곳 <small>냄새</small></span><em>{fmt(p.foodScore)}</em></div>
-        <div className="place-line"><span>🛍️ {PEACE.shopRadiusM}m 안 업소 {p.shops}곳 <small>사람</small></span><em>{fmt(p.shopScore)}</em></div>
+        <div className="place-line"><span>🛍️ {PEACE.shopRadiusM}m 안 상업시설 {p.shops}곳 <small>사람</small></span><em>{fmt(p.shopScore)}</em></div>
         <div className="place-line"><span>🛣️ {p.road ? `${p.road.name.split(' · ')[0]}${p.road.lanes ? ` ${p.road.lanes}차선` : ''} ${p.road.dist}m` : '가까운 도로 없음'} <small>소음</small></span><em>{fmt(p.roadScore)}</em></div>
-        <p className="com-note">냄새 : 사람 : 소음 = {PEACE.wFood * 10} : {PEACE.wShop * 10} : {PEACE.wRoad * 10}. 지도에 반경 {PEACE.zones.radiusM}m 소음 구분도(빨강 8차선+ · 주황 6차선 · 노랑 4차선 · 보라 상가).</p>
+        <p className="com-note">냄새 : 사람 : 소음 = {PEACE.wFood * 10} : {PEACE.wShop * 10} : {PEACE.wRoad * 10}. 지도에 반경 {PEACE.zones.radiusM}m 소음 구분도 · 실선 = 계산 반경 {PEACE.foodRadiusM}m(빨강 8차선+ · 주황 6차선 · 노랑 4차선 · 보라 상가).</p>
       </div>
     )
   }

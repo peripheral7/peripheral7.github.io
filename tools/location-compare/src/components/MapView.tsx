@@ -18,7 +18,7 @@ import { ZONE_STYLE, catCalloutHtml, catCallouts, startCatSlides, zoneRects, typ
 // - "장단점 기준" 오른쪽 "후보지 한눈에"는 모든 후보지가 고르게 들어오도록 확대·이동한다(목적지는 빼고).
 // - 지도를 우클릭(휴대폰은 길게 누르기)하면 그 자리를 "후보지로 / 목적지로" 추가하는 작은 메뉴 → 검색창의 등록 창으로 이어진다.
 // - 추천 카페·식당(광고) 핀을 누르면 오른쪽 광고 칸의 그 카드 배경이 잠깐 강조된다(휴대폰은 그 카드까지 부드럽게 내려간다).
-// - 입지 요인을 펼치면 그 요인을 지도에도: 도서관 = 📚 위치, 평화로움 = 반경 100m 소음 구분도, 길고양이 = 사진 말풍선.
+// - 입지 요인을 펼치면 그 요인을 지도에도: 도서관 = 📚 위치, 평화로움 = 반경 50m 소음 구분도 + 30m(계산 반경) 선, 길고양이 = 사진 말풍선.
 // - 맞춤 이동은 언제나 부드럽게(네이버 panToBounds · Leaflet flyTo 짧게) — 이미 다 보여도 가운데로 옮긴다(예전엔 그대로 둬서 "눌러도 안 움직인다"로 보였다).
 // - "산책"을 켜면 공원 점수가 일정 이상인 공원 경계(parkAreas)를 점수만큼 진한 초록으로 칠한다.
 //   효용이 높은 공원(칠한 공원)만 이름 핀을 항상 보이고, 낮은 공원은 색도 이름도 그리지 않는다(테두리 없이 칠만 한다).
@@ -325,7 +325,9 @@ function NaverMap({ candidates, hubs, active, onSelect, focusKey, hubId, onHub, 
       map: map.current, bounds: new naver.maps.LatLngBounds(new naver.maps.LatLng(r.s, r.w), new naver.maps.LatLng(r.n, r.e)), clickable: false, zIndex: 2,
       fillColor: ZONE_STYLE[r.k].color, fillOpacity: ZONE_STYLE[r.k].alpha, strokeOpacity: 0, strokeWeight: 0,
     }))
-    zoneShapes.current.push(new naver.maps.Circle({ map: map.current, center: new naver.maps.LatLng(zones.lat, zones.lng), radius: 100, clickable: false, zIndex: 3, fillOpacity: 0, strokeColor: '#1c2733', strokeOpacity: 0.55, strokeWeight: 1.5, strokeStyle: 'shortdash' }))
+    zoneShapes.current.push(new naver.maps.Circle({ map: map.current, center: new naver.maps.LatLng(zones.lat, zones.lng), radius: zones.radiusM, clickable: false, zIndex: 3, fillOpacity: 0, strokeColor: '#1c2733', strokeOpacity: 0.55, strokeWeight: 1.5, strokeStyle: 'shortdash' }))
+    // 계산 반경(30m) — 음식점·상업시설·도로를 이 안에서 센다
+    zoneShapes.current.push(new naver.maps.Circle({ map: map.current, center: new naver.maps.LatLng(zones.lat, zones.lng), radius: zones.calcM, clickable: false, zIndex: 3, fillOpacity: 0, strokeColor: '#1c2733', strokeOpacity: 0.85, strokeWeight: 2 }))
   }, [ready, zones])
 
   // 길고양이 사진 말풍선(펼쳤을 때) — 확대 단계가 바뀌면 네모 자리를 다시 고른다
@@ -484,7 +486,8 @@ function OsmMap({ candidates, hubs, active, onSelect, focusKey, hubId, onHub, in
       {zones && zoneRects(zones).map((r, i) => (
         <Rectangle key={`z${i}-${zones.lat}`} bounds={[[r.s, r.w], [r.n, r.e]]} interactive={false} pathOptions={{ stroke: false, fillColor: ZONE_STYLE[r.k].color, fillOpacity: ZONE_STYLE[r.k].alpha }} />
       ))}
-      {zones && <Circle center={[zones.lat, zones.lng]} radius={100} interactive={false} pathOptions={{ color: '#1c2733', weight: 1.5, opacity: 0.55, dashArray: '5 5', fill: false }} />}
+      {zones && <Circle center={[zones.lat, zones.lng]} radius={zones.radiusM} interactive={false} pathOptions={{ color: '#1c2733', weight: 1.5, opacity: 0.55, dashArray: '5 5', fill: false }} />}
+      {zones && <Circle center={[zones.lat, zones.lng]} radius={zones.calcM} interactive={false} pathOptions={{ color: '#1c2733', weight: 2, opacity: 0.85, fill: false }} />}
       {(libraries ?? []).map((l) => (
         <Marker key={`lib-${l.name}`} position={[l.lat, l.lng]} zIndexOffset={600}
           icon={L.divIcon({ className: 'pin-shell', html: libHtml(l), iconSize: [20, 20], iconAnchor: [10, 10] })} />

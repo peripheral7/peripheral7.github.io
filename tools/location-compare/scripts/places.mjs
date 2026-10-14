@@ -13,7 +13,7 @@
 //     도서관유형 = 공공도서관만(작은도서관·어린이·학교·대학·전문·장애인 도서관 제외). xls 는 이 PC 의 Excel 로 data/libraries.csv 로 바꿔 읽는다.
 //   - 큰길(도로 폭): 브이월드 2D 데이터 API 2.0 「도시계획(교통시설) 도로」 LT_C_UPISUQ151 — 도로 규모(광로·대로·중로·소로)와 1~3류로 법정 폭 구간을 안다.
 //     .env.local 의 VWORLD_API_KEY(키에 등록한 서비스 URL 을 domain 으로: https://peripheral7.github.io). data/vworld-roads.json 에 저장. 키가 없으면 OSM 도로 등급으로.
-//   - 50m 안 음식점·업소, 공원 양 끝 상권: 소상공인시장진흥공단 상가(상권)정보 data/stores.sqlite(scripts/stores-sync.mjs)
+//   - 30m 안 음식점·상업시설, 공원 양 끝 상권: 소상공인시장진흥공단 상가(상권)정보 data/stores.sqlite(scripts/stores-sync.mjs)
 //   - 대로 진입 시간: OSRM 자동차(routing.openstreetmap.de, FOSSGIS — OSM 길, 막힘 없는 시간)
 //
 // 계산 규칙·숫자는 src/places-config.json, 설명은 README 4-5절.
@@ -468,7 +468,7 @@ async function main() {
     '## 자료 출처', '', ...CFG.sources.list.map((s) => `- ${s}`), `- OSM 받은 날 ${json.osmAt} · 도서관 데이터기준일자 ${json.libraryAt}`, '',
     '## 🕊️ 평화로움', '', head,
     `| ${PC.foodRadiusM}m 안 음식점(카페 제외) × ${PC.wFood} | ${ids.map((id) => `${out[id].peace.food} → ${out[id].peace.foodScore}`).join(' | ')} |`,
-    `| ${PC.shopRadiusM}m 안 모든 업소 × ${PC.wShop} | ${ids.map((id) => `${out[id].peace.shops} → ${out[id].peace.shopScore}`).join(' | ')} |`,
+    `| ${PC.shopRadiusM}m 안 모든 상업시설 × ${PC.wShop} | ${ids.map((id) => `${out[id].peace.shops} → ${out[id].peace.shopScore}`).join(' | ')} |`,
     `| 도로(${PC.roadNearM}m 안 가장 넓은 도로, 없으면 가장 가까운 도로) × ${PC.wRoad} | ${ids.map((id) => { const r = out[id].peace.road; return r ? `${r.dist}m ${r.name} ${r.lanes}차선 → ${out[id].peace.roadScore}` : '없음 → 10' }).join(' | ')} |`,
     `| **평화로움** | ${ids.map((id) => `**${out[id].peace.score}**`).join(' | ')} |`, '',
     '## 🌳 공원', '', head,
