@@ -58,7 +58,9 @@ const waitOf = (d) => 5 + Math.min(7, Math.round(d / 6))
 //  - 정류장·역 이름과 좌표, 노선 이름 = 서울시 환승경로 응답(pathList 의 fname/fx/fy · tname/tx/ty · routeNm · routeId)
 //  - 버스 종류(색) = 경기도 「정류소 경유노선 목록」(busstationservice v2 getBusStationViaRouteListv2 의 routeTypeCd) — 경기 정류장에서 탄 노선.
 //    서울 버스(노선 ID 가 1 로 시작)나 조회 실패면 노선 번호 모양으로 짐작(서울 3자리 = 간선, 4자리 = 지선, 9xxx = 광역 …).
-//  - 선 모양 = 버스: OSM 도로 길찾기(routing.openstreetmap.de car)로 탄 정류장 → 내릴 정류장을 이은 근사선(실제 노선과 다를 수 있음),
+//  - 선 모양 = 버스: 경기도 「버스노선 조회」(busrouteservice v2)의 노선 궤적(getBusRouteLineListv2)에서 탄 정류장 ~ 내린 정류장 구간만 잘라 쓴다
+//              (정류장 순서 getBusRouteStationListv2 를 궤적 점에 순서대로 맞춰 자름 — sliceRoute). 경기 노선이 아니거나(서울 버스) 실패하면
+//              OSM 도로 길찾기(routing.openstreetmap.de car)로 두 정류장을 이은 근사선(approx),
 //              지하철: 두 역을 잇는 직선(역 사이 좌표가 응답에 없음), 도보: OSM 보행 길찾기(foot) 선.
 //  - 정류장까지·정류장에서 걷는 시간 = OSM 보행 길 거리 ÷ 시속 4.7km(실패하면 직선 × 1.25).
 const r5 = (x) => Math.round(x * 1e5) / 1e5
@@ -85,6 +87,69 @@ const SUBWAY_COLORS = {
   '우이신설선': '#b0ce18', '신림선': '#6789ca', '서해선': '#81a914', '김포골드라인': '#a17800', '에버라인': '#56ad2d', '용인경전철': '#56ad2d', '의정부경전철': '#fda600', 'GTX-A': '#9a6292',
 }
 const subwayColor = (name) => SUBWAY_COLORS[name] ?? Object.entries(SUBWAY_COLORS).find(([k]) => name.includes(k.replace('선', '')))?.[1] ?? '#5a6b7a'
+
+/** 경기 노선 궤적 + 정류장 순서(노선마다 한 번만 묻는다): { line: [[위도, 경도]…], stations: [{ id, lat, lng }…](순서대로) } 또는 null */
+const ggRouteCache = new Map()
+async function ggRouteGeom(routeId) {
+  const key = ENV.GG_BUS_ROUTE_SERVICE_KEY || ENV.DATA_GO_KR_SERVICE_KEY
+  if (!key || !routeId) return null
+  if (!ggRouteCache.has(routeId)) {
+    let geom = null
+    try {
+      const get = async (op) => {
+        const u = `https://apis.data.go.kr/6410000/busrouteservice/v2/${op}?serviceKey=${encodeURIComponent(key)}&routeId=${routeId}&format=json`
+        return (await (await fetch(u, { signal: AbortSignal.timeout(20000) })).json())?.response?.msgBody
+      }
+      const l = (await get('getBusRouteLineListv2'))?.busRouteLineList
+      const s = (await get('getBusRouteStationListv2'))?.busRouteStationList
+      const arr = (x) => (Array.isArray(x) ? x : x ? [x] : [])
+      const line = arr(l).sort((p, q) => p.lineSeq - q.lineSeq).map((p) => [+p.y, +p.x])
+      const stations = arr(s).sort((p, q) => p.stationSeq - q.stationSeq).map((p) => ({ id: String(p.stationId), lat: +p.y, lng: +p.x }))
+      if (line.length >= 2 && stations.length >= 2) geom = { line, stations }
+    } catch { geom = null }
+    ggRouteCache.set(routeId, geom)
+  }
+  return ggRouteCache.get(routeId)
+}
+/** 정류장(순서대로)을 궤적 점에 하나씩, 순서를 지키며 거리 합이 가장 작게 맞춘다(동적 계획법) → 정류장마다 궤적 점 번호 */
+function matchStations(stations, line) {
+  const N = stations.length, M = line.length, c = Math.cos(rad(line[0][0]))
+  const d2 = (s, p) => { const dy = (s.lat - p[0]) * 110540, dx = (s.lng - p[1]) * 111320 * c; return dy * dy + dx * dx }
+  const back = Array.from({ length: N }, () => new Int32Array(M))
+  let prev = new Float64Array(M)
+  for (let j = 0; j < M; j++) prev[j] = Math.sqrt(d2(stations[0], line[j]))
+  for (let k = 1; k < N; k++) {
+    const cur = new Float64Array(M)
+    let best = Infinity, bi = 0
+    for (let j = 0; j < M; j++) {
+      if (prev[j] < best) { best = prev[j]; bi = j } // 앞 정류장은 j 이하 어디든(같은 점도 허용)
+      cur[j] = best + Math.sqrt(d2(stations[k], line[j]))
+      back[k][j] = bi
+    }
+    prev = cur
+  }
+  let j = 0
+  for (let x = 1; x < M; x++) if (prev[x] < prev[j]) j = x
+  const idx = new Array(N)
+  for (let k = N - 1; k >= 0; k--) { idx[k] = j; if (k) j = back[k][j] }
+  return idx
+}
+/** 탄 정류장(fid) ~ 내린 정류장(tid) 구간의 실제 노선 선 — 못 자르면 null */
+function sliceRoute(geom, fid, tid, a, b) {
+  const st = geom.stations
+  const bi = st.findIndex((s) => s.id === String(fid))
+  const ai = bi < 0 ? -1 : st.findIndex((s, k) => k > bi && s.id === String(tid))
+  if (ai < 0) return null
+  geom.idx ??= matchStations(st, geom.line)
+  const i0 = geom.idx[bi], i1 = geom.idx[ai]
+  if (i1 < i0) return null
+  const pts = [a, ...geom.line.slice(i0, i1 + 1), b]
+  // 이상하게 잘렸는지(직선의 5배 + 2km 보다 길면 버린다)
+  let len = 0
+  for (let i = 1; i < pts.length; i++) len += km(pts[i - 1], pts[i])
+  if (len > km(a, b) * 5 + 2) return null
+  return simplify(pts, 5)
+}
 
 /** 경기 정류장에 서는 노선 → 종류(정류장마다 한 번만 묻는다) */
 const ggStationCache = new Map()
@@ -174,11 +239,12 @@ async function buildLegs(from, to, segs) {
       const seoul = String(s.routeId ?? '').startsWith('1')
       const gg = seoul ? null : await ggRouteType(s.fid, s.routeId)
       const type = gg?.type ?? guessBusType(s.routeNm, seoul)
-      const road = await osrmLine('car', a, b)
-      await sleep(250)
+      const real = seoul ? null : await ggRouteGeom(s.routeId).then((g) => (g ? sliceRoute(g, s.fid, s.tid, a, b) : null))
+      const road = real ? null : await osrmLine('car', a, b)
+      if (!real) await sleep(250)
       legs.push({
         mode: 'bus', name: cleanName(s.routeNm), routeId: s.routeId ?? null, type, typeName: gg?.typeName ?? BUS_TYPES[type].label, typeFrom: gg ? 'gg-api' : 'guess',
-        color: BUS_TYPES[type].color, from: s.fname, to: s.tname, line: road ? road.line : [[r5(a[0]), r5(a[1])], [r5(b[0]), r5(b[1])]], approx: true,
+        color: BUS_TYPES[type].color, from: s.fname, to: s.tname, line: real ?? (road ? road.line : [[r5(a[0]), r5(a[1])], [r5(b[0]), r5(b[1])]]), lineFrom: real ? 'gg-route' : road ? 'osm-car' : 'straight', ...(real ? {} : { approx: true }),
       })
     }
     here = b
@@ -226,6 +292,9 @@ export async function transitPath(from, to) {
   } catch (e) { console.error(`대중교통 구간 그리기 실패: ${e.message}`) }
   return row
 }
+
+/** 예전 방식으로 그린 대중교통(경로 그림 없음 · 버스 선 출처 기록 없음)이라 다시 재야 하나 */
+export const transitStale = (t) => !!t && (!t.legs || t.legs.some((l) => l.mode === 'bus' && !l.lineFrom))
 
 /** 한 쌍 전부(도보·자전거·대중교통) + 잰 시각 */
 export async function measurePaths(from, to) {

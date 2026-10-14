@@ -55,7 +55,7 @@
 
 - 실측이 없는 값은 카드에 **"(추정)"**, 그 아래에 **"실측 예정: 출퇴근 평일 08시·18시 · 낮 평일 10시·13시"**.
 - **API 확인(2026-10-14)**: 서울시 환승경로는 공공데이터포털 키(`DATA_GO_KR_SERVICE_KEY`, 개별 칸 `SEOUL_PATHINFO_SERVICE_KEY`)로 동작. 망포·영통·서천 → 경희대는 경로가 나오지만 **수원 → 분당(본가), 수원 서쪽 → 경희대 등 일부는 세 함수(`ByBusNSub`·`ByBus`·`BySubway`) 모두 "XML Parsing Error"** — 그 구간은 추정. 지하철 단독(`getPathInfoBySubway`)은 짧은 구간에서 "경로가 존재하지 않습니다". 버스 도착·위치(서울·경기)는 실시간 값이라 고정 점수에는 안 쓰고(대기 시간 실측용으로 추후), 경기 정류소 조회도 키만 준비됨.
-- **대중교통 자료·지도 경로 그림 = [TRANSIT.md](TRANSIT.md)**(10-14): 고른 경로의 구간(`legs`) — 도보(OSM 보행 길, 정류장까지·에서 시간도 이 거리로), 버스(정류장 좌표·노선, 경기 정류소 경유노선 API 의 `routeTypeCd` 로 종류 색, 선은 OSM 자동차 길 근사), 지하철(역 사이 직선·노선 색).
+- **대중교통 자료·지도 경로 그림 = [TRANSIT.md](TRANSIT.md)**(10-14): 고른 경로의 구간(`legs`) — 도보(OSM 보행 길, 정류장까지·에서 시간도 이 거리로), 버스(정류장 좌표·노선, 경기 정류소 경유노선 API 의 `routeTypeCd` 로 종류 색, 선은 경기 버스노선 궤적 — 서울 버스만 OSM 자동차 길 근사), 지하철(역 사이 직선·노선 색).
 - **대중교통 길찾기 알고리즘 검토**: 직접 만들려면 GTFS(국가대중교통정보센터 TAGO 노선·정류장·시간표) + RAPTOR(라운드 기반, 환승 수 최소·도착 시각 파레토 — OpenTripPlanner 2·R5 가 쓰는 방식) 또는 CSA(Connection Scan). 오픈소스는 **OpenTripPlanner 2**(Java, GTFS+OSM, 도보·환승 통합 — 서버 메모리 2~4GB)·**R5**(Conveyal, 접근성 분석용)·**MOTIS**. 한국 GTFS 는 공식 배포가 없어(TAGO API 를 모아 변환해야 함) 지금은 서울시 환승경로 API + 실패 구간 추정이 현실적. 경로 수가 늘거나 시간대별 배차가 필요해지면 OTP2 를 계산 서버에 올리는 것이 다음 단계.
 
 ## 4. 수단별 점수 (10점 만점, `modeScoresForHub`)
@@ -439,7 +439,7 @@ npm run build
 | `SEOUL_BUS_ARRIVAL_SERVICE_KEY` | 서울특별시 버스도착정보조회 | `http://ws.bus.go.kr/api/rest/arrive` |
 | `GG_BUS_ARRIVAL_SERVICE_KEY` | 경기도 버스도착정보 조회 | `https://apis.data.go.kr/6410000/busarrivalservice/v2` |
 | `GG_BUS_STATION_SERVICE_KEY` | 경기도 정류소 조회(경유노선 목록 → 버스 종류 색, 10-14 사용) | `https://apis.data.go.kr/6410000/busstationservice/v2` |
-| `GG_BUS_ROUTE_SERVICE_KEY`(미사용·미신청) | 경기도 버스노선 조회(노선 궤적 — 신청하면 실제 노선 선, TRANSIT.md) | `https://apis.data.go.kr/6410000/busrouteservice/v2` |
+| `GG_BUS_ROUTE_SERVICE_KEY` | 경기도 버스노선 조회(노선 궤적·정류장 순서 → 지도 실제 버스 노선 선, 10-14 신청·사용, TRANSIT.md) | `https://apis.data.go.kr/6410000/busrouteservice/v2` |
 
 ### 상권 자료 — 통째로 받아 두고 이 PC 에서 찾기(한 달에 한 번)
 
