@@ -1,7 +1,8 @@
 import { useLayoutEffect, useRef, useState, type ReactNode } from 'react'
 import { fmt, WALK_LIMIT, BIKE_LIMIT, WALK_ZONE, slotDone, type CandidateResult, type CarSlot, type HubResult } from '../scoring'
 import { BASE_DEPOSIT, baseRent, hubEmoji, weeklyText, won, type Candidate, type Hub, type ModeKey } from '../data'
-import { brokerageFee, feeText, useGroup } from '../brokerage'
+import { USE_LABEL, brokerageFee, feeText, useGroup, type PropertyUse } from '../brokerage'
+import { money } from '../store'
 import { CATEGORIES, type CommercialIndex } from '../commercial'
 import { SLOT_TEXT, liveNote } from '../live'
 import { placeOf } from '../places'
@@ -11,7 +12,32 @@ import { placeOf } from '../places'
 // 높이는 목적지 2곳 기준으로 고정한다(목적지가 1곳이어도 같은 높이 — 옆 광고 카드도 같은 높이). 목적지가 3곳이면 카드 안을
 // 세로로 스크롤하고(스크롤바는 숨김), 모든 카드가 한 스크롤 상자 안에 있어 같이 움직인다. 맨 위 후보지 줄은 붙어 있다.
 
-type Props = { results: CandidateResult[]; com: CommercialIndex[] | null; hubs: Hub[]; active: number; bike: boolean; onSelect: (index: number) => void; onRename: (id: string, name: string) => void }
+// 후보지 수정: 카드 이름 옆 ✎ → 그 카드 위에 수정 창(이름·보증금·월세·관리비·용도 + 삭제). 금액은 입력 글자 그대로 들고 있다가 저장할 때 숫자로.
+type Patch = { name?: string; deposit?: number; rent?: number; maint?: number; use?: PropertyUse }
+type Props = { results: CandidateResult[]; com: CommercialIndex[] | null; hubs: Hub[]; active: number; bike: boolean; onSelect: (index: number) => void; onEdit: (id: string, patch: Patch) => void; onDelete: (id: string) => void }
+type Editing = { id: string; name: string; deposit: string; rent: string; maint: string; use: PropertyUse }
+
+function EditForm({ e, address, onChange, onSave, onCancel, onDelete }: { e: Editing; address: string; onChange: (e: Editing) => void; onSave: () => void; onCancel: () => void; onDelete: () => void }) {
+  return (
+    <div className="card-edit" onClick={(ev) => ev.stopPropagation()} onKeyDown={(ev) => { ev.stopPropagation(); if (ev.key === 'Escape') onCancel() }}>
+      <form className="cand-edit" onSubmit={(ev) => { ev.preventDefault(); onSave() }}>
+        <span className="tag">후보지 수정</span>
+        <label>이름<input spellCheck={false} autoComplete="off" value={e.name} maxLength={40} autoFocus onChange={(ev) => onChange({ ...e, name: ev.target.value })} /></label>
+        <label>보증금<span className="unit-input"><input type="number" min={0} step={100} inputMode="numeric" placeholder="예: 1000" value={e.deposit} onChange={(ev) => onChange({ ...e, deposit: ev.target.value })} /><i>만원</i></span></label>
+        <label>월세<span className="unit-input"><input type="number" min={0} step={1} inputMode="numeric" placeholder="예: 50" value={e.rent} onChange={(ev) => onChange({ ...e, rent: ev.target.value })} /><i>만원</i></span></label>
+        <label>관리비<span className="unit-input"><input type="number" min={0} step={1} inputMode="numeric" placeholder="예: 7" value={e.maint} onChange={(ev) => onChange({ ...e, maint: ev.target.value })} /><i>만원</i></span></label>
+        <label>용도<select value={e.use} onChange={(ev) => onChange({ ...e, use: ev.target.value as PropertyUse })}>{(Object.keys(USE_LABEL) as PropertyUse[]).map((u) => <option key={u} value={u}>{USE_LABEL[u]}{u === 'officetel' ? '(85㎡ 이하·부엌·욕실)' : ''}</option>)}</select></label>
+        <p className="muted">{address}</p>
+        <div className="edit-actions">
+          <button type="button" className="danger" onClick={onDelete}>삭제</button>
+          <span />
+          <button type="button" className="ghost" onClick={onCancel}>취소</button>
+          <button type="submit" className="solid">저장</button>
+        </div>
+      </form>
+    </div>
+  )
+}
 
 // 점수(0~10)만큼 칸 아래쪽에 색 선을 채운다 — 숫자를 읽지 않아도 길이로 바로 비교된다.
 const Line = ({ v, kind }: { v: number; kind: 'total' | 'hub' | ModeKey | 'com' }) => (
@@ -74,9 +100,11 @@ function reveal(card: HTMLElement) {
 
 export const FIXED_HUBS = 2 // 카드 높이 기준 목적지 수
 
-export function CompareCards({ results, com, hubs, active, bike, onSelect, onRename }: Props) {
-  const [naming, setNaming] = useState<{ id: string; name: string } | null>(null) // 카드에서 이름 바꾸는 중
-  const finish = (save: boolean) => { if (save && naming) onRename(naming.id, naming.name); setNaming(null) }
+export function CompareCards({ results, com, hubs, active, bike, onSelect, onEdit, onDelete }: Props) {
+  const [editing, setEditing] = useState<Editing | null>(null) // 수정 중인 후보지
+  const startEdit = (c: Candidate) => setEditing({ id: c.id, name: c.name, deposit: c.deposit?.toString() ?? '', rent: c.rent?.toString() ?? '', maint: c.maint?.toString() ?? '', use: c.use ?? 'home' })
+  const saveEdit = () => { if (editing) onEdit(editing.id, { name: editing.name.trim() || undefined, deposit: money(editing.deposit), rent: money(editing.rent), maint: money(editing.maint), use: editing.use }); setEditing(null) }
+  const deleteEdit = () => { if (editing && confirm('이 후보지를 삭제할까요?')) { onDelete(editing.id); setEditing(null) } }
   const modes: ModeKey[] = bike ? ['transit', 'car', 'walk', 'bike'] : ['transit', 'car', 'walk']
   const per = 1 + modes.length // 목적지마다 줄 수(목적지 줄 + 수단 줄)
   const rows = 1 + hubs.length * per + 2 // 후보지 · 목적지마다 · 보증금/월세 · 상권 종합
@@ -124,22 +152,14 @@ export function CompareCards({ results, com, hubs, active, bike, onSelect, onRen
             const acc = placeOf(r.candidate)?.access?.roads?.[0]
             return (
             <div key={r.candidate.id} role="button" tabIndex={0} aria-pressed={i === active} className={'col card' + (i === active ? ' on' : '')} style={{ gridRow: `1 / span ${rows}` }}
-              onClick={(e) => { if (!(e.target as HTMLElement).closest('.name-edit, .pen')) { onSelect(i); reveal(e.currentTarget) } }}
+              onClick={(e) => { if (!(e.target as HTMLElement).closest('.card-edit, .pen')) { onSelect(i); reveal(e.currentTarget) } }}
               onKeyDown={(e) => { if ((e.key === 'Enter' || e.key === ' ') && e.target === e.currentTarget) { e.preventDefault(); onSelect(i); reveal(e.currentTarget) } }}>
               <div className="cell head-cell">
                 <span className="rank">{r.rank}</span>
-                {naming?.id === r.candidate.id ? (
-                  <form className="card-name name-edit" onSubmit={(e) => { e.preventDefault(); finish(true) }}>
-                    <input spellCheck={false} autoComplete="off" value={naming.name} maxLength={40} autoFocus aria-label="후보지 이름" onChange={(e) => setNaming({ ...naming, name: e.target.value })}
-                      onKeyDown={(e) => { if (e.key === 'Escape') finish(false) }} onBlur={() => finish(true)} />
-                    <small>Enter 저장 · Esc 취소</small>
-                  </form>
-                ) : (
-                  <div className="card-name">
-                    <b><span>{r.candidate.name}</span><button type="button" className="pen" title="이름 수정" aria-label={`${r.candidate.name} 이름 수정`} onClick={() => setNaming({ id: r.candidate.id, name: r.candidate.name })}>✎</button></b>
-                    <small>{r.candidate.address}</small>
-                  </div>
-                )}
+                <div className="card-name">
+                  <b><span>{r.candidate.name}</span><button type="button" className="pen" title="후보지 수정(이름·보증금·월세·관리비·용도·삭제)" aria-label={`${r.candidate.name} 수정`} onClick={() => startEdit(r.candidate)}>✎</button></b>
+                  <small>{r.candidate.address}</small>
+                </div>
                 <strong className={isBest(r.total, best((x) => x.total)) ? 'best' : ''}>{fmt(r.total)}<Line v={r.total} kind="total" /></strong>
               </div>
               {r.hubs.map((h, hi) => {
@@ -187,6 +207,7 @@ export function CompareCards({ results, com, hubs, active, bike, onSelect, onRen
               })}
               <RentCell c={r.candidate} sect />
               <ComCell c={r.candidate} x={com ? com[i] : undefined} best={!!com && isBest(com[i]?.score ?? null, Math.max(...com.map((c) => c?.score ?? -1)))} />
+              {editing?.id === r.candidate.id && <EditForm e={editing} address={r.candidate.address} onChange={setEditing} onSave={saveEdit} onCancel={() => setEditing(null)} onDelete={deleteEdit} />}
             </div>
             )
           })}

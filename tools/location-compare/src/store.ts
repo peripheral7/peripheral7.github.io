@@ -1,5 +1,5 @@
 // 방문자가 바꾼 후보지·목적지·선호도를 이 브라우저(localStorage)에 저장한다. 다른 사람에게는 안 보인다.
-import { CANDIDATES, DEFAULT_PREFERENCE, HUBS, MAX_HUBS, MAX_WEEKLY, OLD_DEFAULT_NAMES, defaultWeekly, type Candidate, type Hub, type HubMode, type Place, type Preference } from './data'
+import { CANDIDATES, DEFAULT_PREFERENCE, HUBS, LIFESTYLES, MAX_HUBS, MAX_WEEKLY, OLD_DEFAULT_NAMES, applyLifestyle, defaultWeekly, type Candidate, type Hub, type HubMode, type Place, type Preference, type Weights } from './data'
 
 export type State = { candidates: Candidate[]; hubs: Hub[]; pref: Preference }
 
@@ -17,6 +17,15 @@ function migrate({ category: _c, ...c }: any): Candidate { // eslint-disable-lin
   return { ...c, ...renamed, deposit: money(c.deposit), rent: money(c.rent) }
 }
 
+// 라이프스타일을 골라 둔 저장값은 그 라이프스타일의 지금 비율(10-14 새 항목 비율 + 세부설정)로 다시 맞춘다.
+// 라이프스타일 이전(숫자로 정한) 가중치는 그대로 두고 '직접 정한 값'으로
+function loadPref(sp: any, base: Preference, weekly: Record<string, number>, hubMode: Record<string, HubMode>): Preference { // eslint-disable-line @typescript-eslint/no-explicit-any
+  const lifeCustom: Record<string, Weights> = {}
+  for (const [id, w] of Object.entries(sp.lifeCustom ?? {})) if (w && typeof w === 'object') lifeCustom[id] = { transit: 0, car: 0, walk: 0, bike: 0, ...(w as Weights) }
+  const p: Preference = { weights: { ...base.weights, ...sp.weights }, weekly, hubMode, bike: !!sp.bike, lifestyle: typeof sp.lifestyle === 'string' ? sp.lifestyle : undefined, lifeCustom }
+  return p.lifestyle && LIFESTYLES.some((l) => l.id === p.lifestyle) ? applyLifestyle(p, p.lifestyle) : p
+}
+
 export function load(): State {
   const base = defaults()
   try {
@@ -31,7 +40,7 @@ export function load(): State {
       return {
         candidates: saved.candidates.filter(isPoint).map(migrate),
         hubs,
-        pref: { weights: { ...base.pref.weights, ...saved.pref.weights }, weekly, hubMode, bike: !!saved.pref.bike, lifestyle: typeof saved.pref.lifestyle === 'string' ? saved.pref.lifestyle : undefined }, // 라이프스타일 이전(숫자로 정한) 가중치는 그대로 두고 '직접 정한 값'으로
+        pref: loadPref(saved.pref, base.pref, weekly, hubMode),
       }
     }
     const old = JSON.parse(localStorage.getItem(OLD_PREF_KEY) || 'null')

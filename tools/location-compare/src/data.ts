@@ -42,21 +42,29 @@ export type Weights = Record<ModeKey, number>
 export type HubMode = 'auto' | ModeKey
 /** weekly = 목적지별 주 방문(왕복) 횟수, hubMode = 목적지별 이동수단, bike = 자전거를 독립 이동수단으로 씀(가중치 bike)
  *  + 상권·공공시설(도서관) 반경 2배(상권 500→1,000m, 도서관 거리 기준표 2배) */
-export type Preference = { weights: Weights; weekly: Record<string, number>; hubMode?: Record<string, HubMode>; bike?: boolean; lifestyle?: string }
+export type Preference = { weights: Weights; weekly: Record<string, number>; hubMode?: Record<string, HubMode>; bike?: boolean; lifestyle?: string; lifeCustom?: Record<string, Weights> }
 
-/** 라이프스타일(10-14): 교통평점 카드에서 수단 가중치 숫자 대신 고른다. 고르면 가중치·자전거 사용이 정해진다(숫자는 화면에 직접 안 보임). */
+/** 라이프스타일(10-14): 교통평점 카드 ⚙ 에서 수단 가중치 숫자 대신 고른다. 고르면 가중치·자전거 사용이 정해진다.
+ *  비율은 설정 창 "세부설정"에서 라이프스타일마다 바꿀 수 있다(pref.lifeCustom[id], 기본값 단추로 되돌림). */
 export type Lifestyle = { id: string; emoji: string; label: string; note: string; weights: Weights; bike: boolean }
 export const LIFESTYLES: Lifestyle[] = [
   { id: 'balanced', emoji: '⚖️', label: '골고루', note: '대중교통·차·걷기를 두루 씀', weights: { transit: 50, car: 30, walk: 20, bike: 0 }, bike: false },
-  { id: 'transit', emoji: '🚇', label: '대중교통 출퇴근', note: '차 없이 버스·지하철로 다님', weights: { transit: 65, car: 5, walk: 30, bike: 0 }, bike: false },
-  { id: 'car', emoji: '🚗', label: '자차 출퇴근', note: '주로 내 차로 다님', weights: { transit: 15, car: 70, walk: 15, bike: 0 }, bike: false },
-  { id: 'walk', emoji: '🚶', label: '걸어서 동네 생활', note: '가까운 곳은 걸어감, 먼 곳만 대중교통', weights: { transit: 35, car: 5, walk: 60, bike: 0 }, bike: false },
-  { id: 'bike', emoji: '🚲', label: '자전거 생활', note: '자전거로 다니고 비 오면 대중교통', weights: { transit: 25, car: 5, walk: 20, bike: 50 }, bike: true },
+  { id: 'transit', emoji: '🚇', label: '대중교통 출퇴근', note: '차 없이 버스·지하철로 다님', weights: { transit: 95, car: 5, walk: 0, bike: 0 }, bike: false },
+  { id: 'car', emoji: '🚗', label: '자차 출퇴근', note: '주로 내 차로 다님', weights: { transit: 5, car: 90, walk: 5, bike: 0 }, bike: false },
+  { id: 'walk', emoji: '🚶', label: '걸어서 동네 생활', note: '가까운 곳은 걸어감, 먼 곳만 대중교통', weights: { transit: 20, car: 0, walk: 80, bike: 0 }, bike: false },
+  { id: 'bike', emoji: '🚲', label: '자전거 생활', note: '자전거로 다니고 비 오면 대중교통', weights: { transit: 10, car: 0, walk: 10, bike: 80 }, bike: true },
 ]
 export const lifestyleOf = (p: Pick<Preference, 'lifestyle'>) => LIFESTYLES.find((l) => l.id === p.lifestyle) ?? null
+/** 라이프스타일의 지금 비율 = 세부설정에서 바꾼 값, 없으면 기본 */
+export const lifestyleWeights = (p: Pick<Preference, 'lifeCustom'>, l: Lifestyle): Weights => ({ ...l.weights, ...p.lifeCustom?.[l.id] })
 export const applyLifestyle = (p: Preference, id: string): Preference => {
   const l = LIFESTYLES.find((x) => x.id === id) ?? LIFESTYLES[0]
-  return { ...p, lifestyle: l.id, weights: { ...l.weights }, bike: l.bike }
+  return { ...p, lifestyle: l.id, weights: lifestyleWeights(p, l), bike: l.bike }
+}
+/** 세부설정: 지금 고른 라이프스타일의 비율을 바꾼다(라이프스타일이 없으면 가중치만) */
+export const setLifestyleWeights = (p: Preference, w: Weights): Preference => {
+  const l = lifestyleOf(p)
+  return l ? { ...p, weights: w, lifeCustom: { ...p.lifeCustom, [l.id]: w } } : { ...p, weights: w }
 }
 
 /** 교통 선호도 기본값: 수단별 가중치(합이 100이 아니어도 비율로 쓴다)와 목적지별 주 방문 횟수(학교 주 5회 · 본가 월 4회 = 주 1회). */

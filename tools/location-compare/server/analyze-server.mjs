@@ -11,6 +11,8 @@
 //                           (평일 07~10시·17~20시)면 출퇴근, 아니면 낮 값으로 임시 저장(provisional)한다 — 두 기준 중 하나만 먼저 생긴다.
 //                           물어본 길은 모두 기억해 두고(server/cache/r_*.json), 기준 시각이 오면 10분마다 빠진 값·30일 지난 값을 자동으로 잰다.
 //                           paths — 도보·자전거(OSM 길 거리)·대중교통(서울시 환승경로), scripts/paths-lib.mjs. 30일마다 다시.
+//  GET /reverse?lat=&lng=  좌표 → 도로명 주소(브이월드 getAddress, 도로명이 없으면 지번으로 주소 검색해 도로명). 지도 우클릭 등록용.
+//                           브이월드는 Cloudflare Worker 에서 부르면 막혀서(520) 이 PC 에서 부른다. 같은 좌표(약 1m)는 30일 캐시.
 //  GET /health
 //
 // 실행(이 폴더 tools/location-compare 에서):  node server/analyze-server.mjs --tunnel
@@ -189,6 +191,39 @@ async function sweep() {
 setInterval(sweep, 10 * 60_000)
 setTimeout(sweep, 20_000)
 
+// ── 좌표 → 도로명 주소(브이월드) ──
+const VW_DOMAIN = ENV.VWORLD_DOMAIN || 'https://peripheral7.github.io' // 키에 등록한 서비스 URL
+async function vworld(kind, params) {
+  const u = new URL(`https://api.vworld.kr/req/${kind}`)
+  u.search = new URLSearchParams({ ...params, version: '2.0', crs: 'epsg:4326', format: 'json', key: ENV.VWORLD_API_KEY, domain: VW_DOMAIN })
+  const r = await fetch(u, { signal: AbortSignal.timeout(6000) })
+  const j = await r.json()
+  return j?.response?.status === 'OK' ? j.response.result : null
+}
+async function handleReverse(q) {
+  const lat = Number(q.get('lat')), lng = Number(q.get('lng'))
+  if (!Number.isFinite(lat) || !Number.isFinite(lng)) return [400, { error: 'query' }]
+  if (!ENV.VWORLD_API_KEY) return [503, { error: 'no_key' }]
+  const key = `v_${r5(lat)},${r5(lng)}`
+  const hit = cget(key, A_TTL)
+  if (hit) return [200, hit]
+  const res = await vworld('address', { service: 'address', request: 'getAddress', point: `${lng},${lat}`, type: 'both', zipcode: 'false', simple: 'false' })
+  if (!res?.length) return [404, { error: 'none' }]
+  const road = res.find((x) => x.type === 'road'), parcel = res.find((x) => x.type === 'parcel')
+  const bld = road?.structure?.detail || undefined // 건물 이름(있으면)
+  let out = road ? { address: road.text.replace(/\s*\([^)]*\)\s*$/, ''), parcel: parcel?.text, building: bld } : null // 끝의 "(서천동)" 같은 참고 글자는 뺀다
+  // 도로·빈 땅처럼 도로명이 없는 곳: 지번 주소로 주소 검색 → 그 필지의 도로명(건물이 있으면)
+  if (!out && parcel) {
+    const s = await vworld('search', { service: 'search', request: 'search', type: 'address', category: 'parcel', query: parcel.text, size: '1', page: '1' }).catch(() => null)
+    const it = s?.items?.[0]?.address
+    const lvl1 = parcel.structure?.level1 ?? '', lvl2 = parcel.structure?.level2 ?? ''
+    out = it?.road ? { address: `${lvl1} ${lvl2} ${it.road}`.replace(/\s+/g, ' ').trim(), parcel: parcel.text, building: it.bldnm || undefined } : { address: parcel.text, parcel: parcel.text, jibun: true }
+  }
+  if (!out) return [404, { error: 'none' }]
+  cput(key, out)
+  return [200, out]
+}
+
 const keyOk = (got) => { const a = Buffer.from(String(got ?? '')), b = Buffer.from(RELAY_SECRET); return a.length === b.length && crypto.timingSafeEqual(a, b) }
 
 const server = http.createServer(async (req, res) => {
@@ -200,6 +235,7 @@ const server = http.createServer(async (req, res) => {
     if (u.pathname === '/health') return send(200, { ok: true, queue: queue.length, running: !!running })
     if (u.pathname === '/analyze') return send(...handleAnalyze(u.searchParams))
     if (u.pathname === '/route') return send(...(await handleRoute(u.searchParams)))
+    if (u.pathname === '/reverse') return send(...(await handleReverse(u.searchParams)))
     send(404, { error: 'not_found' })
   } catch (e) {
     console.error(e)

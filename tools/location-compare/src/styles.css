@@ -691,14 +691,13 @@ input[type=number]::-webkit-inner-spin-button, input[type=number]::-webkit-outer
 .transport-card .pick button { border: 0; background: none; width: auto; min-width: 26px; height: 24px; border-radius: 8px; color: var(--faint); font-size: 13px; font-variant-numeric: tabular-nums }
 .transport-card .pick button:hover { color: var(--text) }
 .transport-card .pick button.on { color: var(--text); font-weight: 700; background: none }
-/* 가장자리 세로 ‹ › : 마우스를 가장자리 근처(띠 26px)에 올리면 은은하게 나타남 */
-.edge-nav { position: absolute; top: 0; bottom: 0; z-index: 5; width: 26px; border: 0; padding: 0; background: transparent; display: grid; place-items: center; color: var(--muted); opacity: 0; transition: opacity 0.18s, background 0.18s }
-.edge-nav.prev { left: 0; border-radius: var(--radius) 0 0 var(--radius) }
-.edge-nav.next { right: 0; border-radius: 0 var(--radius) var(--radius) 0 }
-.edge-nav span { display: grid; place-items: center; width: 18px; height: 64px; border-radius: 9px; font-size: 20px; line-height: 1; background: rgba(24, 39, 56, 0.05) }
-.edge-nav:hover, .edge-nav:focus-visible { opacity: 1; background: linear-gradient(90deg, rgba(24, 39, 56, 0.035), transparent) }
-.edge-nav.next:hover, .edge-nav.next:focus-visible { background: linear-gradient(270deg, rgba(24, 39, 56, 0.035), transparent) }
-.edge-nav:hover span { background: rgba(24, 39, 56, 0.1); color: var(--text) }
+/* 가장자리 띠(44px): 마우스를 올리면 어두운 그라데이션 + ‹ › — 누르면 앞·뒤 후보지(끝에서는 반대 끝으로) */
+.edge-nav { position: absolute; top: 0; bottom: 0; z-index: 5; width: 44px; border: 0; padding: 0; background: transparent; display: grid; place-items: center; color: #fff; opacity: 0; transition: opacity 0.18s; cursor: pointer }
+.edge-nav.prev { left: 0; border-radius: var(--radius) 0 0 var(--radius); background: linear-gradient(90deg, rgba(24, 39, 56, 0.46), rgba(24, 39, 56, 0.18) 50%, transparent) }
+.edge-nav.next { right: 0; border-radius: 0 var(--radius) var(--radius) 0; background: linear-gradient(270deg, rgba(24, 39, 56, 0.46), rgba(24, 39, 56, 0.18) 50%, transparent) }
+.edge-nav span { font-size: 30px; font-weight: 300; line-height: 1; text-shadow: 0 1px 4px rgba(0, 0, 0, 0.35); transform: translateY(-2px) }
+.edge-nav.prev span { margin-right: 12px } .edge-nav.next span { margin-left: 12px }
+.edge-nav:hover, .edge-nav:focus-visible { opacity: 1 }
 @media (hover: none) { .edge-nav { opacity: 0.55 } }
 /* 3D 집 */
 .house-head { align-items: center; gap: 12px; border-bottom: 1px solid var(--line) }
@@ -777,13 +776,12 @@ input[type=number]::-webkit-inner-spin-button, input[type=number]::-webkit-outer
 .house-head .edit-btn { position: absolute; right: 0; top: 0 }
 .score-block .panel-head { margin: 4px 0 0 }
 .house-ring { display: flex; flex-direction: column; align-items: center; padding: 4px 0 2px }
-.hr-circle { position: relative; width: 172px; height: 172px; display: grid; place-items: center }
+.hr-circle { position: relative; width: 184px; height: 184px; display: grid; place-items: center }
 .hr-svg { position: absolute; inset: 0; width: 100%; height: 100% }
-.hr-svg circle { fill: none; stroke-width: 3.6 }
+.hr-svg circle { fill: none; stroke-width: 2.2 }
 .hr-svg .ring-track { stroke: rgba(24, 39, 56, 0.08) }
 .hr-svg .ring-arc { stroke: var(--good); stroke-linecap: round; transition: stroke-dasharray 0.6s ease }
-.hr-circle .house3d { width: 112px; height: 103px; margin-top: 4px }
-.hr-pct { position: absolute; transform: translate(-50%, -50%); background: var(--good); color: #fff; font-size: 10.5px; font-weight: 600; line-height: 1; padding: 3px 6px; border-radius: 999px; box-shadow: 0 1px 4px rgba(0, 0, 0, 0.18); font-variant-numeric: tabular-nums; pointer-events: none }
+.hr-circle .house3d { width: 146px; height: 134px; margin-top: 6px }
 .hr-score { margin: 2px 0 0; display: flex; align-items: baseline; gap: 4px }
 .hr-score b { font-size: 34px; font-weight: 250; line-height: 1; font-variant-numeric: tabular-nums }
 .hr-score small { font-size: 12px; color: var(--faint) }
@@ -800,3 +798,37 @@ input[type=number]::-webkit-inner-spin-button, input[type=number]::-webkit-outer
 .life-bar { display: flex; height: 5px; margin-top: 5px; border-radius: 3px; overflow: hidden; background: rgba(24, 39, 56, 0.06) }
 .life-bar i { display: block; height: 100% }
 .life-bar i.transit { background: var(--transit) } .life-bar i.car { background: var(--car) } .life-bar i.walk { background: var(--walk) } .life-bar i.bike { background: var(--bike) }
+
+/* ══ 10-14 3차: 교통평점 한 장 카드 · ⚙ 라이프스타일 · 끌어서 넘기기 · 비교 카드에서 후보지 수정 ══ */
+.tc-head { align-items: center; margin: 0; padding: 12px 16px 0 18px; gap: 8px }
+.tc-head h2 { flex: none }
+.tc-life { flex: 1; min-width: 0; font-size: 12px; color: var(--muted); text-align: right; white-space: nowrap; overflow: hidden; text-overflow: ellipsis }
+.tc-head .gear.on { background: var(--panel-2) }
+.tc-body { padding-top: 6px }
+.swipe { touch-action: pan-y; user-select: none; cursor: grab; will-change: transform; transform-origin: 50% 120% }
+.swipe.dragging { cursor: grabbing }
+.swipe .house-head { border-bottom: 0 }
+.house-head .sel-text { max-width: 100% }
+.score-block { padding-top: 0 }
+.transport-card:hover .house3d { transform: none }
+/* 세부설정 */
+.pop-foot { justify-content: flex-start; align-items: center }
+.pop-foot .spacer { flex: 1 }
+.detail-link { border: 0; background: none; padding: 4px 2px; font-size: 12.5px; color: var(--muted); cursor: pointer; text-decoration: underline; text-underline-offset: 3px }
+.detail-link:hover, .detail-link[aria-expanded='true'] { color: var(--text) }
+.life-detail { display: grid; gap: 6px; margin-top: 4px; padding: 10px 12px; border-radius: 14px; background: var(--panel-2) }
+.life-detail > b { font-weight: 500; font-size: 13px }
+.life-detail label { display: grid; grid-template-columns: 1fr 96px; align-items: center; gap: 8px; font-size: 13px }
+.life-detail label .dot { display: inline-block; margin-right: 6px }
+.life-detail input { width: 100%; padding: 5px 8px; border: 1px solid var(--line-2); border-radius: 8px; font-size: 13px; text-align: right; background: #fff; color: var(--text) }
+.life-detail small { font-size: 11px }
+.life-detail small.warn { color: #9a4f17 }
+.life-custom { font-style: normal; margin-left: 6px; font-size: 10px; color: var(--muted); border: 1px solid var(--line-2); border-radius: 999px; padding: 0 6px; vertical-align: 2px }
+/* 비교 카드: 후보지 수정 창(그 카드 위에 덮음) */
+.cards-grid > .col.card { position: relative }
+.card-edit { position: absolute; inset: 0; z-index: 6; background: rgba(255, 255, 255, 0.97); border-radius: 14px; box-shadow: 0 0 0 1.5px var(--text); padding: 12px 12px 0; cursor: default }
+.card-edit .cand-edit { position: sticky; top: 0; border-bottom: 0 }
+.card-edit .cand-edit label { grid-template-columns: 46px 1fr }
+.card-edit .edit-actions button { padding: 6px 12px }
+.transport-card .edge-nav { top: 48px } /* 머리(교통평점 · ⚙)는 비워 둔다 */
+.transport-card .edge-nav.prev { border-radius: 0 0 0 var(--radius) } .transport-card .edge-nav.next { border-radius: 0 0 var(--radius) 0 }

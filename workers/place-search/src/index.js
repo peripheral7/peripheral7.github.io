@@ -15,7 +15,7 @@
 //
 // 계산 중계(10-14): 새 후보지의 상권·입지 요인·차량 시간은 사용자 PC 의 계산 서버(tools/location-compare/server)가 낸다.
 //  그 서버가 cloudflared 빠른 터널 주소를 POST /relay/register 로 알려 오면(X-Relay-Key = 시크릿 RELAY_SECRET) D1 relay 표에 둔다.
-//  GET /analyze?lat=&lng=  · GET /route?from=lat,lng&to=lat,lng → 출처·IP 상한을 거쳐 그 주소로 넘긴다(키는 Worker 가 붙임).
+//  GET /analyze?lat=&lng=  · GET /reverse?lat=&lng=(좌표 → 도로명 주소) · GET /route?from=lat,lng&to=lat,lng → 출처·IP 상한을 거쳐 그 주소로 넘긴다(키는 Worker 가 붙임).
 //  등록이 없거나 25분 넘게 소식이 없거나 연결이 안 되면 503 { error: 'offline' } — 화면은 "계산 서버 꺼짐"으로 보인다.
 
 const ALLOWED_ORIGINS = new Set(['https://peripheral7.github.io', 'http://localhost:5173', 'http://localhost:5174', 'http://localhost:5175', 'http://localhost:3001', 'http://127.0.0.1:3001'])
@@ -80,15 +80,15 @@ async function relayRegister(request, env) {
   return json({ ok: true }, 200, {})
 }
 
-// /analyze · /route → 계산 서버. 매개변수는 숫자 좌표만 다시 만들어 넘긴다(다른 글자는 안 넘김).
+// /analyze · /reverse · /route → 계산 서버. 매개변수는 숫자 좌표만 다시 만들어 넘긴다(다른 글자는 안 넘김).
 async function relay(env, h, url, who, hour) {
   const coord = (s) => { const [a, b] = String(s || '').split(',').map(Number); return Number.isFinite(a) && Number.isFinite(b) && a > 33 && a < 39 && b > 124 && b < 132 ? `${a.toFixed(5)},${b.toFixed(5)}` : null }
   let path
-  if (url.pathname === '/analyze') {
+  if (url.pathname === '/analyze' || url.pathname === '/reverse') {
     const c = coord(`${url.searchParams.get('lat')},${url.searchParams.get('lng')}`)
     if (!c) return json({ error: 'query' }, 400, h)
     const [lat, lng] = c.split(',')
-    path = `/analyze?lat=${lat}&lng=${lng}`
+    path = `${url.pathname}?lat=${lat}&lng=${lng}`
   } else {
     const f = coord(url.searchParams.get('from')), t = coord(url.searchParams.get('to'))
     if (!f || !t) return json({ error: 'query' }, 400, h)
@@ -116,7 +116,7 @@ export default {
     const url = new URL(request.url)
     if (request.method === 'OPTIONS') return new Response(null, { status: 204, headers: h })
     if (request.method === 'POST' && url.pathname === '/relay/register') return relayRegister(request, env)
-    if (request.method === 'GET' && (url.pathname === '/analyze' || url.pathname === '/route')) {
+    if (request.method === 'GET' && (url.pathname === '/analyze' || url.pathname === '/route' || url.pathname === '/reverse')) {
       if (!origin || !ALLOWED_ORIGINS.has(origin)) return json({ error: 'origin' }, 403, h)
       const now = new Date()
       const who = await sha256((env.SALT || 'place-search') + (request.headers.get('CF-Connecting-IP') || ''))

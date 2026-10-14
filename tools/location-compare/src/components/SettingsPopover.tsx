@@ -1,9 +1,9 @@
-import { useEffect, useRef } from 'react'
-import { LIFESTYLES, MAX_WEEKLY, WEEKS_PER_MONTH, applyLifestyle, defaultWeekly, weightShares, type Hub, type HubMode, type ModeKey, type Preference } from '../data'
+import { useEffect, useRef, useState } from 'react'
+import { DEFAULT_PREFERENCE, LIFESTYLES, MAX_WEEKLY, WEEKS_PER_MONTH, applyLifestyle, defaultWeekly, lifestyleOf, lifestyleWeights, setLifestyleWeights, weightShares, type Hub, type HubMode, type ModeKey, type Preference } from '../data'
 
 // 칸(카드)을 누르면 그 칸 바로 오른쪽에 뜨는 작은 설정 창. 바꾸는 즉시 점수에 반영되고 이 브라우저에 저장된다.
 // 교통평점 창(10-14): 수단 가중치 숫자 대신 **라이프스타일**을 고른다(data.ts LIFESTYLES — 고르면 가중치·자전거 사용이 정해짐).
-// 각 카드에 그 라이프스타일의 수단 비율을 작은 막대로 보인다.
+// 각 카드에 그 라이프스타일의 수단 비율을 작은 막대로 보인다. 왼쪽 아래 "세부설정" = 지금 고른 라이프스타일의 수단 비율을 숫자로(합 100 기준 비율).
 // 목적지 창: 주 방문(왕복) 횟수(0.5 단위, 월 4회 = 주 1회)와 그 목적지에 갈 때 쓰는 이동수단(자동 = 가중치로 섞음).
 type Props = { kind: 'weekly' | 'weights'; hubs: Hub[]; value: Preference; onChange: (p: Preference) => void; onClose: () => void }
 
@@ -34,8 +34,14 @@ export function SettingsPopover({ kind, hubs, value, onChange, onClose }: Props)
 
   const setWeekly = (id: string, v: number) => onChange({ ...value, weekly: { ...value.weekly, [id]: Math.max(0, Math.min(MAX_WEEKLY, Math.round((v || 0) * 2) / 2)) } })
   const setMode = (id: string, m: HubMode) => onChange({ ...value, hubMode: { ...value.hubMode, [id]: m } })
+  const [detail, setDetail] = useState(false) // 세부설정(비율 입력) 펼침
+  const life = lifestyleOf(value)
+  const detailKeys: ModeKey[] = value.bike ? ['transit', 'car', 'walk', 'bike'] : ['transit', 'car', 'walk']
+  const setW = (k: ModeKey, v: number) => onChange(setLifestyleWeights(value, { ...value.weights, [k]: Math.max(0, Math.min(100, Math.round(v || 0))) }))
+  const wSum = detailKeys.reduce((a, k) => a + (value.weights[k] ?? 0), 0)
+  // 기본값 = 라이프스타일 "골고루" + 세부설정에서 바꾼 비율 모두 지움
   const reset = () => onChange(kind === 'weights'
-    ? applyLifestyle(value, 'balanced')
+    ? applyLifestyle({ ...value, lifeCustom: {}, weights: { ...DEFAULT_PREFERENCE.weights } }, 'balanced')
     : { ...value, weekly: Object.fromEntries(hubs.map((h) => [h.id, defaultWeekly(h.category)])), hubMode: {} })
 
   return (
@@ -48,12 +54,12 @@ export function SettingsPopover({ kind, hubs, value, onChange, onClose }: Props)
         <div className="life-list" role="radiogroup" aria-label="라이프스타일">
           {LIFESTYLES.map((l) => {
             const keys: ModeKey[] = l.bike ? ['transit', 'car', 'walk', 'bike'] : ['transit', 'car', 'walk']
-            const sh = weightShares(l.weights, keys)
+            const sh = weightShares(lifestyleWeights(value, l), keys)
             const on = value.lifestyle === l.id
             return (
               <button type="button" key={l.id} role="radio" aria-checked={on} className={'life-card' + (on ? ' on' : '')} onClick={() => onChange(applyLifestyle(value, l.id))}>
                 <span className="life-emoji" aria-hidden>{l.emoji}</span>
-                <span className="life-text"><b>{l.label}</b><small>{l.note}</small>
+                <span className="life-text"><b>{l.label}{value.lifeCustom?.[l.id] ? <i className="life-custom">세부설정</i> : null}</b><small>{l.note}</small>
                   <span className="life-bar" aria-label={keys.map((k) => `${MODE_INFO[k].label} ${sh[k]}%`).join(' · ')}>
                     {keys.map((k) => <i key={k} className={k} style={{ width: `${sh[k]}%` }} />)}
                   </span>
@@ -62,6 +68,17 @@ export function SettingsPopover({ kind, hubs, value, onChange, onClose }: Props)
             )
           })}
           {!value.lifestyle && <p className="sum-note">지금은 예전에 숫자로 정한 비율을 쓰는 중 — 하나를 고르면 바뀝니다.</p>}
+          {detail && (
+            <div className="life-detail" role="group" aria-label={`${life ? life.label : '직접 정한'} 수단 비율`}>
+              <b>{life ? `${life.emoji} ${life.label}` : '직접 정한 비율'} 비율</b>
+              {detailKeys.map((k) => (
+                <label key={k}><span><span className={`dot ${k}`} />{MODE_INFO[k].label}</span>
+                  <span className="unit-input"><input type="number" min={0} max={100} step={5} inputMode="numeric" value={value.weights[k] ?? 0} onFocus={(e) => e.currentTarget.select()} onChange={(e) => setW(k, Number(e.target.value))} /><i>%</i></span>
+                </label>
+              ))}
+              <small className={wSum === 100 ? 'muted' : 'warn'}>합 {wSum}{wSum === 100 ? '' : ` — 100 ${wSum > 100 ? '초과' : '부족'}(비율로 계산)`}</small>
+            </div>
+          )}
         </div>
       ) : hubs.map((h) => {
         const n = value.weekly[h.id] ?? 0
@@ -80,7 +97,10 @@ export function SettingsPopover({ kind, hubs, value, onChange, onClose }: Props)
           </div>
         )
       })}
-      <div className="pop-foot"><button className="ghost" onClick={reset}>기본값</button><button className="solid" onClick={onClose}>완료</button></div>
+      <div className="pop-foot">
+        {kind === 'weights' && <button type="button" className="link detail-link" aria-expanded={detail} onClick={() => setDetail(!detail)}>세부설정 {detail ? '▴' : '▾'}</button>}
+        <button className="ghost" onClick={reset}>기본값</button><span className="spacer" /><button className="solid" onClick={onClose}>완료</button>
+      </div>
     </div>
   )
 }

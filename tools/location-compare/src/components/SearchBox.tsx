@@ -101,7 +101,9 @@ export function SearchBox({ hubs, tripsOf, onCandidate, onHub, onPreview, onResu
     onPreview(p, false)
     void reverseGeocode(lat, lng).then((a) => {
       if (id !== seq.current) return // 그사이 다른 곳을 고르거나 검색했다
-      const name = a ? a.building || (a.rough ? MAP_PICK_NAME : a.address.split(' ').slice(2).join(' ') || a.address) : MAP_PICK_NAME
+      // 이름 = 건물 이름, 없으면 도로명 부분("서천동로43번길 5-3"), 도로명이 없으면 시·도 뒤 주소
+      const road = a?.address.match(/[가-힣\d]+(?:로|길)\s?\d+(?:-\d+)?/)?.[0]
+      const name = a ? a.building || (a.rough ? MAP_PICK_NAME : road || a.address.split(' ').slice(2).join(' ') || a.address) : MAP_PICK_NAME
       const q: Place = { ...p, name, address: a?.address ?? coord }
       setItems([q])
       setDraft((d) => (d && d.name === MAP_PICK_NAME ? { ...d, name } : d))

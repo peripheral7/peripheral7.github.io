@@ -158,19 +158,29 @@ async function searchOnce(query: string): Promise<{ places: Place[]; errors: str
 
 // ── 좌표 → 주소(지도 우클릭 등록) ─────────────────────────────────────
 // 1) 네이버 지도 JS 역지오코더 — 도로명 주소·건물 이름까지. NCP 앱에서 "Reverse Geocoding" 을 켜야 동작(2026-10-13 지금은 꺼져 있어 403).
-// 2) 안 되면 OpenStreetMap Nominatim(키 없음, 브라우저에서 바로) — 동·구 정도만 나와 "부근"으로 표시(rough).
-//    브이월드 주소 API 는 정확하지만 키가 브라우저에 드러나고, Cloudflare Worker 에서 부르면 브이월드가 막는다(520).
-// 3) 둘 다 안 되면 null(위경도로 표시). 같은 좌표(약 1m)는 한 번만 묻는다.
+// 2) 계산 서버(Worker /reverse → 이 PC) 의 브이월드 주소 API — 도로명 주소(도로 위를 누르면 그 필지 지번으로 찾은 도로명).
+//    브이월드 키는 브라우저에 안 나가고, Cloudflare Worker 에서 부르면 브이월드가 막아서(520) 이 PC 가 부른다. PC 가 꺼지면 건너뜀.
+// 3) 그래도 안 되면 OpenStreetMap Nominatim(키 없음) — 동·구 정도만 나와 "부근"으로 표시(rough).
+// 4) 모두 안 되면 null(위경도로 표시). 같은 좌표(약 1m)는 한 번만 묻는다.
 export type RevAddr = { address: string; building?: string; rough?: boolean }
 const revCache = new Map<string, Promise<RevAddr | null>>()
 export function reverseGeocode(lat: number, lng: number): Promise<RevAddr | null> {
   const k = `${lat.toFixed(5)},${lng.toFixed(5)}`
   let p = revCache.get(k)
   if (!p) {
-    p = naverReverse(lat, lng).then((a) => a ?? osmReverse(lat, lng))
+    p = naverReverse(lat, lng).then((a) => a ?? serverReverse(lat, lng)).then((a) => a ?? osmReverse(lat, lng))
     revCache.set(k, p)
   }
   return p
+}
+async function serverReverse(lat: number, lng: number): Promise<RevAddr | null> {
+  if (!SEARCH_URL) return null
+  try {
+    const r = await fetch(`${SEARCH_URL.replace(/\/+$/, '')}/reverse?lat=${lat.toFixed(5)}&lng=${lng.toFixed(5)}`, { signal: AbortSignal.timeout(8000) })
+    if (!r.ok) return null
+    const j = await r.json()
+    return j?.address ? { address: j.address, building: j.building || undefined } : null
+  } catch { return null }
 }
 async function osmReverse(lat: number, lng: number): Promise<RevAddr | null> {
   try {

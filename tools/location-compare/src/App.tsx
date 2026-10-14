@@ -1,12 +1,12 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { BASE_DEPOSIT, MAX_HUBS, activeModes, lifestyleOf, baseRent, hubEmoji, weeklyText, won, type Place } from './data'
 import { evaluate, hubInsights, shareOf } from './scoring'
-import { addCandidate, load, money, removeCandidate, removeHub, save, setHub, updateCandidate, type State } from './store'
+import { addCandidate, load, removeCandidate, removeHub, save, setHub, updateCandidate, type State } from './store'
 import { MapView } from './components/MapView'
 import type { MapPoint } from './placeNear'
 import { SearchBox } from './components/SearchBox'
 import { FactorsPanel, type FactorBest, type FactorOpen } from './components/Panels'
-import { EdgeNav, ScoreBlock } from './components/TransportCard'
+import { EdgeNav, ScoreBlock, Swipe, type SwipeApi } from './components/TransportCard'
 import { MODE_INFO } from './components/SettingsPopover'
 import { CompareCards } from './components/CompareCards'
 import { SettingsPopover } from './components/SettingsPopover'
@@ -19,7 +19,6 @@ import { ListingCards, SpotCards } from './components/Recommend'
 import { SPOTS } from './recommend'
 import { DEFAULT_FUEL, loadCommute, saveCommute, type CommuteSaved } from './commute'
 import { fuelPriceFor } from './fuel'
-import { USE_LABEL, type PropertyUse } from './brokerage'
 import { loadParks, parkAreaPin, strollNear, PARK_AREAS, PARK_AREA_MIN, STROLL_RADIUS, type Park } from './parks'
 import { PLACE_KEYS, loadPlaceOn, placeFor, placeSummary, savePlaceOn, type PlaceOn } from './places'
 import { liveMajors, liveNote, requestLive } from './live'
@@ -45,7 +44,6 @@ export default function App() {
   const [mapPick, setMapPick] = useState<{ place: Place; kind: 'candidate' | 'hub'; at: MapPoint; n: number } | null>(null) // 지도 우클릭 → 검색창 등록 창
   const [found, setFound] = useState<Place[]>([]) // 검색 결과 전부(지도에 작은 점)
   const mapCenter = useRef<{ lat: number; lng: number } | null>(null) // 지금 지도 가운데(검색 결과 정렬)
-  const [editing, setEditing] = useState<{ id: string; name: string; deposit: string; rent: string; maint: string; use: PropertyUse } | null>(null) // 수정 중인 후보지(금액은 입력 글자 그대로)
   const [catState, setCatState] = useState<CatState>(() => pruneCats(loadCats())) // 길고양이 지수(선택 요인) — 사진은 이 브라우저에만 저장
   const [commute, setCommute] = useState<CommuteSaved>(loadCommute) // 출퇴근 인사이트의 연비·기름값(null = 자동)
   // 넓은 화면의 오른쪽 열(.right-col, contain: size)이 왼쪽·가운데보다 길면 넘친 만큼 .stage 아래 여백(--right-extra)으로 자리를 만든다
@@ -153,14 +151,12 @@ export default function App() {
   // 번호 = 종합 순위(지도 핀·번호 단추 모두), 단추는 순위 순서로
   const ranks = useMemo(() => results.map((r) => r.rank), [results])
   const byRank = candidates.map((c, i) => ({ c, i, rank: ranks[i] ?? i + 1 })).sort((a, b) => a.rank - b.rank)
-  // 선택한 후보지 박스 위쪽 ‹ › : 순위 순서로 앞·뒤 후보지(끝에서는 처음으로 돈다)
-  // 교통평점 카드 가장자리 ‹ › : 순위 순서로 앞·뒤 후보지(끝에서는 돌지 않는다 — 넘길 곳이 없으면 단추도 없음)
+  // 교통평점 카드 넘기기: 순위 순서로 앞·뒤 후보지(끝에서는 반대 끝으로 돈다)
   const k = byRank.findIndex((x) => x.i === active)
-  const prev = k > 0 ? () => select(byRank[k - 1].i) : undefined
-  const next = k >= 0 && k < byRank.length - 1 ? () => select(byRank[k + 1].i) : undefined
-  const rename = (id: string, name: string) => setState(updateCandidate(state, id, { name }))
-  const saveEdit = () => { if (editing) setState(updateCandidate(state, editing.id, { name: editing.name, deposit: money(editing.deposit), rent: money(editing.rent), maint: money(editing.maint), use: editing.use })); setEditing(null) }
-  const deleteEdit = () => { if (editing && confirm('이 후보지를 삭제할까요?')) { update(removeCandidate(state, editing.id)); setEditing(null) } }
+  const swipe: SwipeApi = useRef(null)
+  // 후보지 수정(후보지별 비교 카드 ✎): 이름·보증금·월세·관리비·용도, 삭제
+  const editCandidate = (id: string, patch: Parameters<typeof updateCandidate>[2]) => setState(updateCandidate(state, id, patch))
+  const deleteCandidate = (id: string) => update(removeCandidate(state, id))
   const close = () => setPop('none')
   const weekSum = hubs.reduce((a, h) => a + (pref.weekly[h.id] ?? 0), 0)
   // 주 목적지(지도 맞춤) = 주 방문이 가장 많은 곳 하나 — 같으면 학교·직장을 먼저. 후보지를 고르면 후보지와 이곳이 지도 가운데에 균형 있게.
@@ -202,44 +198,29 @@ export default function App() {
       </header>
 
       <main className="stage" ref={stageRef}>
-        {/* 왼쪽 위: 교통평점 카드 = 고른 후보지(3D 집·이름·주요 교통수단) + 종합·수단별 교통평점. 가장자리에 마우스를 올리면 ‹ › */}
+        {/* 왼쪽 위: 교통평점 카드(한 장) = 고른 후보지(이름·3D 집·종합 원형)·주요 교통수단·수단별 교통평점. ⚙ = 라이프스타일.
+            가장자리 띠에 마우스를 올리면 어두운 그라데이션 + ‹ ›, 카드를 끌어서 넘기기(끝에서는 반대 끝으로) */}
         <div className="modes-area anchor">
           <div className="panel transport-card">
-            <EdgeNav onPrev={prev} onNext={next} />
+            {byRank.length > 1 && <EdgeNav onPrev={() => swipe.current?.(-1)} onNext={() => swipe.current?.(1)} />}
+            <div className="panel-head tc-head">
+              <h2>교통평점</h2>
+              <span className="tc-life">{life ? `${life.emoji} ${life.label}` : `직접 정한 비율 ${modes.map((m) => w[m]).join('·')}`}</span>
+              <button type="button" className={'gear' + (pop === 'weights' ? ' on' : '')} data-pop-trigger="weights" aria-expanded={pop === 'weights'} aria-label="라이프스타일 설정" title="라이프스타일 설정" onClick={() => toggle('weights')}>⚙️</button>
+            </div>
             <div className="tc-body">
             {cur ? (
-              editing?.id === cur.candidate.id ? (
-                <form className="cand-edit" onSubmit={(e) => { e.preventDefault(); saveEdit() }} onKeyDown={(e) => { if (e.key === 'Escape') setEditing(null) }}>
-                  <span className="tag">후보지 수정</span>
-                  <label>이름<input spellCheck={false} autoComplete="off" value={editing.name} maxLength={40} autoFocus onChange={(e) => setEditing({ ...editing, name: e.target.value })} /></label>
-                  <label>보증금<span className="unit-input"><input type="number" min={0} step={100} inputMode="numeric" placeholder="예: 1000" value={editing.deposit} onChange={(e) => setEditing({ ...editing, deposit: e.target.value })} /><i>만원</i></span></label>
-                  <label>월세<span className="unit-input"><input type="number" min={0} step={1} inputMode="numeric" placeholder="예: 50" value={editing.rent} onChange={(e) => setEditing({ ...editing, rent: e.target.value })} /><i>만원</i></span></label>
-                  <label>관리비<span className="unit-input"><input type="number" min={0} step={1} inputMode="numeric" placeholder="예: 7" value={editing.maint} onChange={(e) => setEditing({ ...editing, maint: e.target.value })} /><i>만원</i></span></label>
-                  <label>용도<select value={editing.use} onChange={(e) => setEditing({ ...editing, use: e.target.value as PropertyUse })}>{(Object.keys(USE_LABEL) as PropertyUse[]).map((u) => <option key={u} value={u}>{USE_LABEL[u]}{u === 'officetel' ? '(85㎡ 이하·부엌·욕실)' : ''}</option>)}</select></label>
-                  <p className="muted">{cur.candidate.address}</p>
-                  <div className="edit-actions">
-                    <button type="button" className="danger" onClick={deleteEdit}>삭제</button>
-                    <span />
-                    <button type="button" className="ghost" onClick={() => setEditing(null)}>취소</button>
-                    <button type="submit" className="solid">저장</button>
-                  </div>
-                </form>
-              ) : (
+              <Swipe pos={Math.max(0, k)} count={byRank.length} api={swipe} onMove={(d) => select(byRank[(k + d + byRank.length) % byRank.length].i)}>
                 <div className="sel-head house-head">
                   <div className="sel-text">
                     <span className="tag">종합 {cur.rank}위{rentText(cur.candidate)}</span>
                     <h3>{cur.candidate.name}</h3>
                     <p>{cur.candidate.address}</p>
                   </div>
-                  <button className="edit-btn" aria-label={`${cur.candidate.name} 수정`} onClick={() => setEditing({ id: cur.candidate.id, name: cur.candidate.name, deposit: cur.candidate.deposit?.toString() ?? '', rent: cur.candidate.rent?.toString() ?? '', maint: cur.candidate.maint?.toString() ?? '', use: cur.candidate.use ?? 'home' })}>수정</button>
                 </div>
-              )
+                <ScoreBlock r={cur} modes={modes} />
+              </Swipe>
             ) : <p className="empty">검색해서 후보지를 넣어 주세요.</p>}
-            {cur && (
-              <div className={'tappable score-tap' + (pop === 'weights' ? ' on' : '')} {...tap('weights', '라이프스타일 고르기 열기')}>
-                <ScoreBlock r={cur} modes={modes} action={<span className="tap-hint">{life ? `${life.emoji} ${life.label}` : `직접 정한 비율 ${modes.map((m) => w[m]).join('·')}`} ↗</span>} />
-              </div>
-            )}
             <div className="pick" role="tablist" aria-label="후보지 선택">
               {byRank.map(({ c, i, rank }) => <button key={c.id} role="tab" aria-selected={i === active} className={i === active ? 'on' : ''} onClick={() => select(i)} title={c.name} aria-label={`${rank}위 ${c.name}`}>{rank}</button>)}
             </div>
@@ -304,7 +285,7 @@ export default function App() {
         <ListingCards candidates={candidates} />
 
         <section className="cards-area">
-          {results.length > 0 && <CompareCards results={results} com={comPrefs.on ? comIdx : null} hubs={hubs} active={active} bike={!!pref.bike} onSelect={select} onRename={rename} />}
+          {results.length > 0 && <CompareCards results={results} com={comPrefs.on ? comIdx : null} hubs={hubs} active={active} bike={!!pref.bike} onSelect={select} onEdit={editCandidate} onDelete={deleteCandidate} />}
         </section>
       </main>
 

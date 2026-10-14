@@ -1,10 +1,13 @@
-import type { ReactNode } from 'react'
+import { useEffect, useLayoutEffect, useRef, useState, type ReactNode } from 'react'
 import { fmt, type CandidateResult, type HubResult } from '../scoring'
 import { hubEmoji, type ModeKey } from '../data'
 import { MODE_INFO } from './SettingsPopover'
 
-// 왼쪽 위 "교통평점" 카드 — 고른 후보지(3D 집 그림·이름·주요 교통수단) + 종합 원형 그래프 + 수단별 교통평점 눈금 막대.
-// 카드 안쪽 왼쪽·오른쪽 가장자리에 마우스를 올리면 세로로 긴 은은한 ‹ › 가 나타나 앞·뒤 순위 후보지로 넘긴다(넘길 곳이 있을 때만).
+// 왼쪽 위 "교통평점" 카드(한 장) — 고른 후보지(이름·3D 집·종합 원형)·주요 교통수단·수단별 교통평점 눈금 막대.
+// 라이프스타일은 카드 오른쪽 위 ⚙ 에서 고른다. 후보지 넘기기(Swipe):
+//  - 카드 안쪽 왼쪽·오른쪽 가장자리 띠(44px)에 마우스를 올리면 어두운 그라데이션 + ‹ › → 누르면 앞·뒤 순위 후보지(끝에서는 반대 끝으로 돈다)
+//  - 카드를 누른 채 옆으로 끌면 카드처럼 따라오고, 충분히 끌고 놓으면 넘어간다(살짝이면 제자리로)
+//  - 넘어갈 때 지금 내용이 나간 쪽 반대편에서 새 후보지가 미끄러져 들어온다(번호 단추로 고를 때도 순위 방향대로)
 
 /** 수단 교통평점 = 그 수단을 점수에 넣은 목적지들의 점수를 주 방문 비율로 평균(넣은 목적지가 없으면 null) */
 export function modeSummary(r: CandidateResult, mode: ModeKey): number | null {
@@ -21,12 +24,11 @@ const Ticks = ({ value, mode }: { value: number | null; mode: ModeKey }) => (
   </span>
 )
 
-/** 카드 가운데: 큰 3D 집을 원이 둘러싸고, 원 테두리를 종합 점수 비율(0~100%)만큼 채운다(12시 방향부터 시계 방향).
- *  채운 끝에 작은 퍼센트 꼬리표, 원 아래에 점수. */
+/** 카드 가운데: 큰 3D 집을 얇은 원이 둘러싸고, 원 테두리를 종합 점수 비율(0~100%)만큼 채운다(12시 방향부터 시계 방향, 숫자 꼬리표 없음).
+ *  원 아래에 점수. */
 export function HouseRing({ value, rank }: { value: number; rank: number }) {
   const pct = Math.max(0, Math.min(10, value)) * 10
-  const a = ((pct / 100) * 360 - 90) * (Math.PI / 180) // 채운 끝 각도
-  const R = 46, cx = 50 + R * Math.cos(a), cy = 50 + R * Math.sin(a)
+  const R = 47.5
   return (
     <div className="house-ring">
       <div className="hr-circle">
@@ -35,7 +37,6 @@ export function HouseRing({ value, rank }: { value: number; rank: number }) {
           <circle className="ring-arc" cx="50" cy="50" r={R} pathLength={100} strokeDasharray={`${pct} 100`} transform="rotate(-90 50 50)" />
         </svg>
         <House3D rank={rank} />
-        <span className="hr-pct" style={{ left: `${cx}%`, top: `${cy}%` }}>{Math.round(pct)}%</span>
       </div>
       <p className="hr-score"><b>{fmt(value)}</b><small>/ 10</small></p>
       <p className="hr-rank">종합 {rank}위</p>
@@ -73,7 +74,7 @@ export function House3D({ rank }: { rank: number }) {
   )
 }
 
-/** 카드 안쪽 가장자리의 세로 ‹ › (넘길 곳이 없으면 그리지 않는다) */
+/** 카드 안쪽 가장자리 띠: 마우스를 올리면 어두운 그라데이션 + ‹ › (넘길 곳이 없으면 그리지 않는다) */
 export function EdgeNav({ onPrev, onNext }: { onPrev?: () => void; onNext?: () => void }) {
   return (
     <>
@@ -82,6 +83,82 @@ export function EdgeNav({ onPrev, onNext }: { onPrev?: () => void; onNext?: () =
     </>
   )
 }
+
+const SWIPE_MIN = 60 // 이만큼(px) 끌고 놓으면 넘어간다(빠르게 튕기면 더 짧아도)
+const OUT_MS = 170, IN_MS = 260
+/** 끌어서 넘기는 카드 내용. pos = 지금 후보지의 순위 자리(0부터), count = 후보지 수.
+ *  go(+1|-1) 로 넘기면 나가는 애니메이션 뒤에 onMove 를 부르고, pos 가 바뀌면 그 방향 반대편에서 들어온다. */
+export function Swipe({ pos, count, onMove, api, children }: { pos: number; count: number; onMove: (d: 1 | -1) => void; api?: SwipeApi; children: ReactNode }) {
+  const box = useRef<HTMLDivElement>(null)
+  const [x, setX] = useState(0) // 끄는 중 이동량(px)
+  const [anim, setAnim] = useState<'' | 'snap' | 'out' | 'in'>('')
+  const dir = useRef<1 | -1 | 0>(0) // 우리가 넘긴 방향(번호 단추로 고르면 0 → 순위 차이로)
+  const drag = useRef<{ id: number; x0: number; y0: number; t0: number; on: boolean; moved: boolean } | null>(null)
+  const prevPos = useRef(pos)
+  const busy = useRef(false)
+  const w = () => box.current?.offsetWidth ?? 300
+  const go = (d: 1 | -1) => {
+    if (busy.current || count < 2) return
+    busy.current = true
+    dir.current = d
+    setAnim('out'); setX(-d * w())
+    setTimeout(() => onMove(d), OUT_MS)
+  }
+  // 새 후보지: 들어올 쪽 바깥에 놓고 → 다음 프레임에 0 으로
+  useLayoutEffect(() => {
+    if (prevPos.current === pos) return
+    const d = dir.current || (pos > prevPos.current ? 1 : -1)
+    prevPos.current = pos; dir.current = 0
+    setAnim(''); setX(d * w() * 0.6)
+    // (rAF 는 창이 가려져 있으면 멈추므로 타이머로)
+    const r = setTimeout(() => { setAnim('in'); setX(0) }, 20)
+    const t = setTimeout(() => { setAnim(''); setX(0); busy.current = false }, IN_MS + 60)
+    return () => { clearTimeout(r); clearTimeout(t); setX(0); busy.current = false }
+  }, [pos]) // eslint-disable-line react-hooks/exhaustive-deps
+  useEffect(() => { if (api) api.current = go })
+
+  const onDown = (e: React.PointerEvent) => {
+    if (e.button !== 0 || busy.current || count < 2) return
+    if ((e.target as HTMLElement).closest('button, a, input, select, textarea, [data-no-swipe]')) return
+    drag.current = { id: e.pointerId, x0: e.clientX, y0: e.clientY, t0: performance.now(), on: false, moved: false }
+  }
+  const onMoveP = (e: React.PointerEvent) => {
+    const d = drag.current
+    if (!d || d.id !== e.pointerId) return
+    const dx = e.clientX - d.x0, dy = e.clientY - d.y0
+    if (!d.on) {
+      if (Math.abs(dx) < 6) return
+      if (Math.abs(dy) > Math.abs(dx)) { drag.current = null; return } // 세로로 움직이면 스크롤에 양보
+      d.on = true; d.moved = true
+      box.current?.setPointerCapture(e.pointerId)
+      setAnim('')
+    }
+    setX(dx)
+  }
+  const onUp = (e: React.PointerEvent) => {
+    const d = drag.current
+    drag.current = null
+    if (!d || !d.on) return
+    const dx = e.clientX - d.x0, v = dx / Math.max(1, performance.now() - d.t0) // px/ms
+    if (Math.abs(dx) > SWIPE_MIN || (Math.abs(v) > 0.5 && Math.abs(dx) > 20)) go(dx < 0 ? 1 : -1)
+    else { setAnim('snap'); setX(0) }
+    // 끌고 난 뒤의 click 은 버린다(안의 칸이 눌리지 않게)
+    const stop = (ev: MouseEvent) => { ev.stopPropagation(); ev.preventDefault() }
+    window.addEventListener('click', stop, { capture: true, once: true })
+    setTimeout(() => window.removeEventListener('click', stop, { capture: true }), 0)
+  }
+  const tilt = Math.max(-4, Math.min(4, x / 60))
+  const fade = 1 - Math.min(0.55, Math.abs(x) / (w() * 1.4))
+  const ms = anim === 'out' ? OUT_MS : anim === 'in' ? IN_MS : anim === 'snap' ? 220 : 0
+  return (
+    <div ref={box} className={'swipe' + (drag.current?.on ? ' dragging' : '')} onPointerDown={onDown} onPointerMove={onMoveP} onPointerUp={onUp} onPointerCancel={onUp}
+      style={{ transform: `translateX(${x}px) rotate(${tilt}deg)`, opacity: fade, transition: ms ? `transform ${ms}ms ${anim === 'out' ? 'ease-in' : 'cubic-bezier(.2,.8,.2,1)'}, opacity ${ms}ms` : 'none' }}>
+      {children}
+    </div>
+  )
+}
+/** 바깥(가장자리 ‹ ›)에서 Swipe 의 넘기기를 부르기 위한 손잡이 */
+export type SwipeApi = React.MutableRefObject<((d: 1 | -1) => void) | null>
 
 /** 주요 교통수단 한 줄: 주 방문이 가장 많은 목적지에 실제로 가장 크게 반영된 수단 */
 export function MainMode({ r }: { r: CandidateResult }) {
@@ -99,11 +176,10 @@ export function MainMode({ r }: { r: CandidateResult }) {
   )
 }
 
-/** 종합 원형 + 수단별 교통평점 눈금 막대 */
-export function ScoreBlock({ r, modes, action }: { r: CandidateResult; modes: ModeKey[]; action: ReactNode }) {
+/** 종합 원형 + 수단별 교통평점 눈금 막대(카드 안에 바로 — 따로 묶은 칸 없음) */
+export function ScoreBlock({ r, modes }: { r: CandidateResult; modes: ModeKey[] }) {
   return (
     <div className="score-block">
-      <div className="panel-head"><h2>교통평점</h2>{action}</div>
       <HouseRing value={r.total} rank={r.rank} />
       <MainMode r={r} />
       <div className="mode-rows">
