@@ -693,8 +693,8 @@ input[type=number]::-webkit-inner-spin-button, input[type=number]::-webkit-outer
 .transport-card .pick button.on { color: var(--text); font-weight: 700; background: none }
 /* 가장자리 띠(44px): 마우스를 올리면 어두운 그라데이션 + ‹ › — 누르면 앞·뒤 후보지(끝에서는 반대 끝으로) */
 .edge-nav { position: absolute; top: 0; bottom: 0; z-index: 5; width: 44px; border: 0; padding: 0; background: transparent; display: grid; place-items: center; color: #fff; opacity: 0; transition: opacity 0.18s; cursor: pointer }
-.edge-nav.prev { left: 0; border-radius: var(--radius) 0 0 var(--radius); background: linear-gradient(90deg, rgba(24, 39, 56, 0.46), rgba(24, 39, 56, 0.18) 50%, transparent) }
-.edge-nav.next { right: 0; border-radius: 0 var(--radius) var(--radius) 0; background: linear-gradient(270deg, rgba(24, 39, 56, 0.46), rgba(24, 39, 56, 0.18) 50%, transparent) }
+.edge-nav.prev { left: 0; border-radius: var(--radius) 0 0 var(--radius); background: linear-gradient(90deg, rgba(24, 39, 56, 0.24), rgba(24, 39, 56, 0.08) 50%, transparent) }
+.edge-nav.next { right: 0; border-radius: 0 var(--radius) var(--radius) 0; background: linear-gradient(270deg, rgba(24, 39, 56, 0.24), rgba(24, 39, 56, 0.08) 50%, transparent) }
 .edge-nav span { font-size: 30px; font-weight: 300; line-height: 1; text-shadow: 0 1px 4px rgba(0, 0, 0, 0.35); transform: translateY(-2px) }
 .edge-nav.prev span { margin-right: 12px } .edge-nav.next span { margin-left: 12px }
 .edge-nav:hover, .edge-nav:focus-visible { opacity: 1 }
