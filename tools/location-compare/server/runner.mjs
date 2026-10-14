@@ -36,7 +36,11 @@ async function overpassFetch(opts) { // server/runner.mjs 가 붙인 것: 미러
 }
 `
 
-const gitShow =(rel) => execFileSync('git', ['show', `HEAD:tools/location-compare/${rel}`], { cwd: REPO, maxBuffer: 64 << 20 })
+// 이 폴더의 저장소 안 경로(블로그에서는 tools/location-compare/, 따로 떼어 낸 저장소에서는 빈 글자)
+const PREFIX = execFileSync('git', ['rev-parse', '--show-prefix'], { cwd: TOOL }).toString().trim()
+const gitShow = (rel) => execFileSync('git', ['show', `HEAD:${PREFIX}${rel}`], { cwd: TOOL, maxBuffer: 64 << 20 })
+// 큰 원본 자료(공원 경계 Shapefile 폴더·도서관 xls)가 있는 곳: 블로그에서는 저장소 맨 위, 따로 떼어 낸 곳에서는 raw/ (places.mjs 와 같은 규칙)
+const RAW = process.env.WHERETO_RAW_DIR || (fs.existsSync(path.join(TOOL, 'raw')) ? path.join(TOOL, 'raw') : REPO)
 
 function link(src, dst) { // 파일 = 하드링크(같은 드라이브), 폴더 = 정션
   if (fs.existsSync(dst) || !fs.existsSync(src)) return
@@ -56,7 +60,7 @@ function prepare(lat, lng) {
   fs.copyFileSync(path.join(TOOL, '.env.local'), path.join(WTOOL, '.env.local'))
   // 원본 자료(경로는 places-config.json 의 sources 기준, 저장소 맨 위)
   const cfg = JSON.parse(fs.readFileSync(path.join(WTOOL, 'src', 'places-config.json'), 'utf8'))
-  for (const rel of [cfg.sources.parkShp, cfg.sources.libraryXls]) link(path.join(REPO, path.dirname(rel) === '.' ? rel : path.dirname(rel)), path.join(WORK, path.dirname(rel) === '.' ? rel : path.dirname(rel)))
+  for (const rel of [cfg.sources.parkShp, cfg.sources.libraryXls]) link(path.join(RAW, path.dirname(rel) === '.' ? rel : path.dirname(rel)), path.join(WORK, path.dirname(rel) === '.' ? rel : path.dirname(rel)))
   const data = path.join(TOOL, 'data'), wdata = path.join(WTOOL, 'data')
   for (const f of fs.readdirSync(data)) if (f === 'stores.sqlite' || f === 'libraries.csv' || /^baseline-.*\.json$/.test(f)) link(path.join(data, f), path.join(wdata, f))
   // 고도: 덮는 범위 안(여유 2km)일 때만 — 밖이면 경사 보정 없이

@@ -36,8 +36,10 @@ for (const l of (fs.existsSync(path.join(ROOT, '.env.local')) ? fs.readFileSync(
 /** 도시·군계획시설 도로 규모별 폭(m) — 「도시·군계획시설의 결정·구조 및 설치기준에 관한 규칙」 제9조 */
 const ROAD_WIDTH = { 광로: { 1: '70m 이상', 2: '50~70m', 3: '40~50m' }, 대로: { 1: '35~40m', 2: '30~35m', 3: '25~30m' }, 중로: { 1: '20~25m', 2: '15~20m', 3: '12~15m' }, 소로: { 1: '10~12m', 2: '8~10m', 3: '8m 미만' } }
 const DB_FILE = path.join(ROOT, 'data', 'stores.sqlite')
-const SHP = path.join(REPO, CFG.sources.parkShp)
-const LIB_XLS = path.join(REPO, CFG.sources.libraryXls)
+// 큰 원본 자료 폴더: 블로그 저장소에서는 저장소 맨 위, 따로 떼어 낸 저장소에서는 raw/ (WHERETO_RAW_DIR 로 바꿀 수 있음)
+const RAW = process.env.WHERETO_RAW_DIR || (fs.existsSync(path.join(ROOT, 'raw')) ? path.join(ROOT, 'raw') : REPO)
+const SHP = path.join(RAW, CFG.sources.parkShp)
+const LIB_XLS = path.join(RAW, CFG.sources.libraryXls)
 const LIB_CSV = path.join(ROOT, 'data', 'libraries.csv')
 const refresh = process.argv.includes('--refresh')
 const EPSG5174 = '+proj=tmerc +lat_0=38 +lon_0=127.0028902777778 +k=1 +x_0=200000 +y_0=500000 +ellps=bessel +units=m +no_defs +towgs84=-115.80,474.99,674.11,1.16,-2.31,-1.63,6.43'
@@ -188,7 +190,7 @@ function readShp(shpFile) {
 
 // ── 도서관(표준데이터 xls → csv) ──
 function libraries() {
-  if (!fs.existsSync(LIB_CSV) || fs.statSync(LIB_CSV).mtimeMs < fs.statSync(LIB_XLS).mtimeMs) {
+  if (!fs.existsSync(LIB_CSV) || (fs.existsSync(LIB_XLS) && fs.statSync(LIB_CSV).mtimeMs < fs.statSync(LIB_XLS).mtimeMs)) { // 리눅스 서버는 csv 만 올려 둔다(Excel 없음)
     console.log('도서관 xls → csv(Excel)…')
     const ps = `$x=New-Object -ComObject Excel.Application;$x.DisplayAlerts=$false;$w=$x.Workbooks.Open('${LIB_XLS.replace(/'/g, "''")}',0,$true);$w.SaveAs('${LIB_CSV.replace(/'/g, "''")}',62);$w.Close($false);$x.Quit()`
     execFileSync('powershell.exe', ['-NoProfile', '-Command', ps], { stdio: 'inherit' })
