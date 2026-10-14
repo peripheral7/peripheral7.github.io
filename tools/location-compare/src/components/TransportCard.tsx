@@ -1,10 +1,11 @@
 import { Component, lazy, Suspense, useEffect, useLayoutEffect, useRef, useState, type ReactNode } from 'react'
 import { fmt, type CandidateResult, type HubResult } from '../scoring'
-import { hubEmoji, type Candidate, type ModeKey } from '../data'
+import { createPortal } from 'react-dom'
+import { hubEmoji, type Candidate, type ModeKey, type Preference } from '../data'
 import { roofColor } from '../house3d/colors'
-import { houseSpec } from '../house3d/spec'
+import { houseSpec, OPTION_EMOJI, OPTION_LABEL } from '../house3d/spec'
 import { MODE_INFO } from './SettingsPopover'
-import { catName, mins, pn, rankText, t } from '../i18n'
+import { addr, catName, mins, pn, rankText, t } from '../i18n'
 import { useNarrow } from '../mobile'
 
 // 왼쪽 위 "교통평점" 카드(한 장) — 고른 후보지(이름·3D 집·종합 원형)·주요 교통수단·수단별 교통평점 눈금 막대.
@@ -29,8 +30,10 @@ const Ticks = ({ value, mode }: { value: number | null; mode: ModeKey }) => (
 )
 
 /** 카드 가운데: 큰 3D 집을 얇은 원이 둘러싸고, 원 테두리를 종합 점수 비율(0~100%)만큼 채운다(12시 방향부터 시계 방향, 숫자 꼬리표 없음).
- *  원 아래에 점수. */
-export function HouseRing({ value, rank, candidate }: { value: number; rank: number; candidate: Candidate }) {
+ *  원 아래에 점수. 집을 누르면 오른쪽에 크게 보기 창(HouseDetail). 둘레 장식은 라이프스타일(pref)·입지 요인으로 정해진다(house3d/spec.ts). */
+export function HouseRing({ value, rank, candidate, pref }: { value: number; rank: number; candidate: Candidate; pref?: Preference }) {
+  const [open, setOpen] = useState(false)
+  const spec = houseSpec(candidate, rank, pref)
   const pct = Math.max(0, Math.min(10, value)) * 10
   const R = 47.5
   const svg = <House3D rank={rank} />
@@ -38,7 +41,8 @@ export function HouseRing({ value, rank, candidate }: { value: number; rank: num
   if (useNarrow()) return null
   return (
     <div className="house-ring">
-      <div className="hr-circle">
+      <div className="hr-circle" role="button" tabIndex={0} title={t('집 크게 보기', 'View the house')} aria-label={t('집 크게 보기', 'View the house')}
+        onClick={() => setOpen(true)} onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); setOpen(true) } }}>
         <svg viewBox="0 0 100 100" className="hr-svg" aria-hidden>
           <circle className="ring-track" cx="50" cy="50" r={R} />
           <circle className="ring-arc" cx="50" cy="50" r={R} pathLength={100} strokeDasharray={`${pct} 100`} transform="rotate(-90 50 50)" />
@@ -47,7 +51,7 @@ export function HouseRing({ value, rank, candidate }: { value: number; rank: num
           <GLBoundary fallback={svg}>
             <Suspense fallback={svg}>
               <div className="house3d-box" aria-hidden>
-                <House3DView {...houseSpec(candidate, rank)} />
+                <House3DView {...spec} />
               </div>
             </Suspense>
           </GLBoundary>
@@ -55,6 +59,7 @@ export function HouseRing({ value, rank, candidate }: { value: number; rank: num
       </div>
       <p className="hr-score"><b>{fmt(value)}</b><small>/ 10</small></p>
       <p className="hr-rank">{t('종합', 'Overall')} {rankText(rank)}</p>
+      {open && <HouseDetail spec={spec} candidate={candidate} rank={rank} svg={svg} onClose={() => setOpen(false)} />}
     </div>
   )
 }
@@ -72,6 +77,46 @@ class GLBoundary extends Component<{ fallback: ReactNode; children: ReactNode },
   state = { failed: false }
   static getDerivedStateFromError() { return { failed: true } }
   render() { return this.state.failed ? this.props.fallback : this.props.children }
+}
+
+/** 집 크게 보기: 화면 오른쪽 창(계산 방식 창과 같은 .overlay/.drawer) + 뒤 배경 흐리게. 끌어서 돌리기·휠로 확대, 장식마다 까닭.
+ *  배경을 누르면 닫힘(Esc·× 도) — 단, 집을 돌리다 창 밖에서 손을 떼는 경우는 닫지 않는다(누르기 시작한 곳이 배경일 때만).
+ *  창은 카드(Swipe) 안에서 열리므로(포털이어도 React 이벤트는 부모로 올라간다) pointerdown·click 은 맨 바깥에서 멈춘다 — Swipe 가 끌기를 시작하지 않고 집 원의 onClick 이 다시 열지 않게.
+ *  pointermove·pointerup 은 멈추지 않는다: OrbitControls 가 document 에서 듣는다(멈추면 돌리기가 안 된다). */
+function HouseDetail({ spec, candidate, rank, svg, onClose }: { spec: ReturnType<typeof houseSpec>; candidate: Candidate; rank: number; svg: ReactNode; onClose: () => void }) {
+  const downOnBack = useRef(false)
+  useEffect(() => {
+    const onKey = (e: KeyboardEvent) => { if (e.key === 'Escape') onClose() }
+    window.addEventListener('keydown', onKey)
+    return () => window.removeEventListener('keydown', onKey)
+  }, [onClose])
+  const stop = (e: React.SyntheticEvent) => e.stopPropagation()
+  return createPortal(
+    <div className="overlay house-overlay"
+      onPointerDown={(e) => { downOnBack.current = e.target === e.currentTarget; stop(e) }}
+      onClick={(e) => { stop(e); if (e.target === e.currentTarget && downOnBack.current) onClose() }}>
+      <section className="glass drawer house-drawer" role="dialog" aria-modal="true" aria-label={t('집 크게 보기', 'View the house')}>
+        <div className="drawer-head">
+          <div><small>{t('종합', 'Overall')} {rankText(rank)} · {spec.notes.kindLabel}</small><h2>{pn(candidate.name)}</h2><p className="hd-addr">{addr(candidate.address)}</p></div>
+          <button className="close" aria-label={t('닫기', 'Close')} onClick={onClose}>×</button>
+        </div>
+        <div className="hd-stage">
+          {canWebGL() ? (
+            <GLBoundary fallback={svg}>
+              <Suspense fallback={svg}><House3DView {...spec} interactive /></Suspense>
+            </GLBoundary>
+          ) : svg}
+        </div>
+        <p className="hd-hint">{t('끌어서 돌리기 · 휠로 확대', 'Drag to rotate · scroll to zoom')}</p>
+        {spec.notes.why.length > 0 && (
+          <ul className="hd-why">
+            {spec.notes.why.map(({ o, text }) => <li key={o}><span aria-hidden>{OPTION_EMOJI[o]}</span><b>{OPTION_LABEL[o]}</b><small>{text}</small></li>)}
+          </ul>
+        )}
+      </section>
+    </div>,
+    document.body,
+  )
 }
 
 /** SVG 집(아이소메트릭) — 3D 대체 화면. 지붕 색은 순위(1위 초록 → 아래로 갈수록 회색빛) */
@@ -207,10 +252,10 @@ export function MainMode({ r }: { r: CandidateResult }) {
 }
 
 /** 종합 원형 + 수단별 교통평점 눈금 막대(카드 안에 바로 — 따로 묶은 칸 없음) */
-export function ScoreBlock({ r, modes }: { r: CandidateResult; modes: ModeKey[] }) {
+export function ScoreBlock({ r, modes, pref }: { r: CandidateResult; modes: ModeKey[]; pref?: Preference }) {
   return (
     <div className="score-block">
-      <HouseRing value={r.total} rank={r.rank} candidate={r.candidate} />
+      <HouseRing value={r.total} rank={r.rank} candidate={r.candidate} pref={pref} />
       <MainMode r={r} />
       <div className="mode-rows">
         {modes.map((m) => {

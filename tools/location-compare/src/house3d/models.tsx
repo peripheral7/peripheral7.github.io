@@ -102,9 +102,10 @@ function Parapet({ w, y, roof }: { w: number; y: number; roof: string }) {
   )
 }
 
-/** 박공지붕 주택: 벽 상자 7×3.2×7.4 + 박공(삼각 기둥) + 지붕 두 장 + 문·창·굴뚝. 용마루는 앞뒤(z) 방향. */
+/** 박공지붕 주택: 벽 상자 7.4×3.2×7.4(정사각형) + 박공(삼각 기둥) + 지붕 두 장 + 문·창·굴뚝. 용마루는 앞뒤(z) 방향.
+ *  처마를 사방 0.45m 씩 같게 내밀어 위에서 본 지붕도 8.3×8.3 정사각형 — 앞뒤로만 길게 내밀면 세로로 긴 집처럼 보인다. */
 export function Home({ roof }: { roof: string }) {
-  const H = 3.2, RISE = 2.6, HALF = 3.5, D = 7.4, OVER = 0.45, T = 0.22
+  const H = 3.2, RISE = 2.6, HALF = 3.7, D = 7.4, OVER = 0.45, T = 0.22
   // 박공: 삼각형(x-y)을 z 로 D 만큼 밀어낸 기둥
   const gable = useMemo(() => {
     const s = new THREE.Shape([new THREE.Vector2(-HALF, 0), new THREE.Vector2(HALF, 0), new THREE.Vector2(0, RISE)])
@@ -123,14 +124,14 @@ export function Home({ roof }: { roof: string }) {
       <mesh geometry={gable} position={[0, H, 0]} castShadow receiveShadow>
         <Mat color={WALL} />
       </mesh>
-      <Box size={[L, T, D + 0.8]} pos={[cx, cy, 0]} rot={[0, 0, -a]} color={roof} />
-      <Box size={[L, T, D + 0.8]} pos={[-cx, cy, 0]} rot={[0, 0, a]} color={roof} />
+      <Box size={[L, T, D + 2 * OVER]} pos={[cx, cy, 0]} rot={[0, 0, -a]} color={roof} />
+      <Box size={[L, T, D + 2 * OVER]} pos={[-cx, cy, 0]} rot={[0, 0, a]} color={roof} />
       {/* 앞: 현관문 + 창 / 옆: 창 두 개 */}
-      <Box size={[1.1, 2, 0.08]} pos={[-1.5, 1, D / 2 + 0.04]} color={DOOR} />
-      <Win face="z" at={D / 2} u={1.5} y={1.9} />
+      <Box size={[1.1, 2, 0.08]} pos={[-1.6, 1, D / 2 + 0.04]} color={DOOR} />
+      <Win face="z" at={D / 2} u={1.6} y={1.9} />
       <Win face="x" at={HALF} u={-1.7} y={1.9} />
       <Win face="x" at={HALF} u={1.7} y={1.9} />
-      {/* 굴뚝: 오른쪽 지붕면을 뚫고 올라온다(x=1.8 에서 지붕 높이 ≈ 4.46) */}
+      {/* 굴뚝: 오른쪽 지붕면을 뚫고 올라온다(x=1.8 에서 지붕 높이 ≈ 4.5) */}
       <Box size={[0.7, 1.8, 0.7]} pos={[1.8, 5, -1.8]} color={CHIMNEY} />
     </group>
   )

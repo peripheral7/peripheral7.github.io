@@ -250,7 +250,7 @@ export default function App() {
                     <p>{addr(cur.candidate.address)}</p>
                   </div>
                 </div>
-                <ScoreBlock r={cur} modes={modes} />
+                <ScoreBlock r={cur} modes={modes} pref={pref} />
               </Swipe>
             ) : <p className="empty">{t('검색해서 후보지를 넣어 주세요.', 'Search to add a candidate home.')}</p>}
             <div className="pick" role="tablist" aria-label={t('후보지 선택', 'Pick a candidate')}>

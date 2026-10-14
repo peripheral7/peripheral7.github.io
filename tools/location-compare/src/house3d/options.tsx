@@ -3,7 +3,7 @@
 // 자리: 집(±3.7m) 둘레 다섯 칸(SLOTS) 중 카메라에서 보이는 앞·옆쪽. 공원만 칸 대신 판 가장자리 전체(산책길 + 나무).
 import { useMemo } from 'react'
 import * as THREE from 'three'
-import type { HouseOption } from './spec'
+import { placeOptions, SLOTS, type HouseOption } from './spec'
 import { Box, Mat, seeded, useCanvasTexture } from './models'
 
 type V3 = [number, number, number]
@@ -277,34 +277,24 @@ function BusStop() {
   )
 }
 
-/** 장식이 서는 칸(집 둘레, 카메라에서 보이는 쪽) — A 화면 왼쪽 · B 왼쪽 아래(현관 앞) · C 아래 · D 오른쪽 아래 · E 오른쪽 */
-const SLOTS = { A: [-5.8, 2.6], B: [-1.2, 6.0], C: [4.8, 4.8], D: [6.0, -1.2], E: [2.6, -5.8] } as const
-type Slot = keyof typeof SLOTS
-/** 장식마다 좋아하는 칸(앞쪽부터). 칸이 차 있으면 다음 칸, 다 차면 그 장식은 빠진다(최대 5개) */
-const PREFER: Record<Exclude<HouseOption, 'park'>, Slot[]> = {
-  cafe: ['C', 'B', 'D'],
-  cat: ['B', 'C', 'A'],
-  tree: ['A', 'E', 'D'],
-  library: ['D', 'A', 'E'],
-  bike: ['D', 'E', 'C'],
-  car: ['E', 'D', 'A'],
-  bus: ['A', 'E', 'D'],
+/** 횡단보도(도보 = 파랑 수단 색 표지): 아스팔트 조각 + 흰 줄 다섯 + 파란 보행자 표지 기둥 — 걸어서 생활하는 라이프스타일 */
+function Crosswalk() {
+  return (
+    <group>
+      <Box size={[2.8, 0.03, 3.2]} pos={[0, 0.015, 0]} color="#8a8e94" />
+      {[-1.2, -0.6, 0, 0.6, 1.2].map((z) => <Box key={z} size={[2.3, 0.04, 0.32]} pos={[0, 0.03, z]} color="#fbfbf8" />)}
+      <Rod a={[1.75, 0, -1.2]} b={[1.75, 2.4, -1.2]} r={0.05} color="#6b6f74" />
+      <Box size={[0.7, 0.7, 0.05]} pos={[1.75, 2.35, -1.16]} color="#4f86c6" />
+      <Box size={[0.12, 0.34, 0.02]} pos={[1.75, 2.3, -1.12]} color="#ffffff" />
+      <mesh position={[1.75, 2.55, -1.12]}>
+        <sphereGeometry args={[0.07, 10, 8]} />
+        <Mat color="#ffffff" />
+      </mesh>
+    </group>
+  )
 }
-const PIECE: Record<Exclude<HouseOption, 'park'>, () => JSX.Element> = { cafe: CafeSet, cat: Cat, tree: () => <Conifer />, library: Library, bike: Bike, car: Car, bus: BusStop }
 
-/** 칸 배정: 앞 순서(spec.ts 가 정한 순서) 장식부터 좋아하는 칸을 차지한다 */
-export function placeOptions(options: HouseOption[]) {
-  const used = new Set<Slot>()
-  const out: { o: Exclude<HouseOption, 'park'>; slot: Slot }[] = []
-  for (const o of options) {
-    if (o === 'park') continue
-    const slot = PREFER[o].find((s) => !used.has(s)) ?? (Object.keys(SLOTS) as Slot[]).find((s) => !used.has(s))
-    if (!slot) continue
-    used.add(slot)
-    out.push({ o, slot })
-  }
-  return out
-}
+const PIECE: Record<Exclude<HouseOption, 'park'>, () => JSX.Element> = { cafe: CafeSet, cat: Cat, tree: () => <Conifer />, library: Library, bike: Bike, car: Car, bus: BusStop, walk: Crosswalk }
 
 /** 판 반지름: 장식 없음 6.6 · 칸 장식 8.2 · 공원(산책길 + 나무 둘레) 9.4 */
 export const groundRadius = (options: HouseOption[]) => (options.includes('park') ? 9.4 : options.length ? 8.2 : 6.6)
