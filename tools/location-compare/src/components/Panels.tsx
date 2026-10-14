@@ -1,95 +1,35 @@
-import { useEffect, useRef, useState, type ReactNode } from 'react'
-import { fmt, type CandidateResult } from '../scoring'
+import { useEffect, useRef, useState } from 'react'
+import { fmt } from '../scoring'
 import { CAT_RADIUS_M, livePhotos, type CatIndex } from '../cats'
-import { LIBRARY_AT, OSM_AT, PLACE_KEYS, PLACE_LABEL, PLACE_NOTE, placeSummary, type PlaceKey, type PlaceOn, type PlaceRow } from '../places'
-import { BRAND_PARTS, CATEGORIES, ENOUGH, NEED_WEIGHT, STDR_YM, THIN, WALK5, WANT_WEIGHT, setTier, tierOf, type CommercialIndex, type CommercialPrefs, type Tier } from '../commercial'
-
-// ── 고른 후보지: 종합 점수(원형 그래프) + 수단별 점수(눈금 막대) ──────────
-// 수단 점수는 목적지별 점수를 "월 왕복 비율"로 평균한 값(종합 점수와 같은 비율). 도보는 걸어갈 수 있는 목적지만,
-// 대중교통은 도보 10분 이내(transitSkipped)인 목적지와 대중교통 자료가 아직 없는(transitPending, 검색으로 넣은 후보지) 목적지를 뺀다.
-
-export type ModeKey = 'transit' | 'car' | 'walk'
-export const MODE_LABEL: Record<ModeKey, string> = { transit: '대중교통', car: '차량', walk: '도보' }
-
-export function modeSummary(r: CandidateResult, mode: ModeKey): number | null {
-  const rows = r.hubs.filter((h) => (mode === 'walk' ? h.walkCounts : mode === 'transit' ? !h.transitSkipped && !h.transitPending : true))
-  const w = rows.reduce((a, h) => a + h.share, 0)
-  if (!rows.length || w === 0) return null
-  return rows.reduce((a, h) => a + (mode === 'walk' ? h.scores.walk ?? 0 : h.scores[mode]) * h.share, 0) / w
-}
-
-const Ticks = ({ value, mode }: { value: number | null; mode: ModeKey }) => (
-  <span className={`ticks ${mode}`} aria-hidden>
-    <span style={{ width: `${value === null ? 0 : Math.max(0, Math.min(10, value)) * 10}%` }} />
-  </span>
-)
-
-// 종합 점수: 원 테두리만 점수(0~10)만큼 채운다(12시 방향에서 시계 방향). 가운데에 점수.
-const TotalRing = ({ value }: { value: number }) => (
-  <span className="total-ring">
-    <svg viewBox="0 0 100 100" aria-hidden>
-      <circle className="ring-track" cx="50" cy="50" r="44" />
-      <circle className="ring-arc" cx="50" cy="50" r="44" pathLength={100} strokeDasharray={`${Math.max(0, Math.min(10, value)) * 10} 100`} transform="rotate(-90 50 50)" />
-    </svg>
-    <em>{fmt(value)}<small>/ 10</small></em>
-  </span>
-)
-
-export function ModeScorePanel({ r, action }: { r: CandidateResult; action: ReactNode }) {
-  const modes: ModeKey[] = ['transit', 'car', 'walk']
-  return (
-    <div className="panel mode-panel">
-      <div className="panel-head"><h2>이동수단별 점수</h2>{action}</div>
-      <div className="total-wrap">
-        <TotalRing value={r.total} />
-        <p className="gauge-caption"><b>{r.candidate.name}</b><br />종합 {r.rank}위</p>
-      </div>
-      <div className="mode-rows">
-        {modes.map((m) => {
-          const v = modeSummary(r, m)
-          // 도보는 30분 안에 걸어갈 수 있는 목적지만 적는다(30분+ 문구 없음)
-          const detail = r.hubs.flatMap((h) => {
-            if (m === 'transit') return h.transitSkipped || h.transitPending ? [] : [`${h.hub.category} ${h.trip.transit}분`]
-            if (m === 'car') return [`${h.hub.category} ${h.trip.carRush}/${h.trip.carFree}분`]
-            return h.scores.walk !== null ? [`${h.hub.category} ${h.trip.walk}분`] : []
-          }).join(' · ')
-          return (
-            <div className="mode-row" key={m}>
-              <span className={`dot ${m}`} />
-              <div className="mode-text"><b>{MODE_LABEL[m]}</b><small>{m === 'transit' && r.hubs.some((h) => h.transitPending) ? '대중교통 자료 개발 중' : detail}</small></div>
-              <Ticks value={v} mode={m} />
-              <em>{v === null ? '—' : fmt(v)}</em>
-            </div>
-          )
-        })}
-      </div>
-    </div>
-  )
-}
+import { LIBRARY_AT, OSM_AT, PEACE, PLACE_KEYS, PLACE_LABEL, PLACE_NOTE, placeSummary, type PlaceKey, type PlaceOn, type PlaceRow } from '../places'
+import { CATEGORIES, ENOUGH, NEED_WEIGHT, STDR_YM, WALK5, WANT_WEIGHT, setTier, tierOf, type CommercialIndex, type CommercialPrefs, type Tier } from '../commercial'
 
 // ── 오른쪽 위: 입지 요인(지수) ────────────────────────────────────────
 // 모든 지수를 같은 모양(이름 · 짧은 설명 · 눈금 · 점수)의 한 줄로 보여 준다. 어떤 지수를 쓸지는 카드 오른쪽 위 ⚙ 에서 고른다.
-// 지금 동작하는 지수는 도보 5분 상권(이름을 누르면 필수·선호 업종 고르기)과 길고양이, 나머지는 준비 중이라 고를 수 없다.
+// 이름을 누르면 아래에 내역이 펼쳐지고(한 번에 하나) 지도에도 그 요인이 보인다 — 도서관 위치, 평화로움 소음 구분도, 길고양이 사진.
+// 펼친 요인(open)은 App 이 들고 있다(지도와 같이 쓰려고).
 /** 후보지 중 최고점(이름 옆 작은 글씨) — self = 그 후보지가 지금 고른 후보지, detail = 세부 내역(고른 후보지가 아닐 때만 아래에 보임) */
 export type FactorBest = { score: number; name: string; self: boolean; detail?: string }
 type FactorsProps = {
   best: Record<string, FactorBest | null>; bike: boolean
   cat: CatIndex | null; catOn: boolean; onToggleCat: () => void; onRegister: () => void; onGallery: (start?: number) => void
-  com: CommercialIndex | null; comCounts: Record<string, number> | null; comBrands: Record<string, number> | null; comPrefs: CommercialPrefs; onComPrefs: (p: CommercialPrefs) => void
+  com: CommercialIndex | null; comCounts: Record<string, number> | null; comPrefs: CommercialPrefs; onComPrefs: (p: CommercialPrefs) => void
   place: PlaceRow | null; placeOn: PlaceOn; onPlaceOn: (v: PlaceOn) => void
   missing: string // 자료가 없을 때 보일 말(계산 중·계산 서버 꺼짐 등 — live.ts liveNote)
+  open: FactorOpen; onOpen: (k: FactorOpen) => void
 }
+/** 펼친 요인(한 번에 하나) */
+export type FactorOpen = 'com' | PlaceKey | 'cat' | null
 
 const BestTag = ({ b }: { b: FactorBest | null | undefined }) => (b ? <small className="best-tag" title="후보지 중 가장 높은 점수">최고 {fmt(b.score)} · {b.name}</small> : null)
 const BestDetail = ({ b }: { b: FactorBest | null | undefined }) => (b && !b.self && b.detail ? <small className="best-detail">{b.name}: {b.detail}</small> : null)
 
 const SOON: { name: string; note: string }[] = [] // 준비 중인 지수(지금은 없음 — 쾌적함은 삭제)
 
-export function FactorsPanel({ cat, catOn, onToggleCat, onRegister, onGallery, com, comCounts, comBrands, comPrefs, onComPrefs, place, placeOn, onPlaceOn, best, bike, missing }: FactorsProps) {
-  const [placeOpen, setPlaceOpen] = useState<PlaceKey | null>(null)
+export function FactorsPanel({ cat, catOn, onToggleCat, onRegister, onGallery, com, comCounts, comPrefs, onComPrefs, place, placeOn, onPlaceOn, best, bike, missing, open, onOpen }: FactorsProps) {
   const [pick, setPick] = useState(false)
-  const [comOpen, setComOpen] = useState(false)
-  const [catOpen, setCatOpen] = useState(false) // 길고양이 이름을 누르면 사진 썸네일
+  const toggle = (k: Exclude<FactorOpen, null>) => onOpen(open === k ? null : k)
+  const comOpen = open === 'com', catOpen = open === 'cat', placeOpen = PLACE_KEYS.includes(open as PlaceKey) ? (open as PlaceKey) : null
   const names = (ids: string[]) => ids.map((id) => CATEGORIES.find((c) => c.id === id)?.label ?? id).join('·')
   const box = useRef<HTMLDivElement>(null)
   useEffect(() => {
@@ -119,19 +59,19 @@ export function FactorsPanel({ cat, catOn, onToggleCat, onRegister, onGallery, c
       {comPrefs.on && (
         <div className="factor com-factor">
           <div>
-            <button type="button" className="com-open" aria-expanded={comOpen} onClick={() => setComOpen(!comOpen)}>🏪 {bike ? '자전거 상권(1km)' : '도보 5분 상권'} <i aria-hidden>{comOpen ? '▴' : '▾'}</i></button><BestTag b={best.com} />
+            <button type="button" className="com-open" aria-expanded={comOpen} onClick={() => toggle('com')}>🏪 {bike ? '자전거 상권(1km)' : '도보 5분 상권'} <i aria-hidden>{comOpen ? '▴' : '▾'}</i></button><BestTag b={best.com} />
             <small>{!com && (comPrefs.need.length + comPrefs.want.length) > 0 ? `${missing} · ` : ''}{comPrefs.need.length ? `필수 ${names(comPrefs.need)}` : ''}{comPrefs.need.length && comPrefs.want.length ? ' · ' : ''}{comPrefs.want.length ? `선호 ${names(comPrefs.want)}` : ''}{!comPrefs.need.length && !comPrefs.want.length ? '업종을 골라 주세요' : ''}</small>
           </div>
           <span className="factor-score"><span className="ticks com" aria-hidden><span style={{ width: `${(com?.score ?? 0) * 10}%` }} /></span><em title={com ? undefined : missing}>{com ? fmt(com.score) : '—'}</em></span>
         </div>
       )}
-      {comPrefs.on && comOpen && <CommercialPicker prefs={comPrefs} onChange={onComPrefs} counts={comCounts} brands={comBrands} bike={bike} />}
+      {comPrefs.on && comOpen && <CommercialPicker prefs={comPrefs} onChange={onComPrefs} counts={comCounts} bike={bike} />}
       {PLACE_KEYS.filter((k) => placeOn[k]).map((k) => {
         const s = place?.[k].score ?? null
         return [
           <div className="factor place-factor" key={k}>
             <div>
-              <button type="button" className="com-open" aria-expanded={placeOpen === k} onClick={() => setPlaceOpen(placeOpen === k ? null : k)}>{PLACE_LABEL[k]} <i aria-hidden>{placeOpen === k ? '▴' : '▾'}</i></button><BestTag b={best[k]} />
+              <button type="button" className="com-open" aria-expanded={placeOpen === k} onClick={() => toggle(k)}>{PLACE_LABEL[k]} <i aria-hidden>{placeOpen === k ? '▴' : '▾'}</i></button><BestTag b={best[k]} />
               {(!place || placeSummary(k, place)) && <small>{place ? placeSummary(k, place) : `${PLACE_NOTE[k]} — ${missing}`}</small>}
               <BestDetail b={best[k]} />
             </div>
@@ -143,7 +83,7 @@ export function FactorsPanel({ cat, catOn, onToggleCat, onRegister, onGallery, c
       {catOn && (
         <div className="factor">
           <div>
-            <button type="button" className="com-open" aria-expanded={catOpen} onClick={() => setCatOpen(!catOpen)}>🐈 길고양이 지수 <i aria-hidden>{catOpen ? '▴' : '▾'}</i></button><BestTag b={best.cat} />
+            <button type="button" className="com-open" aria-expanded={catOpen} onClick={() => toggle('cat')}>🐈 길고양이 지수 <i aria-hidden>{catOpen ? '▴' : '▾'}</i></button><BestTag b={best.cat} />
             <span className="factor-links">
               <button type="button" onClick={() => onGallery(0)} disabled={!cat || cat.photos === 0}>사진{cat && cat.photos ? ` ${cat.photos}` : ''}</button>
               <button type="button" onClick={onRegister}>등록</button>
@@ -163,26 +103,56 @@ export function FactorsPanel({ cat, catOn, onToggleCat, onRegister, onGallery, c
   )
 }
 
-// 도보 5분 상권: 업종마다 필수 / 선호 / 안 봄. 오른쪽 숫자 = 고른 후보지의 반경 500m 안 개수 / 기준 개수
-const TIERS: { t: Tier; label: string }[] = [{ t: 'need', label: '필수' }, { t: 'want', label: '선호' }, { t: 'off', label: '안 봄' }]
-function CommercialPicker({ prefs, onChange, counts, brands, bike }: { prefs: CommercialPrefs; onChange: (p: CommercialPrefs) => void; counts: Record<string, number> | null; brands: Record<string, number> | null; bike: boolean }) {
+// 도보 5분 상권: 업종 칩을 필수(초록) · 선호(노랑) · 생략(회색) 세 칸 사이로 끌어다 놓는다(마우스·손가락 모두 — 포인터 이벤트로 직접 구현).
+// 칩을 눌렀다 떼기만 하면(끌지 않고) 다음 칸으로 넘어가고, 키보드는 ← → 로 옮긴다. 칩 오른쪽 숫자 = 고른 후보지의 반경 안 개수 / 기준 개수
+const TIERS: { t: Tier; label: string }[] = [{ t: 'need', label: '필수' }, { t: 'want', label: '선호' }, { t: 'off', label: '생략' }]
+function CommercialPicker({ prefs, onChange, counts, bike }: { prefs: CommercialPrefs; onChange: (p: CommercialPrefs) => void; counts: Record<string, number> | null; bike: boolean }) {
+  const [drag, setDrag] = useState<{ id: string; x: number; y: number; dx: number; dy: number; moved: boolean; over: Tier | null } | null>(null)
+  const zoneAt = (x: number, y: number): Tier | null => (document.elementFromPoint(x, y)?.closest('[data-tier]') as HTMLElement | null)?.dataset.tier as Tier ?? null
+  const move = (id: string, t: Tier) => onChange(setTier(prefs, id, t))
+  const next = (id: string, d = 1) => { const i = TIERS.findIndex((x) => x.t === tierOf(prefs, id)); move(id, TIERS[(i + d + TIERS.length) % TIERS.length].t) }
+  useEffect(() => {
+    if (!drag) return
+    const onMove = (e: PointerEvent) => setDrag((d) => d && { ...d, dx: e.clientX - d.x, dy: e.clientY - d.y, moved: d.moved || Math.hypot(e.clientX - d.x, e.clientY - d.y) > 5, over: zoneAt(e.clientX, e.clientY) })
+    const onUp = (e: PointerEvent) => {
+      setDrag((d) => {
+        if (!d) return null
+        if (!d.moved) next(d.id)
+        else { const t = zoneAt(e.clientX, e.clientY); if (t) move(d.id, t) }
+        return null
+      })
+    }
+    window.addEventListener('pointermove', onMove)
+    window.addEventListener('pointerup', onUp)
+    window.addEventListener('pointercancel', onUp)
+    return () => { window.removeEventListener('pointermove', onMove); window.removeEventListener('pointerup', onUp); window.removeEventListener('pointercancel', onUp) }
+  }, [drag?.id]) // eslint-disable-line react-hooks/exhaustive-deps
   return (
-    <div className="com-picker" role="group" aria-label="상권 업종 고르기">
-      {CATEGORIES.map((c) => {
-        const t = tierOf(prefs, c.id)
+    <div className="com-picker tier-board" role="group" aria-label="상권 업종 고르기 — 칩을 필수·선호·생략 칸으로 끌어다 놓기">
+      {TIERS.map(({ t, label }) => {
+        const items = CATEGORIES.filter((c) => tierOf(prefs, c.id) === t)
         return (
-          <div className="com-cat" key={c.id}>
-            <span className="com-name" title={THIN[c.id]}>{c.emoji} {c.label}{THIN[c.id] && <sup aria-label="자료 부족">*</sup>}</span>
-            <span className="seg" role="radiogroup" aria-label={`${c.label} 반영`}>
-              {TIERS.map((x) => (
-                <button key={x.t} type="button" role="radio" aria-checked={t === x.t} className={t === x.t ? `on ${x.t}` : ''} onClick={() => onChange(setTier(prefs, c.id, x.t))}>{x.label}</button>
-              ))}
-            </span>
-            <em className="com-count">{counts ? `${counts[c.id]}/${ENOUGH[c.id]}` : ''}</em>
+          <div key={t} className={`tier-zone ${t}${drag?.moved && drag.over === t ? ' over' : ''}`} data-tier={t}>
+            <span className="tier-name">{label}</span>
+            <div className="tier-chips">
+              {items.map((c) => {
+                const dragging = drag?.id === c.id && drag.moved
+                return (
+                  <button key={c.id} type="button" className={`tier-chip ${t}${dragging ? ' dragging' : ''}`} style={dragging ? { transform: `translate(${drag.dx}px, ${drag.dy}px)` } : undefined}
+                    title={`${c.label} — 끌어서 칸을 옮기거나 눌러서 다음 칸으로`}
+                    aria-label={`${c.label} (${label}) — 눌러서 다음 칸으로, ← → 로 옮기기`}
+                    onPointerDown={(e) => { if (e.button !== 0) return; e.preventDefault(); setDrag({ id: c.id, x: e.clientX, y: e.clientY, dx: 0, dy: 0, moved: false, over: t }) }}
+                    onKeyDown={(e) => { if (e.key === 'ArrowRight' || e.key === 'Enter' || e.key === ' ') { e.preventDefault(); next(c.id, 1) } else if (e.key === 'ArrowLeft') { e.preventDefault(); next(c.id, -1) } }}>
+                    {c.emoji} {c.label}{counts && <em>{counts[c.id]}/{ENOUGH[c.id]}</em>}
+                  </button>
+                )
+              })}
+              {!items.length && <span className="tier-empty">여기로 끌어다 놓기</span>}
+            </div>
           </div>
         )
       })}
-      <p className="com-note">필수 {NEED_WEIGHT * 100}% · 선호 {WANT_WEIGHT * 100}%, 묶음 안은 똑같이. 반경 {bike ? WALK5 * 2 : WALK5}m{bike ? '(자전거)' : ''} 안 개수가 기준(오른쪽 /뒤 숫자)에 닿으면 9점, 그 위로는 거의 안 오름. 상가정보 {STDR_YM.slice(0, 4)}.{STDR_YM.slice(4)} 기준{Object.keys(THIN).length ? ' · * ' + Object.values(THIN)[0] : ''}.</p>
+      <p className="com-note">필수 {NEED_WEIGHT * 100}% · 선호 {WANT_WEIGHT * 100}%. 반경 {bike ? WALK5 * 2 : WALK5}m{bike ? '(자전거)' : ''} 안 개수가 기준(/뒤 숫자)에 닿으면 9점. 상가정보 {STDR_YM.slice(0, 4)}.{STDR_YM.slice(4)} 기준.</p>
     </div>
   )
 }
@@ -207,12 +177,13 @@ function CatThumbs({ cat, onOpen, onRegister }: { cat: CatIndex | null; onOpen: 
 function PlaceDetail({ k, r }: { k: PlaceKey; r: PlaceRow }) {
   if (k === 'peace') {
     const p = r.peace
+    const kind = p.road?.kind === 'mid' ? '중로' : '큰길'
     return (
       <div className="com-picker place-detail">
-        <div className="place-line"><span>🍽️ 60m 안 음식점·주점 {p.food}곳</span><em>{fmt(p.foodScore)}</em></div>
-        <div className="place-line"><span>🌿 300m 안 녹지 비율 {p.green}%</span><em>{fmt(p.greenScore)}</em></div>
-        <div className="place-line"><span>🛣️ {p.road ? `큰길 ${p.road.name} ${p.road.dist}m` : '가까운 큰길 없음'}</span><em>{fmt(p.roadScore)}</em></div>
-        <p className="com-note">평화로움 = 음식점 점수 × 0.4 + 큰길 점수 × 0.4 + 녹지 점수 × 0.2. 녹지는 반경 300m 안 녹지(공원·숲·풀밭) 비율이 30% 이상이면 10점, 그 아래는 비율에 비례. 음식점은 5곳까지 1곳당 0.2점만 깎고, 6곳부터 크게 깎이며 30곳 넘으면 거의 0점에서 큰 차이 없음. 큰길(도시계획 도로 광로·대로 = 폭 25m 이상, 브이월드)의 가장자리가 30m 안이면 0점, 60m 안이면 5점, 그 밖이면 10점.</p>
+        <div className="place-line"><span>🍽️ {PEACE.foodRadiusM}m 안 음식점 {p.food}곳 <small>냄새</small></span><em>{fmt(p.foodScore)}</em></div>
+        <div className="place-line"><span>🛍️ {PEACE.shopRadiusM}m 안 업소 {p.shops}곳 <small>사람</small></span><em>{fmt(p.shopScore)}</em></div>
+        <div className="place-line"><span>🛣️ {p.road ? `${/^(광로|대로|중로)/.test(p.road.name) ? '' : kind + ' '}${p.road.name.split(' · ')[0]} ${p.road.dist}m` : '가까운 큰길 없음'} <small>소음</small></span><em>{fmt(p.roadScore)}</em></div>
+        <p className="com-note">냄새 : 사람 : 소음 = {PEACE.wFood * 10} : {PEACE.wShop * 10} : {PEACE.wRoad * 10}. 지도에 반경 {PEACE.zones.radiusM}m 소음 구분도(빨강 큰길 · 주황 중로 · 노랑 상가).</p>
       </div>
     )
   }

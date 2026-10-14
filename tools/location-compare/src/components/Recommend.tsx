@@ -46,12 +46,23 @@ export function ListingCards({ candidates }: { candidates: Candidate[] }) {
   )
 }
 
-export function SpotCards({ candidates }: { candidates: Candidate[] }) {
+/** flash = 지도에서 누른 카페(그 카드 배경을 잠깐 강조하고, 화면 밖이면 부드럽게 그 카드까지 — 휴대폰에서 주로) */
+export function SpotCards({ candidates, flash }: { candidates: Candidate[]; flash?: { id: string; n: number } | null }) {
+  const [lit, setLit] = useState<string | null>(null)
+  useEffect(() => {
+    if (!flash) return
+    setLit(null)
+    const el = document.querySelector<HTMLElement>(`[data-spot="${flash.id}"]`)
+    el?.scrollIntoView({ behavior: 'smooth', block: 'nearest' })
+    const a = requestAnimationFrame(() => setLit(flash.id)) // 같은 카드를 다시 눌러도 다시 켜지게 한 박자 뒤
+    const t = setTimeout(() => setLit(null), 1600)
+    return () => { cancelAnimationFrame(a); clearTimeout(t) }
+  }, [flash])
   return (
     <aside className="side-card panel" aria-label="근처 카페·식당">
       <div className="panel-head"><h2>근처 카페·식당</h2><span className="soon">광고</span></div>
       {SPOTS.map((x) => (
-        <a key={x.id} className="rec-item" href={naverMapUrl(x.query)} target="_blank" rel="noopener noreferrer">
+        <a key={x.id} data-spot={x.id} className={'rec-item' + (lit === x.id ? ' flash' : '')} href={naverMapUrl(x.query)} target="_blank" rel="noopener noreferrer">
           <Thumb src={x.image} alt={x.name} />
           <span className="rec-text">
             <b>{x.name}</b>

@@ -1,6 +1,6 @@
 import { useEffect, useLayoutEffect, useRef, useState, type ReactNode } from 'react'
 import { placeNear, type MapPoint } from '../placeNear'
-import { HUB_CATEGORIES, MAX_HUBS, MAX_TRIPS, NEW_HUB_TRIPS, type Hub, type Place } from '../data'
+import { HUB_CATEGORIES, MAX_HUBS, MAX_WEEKLY, WEEKS_PER_MONTH, defaultWeekly, type Hub, type Place } from '../data'
 import { guessHubCategory, money } from '../store'
 import { normalizeQuery, placeSearchAvailable, reverseGeocode, search, searchAvailable } from '../naver'
 
@@ -24,7 +24,7 @@ type Props = {
   centerRef: { current: { lat: number; lng: number } | null } // 지금 지도 가운데
   external?: { place: Place; kind: 'candidate' | 'hub'; at: MapPoint; n: number } | null // 지도 우클릭으로 고른 곳 → 누른 점 옆에 바로 등록 창
 }
-// 등록 창에서 정하는 주요 설정: 후보지 = 이름·보증금·월세, 목적지 = 이름·분류·월 왕복 횟수
+// 등록 창에서 정하는 주요 설정: 후보지 = 이름·보증금·월세, 목적지 = 이름·분류·주 방문 횟수(비워 두면 분류 기본값 — 학교·직장 주 5, 본가 주 1)
 type Draft = { kind: 'candidate' | 'hub'; name: string; category: string; deposit: string; rent: string; maint: string; trips: string }
 
 // 맞춤법 검사·자동 고침을 끈 입력칸 속성
@@ -97,7 +97,7 @@ export function SearchBox({ hubs, tripsOf, onCandidate, onHub, onPreview, onResu
     const coord = `${lat.toFixed(5)}, ${lng.toFixed(5)}`
     const p: Place = { ...external.place, name: MAP_PICK_NAME, address: '주소 찾는 중…' }
     setBusy(false); setItems([p]); setMsg(''); setOpen(false); setPicked(0); setSideTop(0); setFloatAt(external.at)
-    setDraft({ kind: external.kind, name: MAP_PICK_NAME, category: '기타', deposit: '', rent: '', maint: '', trips: String(NEW_HUB_TRIPS) })
+    setDraft({ kind: external.kind, name: MAP_PICK_NAME, category: '기타', deposit: '', rent: '', maint: '', trips: '' })
     onPreview(p, false)
     void reverseGeocode(lat, lng).then((a) => {
       if (id !== seq.current) return // 그사이 다른 곳을 고르거나 검색했다
@@ -115,22 +115,24 @@ export function SearchBox({ hubs, tripsOf, onCandidate, onHub, onPreview, onResu
   }
   const start = (kind: Draft['kind']) => {
     const p = items[picked!]
-    setDraft({ kind, name: p.name, category: guessHubCategory(p), deposit: '', rent: '', maint: '', trips: String(NEW_HUB_TRIPS) })
+    setDraft({ kind, name: p.name, category: guessHubCategory(p), deposit: '', rent: '', maint: '', trips: '' })
   }
-  // 목적지가 이미 꽉 찼으면 월 왕복이 가장 적은 목적지 자리에 넣는다(바꿀 목적지를 따로 고르지 않음)
+  // 목적지가 이미 꽉 찼으면 주 방문이 가장 적은 목적지 자리에 넣는다(바꿀 목적지를 따로 고르지 않음)
   const replaceHub = hubs.length >= MAX_HUBS ? hubs.reduce((a, h) => (tripsOf(h.id) < tripsOf(a.id) ? h : a)) : undefined
   const commit = () => {
     if (!draft || picked === null) return
     const p = items[picked]
     const name = draft.name.trim() || p.name
     if (draft.kind === 'candidate') onCandidate(p, name, money(draft.deposit), money(draft.rent), money(draft.maint))
-    else onHub(p, replaceHub?.id, name, draft.category.trim() || '기타', Math.min(MAX_TRIPS, money(draft.trips) ?? 0))
+    else onHub(p, replaceHub?.id, name, draft.category.trim() || '기타', weekly)
     setOpen(false); setQ(''); setItems([]); setMsg(''); reset(); seq.current++
   }
   // 등록 창에서 취소: 지도 우클릭으로 연 창이면 통째로 닫고, 검색 결과에서 연 창이면 "후보지로/목적지로" 단추로 돌아간다
   const cancel = () => { if (floatAt) { setItems([]); reset(); seq.current++ } else setDraft(null) }
 
-  const trips = Math.min(MAX_TRIPS, money(draft?.trips ?? '') ?? 0)
+  // 주 방문: 직접 넣은 값(0.5 단위), 비었으면 분류 기본값
+  const typed = Number((draft?.trips ?? '').replace(',', '.'))
+  const weekly = draft?.trips.trim() && Number.isFinite(typed) ? Math.max(0, Math.min(MAX_WEEKLY, Math.round(typed * 2) / 2)) : defaultWeekly(draft?.category ?? '')
   const custom = draft && !HUB_CATEGORIES.includes(draft.category) ? draft.category : ''
 
   const form = draft && picked !== null && items[picked] ? (
@@ -154,13 +156,14 @@ export function SearchBox({ hubs, tripsOf, onCandidate, onHub, onPreview, onResu
           </div>
         </div>
         <div className="field">
-          <span>월 왕복</span>
+          <span>주 방문</span>
           <div className="trip-input">
-            <input type="range" min={0} max={MAX_TRIPS} step={1} value={trips} aria-label="월 왕복 횟수(끌어서)" onChange={(e) => setDraft({ ...draft, trips: e.target.value })} />
-            <span className="unit-input"><input {...plain} type="text" inputMode="numeric" maxLength={3} value={draft.trips} aria-label="월 왕복 횟수(직접 입력)" onChange={(e) => setDraft({ ...draft, trips: e.target.value.replace(/\D/g, '') })} /><i>회</i></span>
+            <input type="range" min={0} max={MAX_WEEKLY} step={0.5} value={weekly} aria-label="주 방문 횟수(끌어서)" onChange={(e) => setDraft({ ...draft, trips: e.target.value })} />
+            <span className="unit-input"><input {...plain} type="text" inputMode="decimal" maxLength={4} value={draft.trips || String(weekly)} aria-label="주 방문 횟수(직접 입력)" onChange={(e) => setDraft({ ...draft, trips: e.target.value.replace(/[^\d.]/g, '') })} /><i>회</i></span>
           </div>
+          <small className="register-hint">{draft.trips ? '' : `${draft.category || '기타'} 기본값 · `}월 {Math.round(weekly * WEEKS_PER_MONTH * 10) / 10}회</small>
         </div>
-        {replaceHub && <p className="register-note">목적지는 최대 {MAX_HUBS}곳 — 월 왕복이 가장 적은 「{replaceHub.name}」 자리에 들어갑니다.</p>}
+        {replaceHub && <p className="register-note">목적지는 최대 {MAX_HUBS}곳 — 주 방문이 가장 적은 「{replaceHub.name}」 자리에 들어갑니다.</p>}
       </>}
       <div className="register-actions"><button type="button" className="ghost" onClick={cancel}>취소</button><button type="submit" className="solid">등록</button></div>
     </form>

@@ -13,7 +13,8 @@
 //     도서관유형 = 공공도서관만(작은도서관·어린이·학교·대학·전문·장애인 도서관 제외). xls 는 이 PC 의 Excel 로 data/libraries.csv 로 바꿔 읽는다.
 //   - 큰길(도로 폭): 브이월드 2D 데이터 API 2.0 「도시계획(교통시설) 도로」 LT_C_UPISUQ151 — 도로 규모(광로·대로·중로·소로)와 1~3류로 법정 폭 구간을 안다.
 //     .env.local 의 VWORLD_API_KEY(키에 등록한 서비스 URL 을 domain 으로: https://peripheral7.github.io). data/vworld-roads.json 에 저장. 키가 없으면 OSM 도로 등급으로.
-//   - 60m 안 음식점·공원 양 끝 상권: 소상공인시장진흥공단 상가(상권)정보 data/stores.sqlite(scripts/stores-sync.mjs)
+//   - 50m 안 음식점·업소, 공원 양 끝 상권: 소상공인시장진흥공단 상가(상권)정보 data/stores.sqlite(scripts/stores-sync.mjs)
+//   - 대로 진입 시간: OSRM 자동차(routing.openstreetmap.de, FOSSGIS — OSM 길, 막힘 없는 시간)
 //
 // 계산 규칙·숫자는 src/places-config.json, 설명은 README 4-5절.
 import fs from 'node:fs'
@@ -106,7 +107,10 @@ async function osm() {
   console.log('OSM 받는 중…')
   const r = await fetch('https://overpass-api.de/api/interpreter', { method: 'POST', body: 'data=' + encodeURIComponent(q), headers: { 'Content-Type': 'application/x-www-form-urlencoded', 'User-Agent': 'peripheral7-location-compare/1.0' } })
   const t = await r.text()
-  if (!t.startsWith('{')) throw new Error(`Overpass 실패(${r.status}): ${t.slice(0, 200)}`)
+  if (!t.startsWith('{')) {
+    if (!refresh && fs.existsSync(OSM_FILE)) { console.warn(`Overpass 실패(${r.status}) — 저장해 둔 OSM 을 씀`); return JSON.parse(fs.readFileSync(OSM_FILE, 'utf8')) }
+    throw new Error(`Overpass 실패(${r.status}): ${t.slice(0, 200)}`)
+  }
   fs.mkdirSync(path.dirname(OSM_FILE), { recursive: true })
   fs.writeFileSync(OSM_FILE, t)
   return JSON.parse(t)
@@ -117,6 +121,13 @@ async function vworldRoads() {
   const key = process.env.VWORLD_API_KEY || ENV.VWORLD_API_KEY
   if (!key) return null
   if (!refresh && fs.existsSync(VW_FILE) && Date.now() - fs.statSync(VW_FILE).mtimeMs < 86_400_000) return JSON.parse(fs.readFileSync(VW_FILE, 'utf8'))
+  try { return await vworldFetch(key) } catch (e) {
+    if (!fs.existsSync(VW_FILE)) throw e
+    console.warn(`브이월드 다시 받기 실패 — 저장해 둔 것을 씀(${e.message})`)
+    return JSON.parse(fs.readFileSync(VW_FILE, 'utf8'))
+  }
+}
+async function vworldFetch(key) {
   console.log('브이월드 도시계획 도로 받는 중…')
   const feats = []
   for (let page = 1; page < 50; page++) {
@@ -196,6 +207,24 @@ function libraries() {
   const [iN, iT, iLat, iLng, iA, iSeat, iBook, iDate] = ['도서관명', '도서관유형', '위도', '경도', '소재지도로명주소', '열람좌석수', '자료수(도서)', '데이터기준일자'].map(col)
   return rows.slice(1).filter((r) => CFG.library.types.includes(r[iT])).map((r) => ({ name: r[iN], type: r[iT], lat: +r[iLat], lng: +r[iLng], addr: r[iA], seats: +r[iSeat] || 0, books: +r[iBook] || 0, date: r[iDate] }))
     .filter((l) => l.lat > 33 && l.lng > 124)
+}
+
+// ── 대로 진입: OSRM 자동차(막힘 없는 시간) ──
+async function carMin(from, to) {
+  for (let i = 0; i < 2; i++) {
+    try {
+      const r = await fetch(`https://routing.openstreetmap.de/routed-car/route/v1/driving/${from[1]},${from[0]};${to[1]},${to[0]}?overview=false`, { headers: { 'User-Agent': 'peripheral7-location-compare/1.0' }, signal: AbortSignal.timeout(20000) })
+      const j = await r.json()
+      if (j.code === 'Ok' && j.routes?.[0]) return { min: j.routes[0].duration / 60, m: j.routes[0].distance }
+    } catch { /* 한 번 더 */ }
+    await new Promise((r) => setTimeout(r, 800))
+  }
+  return null
+}
+const interp = (table, x) => { // [[x, y], …] 사이는 직선, 바깥은 끝값
+  if (x <= table[0][0]) return table[0][1]
+  for (let i = 1; i < table.length; i++) if (x <= table[i][0]) { const [x0, y0] = table[i - 1], [x1, y1] = table[i]; return y0 + ((y1 - y0) * (x - x0)) / (x1 - x0) }
+  return table[table.length - 1][1]
 }
 
 async function main() {
@@ -290,35 +319,82 @@ async function main() {
   const vw = await vworldRoads()
   const osmRoads = els.filter((e) => e.tags?.highway && /^(motorway|trunk|primary|secondary|tertiary)$/.test(e.tags.highway) && e.tags.name).map((e) => ({ name: e.tags.name, line: ring(e.geometry) }))
   const roadSource = vw ? 'vworld' : 'osm'
+  // kind: big = 광로·대로(폭 25m 이상), mid = 중로(폭 12~25m)
+  const kindOf = (grade) => (PC.bigRoadGrades.includes(grade) ? 'big' : PC.midRoadGrades.includes(grade) ? 'mid' : null)
+  const isBigOsm = (e) => PC.roadClasses.includes(e.tags.highway) || /대로$/.test(e.tags.name ?? '') || Number(e.tags.lanes) >= PC.roadMinLanes
   const roads = vw
-    ? vw.filter((r) => PC.bigRoadGrades.includes(r.grade)).map((r) => {
+    ? vw.filter((r) => kindOf(r.grade)).map((r) => {
         const rings = r.polys.map((poly) => poly.map(([lng, lat]) => xy(lat, lng)))
         // 도로 이름: 이 도로 면 안을 지나는 OSM 길 이름(없으면 도시계획 도로 번호)
         const nm = osmRoads.find((o) => o.line.some((q) => rings.some((rr) => inside(q, rr))))?.name
-        return { name: `${nm ?? r.name.split('/').pop().replace(/[()]/g, '')} · ${r.grade}${r.ty}류(폭 ${ROAD_WIDTH[r.grade]?.[r.ty] ?? '?'})`, rings }
+        return { kind: kindOf(r.grade), name: `${nm ?? r.name.split('/').pop().replace(/[()]/g, '')} · ${r.grade}${r.ty}류(폭 ${ROAD_WIDTH[r.grade]?.[r.ty] ?? '?'})`, rings }
       })
-    : els.filter((e) => e.tags?.highway && (PC.roadClasses.includes(e.tags.highway) || /대로$/.test(e.tags.name ?? '') || Number(e.tags.lanes) >= PC.roadMinLanes))
-      .map((e) => ({ name: e.tags.name ?? e.tags.ref ?? e.tags.highway, line: ring(e.geometry) }))
+    : els.filter((e) => e.tags?.highway && e.geometry && (isBigOsm(e) || /^(secondary|tertiary)$/.test(e.tags.highway)))
+      .map((e) => ({ kind: isBigOsm(e) ? 'big' : 'mid', name: e.tags.name ?? e.tags.ref ?? e.tags.highway, line: ring(e.geometry) }))
+  const roadDist = (q, r) => (r.rings ? polyDist(q, r.rings) : lineDist(q, r.line))
+  // 대로 진입 후보: 이름 있는 간선도로(OSM trunk·primary·secondary, 지하차도·터널 등은 진입 못 하니 뺀다)를 이름별로
+  const AC = CFG.access
+  const exclude = new RegExp(AC.excludeName)
+  const arterials = Object.values(els.filter((e) => e.tags?.highway && AC.classes.includes(e.tags.highway) && e.tags.name && e.geometry && !exclude.test(e.tags.name) && e.tags.tunnel !== 'yes')
+    .reduce((m, e) => {
+      const a = (m[e.tags.name] ??= { name: e.tags.name, cls: e.tags.highway, lines: [] })
+      a.lines.push(e.geometry.map((g) => [g.lat, g.lon]))
+      if (AC.classes.indexOf(e.tags.highway) < AC.classes.indexOf(a.cls)) a.cls = e.tags.highway
+      return m
+    }, {}))
+  const gradeOf = (a) => AC.roadGrade[a.name] ?? (a.cls === 'secondary' ? 2 : 1)
   const libs = libraries()
 
   const out = {}
   for (const c of CANDIDATES) {
     const p = xy(c.lat, c.lng)
     // 평화로움
-    const food = storesNear(c.lat, c.lng, PC.foodRadiusM).filter(isFood).length
-    const road = roads.map((r) => ({ name: r.name, d: r.rings ? polyDist(p, r.rings) : lineDist(p, r.line) })).sort((a, b) => a.d - b.d)[0] ?? null
-    const foodScore = food <= PC.foodFree ? 10 - PC.foodSmallPenalty * food : (10 - PC.foodSmallPenalty * PC.foodFree) * Math.pow(10, -(food - PC.foodFree) / PC.foodDecay)
-    const roadScore = !road || road.d > PC.roadFarM ? 10 : road.d > PC.roadNearM ? PC.roadMidScore : 0
-    // 반경 greenRadiusM 안 녹지 비율(공원 쪽 녹지 비율과 같은 격자 방식)
-    let gIn = 0, gAll = 0
-    for (let dx = -PC.greenRadiusM; dx <= PC.greenRadiusM; dx += PK.greenGridM) for (let dy = -PC.greenRadiusM; dy <= PC.greenRadiusM; dy += PK.greenGridM) {
-      if (dx * dx + dy * dy > PC.greenRadiusM ** 2) continue
-      gAll++; const q = [p[0] + dx, p[1] + dy]
-      if (greens.some((r) => inside(q, r))) gIn++
+    // 평화로움: 음식점(냄새) · 상업시설(사람) · 도로(소음) = 0.2 : 0.2 : 0.6
+    const Z = PC.zones
+    const shopsNear = storesNear(c.lat, c.lng, Math.max(PC.foodRadiusM, PC.shopRadiusM, Z.radiusM + Z.shopRadiusM))
+    const within = (s, rad) => { const q = xy(s.lat, s.lon); return Math.hypot(q[0] - p[0], q[1] - p[1]) <= rad }
+    const food = shopsNear.filter((s) => isFood(s) && within(s, PC.foodRadiusM)).length
+    const shops = shopsNear.filter((s) => within(s, PC.shopRadiusM)).length
+    const foodScore = 10 * (1 - interp(PC.foodPenalty, food))
+    const shopScore = shops <= PC.shopFree ? 10 : 10 * Math.pow(PC.shopFactor, shops - PC.shopFree)
+    const near1 = (kind) => roads.filter((r) => r.kind === kind).map((r) => ({ name: r.name, kind, d: roadDist(p, r) })).sort((a, b) => a.d - b.d)[0] ?? null
+    const big = near1('big'), mid = near1('mid')
+    const road = big && big.d <= PC.roadNearM ? big : mid && mid.d <= PC.roadNearM ? mid : [big, mid].filter(Boolean).sort((a, b) => a.d - b.d)[0] ?? null
+    const roadScore = road && road.d <= PC.roadNearM ? 10 - (road.kind === 'big' ? PC.bigRoadPenalty : PC.midRoadPenalty) : 10
+    const peace = foodScore * PC.wFood + shopScore * PC.wShop + roadScore * PC.wRoad
+    // 지도 구분도: 반경 100m 를 10m 칸으로 — 1 큰길 진함 · 2 큰길 옅음 · 3 중로 진함 · 4 중로 옅음 · 5 상가 진함 · 6 상가 옅음
+    const nearRoads = roads.filter((r) => roadDist(p, r) <= Z.radiusM + Z.bigWeakM)
+    const shopPts = shopsNear.map((s) => xy(s.lat, s.lon))
+    const cells = []
+    const nz = Math.round(Z.radiusM / Z.stepM)
+    for (let i = -nz; i <= nz; i++) for (let j = -nz; j <= nz; j++) {
+      if ((i * i + j * j) * Z.stepM ** 2 > Z.radiusM ** 2) continue
+      const q = [p[0] + i * Z.stepM, p[1] + j * Z.stepM]
+      const db = Math.min(Infinity, ...nearRoads.filter((r) => r.kind === 'big').map((r) => roadDist(q, r)))
+      const dm = Math.min(Infinity, ...nearRoads.filter((r) => r.kind === 'mid').map((r) => roadDist(q, r)))
+      const ns = shopPts.filter((s) => Math.hypot(s[0] - q[0], s[1] - q[1]) <= Z.shopRadiusM).length
+      const k = db <= Z.bigStrongM ? 1 : db <= Z.bigWeakM ? 2 : dm <= Z.midStrongM ? 3 : dm <= Z.midWeakM ? 4 : ns >= Z.shopStrong ? 5 : ns >= 1 ? 6 : 0
+      if (k) cells.push([i, j, k])
     }
-    const green300 = gIn / gAll
-    const greenScore300 = Math.min(10, (10 * green300) / PC.greenFullRatio)
-    const peace = foodScore * PC.wFood + roadScore * PC.wRoad + greenScore300 * PC.wGreen
+    // 대로 진입: 가까운 간선도로 몇 개까지 자동차 시간(막힘 없음 × localFactor) → 시간 점수 × 등급 가중치, 가장 높은 것
+    const llDist = (a, b) => Math.hypot((a[0] - b[0]) * KY, (a[1] - b[1]) * KX)
+    const nearPt = (a) => { // 그 도로에서 후보지와 가장 가까운 점(꼭짓점 사이를 10m 로 나눠 찾음)
+      let best = null, bd = Infinity
+      for (const ln of a.lines) for (let i = 1; i < ln.length; i++) {
+        const n = Math.max(1, Math.ceil(llDist(ln[i - 1], ln[i]) / 10))
+        for (let k = 0; k <= n; k++) { const q = [ln[i - 1][0] + ((ln[i][0] - ln[i - 1][0]) * k) / n, ln[i - 1][1] + ((ln[i][1] - ln[i - 1][1]) * k) / n]; const d = llDist(q, [c.lat, c.lng]); if (d < bd) { bd = d; best = q } }
+      }
+      return { pt: best, d: bd }
+    }
+    const tries = arterials.map((a) => ({ a, ...nearPt(a) })).filter((x) => x.pt && x.d <= AC.searchM).sort((x, y) => x.d - y.d).slice(0, AC.nearest)
+    const access = []
+    for (const t of tries) {
+      const r = await carMin([c.lat, c.lng], t.pt)
+      const min = r ? r.min * AC.localFactor : ((t.d * 1.4) / 1000 / 20) * 60 * AC.localFactor // 못 받으면 직선 × 1.4 ÷ 시속 20km
+      const grade = gradeOf(t.a)
+      access.push({ name: t.a.name, grade, min: +min.toFixed(1), m: Math.round(r?.m ?? t.d * 1.4), score: +(interp(AC.scoreTable, min) * AC.gradeWeight[grade]).toFixed(1), est: !r })
+    }
+    access.sort((x, y) => y.score - x.score || x.min - y.min)
     // 공원
     const near = parks.map((k) => ({ k, d: polyDist(p, k.rings) })).filter((x) => x.d <= PK.radiusM)
       .map((x) => ({ ...x, eff: x.k.value * (x.d <= PK.fullM ? 1 : 1 - (1 - PK.farFactor) * (x.d - PK.fullM) / (PK.radiusM - PK.fullM)) }))
@@ -341,12 +417,13 @@ async function main() {
 
     out[c.id] = {
       name: c.name, lat: c.lat, lng: c.lng,
-      peace: { score: +peace.toFixed(1), food, foodScore: +foodScore.toFixed(1), road: road ? { name: road.name, dist: Math.round(road.d) } : null, roadScore, green: +(green300 * 100).toFixed(0), greenScore: +greenScore300.toFixed(1) },
+      peace: { score: +peace.toFixed(1), food, foodScore: +foodScore.toFixed(1), shops, shopScore: +shopScore.toFixed(1), road: road ? { name: road.name, kind: road.kind, dist: Math.round(road.d) } : null, roadScore, zones: { step: Z.stepM, cells } },
+      access: { score: access[0]?.score ?? null, roads: access },
       park: {
         score: +parkScore.toFixed(1), green: +(green * 100).toFixed(0), greenBonus,
         parks: near.slice(0, 5).map((x) => ({ name: x.k.name, type: x.k.type, dist: Math.round(x.d), value: x.k.value, eff: +x.eff.toFixed(1), areaHa: x.k.areaHa, walkM: x.k.walkM, waterside: x.k.waterside, linked: x.k.linked, relief: x.k.relief, steep: x.k.steep })),
       },
-      library: { score: +libScore.toFixed(1), near: libNear.map((l) => ({ name: l.name, dist: Math.round(l.d), seats: l.seats, books: l.books })) },
+      library: { score: +libScore.toFixed(1), near: libNear.map((l) => ({ name: l.name, dist: Math.round(l.d), seats: l.seats, books: l.books, lat: +l.lat.toFixed(6), lng: +l.lng.toFixed(6), addr: l.addr })) },
     }
   }
   const json = {
@@ -381,9 +458,9 @@ async function main() {
   const L = [`# 입지 요인 — 평화로움 · 공원 · 도서관`, '', `\`node scripts/places.mjs\` 가 만든다(손으로 고치지 말 것). 만든 날 ${json.generatedAt}. 규칙은 \`src/places-config.json\`, 설명은 README 4-5절.`, '',
     '## 자료 출처', '', ...CFG.sources.list.map((s) => `- ${s}`), `- OSM 받은 날 ${json.osmAt} · 도서관 데이터기준일자 ${json.libraryAt}`, '',
     '## 🕊️ 평화로움', '', head,
-    `| 60m 안 음식점·주점 | ${ids.map((id) => `${out[id].peace.food} → ${out[id].peace.foodScore}`).join(' | ')} |`,
-    `| ${PC.greenRadiusM}m 안 녹지 비율 | ${ids.map((id) => `${out[id].peace.green}% → ${out[id].peace.greenScore}`).join(' | ')} |`,
-    `| 가장 가까운 큰길 | ${ids.map((id) => { const r = out[id].peace.road; return r ? `${r.dist}m ${r.name} → ${out[id].peace.roadScore}` : '없음 → 10' }).join(' | ')} |`,
+    `| ${PC.foodRadiusM}m 안 음식점(카페 제외) × ${PC.wFood} | ${ids.map((id) => `${out[id].peace.food} → ${out[id].peace.foodScore}`).join(' | ')} |`,
+    `| ${PC.shopRadiusM}m 안 모든 업소 × ${PC.wShop} | ${ids.map((id) => `${out[id].peace.shops} → ${out[id].peace.shopScore}`).join(' | ')} |`,
+    `| 가장 가까운 큰길·중로 × ${PC.wRoad} | ${ids.map((id) => { const r = out[id].peace.road; return r ? `${r.dist}m ${r.name} → ${out[id].peace.roadScore}` : '없음 → 10' }).join(' | ')} |`,
     `| **평화로움** | ${ids.map((id) => `**${out[id].peace.score}**`).join(' | ')} |`, '',
     '## 🌳 공원', '', head,
     `| 가장 좋은 공원(거리 반영) | ${ids.map((id) => { const k = out[id].park.parks[0]; return k ? `${k.name}(${k.type}) ${k.dist}m · ${k.value}점${k.linked ? '(연결 ×1.8)' : ''}${k.steep < 1 ? `(산길 ×${k.steep})` : ''} → ${k.eff}` : `${PK.radiusM}m 안 없음` }).join(' | ')} |`,
@@ -394,6 +471,9 @@ async function main() {
     `### 공원별 점수(후보지 ${PK.radiusM}m 안)`, '', '| 공원 | 유형 | 면적 | 산책로 | 길이 | 물가 | 양 끝 상권 | 연결 | 산책로 경사 | 고저차 | 경사 배율 | 점수 |', '|---|---|---:|---:|---:|:---:|---:|:---:|---:|---:|---:|---:|',
     ...parks.filter((k) => CANDIDATES.some((c) => polyDist(xy(c.lat, c.lng), k.rings) <= PK.radiusM)).sort((a, b) => b.value - a.value)
       .map((k) => `| ${k.name} | ${k.type} | ${k.areaHa}ha | ${k.walkM}m | ${k.spanM}m | ${k.waterside ? '○' : ''} | ${k.endShops.join('·')} | ${k.linked ? '×1.8' : ''} | ${k.grade}% | ${k.relief}m | ×${k.steep} | ${k.value} |`), '',
+    '## 🚗 대로 진입', '', head,
+    ...[0, 1, 2].map((i) => `| ${i + 1}번째 | ${ids.map((id) => { const a = out[id].access.roads[i]; return a ? `${a.name}(${a.grade}등급) ${a.min}분${a.est ? '(추정)' : ''} → ${a.score}` : '—' }).join(' | ')} |`),
+    `| **대로 진입** | ${ids.map((id) => `**${out[id].access.score ?? '—'}**`).join(' | ')} |`, '',
     '## 📚 도서관(공공도서관)', '', head,
     ...[0, 1, 2].map((i) => `| ${i + 1}번째로 가까운 곳 | ${ids.map((id) => { const l = out[id].library.near[i]; return l ? `${l.name} ${l.dist}m` : '—' }).join(' | ')} |`),
     `| **도서관** | ${ids.map((id) => `**${out[id].library.score}**`).join(' | ')} |`, '',

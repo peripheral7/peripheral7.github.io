@@ -1,13 +1,14 @@
 import { useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState } from 'react'
-import { MapContainer, Marker, Polygon, Polyline, TileLayer, Tooltip, useMap, useMapEvents } from 'react-leaflet'
+import { Circle, MapContainer, Marker, Polygon, Polyline, Rectangle, TileLayer, Tooltip, useMap, useMapEvents } from 'react-leaflet'
 import L from 'leaflet'
 import { hubEmoji, type Candidate, type Hub, type Place } from '../data'
 import type { Insight } from '../scoring'
 import { loadNaverMaps, MAP_KEY_ID, onNaverAuthFailure, reverseGeocode, type RevAddr } from '../naver'
 import { CATEGORIES, type Major } from '../commercial'
-import { naverMapUrl, type Spot } from '../recommend'
+import type { Spot } from '../recommend'
 import { parkAreaAlpha, type Park, type ParkArea } from '../parks'
 import { placeNear, type MapPoint } from '../placeNear'
+import { ZONE_STYLE, catCalloutHtml, catCallouts, startCatSlides, zoneRects, type CatPin, type Zones } from '../mapOverlays'
 
 // 지도: 네이버 지도 키(VITE_NAVER_MAP_KEY_ID)가 있으면 네이버 지도, 없거나 인증이 실패하면 OSM 밝은 지도.
 // - 후보지를 고르면 "그 후보지 + 주요 목적지"가 다 들어오도록 확대·이동한다.
@@ -16,7 +17,9 @@ import { placeNear, type MapPoint } from '../placeNear'
 // - 주요 매장(올리브영·이마트·홈플러스 등, 상권 지수에서 필수·선호로 고른 업종만)은 작은 이모지 원으로, 확대하면 브랜드 이름도.
 // - "장단점 기준" 오른쪽 "후보지 한눈에"는 모든 후보지가 고르게 들어오도록 확대·이동한다(목적지는 빼고).
 // - 지도를 우클릭(휴대폰은 길게 누르기)하면 그 자리를 "후보지로 / 목적지로" 추가하는 작은 메뉴 → 검색창의 등록 창으로 이어진다.
-// - 추천 카페·식당(광고) 핀을 누르면 그 가게의 네이버지도 페이지가 새 탭으로 열린다.
+// - 추천 카페·식당(광고) 핀을 누르면 오른쪽 광고 칸의 그 카드 배경이 잠깐 강조된다(휴대폰은 그 카드까지 부드럽게 내려간다).
+// - 입지 요인을 펼치면 그 요인을 지도에도: 도서관 = 📚 위치, 평화로움 = 반경 100m 소음 구분도, 길고양이 = 사진 말풍선.
+// - 맞춤 이동은 언제나 부드럽게(네이버 panToBounds · Leaflet flyTo 짧게) — 이미 다 보여도 가운데로 옮긴다(예전엔 그대로 둬서 "눌러도 안 움직인다"로 보였다).
 // - "산책"을 켜면 공원 점수가 일정 이상인 공원 경계(parkAreas)를 점수만큼 진한 초록으로 칠한다.
 //   효용이 높은 공원(칠한 공원)만 이름 핀을 항상 보이고, 낮은 공원은 색도 이름도 그리지 않는다(테두리 없이 칠만 한다).
 
@@ -35,6 +38,12 @@ type Props = {
   layers?: { com: boolean; walk: boolean }; onLayer?: (k: 'com' | 'walk') => void // 지도 위 상권·산책 단추
   onMapPick?: (p: Place, kind: 'candidate' | 'hub', at: MapPoint) => void // 우클릭 메뉴로 고른 곳(at = 누른 점, 등록 창을 그 옆에)
   previewFly?: boolean // false 면 임시 핀만 찍고 지도는 움직이지 않는다(우클릭으로 고른 곳)
+  onSpot?: (id: string) => void // 광고 카페·식당 핀을 누름
+  libraries?: { name: string; lat: number; lng: number; dist: number }[] // 도서관을 펼쳤을 때
+  zones?: Zones | null // 평화로움을 펼쳤을 때
+  catPins?: CatPin[] // 길고양이를 펼쳤을 때
+  onCatOpen?: (start: number) => void // 말풍선을 누르면 그 사진부터 크게
+  overlayFit?: { key: string; pts: [number, number][] } | null // 입지 요인을 펼치면 그 범위로 맞춤(key 가 바뀔 때마다)
 }
 /** 우클릭 메뉴 자리: 지도 안 위치(px)·지도 크기·좌표 */
 type Ctx = { x: number; y: number; w: number; h: number; lat: number; lng: number }
@@ -57,7 +66,7 @@ const spotHtml = (s: Spot, named: boolean) => `<span class="major-pin spot-pin" 
 const majorHtml = (m: Major, named: boolean) => `<span class="major-pin${m.inferred ? ' inferred' : ''}" title="${esc(majorTitle(m))}"><i>${catEmoji(m.cat)}</i>${named ? `<b>${esc(m.brand)}</b>` : ''}</span>`
 /** 산책: 공원·하천 이모지 원 + (확대했을 때) 이름 */
 const parkHtml = (p: Park, named: boolean) => `<span class="major-pin park-pin" title="${esc(p.kind)} — ${esc(p.name)}"><i>${p.kind === '하천' ? '🌊' : '🌳'}</i>${named ? `<b>${esc(p.name)}</b>` : ''}</span>`
-const openSpot = (s: Spot) => window.open(naverMapUrl(s.query), '_blank', 'noopener,noreferrer')
+const libHtml = (l: { name: string; dist: number }) => `<span class="major-pin lib-pin" title="${esc(l.name)} · ${l.dist}m"><i>📚</i><b>${esc(l.name)}</b></span>`
 const parkAreaTitle = (a: ParkArea) => `${a.name} · 공원 점수 ${a.value}`
 const hubHtml = (h: Hub, on: boolean) => `<span class="pin hub${on ? ' on' : ''}"><b>${hubEmoji(h.category)}</b></span>`
 
@@ -153,7 +162,7 @@ function MapMenu({ ctx, onPick, onClose }: { ctx: Ctx; onPick: NonNullable<Props
 
 // ── 네이버 지도 ──────────────────────────────────────────────────────
 /* eslint-disable @typescript-eslint/no-explicit-any */
-function NaverMap({ candidates, hubs, active, onSelect, focusKey, hubId, onHub, insights, focusHubIds, ranks, preview, previewFly, results, centerRef, majors, parks, parkAreas, spots, allKey, onContext, onFail }: Inner & { onFail: () => void }) {
+function NaverMap({ candidates, hubs, active, onSelect, focusKey, hubId, onHub, insights, focusHubIds, ranks, preview, previewFly, results, centerRef, majors, parks, parkAreas, spots, allKey, onContext, onFail, onSpot, libraries, zones, catPins, onCatOpen, overlayFit }: Inner & { onFail: () => void }) {
   const box = useRef<HTMLDivElement>(null)
   const map = useRef<any>(null)
   const layers = useRef<any[]>([])
@@ -161,26 +170,17 @@ function NaverMap({ candidates, hubs, active, onSelect, focusKey, hubId, onHub, 
   const [zoom, setZoom] = useState(12)
   const detail = zoom >= DETAIL_ZOOM
 
-  // force=false 면, 이미 그 구간이 알맞게 보이고 있을 때는 움직이지 않는다(같은 자리로 다시 맞추며 흔들리는 것 방지)
-  const fit = (force = false, all = false) => {
+  // 언제나 부드럽게 맞춘다(panToBounds = 이동·확대를 한 번에 애니메이션). 이미 알맞게 보이면 가운데로 살짝 옮기기만 한다.
+  const fit = (_force = false, all = false) => {
     const n = window.naver
     const pts = all ? allCands(candidates) : frame(candidates, hubs, active, focusHubIds)
     if (!n?.maps || !map.current || !pts.length) return
     const b = new n.maps.LatLngBounds(new n.maps.LatLng(pts[0][0], pts[0][1]), new n.maps.LatLng(pts[0][0], pts[0][1]))
     pts.forEach(([la, ln]) => b.extend(new n.maps.LatLng(la, ln)))
-    if (!force) {
-      const view = map.current.getBounds()
-      const inView = pts.every(([la, ln]) => view.hasLatLng(new n.maps.LatLng(la, ln)))
-      const vs = view.getNE(), vw = view.getSW(), bs = b.getNE(), bw = b.getSW()
-      const fill = Math.max((bs.lat() - bw.lat()) / (vs.lat() - vw.lat()), (bs.lng() - bw.lng()) / (vs.lng() - vw.lng()))
-      if (inView && fill > 0.35) return // 이미 들어와 있고 너무 작지도 않다
-    }
     const pad = all ? PAD_ALL : PAD
-    if (all) { // 후보지 한눈에: 네 변 여백을 같게 두어 후보지들의 중앙(최소 사각형의 가운데)이 지도 중심이 되게 한다
-      map.current.fitBounds(b, { top: pad, right: pad, bottom: pad, left: pad })
-      return
-    }
-    map.current.fitBounds(b, { top: pad + 40, right: pad, bottom: pad, left: pad })
+    const margin = all ? { top: pad, right: pad, bottom: pad, left: pad } : { top: pad + 40, right: pad, bottom: pad, left: pad }
+    const ease = { duration: 650, easing: 'easeOutCubic' }
+    try { map.current.panToBounds(b, ease, margin) } catch { map.current.fitBounds(b, margin) }
   }
 
   useEffect(() => onNaverAuthFailure(onFail), []) // eslint-disable-line react-hooks/exhaustive-deps
@@ -217,7 +217,7 @@ function NaverMap({ candidates, hubs, active, onSelect, focusKey, hubId, onHub, 
     if (!preview) return
     const at = new naver.maps.LatLng(preview.lat, preview.lng)
     previewMarker.current = new naver.maps.Marker({ map: map.current, position: at, zIndex: 200, icon: { content: previewHtml(preview.name), anchor: new naver.maps.Point(8, 8) } })
-    if (previewFly !== false) map.current.morph(at, Math.max(PREVIEW_ZOOM, map.current.getZoom()))
+    if (previewFly !== false) map.current.morph(at, Math.max(PREVIEW_ZOOM, map.current.getZoom()), { duration: 600, easing: 'easeOutCubic' })
   }, [ready, preview]) // eslint-disable-line react-hooks/exhaustive-deps
 
   // 검색 결과 전부: 작은 점(누른 결과는 위의 빨간 점이 대신한다)
@@ -255,7 +255,7 @@ function NaverMap({ candidates, hubs, active, onSelect, focusKey, hubId, onHub, 
         map: map.current, position: new naver.maps.LatLng(s.lat, s.lng), zIndex: 6, cursor: 'pointer',
         icon: { content: spotHtml(s, detail), anchor: new naver.maps.Point(10, 10) },
       })
-      naver.maps.Event.addListener(m, 'click', () => openSpot(s))
+      naver.maps.Event.addListener(m, 'click', () => onSpot?.(s.id))
       return m
     })
   }, [ready, spots, detail])
@@ -271,6 +271,47 @@ function NaverMap({ candidates, hubs, active, onSelect, focusKey, hubId, onHub, 
       fillColor: '#3f9a52', fillOpacity: parkAreaAlpha(a.value), strokeOpacity: 0, strokeWeight: 0, // 테두리 없이 칠만
     }))
   }, [ready, parkAreas])
+
+  // 도서관(펼쳤을 때)
+  const libMarkers = useRef<any[]>([])
+  useEffect(() => {
+    const naver = window.naver
+    if (!ready || !naver) return
+    libMarkers.current.forEach((m) => m.setMap(null))
+    libMarkers.current = (libraries ?? []).map((l) => new naver.maps.Marker({
+      map: map.current, position: new naver.maps.LatLng(l.lat, l.lng), zIndex: 60,
+      icon: { content: libHtml(l), anchor: new naver.maps.Point(10, 10) },
+    }))
+  }, [ready, libraries])
+
+  // 평화로움 소음 구분도(펼쳤을 때)
+  const zoneShapes = useRef<any[]>([])
+  useEffect(() => {
+    const naver = window.naver
+    if (!ready || !naver) return
+    zoneShapes.current.forEach((m) => m.setMap(null))
+    zoneShapes.current = []
+    if (!zones) return
+    zoneShapes.current = zoneRects(zones).map((r) => new naver.maps.Rectangle({
+      map: map.current, bounds: new naver.maps.LatLngBounds(new naver.maps.LatLng(r.s, r.w), new naver.maps.LatLng(r.n, r.e)), clickable: false, zIndex: 2,
+      fillColor: ZONE_STYLE[r.k].color, fillOpacity: ZONE_STYLE[r.k].alpha, strokeOpacity: 0, strokeWeight: 0,
+    }))
+    zoneShapes.current.push(new naver.maps.Circle({ map: map.current, center: new naver.maps.LatLng(zones.lat, zones.lng), radius: 100, clickable: false, zIndex: 3, fillOpacity: 0, strokeColor: '#1c2733', strokeOpacity: 0.55, strokeWeight: 1.5, strokeStyle: 'shortdash' }))
+  }, [ready, zones])
+
+  // 길고양이 사진 말풍선(펼쳤을 때) — 확대 단계가 바뀌면 네모 자리를 다시 고른다
+  const catMarkers = useRef<any[]>([])
+  useEffect(() => {
+    const naver = window.naver
+    if (!ready || !naver) return
+    catMarkers.current.forEach((m) => m.setMap(null))
+    catMarkers.current = catCallouts(catPins ?? [], zoom).map((c) => {
+      const m = new naver.maps.Marker({ map: map.current, position: new naver.maps.LatLng(c.lat, c.lng), zIndex: 300, cursor: 'pointer', icon: { content: catCalloutHtml(c), anchor: new naver.maps.Point(0, 0) } })
+      naver.maps.Event.addListener(m, 'click', () => onCatOpen?.(c.start))
+      return m
+    })
+  }, [ready, catPins, zoom]) // eslint-disable-line react-hooks/exhaustive-deps
+  useEffect(() => (box.current ? startCatSlides(box.current) : undefined), [ready])
 
   // 산책(공원·하천)
   const parkMarkers = useRef<any[]>([])
@@ -318,6 +359,14 @@ function NaverMap({ candidates, hubs, active, onSelect, focusKey, hubId, onHub, 
 
   useEffect(() => { if (ready) fit() }, [ready, active, focusKey, focusHubIds.join()]) // eslint-disable-line react-hooks/exhaustive-deps
   useEffect(() => { if (ready && allKey) fit(true, true) }, [allKey]) // eslint-disable-line react-hooks/exhaustive-deps
+  useEffect(() => {
+    const n = window.naver
+    if (!ready || !n || !overlayFit?.pts.length) return
+    const p0 = overlayFit.pts[0]
+    const b = new n.maps.LatLngBounds(new n.maps.LatLng(p0[0], p0[1]), new n.maps.LatLng(p0[0], p0[1]))
+    overlayFit.pts.forEach(([la, ln]) => b.extend(new n.maps.LatLng(la, ln)))
+    try { map.current.panToBounds(b, { duration: 650, easing: 'easeOutCubic' }, { top: PAD + 40, right: PAD, bottom: PAD, left: PAD }) } catch { map.current.fitBounds(b) }
+  }, [ready, overlayFit?.key]) // eslint-disable-line react-hooks/exhaustive-deps
 
   const zoomBy = (d: number) => map.current?.setZoom(map.current.getZoom() + d, true)
   return (
@@ -336,22 +385,21 @@ function NaverMap({ candidates, hubs, active, onSelect, focusKey, hubId, onHub, 
 // ── OSM(네이버 키가 없을 때) ─────────────────────────────────────────
 const fitOptions = { paddingTopLeft: [PAD, PAD + 40] as [number, number], paddingBottomRight: [PAD, PAD] as [number, number] }
 
-// flyToBounds 는 가까운 곳도 한 번 축소했다 다시 확대해서 흔들려 보였다 → 목표 확대 단계가 같고 이미 다 보이면 그대로 두고,
-// 아니면 fitBounds 로 부드럽게 맞춘다.
-function fitSmart(map: L.Map, pts: [number, number][], force = false, all = false) {
+// 맞춤 이동: 목표(가운데·확대)를 계산해, 확대 단계 차이가 작으면 flyTo(짧게 0.6초 — 축소했다 확대하는 흔들림이 거의 없음),
+// 같은 단계면 panTo 로 옮기기만, 차이가 크면(3단계 넘게) 한 번에 setView 애니메이션. 이미 다 보여도 가운데로 옮긴다
+// (예전엔 그대로 둬서 "후보지를 눌러도 안 움직인다"로 보였다).
+function fitSmart(map: L.Map, pts: [number, number][], _force = false, all = false) {
   if (!pts.length) return
   const pad = all ? PAD_ALL : PAD
-  const opts = { paddingTopLeft: [pad, pad + (all ? 36 : 40)] as [number, number], paddingBottomRight: [pad, pad] as [number, number] }
   const b = L.latLngBounds(pts)
-  if (all) { // 후보지 한눈에: 여백을 네 변 같게 두고 중심을 후보지들의 중앙(최소 사각형의 가운데)에 둔다
-    const z = Math.min(17, map.getBoundsZoom(b, false, L.point(pad * 2, pad * 2))) // zoomSnap 0.25 라서 여백이 남아도 최대 1/4 단계
-    map.setView(b.getCenter(), z, { animate: false })
-    return
-  }
-  const target = Math.min(all ? 17 : 16, map.getBoundsZoom(b, false, L.point(pad * 2, pad * 2 + 40)))
+  const top = all ? pad : pad + 40
+  const target = Math.min(all ? 17 : 16, map.getBoundsZoom(b, false, L.point(pad * 2, pad + top)))
+  // 위쪽 여백이 더 크니(검색창) 가운데를 그만큼 위로 — 픽셀로 옮겨 계산
+  const c = map.unproject(map.project(b.getCenter(), target).subtract(L.point(0, (top - pad) / 2)), target)
   const z = map.getZoom()
-  if (!force && z === target && map.getBounds().contains(b)) return
-  map.fitBounds(b, { ...opts, maxZoom: all ? 17 : 16, animate: true }) // 확대 단계가 같으면 옮기기만 한다
+  if (Math.abs(z - target) < 0.01) map.panTo(c, { animate: true, duration: 0.5, easeLinearity: 0.3 })
+  else if (Math.abs(z - target) <= 3) map.flyTo(c, target, { duration: 0.6, easeLinearity: 0.3 })
+  else map.setView(c, target, { animate: true })
 }
 
 function Framing({ pts, focusKey, active, all, allKey }: { pts: [number, number][]; focusKey: number; active: number; all: [number, number][]; allKey: number }) {
@@ -378,7 +426,7 @@ function Controls({ pts }: { pts: [number, number][] }) {
   )
 }
 
-function OsmMap({ candidates, hubs, active, onSelect, focusKey, hubId, onHub, insights, focusHubIds, ranks, preview, previewFly, results, centerRef, majors, parks, parkAreas, spots, allKey, onContext }: Inner) {
+function OsmMap({ candidates, hubs, active, onSelect, focusKey, hubId, onHub, insights, focusHubIds, ranks, preview, previewFly, results, centerRef, majors, parks, parkAreas, spots, allKey, onContext, onSpot, libraries, zones, catPins, onCatOpen, overlayFit }: Inner) {
   const pts = useMemo(() => frame(candidates, hubs, active, focusHubIds), [candidates, hubs, active, focusHubIds])
   const [zoom, setZoom] = useState(13)
   const cur = candidates[active]
@@ -402,9 +450,19 @@ function OsmMap({ candidates, hubs, active, onSelect, focusKey, hubId, onHub, in
           icon={L.divIcon({ className: 'pin-shell', html: majorHtml(m, detail), iconSize: [20, 20], iconAnchor: [10, 10] })} />
       ))}
       {(spots ?? []).map((s) => (
-        <Marker key={`s-${s.id}-${detail}`} position={[s.lat, s.lng]} zIndexOffset={-400} eventHandlers={{ click: () => openSpot(s) }}
+        <Marker key={`s-${s.id}-${detail}`} position={[s.lat, s.lng]} zIndexOffset={-400} eventHandlers={{ click: () => onSpot?.(s.id) }}
           icon={L.divIcon({ className: 'pin-shell', html: spotHtml(s, detail), iconSize: [20, 20], iconAnchor: [10, 10] })} />
       ))}
+      {zones && zoneRects(zones).map((r, i) => (
+        <Rectangle key={`z${i}-${zones.lat}`} bounds={[[r.s, r.w], [r.n, r.e]]} interactive={false} pathOptions={{ stroke: false, fillColor: ZONE_STYLE[r.k].color, fillOpacity: ZONE_STYLE[r.k].alpha }} />
+      ))}
+      {zones && <Circle center={[zones.lat, zones.lng]} radius={100} interactive={false} pathOptions={{ color: '#1c2733', weight: 1.5, opacity: 0.55, dashArray: '5 5', fill: false }} />}
+      {(libraries ?? []).map((l) => (
+        <Marker key={`lib-${l.name}`} position={[l.lat, l.lng]} zIndexOffset={600}
+          icon={L.divIcon({ className: 'pin-shell', html: libHtml(l), iconSize: [20, 20], iconAnchor: [10, 10] })} />
+      ))}
+      <CatLayer pins={catPins} zoom={zoom} onOpen={onCatOpen} />
+      <OverlayFit fit={overlayFit} />
       {(parks ?? []).map((p) => (
         <Marker key={`p-${p.id}`} position={[p.lat, p.lng]} zIndexOffset={-500}
           icon={L.divIcon({ className: 'pin-shell', html: parkHtml(p, true), iconSize: [20, 20], iconAnchor: [10, 10] })} />
@@ -447,10 +505,28 @@ function OsmMap({ candidates, hubs, active, onSelect, focusKey, hubId, onHub, in
   )
 }
 
+/** OSM: 입지 요인을 펼치면 그 범위로 */
+function OverlayFit({ fit }: { fit?: Props['overlayFit'] }) {
+  const map = useMap()
+  useEffect(() => { if (fit?.pts.length) fitSmart(map, fit.pts) }, [fit?.key]) // eslint-disable-line react-hooks/exhaustive-deps
+  return null
+}
+
+/** OSM: 길고양이 사진 말풍선(확대 단계가 바뀌면 자리를 다시 고름) + 슬라이드 */
+function CatLayer({ pins, zoom, onOpen }: { pins?: CatPin[]; zoom: number; onOpen?: (start: number) => void }) {
+  const map = useMap()
+  useEffect(() => startCatSlides(map.getContainer()), [map])
+  const list = useMemo(() => catCallouts(pins ?? [], Math.round(zoom)), [pins, zoom])
+  return <>{list.map((c, i) => (
+    <Marker key={`cat${i}-${c.lat}-${c.dx}-${c.dy}`} position={[c.lat, c.lng]} zIndexOffset={2500} eventHandlers={{ click: () => onOpen?.(c.start) }}
+      icon={L.divIcon({ className: 'pin-shell', html: catCalloutHtml(c), iconSize: [0, 0], iconAnchor: [0, 0] })} />
+  ))}</>
+}
+
 /** OSM: 검색 결과를 누르면 그 위치로 */
 function PreviewFly({ preview }: { preview: Place | null }) {
   const map = useMap()
-  useEffect(() => { if (preview) map.flyTo([preview.lat, preview.lng], Math.max(PREVIEW_ZOOM, map.getZoom()), { duration: 0.6 }) }, [map, preview])
+  useEffect(() => { if (preview) map.flyTo([preview.lat, preview.lng], Math.max(PREVIEW_ZOOM, map.getZoom()), { duration: 0.6, easeLinearity: 0.3 }) }, [map, preview])
   return null
 }
 

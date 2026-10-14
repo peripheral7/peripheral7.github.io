@@ -5,8 +5,9 @@
 // 이 PC 에서 한 번 재서 결과만 올리면, 공개 사이트에는 네이버 API 를 부르는 길 자체가 없다.
 //
 // 사용(이 폴더에서):
-//   node scripts/fetch-routes.mjs --slot rush        # 평일 출퇴근 시간(예: 08:00~09:00)에 실행
-//   node scripts/fetch-routes.mjs --slot free        # 한가한 시간(예: 11:00~15:00)에 실행
+//   node scripts/fetch-routes.mjs --slot rush        # 평일 08시·18시(앞뒤 20분)에 실행 — 오전이면 am, 오후면 pm 표본
+//   node scripts/fetch-routes.mjs --slot free        # 평일 10시·13시(앞뒤 20분)에 실행
+//   두 표본이 모이면 그 평균이 그 시간대 값(min·km)이 된다.
 //   node scripts/fetch-routes.mjs --slot free --dry-run   # 부를 목록과 남은 한도만 보여 주고 부르지 않음
 //   그다음 npm run build → 커밋.
 //
@@ -72,6 +73,7 @@ if (!ID || !SECRET) {
 const data = JSON.parse(fs.readFileSync(ROUTES, 'utf8'))
 data.pairs ??= {}
 const at = new Date().toLocaleString('sv-SE').slice(0, 16) // YYYY-MM-DD HH:MM
+const sub = new Date().getHours() < 12 ? 'am' : 'pm' // 출퇴근 08시 = am · 18시 = pm, 낮 10시 = am · 13시 = pm
 const sleep = (ms) => new Promise((r) => setTimeout(r, ms))
 
 for (const { c, h } of pairs) {
@@ -88,7 +90,11 @@ for (const { c, h } of pairs) {
   }
   const min = Math.round(route.duration / 60000)
   const km = Math.round(route.distance / 100) / 10
-  data.pairs[`${c.id}:${h.id}`] = { ...(data.pairs[`${c.id}:${h.id}`] ?? {}), [slot]: { min, km, at } }
+  const pair = data.pairs[`${c.id}:${h.id}`] ?? {}
+  const samples = { ...(pair[slot]?.samples ?? {}), [sub]: { min, km, at } }
+  const ss = Object.values(samples)
+  pair[slot] = { min: Math.round(ss.reduce((a, x) => a + x.min, 0) / ss.length), km: Math.round((ss.reduce((a, x) => a + x.km, 0) / ss.length) * 10) / 10, at, samples }
+  data.pairs[`${c.id}:${h.id}`] = pair
   console.log(`  ${c.name} → ${h.name}: ${min}분 · ${km}km`)
   await sleep(300) // 짧은 간격으로 몰아 부르지 않는다
 }

@@ -5,9 +5,12 @@
 //
 //  GET /analyze?lat=&lng=   새 후보지의 상권·평화로움·공원·도서관(server/runner.mjs = scripts 를 그대로 실행, 약 30초)
 //                           → 200 결과 | 202 { pending, position }(계산 중 — 몇 초 뒤 다시) | 4xx/5xx { error }
-//  GET /route?from=lat,lng&to=lat,lng   차량 시간 { free?, rush? } — 네이버 Directions 5(자동차)는 "지금 교통"만 재므로
-//                           시간대 안(출퇴근 = 평일 07:30~09:30, 낮 = 평일 10:30~16:00)에 물으면 바로 재고, 밖이면 저장된 값만 준다.
-//                           물어본 길은 모두 기억해 두고(server/cache/r_*.json), 시간대가 오면 10분마다 빠진 값·30일 지난 값을 자동으로 잰다.
+//  GET /route?from=lat,lng&to=lat,lng   { free?, rush?, paths? }
+//                           차량 — 네이버 Directions 5(자동차)는 "지금 교통"만 잰다. 기준 시각(출퇴근 = 평일 08시·18시, 낮 = 평일 10시·13시,
+//                           각 ±20분)에 두 번씩 재서 평균(samples.am·pm). 처음 묻는 길은 그 자리에서 한 번 재서 지금이 혼잡 시간대
+//                           (평일 07~10시·17~20시)면 출퇴근, 아니면 낮 값으로 임시 저장(provisional)한다 — 두 기준 중 하나만 먼저 생긴다.
+//                           물어본 길은 모두 기억해 두고(server/cache/r_*.json), 기준 시각이 오면 10분마다 빠진 값·30일 지난 값을 자동으로 잰다.
+//                           paths — 도보·자전거(OSM 길 거리)·대중교통(서울시 환승경로), scripts/paths-lib.mjs. 30일마다 다시.
 //  GET /health
 //
 // 실행(이 폴더 tools/location-compare 에서):  node server/analyze-server.mjs --tunnel
@@ -20,6 +23,7 @@ import crypto from 'node:crypto'
 import { spawn } from 'node:child_process'
 import { fileURLToPath } from 'node:url'
 import { analyze } from './runner.mjs'
+import { measurePaths } from '../scripts/paths-lib.mjs'
 
 const TOOL = path.dirname(path.dirname(fileURLToPath(import.meta.url)))
 const CACHE = path.join(TOOL, 'server', 'cache')
@@ -98,22 +102,35 @@ function handleAnalyze(q) {
   return [202, { pending: true, position: queue.length - (running ? 0 : 1) }]
 }
 
-// 시간대(이 PC 시간대 = 한국): 출퇴근 = 평일 07:30~09:30, 낮 = 평일 10:30~16:00 — 그 밖(밤·주말)에는 재지 않는다
-// (밤에 잰 값은 낮보다 한가해서 "낮" 값으로 쓰면 틀린다). scripts/scheduled-routes.ps1 과 같은 창.
-export const SLOT_WINDOWS = { rush: [7 * 60 + 30, 9 * 60 + 30], free: [10 * 60 + 30, 16 * 60] }
+// 기준 시각(이 PC 시간대 = 한국, 평일만): 출퇴근 = 08:00(am)·18:00(pm), 낮 = 10:00(am)·13:00(pm), 각 앞뒤 20분 창에서 잰다.
+// 두 값의 평균을 그 시간대 값으로 쓴다(사용자 지정 2026-10-14). scripts/scheduled-routes.ps1 과 같은 창.
+export const SLOT_WINDOWS = [
+  { slot: 'rush', sub: 'am', at: 8 * 60 }, { slot: 'rush', sub: 'pm', at: 18 * 60 },
+  { slot: 'free', sub: 'am', at: 10 * 60 }, { slot: 'free', sub: 'pm', at: 13 * 60 },
+]
+const WINDOW_MIN = 20
 function slotNow(d = new Date()) {
   const wd = d.getDay(), m = d.getHours() * 60 + d.getMinutes()
   if (wd < 1 || wd > 5) return null
-  for (const [k, [a, b]] of Object.entries(SLOT_WINDOWS)) if (m >= a && m < b) return k
-  return null
+  return SLOT_WINDOWS.find((w) => Math.abs(m - w.at) <= WINDOW_MIN) ?? null
+}
+/** 지금이 막히는 시간대인가(처음 등록할 때 한 번 잰 값을 어느 쪽에 둘지): 평일 07~10시·17~20시 */
+function congestedNow(d = new Date()) {
+  const wd = d.getDay(), h = d.getHours()
+  return wd >= 1 && wd <= 5 && ((h >= 7 && h < 10) || (h >= 17 && h < 20))
 }
 const pt = (s) => { const [a, b] = String(s ?? '').split(',').map(Number); return Number.isFinite(a) && Number.isFinite(b) ? [r5(a), r5(b)] : null }
-const fresh = (v) => v && Date.now() - (v.ts ?? Date.parse(v.at.replace(' ', 'T'))) < SLOT_TTL
+const fresh = (v) => !!v && Date.now() - (v.ts ?? Date.parse(v.at.replace(' ', 'T'))) < SLOT_TTL
 const pairOf = (key) => { const m = key.match(/^r_([\d.]+),([\d.]+)_([\d.]+),([\d.]+)$/); return m ? [[+m[1], +m[2]], [+m[3], +m[4]]] : null }
 const readPair = (key) => { try { return JSON.parse(fs.readFileSync(cfile(key), 'utf8')) } catch { return null } }
-const slotsOnly = (p) => ({ ...(p.free ? { free: p.free } : {}), ...(p.rush ? { rush: p.rush } : {}) })
+const slotsOnly = (p) => ({ ...(p.free ? { free: p.free } : {}), ...(p.rush ? { rush: p.rush } : {}), ...(p.paths ? { paths: p.paths } : {}) })
+const avgSlot = (samples) => {
+  const ss = Object.values(samples)
+  return { min: Math.round(ss.reduce((a, x) => a + x.min, 0) / ss.length), km: Math.round((ss.reduce((a, x) => a + x.km, 0) / ss.length) * 10) / 10, at: ss.map((x) => x.at).sort().pop(), ts: Math.max(...ss.map((x) => x.ts ?? 0)), samples }
+}
 
-async function measure(key, from, to, slot) { // 1회 재서 그 길 파일에 저장. 성공하면 true
+// 1회 재서 그 길 파일에 저장. sub = 'am'|'pm' 이면 기준 시각 표본(평균), null 이면 등록 시각 임시값(provisional). 성공하면 true
+async function measure(key, from, to, slot, sub = null) {
   if (!ENV.NAVER_CLIENT_ID || !ENV.NAVER_CLIENT_SECRET || !bump('route')) return false
   const url = `https://maps.apigw.ntruss.com/map-direction/v1/driving?start=${from[1]},${from[0]}&goal=${to[1]},${to[0]}&option=trafast`
   const res = await fetch(url, { headers: { 'x-ncp-apigw-api-key-id': ENV.NAVER_CLIENT_ID, 'x-ncp-apigw-api-key': ENV.NAVER_CLIENT_SECRET }, signal: AbortSignal.timeout(15000) })
@@ -121,7 +138,9 @@ async function measure(key, from, to, slot) { // 1회 재서 그 길 파일에 �
   const s = body?.route?.trafast?.[0]?.summary
   if (!res.ok || body.code !== 0 || !s) { console.error(`길찾기 실패 ${key}: HTTP ${res.status} ${JSON.stringify(body).slice(0, 160)}`); return false }
   const p = readPair(key) ?? { asked: Date.now() }
-  p[slot] = { min: Math.round(s.duration / 60000), km: Math.round(s.distance / 100) / 10, at: new Date().toLocaleString('sv-SE').slice(0, 16), ts: Date.now() }
+  const sample = { min: Math.round(s.duration / 60000), km: Math.round(s.distance / 100) / 10, at: new Date().toLocaleString('sv-SE').slice(0, 16), ts: Date.now() }
+  if (sub) p[slot] = avgSlot({ ...(p[slot]?.samples ?? {}), [sub]: sample })
+  else p[slot] = { ...sample, provisional: true }
   cput(key, p)
   return true
 }
@@ -137,30 +156,35 @@ async function handleRoute(q) {
     p = { asked: Date.now() }
     cput(key, p)
   } else if (Date.now() - (p.asked ?? 0) > 86400_000) { p.asked = Date.now(); cput(key, p) }
-  const slot = slotNow()
-  if (slot && !fresh(p[slot]) && (await measure(key, from, to, slot))) p = readPair(key)
+  const w = slotNow()
+  if (w && !fresh(p[w.slot]?.samples?.[w.sub]) && (await measure(key, from, to, w.slot, w.sub))) p = readPair(key)
+  else if (!p.free && !p.rush && (await measure(key, from, to, congestedNow() ? 'rush' : 'free'))) p = readPair(key) // 처음: 지금 교통으로 한 번
+  // 도보·자전거·대중교통 길(30일마다 다시)
+  if (!p.paths || Date.now() - (p.paths.ts ?? 0) > SLOT_TTL) {
+    try { p = { ...readPair(key), paths: { ...(await measurePaths(from, to)), ts: Date.now() } }; cput(key, p) } catch (e) { console.error(`길(도보·대중교통) 실패 ${key}: ${e.message}`) }
+  }
   return [200, slotsOnly(p)]
 }
 
-// 시간대 자동 측정: 10분마다, 시간대 안이면 그 시간대 값이 없거나 30일 지난 길을 차례로 잰다(최근 60일 안에 물어본 길만)
+// 기준 시각 자동 측정: 10분마다, 기준 시각 창(±20분) 안이면 그 표본이 없거나 30일 지난 길을 차례로 잰다(최근 60일 안에 물어본 길만)
 let sweeping = false
 async function sweep() {
-  const slot = slotNow()
-  if (!slot || sweeping) return
+  const w = slotNow()
+  if (!w || sweeping) return
   sweeping = true
   let n = 0
   try {
     for (const f of fs.readdirSync(CACHE).filter((x) => x.startsWith('r_'))) {
       const key = f.slice(0, -5), p = readPair(key), pair = pairOf(key)
-      if (!p || !pair || fresh(p[slot]) || Date.now() - (p.asked ?? 0) > 60 * 86400_000) continue
-      if (slotNow() !== slot) break // 시간대가 끝났으면 멈춤
-      if (!(await measure(key, pair[0], pair[1], slot))) break // 한도·인증 문제면 다음 차례에
+      if (!p || !pair || fresh(p[w.slot]?.samples?.[w.sub]) || Date.now() - (p.asked ?? 0) > 60 * 86400_000) continue
+      if (slotNow() !== w) break // 창이 끝났으면 멈춤
+      if (!(await measure(key, pair[0], pair[1], w.slot, w.sub))) break // 한도·인증 문제면 다음 차례에
       n++
       await new Promise((r) => setTimeout(r, 400))
     }
   } catch (e) { console.error('자동 측정 오류:', e.message) }
   sweeping = false
-  if (n) console.log(`자동 측정 ${slot} ${n}건`)
+  if (n) console.log(`자동 측정 ${w.slot}.${w.sub} ${n}건`)
 }
 setInterval(sweep, 10 * 60_000)
 setTimeout(sweep, 20_000)

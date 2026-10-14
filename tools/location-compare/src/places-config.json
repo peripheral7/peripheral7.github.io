@@ -2,8 +2,8 @@
   "_설명": "입지 요인(평화로움·공원·도서관) 계산 규칙. 숫자를 고친 뒤 node scripts/places.mjs → 빌드. 설명은 README 4-5절.",
   "fetchMargin": 1300,
   "peace": {
-    "_설명": "평화로움 = 음식점 점수 × wFood + 큰길 점수 × wRoad + 녹지 점수 × wGreen (각 0~10). 음식점은 반경 foodRadiusM 안 음식점·주점 수 n: n ≤ foodFree 이면 1곳당 foodSmallPenalty 만 깎고, 그 위로는 크게 깎되(10^(−(n−foodFree)/foodDecay)) 30곳쯤부터는 거의 0 근처에서 큰 차이 없음. 큰길은 roadNearM 안이면 0, roadFarM 안이면 roadMidScore, 그 밖이면 10. 녹지 = 반경 greenRadiusM(300m) 안 녹지(공원·녹지 시설·숲·풀밭) 비율이 greenFullRatio(30%) 이상이면 10점, 그 아래는 비율에 비례. 합계 = 음식점×wFood + 큰길×wRoad + 녹지×wGreen",
-    "foodRadiusM": 60,
+    "_설명": "평화로움 = 음식점(냄새) 점수 × wFood + 상업시설(사람) 점수 × wShop + 도로(소음) 점수 × wRoad (각 0~10, 비중 0.2 : 0.2 : 0.6 — 사용자 지정 2026-10-14). 음식점 = 반경 foodRadiusM 안 카페가 아닌 음식점·주점 수 n, 감점 비율은 foodPenalty 표(5곳 70% · 10곳 100%, 사이는 직선). 상업시설 = 반경 shopRadiusM 안 모든 업소 수 n, shopFree 이하면 감점 없음, 그 위로는 1곳마다 × shopFactor(0.7)로 크게 깎임. 도로 = 큰길(광로·대로) 가장자리가 roadNearM 안이면 bigRoadPenalty 점 감점, 아니고 중로가 roadNearM 안이면 midRoadPenalty 점 감점.",
+    "foodRadiusM": 50,
     "foodPrefix": [
       "I201",
       "I202",
@@ -15,28 +15,54 @@
       "I210",
       "I211"
     ],
-    "foodFree": 5,
-    "foodSmallPenalty": 0.2,
-    "foodDecay": 25,
+    "foodPenalty": [
+      [
+        0,
+        0
+      ],
+      [
+        5,
+        0.7
+      ],
+      [
+        10,
+        1
+      ]
+    ],
+    "shopRadiusM": 50,
+    "shopFree": 9,
+    "shopFactor": 0.7,
     "roadClasses": [
       "motorway",
       "trunk",
       "primary"
     ],
     "roadMinLanes": 6,
-    "_road": "큰길 = 브이월드 도시계획(교통시설) 도로 중 규모가 bigRoadGrades(광로·대로 = 폭 25m 이상)인 도로 면, 가장자리까지 거리. 키가 없으면 OSM: highway 가 roadClasses 이거나 이름이 …대로 이거나 차로 수 roadMinLanes 이상",
+    "_road": "큰길 = 브이월드 도시계획(교통시설) 도로 중 규모가 bigRoadGrades(광로·대로 = 폭 25m 이상), 중로 = midRoadGrades(폭 12~25m)인 도로 면, 가장자리까지 거리. 키가 없으면 OSM: 큰길 = highway 가 roadClasses 이거나 이름이 …대로 이거나 차로 수 roadMinLanes 이상, 중로 = secondary·tertiary",
     "roadNearM": 30,
-    "roadFarM": 60,
-    "roadMidScore": 5,
-    "greenRadiusM": 300,
-    "greenFullRatio": 0.3,
-    "wFood": 0.4,
-    "wRoad": 0.4,
-    "wGreen": 0.2,
+    "bigRoadPenalty": 10,
+    "midRoadPenalty": 7,
+    "wFood": 0.2,
+    "wShop": 0.2,
+    "wRoad": 0.6,
     "bigRoadGrades": [
       "광로",
       "대로"
-    ]
+    ],
+    "midRoadGrades": [
+      "중로"
+    ],
+    "zones": {
+      "_설명": "지도 구분도(입지 요인에서 평화로움을 펼치면): 후보지 반경 radiusM 을 stepM 격자로 나눠 칸마다 단계를 매긴다. 큰길 가장자리 bigStrongM 안 = 큰길 진함(붉은색), bigWeakM 안 = 큰길 옅음, 중로 midStrongM 안 = 중로 진함(주황), midWeakM 안 = 중로 옅음, 반경 shopRadiusM 안 업소 shopStrong 곳 이상 = 상가 진함(노랑), 1곳 이상 = 상가 옅음, 나머지 = 조용(칠하지 않음)",
+      "radiusM": 100,
+      "stepM": 10,
+      "bigStrongM": 15,
+      "bigWeakM": 40,
+      "midStrongM": 10,
+      "midWeakM": 25,
+      "shopRadiusM": 20,
+      "shopStrong": 4
+    }
   },
   "park": {
     "_설명": "더하기 방식(감점 없음). 공원 = 공간시설(UQ162) 공원 경계(어린이·근린·소·문화·역사·수변·체육·도시농업 공원, 도시자연공원구역). 공원 점수(공원마다) = logA × log10(산책로 길이 ÷ logL0), 최소 minPoints · 최대 10 (예시 맞춤: 반달공원 398m → 2, 신동수변공원 1,340m → 7.6, 글빛누리공원 1,473m → 8, 광교호수공원 31.8km → 10). 물가면 +watersideBonus. 산길(고저차 큼)이면 × slope 배율. 길게 이어져 양 끝이 상권에 닿으면 × link.mult. 후보지 점수 = radiusM(500m) 안 가장 좋은 공원(500m 안은 거리 감점 없음) + 두 번째 공원 × secondShare + 녹지 비율 가산, 최대 10",
@@ -103,5 +129,55 @@
     "fullM": 500,
     "halfM": 1000,
     "zeroM": 2000
+  },
+  "access": {
+    "_설명": "차량 대로 진입(2026-10-14, 사용자 지정): 후보지에서 가까운 간선도로(이름별)까지 자동차로 가는 시간. OSRM(routing.openstreetmap.de 자동차, 막힘 없는 시간) × localFactor. 시간 점수 = scoreTable(3분 이내 10 · 5분 6 · 10분 2 · 15분 0, 사이는 직선) × 도로 등급 가중치. 가장 가까운 도로 nearest 개 중 가장 높은 점수",
+    "classes": [
+      "trunk",
+      "primary",
+      "secondary"
+    ],
+    "excludeName": "지하|터널|고가|IC|JC|나들목|램프",
+    "roadGrade": {
+      "동부대로": 1,
+      "덕영대로": 1,
+      "경부고속도로": 1,
+      "봉영로": 2,
+      "영통로": 2,
+      "동수원로": 2,
+      "효행로": 2,
+      "동탄원천로": 2,
+      "삼성1로": 3,
+      "삼성2로": 3,
+      "동탄지성로": 3,
+      "기산교": 3
+    },
+    "_grade": "도로 등급: 1 = 광역 간선(여러 시를 잇는 대로), 2 = 지역 간선, 3 = 보조 간선. 표에 없는 도로는 OSM 등급으로(trunk·primary = 1, secondary = 2)",
+    "gradeWeight": {
+      "1": 1,
+      "2": 0.85,
+      "3": 0.7
+    },
+    "scoreTable": [
+      [
+        3,
+        10
+      ],
+      [
+        5,
+        6
+      ],
+      [
+        10,
+        2
+      ],
+      [
+        15,
+        0
+      ]
+    ],
+    "localFactor": 1.2,
+    "nearest": 3,
+    "searchM": 2500
   }
 }

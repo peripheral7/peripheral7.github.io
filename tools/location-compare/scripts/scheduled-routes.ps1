@@ -3,7 +3,7 @@
 #   powershell -ExecutionPolicy Bypass -File scheduled-routes.ps1 -Slot rush
 #   powershell -ExecutionPolicy Bypass -File scheduled-routes.ps1 -Slot free -Force   (시간대 검사 건너뜀)
 #
-# 시간대 검사: rush 는 평일 07:30~09:30, free 는 평일 10:30~16:00 에만 잰다.
+# 시간대 검사: rush 는 평일 08:00·18:00, free 는 평일 10:00·13:00 의 앞뒤 20분에만 잰다(두 번 재서 평균 — fetch-routes.mjs).
 # PC 가 꺼져 있다가 늦게 켜져서 엉뚱한 시각에 돌면 "출퇴근" 값이 틀어지므로, 범위 밖이면 재지 않고 로그만 남긴다.
 # 로그: 이 폴더 위의 scheduled-routes.log
 #
@@ -28,9 +28,10 @@ function Write-Log($msg) { Add-Content -LiteralPath $Log -Encoding UTF8 -Value (
 $now = Get-Date
 $weekday = $now.DayOfWeek -notin @([DayOfWeek]::Saturday, [DayOfWeek]::Sunday)
 $mins = $now.Hour * 60 + $now.Minute
-$inWindow = if ($Slot -eq 'rush') { $mins -ge 450 -and $mins -le 570 } else { $mins -ge 630 -and $mins -le 960 }
+$centers = if ($Slot -eq 'rush') { @(480, 1080) } else { @(600, 780) }
+$inWindow = @($centers | Where-Object { [Math]::Abs($mins - $_) -le 20 }).Count -gt 0
 if (-not $Force -and (-not $weekday -or -not $inWindow)) {
-    Write-Log "시간대 밖(평일 $(if ($Slot -eq 'rush') { '07:30~09:30' } else { '10:30~16:00' }) 아님) - 재지 않음"
+    Write-Log "시간대 밖(평일 $(if ($Slot -eq 'rush') { '08:00·18:00' } else { '10:00·13:00' }) ±20분 아님) - 재지 않음"
     exit 0
 }
 

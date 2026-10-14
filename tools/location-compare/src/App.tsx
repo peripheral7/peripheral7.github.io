@@ -1,16 +1,19 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
-import { BASE_DEPOSIT, MAX_HUBS, baseRent, hubEmoji, weightShares, won, type Place } from './data'
-import { evaluate, fmt, hubInsights } from './scoring'
+import { BASE_DEPOSIT, MAX_HUBS, activeModes, baseRent, hubEmoji, weeklyText, won, type Place } from './data'
+import { evaluate, hubInsights, shareOf } from './scoring'
 import { addCandidate, load, money, removeCandidate, removeHub, save, setHub, updateCandidate, type State } from './store'
 import { MapView } from './components/MapView'
 import type { MapPoint } from './placeNear'
 import { SearchBox } from './components/SearchBox'
-import { ModeScorePanel, FactorsPanel, type FactorBest } from './components/Panels'
+import { FactorsPanel, type FactorBest, type FactorOpen } from './components/Panels'
+import { EdgeNav, House3D, MainMode, ScoreBlock } from './components/TransportCard'
+import { MODE_INFO } from './components/SettingsPopover'
 import { CompareCards } from './components/CompareCards'
 import { SettingsPopover } from './components/SettingsPopover'
 import { GuidePanel } from './components/GuidePanel'
 import { CatGallery, CatRegister } from './components/CatPanel'
-import { catIndex, loadCats, pruneCats, removeMyPhoto, saveCats, type CatState } from './cats'
+import { catIndex, livePhotos, loadCats, pruneCats, removeMyPhoto, saveCats, type CatState } from './cats'
+import type { CatPin } from './mapOverlays'
 import { CommutePanel } from './components/CommutePanel'
 import { ListingCards, SpotCards } from './components/Recommend'
 import { SPOTS } from './recommend'
@@ -20,7 +23,7 @@ import { USE_LABEL, type PropertyUse } from './brokerage'
 import { loadParks, parkAreaPin, strollNear, PARK_AREAS, PARK_AREA_MIN, STROLL_RADIUS, type Park } from './parks'
 import { PLACE_KEYS, loadPlaceOn, placeFor, placeSummary, savePlaceOn, type PlaceOn } from './places'
 import { liveMajors, liveNote, requestLive } from './live'
-import { MAJORS, commercialIndex, loadCommercial, pickedCats, saveCommercial, walk5Brand, walk5Counts, type CommercialPrefs } from './commercial'
+import { MAJORS, commercialIndex, loadCommercial, pickedCats, saveCommercial, walk5Counts, type CommercialPrefs } from './commercial'
 
 // " · 3,000/40 (1,000 기준 월 50)" — 금액을 안 넣었으면 빈 글자
 const rentText = (c: { deposit?: number; rent?: number }) => {
@@ -32,7 +35,9 @@ export default function App() {
   const [state, setState] = useState<State>(load)
   const [active, setActive] = useState(0)
   const [focusKey, setFocusKey] = useState(0) // 목록이 바뀌면 지도를 다시 맞춘다
-  const [pop, setPop] = useState<'none' | 'trips' | 'weights'>('none')
+  const [pop, setPop] = useState<'none' | 'weekly' | 'weights'>('none')
+  const [factorOpen, setFactorOpen] = useState<FactorOpen>(null) // 펼친 입지 요인(지도에도 표시)
+  const [spotFlash, setSpotFlash] = useState<{ id: string; n: number } | null>(null) // 지도 카페 핀 → 광고 카드 강조
   const [guide, setGuide] = useState(false)
   const [hubPick, setHubPick] = useState<string | null>(null) // 지도 장단점 기준 목적지
   const [preview, setPreview] = useState<Place | null>(null) // 검색 결과를 누르면 지도가 그 위치로
@@ -131,37 +136,58 @@ export default function App() {
     if (top > 0) setActive(top)
   }, [results])
   const select = useCallback((i: number) => setActive(i), [])
+  const onSpot = useCallback((id: string) => setSpotFlash({ id, n: Date.now() }), [])
   const update = (next: State, nextActive?: number) => { setState(next); if (nextActive !== undefined) setActive(nextActive); setFocusKey((k) => k + 1) }
   const onCandidate = (p: Place, name: string, deposit?: number, rent?: number, maint?: number) => update(addCandidate(state, p, name, deposit, rent, maint), candidates.length)
-  const onHub = (p: Place, replaceId: string | undefined, name: string, category: string, trips: number) => update(setHub(state, p, replaceId, name, category, trips))
-  const toggle = (k: 'trips' | 'weights') => setPop((p) => (p === k ? 'none' : k))
+  const onHub = (p: Place, replaceId: string | undefined, name: string, category: string, weekly: number) => update(setHub(state, p, replaceId, name, category, weekly))
+  const toggle = (k: 'weekly' | 'weights') => setPop((p) => (p === k ? 'none' : k))
   // 카드를 누르면(또는 Enter·Space) 설정 창이 열리게 하는 속성
-  const tap = (k: 'trips' | 'weights', label: string) => ({
+  const tap = (k: 'weekly' | 'weights', label: string) => ({
     role: 'button', tabIndex: 0, 'aria-expanded': pop === k, 'aria-label': label, 'data-pop-trigger': k,
     onClick: (e: React.MouseEvent) => { if (!(e.target as HTMLElement).closest('.no-pop')) toggle(k) },
     onKeyDown: (e: React.KeyboardEvent) => { if ((e.key === 'Enter' || e.key === ' ') && e.target === e.currentTarget) { e.preventDefault(); toggle(k) } },
   })
-  const w = weightShares(pref.weights) // 카드에는 합 100 기준 비율로
+  const modes = activeModes(pref)
+  const w = shareOf(pref) // 카드에는 합 100 기준 비율로
   // 번호 = 종합 순위(지도 핀·번호 단추 모두), 단추는 순위 순서로
   const ranks = useMemo(() => results.map((r) => r.rank), [results])
   const byRank = candidates.map((c, i) => ({ c, i, rank: ranks[i] ?? i + 1 })).sort((a, b) => a.rank - b.rank)
   // 선택한 후보지 박스 위쪽 ‹ › : 순위 순서로 앞·뒤 후보지(끝에서는 처음으로 돈다)
-  const step = (d: number) => {
-    if (!byRank.length) return
-    const k = byRank.findIndex((x) => x.i === active)
-    select(byRank[(k + d + byRank.length) % byRank.length].i)
-  }
+  // 교통평점 카드 가장자리 ‹ › : 순위 순서로 앞·뒤 후보지(끝에서는 돌지 않는다 — 넘길 곳이 없으면 단추도 없음)
+  const k = byRank.findIndex((x) => x.i === active)
+  const prev = k > 0 ? () => select(byRank[k - 1].i) : undefined
+  const next = k >= 0 && k < byRank.length - 1 ? () => select(byRank[k + 1].i) : undefined
   const rename = (id: string, name: string) => setState(updateCandidate(state, id, { name }))
   const saveEdit = () => { if (editing) setState(updateCandidate(state, editing.id, { name: editing.name, deposit: money(editing.deposit), rent: money(editing.rent), maint: money(editing.maint), use: editing.use })); setEditing(null) }
   const deleteEdit = () => { if (editing && confirm('이 후보지를 삭제할까요?')) { update(removeCandidate(state, editing.id)); setEditing(null) } }
   const close = () => setPop('none')
-  const tripSum = hubs.reduce((a, h) => a + (pref.trips[h.id] ?? 0), 0)
-  // 주 목적지 = 월 왕복 비율 50% 이상(보통 1곳, 반반이면 2곳). 횟수가 모두 0이면 전부.
+  const weekSum = hubs.reduce((a, h) => a + (pref.weekly[h.id] ?? 0), 0)
+  // 주 목적지 = 주 방문 비율 50% 이상(보통 1곳, 반반이면 2곳). 횟수가 모두 0이면 전부.
   const mainHubIds = useMemo(() => {
-    const total = hubs.reduce((a, h) => a + (pref.trips[h.id] ?? 0), 0)
-    const main = total > 0 ? hubs.filter((h) => (pref.trips[h.id] ?? 0) / total >= 0.5) : hubs
+    const main = weekSum > 0 ? hubs.filter((h) => (pref.weekly[h.id] ?? 0) / weekSum >= 0.5) : hubs
     return (main.length ? main : hubs).map((h) => h.id)
-  }, [hubs, pref.trips])
+  }, [hubs, pref.weekly, weekSum])
+  // 펼친 입지 요인을 지도에: 도서관 위치 · 평화로움 구분도 · 길고양이 사진
+  const curPlace = placeFor(candidates[active], !!pref.bike)
+  const mapLibraries = useMemo(() => (factorOpen === 'library' && curPlace ? curPlace.library.near.filter((l) => l.lat && l.lng).map((l) => ({ name: l.name, lat: l.lat!, lng: l.lng!, dist: l.dist })) : undefined), [factorOpen, curPlace])
+  const mapZones = useMemo(() => (factorOpen === 'peace' && curPlace?.peace.zones && candidates[active] ? { lat: candidates[active].lat, lng: candidates[active].lng, ...curPlace.peace.zones } : null), [factorOpen, curPlace, candidates, active])
+  // 펼친 요인 범위로 지도 맞춤: 평화로움 = 반경 150m, 도서관 = 후보지 + 도서관, 길고양이 = 후보지 + 고양이
+  const overlayFit = useMemo(() => {
+    const c = candidates[active]
+    if (!c || !factorOpen) return null
+    const d = 150 / 110540, e = 150 / (111320 * Math.cos((c.lat * Math.PI) / 180))
+    const pts: [number, number][] = factorOpen === 'peace' ? [[c.lat - d, c.lng - e], [c.lat + d, c.lng + e]]
+      : factorOpen === 'library' ? [[c.lat, c.lng], ...(curPlace?.library.near ?? []).filter((l) => l.lat).slice(0, 2).map((l): [number, number] => [l.lat!, l.lng!])]
+      : factorOpen === 'cat' ? [[c.lat - d, c.lng - e], [c.lat + d, c.lng + e], ...(catIdx?.[active]?.cats ?? []).map((x): [number, number] => [x.lat, x.lng])]
+      : []
+    return pts.length ? { key: `${factorOpen}:${c.id}`, pts } : null
+  }, [factorOpen, candidates, active, curPlace, catIdx])
+  const catIdxCur = catIdx ? catIdx[Math.min(active, catIdx.length - 1)] ?? null : null
+  const catPins = useMemo((): CatPin[] | undefined => {
+    if (factorOpen !== 'cat' || !catIdxCur) return undefined
+    let start = 0
+    return catIdxCur.cats.map((c) => { const photos = livePhotos(c).map((p) => p.data); const pin = { lat: c.lat, lng: c.lng, name: c.name, photos, start }; start += photos.length; return pin })
+  }, [factorOpen, catIdxCur])
 
   return (
     <div className="shell">
@@ -174,23 +200,12 @@ export default function App() {
       </header>
 
       <main className="stage" ref={stageRef}>
+        {/* 왼쪽 위: 교통평점 카드 = 고른 후보지(3D 집·이름·주요 교통수단) + 종합·수단별 교통평점. 가장자리에 마우스를 올리면 ‹ › */}
         <div className="modes-area anchor">
-          {cur ? (
-            <div className={'tappable' + (pop === 'weights' ? ' on' : '')} {...tap('weights', '수단 가중치 조정 열기')}>
-              <ModeScorePanel r={cur} action={<span className="tap-hint">가중치 {w.transit}·{w.car}·{w.walk} ↗</span>} />
-            </div>
-          ) : <div className="panel empty">검색해서 후보지를 넣어 주세요.</div>}
-          {pop === 'weights' && <SettingsPopover kind="weights" hubs={hubs} value={pref} onChange={(p) => setState({ ...state, pref: p })} onClose={close} />}
-        </div>
-
-        <div className="selected-area anchor">
-          <div className="panel selected">
-            <div className="sel-nav">
-              <button type="button" className="prev" aria-label="앞 순위 후보지" onClick={() => step(-1)} disabled={byRank.length < 2}>‹</button>
-              <button type="button" className="next" aria-label="다음 순위 후보지" onClick={() => step(1)} disabled={byRank.length < 2}>›</button>
-            </div>
-            <div className="sel-body">
-            {cur && (
+          <div className="panel transport-card">
+            <EdgeNav onPrev={prev} onNext={next} />
+            <div className="tc-body">
+            {cur ? (
               editing?.id === cur.candidate.id ? (
                 <form className="cand-edit" onSubmit={(e) => { e.preventDefault(); saveEdit() }} onKeyDown={(e) => { if (e.key === 'Escape') setEditing(null) }}>
                   <span className="tag">후보지 수정</span>
@@ -208,41 +223,55 @@ export default function App() {
                   </div>
                 </form>
               ) : (
-                <div className="sel-head">
+                <div className="sel-head house-head">
+                  <House3D rank={cur.rank} />
                   <div className="sel-text">
                     <span className="tag">종합 {cur.rank}위{rentText(cur.candidate)}</span>
                     <h3>{cur.candidate.name}</h3>
                     <p>{cur.candidate.address}</p>
+                    <MainMode r={cur} />
                   </div>
                   <button className="edit-btn" aria-label={`${cur.candidate.name} 수정`} onClick={() => setEditing({ id: cur.candidate.id, name: cur.candidate.name, deposit: cur.candidate.deposit?.toString() ?? '', rent: cur.candidate.rent?.toString() ?? '', maint: cur.candidate.maint?.toString() ?? '', use: cur.candidate.use ?? 'home' })}>수정</button>
                 </div>
               )
+            ) : <p className="empty">검색해서 후보지를 넣어 주세요.</p>}
+            {cur && (
+              <div className={'tappable score-tap' + (pop === 'weights' ? ' on' : '')} {...tap('weights', '수단 가중치 조정 열기')}>
+                <ScoreBlock r={cur} modes={modes} action={<span className="tap-hint">가중치 {modes.map((m) => w[m]).join('·')} ↗</span>} />
+              </div>
             )}
-            <div className={'hub-list tappable' + (pop === 'trips' ? ' on' : '')} {...tap('trips', '목적지별 월 왕복 횟수 조정 열기')}>
-              <div className="hub-list-head"><span>주요 목적지</span><span className="tap-hint">월 왕복 횟수 ↗</span></div>
-              {hubs.map((h) => {
-                const t = pref.trips[h.id] ?? 0
-                return (
-                  <div className="hub-line" key={h.id}>
-                    <span className="hub-mark" aria-hidden>{hubEmoji(h.category)}</span>
-                    <div><b>{h.name}</b><small>{h.category} · 월 왕복 {t}회 · 반영 {tripSum > 0 ? Math.round((t / tripSum) * 100) : Math.round(100 / hubs.length)}%</small></div>
-                    <button className="x no-pop" title="이 목적지 빼기" aria-label={`${h.name} 빼기`} onClick={() => update(removeHub(state, h.id))}>×</button>
-                  </div>
-                )
-              })}
-              {hubs.length === 0 && <p className="muted">검색해서 목적지를 넣어 주세요(최대 {MAX_HUBS}곳).</p>}
-            </div>
             <div className="pick" role="tablist" aria-label="후보지 선택">
               {byRank.map(({ c, i, rank }) => <button key={c.id} role="tab" aria-selected={i === active} className={i === active ? 'on' : ''} onClick={() => select(i)} title={c.name} aria-label={`${rank}위 ${c.name}`}>{rank}</button>)}
             </div>
             </div>
           </div>
-          {pop === 'trips' && <SettingsPopover kind="trips" hubs={hubs} value={pref} onChange={(p) => setState({ ...state, pref: p })} onClose={close} />}
+          {pop === 'weights' && <SettingsPopover kind="weights" hubs={hubs} value={pref} onChange={(p) => setState({ ...state, pref: p })} onClose={close} />}
+        </div>
+
+        {/* 왼쪽 아래: 주요 목적지(따로) — 누르면 주 방문 횟수·이동수단 창 */}
+        <div className="selected-area anchor">
+          <div className={'panel hubs-panel tappable' + (pop === 'weekly' ? ' on' : '')} {...tap('weekly', '목적지별 주 방문 횟수·이동수단 조정 열기')}>
+            <div className="panel-head"><h2>주요 목적지</h2><span className="tap-hint">주 방문 횟수 ↗</span></div>
+            {hubs.map((h) => {
+              const t = pref.weekly[h.id] ?? 0
+              const m = pref.hubMode?.[h.id] ?? 'auto'
+              return (
+                <div className="hub-line" key={h.id}>
+                  <span className="hub-mark" aria-hidden>{hubEmoji(h.category)}</span>
+                  <div><b>{h.name}</b><small>{h.category} · {weeklyText(t)}{t >= 1 && t !== 1 ? '' : t === 1 ? '(월 4회)' : ''} · {m === 'auto' ? '수단 자동' : `${MODE_INFO[m].emoji} ${MODE_INFO[m].label}`} · 반영 {weekSum > 0 ? Math.round((t / weekSum) * 100) : Math.round(100 / hubs.length)}%</small></div>
+                  <button className="x no-pop" title="이 목적지 빼기" aria-label={`${h.name} 빼기`} onClick={() => update(removeHub(state, h.id))}>×</button>
+                </div>
+              )
+            })}
+            {hubs.length === 0 && <p className="muted">검색해서 목적지를 넣어 주세요(최대 {MAX_HUBS}곳).</p>}
+          </div>
+          {pop === 'weekly' && <SettingsPopover kind="weekly" hubs={hubs} value={pref} onChange={(p) => setState({ ...state, pref: p })} onClose={close} />}
         </div>
 
         <section className="map-area">
           <MapView candidates={candidates} hubs={hubs} active={active} onSelect={select} focusKey={focusKey} hubId={hubId} onHub={setHubPick} insights={insights} focusHubIds={mainHubIds} ranks={ranks} preview={preview} results={found} centerRef={mapCenter} majors={majors} spots={SPOTS} parks={layers.walk ? areaPins : []} layers={layers} onLayer={toggleLayer}
-            parkAreas={layers.walk ? PARK_AREAS : undefined} previewFly={previewFly} onMapPick={(place, kind, at) => setMapPick({ place, kind, at, n: Date.now() })} />
+            parkAreas={layers.walk ? PARK_AREAS : undefined} previewFly={previewFly} onMapPick={(place, kind, at) => setMapPick({ place, kind, at, n: Date.now() })}
+            onSpot={onSpot} libraries={mapLibraries} zones={mapZones} catPins={catPins} overlayFit={overlayFit} onCatOpen={(start) => { setGalleryIdx(null); setGalleryStart(start); setCatDlg('gallery') }} />
           {layers.walk && (
             <p className="layer-note" role="status">
               {parkState === 'loading' ? '🌳 산책 — 공원·하천 찾는 중…' : parkState === 'error' ? '🌳 산책 — 공원 자료를 받지 못했어요(잠시 뒤 다시 켜 보세요)'
@@ -251,7 +280,7 @@ export default function App() {
               {parkState !== 'loading' && <span className="layer-legend"><i aria-hidden />공원 점수 {PARK_AREA_MIN}점 이상(진할수록 높음)</span>}
             </p>
           )}
-          <SearchBox hubs={hubs} tripsOf={(id) => pref.trips[id] ?? 0} onCandidate={onCandidate} onHub={onHub} onPreview={(p, fly = true) => { setPreview(p); setPreviewFly(fly) }} onResults={setFound} centerRef={mapCenter} external={mapPick} />
+          <SearchBox hubs={hubs} tripsOf={(id) => pref.weekly[id] ?? 0} onCandidate={onCandidate} onHub={onHub} onPreview={(p, fly = true) => { setPreview(p); setPreviewFly(fly) }} onResults={setFound} centerRef={mapCenter} external={mapPick} />
         </section>
 
         {/* 오른쪽 열(넓은 화면): 입지 요인 → 카페·식당 → 출퇴근 인사이트를 위에서부터 빈틈없이 쌓는다. 좁은 화면에서는 이 묶음이 없는 것처럼(display: contents) 각자 칸에 */}
@@ -259,14 +288,14 @@ export default function App() {
         <aside className="factors-area">
           <FactorsPanel cat={catIdx && cur ? catIdx[Math.min(active, catIdx.length - 1)] ?? null : null} catOn={catState.on}
             onToggleCat={() => setCats({ ...catState, on: !catState.on })} onRegister={() => setCatDlg('register')} onGallery={(start = 0) => { setGalleryIdx(null); setGalleryStart(start); setCatDlg('gallery') }}
-            com={cur ? comIdx[Math.min(active, comIdx.length - 1)] ?? null : null} comCounts={walk5Counts(candidates[active], !!pref.bike)} comBrands={walk5Brand(candidates[active], !!pref.bike)} bike={!!pref.bike} best={best} comPrefs={comPrefs} onComPrefs={setComPrefs}
+            com={cur ? comIdx[Math.min(active, comIdx.length - 1)] ?? null : null} comCounts={walk5Counts(candidates[active], !!pref.bike)} bike={!!pref.bike} open={factorOpen} onOpen={setFactorOpen} best={best} comPrefs={comPrefs} onComPrefs={setComPrefs}
             place={placeFor(candidates[active], !!pref.bike)} placeOn={placeOn} onPlaceOn={setPlaceOn} missing={liveNote(candidates[active])} />
         </aside>
 
         {/* 카페·식당 광고 → 출퇴근 인사이트: 지도 높이에 맞춘 입지 요인 아래(후보지별 비교 오른쪽 옆)에 내용만큼 쌓는다(입지 요인이 길어져도 서로 가리지 않음) */}
         <aside className="side-right commute-area">
-          <SpotCards candidates={candidates} />
-            {cur && <CommutePanel r={cur} trips={pref.trips} settings={{ kmpl: commute.kmpl, fuel: commute.fuel ?? fuelAuto?.price ?? DEFAULT_FUEL }}
+          <SpotCards candidates={candidates} flash={spotFlash} />
+            {cur && <CommutePanel r={cur} weekly={pref.weekly} settings={{ kmpl: commute.kmpl, fuel: commute.fuel ?? fuelAuto?.price ?? DEFAULT_FUEL }}
       fuelAuto={fuelAuto} fuelManual={commute.fuel !== null} onKmpl={(n) => saveC({ ...commute, kmpl: n })} onFuel={(n) => saveC({ ...commute, fuel: n })} />}
         </aside>
         </div>
@@ -275,11 +304,11 @@ export default function App() {
         <ListingCards candidates={candidates} />
 
         <section className="cards-area">
-          {results.length > 0 && <CompareCards results={results} com={comPrefs.on ? comIdx : null} hubs={hubs} active={active} onSelect={select} onRename={rename} />}
+          {results.length > 0 && <CompareCards results={results} com={comPrefs.on ? comIdx : null} hubs={hubs} active={active} bike={!!pref.bike} onSelect={select} onRename={rename} />}
         </section>
       </main>
 
-      <p className="foot">이동 시간은 좌표 거리로 추정한 값입니다(차량은 네이버 실측이 있으면 그 값) · 바꾼 후보지·목적지·선호도는 이 브라우저에만 저장됩니다</p>
+      <p className="foot">도보·자전거는 OSM 길 거리, 대중교통은 서울시 환승경로, 차량은 네이버 실측(없으면 "추정") · 바꾼 후보지·목적지·선호도는 이 브라우저에만 저장됩니다</p>
       {guide && <GuidePanel onClose={() => setGuide(false)} />}
       {catDlg === 'register' && <CatRegister state={catState} onChange={setCats} onClose={() => setCatDlg('none')} />}
       {catDlg === 'gallery' && catIdx && (() => {

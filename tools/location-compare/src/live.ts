@@ -1,11 +1,13 @@
 // 새 후보지(검색·지도로 넣은 곳) 계산 — place-search Worker 를 거쳐 사용자 PC 의 계산 서버(server/analyze-server.mjs)가 낸다.
-// 상권·평화로움·공원·도서관 = /analyze(scripts 를 그대로 실행, 약 30초), 차량 시간 = /route(네이버 Directions, 지금 교통).
-// 차량은 시간대 안(SLOT_TEXT)에서만 잰다 — 밖이면 추정식(scoring.ts)으로 "추정"이라 표시하고, 서버가 물어본 길을 기억했다가
-// 그 시간대가 오면 자동으로 잰다. 그래서 값이 빠진 길은 페이지를 열 때마다 한 번씩 다시 묻는다.
-// 대중교통은 아직 개발 중 — 새 후보지는 대중교통을 비워 두고 점수에서도 뺀다(scoring.ts transitPending).
+// 상권·평화로움·공원·도서관·대로 진입 = /analyze(scripts 를 그대로 실행, 약 30초),
+// 길 = /route — 차량(네이버 Directions, 지금 교통) + paths(도보·자전거 OSM 길 거리, 대중교통 서울시 환승경로, scripts/paths-lib.mjs).
+// 차량 기준 시각: 출퇴근 = 평일 08시·18시, 낮 = 평일 10시·13시(각 두 번 재서 평균). 처음 등록할 때는 그 시각 교통으로 한 번 재서
+// 혼잡 시간대(평일 07~10시·17~20시)면 출퇴근, 아니면 낮 값으로 임시 저장하고, 기준 시각이 오면 서버가 자동으로 잰다.
+// 그래서 값이 빠진 길은 페이지를 열 때마다 한 번씩 다시 묻는다. 서버가 길을 답하기 전까지 새 후보지의 대중교통은 비워 둔다(scoring.ts transitPending).
 // 받은 결과는 이 브라우저에 저장해 다시 열어도 그대로 쓴다. 계산 서버가 꺼져 있으면 "계산 서버 꺼짐"으로 보인다.
 import { CANDIDATES, type Candidate, type Hub } from './data'
 import { SEARCH_URL } from './naver'
+import type { TransitRow } from './scoring'
 
 export type LiveStatus = 'loading' | 'ok' | 'offline' | 'outside' | 'error'
 export type LiveAnalysis = {
@@ -14,10 +16,12 @@ export type LiveAnalysis = {
   places: Record<string, unknown> & { lat: number; lng: number }
   stdrYm?: string; osmAt?: string; at: string
 }
-type Slot = { min: number; km: number; at: string }
-/** 실측 시간대(server/analyze-server.mjs SLOT_WINDOWS 와 같게) */
-export const SLOT_TEXT = { rush: '평일 07:30~09:30', free: '평일 10:30~16:00' }
-export type LiveRoute = Partial<Record<'free' | 'rush', Slot>>
+/** 실측 기준 시각(server/analyze-server.mjs SLOT_WINDOWS 와 같게) */
+export const SLOT_TEXT = { rush: '평일 08시·18시', free: '평일 10시·13시' }
+type Sample = { min: number; km: number; at: string }
+type Slot = Sample & { samples?: Partial<Record<'am' | 'pm', Sample>>; provisional?: boolean }
+type Paths = { walk?: { km: number; min: number }; bike?: { km: number; min: number }; transit?: TransitRow | null; at?: string }
+export type LiveRoute = Partial<Record<'free' | 'rush', Slot>> & { paths?: Paths }
 
 const KEY = 'locCompare.live.v1'
 const r5 = (x: number) => (Math.round(x * 1e5) / 1e5).toFixed(5)
@@ -38,6 +42,8 @@ export function isDefaultCandidate(c: Pick<Candidate, 'id' | 'lat' | 'lng'>): bo
 
 export const liveAnalysis = (c: { lat: number; lng: number }): LiveAnalysis | null => store.a[pkey(c)] ?? null
 export const liveRoute = (from: { lat: number; lng: number }, to: { lat: number; lng: number }): LiveRoute | null => store.r[`${pkey(from)}>${pkey(to)}`] ?? null
+/** 도보·자전거·대중교통 길(서버가 답했으면 — 대중교통 경로가 없으면 transit 은 null) */
+export const livePaths = (from: { lat: number; lng: number }, to: { lat: number; lng: number }): Paths | null => liveRoute(from, to)?.paths ?? null
 /** 지도에 보일 새 후보지 주변 주요 매장 */
 export function liveMajors(cands: Candidate[]) {
   return cands.flatMap((c) => (isDefaultCandidate(c) ? [] : (liveAnalysis(c)?.majors ?? []).map((m) => ({ ...m, near: { [c.id]: 0 } }))))
@@ -75,11 +81,12 @@ async function fetchAnalysis(c: Candidate) {
 const asked = new Set<string>() // 이 화면에서 이미 물어본 길(빠진 시간대가 있어도 페이지당 한 번만)
 async function fetchRoute(c: Candidate, h: Hub) {
   const k = `${pkey(c)}>${pkey(h)}`
-  if (inflight.has('r' + k) || asked.has(k) || (store.r[k]?.free && store.r[k]?.rush)) return
+  const done = (x?: Slot) => !!(x?.samples?.am && x?.samples?.pm)
+  if (inflight.has('r' + k) || asked.has(k) || (done(store.r[k]?.free) && done(store.r[k]?.rush) && store.r[k]?.paths)) return
   inflight.add('r' + k); asked.add(k)
   try {
     const { status: s, body } = await get(`/route?from=${c.lat},${c.lng}&to=${h.lat},${h.lng}`)
-    if (s === 200 && (body.free || body.rush)) { store.r[k] = body; persist(); notify() }
+    if (s === 200 && (body.free || body.rush || body.paths)) { store.r[k] = { ...store.r[k], ...body }; persist(); notify() }
   } catch { /* 꺼져 있으면 추정으로 */ } finally { inflight.delete('r' + k) }
 }
 

@@ -671,3 +671,101 @@ input[type=number]::-webkit-inner-spin-button, input[type=number]::-webkit-outer
 /* 지도 우클릭 등록 창: 누른 점 옆(자리는 placeNear), 지도 높이를 넘으면 창 안에서 스크롤 */
 .search-side.map-register { position: absolute; z-index: 800; width: 320px; max-width: calc(100% - 12px); max-height: calc(100% - 12px); overflow-y: auto; scrollbar-width: none }
 .search-side.map-register::-webkit-scrollbar { display: none }
+
+/* ══ 10-14: 교통평점 통합 카드 · 주요 목적지 분리 · 자전거 · 비교 카드 높이 고정 · 상권 3단 끌어 놓기 · 지도 덧그림 ══ */
+:root { --bike: #8a63b8 }
+.dot.bike { background: var(--bike) } .ticks.bike { color: var(--bike) } .score-line.bike { --c: var(--bike) }
+.mode-row.off { opacity: 0.45 }
+
+/* 왼쪽 열: 위 교통평점 카드가 남는 높이를 차지(넘치면 카드 안 스크롤), 아래 주요 목적지는 내용만큼 */
+.stage { grid-template-rows: 1fr auto auto }
+@media (min-width: 901px) {
+  .selected-area { contain: none }
+  .modes-area { contain: size; min-height: 0 }
+  .transport-card { height: 100% }
+}
+.transport-card { position: relative; display: flex; flex-direction: column; padding: 0 !important; overflow: hidden }
+.tc-body { flex: 1; min-height: 0; overflow-y: auto; scrollbar-width: none; padding: 12px 18px 8px; display: flex; flex-direction: column }
+.tc-body::-webkit-scrollbar { display: none }
+.transport-card .pick { margin: auto 0 0; padding-top: 6px; justify-content: center; gap: 2px }
+.transport-card .pick button { border: 0; background: none; width: auto; min-width: 26px; height: 24px; border-radius: 8px; color: var(--faint); font-size: 13px; font-variant-numeric: tabular-nums }
+.transport-card .pick button:hover { color: var(--text) }
+.transport-card .pick button.on { color: var(--text); font-weight: 700; background: none }
+/* 가장자리 세로 ‹ › : 마우스를 가장자리 근처(띠 26px)에 올리면 은은하게 나타남 */
+.edge-nav { position: absolute; top: 0; bottom: 0; z-index: 5; width: 26px; border: 0; padding: 0; background: transparent; display: grid; place-items: center; color: var(--muted); opacity: 0; transition: opacity 0.18s, background 0.18s }
+.edge-nav.prev { left: 0; border-radius: var(--radius) 0 0 var(--radius) }
+.edge-nav.next { right: 0; border-radius: 0 var(--radius) var(--radius) 0 }
+.edge-nav span { display: grid; place-items: center; width: 18px; height: 64px; border-radius: 9px; font-size: 20px; line-height: 1; background: rgba(24, 39, 56, 0.05) }
+.edge-nav:hover, .edge-nav:focus-visible { opacity: 1; background: linear-gradient(90deg, rgba(24, 39, 56, 0.035), transparent) }
+.edge-nav.next:hover, .edge-nav.next:focus-visible { background: linear-gradient(270deg, rgba(24, 39, 56, 0.035), transparent) }
+.edge-nav:hover span { background: rgba(24, 39, 56, 0.1); color: var(--text) }
+@media (hover: none) { .edge-nav { opacity: 0.55 } }
+/* 3D 집 */
+.house-head { align-items: center; gap: 12px; border-bottom: 1px solid var(--line) }
+.house3d { width: 74px; height: 68px; flex: none; filter: drop-shadow(0 4px 6px rgba(24, 39, 56, 0.12)); transition: transform 0.3s }
+.transport-card:hover .house3d { transform: translateY(-2px) rotate(-1.5deg) }
+.main-mode { margin: 5px 0 0; display: flex; flex-wrap: wrap; align-items: baseline; gap: 2px 6px; font-size: 12px }
+.main-mode-label { color: var(--faint); font-size: 11px }
+.main-mode .mm { font-weight: 600; font-size: 13px }
+.main-mode .mm.transit { color: var(--transit) } .main-mode .mm.car { color: var(--car) } .main-mode .mm.walk { color: var(--walk) } .main-mode .mm.bike { color: var(--bike) }
+.main-mode small { color: var(--muted); font-size: 11px }
+.score-tap { margin: 8px -10px 0; padding: 4px 10px; border-radius: 14px }
+.score-tap:hover { box-shadow: 0 0 0 1px var(--line-2), 0 6px 18px rgba(24, 39, 56, 0.08) }
+.score-tap.on { box-shadow: 0 0 0 1.5px var(--text) }
+.score-block .panel-head { margin: 6px 0 4px }
+.total-wrap .gauge-caption small { font-size: 10px; color: var(--faint) }
+/* 주요 목적지(따로) */
+.hubs-panel { padding: 12px 16px 6px !important }
+.hubs-panel .panel-head { margin-bottom: 2px }
+.hubs-panel .panel-head h2 { font-size: 15px }
+.hubs-panel .hub-line:last-of-type { border-bottom: 0 }
+.tappable.hubs-panel:hover { box-shadow: 0 0 0 1px var(--line-2), 0 6px 18px rgba(24, 39, 56, 0.08) }
+.tappable.hubs-panel.on { box-shadow: 0 0 0 1.5px var(--text) }
+/* 목적지 창: 이동수단 고르기 */
+.trips { grid-template-columns: 1fr auto; row-gap: 6px }
+.trips .hub-mode { grid-column: 1 / -1; justify-self: start }
+.hub-mode button { padding: 3px 9px; font-family: "Segoe UI Emoji", "Apple Color Emoji", var(--font) }
+.hub-mode button.on { background: var(--text); color: #fff }
+.register-hint { display: block; margin: 2px 0 0 60px; font-size: 11px; color: var(--faint) }
+
+/* 후보지별 비교: 높이는 목적지 2곳 기준으로 고정(CompareCards 가 잼), 넘치면 세로 스크롤 — 스크롤바 숨김, 후보지 줄은 위에 붙음 */
+.cards-scroll { overflow: auto; scrollbar-width: none; overscroll-behavior: contain }
+.cards-scroll::-webkit-scrollbar { display: none }
+.cards-grid .head-cell { position: sticky; top: 0; z-index: 2; background: #fff }
+.cards-grid > .col.labels { z-index: 4 }
+.cards-grid > .col.labels .head-cell { z-index: 5 }
+@media (min-width: 1321px) {
+  .side-left { contain: size; overflow-y: auto; scrollbar-width: none } /* 광고 칸 = 비교 카드와 같은 높이(광고가 없어도 자리 유지) */
+  .side-left::-webkit-scrollbar { display: none }
+}
+.mode-cell .faint { color: var(--faint); font-size: 10.5px }
+
+/* 광고 카드 강조(지도 ☕ 를 누르면) */
+.rec-item { transition: background-color 0.6s ease; border-radius: 12px }
+.rec-item.flash { background-color: #fbecc9; transition: background-color 0.15s ease }
+
+/* 상권: 필수 · 선호 · 생략 세 칸 끌어 놓기 */
+.tier-board { gap: 6px }
+.tier-zone { display: grid; grid-template-columns: 34px 1fr; align-items: start; gap: 6px; padding: 6px 8px; border-radius: 10px; border: 1.5px dashed transparent; transition: background 0.15s, border-color 0.15s }
+.tier-zone.need { background: rgba(63, 154, 98, 0.1) } .tier-zone.want { background: rgba(226, 183, 20, 0.14) } .tier-zone.off { background: rgba(24, 39, 56, 0.05) }
+.tier-zone.over.need { border-color: #3f9a62 } .tier-zone.over.want { border-color: #c49a08 } .tier-zone.over.off { border-color: #8a96a3 }
+.tier-name { font-size: 11px; font-weight: 600; padding-top: 4px }
+.tier-zone.need .tier-name { color: #2f7d4c } .tier-zone.want .tier-name { color: #9a7600 } .tier-zone.off .tier-name { color: var(--muted) }
+.tier-chips { display: flex; flex-wrap: wrap; gap: 5px; min-height: 26px; align-items: center }
+.tier-chip { display: inline-flex; align-items: center; gap: 4px; border: 1px solid transparent; border-radius: 999px; padding: 3px 9px; font-size: 12px; cursor: grab; touch-action: none; user-select: none; position: relative; transition: box-shadow 0.15s }
+.tier-chip em { font-style: normal; font-size: 10px; opacity: 0.75; font-variant-numeric: tabular-nums }
+.tier-chip.need { background: #3f9a62; color: #fff } .tier-chip.want { background: #f1cf4a; color: #4a3a00 } .tier-chip.off { background: #dfe4e8; color: var(--muted) }
+.tier-chip.dragging { cursor: grabbing; z-index: 50; box-shadow: 0 8px 20px rgba(0, 0, 0, 0.22); pointer-events: none }
+.tier-empty { font-size: 11px; color: var(--faint) }
+
+/* 지도 덧그림: 도서관 · 길고양이 말풍선 */
+.major-pin.lib-pin { border-color: #a07a3c; font-weight: 500 }
+.cat-callout { position: relative; width: 0; height: 0; cursor: pointer }
+.cat-leader { position: absolute; pointer-events: none; overflow: visible }
+.cat-leader line { stroke: #1c2733; stroke-width: 1.5; stroke-opacity: 0.75 }
+.cat-dot { position: absolute; left: -5px; top: -5px; width: 6px; height: 6px; border-radius: 50%; background: #1c2733; border: 2px solid #fff }
+.cat-box { position: absolute; width: 54px; height: 54px; border-radius: 10px; overflow: hidden; background: #ddd; border: 2px solid #fff; box-shadow: 0 3px 10px rgba(0, 0, 0, 0.3) }
+.cat-box img { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; display: block; opacity: 0; transition: opacity 0.6s }
+.cat-box img.on { opacity: 1 }
+.cat-box b { position: absolute; right: 2px; bottom: 2px; font-size: 10px; line-height: 1; color: #fff; background: rgba(0, 0, 0, 0.55); border-radius: 6px; padding: 2px 4px }
+.cat-callout:hover .cat-box { box-shadow: 0 0 0 2px #1c2733, 0 3px 10px rgba(0, 0, 0, 0.3) }

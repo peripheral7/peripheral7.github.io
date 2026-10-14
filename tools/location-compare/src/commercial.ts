@@ -35,8 +35,6 @@ export const catScore = (id: string, n: number, brand = 0) => {
 export const STDR_YM = data.stdrYm
 export const CATEGORIES: CatInfo[] = data.categories.map(({ id, label, emoji }) => ({ id, label, emoji }))
 export const MAJORS = data.majors as Major[]
-/** 자료가 얇아 믿기 어려운 업종(설명 문구) */
-export const THIN: Record<string, string> = { goods: '다이소·생활용품점은 상가정보에 등록이 매우 적어 실제보다 적게 셀 수 있습니다' }
 
 type Row = { lat: number; lng: number; counts: Record<string, Record<string, number>>; brand?: Record<string, Record<string, number>> }
 const ROWS = data.candidates as Record<string, Row>
