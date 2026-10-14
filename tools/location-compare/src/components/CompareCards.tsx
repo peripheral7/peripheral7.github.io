@@ -67,13 +67,14 @@ function RentCell({ c, sect }: { c: Candidate; sect?: boolean }) {
   )
 }
 
-// 상권 종합: 지수 + 필수 업종의 도보 5분 안 개수(선호는 연하게)
+// 상권 종합: 지수 + 고른 업종 이름(필수 → 선호는 아래 작게). 개수는 안 보이고 업종 점수를 색으로만:
+// 7점 이상 초록 · 4점 이상 주황 · 그 아래 무색
+const comTone = (score: number) => (score >= 7 ? 'com-ok' : score >= 4 ? 'com-mid' : undefined)
 function ComCell({ x, best, c }: { x: CommercialIndex | undefined; best: boolean; c: Candidate }) {
   if (x === undefined) return <div className="cell mode-cell"><div><span className="muted">{t('입지 요인 ⚙ 에서 켜면 표시', 'Turn on in Location factors ⚙')}</span></div></div>
   if (x === null) return <div className="cell mode-cell"><div><span className="muted">{t('상권', 'Shops')} {liveNote(c)}</span></div></div>
-  // 고른 업종(필수 → 선호)을 이름·개수로 보이고, 업종 점수가 5점 이상이면 초록색
   const items = (t: 'need' | 'want') => x.parts.filter((p) => p.tier === t).map((p) => (
-    <span key={p.id} className={p.score >= 5 ? 'com-ok' : undefined}>{CATEGORIES.find((q) => q.id === p.id)?.label} {p.count}</span>
+    <span key={p.id} className={comTone(p.score)}>{CATEGORIES.find((q) => q.id === p.id)?.label}</span>
   ))
   const join = (a: ReactNode[]) => a.flatMap((e, i) => (i ? [' · ', e] : [e]))
   const need = items('need'), want = items('want')
