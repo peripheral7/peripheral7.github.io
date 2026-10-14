@@ -18,7 +18,7 @@
 //  GET /analyze?lat=&lng=  · GET /reverse?lat=&lng=(좌표 → 도로명 주소) · GET /route?from=lat,lng&to=lat,lng → 출처·IP 상한을 거쳐 그 주소로 넘긴다(키는 Worker 가 붙임).
 //  등록이 없거나 25분 넘게 소식이 없거나 연결이 안 되면 503 { error: 'offline' } — 화면은 "계산 서버 꺼짐"으로 보인다.
 
-const ALLOWED_ORIGINS = new Set(['https://peripheral7.github.io', 'http://localhost:5173', 'http://localhost:5174', 'http://localhost:5175', 'http://localhost:3001', 'http://127.0.0.1:3001'])
+const ALLOWED_ORIGINS = new Set(['https://peripheral7.github.io', 'https://whereto.mooncg0916.workers.dev', 'http://localhost:5173', 'http://localhost:5174', 'http://localhost:5175', 'http://localhost:3001', 'http://127.0.0.1:3001'])
 // 네이버 개발자센터 검색 API(openapi.naver.com)는 2026-06-29 종료 → NAVER API HUB(네이버 클라우드) 지역 검색으로 이관.
 // 키도 API HUB 에서 새로 받은 Client ID/Secret 이어야 하고, 헤더 이름이 X-NCP-APIGW-API-KEY-ID / X-NCP-APIGW-API-KEY 로 바뀌었다.
 const NAVER_LOCAL = 'https://naverapihub.apigw.ntruss.com/search/v1/local'
