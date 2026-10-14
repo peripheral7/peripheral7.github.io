@@ -667,6 +667,15 @@ input[type=number]::-webkit-inner-spin-button, input[type=number]::-webkit-outer
 .fit-all:hover, .map-controls button:hover, .layer-switch button:not(.on):hover, .hub-switch button:not(.on):hover { background: rgba(255, 255, 255, 0.6) }
 .map-controls button { font-weight: 600 }
 .layer-note { display: flex; flex-wrap: wrap; align-items: center; gap: 4px 10px }
+/* 대중교통 경로(지도): 정류장 점 + 이름표, 아래 한 줄 요약 — 산책 안내가 같이 뜨면 그 위로 */
+.tr-pin { gap: 5px; pointer-events: none }
+.tr-stop { flex: none; width: 14px; height: 14px; border-radius: 50%; background: #fff; border: 4px solid; box-shadow: 0 1px 4px rgba(0, 0, 0, 0.3) }
+.tr-label { display: inline-flex; align-items: center; gap: 4px; padding: 3px 8px; font-size: 11.5px; border-radius: 8px }
+.tr-label small { color: var(--muted, #6b7280); font-size: 11px }
+.tr-label em { font-style: normal; font-weight: 600; font-size: 11px; color: var(--muted, #6b7280) }
+.tr-chip { font-style: normal; color: #fff; font-weight: 700; font-size: 11px; padding: 1px 6px; border-radius: 6px; font-family: 'Segoe UI Emoji', 'Apple Color Emoji', 'Noto Color Emoji', var(--font) }
+.route-note { display: block; max-width: calc(100% - 100px); white-space: nowrap; overflow: hidden; text-overflow: ellipsis }
+.map-area:has(.route-note) .layer-note:not(.route-note) { bottom: 52px }
 .layer-legend { display: inline-flex; align-items: center; gap: 5px; color: var(--muted) }
 .layer-legend i { width: 14px; height: 10px; border-radius: 3px; background: linear-gradient(90deg, rgba(63, 154, 82, 0.25), rgba(63, 154, 82, 0.6)); border: 1px solid #2f7d40 }
 

@@ -2,7 +2,8 @@ import { useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState } fr
 import { Circle, MapContainer, Marker, Polygon, Polyline, Rectangle, TileLayer, Tooltip, useMap, useMapEvents } from 'react-leaflet'
 import L from 'leaflet'
 import { hubEmoji, type Candidate, type Hub, type Place } from '../data'
-import type { Insight } from '../scoring'
+import type { Insight, TransitLeg } from '../scoring'
+import { WALK_STYLE, stopHtml, transitStops, transitSummary } from '../transitMap'
 import { loadNaverMaps, MAP_KEY_ID, onNaverAuthFailure, reverseGeocode, type RevAddr } from '../naver'
 import { CATEGORIES, type Major } from '../commercial'
 import type { Spot } from '../recommend'
@@ -20,6 +21,8 @@ import { ZONE_STYLE, catCalloutHtml, catCallouts, startCatSlides, zoneRects, typ
 // - 추천 카페·식당(광고) 핀을 누르면 오른쪽 광고 칸의 그 카드 배경이 잠깐 강조된다(휴대폰은 그 카드까지 부드럽게 내려간다).
 // - 입지 요인을 펼치면 그 요인을 지도에도: 도서관 = 📚 위치, 평화로움 = 반경 50m 소음 구분도 + 30m(계산 반경) 선, 길고양이 = 사진 말풍선.
 // - 맞춤 이동은 언제나 부드럽게(네이버 panToBounds · Leaflet flyTo 짧게) — 이미 다 보여도 가운데로 옮긴다(예전엔 그대로 둬서 "눌러도 안 움직인다"로 보였다).
+// - 고른 후보지 → "장단점 기준" 목적지의 대중교통 경로(있으면 점선 직선 대신): 도보 = 점선, 버스·지하철 = 노선 색 선, 정류장 = 점 + 이름표(도보 N분).
+//   자료는 서울시 환승경로 + 경기 정류소 경유노선(버스 종류 색), 선 모양은 근사(TRANSIT.md).
 // - "산책"을 켜면 공원 점수가 일정 이상인 공원 경계(parkAreas)를 점수만큼 진한 초록으로 칠한다.
 //   효용이 높은 공원(칠한 공원)만 이름 핀을 항상 보이고, 낮은 공원은 색도 이름도 그리지 않는다(테두리 없이 칠만 한다).
 
@@ -44,6 +47,7 @@ type Props = {
   catPins?: CatPin[] // 길고양이를 펼쳤을 때
   onCatOpen?: (start: number) => void // 말풍선을 누르면 그 사진부터 크게
   overlayFit?: { key: string; pts: [number, number][] } | null // 입지 요인을 펼치면 그 범위로 맞춤(key 가 바뀔 때마다)
+  transit?: { hubId: string; legs: TransitLeg[]; min: number; label: string } | null // 고른 후보지 → 그 목적지 대중교통 경로
 }
 /** 우클릭 메뉴 자리: 지도 안 위치(px)·지도 크기·좌표 */
 type Ctx = { x: number; y: number; w: number; h: number; lat: number; lng: number }
@@ -130,6 +134,11 @@ export function MapView(props: Props) {
         )}
         {props.candidates.length > 1 && <button type="button" className="fit-all" onClick={() => setAllKey((k) => k + 1)}>후보지 한눈에</button>}
       </div>
+      {props.transit && props.transit.legs.length > 0 && (
+        <p className="layer-note route-note" role="status" title="버스 선은 도로를 따라 그린 근사선이에요(실제 노선과 조금 다를 수 있음)">
+          🚌 {props.transit.label}까지 대중교통 <b>{props.transit.min}분</b> · {transitSummary(props.transit.legs)}
+        </p>
+      )}
     </>
   )
 }
@@ -172,7 +181,7 @@ function MapMenu({ ctx, onPick, onClose }: { ctx: Ctx; onPick: NonNullable<Props
 
 // ── 네이버 지도 ──────────────────────────────────────────────────────
 /* eslint-disable @typescript-eslint/no-explicit-any */
-function NaverMap({ candidates, hubs, active, onSelect, focusKey, hubId, onHub, insights, focusHubIds, ranks, preview, previewFly, results, centerRef, majors, parks, parkAreas, spots, allKey, onContext, onFail, onSpot, libraries, zones, catPins, onCatOpen, overlayFit }: Inner & { onFail: () => void }) {
+function NaverMap({ candidates, hubs, active, onSelect, focusKey, hubId, onHub, insights, focusHubIds, ranks, preview, previewFly, results, centerRef, majors, parks, parkAreas, spots, allKey, onContext, onFail, onSpot, libraries, zones, catPins, onCatOpen, overlayFit, transit }: Inner & { onFail: () => void }) {
   const box = useRef<HTMLDivElement>(null)
   const map = useRef<any>(null)
   const layers = useRef<any[]>([])
@@ -364,7 +373,8 @@ function NaverMap({ candidates, hubs, active, onSelect, focusKey, hubId, onHub, 
     layers.current = []
     const cur = candidates[active]
     const hub = hubs.find((h) => h.id === hubId)
-    if (cur) hubs.forEach((h) => layers.current.push(new naver.maps.Polyline({
+    const routed = transit?.legs.length ? transit.hubId : null // 대중교통 경로를 그리는 목적지는 점선 직선을 뺀다
+    if (cur) hubs.filter((h) => h.id !== routed).forEach((h) => layers.current.push(new naver.maps.Polyline({
       map: map.current, path: [new naver.maps.LatLng(cur.lat, cur.lng), new naver.maps.LatLng(h.lat, h.lng)],
       strokeColor: '#2b2b26', strokeOpacity: h.id === hubId ? 0.9 : 0.35, strokeWeight: 2, strokeStyle: 'shortdash',
     })))
@@ -386,7 +396,27 @@ function NaverMap({ candidates, hubs, active, onSelect, focusKey, hubId, onHub, 
       naver.maps.Event.addListener(m, 'click', () => onSelect(i))
       layers.current.push(m)
     })
-  }, [ready, candidates, hubs, active, onSelect, onHub, hubId, insights, detail, ranks])
+  }, [ready, candidates, hubs, active, onSelect, onHub, hubId, insights, detail, ranks, transit])
+
+  // 대중교통 경로: 도보 점선 · 노선 색 선(흰 테두리) · 정류장 점과 이름표
+  const routeShapes = useRef<any[]>([])
+  useEffect(() => {
+    const naver = window.naver
+    if (!ready || !naver) return
+    routeShapes.current.forEach((m) => m.setMap(null))
+    routeShapes.current = []
+    if (!transit?.legs.length) return
+    const path = (line: [number, number][]) => line.map(([la, ln]) => new naver.maps.LatLng(la, ln))
+    for (const l of transit.legs) {
+      if (l.mode === 'walk') {
+        routeShapes.current.push(new naver.maps.Polyline({ map: map.current, path: path(l.line), clickable: false, zIndex: 20, strokeColor: WALK_STYLE.color, strokeOpacity: 0.95, strokeWeight: WALK_STYLE.weight, strokeStyle: 'shortdot', strokeLineCap: 'round' }))
+      } else {
+        routeShapes.current.push(new naver.maps.Polyline({ map: map.current, path: path(l.line), clickable: false, zIndex: 21, strokeColor: '#fff', strokeOpacity: 0.95, strokeWeight: 9, strokeLineCap: 'round', strokeLineJoin: 'round' }))
+        routeShapes.current.push(new naver.maps.Polyline({ map: map.current, path: path(l.line), clickable: false, zIndex: 22, strokeColor: l.color, strokeOpacity: 1, strokeWeight: 5, strokeLineCap: 'round', strokeLineJoin: 'round' }))
+      }
+    }
+    for (const s of transitStops(transit.legs)) routeShapes.current.push(new naver.maps.Marker({ map: map.current, position: new naver.maps.LatLng(s.lat, s.lng), zIndex: 90, clickable: false, icon: { content: stopHtml(s), anchor: new naver.maps.Point(7, 7) } }))
+  }, [ready, transit])
 
   useEffect(() => { if (ready) fit() }, [ready, active, focusKey, focusHubIds.join()]) // eslint-disable-line react-hooks/exhaustive-deps
   useEffect(() => { if (ready && allKey) fit(true, true) }, [allKey]) // eslint-disable-line react-hooks/exhaustive-deps
@@ -459,7 +489,7 @@ function Controls({ pts }: { pts: [number, number][] }) {
   )
 }
 
-function OsmMap({ candidates, hubs, active, onSelect, focusKey, hubId, onHub, insights, focusHubIds, ranks, preview, previewFly, results, centerRef, majors, parks, parkAreas, spots, allKey, onContext, onSpot, libraries, zones, catPins, onCatOpen, overlayFit }: Inner) {
+function OsmMap({ candidates, hubs, active, onSelect, focusKey, hubId, onHub, insights, focusHubIds, ranks, preview, previewFly, results, centerRef, majors, parks, parkAreas, spots, allKey, onContext, onSpot, libraries, zones, catPins, onCatOpen, overlayFit, transit }: Inner) {
   const pts = useMemo(() => frame(candidates, hubs, active, focusHubIds), [candidates, hubs, active, focusHubIds])
   const [zoom, setZoom] = useState(13)
   const cur = candidates[active]
@@ -501,7 +531,17 @@ function OsmMap({ candidates, hubs, active, onSelect, focusKey, hubId, onHub, in
         <Marker key={`p-${p.id}`} position={[p.lat, p.lng]} zIndexOffset={-500}
           icon={L.divIcon({ className: 'pin-shell', html: parkHtml(p, true), iconSize: [20, 20], iconAnchor: [10, 10] })} />
       ))}
-      {cur && hubs.map((h) => (
+      {transit?.legs.map((l, i) => l.mode === 'walk'
+        ? <Polyline key={`tw${i}-${l.line[0].join()}`} positions={l.line} interactive={false} pathOptions={{ color: WALK_STYLE.color, weight: WALK_STYLE.weight, opacity: 0.95, dashArray: '0.1 9', lineCap: 'round' }} />
+        : [
+          <Polyline key={`tc${i}-${l.line[0].join()}`} positions={l.line} interactive={false} pathOptions={{ color: '#fff', weight: 9, opacity: 0.95, lineCap: 'round', lineJoin: 'round' }} />,
+          <Polyline key={`tr${i}-${l.line[0].join()}`} positions={l.line} interactive={false} pathOptions={{ color: l.color, weight: 5, opacity: 1, lineCap: 'round', lineJoin: 'round' }} />,
+        ])}
+      {transit && transitStops(transit.legs).map((s, i) => (
+        <Marker key={`ts${i}-${s.lat}-${s.lng}`} position={[s.lat, s.lng]} zIndexOffset={800} interactive={false}
+          icon={L.divIcon({ className: 'pin-shell', html: stopHtml(s), iconSize: [14, 14], iconAnchor: [7, 7] })} />
+      ))}
+      {cur && hubs.filter((h) => !(transit?.legs.length && transit.hubId === h.id)).map((h) => (
         <Polyline key={h.id + cur.id + (h.id === hubId)} className="route" positions={[[cur.lat, cur.lng], [h.lat, h.lng]]} pathOptions={{ color: '#2b2b26', weight: 2, dashArray: '6 7', opacity: h.id === hubId ? 0.9 : 0.35 }} />
       ))}
       {hubs.map((h) => (

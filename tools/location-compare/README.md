@@ -50,11 +50,12 @@
 |---|---|---|
 | 도보 | **OSM 보행 길 거리** ÷ 시속 4.7km — `scripts/fetch-paths.mjs` → `src/paths.json`(기본 후보지), 새 후보지는 계산 서버 `/route` 의 `paths` | `d × 1.25 ÷ 4.7 × 60` |
 | 자전거 | **OSM 자전거 길 거리** ÷ 시속 15km(같은 파일) | `d × 1.3 ÷ 15 × 60` |
-| 대중교통 | **서울특별시 「대중교통환승경로 조회」**(ws.bus.go.kr `getPathInfoByBusNSub`, 버스+지하철, 경기도 구간도 나옴). 응답 `time` = 문 앞~문 앞 전체 시간으로 보고(1.5km 버스 구간 + 정류장 도보 400m 에 21분이라 탑승만으로는 너무 김), 정류장까지·에서 걷는 시간(직선 × 1.25)과 첫 대기(추정)를 빼고 남은 것을 탑승·환승으로 표시. 환승 = 구간 수 − 1. 여러 경로 중 전체 시간 최소 | 정류장까지 `round(4 + 0.7d)`(3~18분) + 대기 `5 + min(7, round(d/6))` + 탑승(시속 22km) + 환승(≤3km 0 · ≤12km 1 · 그 이상 2회, 1회 5분) |
+| 대중교통 | **서울특별시 「대중교통환승경로 조회」**(ws.bus.go.kr `getPathInfoByBusNSub`, 버스+지하철, 경기도 구간도 나옴). 응답 `time` = 문 앞~문 앞 전체 시간으로 보고(1.5km 버스 구간 + 정류장 도보 400m 에 21분이라 탑승만으로는 너무 김), 정류장까지·에서 걷는 시간(OSM 보행 길 거리, 실패하면 직선 × 1.25 — TRANSIT.md)과 첫 대기(추정)를 빼고 남은 것을 탑승·환승으로 표시. 환승 = 구간 수 − 1. 여러 경로 중 전체 시간 최소 | 정류장까지 `round(4 + 0.7d)`(3~18분) + 대기 `5 + min(7, round(d/6))` + 탑승(시속 22km) + 환승(≤3km 0 · ≤12km 1 · 그 이상 2회, 1회 5분) |
 | 차량 | **네이버 Directions 5 실측**: 출퇴근 = 평일 **08시·18시** 평균, 낮 = 평일 **10시·13시** 평균(각 ±20분 창에서 잰 표본 `samples.am·pm`). 처음 등록한 길은 그 자리에서 한 번 재서 지금이 혼잡 시간대(평일 07~10시·17~20시)면 출퇴근, 아니면 낮 값으로 **임시 저장**(`provisional`, 카드 "(등록 시각)") — 두 기준 중 하나만 먼저 생긴다. 표본이 하나면 "(1회)" | 낮 `max(5, round(d/31×60 + 3))`, 출퇴근 `max(7, round(낮 × 1.52 + 4))` — 하나만 실측이면 다른 쪽은 그 값에서 같은 비율로 |
 
 - 실측이 없는 값은 카드에 **"(추정)"**, 그 아래에 **"실측 예정: 출퇴근 평일 08시·18시 · 낮 평일 10시·13시"**.
 - **API 확인(2026-10-14)**: 서울시 환승경로는 공공데이터포털 키(`DATA_GO_KR_SERVICE_KEY`, 개별 칸 `SEOUL_PATHINFO_SERVICE_KEY`)로 동작. 망포·영통·서천 → 경희대는 경로가 나오지만 **수원 → 분당(본가), 수원 서쪽 → 경희대 등 일부는 세 함수(`ByBusNSub`·`ByBus`·`BySubway`) 모두 "XML Parsing Error"** — 그 구간은 추정. 지하철 단독(`getPathInfoBySubway`)은 짧은 구간에서 "경로가 존재하지 않습니다". 버스 도착·위치(서울·경기)는 실시간 값이라 고정 점수에는 안 쓰고(대기 시간 실측용으로 추후), 경기 정류소 조회도 키만 준비됨.
+- **대중교통 자료·지도 경로 그림 = [TRANSIT.md](TRANSIT.md)**(10-14): 고른 경로의 구간(`legs`) — 도보(OSM 보행 길, 정류장까지·에서 시간도 이 거리로), 버스(정류장 좌표·노선, 경기 정류소 경유노선 API 의 `routeTypeCd` 로 종류 색, 선은 OSM 자동차 길 근사), 지하철(역 사이 직선·노선 색).
 - **대중교통 길찾기 알고리즘 검토**: 직접 만들려면 GTFS(국가대중교통정보센터 TAGO 노선·정류장·시간표) + RAPTOR(라운드 기반, 환승 수 최소·도착 시각 파레토 — OpenTripPlanner 2·R5 가 쓰는 방식) 또는 CSA(Connection Scan). 오픈소스는 **OpenTripPlanner 2**(Java, GTFS+OSM, 도보·환승 통합 — 서버 메모리 2~4GB)·**R5**(Conveyal, 접근성 분석용)·**MOTIS**. 한국 GTFS 는 공식 배포가 없어(TAGO API 를 모아 변환해야 함) 지금은 서울시 환승경로 API + 실패 구간 추정이 현실적. 경로 수가 늘거나 시간대별 배차가 필요해지면 OTP2 를 계산 서버에 올리는 것이 다음 단계.
 
 ## 4. 수단별 점수 (10점 만점, `modeScoresForHub`)
@@ -280,7 +281,8 @@
 src/data.ts                          기본 후보지·목적지·선호도
 src/store.ts                         방문자가 바꾼 목록 저장·후보지/목적지 넣고 빼기
 src/routes.json                      네이버로 잰 차량 소요 시간(출퇴근 08·18시 / 낮 10·13시 표본과 평균, 비어 있으면 추정)
-src/paths.json · scripts/fetch-paths.mjs · scripts/paths-lib.mjs  도보·자전거(OSM 길)·대중교통(서울시 환승경로) — 계산 서버도 paths-lib 를 씀
+src/paths.json · scripts/fetch-paths.mjs · scripts/paths-lib.mjs  도보·자전거(OSM 길)·대중교통(서울시 환승경로 + 경로 그림 legs) — 계산 서버도 paths-lib 를 씀
+src/transitMap.ts · TRANSIT.md      지도 대중교통 경로(정류장 점·이름표·요약) · 대중교통 자료 출처와 한계
 src/mapOverlays.ts                   지도 덧그림: 평화로움 구분도 칸 → 네모, 길고양이 사진 말풍선(30m 묶음·겹침 피하기·슬라이드)
 src/components/TransportCard.tsx     교통평점 카드(3D 집·가장자리 ‹ ›·주요 교통수단·종합/수단 막대)
 src/scoring.ts                       시간 추정 · 수단 점수 · 가중치 · 종합 점수
@@ -433,7 +435,8 @@ npm run build
 | `SEOUL_PATHINFO_SERVICE_KEY` | 서울특별시 대중교통환승경로 조회 | `http://ws.bus.go.kr/api/rest/pathinfo` |
 | `SEOUL_BUS_ARRIVAL_SERVICE_KEY` | 서울특별시 버스도착정보조회 | `http://ws.bus.go.kr/api/rest/arrive` |
 | `GG_BUS_ARRIVAL_SERVICE_KEY` | 경기도 버스도착정보 조회 | `https://apis.data.go.kr/6410000/busarrivalservice/v2` |
-| `GG_BUS_STATION_SERVICE_KEY` | 경기도 정류소 조회 | `https://apis.data.go.kr/6410000/busstationservice/v2` |
+| `GG_BUS_STATION_SERVICE_KEY` | 경기도 정류소 조회(경유노선 목록 → 버스 종류 색, 10-14 사용) | `https://apis.data.go.kr/6410000/busstationservice/v2` |
+| `GG_BUS_ROUTE_SERVICE_KEY`(미사용·미신청) | 경기도 버스노선 조회(노선 궤적 — 신청하면 실제 노선 선, TRANSIT.md) | `https://apis.data.go.kr/6410000/busrouteservice/v2` |
 
 ### 상권 자료 — 통째로 받아 두고 이 PC 에서 찾기(한 달에 한 번)
 

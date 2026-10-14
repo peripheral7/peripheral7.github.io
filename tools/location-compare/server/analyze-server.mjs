@@ -25,7 +25,7 @@ import crypto from 'node:crypto'
 import { spawn } from 'node:child_process'
 import { fileURLToPath } from 'node:url'
 import { analyze } from './runner.mjs'
-import { measurePaths } from '../scripts/paths-lib.mjs'
+import { measurePaths, transitPath } from '../scripts/paths-lib.mjs'
 
 const TOOL = path.dirname(path.dirname(fileURLToPath(import.meta.url)))
 const CACHE = path.join(TOOL, 'server', 'cache')
@@ -164,6 +164,8 @@ async function handleRoute(q) {
   // 도보·자전거·대중교통 길(30일마다 다시)
   if (!p.paths || Date.now() - (p.paths.ts ?? 0) > SLOT_TTL) {
     try { p = { ...readPair(key), paths: { ...(await measurePaths(from, to)), ts: Date.now() } }; cput(key, p) } catch (e) { console.error(`길(도보·대중교통) 실패 ${key}: ${e.message}`) }
+  } else if (p.paths.transit && !p.paths.transit.legs) { // 지도 경로 그림(legs)이 생기기 전에 잰 길 — 대중교통만 다시
+    try { const t = await transitPath(from, to); if (t) { p = { ...readPair(key) }; p.paths = { ...p.paths, transit: t }; cput(key, p) } } catch (e) { console.error(`대중교통 경로 그림 실패 ${key}: ${e.message}`) }
   }
   return [200, slotsOnly(p)]
 }

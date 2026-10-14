@@ -24,6 +24,7 @@ export type Trip = {
   transit: number // 대중교통 전체(분)
   transitSource: 'api' | 'est' // 서울시 환승경로로 찾은 값인가
   routes: string[] // 대중교통 노선(찾았을 때)
+  legs: TransitLeg[] // 대중교통 경로 구간(지도 그림, 없으면 빈 목록)
   carFree: number // 차량: 여유 시간대(분)
   carRush: number // 차량: 출퇴근 시간대(분)
   carKm: number // 차량 도로 거리(실측 없으면 직선 × 1.3)
@@ -53,7 +54,12 @@ export function mergeSlot(a?: CarSlot | null, b?: CarSlot | null): CarSlot | und
 }
 
 type PathRow = { walk?: { km: number; min: number }; bike?: { km: number; min: number }; transit?: TransitRow | null; lat?: number; lng?: number }
-export type TransitRow = { min: number; ride: number; access: number; egress: number; wait: number; transfers: number; routes: string[]; first?: string; last?: string }
+export type TransitRow = { min: number; ride: number; access: number; egress: number; wait: number; transfers: number; routes: string[]; first?: string; last?: string; legs?: TransitLeg[] }
+/** 대중교통 경로의 한 구간(scripts/paths-lib.mjs buildLegs, 자료 출처는 TRANSIT.md) — 지도에 도보는 점선, 버스·지하철은 노선 색 선.
+ *  line = [위도, 경도] 점들, approx = 실제 노선이 아닌 근사선(버스 = 도로 길찾기, 지하철 = 역 사이 직선) */
+export type TransitLeg =
+  | { mode: 'walk'; min: number; m: number; line: [number, number][]; approx?: boolean }
+  | { mode: 'bus' | 'subway'; name: string; color: string; from: string; to: string; line: [number, number][]; type?: string; typeName?: string; approx?: boolean }
 const PATHS = (paths as unknown as { pairs: Record<string, PathRow> }).pairs ?? {}
 
 const R = 6371
@@ -94,7 +100,7 @@ export function estimateTrip(from: Candidate, to: Hub): Trip {
   const carKm = m.rush?.km ?? m.free?.km ?? km * ROAD_FACTOR
   return {
     km, walk, walkKm, bike, pathSource: p.walk ? 'osm' : 'est',
-    access, wait, transfers, ride, transit, transitSource: t ? 'api' : 'est', routes: t?.routes ?? [],
+    access, wait, transfers, ride, transit, transitSource: t ? 'api' : 'est', routes: t?.routes ?? [], legs: t?.legs ?? [],
     carFree, carRush, carKm, carSource: { free: m.free ?? null, rush: m.rush ?? null },
   }
 }

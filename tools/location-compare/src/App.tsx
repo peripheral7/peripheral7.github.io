@@ -81,6 +81,10 @@ export default function App() {
   const topAddress = results.find((r) => r.rank === 1)?.candidate.address ?? ''
   const fuelAuto = useMemo(() => (topAddress ? fuelPriceFor(topAddress) : null), [topAddress])
   const saveC = (s: CommuteSaved) => { setCommute(s); saveCommute(s) }
+  // 지도의 대중교통 경로: 고른 후보지 → "장단점 기준" 목적지(걸어가는 거리라 대중교통을 빼는 곳·아직 찾는 중인 곳은 없음)
+  const curHub = hubIndex >= 0 ? cur?.hubs[hubIndex] : undefined
+  const transitRoute = useMemo(() => (curHub && !curHub.transitSkipped && !curHub.transitPending && curHub.trip.legs.length
+    ? { hubId: curHub.hub.id, legs: curHub.trip.legs, min: curHub.trip.transit, label: curHub.hub.category || curHub.hub.name } : null), [curHub])
   const insights = useMemo(() => (hubIndex >= 0 ? hubInsights(results, hubIndex) : results.map(() => ({ pros: [], cons: [] }))), [results, hubIndex])
 
   useEffect(() => { save(state, user) }, [state]) // eslint-disable-line react-hooks/exhaustive-deps -- 사용자를 바꾸면 state 도 같이 바뀐다
@@ -268,7 +272,7 @@ export default function App() {
         <section className="map-area">
           <MapView candidates={candidates} hubs={hubs} active={active} onSelect={select} focusKey={focusKey} hubId={hubId} onHub={setHubPick} insights={insights} focusHubIds={mainHubIds} ranks={ranks} preview={preview} results={found} centerRef={mapCenter} majors={majors} spots={SPOTS} parks={layers.walk ? areaPins : []} layers={layers} onLayer={toggleLayer}
             parkAreas={layers.walk ? PARK_AREAS : undefined} previewFly={previewFly} onMapPick={(place, kind, at) => setMapPick({ place, kind, at, n: Date.now() })}
-            onSpot={onSpot} libraries={mapLibraries} zones={mapZones} catPins={catPins} overlayFit={overlayFit} onCatOpen={(start) => { setGalleryIdx(null); setGalleryStart(start); setCatDlg('gallery') }} />
+            onSpot={onSpot} libraries={mapLibraries} zones={mapZones} catPins={catPins} overlayFit={overlayFit} transit={transitRoute} onCatOpen={(start) => { setGalleryIdx(null); setGalleryStart(start); setCatDlg('gallery') }} />
           {layers.walk && (
             <p className="layer-note" role="status">
               {parkState === 'loading' ? '🌳 산책 — 공원·하천 찾는 중…' : parkState === 'error' ? '🌳 산책 — 공원 자료를 받지 못했어요(잠시 뒤 다시 켜 보세요)'

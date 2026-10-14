@@ -5,12 +5,13 @@
 //
 // 사용(이 폴더에서):  node scripts/bake-profiles.mjs [사용자 id ...] [--routes-only]
 //   이미 실린 좌표는 건너뛴다(다시 계산하려면 src/profiles-live.json 에서 그 줄을 지운다).
+//   --transit  대중교통만 다시(지도 경로 그림 legs 가 없는 길) — 분석·차량은 건드리지 않는다
 import fs from 'node:fs'
 import path from 'node:path'
 import { fileURLToPath } from 'node:url'
 import { PROFILES } from '../src/data.ts'
 import { analyze } from '../server/runner.mjs'
-import { ENV, measurePaths } from './paths-lib.mjs'
+import { ENV, measurePaths, transitPath } from './paths-lib.mjs'
 
 const ROOT = path.dirname(path.dirname(fileURLToPath(import.meta.url)))
 const OUT = path.join(ROOT, 'src', 'profiles-live.json')
@@ -18,7 +19,8 @@ const CACHE = path.join(ROOT, 'server', 'cache')
 fs.mkdirSync(CACHE, { recursive: true })
 const args = process.argv.slice(2)
 const only = args.filter((a) => !a.startsWith('--'))
-const routesOnly = args.includes('--routes-only')
+const transitOnly = args.includes('--transit')
+const routesOnly = args.includes('--routes-only') || transitOnly
 
 // live.ts 와 같은 열쇠(소수 5자리)
 const r5 = (x) => (Math.round(x * 1e5) / 1e5).toFixed(5)
@@ -61,10 +63,13 @@ for (const p of PROFILES.filter((x) => x.id !== 'me' && (!only.length || only.in
     for (const hub of p.hubs) {
       const rk = `${k}>${pkey(hub)}`
       const row = out.r[rk] ?? {}
+      if (transitOnly && row.paths && !row.paths.transit?.legs) {
+        try { row.paths = { ...row.paths, transit: await transitPath([c.lat, c.lng], [hub.lat, hub.lng]) } } catch (e) { console.error(`  대중교통 실패 ${e.message}`) }
+      }
       if (!row.paths) {
         try { row.paths = { ...(await measurePaths([c.lat, c.lng], [hub.lat, hub.lng])), ts: Date.now() } } catch (e) { console.error(`  길 실패 ${e.message}`) }
       }
-      if (!row.free && !row.rush) {
+      if (!row.free && !row.rush && !transitOnly) {
         const s = await drive(c, hub)
         if (s) row[win ? win.slot : congested ? 'rush' : 'free'] = win ? { ...s, samples: { [win.sub]: s } } : { ...s, provisional: true }
       }
