@@ -10,6 +10,7 @@ import type { Spot } from '../recommend'
 import { parkAreaAlpha, type Park, type ParkArea } from '../parks'
 import { placeNear, type MapPoint } from '../placeNear'
 import { ZONE_STYLE, catCalloutHtml, catCallouts, startCatSlides, zoneRects, type CatPin, type Zones } from '../mapOverlays'
+import { addr, catName, pn, rankText, t } from '../i18n'
 
 // 지도: 네이버 지도 키(VITE_NAVER_MAP_KEY_ID)가 있으면 네이버 지도, 없거나 인증이 실패하면 OSM 밝은 지도.
 // - 후보지를 고르면 "그 후보지 + 주요 목적지"가 다 들어오도록 확대·이동한다.
@@ -58,29 +59,29 @@ const PAD = 70
 const PAD_ALL = 28 // 후보지 한눈에: 가장자리 여백만 살짝
 const esc = (s: string) => s.replace(/[&<>"]/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' })[c]!)
 const candHtml = (n: number, on: boolean) => `<span class="pin cand${on ? ' on' : ''}">${n}</span>`
-const previewHtml = (name: string) => `<div class="nv-pin"><span class="pin preview"></span><span class="map-label preview-label">${esc(name)}</span></div>`
+const previewHtml = (name: string) => `<div class="nv-pin"><span class="pin preview"></span><span class="map-label preview-label">${esc(pn(name))}</span></div>`
 const RESULT_DOT = '<span class="pin result-dot"></span>'
 const same = (a: Place, b: Place | null | undefined) => !!b && Math.abs(a.lat - b.lat) < 1e-7 && Math.abs(a.lng - b.lng) < 1e-7
 export const PREVIEW_ZOOM = 16
-const majorTitle = (m: Major) => `${m.brand} — ${m.name}${m.addr ? ` · ${m.addr}` : ''}`
+const majorTitle = (m: Major) => `${pn(m.brand)} — ${pn(m.name)}${m.addr ? ` · ${addr(m.addr)}` : ''}`
 const catEmoji = (id: string) => CATEGORIES.find((c) => c.id === id)?.emoji ?? '🏬'
 /** 주요 매장: 이모지 원 + (확대했을 때) 브랜드 이름 */
 /** 추천 카페·식당: ☕/🍽️ 원 + 이름(확대했을 때). 주요 매장 핀과 같은 모양, 테두리 색만 다르다. */
-const spotHtml = (s: Spot, named: boolean) => `<span class="major-pin spot-pin" title="${esc(s.name)} — ${esc(s.address)} (누르면 네이버지도)"><i>${s.kind === '카페' ? '☕' : '🍽️'}</i>${named ? `<b>${esc(s.name)}</b>` : ''}</span>`
-const majorHtml = (m: Major, named: boolean) => `<span class="major-pin${m.inferred ? ' inferred' : ''}" title="${esc(majorTitle(m))}"><i>${catEmoji(m.cat)}</i>${named ? `<b>${esc(m.brand)}</b>` : ''}</span>`
+const spotHtml = (s: Spot, named: boolean) => `<span class="major-pin spot-pin" title="${esc(pn(s.name))} — ${esc(addr(s.address))} ${t('(누르면 네이버지도)', '(click for Naver Map)')}"><i>${s.kind === '카페' ? '☕' : '🍽️'}</i>${named ? `<b>${esc(pn(s.name))}</b>` : ''}</span>`
+const majorHtml = (m: Major, named: boolean) => `<span class="major-pin${m.inferred ? ' inferred' : ''}" title="${esc(majorTitle(m))}"><i>${catEmoji(m.cat)}</i>${named ? `<b>${esc(pn(m.brand))}</b>` : ''}</span>`
 /** 산책: 공원·하천 이모지 원 + (확대했을 때) 이름 */
-const parkHtml = (p: Park, named: boolean) => `<span class="major-pin park-pin" title="${esc(p.kind)} — ${esc(p.name)}"><i>${p.kind === '하천' ? '🌊' : '🌳'}</i>${named ? `<b>${esc(p.name)}</b>` : ''}</span>`
-const libHtml = (l: { name: string; dist: number }) => `<span class="major-pin lib-pin" title="${esc(l.name)} · ${l.dist}m"><i>📚</i><b>${esc(l.name)}</b></span>`
-const parkAreaTitle = (a: ParkArea) => `${a.name} · 공원 점수 ${a.value}`
+const parkHtml = (p: Park, named: boolean) => `<span class="major-pin park-pin" title="${esc(pn(p.kind))} — ${esc(pn(p.name))}"><i>${p.kind === '하천' ? '🌊' : '🌳'}</i>${named ? `<b>${esc(pn(p.name))}</b>` : ''}</span>`
+const libHtml = (l: { name: string; dist: number }) => `<span class="major-pin lib-pin" title="${esc(pn(l.name))} · ${l.dist}m"><i>📚</i><b>${esc(pn(l.name))}</b></span>`
+const parkAreaTitle = (a: ParkArea) => `${pn(a.name)} · ${t('공원 점수', 'park score')} ${a.value}`
 const hubHtml = (h: Hub, on: boolean) => `<span class="pin hub${on ? ' on' : ''}"><b>${hubEmoji(h.category)}</b></span>`
 
 /** 후보지 옆 글자: 이름 + (목적지 기준) 장점·단점 */
 function labelHtml(name: string, ins: Insight | undefined, hub: Hub | undefined) {
   const pros = ins?.pros.length ? `<span class="pro">＋ ${ins.pros.map(esc).join(' · ')}</span>` : ''
   const cons = ins?.cons.length ? `<span class="con">－ ${ins.cons.map(esc).join(' · ')}</span>` : ''
-  const rank = ins?.rank ? ` ${ins.rank}위/${ins.of}` : ''
-  const head = hub ? `<small>${esc(hub.category)} 기준${rank}</small>` : ''
-  return `<b>${esc(name)}</b>${head}${pros}${cons}`
+  const rank = ins?.rank ? ` ${rankText(ins.rank)}/${ins.of}` : ''
+  const head = hub ? `<small>${t(`${esc(hub.category)} 기준${rank}`, `vs ${esc(catName(hub.category))}${rank}`)}</small>` : ''
+  return `<b>${esc(pn(name))}</b>${head}${pros}${cons}`
 }
 
 /** 모든 후보지(한번에 보기) */
@@ -117,26 +118,26 @@ export function MapView(props: Props) {
       {ctx && props.onMapPick && <MapMenu ctx={ctx} onPick={props.onMapPick} onClose={closeCtx} />}
       <div className="map-top">
         {props.hubs.length > 0 && (
-          <div className="hub-switch" role="tablist" aria-label="장단점을 볼 목적지">
-            <span>장단점 기준</span>
+          <div className="hub-switch" role="tablist" aria-label={t('장단점을 볼 목적지', 'Destination for pros and cons')}>
+            <span>{t('장단점 기준', 'Pros/cons for')}</span>
             {props.hubs.map((h) => (
               <button key={h.id} role="tab" aria-selected={h.id === props.hubId} className={h.id === props.hubId ? 'on' : ''} onClick={() => props.onHub(h.id)}>
-                <i aria-hidden>{hubEmoji(h.category)}</i>{h.category}
+                <i aria-hidden>{hubEmoji(h.category)}</i>{catName(h.category)}
               </button>
             ))}
           </div>
         )}
         {props.layers && props.onLayer && (
-          <div className="layer-switch" role="group" aria-label="지도에 보일 지표">
-            <button type="button" aria-pressed={props.layers.com} className={props.layers.com ? 'on' : ''} onClick={() => props.onLayer!('com')}>🏪 상권</button>
-            <button type="button" aria-pressed={props.layers.walk} className={props.layers.walk ? 'on' : ''} onClick={() => props.onLayer!('walk')}>🌳 산책</button>
+          <div className="layer-switch" role="group" aria-label={t('지도에 보일 지표', 'Map layers')}>
+            <button type="button" aria-pressed={props.layers.com} className={props.layers.com ? 'on' : ''} onClick={() => props.onLayer!('com')}>🏪 {t('상권', 'Shops')}</button>
+            <button type="button" aria-pressed={props.layers.walk} className={props.layers.walk ? 'on' : ''} onClick={() => props.onLayer!('walk')}>🌳 {t('산책', 'Walks')}</button>
           </div>
         )}
-        {props.candidates.length > 1 && <button type="button" className="fit-all" onClick={() => setAllKey((k) => k + 1)}>후보지 한눈에</button>}
+        {props.candidates.length > 1 && <button type="button" className="fit-all" onClick={() => setAllKey((k) => k + 1)}>{t('후보지 한눈에', 'Show all candidates')}</button>}
       </div>
       {props.transit && props.transit.legs.length > 0 && (
-        <p className="layer-note route-note" role="status" title="버스 선은 도로를 따라 그린 근사선이에요(실제 노선과 조금 다를 수 있음)">
-          🚌 {props.transit.label}까지 대중교통 <b>{props.transit.min}분</b> · {transitSummary(props.transit.legs)}
+        <p className="layer-note route-note" role="status" title={t('버스 선은 도로를 따라 그린 근사선이에요(실제 노선과 조금 다를 수 있음)', 'Bus lines are approximated along roads (may differ slightly from the real route)')}>
+          🚌 {t(`${props.transit.label}까지 대중교통`, `Transit to ${catName(props.transit.label)}`)} <b>{t(`${props.transit.min}분`, `${props.transit.min} min`)}</b> · {transitSummary(props.transit.legs)}
         </p>
       )}
     </>
@@ -146,7 +147,7 @@ export function MapView(props: Props) {
 /** 우클릭 메뉴: 주소를 (되면) 찾아 보여 주고, 후보지로 / 목적지로 */
 function MapMenu({ ctx, onPick, onClose }: { ctx: Ctx; onPick: NonNullable<Props['onMapPick']>; onClose: () => void }) {
   const ref = useRef<HTMLDivElement>(null)
-  const [addr, setAddr] = useState<RevAddr | null | undefined>(undefined) // undefined = 찾는 중
+  const [found, setAddr] = useState<RevAddr | null | undefined>(undefined) // undefined = 찾는 중
   const [pos, setPos] = useState<{ left: number; top: number } | null>(null)
   useEffect(() => {
     let alive = true
@@ -165,16 +166,16 @@ function MapMenu({ ctx, onPick, onClose }: { ctx: Ctx; onPick: NonNullable<Props
     const el = ref.current
     if (!el) return
     setPos(placeNear(ctx, el.offsetWidth, el.offsetHeight))
-  }, [ctx, addr])
+  }, [ctx, found])
   const coord = `${ctx.lat.toFixed(5)}, ${ctx.lng.toFixed(5)}`
   // 주소는 등록 창이 다시 받아 채운다(같은 좌표는 한 번만 물음) — 여기서는 좌표와 누른 점만 넘긴다(등록 창도 누른 점 옆에)
   const pick = (kind: 'candidate' | 'hub') => { onPick({ name: '', address: '', lat: ctx.lat, lng: ctx.lng, category: '지도' }, kind, { x: ctx.x, y: ctx.y, w: ctx.w, h: ctx.h }); onClose() }
   return (
-    <div ref={ref} className="map-ctx" role="menu" aria-label="이 위치 추가" onContextMenu={(e) => e.preventDefault()}
+    <div ref={ref} className="map-ctx" role="menu" aria-label={t('이 위치 추가', 'Add this location')} onContextMenu={(e) => e.preventDefault()}
       style={pos ?? { left: ctx.x, top: ctx.y, visibility: 'hidden' }}>
-      <small>{addr === undefined ? '주소 찾는 중…' : addr ? (addr.building ? `${addr.building} · ${addr.address}` : addr.address) : coord}</small>
-      <button type="button" role="menuitem" autoFocus onClick={() => pick('candidate')}>📍 후보지로 추가</button>
-      <button type="button" role="menuitem" onClick={() => pick('hub')}>🎯 목적지로 추가</button>
+      <small>{found === undefined ? t('주소 찾는 중…', 'Finding address…') : found ? (found.building ? `${pn(found.building)} · ${addr(found.address)}` : addr(found.address)) : coord}</small>
+      <button type="button" role="menuitem" autoFocus onClick={() => pick('candidate')}>📍 {t('후보지로 추가', 'Add as candidate')}</button>
+      <button type="button" role="menuitem" onClick={() => pick('hub')}>🎯 {t('목적지로 추가', 'Add as destination')}</button>
     </div>
   )
 }
@@ -265,7 +266,7 @@ function NaverMap({ candidates, hubs, active, onSelect, focusKey, hubId, onHub, 
     if (!ready || !naver) return
     resultMarkers.current.forEach((m) => m.setMap(null))
     resultMarkers.current = (results ?? []).filter((r) => !same(r, preview)).map((r) => new naver.maps.Marker({
-      map: map.current, position: new naver.maps.LatLng(r.lat, r.lng), title: r.name, zIndex: 150, clickable: false,
+      map: map.current, position: new naver.maps.LatLng(r.lat, r.lng), title: pn(r.name), zIndex: 150, clickable: false,
       icon: { content: RESULT_DOT, anchor: new naver.maps.Point(6, 6) },
     }))
   }, [ready, results, preview])
@@ -380,8 +381,8 @@ function NaverMap({ candidates, hubs, active, onSelect, focusKey, hubId, onHub, 
     })))
     hubs.forEach((h) => {
       const m = new naver.maps.Marker({
-        map: map.current, position: new naver.maps.LatLng(h.lat, h.lng), title: h.name,
-        icon: { content: `<div class="nv-pin">${hubHtml(h, h.id === hubId)}<span class="map-label">${esc(h.category)} · ${esc(h.name)}</span></div>`, anchor: new naver.maps.Point(15, 15) },
+        map: map.current, position: new naver.maps.LatLng(h.lat, h.lng), title: pn(h.name),
+        icon: { content: `<div class="nv-pin">${hubHtml(h, h.id === hubId)}<span class="map-label">${esc(catName(h.category))} · ${esc(pn(h.name))}</span></div>`, anchor: new naver.maps.Point(15, 15) },
       })
       naver.maps.Event.addListener(m, 'click', () => onHub(h.id))
       layers.current.push(m)
@@ -390,7 +391,7 @@ function NaverMap({ candidates, hubs, active, onSelect, focusKey, hubId, onHub, 
       const on = i === active
       const label = on || detail ? `<span class="map-label ins-label${on ? ' on' : ''}">${labelHtml(c.name, insights[i], hub)}</span>` : ''
       const m = new naver.maps.Marker({
-        map: map.current, position: new naver.maps.LatLng(c.lat, c.lng), title: c.name, zIndex: on ? 100 : 10,
+        map: map.current, position: new naver.maps.LatLng(c.lat, c.lng), title: pn(c.name), zIndex: on ? 100 : 10,
         icon: { content: `<div class="nv-pin">${candHtml(ranks[i] ?? i + 1, on)}${label}</div>`, anchor: new naver.maps.Point(17, 17) },
       })
       naver.maps.Event.addListener(m, 'click', () => onSelect(i))
@@ -434,9 +435,9 @@ function NaverMap({ candidates, hubs, active, onSelect, focusKey, hubId, onHub, 
     <div className="map naver-map" onContextMenu={(e) => e.preventDefault()}>
       <div ref={box} className="naver-box" />
       <div className="map-controls">
-        <button aria-label="확대" onClick={() => zoomBy(1)}>+</button>
-        <button aria-label="고른 후보지와 목적지 보기" onClick={() => fit(true)}>◎</button>
-        <button aria-label="축소" onClick={() => zoomBy(-1)}>−</button>
+        <button aria-label={t('확대', 'Zoom in')} onClick={() => zoomBy(1)}>+</button>
+        <button aria-label={t('고른 후보지와 목적지 보기', 'Show selected candidate and destinations')} onClick={() => fit(true)}>◎</button>
+        <button aria-label={t('축소', 'Zoom out')} onClick={() => zoomBy(-1)}>−</button>
       </div>
     </div>
   )
@@ -482,9 +483,9 @@ function Controls({ pts }: { pts: [number, number][] }) {
   const map = useMap()
   return (
     <div className="map-controls" ref={(el) => { if (el) { L.DomEvent.disableClickPropagation(el); L.DomEvent.disableScrollPropagation(el) } }}>
-      <button aria-label="확대" onClick={() => map.zoomIn()}>+</button>
-      <button aria-label="고른 후보지와 목적지 보기" onClick={() => fitSmart(map, pts, true)}>◎</button>
-      <button aria-label="축소" onClick={() => map.zoomOut()}>−</button>
+      <button aria-label={t('확대', 'Zoom in')} onClick={() => map.zoomIn()}>+</button>
+      <button aria-label={t('고른 후보지와 목적지 보기', 'Show selected candidate and destinations')} onClick={() => fitSmart(map, pts, true)}>◎</button>
+      <button aria-label={t('축소', 'Zoom out')} onClick={() => map.zoomOut()}>−</button>
     </div>
   )
 }
@@ -547,7 +548,7 @@ function OsmMap({ candidates, hubs, active, onSelect, focusKey, hubId, onHub, in
       {hubs.map((h) => (
         <Marker key={h.id} position={[h.lat, h.lng]} icon={L.divIcon({ className: 'pin-shell', html: hubHtml(h, h.id === hubId), iconSize: [30, 30], iconAnchor: [15, 15] })}
           eventHandlers={{ click: () => onHub(h.id) }}>
-          <Tooltip permanent direction="right" offset={[14, 0]} className="map-label">{h.category} · {h.name}</Tooltip>
+          <Tooltip permanent direction="right" offset={[14, 0]} className="map-label">{catName(h.category)} · {pn(h.name)}</Tooltip>
         </Marker>
       ))}
       {candidates.map((c, i) => {
@@ -565,11 +566,11 @@ function OsmMap({ candidates, hubs, active, onSelect, focusKey, hubId, onHub, in
       })}
       {preview && (
         <Marker position={[preview.lat, preview.lng]} zIndexOffset={2000} icon={L.divIcon({ className: 'pin-shell', html: '<span class="pin preview"></span>', iconSize: [16, 16], iconAnchor: [8, 8] })}>
-          <Tooltip permanent direction="right" offset={[8, 0]} className="map-label preview-label">{preview.name}</Tooltip>
+          <Tooltip permanent direction="right" offset={[8, 0]} className="map-label preview-label">{pn(preview.name)}</Tooltip>
         </Marker>
       )}
       {(results ?? []).filter((r) => !same(r, preview)).map((r, i) => (
-        <Marker key={`r${i}-${r.lat}-${r.lng}`} position={[r.lat, r.lng]} zIndexOffset={1500} interactive={false} title={r.name}
+        <Marker key={`r${i}-${r.lat}-${r.lng}`} position={[r.lat, r.lng]} zIndexOffset={1500} interactive={false} title={pn(r.name)}
           icon={L.divIcon({ className: 'pin-shell', html: RESULT_DOT, iconSize: [12, 12], iconAnchor: [6, 6] })} />
       ))}
       <PreviewFly preview={previewFly === false ? null : preview ?? null} />

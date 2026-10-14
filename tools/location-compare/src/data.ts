@@ -1,4 +1,5 @@
 import type { PropertyUse } from './brokerage'
+import { isEn, manEn, t } from './i18n'
 
 // 처음 열었을 때의 후보지·목적지·선호도(기본값). 방문자가 검색으로 바꾼 목록은 그 브라우저에만 저장되고(store.ts),
 // "처음 목록으로"를 누르면 여기로 돌아온다.
@@ -41,9 +42,9 @@ export const HUBS: Hub[] = HUB_LIST.slice(0, MAX_HUBS)
 export type Profile = { id: string; label: string; emoji: string; note: string; candidates: Candidate[]; hubs: Hub[] }
 const school = (id: string, name: string, address: string, lat: number, lng: number): Hub => ({ id, name, category: '학교', address, lat, lng })
 export const PROFILES: Profile[] = [
-  { id: 'me', label: '나', emoji: '🙂', note: '경희대 국제캠퍼스 · 분당 본가', candidates: CANDIDATES, hubs: HUBS },
+  { id: 'me', label: t('나', 'Me'), emoji: '🙂', note: t('경희대 국제캠퍼스 · 분당 본가', 'Kyung Hee Univ. Global Campus · family home in Bundang'), candidates: CANDIDATES, hubs: HUBS },
   {
-    id: 'skku', label: '성균관대', emoji: '🧪', note: '시험용 · 자연과학캠퍼스(수원 율전동)',
+    id: 'skku', label: t('성균관대', 'SKKU'), emoji: '🧪', note: t('시험용 · 자연과학캠퍼스(수원 율전동)', 'Test · Natural Sciences Campus (Yuljeon-dong, Suwon)'),
     hubs: [school('hk', '성균관대학교 자연과학캠퍼스', '경기도 수원시 장안구 서부로 2066', 37.29336, 126.97465)],
     candidates: [
       { id: 'k1', name: '성균관대역 서부로', address: '경기도 수원시 장안구 서부로 2119', lat: 37.29787, lng: 126.9708 },
@@ -53,7 +54,7 @@ export const PROFILES: Profile[] = [
     ],
   },
   {
-    id: 'ajou', label: '아주대', emoji: '🧪', note: '시험용 · 수원 원천동',
+    id: 'ajou', label: t('아주대', 'Ajou'), emoji: '🧪', note: t('시험용 · 수원 원천동', 'Test · Woncheon-dong, Suwon'),
     hubs: [school('ha', '아주대학교', '경기도 수원시 영통구 월드컵로 206', 37.28338, 127.04607)],
     candidates: [
       { id: 'a1', name: '아주대 정문 아주로', address: '경기도 수원시 팔달구 아주로 25', lat: 37.27708, lng: 127.04369 },
@@ -63,7 +64,7 @@ export const PROFILES: Profile[] = [
     ],
   },
   {
-    id: 'kgu', label: '경기대', emoji: '🧪', note: '시험용 · 수원캠퍼스(연무동·광교)',
+    id: 'kgu', label: t('경기대', 'Kyonggi'), emoji: '🧪', note: t('시험용 · 수원캠퍼스(연무동·광교)', 'Test · Suwon Campus (Yeonmu-dong · Gwanggyo)'),
     hubs: [school('hg', '경기대학교 수원캠퍼스', '경기도 수원시 영통구 광교산로 154-42', 37.30056, 127.03474)],
     candidates: [
       { id: 'g1', name: '경기대 정문 광교산로', address: '경기도 수원시 장안구 광교산로140번길 3', lat: 37.29998, lng: 127.0305 },
@@ -73,7 +74,7 @@ export const PROFILES: Profile[] = [
     ],
   },
   {
-    id: 'yonsei', label: '연세대', emoji: '🧪', note: '시험용 · 신촌캠퍼스',
+    id: 'yonsei', label: t('연세대', 'Yonsei'), emoji: '🧪', note: t('시험용 · 신촌캠퍼스', 'Test · Sinchon Campus'),
     hubs: [school('hy', '연세대학교 신촌캠퍼스', '서울특별시 서대문구 연세로 50', 37.56711, 126.93903)],
     candidates: [
       { id: 'y1', name: '신촌역 연세로', address: '서울특별시 서대문구 연세로9길 7', lat: 37.55846, lng: 126.93646 },
@@ -99,10 +100,10 @@ export type Preference = { weights: Weights; weekly: Record<string, number>; hub
  *  비율은 설정 창 "세부설정"에서 라이프스타일마다 바꿀 수 있다(pref.lifeCustom[id], 기본값 단추로 되돌림). */
 export type Lifestyle = { id: string; emoji: string; label: string; note: string; weights: Weights; bike: boolean }
 export const LIFESTYLES: Lifestyle[] = [
-  { id: 'transit', emoji: '🚇', label: '대중교통 출퇴근', note: '차 없이 버스·지하철로 다님', weights: { transit: 95, car: 5, walk: 0, bike: 0 }, bike: false },
-  { id: 'car', emoji: '🚗', label: '자차 출퇴근', note: '주로 내 차로 다님', weights: { transit: 5, car: 90, walk: 5, bike: 0 }, bike: false },
-  { id: 'walk', emoji: '🚶', label: '걸어서 동네 생활', note: '가까운 곳은 걸어감, 먼 곳만 대중교통', weights: { transit: 20, car: 0, walk: 80, bike: 0 }, bike: false },
-  { id: 'bike', emoji: '🚲', label: '자전거 생활', note: '자전거로 다니고 비 오면 대중교통', weights: { transit: 10, car: 0, walk: 10, bike: 80 }, bike: true },
+  { id: 'transit', emoji: '🚇', label: t('대중교통 출퇴근', 'Transit commuter'), note: t('차 없이 버스·지하철로 다님', 'No car — bus and subway'), weights: { transit: 95, car: 5, walk: 0, bike: 0 }, bike: false },
+  { id: 'car', emoji: '🚗', label: t('자차 출퇴근', 'Car commuter'), note: t('주로 내 차로 다님', 'Mostly drive my own car'), weights: { transit: 5, car: 90, walk: 5, bike: 0 }, bike: false },
+  { id: 'walk', emoji: '🚶', label: t('걸어서 동네 생활', 'Walk-around local life'), note: t('가까운 곳은 걸어감, 먼 곳만 대중교통', 'Walk nearby, transit only for far places'), weights: { transit: 20, car: 0, walk: 80, bike: 0 }, bike: false },
+  { id: 'bike', emoji: '🚲', label: t('자전거 생활', 'Bike life'), note: t('자전거로 다니고 비 오면 대중교통', 'Ride a bike, transit when it rains'), weights: { transit: 10, car: 0, walk: 10, bike: 80 }, bike: true },
 ]
 export const lifestyleOf = (p: Pick<Preference, 'lifestyle'>) => LIFESTYLES.find((l) => l.id === p.lifestyle) ?? null
 /** 라이프스타일의 지금 비율 = 세부설정에서 바꾼 값, 없으면 기본 */
@@ -128,9 +129,11 @@ export const MODE_KEYS: ModeKey[] = ['transit', 'car', 'walk', 'bike']
 export const activeModes = (p: Pick<Preference, 'bike'>): ModeKey[] => (p.bike ? MODE_KEYS : ['transit', 'car', 'walk'])
 /** "주 5회" · "주 1회(월 4회)" · "격주(주 0.5회)" */
 export function weeklyText(n: number): string {
-  if (n === 0) return '안 감'
+  if (n === 0) return t('안 감', 'never')
   const w = Number.isInteger(n) ? String(n) : n.toFixed(1)
-  return n < 1 ? `월 ${Math.round(n * WEEKS_PER_MONTH * 10) / 10}회` : `주 ${w}회`
+  const m = Math.round(n * WEEKS_PER_MONTH * 10) / 10
+  if (isEn) return n < 1 ? `${m}×/month` : `${w}×/week`
+  return n < 1 ? `월 ${m}회` : `주 ${w}회`
 }
 
 /** 가중치를 합 100 기준 비율(정수)로. 합이 100을 넘거나 모자라도 비율만 본다(반올림 차이는 큰 나머지 순으로 맞춤). 합 0 이면 똑같이.
@@ -154,8 +157,9 @@ export function baseRent(c: Pick<Candidate, 'deposit' | 'rent'>): number | null 
   if (c.rent === undefined && c.deposit === undefined) return null
   return Math.max(0, Math.round((c.rent ?? 0) + ((c.deposit ?? 0) - BASE_DEPOSIT) * CONVERSION_RATE / 12))
 }
-/** 1,000 → "1,000", 15000 → "1억 5,000" (만원 단위) */
+/** 1,000 → "1,000", 15000 → "1억 5,000" (만원 단위) — 영어 화면은 "₩10M"·"₩150M"(단위 포함) */
 export function won(v: number): string {
+  if (isEn) return manEn(v)
   const eok = Math.floor(v / 10000), man = v % 10000
   return eok ? `${eok}억${man ? ' ' + man.toLocaleString('ko-KR') : ''}` : man.toLocaleString('ko-KR')
 }

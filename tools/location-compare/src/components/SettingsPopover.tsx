@@ -1,4 +1,5 @@
 import { useEffect, useRef, useState } from 'react'
+import { catName, pn, t } from '../i18n'
 import { DEFAULT_PREFERENCE, LIFESTYLES, MAX_WEEKLY, WEEKS_PER_MONTH, applyLifestyle, defaultWeekly, lifestyleOf, lifestyleWeights, setLifestyleWeights, weightShares, type Hub, type HubMode, type ModeKey, type Preference } from '../data'
 
 // 칸(카드)을 누르면 그 칸 바로 오른쪽에 뜨는 작은 설정 창. 바꾸는 즉시 점수에 반영되고 이 브라우저에 저장된다.
@@ -8,12 +9,12 @@ import { DEFAULT_PREFERENCE, LIFESTYLES, MAX_WEEKLY, WEEKS_PER_MONTH, applyLifes
 type Props = { kind: 'weekly' | 'weights'; hubs: Hub[]; value: Preference; onChange: (p: Preference) => void; onClose: () => void }
 
 export const MODE_INFO: Record<ModeKey, { label: string; emoji: string; note: string }> = {
-  transit: { label: '대중교통', emoji: '🚌', note: '대기·정류장까지 도보·환승' },
-  car: { label: '차량', emoji: '🚗', note: '정체 · 거리 대비 시간 · 대로 진입' },
-  walk: { label: '도보', emoji: '🚶', note: '걷는 시간 · 10분까지 도보권' },
-  bike: { label: '자전거', emoji: '🚲', note: '자전거 길 시간 · 40분까지' },
+  transit: { label: t('대중교통', 'Transit'), emoji: '🚌', note: t('대기·정류장까지 도보·환승', 'wait · walk to stop · transfers') },
+  car: { label: t('차량', 'Car'), emoji: '🚗', note: t('정체 · 거리 대비 시간 · 대로 진입', 'congestion · time vs distance · arterial access') },
+  walk: { label: t('도보', 'Walk'), emoji: '🚶', note: t('걷는 시간 · 10분까지 도보권', 'walking time · walkable up to 10 min') },
+  bike: { label: t('자전거', 'Bike'), emoji: '🚲', note: t('자전거 길 시간 · 40분까지', 'bike-path time · up to 40 min') },
 }
-const HUB_MODES: { m: HubMode; label: string }[] = [{ m: 'auto', label: '자동' }, { m: 'transit', label: '🚌' }, { m: 'car', label: '🚗' }, { m: 'walk', label: '🚶' }, { m: 'bike', label: '🚲' }]
+const HUB_MODES: { m: HubMode; label: string }[] = [{ m: 'auto', label: t('자동', 'Auto') }, { m: 'transit', label: '🚌' }, { m: 'car', label: '🚗' }, { m: 'walk', label: '🚶' }, { m: 'bike', label: '🚲' }]
 
 export function SettingsPopover({ kind, hubs, value, onChange, onClose }: Props) {
   const box = useRef<HTMLDivElement>(null)
@@ -45,13 +46,13 @@ export function SettingsPopover({ kind, hubs, value, onChange, onClose }: Props)
     : { ...value, weekly: Object.fromEntries(hubs.map((h) => [h.id, defaultWeekly(h.category)])), hubMode: {} })
 
   return (
-    <div className="popover" ref={box} role="dialog" aria-label={kind === 'weights' ? '라이프스타일 고르기' : '목적지 방문 횟수·이동수단 조정'}>
+    <div className="popover" ref={box} role="dialog" aria-label={kind === 'weights' ? t('라이프스타일 고르기', 'Choose a lifestyle') : t('목적지 방문 횟수·이동수단 조정', 'Visits and travel mode per destination')}>
       <div className="pop-head">
-        <b>{kind === 'weights' ? '라이프스타일' : '주 방문 횟수 · 이동수단'}</b>
-        <button className="close" aria-label="닫기" onClick={onClose}>×</button>
+        <b>{kind === 'weights' ? t('라이프스타일', 'Lifestyle') : t('주 방문 횟수 · 이동수단', 'Visits per week · travel mode')}</b>
+        <button className="close" aria-label={t('닫기', 'Close')} onClick={onClose}>×</button>
       </div>
       {kind === 'weights' ? (
-        <div className="life-list" role="radiogroup" aria-label="라이프스타일">
+        <div className="life-list" role="radiogroup" aria-label={t('라이프스타일', 'Lifestyle')}>
           {LIFESTYLES.map((l) => {
             const keys: ModeKey[] = l.bike ? ['transit', 'car', 'walk', 'bike'] : ['transit', 'car', 'walk']
             const sh = weightShares(lifestyleWeights(value, l), keys)
@@ -59,7 +60,7 @@ export function SettingsPopover({ kind, hubs, value, onChange, onClose }: Props)
             return (
               <button type="button" key={l.id} role="radio" aria-checked={on} className={'life-card' + (on ? ' on' : '')} onClick={() => onChange(applyLifestyle(value, l.id))}>
                 <span className="life-emoji" aria-hidden>{l.emoji}</span>
-                <span className="life-text"><b>{l.label}{value.lifeCustom?.[l.id] ? <i className="life-custom">세부설정</i> : null}</b><small>{l.note}</small>
+                <span className="life-text"><b>{l.label}{value.lifeCustom?.[l.id] ? <i className="life-custom">{t('세부설정', 'custom')}</i> : null}</b><small>{l.note}</small>
                   <span className="life-bar" aria-label={keys.map((k) => `${MODE_INFO[k].label} ${sh[k]}%`).join(' · ')}>
                     {keys.map((k) => <i key={k} className={k} style={{ width: `${sh[k]}%` }} />)}
                   </span>
@@ -67,16 +68,16 @@ export function SettingsPopover({ kind, hubs, value, onChange, onClose }: Props)
               </button>
             )
           })}
-          {!value.lifestyle && <p className="sum-note">지금은 예전에 숫자로 정한 비율을 쓰는 중 — 하나를 고르면 바뀝니다.</p>}
+          {!value.lifestyle && <p className="sum-note">{t('지금은 예전에 숫자로 정한 비율을 쓰는 중 — 하나를 고르면 바뀝니다.', 'Currently using an older custom mix — pick one to switch.')}</p>}
           {detail && (
-            <div className="life-detail" role="group" aria-label={`${life ? life.label : '직접 정한'} 수단 비율`}>
-              <b>{life ? `${life.emoji} ${life.label}` : '직접 정한 비율'} 비율</b>
+            <div className="life-detail" role="group" aria-label={t(`${life ? life.label : '직접 정한'} 수단 비율`, `${life ? life.label : 'Custom'} mode mix`)}>
+              <b>{life ? `${life.emoji} ${life.label}` : t('직접 정한 비율', 'Custom mix')} {t('비율', 'mix')}</b>
               {detailKeys.map((k) => (
                 <label key={k}><span><span className={`dot ${k}`} />{MODE_INFO[k].label}</span>
                   <span className="unit-input"><input type="number" min={0} max={100} step={5} inputMode="numeric" value={value.weights[k] ?? 0} onFocus={(e) => e.currentTarget.select()} onChange={(e) => setW(k, Number(e.target.value))} /><i>%</i></span>
                 </label>
               ))}
-              <small className={wSum === 100 ? 'muted' : 'warn'}>합 {wSum}{wSum === 100 ? '' : ` — 100 ${wSum > 100 ? '초과' : '부족'}(비율로 계산)`}</small>
+              <small className={wSum === 100 ? 'muted' : 'warn'}>{t('합', 'Sum')} {wSum}{wSum === 100 ? '' : t(` — 100 ${wSum > 100 ? '초과' : '부족'}(비율로 계산)`, ` — ${wSum > 100 ? 'over' : 'under'} 100 (used as ratios)`)}</small>
             </div>
           )}
         </div>
@@ -85,21 +86,21 @@ export function SettingsPopover({ kind, hubs, value, onChange, onClose }: Props)
         const mode = value.hubMode?.[h.id] ?? 'auto'
         return (
           <div className="trips" key={h.id}>
-            <span><b>{h.name}</b><small>{h.category} · 주 0~{MAX_WEEKLY}회(0.5 단위) · 월 {Math.round(n * WEEKS_PER_MONTH * 10) / 10}회</small></span>
+            <span><b>{pn(h.name)}</b><small>{catName(h.category)} · {t(`주 0~${MAX_WEEKLY}회(0.5 단위) · 월 ${Math.round(n * WEEKS_PER_MONTH * 10) / 10}회`, `0–${MAX_WEEKLY}×/week (steps of 0.5) · ${Math.round(n * WEEKS_PER_MONTH * 10) / 10}×/month`)}</small></span>
             <span className="stepper">
-              <input type="number" min={0} max={MAX_WEEKLY} step={0.5} inputMode="decimal" aria-label={`${h.name} 주 방문 횟수`} value={n} onFocus={(e) => e.currentTarget.select()} onChange={(e) => setWeekly(h.id, Number(e.target.value))} />
+              <input type="number" min={0} max={MAX_WEEKLY} step={0.5} inputMode="decimal" aria-label={t(`${h.name} 주 방문 횟수`, `${pn(h.name)} visits per week`)} value={n} onFocus={(e) => e.currentTarget.select()} onChange={(e) => setWeekly(h.id, Number(e.target.value))} />
             </span>
-            <span className="hub-mode seg" role="radiogroup" aria-label={`${h.name} 이동수단`} title="자동 = 수단 가중치로 섞음. 수단을 고르면 이 목적지 점수는 그 수단만으로(다른 수단은 카드에 회색으로 참고)">
+            <span className="hub-mode seg" role="radiogroup" aria-label={t(`${h.name} 이동수단`, `${pn(h.name)} travel mode`)} title={t('자동 = 수단 가중치로 섞음. 수단을 고르면 이 목적지 점수는 그 수단만으로(다른 수단은 카드에 회색으로 참고)', 'Auto = blend modes by weight. Pick a mode to score this destination by that mode only (others shown in grey)')}>
               {HUB_MODES.filter((x) => x.m !== 'bike' || value.bike).map((x) => (
-                <button key={x.m} type="button" role="radio" aria-checked={mode === x.m} className={mode === x.m ? 'on' : ''} aria-label={x.m === 'auto' ? '자동' : MODE_INFO[x.m as ModeKey].label} onClick={() => setMode(h.id, x.m)}>{x.label}</button>
+                <button key={x.m} type="button" role="radio" aria-checked={mode === x.m} className={mode === x.m ? 'on' : ''} aria-label={x.m === 'auto' ? t('자동', 'Auto') : MODE_INFO[x.m as ModeKey].label} onClick={() => setMode(h.id, x.m)}>{x.label}</button>
               ))}
             </span>
           </div>
         )
       })}
       <div className="pop-foot">
-        {kind === 'weights' && <button type="button" className="link detail-link" aria-expanded={detail} onClick={() => setDetail(!detail)}>세부설정 {detail ? '▴' : '▾'}</button>}
-        <button className="ghost" onClick={reset}>기본값</button><span className="spacer" /><button className="solid" onClick={onClose}>완료</button>
+        {kind === 'weights' && <button type="button" className="link detail-link" aria-expanded={detail} onClick={() => setDetail(!detail)}>{t('세부설정', 'Fine-tune')} {detail ? '▴' : '▾'}</button>}
+        <button className="ghost" onClick={reset}>{t('기본값', 'Reset')}</button><span className="spacer" /><button className="solid" onClick={onClose}>{t('완료', 'Done')}</button>
       </div>
     </div>
   )

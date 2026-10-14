@@ -8,6 +8,10 @@
 import data from './commercial.json'
 import type { Candidate } from './data'
 import { isDefaultCandidate, liveAnalysis } from './live'
+import { pn, t } from './i18n'
+
+/** 업종 이름(영어 화면) — commercial-categories.json 에 업종을 더하면 여기도 */
+const CAT_EN: Record<string, string> = { cafe: 'Café', goods: 'Variety', mart: 'Grocery', clinic: 'Medical', food: 'Restaurant' }
 
 export type Tier = 'need' | 'want' | 'off'
 export type CommercialPrefs = { on: boolean; need: string[]; want: string[] }
@@ -33,7 +37,7 @@ export const catScore = (id: string, n: number, brand = 0) => {
   return bp ? sat(n, ENOUGH[id]) * (1 - bp.weight) + sat(brand, bp.enough) * bp.weight : sat(n, ENOUGH[id])
 }
 export const STDR_YM = data.stdrYm
-export const CATEGORIES: CatInfo[] = data.categories.map(({ id, label, emoji }) => ({ id, label, emoji }))
+export const CATEGORIES: CatInfo[] = data.categories.map(({ id, label, emoji }) => ({ id, label: t(label, CAT_EN[id] ?? pn(label)), emoji }))
 export const MAJORS = data.majors as Major[]
 
 type Row = { lat: number; lng: number; counts: Record<string, Record<string, number>>; brand?: Record<string, Record<string, number>> }

@@ -3,6 +3,7 @@
 import { distanceKm } from './scoring'
 import type { Candidate } from './data'
 import areas from './park-areas.json'
+import { t } from './i18n'
 
 export type Park = { id: string; name: string; kind: '공원' | '하천'; lat: number; lng: number }
 export const STROLL_RADIUS = 800 // m — 도보 약 10분
@@ -21,7 +22,7 @@ export async function loadParks(cs: Candidate[]): Promise<Park[]> {
   const around = cs.map((c) => `(around:${STROLL_RADIUS},${c.lat},${c.lng})`)
   const q = `[out:json][timeout:25];(${around.map((a) => `nwr["leisure"="park"]["name"]${a};way["waterway"~"^(river|stream)$"]["name"]${a};`).join('')});out center tags;`
   const res = await fetch(ENDPOINT, { method: 'POST', body: 'data=' + encodeURIComponent(q), headers: { 'Content-Type': 'application/x-www-form-urlencoded' } })
-  if (!res.ok) throw new Error('공원 자료를 받지 못했습니다.')
+  if (!res.ok) throw new Error(t('공원 자료를 받지 못했습니다.', 'Could not load park data.'))
   const j = await res.json() as { elements: { id: number; type: string; lat?: number; lon?: number; center?: { lat: number; lon: number }; tags?: Record<string, string> }[] }
   const seen = new Set<string>()
   const parks: Park[] = []

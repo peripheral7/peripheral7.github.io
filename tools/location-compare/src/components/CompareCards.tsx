@@ -6,6 +6,9 @@ import { money } from '../store'
 import { CATEGORIES, type CommercialIndex } from '../commercial'
 import { SLOT_TEXT, liveNote } from '../live'
 import { placeOf } from '../places'
+import { MAN_UNIT, addr, catName, isEn, manEn, mins, pn, t } from '../i18n'
+
+const MODE_NAME: Record<ModeKey, string> = { transit: t('대중교통', 'Transit'), car: t('차량', 'Car'), walk: t('도보', 'Walk'), bike: t('자전거', 'Bike') }
 
 // 아래쪽: 후보지 카드를 가로로 늘어놓는다. 모든 카드가 같은 줄(행)을 공유해서(CSS subgrid)
 // "대중교통" 줄을 옆으로 읽으면 후보지끼리 대기·역까지 도보·환승을, "차량" 줄은 출퇴근/낮 차이를 바로 비교할 수 있다.
@@ -21,18 +24,18 @@ function EditForm({ e, address, onChange, onSave, onCancel, onDelete }: { e: Edi
   return (
     <div className="card-edit" onClick={(ev) => ev.stopPropagation()} onKeyDown={(ev) => { ev.stopPropagation(); if (ev.key === 'Escape') onCancel() }}>
       <form className="cand-edit" onSubmit={(ev) => { ev.preventDefault(); onSave() }}>
-        <span className="tag">후보지 수정</span>
-        <label>이름<input spellCheck={false} autoComplete="off" value={e.name} maxLength={40} autoFocus onChange={(ev) => onChange({ ...e, name: ev.target.value })} /></label>
-        <label>보증금<span className="unit-input"><input type="number" min={0} step={100} inputMode="numeric" placeholder="예: 1000" value={e.deposit} onChange={(ev) => onChange({ ...e, deposit: ev.target.value })} /><i>만원</i></span></label>
-        <label>월세<span className="unit-input"><input type="number" min={0} step={1} inputMode="numeric" placeholder="예: 50" value={e.rent} onChange={(ev) => onChange({ ...e, rent: ev.target.value })} /><i>만원</i></span></label>
-        <label>관리비<span className="unit-input"><input type="number" min={0} step={1} inputMode="numeric" placeholder="예: 7" value={e.maint} onChange={(ev) => onChange({ ...e, maint: ev.target.value })} /><i>만원</i></span></label>
-        <label>용도<select value={e.use} onChange={(ev) => onChange({ ...e, use: ev.target.value as PropertyUse })}>{(Object.keys(USE_LABEL) as PropertyUse[]).map((u) => <option key={u} value={u}>{USE_LABEL[u]}{u === 'officetel' ? '(85㎡ 이하·부엌·욕실)' : ''}</option>)}</select></label>
-        <p className="muted">{address}</p>
+        <span className="tag">{t('후보지 수정', 'Edit candidate')}</span>
+        <label>{t('이름', 'Name')}<input spellCheck={false} autoComplete="off" value={e.name} maxLength={40} autoFocus onChange={(ev) => onChange({ ...e, name: ev.target.value })} /></label>
+        <label>{t('보증금', 'Deposit')}<span className="unit-input"><input type="number" min={0} step={100} inputMode="numeric" placeholder={t('예: 1000', 'e.g. 1000')} value={e.deposit} onChange={(ev) => onChange({ ...e, deposit: ev.target.value })} /><i>{MAN_UNIT}</i></span></label>
+        <label>{t('월세', 'Monthly rent')}<span className="unit-input"><input type="number" min={0} step={1} inputMode="numeric" placeholder={t('예: 50', 'e.g. 50')} value={e.rent} onChange={(ev) => onChange({ ...e, rent: ev.target.value })} /><i>{MAN_UNIT}</i></span></label>
+        <label>{t('관리비', 'Maint. fee')}<span className="unit-input"><input type="number" min={0} step={1} inputMode="numeric" placeholder={t('예: 7', 'e.g. 7')} value={e.maint} onChange={(ev) => onChange({ ...e, maint: ev.target.value })} /><i>{MAN_UNIT}</i></span></label>
+        <label>{t('용도', 'Use')}<select value={e.use} onChange={(ev) => onChange({ ...e, use: ev.target.value as PropertyUse })}>{(Object.keys(USE_LABEL) as PropertyUse[]).map((u) => <option key={u} value={u}>{USE_LABEL[u]}{u === 'officetel' ? t('(85㎡ 이하·부엌·욕실)', ' (≤85㎡, kitchen, bath)') : ''}</option>)}</select></label>
+        <p className="muted">{addr(address)}</p>
         <div className="edit-actions">
-          <button type="button" className="danger" onClick={onDelete}>삭제</button>
+          <button type="button" className="danger" onClick={onDelete}>{t('삭제', 'Delete')}</button>
           <span />
-          <button type="button" className="ghost" onClick={onCancel}>취소</button>
-          <button type="submit" className="solid">저장</button>
+          <button type="button" className="ghost" onClick={onCancel}>{t('취소', 'Cancel')}</button>
+          <button type="submit" className="solid">{t('저장', 'Save')}</button>
         </div>
       </form>
     </div>
@@ -48,43 +51,47 @@ const Line = ({ v, kind }: { v: number; kind: 'total' | 'hub' | ModeKey | 'com' 
 // + 관리비 · 월 합계(월세 + 관리비) · 예상 중개수수료(법정 상한, 한쪽 몫, 부가세 별도 — brokerage.ts)
 function RentCell({ c, sect }: { c: Candidate; sect?: boolean }) {
   const b = baseRent(c)
-  if (b === null) return <div className={"cell rent-cell" + (sect ? " sect" : "")}><span className="muted">미입력 · 수정에서 입력</span></div>
+  if (b === null) return <div className={"cell rent-cell" + (sect ? " sect" : "")}><span className="muted">{t('미입력 · 수정에서 입력', 'Not set · add via ✎')}</span></div>
   const use = c.use ?? 'home'
   const f = brokerageFee(use, 'lease', c)
   return (
     <div className={"cell rent-cell" + (sect ? " sect" : "")}>
-      <b>{won(c.deposit ?? 0)} / {c.rent ?? 0}<small>만원</small>{c.maint ? <small> · 관리비 {c.maint}</small> : null}</b>
-      <small className="faint">보증금 {won(BASE_DEPOSIT)} 기준 월 {b}만원{c.maint ? ` · 월 합계 ${(c.rent ?? 0) + c.maint}만원` : ''}</small>
-      <small className="faint" title={`${f.formula} · ${f.basis} · 부가세 별도`}>{useGroup(use)} · 중개수수료 최대 {feeText(f.fee)}</small>
+      {isEn
+        ? <b>{won(c.deposit ?? 0)} / {manEn(c.rent ?? 0)}{c.maint ? <small> · maint. {manEn(c.maint)}</small> : null}</b>
+        : <b>{won(c.deposit ?? 0)} / {c.rent ?? 0}<small>만원</small>{c.maint ? <small> · 관리비 {c.maint}</small> : null}</b>}
+      <small className="faint">{isEn
+        ? `≈ ${manEn(b)}/mo at ${won(BASE_DEPOSIT)} deposit${c.maint ? ` · total ${manEn((c.rent ?? 0) + c.maint)}/mo` : ''}`
+        : `보증금 ${won(BASE_DEPOSIT)} 기준 월 ${b}만원${c.maint ? ` · 월 합계 ${(c.rent ?? 0) + c.maint}만원` : ''}`}</small>
+      <small className="faint" title={`${f.formula} · ${f.basis} · ${t('부가세 별도', 'VAT excluded')}`}>{useGroup(use)} · {t('중개수수료 최대', 'broker fee up to')} {feeText(f.fee)}</small>
     </div>
   )
 }
 
 // 상권 종합: 지수 + 필수 업종의 도보 5분 안 개수(선호는 연하게)
 function ComCell({ x, best, c }: { x: CommercialIndex | undefined; best: boolean; c: Candidate }) {
-  if (x === undefined) return <div className="cell mode-cell"><div><span className="muted">입지 요인 ⚙ 에서 켜면 표시</span></div></div>
-  if (x === null) return <div className="cell mode-cell"><div><span className="muted">상권 {liveNote(c)}</span></div></div>
+  if (x === undefined) return <div className="cell mode-cell"><div><span className="muted">{t('입지 요인 ⚙ 에서 켜면 표시', 'Turn on in Location factors ⚙')}</span></div></div>
+  if (x === null) return <div className="cell mode-cell"><div><span className="muted">{t('상권', 'Shops')} {liveNote(c)}</span></div></div>
   // 고른 업종(필수 → 선호)을 이름·개수로 보이고, 업종 점수가 5점 이상이면 초록색
   const items = (t: 'need' | 'want') => x.parts.filter((p) => p.tier === t).map((p) => (
-    <span key={p.id} className={p.score >= 5 ? 'com-ok' : undefined}>{CATEGORIES.find((c) => c.id === p.id)?.label} {p.count}</span>
+    <span key={p.id} className={p.score >= 5 ? 'com-ok' : undefined}>{CATEGORIES.find((q) => q.id === p.id)?.label} {p.count}</span>
   ))
   const join = (a: ReactNode[]) => a.flatMap((e, i) => (i ? [' · ', e] : [e]))
   const need = items('need'), want = items('want')
   return (
     <div className="cell mode-cell">
-      <div><b>{join(need.length ? need : want)}</b>{need.length > 0 && want.length > 0 && <small>선호 {join(want)}</small>}</div>
+      <div><b>{join(need.length ? need : want)}</b>{need.length > 0 && want.length > 0 && <small>{t('선호', 'nice-to-have')} {join(want)}</small>}</div>
       <em className={best ? 'best' : ''}>{fmt(x.score)}<Line v={x.score} kind="com" /></em>
     </div>
   )
 }
 
 // 차량 시간대 표시: 두 기준 시각 평균이면 "실측", 하나뿐이면 "1회", 등록 때 잰 임시 값이면 "등록 시각", 없으면 "추정"
-const slotTag = (s: CarSlot | null) => (!s ? '(추정)' : slotDone(s) ? '' : s.provisional ? '(등록 시각)' : '(1회)')
+const slotTag = (s: CarSlot | null) => (!s ? t('(추정)', ' (est.)') : slotDone(s) ? '' : s.provisional ? t('(등록 시각)', ' (at sign-up)') : t('(1회)', ' (1 sample)'))
 function carNote(h: HubResult): string {
   const { free, rush } = h.trip.carSource
-  if (slotDone(free) && slotDone(rush)) return '네이버 실측(기준 시각 평균)'
-  const todo = [!slotDone(rush) && `출퇴근 ${SLOT_TEXT.rush}`, !slotDone(free) && `낮 ${SLOT_TEXT.free}`].filter(Boolean).join(' · ')
-  return `실측 예정: ${todo}`
+  if (slotDone(free) && slotDone(rush)) return t('네이버 실측(기준 시각 평균)', 'Naver measured (avg. of reference times)')
+  const todo = [!slotDone(rush) && `${t('출퇴근', 'rush')} ${SLOT_TEXT.rush}`, !slotDone(free) && `${t('낮', 'daytime')} ${SLOT_TEXT.free}`].filter(Boolean).join(' · ')
+  return t(`실측 예정: ${todo}`, `To be measured: ${todo}`)
 }
 
 // 카드가 일부라도 가려져 있으면, 카드 전체가 보이도록 가로 스크롤을 가장 가까운 끝까지만 움직인다
@@ -104,7 +111,7 @@ export function CompareCards({ results, com, hubs, active, bike, onSelect, onEdi
   const [editing, setEditing] = useState<Editing | null>(null) // 수정 중인 후보지
   const startEdit = (c: Candidate) => setEditing({ id: c.id, name: c.name, deposit: c.deposit?.toString() ?? '', rent: c.rent?.toString() ?? '', maint: c.maint?.toString() ?? '', use: c.use ?? 'home' })
   const saveEdit = () => { if (editing) onEdit(editing.id, { name: editing.name.trim() || undefined, deposit: money(editing.deposit), rent: money(editing.rent), maint: money(editing.maint), use: editing.use }); setEditing(null) }
-  const deleteEdit = () => { if (editing && confirm('이 후보지를 삭제할까요?')) { onDelete(editing.id); setEditing(null) } }
+  const deleteEdit = () => { if (editing && confirm(t('이 후보지를 삭제할까요?', 'Delete this candidate?'))) { onDelete(editing.id); setEditing(null) } }
   const modes: ModeKey[] = bike ? ['transit', 'car', 'walk', 'bike'] : ['transit', 'car', 'walk']
   const per = 1 + modes.length // 목적지마다 줄 수(목적지 줄 + 수단 줄)
   const rows = 1 + hubs.length * per + 2 // 후보지 · 목적지마다 · 보증금/월세 · 상권 종합
@@ -134,18 +141,18 @@ export function CompareCards({ results, com, hubs, active, bike, onSelect, onEdi
 
   return (
     <div className="panel compare">
-      <div className="panel-head"><h2>후보지별 비교</h2>{hubs.length > FIXED_HUBS && <span className="tap-hint">↕ 카드 안에서 스크롤</span>}</div>
+      <div className="panel-head"><h2>{t('후보지별 비교', 'Compare candidates')}</h2>{hubs.length > FIXED_HUBS && <span className="tap-hint">{t('↕ 카드 안에서 스크롤', '↕ scroll inside the cards')}</span>}</div>
       <div className="cards-scroll" ref={scroll} style={fixedH ? { height: fixedH } : undefined}>
         <div className="cards-grid" style={{ gridTemplateRows: `repeat(${rows}, auto)`, gridTemplateColumns: `112px repeat(${results.length}, minmax(232px, 1fr))` }}>
           {/* 왼쪽 줄 이름 */}
           <div className="col labels" style={{ gridRow: `1 / span ${rows}` }}>
-            <div className="cell head-cell"><span className="muted">후보지</span></div>
+            <div className="cell head-cell"><span className="muted">{t('후보지', 'Candidate')}</span></div>
             {hubs.map((h) => [
-              <div key={h.id + 'h'} className="cell hub-cell sect"><span className="hub-mark" aria-hidden>{hubEmoji(h.category)}</span><span>{h.category}</span></div>,
-              ...modes.map((m) => <div key={h.id + m} className="cell row-label"><span className={`dot ${m}`} />{{ transit: '대중교통', car: '차량', walk: '도보', bike: '자전거' }[m]}</div>),
+              <div key={h.id + 'h'} className="cell hub-cell sect"><span className="hub-mark" aria-hidden>{hubEmoji(h.category)}</span><span>{catName(h.category)}</span></div>,
+              ...modes.map((m) => <div key={h.id + m} className="cell row-label"><span className={`dot ${m}`} />{MODE_NAME[m]}</div>),
             ])}
-            <div className="cell row-label rent-label sect">보증금/월세</div>
-            <div className="cell row-label">🏪 상권 종합</div>
+            <div className="cell row-label rent-label sect">{t('보증금/월세', 'Deposit/rent')}</div>
+            <div className="cell row-label">🏪 {t('상권 종합', 'Shops overall')}</div>
           </div>
 
           {results.map((r, i) => ({ r, i })).sort((a, b) => a.r.rank - b.r.rank).map(({ r, i }) => {
@@ -157,33 +164,33 @@ export function CompareCards({ results, com, hubs, active, bike, onSelect, onEdi
               <div className="cell head-cell">
                 <span className="rank">{r.rank}</span>
                 <div className="card-name">
-                  <b><span>{r.candidate.name}</span><button type="button" className="pen" title="후보지 수정(이름·보증금·월세·관리비·용도·삭제)" aria-label={`${r.candidate.name} 수정`} onClick={() => startEdit(r.candidate)}>✎</button></b>
-                  <small>{r.candidate.address}</small>
+                  <b><span>{pn(r.candidate.name)}</span><button type="button" className="pen" title={t('후보지 수정(이름·보증금·월세·관리비·용도·삭제)', 'Edit candidate (name, deposit, rent, maint. fee, use, delete)')} aria-label={t(`${r.candidate.name} 수정`, `Edit ${pn(r.candidate.name)}`)} onClick={() => startEdit(r.candidate)}>✎</button></b>
+                  <small>{addr(r.candidate.address)}</small>
                 </div>
                 <strong className={isBest(r.total, best((x) => x.total)) ? 'best' : ''}>{fmt(r.total)}<Line v={r.total} kind="total" /></strong>
               </div>
               {r.hubs.map((h, hi) => {
-                const t = h.trip, s = h.scores
-                const diff = t.carRush - t.carFree
-                const { free, rush } = t.carSource
+                const tr = h.trip, s = h.scores
+                const diff = tr.carRush - tr.carFree
+                const { free, rush } = tr.carSource
                 const muted = (m: ModeKey) => (h.mode !== 'auto' && !used(h, m) ? ' muted-mode' : '')
                 return [
-                  <div key={h.hub.id + 'h'} className="cell hub-cell sect"><span>{h.hub.name}</span><small>{t.km.toFixed(1)}km · {weeklyText(h.weekly)} · 반영 {Math.round(h.share * 100)}%{h.mode !== 'auto' ? ` · ${{ transit: '대중교통', car: '차량', walk: '도보', bike: '자전거' }[h.mode]}로 감` : ''}</small><b className={isBest(h.hubScore, best((x) => x.hubs[hi].hubScore)) ? 'best' : ''}>{fmt(h.hubScore)}<Line v={h.hubScore} kind="hub" /></b></div>,
+                  <div key={h.hub.id + 'h'} className="cell hub-cell sect"><span>{pn(h.hub.name)}</span><small>{tr.km.toFixed(1)}km · {weeklyText(h.weekly)} · {t('반영', 'weight')} {Math.round(h.share * 100)}%{h.mode !== 'auto' ? t(` · ${MODE_NAME[h.mode]}로 감`, ` · by ${MODE_NAME[h.mode].toLowerCase()}`) : ''}</small><b className={isBest(h.hubScore, best((x) => x.hubs[hi].hubScore)) ? 'best' : ''}>{fmt(h.hubScore)}<Line v={h.hubScore} kind="hub" /></b></div>,
                   ...modes.map((m) => {
                     if (m === 'transit') return (
                       <div key={h.hub.id + m} className={'cell mode-cell' + muted(m)}>
                         {h.transitPending && !h.transitSkipped
-                          ? <div><span className="muted">대중교통 경로 찾는 중 — {liveNote(r.candidate)}</span></div>
+                          ? <div><span className="muted">{t('대중교통 경로 찾는 중', 'Finding transit route')} — {liveNote(r.candidate)}</span></div>
                           : h.transitSkipped
-                          ? <div><span className="muted">도보 {t.walk}분 · 도보권이라 대중교통 제외</span></div>
-                          : <><div><b>{t.transit}분{t.transitSource === 'est' ? '(추정)' : ''}</b><small>{t.routes.length ? `${[...new Set(t.routes)].slice(0, 2).join('→')} · ` : ''}대기 {t.wait}분 · 정류장까지 {t.access}분 · 환승 {t.transfers}회</small></div>
+                          ? <div><span className="muted">{t(`도보 ${tr.walk}분 · 도보권이라 대중교통 제외`, `Walk ${tr.walk} min · walkable, so transit is skipped`)}</span></div>
+                          : <><div><b>{mins(tr.transit)}{tr.transitSource === 'est' ? t('(추정)', ' (est.)') : ''}</b><small>{tr.routes.length ? `${[...new Set(tr.routes)].slice(0, 2).map(pn).join('→')} · ` : ''}{t(`대기 ${tr.wait}분 · 정류장까지 ${tr.access}분 · 환승 ${tr.transfers}회`, `wait ${tr.wait} min · ${tr.access} min to stop · ${tr.transfers} transfer${tr.transfers === 1 ? '' : 's'}`)}</small></div>
                             <em className={isBest(s.transit, best((x) => (x.hubs[hi].transitSkipped || x.hubs[hi].transitPending ? null : x.hubs[hi].scores.transit))) ? 'best' : ''}>{fmt(s.transit)}<Line v={s.transit} kind="transit" /></em></>}
                       </div>
                     )
                     if (m === 'car') return (
                       <div key={h.hub.id + m} className={'cell mode-cell' + muted(m)}>
-                        <div><b>출퇴근 {t.carRush}분{slotTag(rush)} · 낮 {t.carFree}분{slotTag(free)}</b>
-                          <small>정체 {s.carRatio.toFixed(2)}배({diff >= 0 ? '+' : ''}{diff}분) · 거리 대비 {fmt(s.carParts.efficiency)}{acc ? ` · ${acc.name} 진입 ${Math.round(acc.min)}분` : ''}</small>
+                        <div><b>{t('출퇴근', 'Rush')} {mins(tr.carRush)}{slotTag(rush)} · {t('낮', 'day')} {mins(tr.carFree)}{slotTag(free)}</b>
+                          <small>{t(`정체 ${s.carRatio.toFixed(2)}배(${diff >= 0 ? '+' : ''}${diff}분)`, `congestion ×${s.carRatio.toFixed(2)} (${diff >= 0 ? '+' : ''}${diff} min)`)} · {t('거리 대비', 'vs distance')} {fmt(s.carParts.efficiency)}{acc ? t(` · ${acc.name} 진입 ${Math.round(acc.min)}분`, ` · ${Math.round(acc.min)} min to ${pn(acc.name)}`) : ''}</small>
                           <small className="faint">{carNote(h)}</small></div>
                         <em className={isBest(s.car, best((x) => x.hubs[hi].scores.car)) ? 'best' : ''}>{fmt(s.car)}<Line v={s.car} kind="car" /></em>
                       </div>
@@ -191,15 +198,15 @@ export function CompareCards({ results, com, hubs, active, bike, onSelect, onEdi
                     if (m === 'walk') return (
                       <div key={h.hub.id + m} className={'cell mode-cell' + muted(m)}>
                         {s.walk !== null
-                          ? <><div><b>{t.walk}분</b><small>{t.walk <= WALK_ZONE ? '도보권' : '걸어서'} · {t.pathSource === 'osm' ? `길 ${t.walkKm.toFixed(1)}km` : '직선 추정'}</small></div><em className={isBest(s.walk, best((x) => x.hubs[hi].scores.walk)) ? 'best' : ''}>{fmt(s.walk)}<Line v={s.walk} kind="walk" /></em></>
-                          : <div><span className="muted">{WALK_LIMIT}분 초과</span></div>}
+                          ? <><div><b>{mins(tr.walk)}</b><small>{tr.walk <= WALK_ZONE ? t('도보권', 'walkable') : t('걸어서', 'on foot')} · {tr.pathSource === 'osm' ? t(`길 ${tr.walkKm.toFixed(1)}km`, `path ${tr.walkKm.toFixed(1)} km`) : t('직선 추정', 'straight-line est.')}</small></div><em className={isBest(s.walk, best((x) => x.hubs[hi].scores.walk)) ? 'best' : ''}>{fmt(s.walk)}<Line v={s.walk} kind="walk" /></em></>
+                          : <div><span className="muted">{t(`${WALK_LIMIT}분 초과`, `over ${WALK_LIMIT} min`)}</span></div>}
                       </div>
                     )
                     return (
                       <div key={h.hub.id + m} className={'cell mode-cell' + muted(m)}>
                         {s.bike !== null
-                          ? <><div><b>{t.bike}분</b><small>{t.pathSource === 'osm' ? '자전거 길' : '직선 추정'}</small></div><em className={isBest(s.bike, best((x) => x.hubs[hi].scores.bike)) ? 'best' : ''}>{fmt(s.bike)}<Line v={s.bike} kind="bike" /></em></>
-                          : <div><span className="muted">{BIKE_LIMIT}분 초과</span></div>}
+                          ? <><div><b>{mins(tr.bike)}</b><small>{tr.pathSource === 'osm' ? t('자전거 길', 'bike path') : t('직선 추정', 'straight-line est.')}</small></div><em className={isBest(s.bike, best((x) => x.hubs[hi].scores.bike)) ? 'best' : ''}>{fmt(s.bike)}<Line v={s.bike} kind="bike" /></em></>
+                          : <div><span className="muted">{t(`${BIKE_LIMIT}분 초과`, `over ${BIKE_LIMIT} min`)}</span></div>}
                       </div>
                     )
                   }),

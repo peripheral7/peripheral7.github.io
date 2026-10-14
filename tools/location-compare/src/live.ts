@@ -7,6 +7,7 @@
 // 받은 결과는 이 브라우저에 저장해 다시 열어도 그대로 쓴다. 계산 서버가 꺼져 있으면 "계산 서버 꺼짐"으로 보인다.
 import { CANDIDATES, type Candidate, type Hub } from './data'
 import { SEARCH_URL } from './naver'
+import { t } from './i18n'
 import type { TransitRow } from './scoring'
 import BAKED from './profiles-live.json' // 시험용 사용자(data.ts PROFILES) 후보지 — 미리 계산(scripts/bake-profiles.mjs)
 
@@ -18,7 +19,7 @@ export type LiveAnalysis = {
   stdrYm?: string; osmAt?: string; at: string
 }
 /** 실측 기준 시각(server/analyze-server.mjs SLOT_WINDOWS 와 같게) */
-export const SLOT_TEXT = { rush: '평일 08시·18시', free: '평일 10시·13시' }
+export const SLOT_TEXT = { rush: t('평일 08시·18시', 'weekdays 8am·6pm'), free: t('평일 10시·13시', 'weekdays 10am·1pm') }
 type Sample = { min: number; km: number; at: string }
 type Slot = Sample & { samples?: Partial<Record<'am' | 'pm', Sample>>; provisional?: boolean }
 type Paths = { walk?: { km: number; min: number }; bike?: { km: number; min: number }; transit?: TransitRow | null; at?: string }
@@ -121,5 +122,5 @@ export function retryLive(cands: Candidate[], hubs: Hub[]) {
 /** 상태 문구(자료가 없을 때 화면에 보일 말) */
 export function liveNote(c: { lat: number; lng: number } | undefined): string {
   const s = c ? statusOf(c) : null
-  return s === 'loading' ? '계산 중… (약 30초)' : s === 'offline' ? '계산 서버 꺼짐 — 나중에 다시' : s === 'outside' ? '서울·경기 밖이라 자료 없음' : s === 'error' ? '계산 실패' : '자료 없음'
+  return s === 'loading' ? t('계산 중… (약 30초)', 'Calculating… (about 30 s)') : s === 'offline' ? t('계산 서버 꺼짐 — 나중에 다시', 'Calculation server offline — try later') : s === 'outside' ? t('서울·경기 밖이라 자료 없음', 'No data outside Seoul/Gyeonggi') : s === 'error' ? t('계산 실패', 'Calculation failed') : t('자료 없음', 'No data')
 }

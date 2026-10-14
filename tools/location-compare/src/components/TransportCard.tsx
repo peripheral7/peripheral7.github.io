@@ -2,6 +2,7 @@ import { useEffect, useLayoutEffect, useRef, useState, type ReactNode } from 're
 import { fmt, type CandidateResult, type HubResult } from '../scoring'
 import { hubEmoji, type ModeKey } from '../data'
 import { MODE_INFO } from './SettingsPopover'
+import { catName, mins, pn, rankText, t } from '../i18n'
 
 // 왼쪽 위 "교통평점" 카드(한 장) — 고른 후보지(이름·3D 집·종합 원형)·주요 교통수단·수단별 교통평점 눈금 막대.
 // 라이프스타일은 카드 오른쪽 위 ⚙ 에서 고른다. 후보지 넘기기(Swipe):
@@ -39,7 +40,7 @@ export function HouseRing({ value, rank }: { value: number; rank: number }) {
         <House3D rank={rank} />
       </div>
       <p className="hr-score"><b>{fmt(value)}</b><small>/ 10</small></p>
-      <p className="hr-rank">종합 {rank}위</p>
+      <p className="hr-rank">{t('종합', 'Overall')} {rankText(rank)}</p>
     </div>
   )
 }
@@ -78,8 +79,8 @@ export function House3D({ rank }: { rank: number }) {
 export function EdgeNav({ onPrev, onNext }: { onPrev?: () => void; onNext?: () => void }) {
   return (
     <>
-      {onPrev && <button type="button" className="edge-nav prev" aria-label="앞 순위 후보지" onClick={onPrev}><span aria-hidden>‹</span></button>}
-      {onNext && <button type="button" className="edge-nav next" aria-label="다음 순위 후보지" onClick={onNext}><span aria-hidden>›</span></button>}
+      {onPrev && <button type="button" className="edge-nav prev" aria-label={t('앞 순위 후보지', 'Previous-ranked candidate')} onClick={onPrev}><span aria-hidden>‹</span></button>}
+      {onNext && <button type="button" className="edge-nav next" aria-label={t('다음 순위 후보지', 'Next-ranked candidate')} onClick={onNext}><span aria-hidden>›</span></button>}
     </>
   )
 }
@@ -164,14 +165,14 @@ export type SwipeApi = React.MutableRefObject<((d: 1 | -1) => void) | null>
 export function MainMode({ r }: { r: CandidateResult }) {
   const h = [...r.hubs].sort((a, b) => b.share - a.share)[0]
   if (!h) return null
-  const m = h.main, t = h.trip
-  const min = m === 'transit' ? t.transit : m === 'car' ? t.carRush : m === 'walk' ? t.walk : t.bike
-  const extra = m === 'transit' && t.routes.length ? ` · ${[...new Set(t.routes.map((x) => x.replace(/(수원|용인|오산|성남|예수원|화성)$/, '')))].slice(0, 2).join('→')}` : m === 'car' ? ' (출퇴근)' : ''
+  const m = h.main, tr = h.trip
+  const min = m === 'transit' ? tr.transit : m === 'car' ? tr.carRush : m === 'walk' ? tr.walk : tr.bike
+  const extra = m === 'transit' && tr.routes.length ? ` · ${[...new Set(tr.routes.map((x) => pn(x.replace(/(수원|용인|오산|성남|예수원|화성)$/, ''))))].slice(0, 2).join('→')}` : m === 'car' ? t(' (출퇴근)', ' (rush hour)') : ''
   return (
     <p className="main-mode">
-      <span className="main-mode-label">주요 교통수단</span>
+      <span className="main-mode-label">{t('주요 교통수단', 'Main mode')}</span>
       <b className={`mm ${m}`}>{MODE_INFO[m].emoji} {MODE_INFO[m].label}</b>
-      <small>{hubEmoji(h.hub.category)} {h.hub.category} {min}분{extra}{h.mode !== 'auto' ? ' · 직접 지정' : ''}</small>
+      <small>{hubEmoji(h.hub.category)} {catName(h.hub.category)} {mins(min)}{extra}{h.mode !== 'auto' ? t(' · 직접 지정', ' · set manually') : ''}</small>
     </p>
   )
 }
@@ -186,15 +187,16 @@ export function ScoreBlock({ r, modes }: { r: CandidateResult; modes: ModeKey[] 
         {modes.map((m) => {
           const v = modeSummary(r, m)
           const detail = r.hubs.flatMap((h) => {
-            if (m === 'transit') return h.transitPending ? [] : h.transitSkipped ? [] : [`${h.hub.category} ${h.trip.transit}분${h.trip.transitSource === 'est' ? '(추정)' : ''}`]
-            if (m === 'car') return [`${h.hub.category} ${h.trip.carRush}/${h.trip.carFree}분`]
-            if (m === 'walk') return h.scores.walk !== null ? [`${h.hub.category} ${h.trip.walk}분`] : []
-            return h.scores.bike !== null ? [`${h.hub.category} ${h.trip.bike}분`] : []
+            const c = catName(h.hub.category)
+            if (m === 'transit') return h.transitPending ? [] : h.transitSkipped ? [] : [`${c} ${mins(h.trip.transit)}${h.trip.transitSource === 'est' ? t('(추정)', ' (est.)') : ''}`]
+            if (m === 'car') return [`${c} ${mins(`${h.trip.carRush}/${h.trip.carFree}`)}`]
+            if (m === 'walk') return h.scores.walk !== null ? [`${c} ${mins(h.trip.walk)}`] : []
+            return h.scores.bike !== null ? [`${c} ${mins(h.trip.bike)}`] : []
           }).join(' · ')
           return (
             <div className={'mode-row' + (v === null ? ' off' : '')} key={m}>
               <span className={`dot ${m}`} />
-              <div className="mode-text"><b>{MODE_INFO[m].label}</b><small>{m === 'transit' && r.hubs.some((h) => h.transitPending) ? '대중교통 경로 찾는 중' : detail || '이 후보지에서는 안 씀'}</small></div>
+              <div className="mode-text"><b>{MODE_INFO[m].label}</b><small>{m === 'transit' && r.hubs.some((h) => h.transitPending) ? t('대중교통 경로 찾는 중', 'Finding transit route') : detail || t('이 후보지에서는 안 씀', 'Not used for this candidate')}</small></div>
               <Ticks value={v} mode={m} />
               <em>{v === null ? '—' : fmt(v)}</em>
             </div>

@@ -3,6 +3,7 @@ import { createPortal } from 'react-dom'
 import { won, type Candidate } from '../data'
 import { brokerageFee, feeText, useGroup, USE_LABEL } from '../brokerage'
 import { LISTINGS, SPOTS, meters, naverMapUrl, nearest, type Listing } from '../recommend'
+import { addr, isEn, manEn, pn, t } from '../i18n'
 
 // 후보지별 비교 양옆의 추천 카드(추후 광고). 이미지는 정사각형 빈 칸으로 둔다.
 // 왼쪽 매물을 누르면 중개업자 소개 창이 화면 정가운데에 지도의 3/4 크기로 열리고(배경은 20% 어둡게), 배경을 누르거나 Esc 로 닫는다.
@@ -14,27 +15,27 @@ const Thumb = ({ src, alt }: { src?: string; alt: string }) => (
 
 const Near = ({ p, candidates }: { p: { lat: number; lng: number }; candidates: Candidate[] }) => {
   const n = nearest(p, candidates)
-  return n ? <small className="rec-near">📍 {n.name} {meters(n.m)}</small> : null
+  return n ? <small className="rec-near">📍 {pn(n.name)} {meters(n.m)}</small> : null
 }
 
 // 보증금/월세 · 관리비 한 줄(만원)
-const money = (x: Listing) => `${won(x.deposit)} / ${x.rent}`
+const money = (x: Listing) => (isEn ? `${won(x.deposit)} / ${manEn(x.rent)}` : `${won(x.deposit)} / ${x.rent}`)
 const Fee = ({ x }: { x: Listing }) => {
   const f = brokerageFee(x.use, x.deal, x)
-  return <small className="rec-fee" title={`${f.formula} · ${f.basis} · 부가세 별도`}>중개수수료 최대 {feeText(f.fee)}</small>
+  return <small className="rec-fee" title={`${f.formula} · ${f.basis} · ${t('부가세 별도', 'VAT excluded')}`}>{t('중개수수료 최대', 'Broker fee up to')} {feeText(f.fee)}</small>
 }
 
 export function ListingCards({ candidates }: { candidates: Candidate[] }) {
   const [open, setOpen] = useState<Listing | null>(null)
   return (
-    <aside className="side-card side-left panel" aria-label="추천 매물">
-      <div className="panel-head"><h2>추천 매물</h2><span className="soon">광고</span></div>
+    <aside className="side-card side-left panel" aria-label={t('추천 매물', 'Featured listings')}>
+      <div className="panel-head"><h2>{t('추천 매물', 'Featured listings')}</h2><span className="soon">{t('광고', 'Ad')}</span></div>
       {LISTINGS.map((x) => (
         <button type="button" key={x.id} className="rec-item" onClick={() => setOpen(x)}>
           <Thumb src={x.image} alt={x.title} />
           <span className="rec-text">
             <b>{x.title} <em className={`rec-use ${x.use === 'other' ? 'shop' : ''}`}>{useGroup(x.use)}</em></b>
-            <span className="rec-price">{money(x)}<small>만원</small>{x.maint ? <small> · 관리비 {x.maint}</small> : null}</span>
+            <span className="rec-price">{money(x)}{isEn ? null : <small>만원</small>}{x.maint ? <small>{t(` · 관리비 ${x.maint}`, ` · maint. ${manEn(x.maint)}`)}</small> : null}</span>
             <Fee x={x} />
             <Near p={x} candidates={candidates} />
             <span className="rec-tags">{x.points.map((t) => <i key={t}>{t}</i>)}</span>
@@ -59,14 +60,14 @@ export function SpotCards({ candidates, flash }: { candidates: Candidate[]; flas
     return () => { cancelAnimationFrame(a); clearTimeout(t) }
   }, [flash])
   return (
-    <aside className="side-card panel" aria-label="근처 카페·식당">
-      <div className="panel-head"><h2>근처 카페·식당</h2><span className="soon">광고</span></div>
+    <aside className="side-card panel" aria-label={t('근처 카페·식당', 'Nearby cafés & restaurants')}>
+      <div className="panel-head"><h2>{t('근처 카페·식당', 'Nearby cafés & restaurants')}</h2><span className="soon">{t('광고', 'Ad')}</span></div>
       {SPOTS.map((x) => (
         <a key={x.id} data-spot={x.id} className={'rec-item' + (lit === x.id ? ' flash' : '')} href={naverMapUrl(x.query)} target="_blank" rel="noopener noreferrer">
           <Thumb src={x.image} alt={x.name} />
           <span className="rec-text">
-            <b>{x.name}</b>
-            <small className="rec-kind">{x.kind} · {x.address}</small>
+            <b>{pn(x.name)}</b>
+            <small className="rec-kind">{x.kind === '카페' ? t('카페', 'Café') : t('식당', 'Restaurant')} · {addr(x.address)}</small>
             <Near p={x} candidates={candidates} />
             <span className="rec-tags">{x.keywords.map((t) => <i key={t}>{t}</i>)}</span>
           </span>
@@ -95,10 +96,10 @@ function AgentDialog({ x, candidates, onClose }: { x: Listing; candidates: Candi
   }, [onClose])
   return createPortal(
     <div className="rec-overlay" onClick={onClose}>
-      <section className="rec-dialog" style={size} role="dialog" aria-modal="true" aria-label={`${x.agent.office} 소개`} onClick={(e) => e.stopPropagation()}>
+      <section className="rec-dialog" style={size} role="dialog" aria-modal="true" aria-label={t(`${x.agent.office} 소개`, `About ${x.agent.office}`)} onClick={(e) => e.stopPropagation()}>
         <div className="rec-dialog-head">
-          <div><small>부동산 소개</small><h2>{x.agent.office}</h2></div>
-          <button className="close" aria-label="닫기" onClick={onClose}>×</button>
+          <div><small>{t('부동산 소개', 'Real estate agency')}</small><h2>{x.agent.office}</h2></div>
+          <button className="close" aria-label={t('닫기', 'Close')} onClick={onClose}>×</button>
         </div>
         <div className="rec-dialog-body">
           <Thumb src={x.image} alt={x.title} />
@@ -109,7 +110,7 @@ function AgentDialog({ x, candidates, onClose }: { x: Listing; candidates: Candi
             <span className="rec-tags">{x.points.map((t) => <i key={t}>{t}</i>)}</span>
             <FeeTable x={x} />
             <p>{x.agent.intro}</p>
-            {x.agent.phone && <a className="solid rec-call" href={`tel:${x.agent.phone}`}>전화 {x.agent.phone}</a>}
+            {x.agent.phone && <a className="solid rec-call" href={`tel:${x.agent.phone}`}>{t('전화', 'Call')} {x.agent.phone}</a>}
           </div>
         </div>
       </section>
@@ -123,11 +124,11 @@ function FeeTable({ x }: { x: Listing }) {
   const f = brokerageFee(x.use, x.deal, x)
   return (
     <dl className="rec-money">
-      <dt>용도</dt><dd>{USE_LABEL[x.use]}({useGroup(x.use)})</dd>
-      <dt>보증금 / 월세</dt><dd>{money(x)}만원</dd>
-      <dt>관리비</dt><dd>{x.maint ? `월 ${x.maint}만원` : '없음·미입력'}</dd>
-      <dt>월 부담</dt><dd>월세 + 관리비 = {x.rent + (x.maint ?? 0)}만원</dd>
-      <dt>예상 중개수수료</dt><dd><b>최대 {feeText(f.fee)}</b> <small>(부가세 별도 {feeText(f.vat)})</small><small className="rec-formula">{f.formula} · {f.basis}</small></dd>
+      <dt>{t('용도', 'Use')}</dt><dd>{USE_LABEL[x.use]} ({useGroup(x.use)})</dd>
+      <dt>{t('보증금 / 월세', 'Deposit / rent')}</dt><dd>{money(x)}{t('만원', '')}</dd>
+      <dt>{t('관리비', 'Maint. fee')}</dt><dd>{x.maint ? t(`월 ${x.maint}만원`, `${manEn(x.maint)}/month`) : t('없음·미입력', 'none / not given')}</dd>
+      <dt>{t('월 부담', 'Monthly total')}</dt><dd>{t(`월세 + 관리비 = ${x.rent + (x.maint ?? 0)}만원`, `rent + maint. = ${manEn(x.rent + (x.maint ?? 0))}`)}</dd>
+      <dt>{t('예상 중개수수료', 'Est. broker fee')}</dt><dd><b>{t('최대', 'up to')} {feeText(f.fee)}</b> <small>({t('부가세 별도', 'VAT excluded')} {feeText(f.vat)})</small><small className="rec-formula">{f.formula} · {f.basis}</small></dd>
     </dl>
   )
 }

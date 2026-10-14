@@ -1,18 +1,19 @@
 // 지도 위 덧그림(입지 요인을 펼쳤을 때): 평화로움 소음 구분도 · 길고양이 사진 말풍선. 네이버·OSM 두 지도가 같이 쓴다.
 import type { ZoneCell } from './places'
+import { t } from './i18n'
 
 // ── 평화로움 구분도 ──
 // places.mjs 가 후보지 반경 50m 를 5m 칸으로(places-config.json peace.zones) 나눠 단계(1~6)를 매긴다. 칸을 위경도 네모로 바꿔 단계 색으로 칠한다(테두리 없음).
 export const ZONE_STYLE: Record<number, { color: string; alpha: number; label: string }> = {
   // 도로 색은 차로 수(사용자 지정 10-14): 8차선 이상 빨강 · 6차선 주황 · 4차선(중로) 노랑. 상가는 보라
-  1: { color: '#d63b2f', alpha: 0.42, label: '8차선 이상 바로 옆' },
-  2: { color: '#d63b2f', alpha: 0.18, label: '8차선 이상 40m 안' },
-  3: { color: '#ef8a2c', alpha: 0.42, label: '6차선 바로 옆' },
-  4: { color: '#ef8a2c', alpha: 0.2, label: '6차선 30m 안' },
-  5: { color: '#e8c21a', alpha: 0.45, label: '4차선(중로) 바로 옆' },
-  6: { color: '#e8c21a', alpha: 0.22, label: '4차선 22m 안' },
-  7: { color: '#8f6cc4', alpha: 0.3, label: '상가 밀집' },
-  8: { color: '#8f6cc4', alpha: 0.13, label: '상가 있음' },
+  1: { color: '#d63b2f', alpha: 0.42, label: t('8차선 이상 바로 옆', 'right by 8+ lanes') },
+  2: { color: '#d63b2f', alpha: 0.18, label: t('8차선 이상 40m 안', 'within 40 m of 8+ lanes') },
+  3: { color: '#ef8a2c', alpha: 0.42, label: t('6차선 바로 옆', 'right by 6 lanes') },
+  4: { color: '#ef8a2c', alpha: 0.2, label: t('6차선 30m 안', 'within 30 m of 6 lanes') },
+  5: { color: '#e8c21a', alpha: 0.45, label: t('4차선(중로) 바로 옆', 'right by 4 lanes') },
+  6: { color: '#e8c21a', alpha: 0.22, label: t('4차선 22m 안', 'within 22 m of 4 lanes') },
+  7: { color: '#8f6cc4', alpha: 0.3, label: t('상가 밀집', 'dense shops') },
+  8: { color: '#8f6cc4', alpha: 0.13, label: t('상가 있음', 'some shops') },
 }
 /** radiusM = 칠하는 반경(점선 원), calcM = 평화로움 계산 반경(실선 원) */
 export type Zones = { lat: number; lng: number; step: number; cells: ZoneCell[]; radiusM: number; calcM: number }
@@ -64,7 +65,7 @@ export function catCallouts(pins: CatPin[], zoom: number): CatCallout[] {
     const dx = Math.round(best[0] * LEN * 0.75), dy = Math.round(best[1] * LEN * 0.75)
     placed.push({ x: a.x + dx, y: a.y + dy })
     const photos = g.items.flatMap((p) => p.photos)
-    return { lat: g.lat, lng: g.lng, dx, dy, photos, name: g.items.map((p) => p.name).filter(Boolean).join(' · ') || '길고양이', start: g.items[0].start, count: g.items.length }
+    return { lat: g.lat, lng: g.lng, dx, dy, photos, name: g.items.map((p) => p.name).filter(Boolean).join(' · ') || t('길고양이', 'Street cat'), start: g.items[0].start, count: g.items.length }
   })
 }
 
@@ -76,7 +77,7 @@ export function catCalloutHtml(c: CatCallout): string {
   // 슬라이드: 첫 사진만 보이고(.on), startCatSlides 가 2.4초마다 다음 사진으로 넘긴다
   const imgs = c.photos.map((src, i) => `<img data-pin-nopin="true" src="${src}" alt=""${i === 0 ? ' class="on"' : ''}>`).join('')
   const L = Math.max(Math.abs(c.dx), Math.abs(c.dy)) + CAT_BOX
-  return `<div class="cat-callout" data-start="${c.start}" title="${esc(c.name)} — 눌러서 크게 보기">`
+  return `<div class="cat-callout" data-start="${c.start}" title="${esc(c.name)} — ${t('눌러서 크게 보기', 'click to enlarge')}">`
     + `<svg class="cat-leader" width="${L * 2}" height="${L * 2}" style="left:${-L}px;top:${-L}px" aria-hidden><line x1="${L}" y1="${L}" x2="${L + c.dx}" y2="${L + c.dy}" /></svg>`
     + `<span class="cat-dot"></span>`
     + `<span class="cat-box${slide ? ' slide' : ''}" style="left:${c.dx - CAT_BOX / 2}px;top:${c.dy - CAT_BOX / 2}px">${imgs}${n > 1 ? `<b>${n}</b>` : ''}</span>`

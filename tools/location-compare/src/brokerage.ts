@@ -10,11 +10,13 @@
 //  - 중개보수 = 거래금액 × 상한요율, 단 한도액을 넘을 수 없다. 의뢰인 쌍방에게서 각각 받는다(아래 값은 한쪽 몫)
 // 금액 단위: 입력은 만원, 결과 수수료는 원.
 
+import { isEn, krw, t } from './i18n'
+
 /** 용도: 주택(아파트·빌라·원룸 등) · 주거용 오피스텔(85㎡ 이하·부엌·욕실) · 상가·기타(토지·상가·85㎡ 초과 오피스텔) */
 export type PropertyUse = 'home' | 'officetel' | 'other'
-export const USE_LABEL: Record<PropertyUse, string> = { home: '주택', officetel: '주거용 오피스텔', other: '상가·기타' }
+export const USE_LABEL: Record<PropertyUse, string> = { home: t('주택', 'Housing'), officetel: t('주거용 오피스텔', 'Residential officetel'), other: t('상가·기타', 'Commercial / other') }
 /** 화면 표시: 주거용 / 상가용 */
-export const useGroup = (u: PropertyUse) => (u === 'other' ? '상가용' : '주거용')
+export const useGroup = (u: PropertyUse) => (u === 'other' ? t('상가용', 'commercial') : t('주거용', 'residential'))
 /** 거래: 매매·교환 / 임대차(전세·월세) */
 export type Deal = 'sale' | 'lease'
 
@@ -68,21 +70,22 @@ export function brokerageFee(use: PropertyUse, deal: Deal, o: { price?: number; 
   if (use === 'home') {
     const b = HOME_BANDS[deal].find((x) => x.below === null || amount < x.below)!
     rate = b.rate; cap = b.cap
-    basis = '경기도 주택 중개보수 조례 별표1'
+    basis = t('경기도 주택 중개보수 조례 별표1', 'Gyeonggi housing brokerage ordinance, Table 1')
   } else if (use === 'officetel') {
     rate = OFFICETEL_RATE[deal]
-    basis = '공인중개사법 시행규칙 별표2(주거용 오피스텔)'
+    basis = t('공인중개사법 시행규칙 별표2(주거용 오피스텔)', 'Licensed Real Estate Agents Act rules, Table 2 (residential officetel)')
   } else {
     rate = OTHER_RATE
-    basis = '공인중개사법 시행규칙 제20조(주택 외)'
+    basis = t('공인중개사법 시행규칙 제20조(주택 외)', 'Licensed Real Estate Agents Act rules, Art. 20 (non-housing)')
   }
   const raw = Math.round(amount * 10000 * rate)
   const fee = cap === null ? raw : Math.min(raw, cap)
   const won = (n: number) => n.toLocaleString('ko-KR')
-  const amountText = deal === 'lease' && o.rent ? `${won(o.deposit ?? 0)} + ${won(o.rent)} × ${amount === (o.deposit ?? 0) + o.rent * 100 ? 100 : 70} = ${won(amount)}만원` : `${won(amount)}만원`
-  const formula = `${amountText} × ${(rate * 1000).toFixed(0)}/1000${cap !== null && raw > cap ? ` → 한도 ${won(cap)}원` : ''}`
+  const unit = t('만원', '×₩10K')
+  const amountText = deal === 'lease' && o.rent ? `${won(o.deposit ?? 0)} + ${won(o.rent)} × ${amount === (o.deposit ?? 0) + o.rent * 100 ? 100 : 70} = ${won(amount)}${unit}` : `${won(amount)}${unit}`
+  const formula = `${amountText} × ${(rate * 1000).toFixed(0)}/1000${cap !== null && raw > cap ? t(` → 한도 ${won(cap)}원`, ` → capped at ₩${won(cap)}`) : ''}`
   return { amount, rate, cap, fee, vat: Math.round(fee * VAT), basis, formula }
 }
 
 /** 18,000원 → "1.8만원", 1,350,000원 → "135만원" */
-export const feeText = (won: number) => (won >= 10000 ? `${(Math.round(won / 1000) / 10).toLocaleString('ko-KR')}만원` : `${won.toLocaleString('ko-KR')}원`)
+export const feeText = (won: number) => (isEn ? krw(won) : won >= 10000 ? `${(Math.round(won / 1000) / 10).toLocaleString('ko-KR')}만원` : `${won.toLocaleString('ko-KR')}원`)

@@ -4,6 +4,7 @@ import { BIKE_LIMIT, CAR_PARTS, DEFAULT_REF, ROAD_FACTOR, TRANSIT_PARTS, WALK_LI
 import { DEFAULT_FUEL, DEFAULT_KMPL, FARE_BASE_KM, FARE_STEP, FARE_STEP_KM, TRANSIT_FARE } from '../commute'
 import { LIBRARY_AT, OSM_AT, PEACE } from '../places'
 import { CAT_BASE, CAT_FOUR, CAT_MAX, CAT_RADIUS_M, FIELD_RADIUS_M, PHOTO_MAX_SIDE, PHOTO_QUALITY, PHOTO_VALID_DAYS } from '../cats'
+import { isEn, t } from '../i18n'
 
 const fmt1 = (x: number) => (Math.round(x * 10) / 10).toString()
 
@@ -18,8 +19,9 @@ export function GuidePanel({ onClose }: { onClose: () => void }) {
 
   return (
     <div className="overlay" onClick={onClose}>
-      <section className="glass drawer guide" role="dialog" aria-modal="true" aria-label="계산 방식 안내" onClick={(e) => e.stopPropagation()}>
-        <div className="drawer-head"><div><small>HOW IT WORKS</small><h2>기능과 계산 방식</h2></div><button className="close" aria-label="닫기" onClick={onClose}>×</button></div>
+      <section className="glass drawer guide" role="dialog" aria-modal="true" aria-label={t('계산 방식 안내', 'How it works')} onClick={(e) => e.stopPropagation()}>
+        <div className="drawer-head"><div><small>HOW IT WORKS</small><h2>{t('기능과 계산 방식', 'Features and scoring')}</h2></div><button className="close" aria-label={t('닫기', 'Close')} onClick={onClose}>×</button></div>
+        {isEn ? <GuideEn pct={pct} /> : <>
 
         <h3>1. 화면 구성</h3>
         <ul>
@@ -94,7 +96,90 @@ export function GuidePanel({ onClose }: { onClose: () => void }) {
           <li>대중교통 대기 시간은 배차 자료가 없어 추정입니다. 서울시 환승경로 API 는 일부 장거리 구간(예: 수원 → 분당)에서 경로를 주지 않아 그 구간은 추정입니다.</li>
           <li>대로 진입 시간은 막힘 없는 시간(OSM 자동차 경로) × 1.2 입니다.</li>
         </ul>
+        </>}
       </section>
     </div>
+  )
+}
+
+// 영어판(외국인 유학생용) — 한국어판과 같은 절·같은 상수. 한국어판을 고치면 여기도 같이 고친다(DEV-GUIDE.md).
+function GuideEn({ pct }: { pct: (x: number) => string }) {
+  return (
+    <>
+      <h3>1. Layout</h3>
+      <ul>
+        <li><b>Map</b> — numbered circles are candidate homes (number = overall rank); emoji circles are your destinations (🏫 school · 🏠 family home · 🏢 work · 🚉 transit hub). Selecting a candidate zooms the map to fit it and its destinations and draws dashed lines to them. Pick a destination with "Pros/cons for" (top right, or click its pin) to see each candidate's rank for that destination and its pros (＋ walkable · best transit · best by car · no transfers · shortest wait) and cons (－ walk over {WALK_LIMIT} min · weak transit · rush-hour congestion · many transfers). Within a {WALK_ONLY}-minute walk, transit items are not mentioned. <b>"Show all candidates"</b> fits every candidate on screen. Labels show on the selected candidate only, or on all visible candidates once you zoom in to level 14+. Without a Naver map key, a light OpenStreetMap map is used.</li>
+        <li><b>Search (on the map)</b> — find apartments, addresses, schools and offices in one box (Korean names work best; results come from Naver). Search runs when you stop typing (it retries once with corrected spacing if nothing is found), and results are sorted by distance from the map center (small dots on the map). Click a result to move the map there, then add it with "As candidate" or "As destination". Up to {MAX_HUBS} destinations (when full, the least-visited one is replaced). You can also right-click the map (long-press on phones) to add that spot.</li>
+        <li><b>Transport score (top left)</b> — the selected candidate: name, address, deposit/rent · a 3D house in a ring filled by the overall score, with score and rank · <b>main mode</b> (the mode that actually counts most for your most-visited destination, with its time) · a bar per mode (destination scores averaged by visit share). Hover the left/right edge of the card for ‹ › to step through candidates by rank (wraps around), drag the card, or click a rank number below. <b>⚙</b> picks a lifestyle (transit commuter · car commuter · walk-around local life · bike life — this sets the mode mix and whether biking is used; "Fine-tune" lets you type the mix). Rename, edit amounts or delete a candidate with ✎ on its comparison card.</li>
+        <li><b>Destinations (bottom left)</b> — click to set <b>visits per week</b> for each destination (steps of 0.5 — school/work default 5×/week, family home 4×/month = 1×/week) and a <b>travel mode</b> (Auto = blend by weights · 🚌 · 🚗 · 🚶 · 🚲 — picking one scores that destination by that mode only). × removes a destination.</li>
+        <li><b>Location factors (top right)</b> — choose factors with ⚙: <b>shops within a 5-min walk</b>, <b>street-cat index</b> (shows a score row plus photo/add links; click the name for thumbnails; not part of the comparison cards), <b>quietness</b> · <b>parks</b> · <b>library</b> (on by default). Click a name to expand its details for the selected candidate; it also appears on the map (quietness noise zones · 📚 library pins). See §8.</li>
+        <li><b>Shops within a 5-min walk</b> — click the name and drag shop-type chips between <b>Must (green) · Nice (yellow) · Skip (grey)</b> (a click moves a chip to the next box). The count within 500 m is compared with a <b>target count</b> per type (café 50 · variety 6 · grocery 10 · medical 30 — set against the Gyeonggi/Seoul distribution: grocery = average, medical = top 20%, café = top 10%. Default: variety must, grocery and café nice, medical skipped). Type score = 10 × (1 − 10^(−count ÷ target)) — 9 points at the target and barely more above it (diminishing returns, max 10). For cafés this reads as "the more cafés, the likelier one suits you". Variety = 50% count score + 50% Olive Young / Daiso stores (one store = 9). Restaurants are excluded here (quietness still counts restaurants within 30 m). Shop index = Must average × 0.8 + Nice average × 0.2 (equal within a group; if only one group is used it counts 100%). It is not mixed into the overall score — it appears in the "Shops overall" row. Major stores of the chosen types (Olive Young, E-Mart, Homeplus, Starbucks…) show as small emoji circles on the map (dashed = large mart inferred from tenant stores). Data: Small Enterprise and Market Service store data — candidates added by search are computed the same way by the calculation server (about 30 s; "server offline" if it is off).</li>
+        <li><b>Commute insights (below the factors)</b> — daily and monthly travel time and cost for the selected candidate, transit and car side by side (§6). Fuel economy and fuel price can be edited right there.</li>
+        <li><b>Compare candidates (bottom cards)</b> — candidate cards side by side with aligned rows: read across a row to compare wait, walk to stop, transfers, and rush-hour vs daytime driving. The best score is green. The faint text in the deposit/rent row is <b>the monthly rent adjusted to a ₩10M deposit</b> (deposit-to-rent conversion 6%/year — a ₩10M deposit difference = ₩50K/month). Korean rentals usually need a deposit (보증금) plus monthly rent (월세); amounts are entered in units of ₩10,000 (만원). The row also shows the maintenance fee, the monthly total (rent + maint.) and the <b>estimated broker fee</b> (legal maximum, one party's share, VAT excluded — housing uses the Gyeonggi ordinance Table 1 rates and caps, residential officetels 0.4%, commercial/other 0.9%; deal amount = deposit + rent × 100, or × 70 if that is under ₩50M). Edit the maintenance fee and use with ✎. The side cards are ad slots: a listing (sample) opens an agency dialog with a cost table (click outside to close); a café opens Naver Map. Cafés also appear as ☕ on the map, and clicking a ☕ highlights its card. Card height is fixed for 2 destinations — with 3, scroll inside the cards (all cards move together).</li>
+        <li>Your candidates, destinations and preferences are saved only in this browser. The KO/EN buttons at the top switch the language (also saved in this browser).</li>
+      </ul>
+
+      <h3>2. Travel time</h3>
+      <p>Real routes are used when available; otherwise a straight-line estimate (marked "est.").</p>
+      <ul>
+        <li><b>Walking/biking</b> = distance along OpenStreetMap paths ÷ 4.7 km/h · 15 km/h. <b>Up to {WALK_ZONE} min on foot is "walkable"</b> (you walk); beyond that you take transit.</li>
+        <li><b>Transit</b> = total time, routes and transfers from the Seoul Metropolitan Government transfer-route API (bus + subway, including Gyeonggi), plus the walk to the stop (straight line × 1.25). The first wait is estimated (5 min + distance ÷ 6, at most +7 min). If no route is found (some long trips), it is estimated: walk to stop 4 min + 0.7 min/km, riding at 22 km/h, 0–2 transfers.</li>
+        <li><b>Car</b> = measured with Naver Directions. <b>Rush hour = average of weekdays 8am and 6pm; daytime = average of weekdays 10am and 1pm.</b> A newly added place is measured once with current traffic and stored provisionally as rush hour (weekdays 7–10am, 5–8pm) or daytime ("at sign-up"); the calculation server measures again at the reference times. Without measurements it is estimated (daytime = straight distance ÷ 31 km/h + 3 min, rush hour = daytime × 1.52 + 4 min) and marked "est. · to be measured".</li>
+      </ul>
+
+      <h3>3. Mode scores (out of 10)</h3>
+      <ul>
+        <li><b>Fixed reference per destination.</b> Transit and car get 10 when they match the destination's reference (currently the same default for all: wait {DEFAULT_REF.wait} min · walk to stop {DEFAULT_REF.access} min · {DEFAULT_REF.transfers} transfers · congestion ratio {DEFAULT_REF.carRatio}); worse values get <code>10 × reference ÷ my value</code> (max 10). Candidates are not compared with each other, so adding or removing candidates does not change scores. Per-area references (campus gates, business districts…) will be precomputed later.</li>
+        <li><b>Transit.</b> Wait, walk and transfers each score <code>10 × reference ÷ my value</code> (transfers +1 each so 0 can be divided — 0 → 10 · 1 → 5 · 2 → 3.3), combined as wait {pct(TRANSIT_PARTS.wait)} · walk {pct(TRANSIT_PARTS.access)} · transfers {pct(TRANSIT_PARTS.transfers)}. Riding time is shown but not scored.</li>
+        <li><b>Car = congestion {pct(CAR_PARTS.congestion)} + efficiency for the distance {pct(CAR_PARTS.efficiency)} + arterial access {pct(CAR_PARTS.access)}.</b> Congestion = <code>10 × reference ratio ÷ (rush ÷ daytime)</code>. Efficiency = reference time for that road distance (3 min + distance ÷ reference speed, which rises from 20 km/h on short trips toward 60 km/h on long ones) ÷ actual average time × 10 — far destinations are not penalized; it asks "is it fast for the distance?". Arterial access = driving time from the candidate to the nearest arterial road (≤3 min 10 · 5 min 6 · 10 min 2 · 15 min 0) × road grade (grade 1 such as Dongbu-daero/Deogyeong-daero 1.0 · grade 2 such as Yeongtong-ro/Bongyeong-ro 0.85 · grade 3 0.7).</li>
+        <li><b>Bike (when on).</b> 10 points at ≤10 min → 0 at {BIKE_LIMIT} min; not scored beyond that.</li>
+        <li><b>Walk — time only.</b> 10 at ≤5 min, 0 at {WALK_LIMIT} min, linear in between. ≤{WALK_ZONE} min is <b>walkable</b>. <b>Over {WALK_LIMIT} min, no time or score is shown on the cards.</b></li>
+      </ul>
+
+      <h3>4. Weights and overall score</h3>
+      <ul>
+        <li><b>Destination score</b> = weighted average of mode scores by mode weights. Weights are used as <b>shares of their sum</b> even if they do not add to 100 (e.g. 120·60·20 → 60%·30%·10%).</li>
+        <li><b>Within a {WALK_ONLY}-min walk</b> — you are assumed to walk, so <b>transit is dropped</b> for that destination and the remaining weights are renormalized (cards say "walkable, so transit is skipped").</li>
+        <li><b>Walks over {WALK_LIMIT} min</b> — if at least one candidate can walk to that destination, candidates that cannot get <b>0</b> for walking (dropping it would favor them). If no candidate can walk there (e.g. family home), walking is dropped and transit/car weights are renormalized.</li>
+        <li>If a <b>destination travel mode</b> is set (not Auto), that destination's score = that mode's score. Other modes are shown in grey for reference.</li>
+        <li><b>Overall score</b> = destination scores weighted by <b>share of weekly visits</b> ("weight %" on the cards). If all visits are 0, destinations count equally.</li>
+        <li>Rank = order of overall score.</li>
+      </ul>
+
+      <h3>5. Street-cat index (optional, 0–10)</h3>
+      <ul>
+        <li><b>What is counted</b> — the number n of street cats registered within <b>{CAT_RADIUS_M} m</b> of the candidate (only cats with at least one valid photo), and u = the number of different people who uploaded valid photos of them.</li>
+        <li><b>Score</b> — 0 cats 0 · <b>1 cat {CAT_BASE}</b> · 2 cats {fmt1(CAT_BASE + (CAT_FOUR - CAT_BASE) / 3)} · 3 cats {fmt1(CAT_BASE + (2 * (CAT_FOUR - CAT_BASE)) / 3)} · <b>4 cats {CAT_FOUR}</b> (+{fmt1((CAT_FOUR - CAT_BASE) / 3)} per cat). From 4 cats: <code>{CAT_FOUR} + 0.5 × (u − 1)</code>, up to <b>{CAT_MAX}</b> (5+ contributors). With only one contributor it stops at {CAT_FOUR}.</li>
+        <li><b>Photos</b> — valid for <b>{PHOTO_VALID_DAYS} days (about 2 months)</b> after upload, then dropped from the index; a cat whose photos have all expired is no longer counted. <b>One photo per person per cat.</b></li>
+        <li><b>On site only</b> — your current GPS location (accuracy within 80 m) is recorded as the cat's location and cannot be picked on the map; photos are taken with the camera. To add a photo to an existing cat you must be within {FIELD_RADIUS_M} m. You can add when the cat is seen (dawn · morning · daytime · evening · night) and traits (coat, temperament…).</li>
+        <li><b>Photo size</b> — the long side is reduced to {PHOTO_MAX_SIDE}px and saved as JPEG quality {Math.round(PHOTO_QUALITY * 100)}. Location data (EXIF) is removed.</li>
+        <li><b>Relation to the overall score</b> — the street-cat index is separate and not mixed into the overall score or rank.</li>
+        <li><b>Server upload is off</b> — without a server, registered cats are stored only in this browser and are not visible to others, so you are usually the only contributor for now.</li>
+      </ul>
+
+      <h3>6. Commute insights</h3>
+      <ul>
+        <li><b>Per day</b> = one round trip to your most-visited destination. <b>Per month</b> = sum over destinations of (visits per week × 4 weeks) round trips.</li>
+        <li><b>Transit</b> — time from §2; fare ₩{TRANSIT_FARE.toLocaleString('en-US')} one way + ₩{FARE_STEP} per {FARE_STEP_KM} km beyond {FARE_BASE_KM} km (straight line). Destinations within a {WALK_ONLY}-min walk are walked: walking time, ₩0.</li>
+        <li><b>Car</b> — rush-hour time; fuel cost = road distance ÷ fuel economy × fuel price. Road distance is Naver's measured distance, or straight line × {ROAD_FACTOR}. Default fuel economy {DEFAULT_KMPL} km/L (changes are saved in this browser).</li>
+        <li><b>Fuel price</b> — automatically the <b>Opinet average gasoline price for the city/district of the top-ranked candidate</b>, used for all candidates. If unavailable, the province average, then ₩{DEFAULT_FUEL.toLocaleString('en-US')}/L. A typed value is used instead; "Auto" restores it.</li>
+        <li>Transfer discounts, passes, parking and tolls are not included.</li>
+      </ul>
+
+      <h3>8. Location factors — quietness · parks · library</h3>
+      <ul>
+        <li><b>Quietness</b> = smell : crowds : noise = {PEACE.wFood * 10} : {PEACE.wShop * 10} : {PEACE.wRoad * 10}. Smell = non-café restaurants/bars within {PEACE.foodRadiusM} m (up to 2: 0 · 3: −10% · 5: −20% · from 6: −35% rising steeply · 10: −80% · 15: −100%). Crowds = all businesses within {PEACE.shopRadiusM} m (no penalty up to {PEACE.shopFree}, then × {PEACE.shopFactor} each). Noise = lanes of the widest road within {PEACE.roadNearM} m: 4 lanes −2 · 6 lanes −4 · 8 lanes −8 · 10 lanes −10 (lanes estimated from planned road width). Map noise zones (radius {PEACE.zones.radiusM} m, solid line = {PEACE.foodRadiusM} m scoring radius): red 8+ lanes · orange 6 · yellow 4 · purple shops.</li>
+        <li><b>Parks (additive)</b> — each park scores <code>10.6 × log10(trail length inside the park ÷ 260 m)</code> (min 1, max 10): Bandal Park 0.4 km ≈ 2 · Sindong Waterside Park 1.3 km ≈ 7.6 · Geulbinnuri Park 1.5 km ≈ 8 · Gwanggyo Lake Park 32 km = 10. Long linear parks whose ends reach shopping areas (farthest points 600 m+, elongation 4+, 10+ businesses within 150 m of each end) × 1.8. Hilly parks (elevation range over 10 m) are reduced, down to × 0.4 at 40 m+ (Copernicus DEM 30 m). Candidate score = best park within 500 m + 10% of the second + green share within 500 m (15%+ → +0.5, 30%+ → +1), max 10. Cemetery parks and parks under 0.1 ha are excluded.</li>
+        <li><b>Library</b> — straight-line distance to the nearest public library: within 500 m 10 → 1 km 5 → 2 km 0 (linear between). Small, children's, school, university and special libraries are excluded. With bike life the distances are doubled.</li>
+        <li><b>Data</b> — park boundaries/types: MOLIT urban planning facilities (Gyeonggi, 2026-08) · trails and park names: OpenStreetMap ({OSM_AT}) · libraries: national library standard data (as of {LIBRARY_AT}) · restaurants/businesses: store data · roads: V-World planned roads. Default candidates are precomputed; candidates added by search are computed the same way by the calculation server.</li>
+      </ul>
+
+      <h3>9. Limitations</h3>
+      <ul>
+        <li>Transit wait times are estimated because headway data is not available. The Seoul transfer-route API returns no route for some long trips (e.g. Suwon → Bundang), which are then estimated.</li>
+        <li>Arterial access time = free-flow time (OSM car route) × 1.2.</li>
+        <li>Place names are shown in English using official names where known and Revised Romanization otherwise; search works best with Korean names.</li>
+      </ul>
+    </>
   )
 }

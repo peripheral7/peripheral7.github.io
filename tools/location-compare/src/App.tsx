@@ -22,12 +22,17 @@ import { fuelPriceFor } from './fuel'
 import { loadParks, parkAreaPin, strollNear, PARK_AREAS, PARK_AREA_MIN, STROLL_RADIUS, type Park } from './parks'
 import { PEACE, PLACE_KEYS, loadPlaceOn, placeFor, placeSummary, savePlaceOn, type PlaceOn } from './places'
 import { liveMajors, liveNote, requestLive } from './live'
+import { LANG, addr, catName, isEn, manEn, pn, rankText, setLang, t } from './i18n'
 import { MAJORS, commercialIndex, loadCommercial, pickedCats, saveCommercial, walk5Counts, type CommercialPrefs } from './commercial'
 
-// " · 3,000/40 (1,000 기준 월 50)" — 금액을 안 넣었으면 빈 글자
+// " · 3,000/40 (1,000 기준 월 50)" · " · ₩30M / ₩400K (≈ ₩500K/mo at ₩10M deposit)" — 금액을 안 넣었으면 빈 글자
 const rentText = (c: { deposit?: number; rent?: number }) => {
   const b = baseRent(c)
-  return b === null ? '' : ` · ${won(c.deposit ?? 0)}/${c.rent ?? 0}${c.deposit === BASE_DEPOSIT ? '' : ` (${won(BASE_DEPOSIT)} 기준 월 ${b})`}`
+  if (b === null) return ''
+  const same = c.deposit === BASE_DEPOSIT
+  return isEn
+    ? ` · ${won(c.deposit ?? 0)} / ${manEn(c.rent ?? 0)}${same ? '' : ` (≈ ${manEn(b)}/mo at ${won(BASE_DEPOSIT)} deposit)`}`
+    : ` · ${won(c.deposit ?? 0)}/${c.rent ?? 0}${same ? '' : ` (${won(BASE_DEPOSIT)} 기준 월 ${b})`}`
 }
 
 export default function App() {
@@ -203,18 +208,24 @@ export default function App() {
   return (
     <div className="shell">
       <header className="topbar">
-        <span className="brand"><span className="logo"><span /><span /><span /></span>여기살까?</span>
-        <nav className="users" role="tablist" aria-label="사용자 바꾸기">
+        <span className="brand"><span className="logo"><span /><span /><span /></span>{t('여기살까?', 'WhereTo?')}</span>
+        <nav className="users" role="tablist" aria-label={t('사용자 바꾸기', 'Switch user')}>
           {PROFILES.map((p) => (
             <button key={p.id} type="button" role="tab" aria-selected={p.id === user} className={'user-tab' + (p.id === user ? ' on' : '') + (p.id === 'me' ? '' : ' test')} title={p.note} onClick={() => switchUser(p.id)}>
-              <span aria-hidden>{p.emoji}</span>{p.label}{p.id !== 'me' && <small>시험</small>}
+              <span aria-hidden>{p.emoji}</span>{p.label}{p.id !== 'me' && <small>{t('시험', 'test')}</small>}
             </button>
           ))}
         </nav>
         <nav className="pills">
-          <span className="pill active">입지 지도</span>
-          <button className="pill" onClick={() => setGuide(true)}>계산 방식</button>
+          <span className="pill active">{t('입지 지도', 'Location map')}</span>
+          <button className="pill" onClick={() => setGuide(true)}>{t('계산 방식', 'How it works')}</button>
         </nav>
+        {/* 화면 언어: 바꾸면 저장하고 다시 연다(i18n.ts) */}
+        <div className="lang-switch" role="group" aria-label="Language / 언어">
+          {(['ko', 'en'] as const).map((l) => (
+            <button key={l} type="button" lang={l} aria-pressed={LANG === l} className={LANG === l ? 'on' : ''} title={l === 'ko' ? '한국어' : 'English'} onClick={() => setLang(l)}>{l.toUpperCase()}</button>
+          ))}
+        </div>
       </header>
 
       <main className="stage" ref={stageRef}>
@@ -224,25 +235,25 @@ export default function App() {
           <div className="panel transport-card">
             {byRank.length > 1 && <EdgeNav onPrev={() => swipe.current?.(-1)} onNext={() => swipe.current?.(1)} />}
             <div className="panel-head tc-head">
-              <h2>교통평점</h2>
-              <span className="tc-life">{life ? `${life.emoji} ${life.label}` : `직접 정한 비율 ${modes.map((m) => w[m]).join('·')}`}</span>
-              <button type="button" className={'gear' + (pop === 'weights' ? ' on' : '')} data-pop-trigger="weights" aria-expanded={pop === 'weights'} aria-label="라이프스타일 설정" title="라이프스타일 설정" onClick={() => toggle('weights')}>⚙️</button>
+              <h2>{t('교통평점', 'Transport score')}</h2>
+              <span className="tc-life">{life ? `${life.emoji} ${life.label}` : `${t('직접 정한 비율', 'Custom mix')} ${modes.map((m) => w[m]).join('·')}`}</span>
+              <button type="button" className={'gear' + (pop === 'weights' ? ' on' : '')} data-pop-trigger="weights" aria-expanded={pop === 'weights'} aria-label={t('라이프스타일 설정', 'Lifestyle settings')} title={t('라이프스타일 설정', 'Lifestyle settings')} onClick={() => toggle('weights')}>⚙️</button>
             </div>
             <div className="tc-body">
             {cur ? (
               <Swipe pos={Math.max(0, k)} count={byRank.length} api={swipe} onMove={(d) => select(byRank[(k + d + byRank.length) % byRank.length].i)}>
                 <div className="sel-head house-head">
                   <div className="sel-text">
-                    <span className="tag">종합 {cur.rank}위{rentText(cur.candidate)}</span>
-                    <h3>{cur.candidate.name}</h3>
-                    <p>{cur.candidate.address}</p>
+                    <span className="tag">{t('종합', 'Overall')} {rankText(cur.rank)}{rentText(cur.candidate)}</span>
+                    <h3>{pn(cur.candidate.name)}</h3>
+                    <p>{addr(cur.candidate.address)}</p>
                   </div>
                 </div>
                 <ScoreBlock r={cur} modes={modes} />
               </Swipe>
-            ) : <p className="empty">검색해서 후보지를 넣어 주세요.</p>}
-            <div className="pick" role="tablist" aria-label="후보지 선택">
-              {byRank.map(({ c, i, rank }) => <button key={c.id} role="tab" aria-selected={i === active} className={i === active ? 'on' : ''} onClick={() => select(i)} title={c.name} aria-label={`${rank}위 ${c.name}`}>{rank}</button>)}
+            ) : <p className="empty">{t('검색해서 후보지를 넣어 주세요.', 'Search to add a candidate home.')}</p>}
+            <div className="pick" role="tablist" aria-label={t('후보지 선택', 'Pick a candidate')}>
+              {byRank.map(({ c, i, rank }) => <button key={c.id} role="tab" aria-selected={i === active} className={i === active ? 'on' : ''} onClick={() => select(i)} title={pn(c.name)} aria-label={`${rankText(rank)} ${pn(c.name)}`}>{rank}</button>)}
             </div>
             </div>
           </div>
@@ -251,20 +262,20 @@ export default function App() {
 
         {/* 왼쪽 아래: 주요 목적지(따로) — 누르면 주 방문 횟수·이동수단 창 */}
         <div className="selected-area anchor">
-          <div className={'panel hubs-panel tappable' + (pop === 'weekly' ? ' on' : '')} {...tap('weekly', '목적지별 주 방문 횟수·이동수단 조정 열기')}>
-            <div className="panel-head"><h2>주요 목적지</h2><span className="tap-hint">주 방문 횟수 ↗</span></div>
+          <div className={'panel hubs-panel tappable' + (pop === 'weekly' ? ' on' : '')} {...tap('weekly', t('목적지별 주 방문 횟수·이동수단 조정 열기', 'Open visits-per-week and travel mode settings'))}>
+            <div className="panel-head"><h2>{t('주요 목적지', 'Destinations')}</h2><span className="tap-hint">{t('주 방문 횟수 ↗', 'Visits per week ↗')}</span></div>
             {hubs.map((h) => {
-              const t = pref.weekly[h.id] ?? 0
+              const n = pref.weekly[h.id] ?? 0
               const m = pref.hubMode?.[h.id] ?? 'auto'
               return (
                 <div className="hub-line" key={h.id}>
                   <span className="hub-mark" aria-hidden>{hubEmoji(h.category)}</span>
-                  <div><b>{h.name}</b><small>{h.category} · {weeklyText(t)}{t >= 1 && t !== 1 ? '' : t === 1 ? '(월 4회)' : ''} · {m === 'auto' ? '수단 자동' : `${MODE_INFO[m].emoji} ${MODE_INFO[m].label}`} · 반영 {weekSum > 0 ? Math.round((t / weekSum) * 100) : Math.round(100 / hubs.length)}%</small></div>
-                  <button className="x no-pop" title="이 목적지 빼기" aria-label={`${h.name} 빼기`} onClick={() => update(removeHub(state, h.id))}>×</button>
+                  <div><b>{pn(h.name)}</b><small>{catName(h.category)} · {weeklyText(n)}{n === 1 ? t('(월 4회)', ' (4×/month)') : ''} · {m === 'auto' ? t('수단 자동', 'auto mode') : `${MODE_INFO[m].emoji} ${MODE_INFO[m].label}`} · {t('반영', 'weight')} {weekSum > 0 ? Math.round((n / weekSum) * 100) : Math.round(100 / hubs.length)}%</small></div>
+                  <button className="x no-pop" title={t('이 목적지 빼기', 'Remove this destination')} aria-label={t(`${h.name} 빼기`, `Remove ${pn(h.name)}`)} onClick={() => update(removeHub(state, h.id))}>×</button>
                 </div>
               )
             })}
-            {hubs.length === 0 && <p className="muted">검색해서 목적지를 넣어 주세요(최대 {MAX_HUBS}곳).</p>}
+            {hubs.length === 0 && <p className="muted">{t(`검색해서 목적지를 넣어 주세요(최대 ${MAX_HUBS}곳).`, `Search to add destinations (up to ${MAX_HUBS}).`)}</p>}
           </div>
           {pop === 'weekly' && <SettingsPopover kind="weekly" hubs={hubs} value={pref} onChange={(p) => setState({ ...state, pref: p })} onClose={close} />}
         </div>
@@ -275,10 +286,11 @@ export default function App() {
             onSpot={onSpot} libraries={mapLibraries} zones={mapZones} catPins={catPins} overlayFit={overlayFit} transit={transitRoute} onCatOpen={(start) => { setGalleryIdx(null); setGalleryStart(start); setCatDlg('gallery') }} />
           {layers.walk && (
             <p className="layer-note" role="status">
-              {parkState === 'loading' ? '🌳 산책 — 공원·하천 찾는 중…' : parkState === 'error' ? '🌳 산책 — 공원 자료를 받지 못했어요(잠시 뒤 다시 켜 보세요)'
-                : stroll?.nearest ? `🌳 산책 — 가장 가까운 ${stroll.nearest.p.kind} ${stroll.nearest.p.name} ${Math.round(stroll.nearest.m / 10) * 10}m · 도보 10분(${STROLL_RADIUS}m) 안 ${stroll.count}곳`
-                : '🌳 산책 — 도보 10분(800m) 안에 등록된 공원·하천이 없어요'}
-              {parkState !== 'loading' && <span className="layer-legend"><i aria-hidden />공원 점수 {PARK_AREA_MIN}점 이상(진할수록 높음)</span>}
+              {parkState === 'loading' ? t('🌳 산책 — 공원·하천 찾는 중…', '🌳 Walks — finding parks and streams…') : parkState === 'error' ? t('🌳 산책 — 공원 자료를 받지 못했어요(잠시 뒤 다시 켜 보세요)', '🌳 Walks — could not load park data (try again shortly)')
+                : stroll?.nearest ? t(`🌳 산책 — 가장 가까운 ${stroll.nearest.p.kind} ${stroll.nearest.p.name} ${Math.round(stroll.nearest.m / 10) * 10}m · 도보 10분(${STROLL_RADIUS}m) 안 ${stroll.count}곳`,
+                  `🌳 Walks — nearest ${stroll.nearest.p.kind === '하천' ? 'stream' : 'park'}: ${pn(stroll.nearest.p.name)} ${Math.round(stroll.nearest.m / 10) * 10}m · ${stroll.count} within a 10-min walk (${STROLL_RADIUS}m)`)
+                : t(`🌳 산책 — 도보 10분(${STROLL_RADIUS}m) 안에 등록된 공원·하천이 없어요`, `🌳 Walks — no parks or streams within a 10-min walk (${STROLL_RADIUS}m)`)}
+              {parkState !== 'loading' && <span className="layer-legend"><i aria-hidden />{t(`공원 점수 ${PARK_AREA_MIN}점 이상(진할수록 높음)`, `Parks scoring ${PARK_AREA_MIN}+ (darker = higher)`)}</span>}
             </p>
           )}
           <SearchBox hubs={hubs} tripsOf={(id) => pref.weekly[id] ?? 0} onCandidate={onCandidate} onHub={onHub} onPreview={(p, fly = true) => { setPreview(p); setPreviewFly(fly) }} onResults={setFound} centerRef={mapCenter} external={mapPick} />
@@ -309,12 +321,13 @@ export default function App() {
         </section>
       </main>
 
-      <p className="foot">{user !== 'me' && `시험용 사용자 「${profileOf(user).label}」(${profileOf(user).note}) · `}도보·자전거는 OSM 길 거리, 대중교통은 서울시 환승경로, 차량은 네이버 실측(없으면 "추정") · 바꾼 후보지·목적지·선호도는 이 브라우저에만 저장됩니다</p>
+      <p className="foot">{user !== 'me' && t(`시험용 사용자 「${profileOf(user).label}」(${profileOf(user).note}) · `, `Test user "${profileOf(user).label}" (${profileOf(user).note}) · `)}{t('도보·자전거는 OSM 길 거리, 대중교통은 서울시 환승경로, 차량은 네이버 실측(없으면 "추정") · 바꾼 후보지·목적지·선호도는 이 브라우저에만 저장됩니다',
+        'Walking and cycling use OpenStreetMap path distances, transit uses the Seoul transfer-route API, driving uses Naver measurements ("est." when missing) · Your candidates, destinations and preferences are saved only in this browser')}</p>
       {guide && <GuidePanel onClose={() => setGuide(false)} />}
       {catDlg === 'register' && <CatRegister state={catState} onChange={setCats} onClose={() => setCatDlg('none')} />}
       {catDlg === 'gallery' && catIdx && (() => {
         const i = Math.min(galleryIdx ?? active, catIdx.length - 1)
-        return <CatGallery title={candidates[i]?.name ?? ''} cats={catIdx[i]?.cats ?? []} user={catState.user} start={galleryStart} onRemoveMine={(id) => setCats(removeMyPhoto(catState, id))} onClose={() => setCatDlg('none')} />
+        return <CatGallery title={pn(candidates[i]?.name ?? '')} cats={catIdx[i]?.cats ?? []} user={catState.user} start={galleryStart} onRemoveMine={(id) => setCats(removeMyPhoto(catState, id))} onClose={() => setCatDlg('none')} />
       })()}
     </div>
   )

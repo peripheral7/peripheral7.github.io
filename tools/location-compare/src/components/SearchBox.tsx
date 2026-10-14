@@ -3,6 +3,7 @@ import { placeNear, type MapPoint } from '../placeNear'
 import { HUB_CATEGORIES, MAX_HUBS, MAX_WEEKLY, WEEKS_PER_MONTH, defaultWeekly, type Hub, type Place } from '../data'
 import { guessHubCategory, money } from '../store'
 import { normalizeQuery, placeSearchAvailable, reverseGeocode, search, searchAvailable } from '../naver'
+import { MAN_UNIT, addr, catName, isEn, pn, t } from '../i18n'
 
 // 지도 위 검색창 하나: 후보지(아파트·주소)와 목적지(학교·회사 등)를 같은 창에서 찾는다.
 // - 글자를 치다 잠깐 멈추면(LIVE_DELAY) 저절로 검색해 아래에 결과를 띄운다. Enter 는 바로 검색.
@@ -61,7 +62,7 @@ export function SearchBox({ hubs, tripsOf, onCandidate, onHub, onPreview, onResu
 
   const run = async (raw: string) => {
     const query = normalizeQuery(raw) // "망포  래미안"·"망포 래미안 " 은 같은 검색어(다시 부르지 않음)
-    if (!enabled) { setItems([]); setMsg('네이버 키를 넣고 빌드하면 검색할 수 있습니다(README 10절).'); return }
+    if (!enabled) { setItems([]); setMsg(t('네이버 키를 넣고 빌드하면 검색할 수 있습니다(README 10절).', 'Search needs a Naver key at build time (README §10).')); return }
     if (query.length < MIN_LEN) { seq.current++; setItems([]); setMsg(''); setBusy(false); reset(); return }
     const id = ++seq.current
     const hit = cache.current.get(query)
@@ -72,14 +73,14 @@ export function SearchBox({ hubs, tripsOf, onCandidate, onHub, onPreview, onResu
         const { places, errors } = await search(query)
         res = { places, error: places.length ? '' : errors[0] || '' }
         if (!errors.length) cache.current.set(query, res) // 실패한 검색은 기억하지 않는다
-      } catch (err) { res = { places: [], error: (err as Error).message || '검색에 실패했습니다.' } }
+      } catch (err) { res = { places: [], error: (err as Error).message || t('검색에 실패했습니다.', 'Search failed.') } }
     }
     if (id !== seq.current) return // 그사이 다른 검색어를 쳤다
     setBusy(false); setOpen(true); reset()
     // 지금 지도 가운데에서 가까운 순(네이버 지역 검색에는 위치 조건이 없어, 받은 결과를 여기서 줄 세운다)
     const c = centerRef.current
     setItems(c ? [...res.places].sort((a, b) => km(a, c) - km(b, c)) : res.places)
-    setMsg(res.places.length ? '' : res.error || (placeSearchAvailable() ? '검색 결과가 없습니다.' : '결과가 없습니다. 지금은 도로명·지번 주소로만 찾을 수 있어요.'))
+    setMsg(res.places.length ? '' : res.error || (placeSearchAvailable() ? t('검색 결과가 없습니다.', 'No results. Try Korean place names or a road address.') : t('결과가 없습니다. 지금은 도로명·지번 주소로만 찾을 수 있어요.', 'No results. Only Korean road or lot addresses can be searched right now.')))
   }
 
   // 타자를 멈추면 저절로 검색
@@ -95,7 +96,7 @@ export function SearchBox({ hubs, tripsOf, onCandidate, onHub, onPreview, onResu
     const { lat, lng } = external.place
     const id = ++seq.current // 진행 중인 검색 결과는 버린다
     const coord = `${lat.toFixed(5)}, ${lng.toFixed(5)}`
-    const p: Place = { ...external.place, name: MAP_PICK_NAME, address: '주소 찾는 중…' }
+    const p: Place = { ...external.place, name: MAP_PICK_NAME, address: t('주소 찾는 중…', 'Finding address…') }
     setBusy(false); setItems([p]); setMsg(''); setOpen(false); setPicked(0); setSideTop(0); setFloatAt(external.at)
     setDraft({ kind: external.kind, name: MAP_PICK_NAME, category: '기타', deposit: '', rent: '', maint: '', trips: '' })
     onPreview(p, false)
@@ -106,7 +107,7 @@ export function SearchBox({ hubs, tripsOf, onCandidate, onHub, onPreview, onResu
       const name = a ? a.building || (a.rough ? MAP_PICK_NAME : road || a.address.split(' ').slice(2).join(' ') || a.address) : MAP_PICK_NAME
       const q: Place = { ...p, name, address: a?.address ?? coord }
       setItems([q])
-      setDraft((d) => (d && d.name === MAP_PICK_NAME ? { ...d, name } : d))
+      setDraft((d) => (d && d.name === MAP_PICK_NAME ? { ...d, name: name === MAP_PICK_NAME ? name : isEn ? pn(name) : name } : d))
     })
   }, [external?.n]) // eslint-disable-line react-hooks/exhaustive-deps
 
@@ -117,7 +118,7 @@ export function SearchBox({ hubs, tripsOf, onCandidate, onHub, onPreview, onResu
   }
   const start = (kind: Draft['kind']) => {
     const p = items[picked!]
-    setDraft({ kind, name: p.name, category: guessHubCategory(p), deposit: '', rent: '', maint: '', trips: '' })
+    setDraft({ kind, name: isEn ? pn(p.name) : p.name, category: guessHubCategory(p), deposit: '', rent: '', maint: '', trips: '' })
   }
   // 목적지가 이미 꽉 찼으면 주 방문이 가장 적은 목적지 자리에 넣는다(바꿀 목적지를 따로 고르지 않음)
   const replaceHub = hubs.length >= MAX_HUBS ? hubs.reduce((a, h) => (tripsOf(h.id) < tripsOf(a.id) ? h : a)) : undefined
@@ -139,35 +140,36 @@ export function SearchBox({ hubs, tripsOf, onCandidate, onHub, onPreview, onResu
 
   const form = draft && picked !== null && items[picked] ? (
     <form className="register" onSubmit={(e) => { e.preventDefault(); commit() }} onKeyDown={(e) => { if (e.key === 'Escape') { e.stopPropagation(); cancel() } }}>
-      <span className="register-title">{draft.kind === 'candidate' ? '후보지로 등록' : '목적지로 등록'}</span>
-      <p className="register-addr">📍 {items[picked].address}</p>
-      <label>이름<input {...plain} value={draft.name} maxLength={40} autoFocus onChange={(e) => setDraft({ ...draft, name: e.target.value })} /></label>
+      <span className="register-title">{draft.kind === 'candidate' ? t('후보지로 등록', 'Add as candidate') : t('목적지로 등록', 'Add as destination')}</span>
+      <p className="register-addr">📍 {addr(items[picked].address)}</p>
+      <label>{t('이름', 'Name')}<input {...plain} value={draft.name === MAP_PICK_NAME ? pn(draft.name) : draft.name} maxLength={40} autoFocus onChange={(e) => setDraft({ ...draft, name: e.target.value })} /></label>
       {draft.kind === 'candidate' ? <>
-        <label>보증금<span className="unit-input"><input {...plain} type="number" min={0} step={100} inputMode="numeric" placeholder="예: 1000" value={draft.deposit} onChange={(e) => setDraft({ ...draft, deposit: e.target.value })} /><i>만원</i></span></label>
-        <label>월세<span className="unit-input"><input {...plain} type="number" min={0} step={1} inputMode="numeric" placeholder="예: 50" value={draft.rent} onChange={(e) => setDraft({ ...draft, rent: e.target.value })} /><i>만원</i></span></label>
-        <label>관리비<span className="unit-input"><input {...plain} type="number" min={0} step={1} inputMode="numeric" placeholder="예: 7" value={draft.maint} onChange={(e) => setDraft({ ...draft, maint: e.target.value })} /><i>만원</i></span></label>
+        <label>{t('보증금', 'Deposit')}<span className="unit-input"><input {...plain} type="number" min={0} step={100} inputMode="numeric" placeholder={t('예: 1000', 'e.g. 1000')} value={draft.deposit} onChange={(e) => setDraft({ ...draft, deposit: e.target.value })} /><i>{MAN_UNIT}</i></span></label>
+        <label>{t('월세', 'Monthly rent')}<span className="unit-input"><input {...plain} type="number" min={0} step={1} inputMode="numeric" placeholder={t('예: 50', 'e.g. 50')} value={draft.rent} onChange={(e) => setDraft({ ...draft, rent: e.target.value })} /><i>{MAN_UNIT}</i></span></label>
+        <label>{t('관리비', 'Maint. fee')}<span className="unit-input"><input {...plain} type="number" min={0} step={1} inputMode="numeric" placeholder={t('예: 7', 'e.g. 7')} value={draft.maint} onChange={(e) => setDraft({ ...draft, maint: e.target.value })} /><i>{MAN_UNIT}</i></span></label>
+        {isEn && <small className="register-hint">Amounts in units of ₩10,000 (e.g. 50 = ₩500,000)</small>}
       </> : <>
         <div className="field">
-          <span>분류</span>
-          <div className="cat-pick" role="radiogroup" aria-label="분류">
+          <span>{t('분류', 'Type')}</span>
+          <div className="cat-pick" role="radiogroup" aria-label={t('분류', 'Type')}>
             {HUB_CATEGORIES.map((c) => (
-              <button type="button" key={c} role="radio" aria-checked={draft.category === c} className={draft.category === c ? 'on' : ''} onClick={() => setDraft({ ...draft, category: c })}>{c}</button>
+              <button type="button" key={c} role="radio" aria-checked={draft.category === c} className={draft.category === c ? 'on' : ''} onClick={() => setDraft({ ...draft, category: c })}>{catName(c)}</button>
             ))}
-            <input {...plain} className={'cat-custom' + (custom ? ' on' : '')} value={custom} maxLength={8} placeholder="직접 입력" aria-label="분류 직접 입력"
+            <input {...plain} className={'cat-custom' + (custom ? ' on' : '')} value={custom} maxLength={8} placeholder={t('직접 입력', 'Custom')} aria-label={t('분류 직접 입력', 'Custom type')}
               onChange={(e) => setDraft({ ...draft, category: e.target.value })} />
           </div>
         </div>
         <div className="field">
-          <span>주 방문</span>
+          <span>{t('주 방문', 'Visits/week')}</span>
           <div className="trip-input">
-            <input type="range" min={0} max={MAX_WEEKLY} step={0.5} value={weekly} aria-label="주 방문 횟수(끌어서)" onChange={(e) => setDraft({ ...draft, trips: e.target.value })} />
-            <span className="unit-input"><input {...plain} type="text" inputMode="decimal" maxLength={4} value={draft.trips || String(weekly)} aria-label="주 방문 횟수(직접 입력)" onChange={(e) => setDraft({ ...draft, trips: e.target.value.replace(/[^\d.]/g, '') })} /><i>회</i></span>
+            <input type="range" min={0} max={MAX_WEEKLY} step={0.5} value={weekly} aria-label={t('주 방문 횟수(끌어서)', 'Visits per week (slider)')} onChange={(e) => setDraft({ ...draft, trips: e.target.value })} />
+            <span className="unit-input"><input {...plain} type="text" inputMode="decimal" maxLength={4} value={draft.trips || String(weekly)} aria-label={t('주 방문 횟수(직접 입력)', 'Visits per week')} onChange={(e) => setDraft({ ...draft, trips: e.target.value.replace(/[^\d.]/g, '') })} /><i>{t('회', '×')}</i></span>
           </div>
-          <small className="register-hint">{draft.trips ? '' : `${draft.category || '기타'} 기본값 · `}월 {Math.round(weekly * WEEKS_PER_MONTH * 10) / 10}회</small>
+          <small className="register-hint">{draft.trips ? '' : t(`${draft.category || '기타'} 기본값 · `, `${catName(draft.category || '기타')} default · `)}{t(`월 ${Math.round(weekly * WEEKS_PER_MONTH * 10) / 10}회`, `${Math.round(weekly * WEEKS_PER_MONTH * 10) / 10}×/month`)}</small>
         </div>
-        {replaceHub && <p className="register-note">목적지는 최대 {MAX_HUBS}곳 — 주 방문이 가장 적은 「{replaceHub.name}」 자리에 들어갑니다.</p>}
+        {replaceHub && <p className="register-note">{t(`목적지는 최대 ${MAX_HUBS}곳 — 주 방문이 가장 적은 「${replaceHub.name}」 자리에 들어갑니다.`, `Up to ${MAX_HUBS} destinations — this replaces "${pn(replaceHub.name)}", the least visited one.`)}</p>}
       </>}
-      <div className="register-actions"><button type="button" className="ghost" onClick={cancel}>취소</button><button type="submit" className="solid">등록</button></div>
+      <div className="register-actions"><button type="button" className="ghost" onClick={cancel}>{t('취소', 'Cancel')}</button><button type="submit" className="solid">{t('등록', 'Add')}</button></div>
     </form>
   ) : null
 
@@ -175,21 +177,21 @@ export function SearchBox({ hubs, tripsOf, onCandidate, onHub, onPreview, onResu
     <>
     <div className="search" ref={box}>
       <form className="search-bar" role="search" onSubmit={(e) => { e.preventDefault(); void run(q) }}>
-        <button type="submit" className="search-go" aria-label="검색" disabled={busy}>
+        <button type="submit" className="search-go" aria-label={t('검색', 'Search')} disabled={busy}>
           <svg viewBox="0 0 20 20" aria-hidden><circle cx="9" cy="9" r="6" fill="none" stroke="currentColor" strokeWidth="1.8" /><path d="m13.5 13.5 4 4" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" /></svg>
         </button>
         <input value={q} {...plain} onChange={(e) => setQ(e.target.value)} onFocus={() => (items.length || msg) && setOpen(true)}
           onKeyDown={(e) => { if (e.key === 'Escape') { setOpen(false); reset() } }}
-          placeholder={enabled ? '후보지 및 목적지 검색' : '검색 준비 중 (네이버 키 필요)'} aria-label="후보지 및 목적지 검색" maxLength={40} />
-        {busy && <span className="search-busy" aria-label="검색 중" />}
+          placeholder={enabled ? t('후보지 및 목적지 검색', 'Search homes & destinations') : t('검색 준비 중 (네이버 키 필요)', 'Search not ready (needs Naver key)')} aria-label={t('후보지 및 목적지 검색', 'Search homes and destinations')} maxLength={40} />
+        {busy && <span className="search-busy" aria-label={t('검색 중', 'Searching')} />}
       </form>
       {open && (msg || items.length > 0) && (
         <div className="search-drop">
-          <div className="search-results" ref={list} role="listbox" aria-label="검색 결과">
+          <div className="search-results" ref={list} role="listbox" aria-label={t('검색 결과', 'Search results')}>
             {msg && <p className="muted">{msg}</p>}
             {items.map((p, i) => (
               <button type="button" role="option" aria-selected={picked === i} className={'result' + (picked === i ? ' on' : '')} key={i} onClick={(e) => pick(i, e.currentTarget)}>
-                <b>{p.name}{centerRef.current && <em className="result-km">{kmText(km(p, centerRef.current))}</em>}</b><small>{p.category ? `${p.category} · ` : ''}{p.address}</small>
+                <b title={isEn ? p.name : undefined}>{pn(p.name)}{centerRef.current && <em className="result-km">{kmText(km(p, centerRef.current))}</em>}</b><small>{p.category ? `${isEn ? catName(p.category.split('>').pop()!.trim()) : p.category} · ` : ''}{addr(p.address)}</small>
               </button>
             ))}
           </div>
@@ -197,8 +199,8 @@ export function SearchBox({ hubs, tripsOf, onCandidate, onHub, onPreview, onResu
             <div className={'search-side' + (draft && !floatAt ? ' form' : '')} style={{ top: draft ? 0 : Math.max(0, sideTop) }}>
               {!draft || floatAt ? (
                 <div className="side-actions">
-                  <button type="button" onClick={() => start('candidate')}>후보지로</button>
-                  <button type="button" onClick={() => start('hub')}>목적지로</button>
+                  <button type="button" onClick={() => start('candidate')}>{t('후보지로', 'As candidate')}</button>
+                  <button type="button" onClick={() => start('hub')}>{t('목적지로', 'As destination')}</button>
                 </div>
               ) : (
                 form
@@ -234,7 +236,7 @@ function FloatBox({ at, onClose, children }: { at: MapPoint; onClose: () => void
     return () => window.removeEventListener('pointerdown', down, true)
   }, [])
   return (
-    <div ref={ref} className="search-side form map-register" role="dialog" aria-label="지도에서 고른 곳 등록" onContextMenu={(e) => e.preventDefault()}
+    <div ref={ref} className="search-side form map-register" role="dialog" aria-label={t('지도에서 고른 곳 등록', 'Add the place picked on the map')} onContextMenu={(e) => e.preventDefault()}
       style={pos ?? { left: at.x, top: at.y, visibility: 'hidden' }}>
       {children}
     </div>

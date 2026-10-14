@@ -6,6 +6,7 @@
 // - VITE_TURNSTILE_SITEKEY  (선택) Cloudflare Turnstile 사람 확인 — Worker 가 TURNSTILE_SECRET 을 가지면 필수.
 // 셋 다 비어 있으면: 지도는 OSM 밝은 지도, 검색은 꺼진다.
 import type { Place } from './data'
+import { isEn, t } from './i18n'
 
 export const MAP_KEY_ID = (import.meta.env.VITE_NAVER_MAP_KEY_ID as string | undefined) || ''
 export const SEARCH_URL = (import.meta.env.VITE_PLACE_SEARCH_URL as string | undefined) || ''
@@ -37,7 +38,8 @@ export function loadNaverMaps(): Promise<any> {
   if (!MAP_KEY_ID || authFailed) return Promise.reject(new Error('no key'))
   return (mapsLoading ??= new Promise((resolve, reject) => {
     window.navermap_authFailure = () => { authFailed = true; reject(new Error('naver auth failure')); authListeners.forEach((f) => f()) }
-    loadScript(`https://oapi.map.naver.com/openapi/v3/maps.js?ncpKeyId=${encodeURIComponent(MAP_KEY_ID)}&submodules=geocoder`)
+    // 영어 화면은 지도 글자도 영어(language=en — 네이버 지도 다국어)
+    loadScript(`https://oapi.map.naver.com/openapi/v3/maps.js?ncpKeyId=${encodeURIComponent(MAP_KEY_ID)}&submodules=geocoder${isEn ? '&language=en' : ''}`)
       .then(() => (window.naver?.maps ? resolve(window.naver) : reject(new Error('naver maps missing'))), reject)
   }))
 }
@@ -85,9 +87,9 @@ async function searchPlaces(query: string): Promise<Place[]> {
   const res = await fetch(`${SEARCH_URL.replace(/\/$/, '')}/search?q=${encodeURIComponent(query)}`, {
     headers: token ? { 'X-Turnstile-Token': token } : {},
   })
-  if (res.status === 429) throw new Error('잠시 뒤 다시 검색해 주세요(검색 횟수 제한).')
-  if (res.status === 503) throw new Error('오늘 검색 한도를 다 썼습니다. 내일 다시 이용해 주세요.')
-  if (!res.ok) throw new Error('검색에 실패했습니다.')
+  if (res.status === 429) throw new Error(t('잠시 뒤 다시 검색해 주세요(검색 횟수 제한).', 'Please search again shortly (rate limit).'))
+  if (res.status === 503) throw new Error(t('오늘 검색 한도를 다 썼습니다. 내일 다시 이용해 주세요.', "Today's search limit is used up. Please try again tomorrow."))
+  if (!res.ok) throw new Error(t('검색에 실패했습니다.', 'Search failed.'))
   const body = await res.json()
   return (body.items ?? []) as Place[]
 }
@@ -151,7 +153,7 @@ async function searchOnce(query: string): Promise<{ places: Place[]; errors: str
       for (const p of s.value) {
         if (Number.isFinite(p.lat) && Number.isFinite(p.lng) && !places.some((q) => Math.abs(q.lat - p.lat) < 1e-5 && Math.abs(q.lng - p.lng) < 1e-5)) places.push(p)
       }
-    } else errors.push(s.reason?.message || '검색 실패')
+    } else errors.push(s.reason?.message || t('검색 실패', 'Search failed'))
   }
   return { places, errors }
 }

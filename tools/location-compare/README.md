@@ -315,6 +315,9 @@ src/places-config.json               그 규칙·숫자 · src/places.ts 화면 
 
 ## 8. 개발 지침
 
+> 새 모듈을 만들 때의 전체 지침(템플릿 구조·필수 확인 사항·**영어판 함께 만들기**)은 [DEV-GUIDE.md](DEV-GUIDE.md). 아래는 요점.
+
+- **영어판(KO/EN)**: 화면 글자는 `t('한국어', 'English')`(`src/i18n.ts`)로 두 언어를 함께 적고, 저장되는 이름·주소·분류는 보일 때만 `pn()`·`addr()`·`catName()` 으로 바꾼다. 계산 방식 창은 한국어판과 `GuideEn` 을 같이 고친다.
 - **계산을 바꾸면 세 곳을 함께 고친다**: `src/scoring.ts`(또는 `cats.ts`) → 화면 안 "계산 방식"(`components/GuidePanel.tsx`) → 이 README 3~5절. 화면 배치·조작이 바뀌면 [UI-UX.md](UI-UX.md) 도, 진행 상황은 [PROGRESS.md](PROGRESS.md) 에.
 - **숫자 기준은 상수로**: `WALK_LIMIT`(30)·`WALK_ZONE`(10)·`WALK_ONLY`(10)·`BIKE_LIMIT`(40)·`TRANSIT_PARTS`·`CAR_PARTS`·`WEEKS_PER_MONTH`(4)·`BASE_DEPOSIT`·`CAT_*`. 화면 글자와 안내 창은 상수를 가져다 쓰고 숫자를 따로 적지 않는다.
 - **화면 문구는 최소로**: 카드·패널에는 값과 짧은 라벨만. 규칙 설명("0점으로 계산", "점수 높은 순 …", 서버 업로드 상태, 점수 구간 등)은 "계산 방식" 창과 README 에만 둔다.

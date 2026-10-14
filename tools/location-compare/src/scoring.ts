@@ -4,6 +4,7 @@ import routes from './routes.json'
 import paths from './paths.json'
 import { isDefaultCandidate, livePaths, liveRoute, setStaticCheck } from './live'
 import { placeOf } from './places'
+import { t } from './i18n'
 
 // ── 1. 이동 시간 ──────────────────────────────────────────────────────
 // 실제 경로가 있으면 그 값, 없으면 직선거리 추정.
@@ -278,17 +279,17 @@ export function hubInsights(results: CandidateResult[], hubIndex: number): Insig
 
   rows.forEach((h, i) => {
     const o = out[i]
-    if (h.trip.walk <= WALK_ZONE) o.pros.push(`도보권 ${h.trip.walk}분`)
+    if (h.trip.walk <= WALK_ZONE) o.pros.push(t(`도보권 ${h.trip.walk}분`, `walkable ${h.trip.walk} min`))
     // 도보 10분 이내면 대중교통은 따지지 않는다(점수에서도 뺌)
-    if (!(h.transitSkipped || h.transitPending) && !transit.same && near(h.scores.transit, transit.max)) o.pros.push('대중교통 최적')
-    if (!car.same && near(h.scores.car, car.max)) o.pros.push('차량 이동 최적')
-    if (!(h.transitSkipped || h.transitPending) && !transfers.same && h.trip.transfers === 0) o.pros.push('환승 없음')
-    if (!(h.transitSkipped || h.transitPending) && !waits.same && near(h.trip.wait, waits.min) && o.pros.length < 2) o.pros.push(`대기 최소 ${h.trip.wait}분`)
+    if (!(h.transitSkipped || h.transitPending) && !transit.same && near(h.scores.transit, transit.max)) o.pros.push(t('대중교통 최적', 'best transit'))
+    if (!car.same && near(h.scores.car, car.max)) o.pros.push(t('차량 이동 최적', 'best by car'))
+    if (!(h.transitSkipped || h.transitPending) && !transfers.same && h.trip.transfers === 0) o.pros.push(t('환승 없음', 'no transfers'))
+    if (!(h.transitSkipped || h.transitPending) && !waits.same && near(h.trip.wait, waits.min) && o.pros.length < 2) o.pros.push(t(`대기 최소 ${h.trip.wait}분`, `shortest wait ${h.trip.wait} min`))
 
-    if (h.scores.walk === null && walkable.length > 0) o.cons.push(`도보 ${WALK_LIMIT}분 초과`)
-    if (!(h.transitSkipped || h.transitPending) && !transit.same && near(h.scores.transit, transit.min) && transit.max - transit.min >= GAP) o.cons.push('대중교통 불리')
-    if (!car.same && near(h.scores.car, car.min) && car.max - car.min >= GAP) o.cons.push(`출퇴근 정체 ${(h.trip.carRush / h.trip.carFree).toFixed(1)}배`)
-    if (!(h.transitSkipped || h.transitPending) && !transfers.same && h.trip.transfers === transfers.max && h.trip.transfers > 0) o.cons.push(`환승 ${h.trip.transfers}회`)
+    if (h.scores.walk === null && walkable.length > 0) o.cons.push(t(`도보 ${WALK_LIMIT}분 초과`, `walk over ${WALK_LIMIT} min`))
+    if (!(h.transitSkipped || h.transitPending) && !transit.same && near(h.scores.transit, transit.min) && transit.max - transit.min >= GAP) o.cons.push(t('대중교통 불리', 'weak transit'))
+    if (!car.same && near(h.scores.car, car.min) && car.max - car.min >= GAP) o.cons.push(t(`출퇴근 정체 ${(h.trip.carRush / h.trip.carFree).toFixed(1)}배`, `rush hour ×${(h.trip.carRush / h.trip.carFree).toFixed(1)}`))
+    if (!(h.transitSkipped || h.transitPending) && !transfers.same && h.trip.transfers === transfers.max && h.trip.transfers > 0) o.cons.push(t(`환승 ${h.trip.transfers}회`, `${h.trip.transfers} transfer${h.trip.transfers > 1 ? 's' : ''}`))
     o.pros = o.pros.slice(0, 3)
     o.cons = o.cons.slice(0, 2)
   })

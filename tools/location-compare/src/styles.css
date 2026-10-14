@@ -56,6 +56,11 @@ button { cursor: pointer }
 .pill { border: 0; background: transparent; padding: 7px 14px; border-radius: 999px; color: var(--muted); font-size: 14px; white-space: nowrap }
 .pill:hover { color: var(--text) }
 .pill.active { color: var(--text); font-weight: 500 }
+/* 화면 언어 KO/EN(i18n.ts) — 머리 줄 오른쪽 끝, 사용자 탭과 같은 알약 모양 */
+.lang-switch { display: flex; gap: 2px; padding: 3px; margin-left: auto; border-radius: 999px; background: var(--panel); border: 1px solid var(--line); flex: none }
+.lang-switch button { border: 0; background: transparent; padding: 5px 10px; border-radius: 999px; color: var(--muted); font-size: 12px; font-weight: 600; letter-spacing: 0.04em; cursor: pointer }
+.lang-switch button:hover { color: var(--text); background: var(--panel-2) }
+.lang-switch button.on { color: var(--text); background: var(--accent) }
 .back { margin-left: auto; color: var(--muted); text-decoration: none; font-size: 11px; letter-spacing: 0.12em; white-space: nowrap }
 .back:hover { color: var(--text) }
 

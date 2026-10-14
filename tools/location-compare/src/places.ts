@@ -4,6 +4,7 @@ import data from './places.json'
 import config from './places-config.json'
 import type { Candidate } from './data'
 import { isDefaultCandidate, liveAnalysis } from './live'
+import { pn, t } from './i18n'
 
 export type PlaceKey = 'peace' | 'park' | 'library'
 export type ParkRow = { name: string; type: string; dist: number; value: number; eff: number; areaHa: number; walkM: number; waterside: boolean; linked: boolean; relief?: number; steep?: number }
@@ -17,8 +18,8 @@ export type PlaceRow = {
   park: { score: number; green: number; greenBonus: number; parks: ParkRow[] }
   library: { score: number; near: LibraryRow[] }
 }
-export const PLACE_LABEL: Record<PlaceKey, string> = { peace: '🕊️ 평화로움', park: '🌳 공원', library: '📚 도서관' }
-export const PLACE_NOTE: Record<PlaceKey, string> = { peace: '음식점 · 상업시설 · 도로 소음', park: '공원 · 녹지 비율', library: '가까운 공공도서관' }
+export const PLACE_LABEL: Record<PlaceKey, string> = { peace: t('🕊️ 평화로움', '🕊️ Quietness'), park: t('🌳 공원', '🌳 Parks'), library: t('📚 도서관', '📚 Library') }
+export const PLACE_NOTE: Record<PlaceKey, string> = { peace: t('음식점 · 상업시설 · 도로 소음', 'restaurants · businesses · road noise'), park: t('공원 · 녹지 비율', 'parks · green share'), library: t('가까운 공공도서관', 'nearest public library') }
 /** 평화로움 규칙(화면 한 줄 설명·구분도 범례용) */
 export const PEACE = config.peace
 export const PLACE_KEYS: PlaceKey[] = ['peace', 'park', 'library']
@@ -61,7 +62,7 @@ export function savePlaceOn(v: PlaceOn) { try { localStorage.setItem(KEY, JSON.s
 export function placeSummary(k: PlaceKey, r: PlaceRow): string {
   // 거리(m)·음식점 수 같은 규칙 숫자는 적지 않는다 — 이름만(계산 내역은 이름을 눌렀을 때)
   if (k === 'peace') return ''
-  if (k === 'park') { const p = r.park.parks[0]; return p ? `${p.name}${p.linked ? ' · 길게 연결' : ''} · 녹지 ${r.park.green}%` : `가까운 공원 없음 · 녹지 ${r.park.green}%` }
+  if (k === 'park') { const p = r.park.parks[0]; return p ? `${pn(p.name)}${p.linked ? t(' · 길게 연결', ' · long linked trail') : ''} · ${t('녹지', 'green')} ${r.park.green}%` : `${t('가까운 공원 없음', 'no park nearby')} · ${t('녹지', 'green')} ${r.park.green}%` }
   const l = r.library.near[0]
-  return l ? l.name : '공공도서관 자료 없음'
+  return l ? pn(l.name) : t('공공도서관 자료 없음', 'no public library data')
 }

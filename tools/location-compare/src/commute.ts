@@ -2,6 +2,7 @@
 // 이동 시간은 scoring.ts 의 추정(차량은 네이버 실측이 있으면 그 값)을 그대로 쓴다. 공식 설명은 README 4-3절.
 import { WALK_ONLY, type CandidateResult, type HubResult } from './scoring'
 import { WEEKS_PER_MONTH } from './data'
+import { isEn, krw } from './i18n'
 
 export const TRANSIT_FARE = 1500 // 대중교통 1회(편도) 기본요금(원)
 export const FARE_BASE_KM = 10 // 이 거리까지는 기본요금
@@ -73,7 +74,8 @@ export function commuteInsight(r: CandidateResult, weekly: Record<string, number
 /** 95 → "1시간 35분", 40 → "40분" */
 export function hm(min: number): string {
   const h = Math.floor(min / 60), m = Math.round(min % 60)
+  if (isEn) return h ? `${h} h${m ? ` ${m} min` : ''}` : `${m} min`
   return h ? `${h}시간${m ? ` ${m}분` : ''}` : `${m}분`
 }
-/** 원 → "93,000원"(10원 단위 반올림) */
-export const wonText = (v: number) => `${(Math.round(v / 10) * 10).toLocaleString('ko-KR')}원`
+/** 원 → "93,000원" · "₩93,000"(10원 단위 반올림) */
+export const wonText = (v: number) => krw(Math.round(v / 10) * 10)

@@ -2,6 +2,7 @@
 // 고양이는 방문자가 "현장에서" 사진과 함께 등록한다. 서버가 아직 없어서 등록 내용은 이 브라우저에만 저장되고,
 // 다른 사람과 합치는 업로드는 꺼져 있다(UPLOAD_ENABLED). 계산 방식은 README "길고양이 지수"와 GuidePanel 에 같은 내용으로 적는다.
 import { distanceKm } from './scoring'
+import { t } from './i18n'
 
 export const CAT_RADIUS_M = 300 // 후보지에서 이 거리 안의 고양이만 센다
 export const PHOTO_VALID_DAYS = 60 // 사진 유효 기간(약 2달)
@@ -76,7 +77,7 @@ export function catIndex(at: { lat: number; lng: number }, cats: Cat[], now = Da
   const users = new Set(near.flatMap((c) => livePhotos(c, now).map((p) => p.user))).size
   const photos = near.reduce((a, c) => a + livePhotos(c, now).length, 0)
   const n = near.length
-  const nextHint = n === 0 ? '고양이 1마리 → 4점' : n < 4 ? `${n + 1}마리 → ${fmt1(catScore(n + 1, users))}점` : users < 5 ? '다양한 사용자 참여 → 최대 10점' : ''
+  const nextHint = n === 0 ? t('고양이 1마리 → 4점', '1 cat → 4 pts') : n < 4 ? t(`${n + 1}마리 → ${fmt1(catScore(n + 1, users))}점`, `${n + 1} cats → ${fmt1(catScore(n + 1, users))} pts`) : users < 5 ? t('다양한 사용자 참여 → 최대 10점', 'more contributors → up to 10 pts') : ''
   return { score: catScore(n, users), n, users, cats: near, photos, nextHint }
 }
 const fmt1 = (x: number) => (Math.round(x * 10) / 10).toString()
@@ -91,7 +92,7 @@ export async function shrinkPhoto(file: File): Promise<string> {
   const cv = document.createElement('canvas')
   cv.width = w; cv.height = h
   const ctx = cv.getContext('2d')
-  if (!ctx) throw new Error('이 브라우저에서는 사진을 줄일 수 없습니다.')
+  if (!ctx) throw new Error(t('이 브라우저에서는 사진을 줄일 수 없습니다.', 'This browser cannot resize photos.'))
   ctx.drawImage(bmp, 0, 0, w, h)
   bmp.close?.()
   return cv.toDataURL('image/jpeg', PHOTO_QUALITY)
