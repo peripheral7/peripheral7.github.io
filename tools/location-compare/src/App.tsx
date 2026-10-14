@@ -98,14 +98,14 @@ export default function App() {
   useEffect(() => { saveCommercial(comPrefs) }, [comPrefs])
   useEffect(() => { savePlaceOn(placeOn) }, [placeOn])
   const comIdx = useMemo(() => commercialIndex(candidates, comPrefs, !!pref.bike), [candidates, comPrefs, pref.bike, liveVer]) // eslint-disable-line react-hooks/exhaustive-deps
-  // 지도에 따로 표시할 주요 매장: 필수·선호로 고른 업종의 것만(상권 지수를 껐으면 없음)
+  // 지도에 따로 표시할 주요 매장: 필수 업종의 것만(선호로 옮긴 업종은 지도에 안 보임 — 사용자 지정 10-14)(상권 지수를 껐으면 없음)
   // 지도 위 지표 단추: 상권(주요 매장 표시)·산책(공원·하천 표시). 이 브라우저에 기억한다.
   const [layers, setLayers] = useState<{ com: boolean; walk: boolean }>(() => {
     try { const l = JSON.parse(localStorage.getItem('locCompare.layers.v1') || 'null'); if (l) return { com: l.com !== false, walk: !!l.walk } } catch { /* 기본값 */ }
     return { com: true, walk: false }
   })
   const toggleLayer = (k: 'com' | 'walk') => setLayers((l) => { const n = { ...l, [k]: !l[k] }; try { localStorage.setItem('locCompare.layers.v1', JSON.stringify(n)) } catch { /* 저장 못 해도 동작 */ } return n })
-  const majors = useMemo(() => { const all = [...MAJORS, ...liveMajors(candidates)], on = pickedCats(comPrefs); return layers.com ? (comPrefs.on ? all.filter((m) => on.has(m.cat)) : all) : [] }, [comPrefs, layers.com, candidates, liveVer]) // eslint-disable-line react-hooks/exhaustive-deps
+  const majors = useMemo(() => { const all = [...MAJORS, ...liveMajors(candidates)], on = new Set(comPrefs.need); return layers.com ? (comPrefs.on ? all.filter((m) => on.has(m.cat)) : all) : [] }, [comPrefs, layers.com, candidates, liveVer]) // eslint-disable-line react-hooks/exhaustive-deps
   const [parks, setParks] = useState<Park[]>([])
   const [parkState, setParkState] = useState<'idle' | 'loading' | 'error'>('idle')
   const parkKey = candidates.map((c) => `${c.lat},${c.lng}`).join(';')
