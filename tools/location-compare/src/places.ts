@@ -8,11 +8,11 @@ import { isDefaultCandidate, liveAnalysis } from './live'
 export type PlaceKey = 'peace' | 'park' | 'library'
 export type ParkRow = { name: string; type: string; dist: number; value: number; eff: number; areaHa: number; walkM: number; waterside: boolean; linked: boolean; relief?: number; steep?: number }
 export type LibraryRow = { name: string; dist: number; seats: number; books: number; lat?: number; lng?: number; addr?: string }
-/** 평화로움 구분도 칸: [동쪽 칸 번호, 북쪽 칸 번호, 단계] — 단계 1 큰길 진함 · 2 큰길 옅음 · 3 중로 진함 · 4 중로 옅음 · 5 상가 진함 · 6 상가 옅음 */
+/** 평화로움 구분도 칸: [동쪽 칸 번호, 북쪽 칸 번호, 단계] — 단계 1·2 8차선 이상(진함·옅음) · 3·4 6차선 · 5·6 4차선(중로) · 7·8 상가 */
 export type ZoneCell = [number, number, number]
 export type AccessRoad = { name: string; grade: number; min: number; m: number; score: number; est?: boolean }
 export type PlaceRow = {
-  peace: { score: number; food: number; foodScore: number; shops: number; shopScore: number; road: { name: string; kind?: 'big' | 'mid'; dist: number } | null; roadScore: number; zones?: { step: number; cells: ZoneCell[] } }
+  peace: { score: number; food: number; foodScore: number; shops: number; shopScore: number; road: { name: string; lanes?: number; dist: number } | null; roadScore: number; zones?: { step: number; cells: ZoneCell[] } }
   access?: { score: number | null; roads: AccessRoad[] }
   park: { score: number; green: number; greenBonus: number; parks: ParkRow[] }
   library: { score: number; near: LibraryRow[] }

@@ -4,12 +4,15 @@ import type { ZoneCell } from './places'
 // ── 평화로움 구분도 ──
 // places.mjs 가 후보지 반경 100m 를 10m 칸으로 나눠 단계(1~6)를 매긴다. 칸을 위경도 네모로 바꿔 단계 색으로 칠한다(테두리 없음).
 export const ZONE_STYLE: Record<number, { color: string; alpha: number; label: string }> = {
-  1: { color: '#d63b2f', alpha: 0.42, label: '큰길(광로·대로) 바로 옆' },
-  2: { color: '#d63b2f', alpha: 0.18, label: '큰길 40m 안' },
-  3: { color: '#ef8a2c', alpha: 0.42, label: '중로 바로 옆' },
-  4: { color: '#ef8a2c', alpha: 0.2, label: '중로 25m 안' },
-  5: { color: '#e2b714', alpha: 0.38, label: '상가 밀집' },
-  6: { color: '#e2b714', alpha: 0.16, label: '상가 있음' },
+  // 도로 색은 차로 수(사용자 지정 10-14): 8차선 이상 빨강 · 6차선 주황 · 4차선(중로) 노랑. 상가는 보라
+  1: { color: '#d63b2f', alpha: 0.42, label: '8차선 이상 바로 옆' },
+  2: { color: '#d63b2f', alpha: 0.18, label: '8차선 이상 40m 안' },
+  3: { color: '#ef8a2c', alpha: 0.42, label: '6차선 바로 옆' },
+  4: { color: '#ef8a2c', alpha: 0.2, label: '6차선 30m 안' },
+  5: { color: '#e8c21a', alpha: 0.45, label: '4차선(중로) 바로 옆' },
+  6: { color: '#e8c21a', alpha: 0.22, label: '4차선 22m 안' },
+  7: { color: '#8f6cc4', alpha: 0.3, label: '상가 밀집' },
+  8: { color: '#8f6cc4', alpha: 0.13, label: '상가 있음' },
 }
 export type Zones = { lat: number; lng: number; step: number; cells: ZoneCell[] }
 export type ZoneRect = { s: number; w: number; n: number; e: number; k: number }

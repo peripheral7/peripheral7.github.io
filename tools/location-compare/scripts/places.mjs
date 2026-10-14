@@ -321,18 +321,18 @@ async function main() {
   const vw = await vworldRoads()
   const osmRoads = els.filter((e) => e.tags?.highway && /^(motorway|trunk|primary|secondary|tertiary)$/.test(e.tags.highway) && e.tags.name).map((e) => ({ name: e.tags.name, line: ring(e.geometry) }))
   const roadSource = vw ? 'vworld' : 'osm'
-  // kind: big = 광로·대로(폭 25m 이상), mid = 중로(폭 12~25m)
-  const kindOf = (grade) => (PC.bigRoadGrades.includes(grade) ? 'big' : PC.midRoadGrades.includes(grade) ? 'mid' : null)
-  const isBigOsm = (e) => PC.roadClasses.includes(e.tags.highway) || /대로$/.test(e.tags.name ?? '') || Number(e.tags.lanes) >= PC.roadMinLanes
+  // lanes = 차로 수(양방향 합) — 도시계획 도로 규모·류(법정 폭)로 대략: 중로 4 · 대로3류 6 · 대로2류 8 · 대로1류·광로 10(laneByGrade), 소로는 뺌
+  const lanesOf = (grade, ty) => PC.laneByGrade[grade]?.[String(ty)] ?? null
+  const osmLanes = (e) => Number(e.tags.lanes) || (/^(motorway|trunk|primary)$/.test(e.tags.highway) || /대로$/.test(e.tags.name ?? '') ? 6 : 4)
   const roads = vw
-    ? vw.filter((r) => kindOf(r.grade)).map((r) => {
+    ? vw.filter((r) => lanesOf(r.grade, r.ty)).map((r) => {
         const rings = r.polys.map((poly) => poly.map(([lng, lat]) => xy(lat, lng)))
         // 도로 이름: 이 도로 면 안을 지나는 OSM 길 이름(없으면 도시계획 도로 번호)
         const nm = osmRoads.find((o) => o.line.some((q) => rings.some((rr) => inside(q, rr))))?.name
-        return { kind: kindOf(r.grade), name: `${nm ?? r.name.split('/').pop().replace(/[()]/g, '')} · ${r.grade}${r.ty}류(폭 ${ROAD_WIDTH[r.grade]?.[r.ty] ?? '?'})`, rings }
+        return { lanes: lanesOf(r.grade, r.ty), name: `${nm ?? r.name.split('/').pop().replace(/[()]/g, '')} · ${r.grade}${r.ty}류(폭 ${ROAD_WIDTH[r.grade]?.[r.ty] ?? '?'})`, rings }
       })
-    : els.filter((e) => e.tags?.highway && e.geometry && (isBigOsm(e) || /^(secondary|tertiary)$/.test(e.tags.highway)))
-      .map((e) => ({ kind: isBigOsm(e) ? 'big' : 'mid', name: e.tags.name ?? e.tags.ref ?? e.tags.highway, line: ring(e.geometry) }))
+    : els.filter((e) => e.tags?.highway && e.geometry && /^(motorway|trunk|primary|secondary|tertiary)$/.test(e.tags.highway))
+      .map((e) => ({ lanes: osmLanes(e), name: e.tags.name ?? e.tags.ref ?? e.tags.highway, line: ring(e.geometry) }))
   const roadDist = (q, r) => (r.rings ? polyDist(q, r.rings) : lineDist(q, r.line))
   // 대로 진입 후보: 이름 있는 간선도로(OSM trunk·primary·secondary, 지하차도·터널 등은 진입 못 하니 뺀다)를 이름별로
   const AC = CFG.access
@@ -359,23 +359,30 @@ async function main() {
     const shops = shopsNear.filter((s) => within(s, PC.shopRadiusM)).length
     const foodScore = 10 * (1 - interp(PC.foodPenalty, food))
     const shopScore = shops <= PC.shopFree ? 10 : 10 * Math.pow(PC.shopFactor, shops - PC.shopFree)
-    const near1 = (kind) => roads.filter((r) => r.kind === kind).map((r) => ({ name: r.name, kind, d: roadDist(p, r) })).sort((a, b) => a.d - b.d)[0] ?? null
-    const big = near1('big'), mid = near1('mid')
-    const road = big && big.d <= PC.roadNearM ? big : mid && mid.d <= PC.roadNearM ? mid : [big, mid].filter(Boolean).sort((a, b) => a.d - b.d)[0] ?? null
-    const roadScore = road && road.d <= PC.roadNearM ? 10 - (road.kind === 'big' ? PC.bigRoadPenalty : PC.midRoadPenalty) : 10
+    // 도로: roadNearM 안에 닿는 도로 중 가장 넓은 것(차로 수)으로 감점, 없으면 가장 가까운 도로를 참고로만 적는다
+    const lanePenalty = (n) => { const ks = Object.keys(PC.lanePenalty).map(Number).sort((a, b) => a - b); const k = ks.filter((x) => x <= n).pop(); return k === undefined ? 0 : PC.lanePenalty[k] }
+    const dists = roads.map((r) => ({ name: r.name, lanes: r.lanes, d: roadDist(p, r) }))
+    const touching = dists.filter((r) => r.d <= PC.roadNearM).sort((a, b) => b.lanes - a.lanes || a.d - b.d)
+    const road = touching[0] ?? dists.sort((a, b) => a.d - b.d)[0] ?? null
+    const roadScore = touching[0] ? 10 - lanePenalty(touching[0].lanes) : 10
     const peace = foodScore * PC.wFood + shopScore * PC.wShop + roadScore * PC.wRoad
-    // 지도 구분도: 반경 100m 를 10m 칸으로 — 1 큰길 진함 · 2 큰길 옅음 · 3 중로 진함 · 4 중로 옅음 · 5 상가 진함 · 6 상가 옅음
-    const nearRoads = roads.filter((r) => roadDist(p, r) <= Z.radiusM + Z.bigWeakM)
+    // 지도 구분도: 반경 100m 를 10m 칸으로 — 1·2 8차선 이상(진함·옅음) · 3·4 6차선 · 5·6 4차선 · 7·8 상가
+    const LZ = Object.entries(Z.lanes).map(([n, v]) => ({ n: Number(n), ...v })).sort((a, b) => b.n - a.n) // 넓은 도로부터
+    const nearRoads = roads.filter((r) => roadDist(p, r) <= Z.radiusM + Math.max(...LZ.map((x) => x.weakM)))
     const shopPts = shopsNear.map((s) => xy(s.lat, s.lon))
     const cells = []
     const nz = Math.round(Z.radiusM / Z.stepM)
     for (let i = -nz; i <= nz; i++) for (let j = -nz; j <= nz; j++) {
       if ((i * i + j * j) * Z.stepM ** 2 > Z.radiusM ** 2) continue
       const q = [p[0] + i * Z.stepM, p[1] + j * Z.stepM]
-      const db = Math.min(Infinity, ...nearRoads.filter((r) => r.kind === 'big').map((r) => roadDist(q, r)))
-      const dm = Math.min(Infinity, ...nearRoads.filter((r) => r.kind === 'mid').map((r) => roadDist(q, r)))
-      const ns = shopPts.filter((s) => Math.hypot(s[0] - q[0], s[1] - q[1]) <= Z.shopRadiusM).length
-      const k = db <= Z.bigStrongM ? 1 : db <= Z.bigWeakM ? 2 : dm <= Z.midStrongM ? 3 : dm <= Z.midWeakM ? 4 : ns >= Z.shopStrong ? 5 : ns >= 1 ? 6 : 0
+      let k = 0
+      LZ.forEach((z, zi) => {
+        if (k) return
+        const d = Math.min(Infinity, ...nearRoads.filter((r) => r.lanes >= z.n && (zi === 0 || r.lanes < LZ[zi - 1].n)).map((r) => roadDist(q, r)))
+        if (d <= z.strongM) k = zi * 2 + 1
+        else if (d <= z.weakM) k = zi * 2 + 2
+      })
+      if (!k) { const ns = shopPts.filter((s) => Math.hypot(s[0] - q[0], s[1] - q[1]) <= Z.shopRadiusM).length; k = ns >= Z.shopStrong ? 7 : ns >= 1 ? 8 : 0 }
       if (k) cells.push([i, j, k])
     }
     // 대로 진입: 가까운 간선도로 몇 개까지 자동차 시간(막힘 없음 × localFactor) → 시간 점수 × 등급 가중치, 가장 높은 것
@@ -419,7 +426,7 @@ async function main() {
 
     out[c.id] = {
       name: c.name, lat: c.lat, lng: c.lng,
-      peace: { score: +peace.toFixed(1), food, foodScore: +foodScore.toFixed(1), shops, shopScore: +shopScore.toFixed(1), road: road ? { name: road.name, kind: road.kind, dist: Math.round(road.d) } : null, roadScore, zones: { step: Z.stepM, cells } },
+      peace: { score: +peace.toFixed(1), food, foodScore: +foodScore.toFixed(1), shops, shopScore: +shopScore.toFixed(1), road: road ? { name: road.name, lanes: road.lanes, dist: Math.round(road.d) } : null, roadScore, zones: { step: Z.stepM, cells } },
       access: { score: access[0]?.score ?? null, roads: access },
       park: {
         score: +parkScore.toFixed(1), green: +(green * 100).toFixed(0), greenBonus,
@@ -462,7 +469,7 @@ async function main() {
     '## 🕊️ 평화로움', '', head,
     `| ${PC.foodRadiusM}m 안 음식점(카페 제외) × ${PC.wFood} | ${ids.map((id) => `${out[id].peace.food} → ${out[id].peace.foodScore}`).join(' | ')} |`,
     `| ${PC.shopRadiusM}m 안 모든 업소 × ${PC.wShop} | ${ids.map((id) => `${out[id].peace.shops} → ${out[id].peace.shopScore}`).join(' | ')} |`,
-    `| 가장 가까운 큰길·중로 × ${PC.wRoad} | ${ids.map((id) => { const r = out[id].peace.road; return r ? `${r.dist}m ${r.name} → ${out[id].peace.roadScore}` : '없음 → 10' }).join(' | ')} |`,
+    `| 도로(${PC.roadNearM}m 안 가장 넓은 도로, 없으면 가장 가까운 도로) × ${PC.wRoad} | ${ids.map((id) => { const r = out[id].peace.road; return r ? `${r.dist}m ${r.name} ${r.lanes}차선 → ${out[id].peace.roadScore}` : '없음 → 10' }).join(' | ')} |`,
     `| **평화로움** | ${ids.map((id) => `**${out[id].peace.score}**`).join(' | ')} |`, '',
     '## 🌳 공원', '', head,
     `| 가장 좋은 공원(거리 반영) | ${ids.map((id) => { const k = out[id].park.parks[0]; return k ? `${k.name}(${k.type}) ${k.dist}m · ${k.value}점${k.linked ? '(연결 ×1.8)' : ''}${k.steep < 1 ? `(산길 ×${k.steep})` : ''} → ${k.eff}` : `${PK.radiusM}m 안 없음` }).join(' | ')} |`,

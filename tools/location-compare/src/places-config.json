@@ -2,7 +2,7 @@
   "_설명": "입지 요인(평화로움·공원·도서관) 계산 규칙. 숫자를 고친 뒤 node scripts/places.mjs → 빌드. 설명은 README 4-5절.",
   "fetchMargin": 1300,
   "peace": {
-    "_설명": "평화로움 = 음식점(냄새) 점수 × wFood + 상업시설(사람) 점수 × wShop + 도로(소음) 점수 × wRoad (각 0~10, 비중 0.2 : 0.2 : 0.6 — 사용자 지정 2026-10-14). 음식점 = 반경 foodRadiusM 안 카페가 아닌 음식점·주점 수 n, 감점 비율은 foodPenalty 표(5곳 70% · 10곳 100%, 사이는 직선). 상업시설 = 반경 shopRadiusM 안 모든 업소 수 n, shopFree 이하면 감점 없음, 그 위로는 1곳마다 × shopFactor(0.7)로 크게 깎임. 도로 = 큰길(광로·대로) 가장자리가 roadNearM 안이면 bigRoadPenalty 점 감점, 아니고 중로가 roadNearM 안이면 midRoadPenalty 점 감점.",
+    "_설명": "평화로움 = 음식점(냄새) 점수 × wFood + 상업시설(사람) 점수 × wShop + 도로(소음) 점수 × wRoad (각 0~10, 비중 0.2 : 0.2 : 0.6). 음식점 = 반경 foodRadiusM 안 카페가 아닌 음식점·주점 수 n, 감점 비율 foodPenalty(5곳 70% · 10곳 100%, 사이 직선). 상업시설 = 반경 shopRadiusM 안 모든 업소, shopFree 이하 감점 없음, 그 위로 1곳마다 × shopFactor. 도로 = 가장자리가 roadNearM 안인 도로 중 가장 넓은 것의 차로 수로 감점(lanePenalty: 4차선 2 · 6차선 4 · 8차선 8 · 10차선 10, 사용자 지정 2026-10-14).",
     "foodRadiusM": 50,
     "foodPrefix": [
       "I201",
@@ -38,28 +38,52 @@
       "primary"
     ],
     "roadMinLanes": 6,
-    "_road": "큰길 = 브이월드 도시계획(교통시설) 도로 중 규모가 bigRoadGrades(광로·대로 = 폭 25m 이상), 중로 = midRoadGrades(폭 12~25m)인 도로 면, 가장자리까지 거리. 키가 없으면 OSM: 큰길 = highway 가 roadClasses 이거나 이름이 …대로 이거나 차로 수 roadMinLanes 이상, 중로 = secondary·tertiary",
+    "_road": "도로 = 브이월드 도시계획(교통시설) 도로 면. 차로 수는 규모·류(법정 폭)로 대략 맞춘다(laneByGrade, 차로 3.25m + 보도 양쪽 약 3m): 중로(12~25m) 4차선 · 대로3류(25~30m) 6차선 · 대로2류(30~35m) 8차선 · 대로1류(35~40m)·광로(40m+) 10차선, 소로는 뺌. 키가 없으면 OSM: lanes 태그(양방향 합)가 있으면 그 값, 없으면 trunk·primary 6 · secondary·tertiary 4.",
     "roadNearM": 30,
-    "bigRoadPenalty": 10,
-    "midRoadPenalty": 7,
+    "lanePenalty": {
+      "4": 2,
+      "6": 4,
+      "8": 8,
+      "10": 10
+    },
+    "laneByGrade": {
+      "광로": {
+        "1": 10,
+        "2": 10,
+        "3": 10
+      },
+      "대로": {
+        "1": 10,
+        "2": 8,
+        "3": 6
+      },
+      "중로": {
+        "1": 4,
+        "2": 4,
+        "3": 4
+      }
+    },
     "wFood": 0.2,
     "wShop": 0.2,
     "wRoad": 0.6,
-    "bigRoadGrades": [
-      "광로",
-      "대로"
-    ],
-    "midRoadGrades": [
-      "중로"
-    ],
     "zones": {
-      "_설명": "지도 구분도(입지 요인에서 평화로움을 펼치면): 후보지 반경 radiusM 을 stepM 격자로 나눠 칸마다 단계를 매긴다. 큰길 가장자리 bigStrongM 안 = 큰길 진함(붉은색), bigWeakM 안 = 큰길 옅음, 중로 midStrongM 안 = 중로 진함(주황), midWeakM 안 = 중로 옅음, 반경 shopRadiusM 안 업소 shopStrong 곳 이상 = 상가 진함(노랑), 1곳 이상 = 상가 옅음, 나머지 = 조용(칠하지 않음)",
+      "_설명": "지도 구분도(평화로움을 펼치면): 후보지 반경 radiusM 을 stepM 칸으로. 칸마다 가장 넓은 도로의 영향: 8차선 이상(빨강) · 6차선(주황) · 4차선 중로(노랑), 가장자리까지 거리가 strongM 안이면 진하게, weakM 안이면 옅게. 도로가 없으면 반경 shopRadiusM 안 업소 shopStrong 곳 이상 = 상가 진함(보라), 1곳 이상 = 옅음.",
       "radiusM": 100,
       "stepM": 10,
-      "bigStrongM": 15,
-      "bigWeakM": 40,
-      "midStrongM": 10,
-      "midWeakM": 25,
+      "lanes": {
+        "8": {
+          "strongM": 15,
+          "weakM": 40
+        },
+        "6": {
+          "strongM": 12,
+          "weakM": 30
+        },
+        "4": {
+          "strongM": 10,
+          "weakM": 22
+        }
+      },
       "shopRadiusM": 20,
       "shopStrong": 4
     }
