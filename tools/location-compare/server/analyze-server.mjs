@@ -165,7 +165,7 @@ async function handleRoute(q) {
   if (!p.paths || Date.now() - (p.paths.ts ?? 0) > SLOT_TTL) {
     try { p = { ...readPair(key), paths: { ...(await measurePaths(from, to)), ts: Date.now() } }; cput(key, p) } catch (e) { console.error(`길(도보·대중교통) 실패 ${key}: ${e.message}`) }
   } else if (transitStale(p.paths.transit)) { // 지도 경로 그림이 없거나 옛 방식(버스 = 도로 근사선)으로 잰 길 — 대중교통만 다시
-    try { const t = await transitPath(from, to); if (t) { p = { ...readPair(key) }; p.paths = { ...p.paths, transit: t }; cput(key, p) } } catch (e) { console.error(`대중교통 경로 그림 실패 ${key}: ${e.message}`) }
+    try { const t = await transitPath(from, to, p.paths.walk?.min); if (t) { p = { ...readPair(key) }; p.paths = { ...p.paths, transit: t }; cput(key, p) } } catch (e) { console.error(`대중교통 경로 그림 실패 ${key}: ${e.message}`) }
   }
   return [200, slotsOnly(p)]
 }

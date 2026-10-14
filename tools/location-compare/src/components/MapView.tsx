@@ -48,7 +48,7 @@ type Props = {
   catPins?: CatPin[] // 길고양이를 펼쳤을 때
   onCatOpen?: (start: number) => void // 말풍선을 누르면 그 사진부터 크게
   overlayFit?: { key: string; pts: [number, number][] } | null // 입지 요인을 펼치면 그 범위로 맞춤(key 가 바뀔 때마다)
-  transit?: { hubId: string; legs: TransitLeg[]; min: number; label: string } | null // 고른 후보지 → 그 목적지 대중교통 경로
+  transit?: { hubId: string; legs: TransitLeg[]; min: number; label: string; walkBetter?: number | null } | null // 고른 후보지 → 그 목적지 대중교통 경로(walkBetter = 걷기가 더 빨라 걷는 길만, 값 = 버린 대중교통 분)
 }
 /** 우클릭 메뉴 자리: 지도 안 위치(px)·지도 크기·좌표 */
 type Ctx = { x: number; y: number; w: number; h: number; lat: number; lng: number }
@@ -137,7 +137,9 @@ export function MapView(props: Props) {
       </div>
       {props.transit && props.transit.legs.length > 0 && (
         <p className="layer-note route-note" role="status" title={props.transit.legs.some((l) => l.mode !== 'walk' && l.approx) ? t('일부 선은 근사선이에요(서울 버스 = 도로 길찾기, 지하철 = 역 사이 직선)', 'Some lines are approximate (Seoul buses follow roads, subway is drawn station to station)') : t('경기 버스 실제 노선', 'Actual Gyeonggi bus route')}>
-          🚌 {t(`${props.transit.label}까지 대중교통`, `Transit to ${catName(props.transit.label)}`)} <b>{t(`${props.transit.min}분`, `${props.transit.min} min`)}</b> · {transitSummary(props.transit.legs)}
+          {props.transit.walkBetter != null
+            ? <>🚶 {t(`${props.transit.label}까지 걷기가 더 빨라요`, `Walking to ${catName(props.transit.label)} is faster`)} <b>{t(`${props.transit.min}분`, `${props.transit.min} min`)}</b> · {t(`버스 등 대중교통 ${props.transit.walkBetter}분`, `bus etc. ${props.transit.walkBetter} min`)}</>
+            : <>🚌 {t(`${props.transit.label}까지 대중교통`, `Transit to ${catName(props.transit.label)}`)} <b>{t(`${props.transit.min}분`, `${props.transit.min} min`)}</b> · {transitSummary(props.transit.legs)}</>}
         </p>
       )}
     </>

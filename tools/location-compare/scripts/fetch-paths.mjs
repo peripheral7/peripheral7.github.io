@@ -17,7 +17,7 @@ data.pairs ??= {}
 for (const c of CANDIDATES) for (const h of HUBS) {
   const old = data.pairs[`${c.id}:${h.id}`]
   const r = process.argv.includes('--transit') && old
-    ? { ...old, transit: await transitPath([c.lat, c.lng], [h.lat, h.lng]), at: new Date().toLocaleString('sv-SE').slice(0, 16) }
+    ? { ...old, transit: await transitPath([c.lat, c.lng], [h.lat, h.lng], old.walk?.min), at: new Date().toLocaleString('sv-SE').slice(0, 16) }
     : await measurePaths([c.lat, c.lng], [h.lat, h.lng])
   data.pairs[`${c.id}:${h.id}`] = { ...r, lat: c.lat, lng: c.lng }
   const t = r.transit

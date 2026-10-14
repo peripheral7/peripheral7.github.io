@@ -90,7 +90,7 @@ export default function App() {
   // 지도의 대중교통 경로: 고른 후보지 → "장단점 기준" 목적지(걸어가는 거리라 대중교통을 빼는 곳·아직 찾는 중인 곳은 없음)
   const curHub = hubIndex >= 0 ? cur?.hubs[hubIndex] : undefined
   const transitRoute = useMemo(() => (curHub && !curHub.transitSkipped && !curHub.transitPending && curHub.trip.legs.length
-    ? { hubId: curHub.hub.id, legs: curHub.trip.legs, min: curHub.trip.transit, label: curHub.hub.category || curHub.hub.name } : null), [curHub])
+    ? { hubId: curHub.hub.id, legs: curHub.trip.legs, min: curHub.trip.transit, label: curHub.hub.category || curHub.hub.name, walkBetter: curHub.trip.walkBetter } : null), [curHub])
   const insights = useMemo(() => (hubIndex >= 0 ? hubInsights(results, hubIndex) : results.map(() => ({ pros: [], cons: [] }))), [results, hubIndex])
 
   useEffect(() => { save(state, user) }, [state]) // eslint-disable-line react-hooks/exhaustive-deps -- 사용자를 바꾸면 state 도 같이 바뀐다

@@ -39,7 +39,7 @@ export type RoundTrip = { transitMin: number; transitWon: number; walked: boolea
 
 export function roundTrip(h: HubResult, s: CommuteSettings): RoundTrip {
   const t = h.trip
-  const walked = t.walk <= WALK_ONLY
+  const walked = t.walk <= WALK_ONLY || t.walkBetter !== null // 대중교통이 걷기보다 느린 곳도 걸어간다
   const carKm = t.carKm
   return {
     transitMin: 2 * (walked ? t.walk : t.transit),

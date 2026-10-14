@@ -253,8 +253,61 @@ async function buildLegs(from, to, segs) {
   return legs
 }
 
-/** 대중교통 한 경로: { min(전체), ride, access, egress, wait, transfers, routes[], first, last, legs[] } 또는 null */
-export async function transitPath(from, to) {
+// ── 경로 고르기(10-14 개정) ─────────────────────────────────────────
+// 서울시 API 의 time 은 "정류장까지·에서 걷는 시간"을 직선에 가깝게 짧게 잡는다. 캠퍼스 담·하천·큰길 때문에 실제 보행로가 훨씬 긴 곳에서는
+// API 가 "버스 두 번 + 짧은 도보"를 고르지만, 실제로는 걷는 시간이 길어 그냥 걸어가는 것보다 느리다(정자동 덕영대로 → 성균관대: API 31분,
+// 실제 도보 14분). 그래서:
+//  1) 탑승 시간 = API time − (API 가 가정한 도보 = 직선 × 1.25 ÷ 4.7km/h, 정류장까지·환승·목적지까지) − 첫 대기.  ← API 값에서 도보만 걷어낸 순수 탑승
+//     (예전 코드는 API time 을 전체로 고정한 채 실제 도보를 빼서, 실제 도보가 길수록 탑승이 줄어드는 잘못이 있었다)
+//  2) 전체 = 실제 도보(OSM 보행 길, 구간마다) + 첫 대기 + 탑승 + 환승 대기(1회 TRANSFER_WAIT분 — API time 에는 갈아탈 때 기다림이 없다고 본다;
+//     scoring.ts 추정식의 "환승 1회 5분"과 같은 값).
+//  3) API 경로 후보 상위 TOP_ITEMS 개를 모두 이렇게 다시 재고, 각 경로에서 "앞쪽 k개 노선만 타고 내려서 목적지까지 걷기"(k = 1…n)도 비교한다
+//     — 쓸데없는 마지막 환승을 잘라 낸다. 노선별 탑승 시간은 탑승 전체를 노선 선 길이 비율로 나눈 값.
+//  4) 가장 빠른 대중교통도 그냥 걷기(OSM 보행 길)보다 느리거나 같으면 walkBetter — "대중교통으로 가는 가장 빠른 방법 = 걷기"로 본다:
+//     min = 도보 시간, 대기 0 · 환승 0 · 정류장까지 = 도보 전체, legs = 걷는 길 하나(지도엔 점선). 점수에서 대중교통을 빼지는 않는다
+//     (빼면 도보 점수만 남아, 26분 걷는 곳이 30분 걷고 버스 28분인 곳보다 낮아지는 역전이 생긴다).
+const TOP_ITEMS = 3
+export const TRANSFER_WAIT = 5
+const lineKm = (line) => { let t = 0; for (let i = 1; i < line.length; i++) t += km(line[i - 1], line[i]); return t }
+const estWalk = (a, b) => ((km(a, b) * 1.25) / WALK_KMH) * 60 // API 가 가정했다고 보는 도보(분, 반올림 전)
+
+/** API 경로 하나 → 실제 도보로 다시 잰 가장 빠른 변형(앞쪽 k개 노선만 타기 포함) */
+async function evaluateItem(from, to, it, wait) {
+  const segs = it.pathList ?? []
+  if (!segs.length) return null
+  const legs = await buildLegs(from, to, segs)
+  // 1) 순수 탑승 = API time − API 가정 도보 − 첫 대기
+  let assumed = estWalk(from, [+segs[0].fy, +segs[0].fx]) + estWalk([+segs[segs.length - 1].ty, +segs[segs.length - 1].tx], to)
+  for (let i = 1; i < segs.length; i++) assumed += estWalk([+segs[i - 1].ty, +segs[i - 1].tx], [+segs[i].fy, +segs[i].fx])
+  const rideAll = Math.max(2, (Number(it.time) || 0) - assumed - wait)
+  const rides = legs.filter((l) => l.mode !== 'walk')
+  const lens = rides.map((l) => Math.max(0.1, lineKm(l.line)))
+  const lenSum = lens.reduce((x, y) => x + y, 0)
+  rides.forEach((l, i) => { l.min = Math.max(1, Math.round((rideAll * lens[i]) / lenSum)) })
+  // 2)·3) k = 1…n 개 노선만 타는 변형
+  let best = null
+  for (let k = 1; k <= rides.length; k++) {
+    const cut = legs.indexOf(rides[k - 1])
+    const head = legs.slice(0, cut + 1)
+    const tail = k === rides.length ? legs.slice(cut + 1) : [await walkLeg(rides[k - 1].line[rides[k - 1].line.length - 1], to)]
+    const vl = [...head, ...tail]
+    const walks = vl.filter((l) => l.mode === 'walk')
+    const ride = rides.slice(0, k).reduce((x, l) => x + l.min, 0)
+    const total = walks.reduce((x, l) => x + l.min, 0) + wait + ride + (k - 1) * TRANSFER_WAIT
+    if (!best || total < best.min) {
+      best = {
+        min: total, ride, access: walks[0].min, egress: walks[walks.length - 1].min, wait, transfers: k - 1, transferWait: (k - 1) * TRANSFER_WAIT,
+        routes: segs.slice(0, k).map((x) => x.routeNm), first: segs[0].fname, last: segs[k - 1].tname, legs: vl,
+        ...(k < rides.length ? { trimmed: segs.slice(k).map((x) => x.routeNm) } : {}),
+      }
+    }
+  }
+  return best
+}
+
+/** 대중교통 한 경로: { min(전체), ride, access, egress, wait, transfers, routes[], first, last, legs[], api } 또는 null.
+ *  walkBetter = 그냥 걷는 게 더 빠름(그때 min = 도보 시간, legs = [걷는 길], api = 버린 대중교통). directWalkMin = 이미 잰 OSM 도보(분, 없으면 여기서 잼). */
+export async function transitPath(from, to, directWalkMin) {
   const key = ENV.SEOUL_PATHINFO_SERVICE_KEY || ENV.DATA_GO_KR_SERVICE_KEY
   if (!key) return null
   const u = `http://ws.bus.go.kr/api/rest/pathinfo/getPathInfoByBusNSub?serviceKey=${encodeURIComponent(key)}&startX=${from[1]}&startY=${from[0]}&endX=${to[1]}&endY=${to[0]}&resultType=json`
@@ -264,41 +317,37 @@ export async function transitPath(from, to) {
   }
   const items = j?.msgBody?.itemList
   if (!Array.isArray(items) || !items.length) return null
-  const d = km(from, to)
-  const best = items.map((it) => {
-    const segs = it.pathList ?? []
-    if (!segs.length) return null
-    const first = segs[0], last = segs[segs.length - 1]
-    const walkMin = (a, b) => Math.max(1, Math.round(((km(a, b) * 1.25) / WALK_KMH) * 60))
-    const access = walkMin(from, [+first.fy, +first.fx])
-    const egress = walkMin([+last.ty, +last.tx], to)
-    const total = Number(it.time) || 0
-    const wait = waitOf(d)
-    const ride = Math.max(2, total - access - egress - wait)
-    const transfers = Math.max(0, segs.length - 1)
-    return { min: Math.max(total, access + wait + ride + egress), ride, access, egress, wait, transfers, routes: segs.map((s) => s.routeNm), first: first.fname, last: last.tname, total, segs }
-  }).filter(Boolean).sort((a, b) => a.min - b.min)[0]
+  const wait = waitOf(km(from, to))
+  // 같은 정류장·노선 조합(예: "1550-1오산" / "1550-1예오산" 예약 노선)은 하나만, API time 짧은 순 상위 몇 개
+  const seen = new Set()
+  const top = [...items].sort((x, y) => (Number(x.time) || 0) - (Number(y.time) || 0)).filter((it) => {
+    const k = (it.pathList ?? []).map((p) => `${p.fid}>${p.tid}`).join('|')
+    if (!k || seen.has(k)) return false
+    seen.add(k); return true
+  }).slice(0, TOP_ITEMS)
+  let best = null
+  for (const it of top) {
+    try {
+      const r = await evaluateItem(from, to, it, wait)
+      if (r && (!best || r.min < best.min)) best = { ...r, api: { min: Number(it.time) || 0, routes: (it.pathList ?? []).map((p) => p.routeNm) } }
+    } catch (e) { console.error(`대중교통 경로 다시 재기 실패: ${e.message}`) }
+  }
   if (!best) return null
-  // 고른 경로만 구간을 그린다. 정류장까지·정류장에서 걷는 시간은 OSM 보행 길 거리로 다시 잰다(직선 추정보다 정확).
-  const { segs, total, ...row } = best
-  try {
-    const legs = await buildLegs(from, to, segs)
-    const walks = legs.filter((l) => l.mode === 'walk')
-    row.access = walks[0].min
-    row.egress = walks[walks.length - 1].min
-    row.ride = Math.max(2, total - row.access - row.egress - row.wait)
-    row.min = Math.max(total, row.access + row.wait + row.ride + row.egress)
-    row.legs = legs
-  } catch (e) { console.error(`대중교통 구간 그리기 실패: ${e.message}`) }
-  return row
+  // 4) 그냥 걷기와 비교
+  const direct = await walkLeg(from, to)
+  const walk = directWalkMin ?? direct.min
+  if (walk <= best.min) {
+    return { min: walk, ride: 0, access: walk, egress: 0, wait: 0, transfers: 0, routes: [], legs: [{ ...direct, min: walk }], walkBetter: true, api: { ...best.api, real: best.min, routes: best.routes } }
+  }
+  return best
 }
 
 /** 예전 방식으로 그린 대중교통(경로 그림 없음 · 버스 선 출처 기록 없음)이라 다시 재야 하나 */
-export const transitStale = (t) => !!t && (!t.legs || t.legs.some((l) => l.mode === 'bus' && !l.lineFrom))
+export const transitStale = (t) => !!t && (!t.legs?.length || !t.api || t.legs.some((l) => l.mode === 'bus' && !l.lineFrom))
 
 /** 한 쌍 전부(도보·자전거·대중교통) + 잰 시각 */
 export async function measurePaths(from, to) {
   const wb = await walkBike(from, to)
-  const transit = await transitPath(from, to)
+  const transit = await transitPath(from, to, wb.walk?.min)
   return { ...wb, transit, at: new Date().toLocaleString('sv-SE').slice(0, 16) }
 }

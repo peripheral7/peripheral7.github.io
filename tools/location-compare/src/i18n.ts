@@ -4,7 +4,7 @@
 // - 화면 글자는 `t('한국어', 'English')` 로 두 언어를 나란히 적는다(새 글자를 넣을 때 영어도 반드시 함께 — DEV-GUIDE.md).
 // - 저장되는 값(후보지·목적지 이름, 목적지 분류, 길고양이 시간대 등)은 한국어 그대로 두고, 보일 때만 바꾼다:
 //   고유명사 = pn(), 주소 = addr(), 목적지 분류 = catName() (romanize.ts — 사전에 없으면 국어의 로마자 표기법으로).
-import { romanAddress, romanName, CATEGORY_EN } from './romanize'
+import { romanAddress, romanName, CATEGORY_EN } from './romanize.ts'
 
 export type Lang = 'ko' | 'en'
 const KEY = 'locCompare.lang'
@@ -21,8 +21,11 @@ function detect(): Lang {
 
 export const LANG: Lang = detect()
 export const isEn = LANG === 'en'
-document.documentElement.lang = LANG
-if (LANG === 'en') document.title = 'WhereTo? — compare places to live'
+// Node 에서 이 파일을 읽는 스크립트(scripts/*.mjs → data.ts → i18n.ts)도 있어 document 가 없을 수 있다. 그래서 import 도 './romanize.ts' 처럼 확장자를 붙인다.
+if (typeof document !== 'undefined') {
+  document.documentElement.lang = LANG
+  if (LANG === 'en') document.title = 'WhereTo? — compare places to live'
+}
 
 /** 화면 글자: 한국어와 영어를 나란히 적고 지금 언어 것을 쓴다 */
 export const t = (ko: string, en: string) => (isEn ? en : ko)

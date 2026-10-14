@@ -64,7 +64,7 @@ for (const p of PROFILES.filter((x) => x.id !== 'me' && (!only.length || only.in
       const rk = `${k}>${pkey(hub)}`
       const row = out.r[rk] ?? {}
       if (transitOnly && row.paths && transitStale(row.paths.transit)) {
-        try { row.paths = { ...row.paths, transit: await transitPath([c.lat, c.lng], [hub.lat, hub.lng]) } } catch (e) { console.error(`  대중교통 실패 ${e.message}`) }
+        try { row.paths = { ...row.paths, transit: await transitPath([c.lat, c.lng], [hub.lat, hub.lng], row.paths.walk?.min) } } catch (e) { console.error(`  대중교통 실패 ${e.message}`) }
       }
       if (!row.paths) {
         try { row.paths = { ...(await measurePaths([c.lat, c.lng], [hub.lat, hub.lng])), ts: Date.now() } } catch (e) { console.error(`  길 실패 ${e.message}`) }

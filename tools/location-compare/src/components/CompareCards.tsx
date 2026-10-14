@@ -184,7 +184,7 @@ export function CompareCards({ results, com, hubs, active, bike, onSelect, onEdi
                           ? <div><span className="muted">{t('대중교통 경로 찾는 중', 'Finding transit route')} — {liveNote(r.candidate)}</span></div>
                           : h.transitSkipped
                           ? <div><span className="muted">{t(`도보 ${tr.walk}분 · 도보권이라 대중교통 제외`, `Walk ${tr.walk} min · walkable, so transit is skipped`)}</span></div>
-                          : <><div><b>{mins(tr.transit)}{tr.transitSource === 'est' ? t('(추정)', ' (est.)') : ''}</b><small>{tr.routes.length ? `${[...new Set(tr.routes)].slice(0, 2).map(pn).join('→')} · ` : ''}{t(`대기 ${tr.wait}분 · 정류장까지 ${tr.access}분 · 환승 ${tr.transfers}회`, `wait ${tr.wait} min · ${tr.access} min to stop · ${tr.transfers} transfer${tr.transfers === 1 ? '' : 's'}`)}</small></div>
+                          : <><div><b>{mins(tr.transit)}{tr.transitSource === 'est' ? t('(추정)', ' (est.)') : ''}</b><small>{tr.walkBetter !== null ? t(`걷기가 더 빠름 · 버스 등 ${tr.walkBetter}분`, `walking is faster · bus etc. ${tr.walkBetter} min`) : <>{tr.routes.length ? `${[...new Set(tr.routes)].slice(0, 2).map(pn).join('→')} · ` : ''}{t(`대기 ${tr.wait}분 · 정류장까지 ${tr.access}분 · 환승 ${tr.transfers}회`, `wait ${tr.wait} min · ${tr.access} min to stop · ${tr.transfers} transfer${tr.transfers === 1 ? '' : 's'}`)}</>}</small></div>
                             <em className={isBest(s.transit, best((x) => (x.hubs[hi].transitSkipped || x.hubs[hi].transitPending ? null : x.hubs[hi].scores.transit))) ? 'best' : ''}>{fmt(s.transit)}<Line v={s.transit} kind="transit" /></em></>}
                       </div>
                     )

@@ -1,5 +1,5 @@
 import type { PropertyUse } from './brokerage'
-import { isEn, manEn, t } from './i18n'
+import { isEn, manEn, t } from './i18n.ts'
 
 // 처음 열었을 때의 후보지·목적지·선호도(기본값). 방문자가 검색으로 바꾼 목록은 그 브라우저에만 저장되고(store.ts),
 // "처음 목록으로"를 누르면 여기로 돌아온다.
