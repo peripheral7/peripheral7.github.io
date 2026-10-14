@@ -4,6 +4,7 @@ import { hubEmoji, type Candidate, type ModeKey } from '../data'
 import { houseKind, roofColor } from '../house3d/colors'
 import { MODE_INFO } from './SettingsPopover'
 import { catName, mins, pn, rankText, t } from '../i18n'
+import { useNarrow } from '../mobile'
 
 // 왼쪽 위 "교통평점" 카드(한 장) — 고른 후보지(이름·3D 집·종합 원형)·주요 교통수단·수단별 교통평점 눈금 막대.
 // 라이프스타일은 카드 오른쪽 위 ⚙ 에서 고른다. 후보지 넘기기(Swipe):
@@ -32,6 +33,8 @@ export function HouseRing({ value, rank, candidate }: { value: number; rank: num
   const pct = Math.max(0, Math.min(10, value)) * 10
   const R = 47.5
   const svg = <House3D rank={rank} />
+  // 휴대폰: 집·원을 그리지 않는다(3D 묶음도 안 받음) — 점수는 카드 머리(이름 옆, App.tsx sel-score)에
+  if (useNarrow()) return null
   return (
     <div className="house-ring">
       <div className="hr-circle">

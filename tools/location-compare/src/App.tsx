@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { BASE_DEPOSIT, MAX_HUBS, PROFILES, activeModes, profileOf, lifestyleOf, baseRent, hubEmoji, weeklyText, won, type Place } from './data'
-import { evaluate, hubInsights, shareOf } from './scoring'
+import { evaluate, fmt, hubInsights, shareOf } from './scoring'
 import { addCandidate, load, loadUser, removeCandidate, removeHub, save, saveUser, setHub, updateCandidate, type State } from './store'
 import { MapView } from './components/MapView'
 import type { MapPoint } from './placeNear'
@@ -9,6 +9,7 @@ import { FactorsPanel, type FactorBest, type FactorOpen } from './components/Pan
 import { EdgeNav, ScoreBlock, Swipe, type SwipeApi } from './components/TransportCard'
 import { MODE_INFO } from './components/SettingsPopover'
 import { CompareCards } from './components/CompareCards'
+import { MobileNotice } from './components/MobileNotice'
 import { SettingsPopover } from './components/SettingsPopover'
 import { GuidePanel } from './components/GuidePanel'
 import { CatGallery, CatRegister } from './components/CatPanel'
@@ -245,7 +246,7 @@ export default function App() {
                 <div className="sel-head house-head">
                   <div className="sel-text">
                     <span className="tag">{t('종합', 'Overall')} {rankText(cur.rank)}{rentText(cur.candidate)}</span>
-                    <h3>{pn(cur.candidate.name)}</h3>
+                    <h3>{pn(cur.candidate.name)}<b className="sel-score">{fmt(cur.total)}<small>/ 10</small></b></h3>
                     <p>{addr(cur.candidate.address)}</p>
                   </div>
                 </div>
@@ -323,6 +324,7 @@ export default function App() {
 
       <p className="foot">{user !== 'me' && t(`시험용 사용자 「${profileOf(user).label}」(${profileOf(user).note}) · `, `Test user "${profileOf(user).label}" (${profileOf(user).note}) · `)}{t('도보·자전거는 OSM 길 거리, 대중교통은 서울시 환승경로, 차량은 네이버 실측(없으면 "추정") · 바꾼 후보지·목적지·선호도는 이 브라우저에만 저장됩니다',
         'Walking and cycling use OpenStreetMap path distances, transit uses the Seoul transfer-route API, driving uses Naver measurements ("est." when missing) · Your candidates, destinations and preferences are saved only in this browser')}</p>
+      <MobileNotice />
       {guide && <GuidePanel onClose={() => setGuide(false)} />}
       {catDlg === 'register' && <CatRegister state={catState} onChange={setCats} onClose={() => setCatDlg('none')} />}
       {catDlg === 'gallery' && catIdx && (() => {

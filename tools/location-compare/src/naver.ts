@@ -13,7 +13,7 @@ export const SEARCH_URL = (import.meta.env.VITE_PLACE_SEARCH_URL as string | und
 export const TURNSTILE_SITEKEY = (import.meta.env.VITE_TURNSTILE_SITEKEY as string | undefined) || ''
 
 /* eslint-disable @typescript-eslint/no-explicit-any */
-declare global { interface Window { naver?: any; turnstile?: any; navermap_authFailure?: () => void } }
+declare global { interface Window { naver?: any; turnstile?: any; navermap_authFailure?: () => void; __naverAuthFailed?: boolean } }
 
 const loadScript = (src: string) => new Promise<void>((resolve, reject) => {
   const s = document.createElement('script')
@@ -37,7 +37,17 @@ export function onNaverAuthFailure(cb: () => void): () => void {
 export function loadNaverMaps(): Promise<any> {
   if (!MAP_KEY_ID || authFailed) return Promise.reject(new Error('no key'))
   return (mapsLoading ??= new Promise((resolve, reject) => {
-    window.navermap_authFailure = () => { authFailed = true; reject(new Error('naver auth failure')); authListeners.forEach((f) => f()) }
+    const fail = () => { authFailed = true; reject(new Error('naver auth failure')); authListeners.forEach((f) => f()) }
+    window.navermap_authFailure = fail
+    // index.html 이 미리 넣은 스크립트가 있으면 그것을 이어 쓴다(이미 인증 실패를 알렸으면 바로 실패)
+    if (window.__naverAuthFailed) return fail()
+    const early = document.getElementById('naver-maps-js') as HTMLScriptElement | null
+    if (early) {
+      if (window.naver?.maps) return resolve(window.naver)
+      early.addEventListener('load', () => (window.naver?.maps ? resolve(window.naver) : reject(new Error('naver maps missing'))))
+      early.addEventListener('error', () => reject(new Error('load naver maps')))
+      return
+    }
     // 영어 화면은 지도 글자도 영어(language=en — 네이버 지도 다국어)
     loadScript(`https://oapi.map.naver.com/openapi/v3/maps.js?ncpKeyId=${encodeURIComponent(MAP_KEY_ID)}&submodules=geocoder${isEn ? '&language=en' : ''}`)
       .then(() => (window.naver?.maps ? resolve(window.naver) : reject(new Error('naver maps missing'))), reject)

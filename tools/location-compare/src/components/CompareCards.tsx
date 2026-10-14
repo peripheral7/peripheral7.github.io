@@ -143,7 +143,7 @@ export function CompareCards({ results, com, hubs, active, bike, onSelect, onEdi
     <div className="panel compare">
       <div className="panel-head"><h2>{t('후보지별 비교', 'Compare candidates')}</h2>{hubs.length > FIXED_HUBS && <span className="tap-hint">{t('↕ 카드 안에서 스크롤', '↕ scroll inside the cards')}</span>}</div>
       <div className="cards-scroll" ref={scroll} style={fixedH ? { height: fixedH } : undefined}>
-        <div className="cards-grid" style={{ gridTemplateRows: `repeat(${rows}, auto)`, gridTemplateColumns: `112px repeat(${results.length}, minmax(232px, 1fr))` }}>
+        <div className="cards-grid" style={{ gridTemplateRows: `repeat(${rows}, auto)`, gridTemplateColumns: `var(--lab-w, 112px) repeat(${results.length}, minmax(var(--card-w, 232px), 1fr))` }}>
           {/* 왼쪽 줄 이름 */}
           <div className="col labels" style={{ gridRow: `1 / span ${rows}` }}>
             <div className="cell head-cell"><span className="muted">{t('후보지', 'Candidate')}</span></div>

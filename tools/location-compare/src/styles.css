@@ -858,3 +858,27 @@ input[type=number]::-webkit-inner-spin-button, input[type=number]::-webkit-outer
 .card-edit .edit-actions button { padding: 6px 12px }
 .transport-card .edge-nav { top: 48px } /* 머리(교통평점 · ⚙)는 비워 둔다 */
 .transport-card .edge-nav.prev { border-radius: 0 0 0 var(--radius) } .transport-card .edge-nav.next { border-radius: 0 0 var(--radius) 0 }
+
+/* ── 휴대폰(≤760px, mobile.ts 와 같은 기준) ──
+   지도를 세로로 키워 첫 화면 아래쪽에 고른 후보지 이름·점수만 보이게, 집(3D) 없음(TransportCard HouseRing),
+   지도 위 설명 카드는 고른 후보지만, 상권 핀은 이모지만, 경로 안내 줄은 검색창 아래로(아래 단추 줄과 겹쳤음) */
+.sel-score { display: none }
+.mobile-notice { position: fixed; z-index: 3000; left: 12px; right: 12px; top: 12px; display: flex; align-items: center; gap: 10px; padding: 10px 8px 10px 14px; border-radius: 14px; background: rgba(31, 31, 28, 0.9); color: #fff; font-size: 13px; line-height: 1.4; box-shadow: 0 6px 24px rgba(0, 0, 0, 0.25); -webkit-backdrop-filter: blur(6px); backdrop-filter: blur(6px); animation: mn-in 0.3s ease-out; transition: opacity 0.4s, transform 0.4s }
+.mobile-notice.leaving { opacity: 0; transform: translateY(-8px) }
+.mobile-notice p { margin: 0; flex: 1 }
+.mobile-notice button { flex: none; width: 32px; height: 32px; border: 0; border-radius: 50%; background: rgba(255, 255, 255, 0.12); color: #fff; font-size: 18px; line-height: 1; cursor: pointer }
+@keyframes mn-in { from { opacity: 0; transform: translateY(-8px) } }
+@media (max-width: 760px) {
+  .map-area { height: max(360px, calc(100svh - var(--m-above-map, 140px) - var(--m-below-map, 120px))) }
+  .route-note { top: 74px; bottom: auto; left: 12px; max-width: calc(100% - 24px) }
+  .map-top { max-width: calc(100% - 80px) } /* 오른쪽 아래 확대·축소 단추를 비켜서 */
+  .ins-label:not(.on) { display: none }
+  .ins-label.on { white-space: normal; width: max-content; max-width: min(190px, 48vw) }
+  .major-pin:not(.spot-pin):not(.park-pin):not(.lib-pin) b { display: none }
+  .house-head .sel-text { max-width: none; width: 100% }
+  .sel-head h3 { flex-wrap: wrap; column-gap: 10px }
+  .sel-score { display: inline-flex; align-items: baseline; gap: 3px; font-size: 22px; font-weight: 300; color: var(--good); font-variant-numeric: tabular-nums }
+  .sel-score small { font-size: 11px; color: var(--faint) }
+  .cards-grid { --lab-w: 76px; --card-w: calc(100vw - 150px) }
+  .pen { padding: 6px 8px; margin: -6px -4px }
+}
