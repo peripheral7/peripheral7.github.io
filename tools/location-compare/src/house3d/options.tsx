@@ -60,40 +60,67 @@ function RoundTree({ pos, s = 1, color = '#79b07f' }: { pos: V3; s?: number; col
   )
 }
 
-/** 고양이(앉은 모습, 치즈 태비) — 조용한 동네 */
+/** 치즈 태비 줄무늬: 주황 바탕에 물결치는 세로 줄(구의 가로 방향 = 몸을 감싸는 방향이라 세로 줄이 몸을 두르는 줄무늬가 된다) */
+const drawTabby = (g: CanvasRenderingContext2D, n: number) => {
+  const rnd = seeded(23)
+  g.fillStyle = '#dc8d48'
+  g.fillRect(0, 0, n, n)
+  for (let k = 0; k < 10; k++) {
+    const x0 = (k + 0.3 * rnd()) * (n / 10), w = 5 + rnd() * 6
+    g.strokeStyle = k % 3 === 0 ? '#b4632a' : '#c2733a'
+    g.lineWidth = w
+    g.beginPath()
+    for (let y = 0; y <= n; y += 8) { const x = x0 + Math.sin(y / 22 + k) * 6; if (y === 0) g.moveTo(x, y); else g.lineTo(x, y) }
+    g.stroke()
+  }
+}
+
+/** 고양이(앉은 치즈 태비) — 조용한 동네. 실제 고양이 몸 구조대로: 엉덩이·뒷다리 넓적, 가슴은 곧게 세우고 흰 턱받이,
+ *  앞다리 둘 + 흰 발, 머리(볼·주둥이·분홍 코·초록 눈 + 세로 동공·수염), 세모 귀(안쪽 분홍), 몸을 돌아 앞발을 감싸는 꼬리(곡선 관). */
 function Cat() {
-  const fur = '#e39a4f', white = '#fbf3e6'
+  const fur = useCanvasTexture(drawTabby, [3, 1])
+  const F = '#ffffff', white = '#fbf6ee', pink = '#e3a0a0'
+  // 꼬리: 엉덩이 뒤에서 나와 오른쪽을 돌아 앞발 앞에서 끝나는 곡선
+  const tail = useMemo(() => new THREE.CatmullRomCurve3([[0, 0.14, -0.36], [0.24, 0.07, -0.34], [0.37, 0.05, -0.1], [0.33, 0.05, 0.16], [0.16, 0.05, 0.33], [0.02, 0.06, 0.37]].map((p) => new THREE.Vector3(...p))), [])
+  const fur_ = (c = F) => <meshStandardMaterial color={c} map={c === F ? fur : undefined} roughness={0.95} />
   return (
     <group scale={1.35}>
-      <mesh position={[0, 0.5, 0]} scale={[0.55, 0.72, 0.6]} castShadow>
-        <sphereGeometry args={[0.6, 16, 12]} />
-        <Mat color={fur} />
-      </mesh>
-      <mesh position={[0, 0.55, 0.22]} scale={[0.32, 0.45, 0.25]}>
-        <sphereGeometry args={[0.6, 12, 10]} />
-        <Mat color={white} />
-      </mesh>
-      <mesh position={[0, 1.08, 0.12]} castShadow>
-        <sphereGeometry args={[0.3, 16, 12]} />
-        <Mat color={fur} />
-      </mesh>
+      {/* 엉덩이 + 넓적다리 */}
+      <mesh position={[0, 0.27, -0.08]} scale={[1.05, 0.82, 1.15]} castShadow><sphereGeometry args={[0.3, 24, 16]} />{fur_()}</mesh>
+      {[-1, 1].map((k) => <mesh key={k} position={[k * 0.2, 0.2, -0.02]} scale={[0.7, 1, 1.25]} castShadow><sphereGeometry args={[0.17, 16, 12]} />{fur_()}</mesh>)}
+      {/* 가슴(곧게) + 흰 턱받이 */}
+      <mesh position={[0, 0.56, 0.06]} rotation={[0.12, 0, 0]} scale={[0.85, 1.25, 0.8]} castShadow><sphereGeometry args={[0.25, 24, 16]} />{fur_()}</mesh>
+      <mesh position={[0, 0.6, 0.22]} scale={[0.9, 1.45, 0.55]}><sphereGeometry args={[0.14, 16, 12]} />{fur_(white)}</mesh>
+      {/* 앞다리 + 흰 발 */}
       {[-1, 1].map((k) => (
-        <mesh key={k} position={[k * 0.16, 1.36, 0.1]} rotation={[0, 0, -k * 0.25]} castShadow>
-          <coneGeometry args={[0.1, 0.22, 4]} />
-          <Mat color={fur} />
-        </mesh>
+        <group key={k}>
+          <mesh position={[k * 0.085, 0.21, 0.2]} castShadow><capsuleGeometry args={[0.055, 0.3, 4, 10]} />{fur_()}</mesh>
+          <mesh position={[k * 0.085, 0.035, 0.25]} scale={[1, 0.6, 1.35]}><sphereGeometry args={[0.065, 12, 8]} />{fur_(white)}</mesh>
+        </group>
       ))}
-      {[-1, 1].map((k) => (
-        <mesh key={k} position={[k * 0.11, 1.12, 0.39]}>
-          <sphereGeometry args={[0.04, 8, 6]} />
-          <meshStandardMaterial color="#2b2b2b" roughness={0.3} />
-        </mesh>
-      ))}
-      {/* 꼬리: 몸을 감싸는 반원(토러스 일부) */}
-      <mesh position={[0, 0.08, 0]} rotation={[-Math.PI / 2, 0, -0.3]} castShadow>
-        <torusGeometry args={[0.42, 0.07, 6, 16, Math.PI * 1.1]} />
-        <Mat color={fur} />
-      </mesh>
+      {/* 머리 */}
+      <group position={[0, 0.9, 0.14]}>
+        <mesh scale={[1.15, 0.95, 1]} castShadow><sphereGeometry args={[0.17, 24, 18]} />{fur_()}</mesh>
+        <mesh position={[0, -0.05, 0.135]} scale={[1.4, 0.8, 1]}><sphereGeometry args={[0.075, 16, 12]} />{fur_('#f4e2c8')}</mesh>
+        <mesh position={[0, -0.025, 0.205]} scale={[1.3, 0.8, 0.8]}><sphereGeometry args={[0.018, 10, 8]} /><meshStandardMaterial color={pink} roughness={0.6} /></mesh>
+        {[-1, 1].map((k) => (
+          <group key={k}>
+            {/* 눈: 연두빛 홍채 + 세로로 가는 동공 */}
+            <mesh position={[k * 0.072, 0.03, 0.145]} scale={[1.2, 0.9, 0.6]}><sphereGeometry args={[0.032, 14, 10]} /><meshStandardMaterial color="#c4d14a" roughness={0.25} /></mesh>
+            <mesh position={[k * 0.072, 0.03, 0.163]} scale={[0.32, 1, 0.5]}><sphereGeometry args={[0.022, 10, 8]} /><meshStandardMaterial color="#141414" roughness={0.2} /></mesh>
+            {/* 세모 귀(삼각뿔) + 안쪽 분홍 — 평평한 면이 앞을 보게 y 로 180° */}
+            <group position={[k * 0.105, 0.14, -0.02]} rotation={[0, 0, -k * 0.35]}>
+              <mesh rotation={[0, Math.PI, 0]} castShadow><coneGeometry args={[0.072, 0.15, 3]} />{fur_()}</mesh>
+              <mesh position={[0, -0.01, 0.022]} rotation={[0, Math.PI, 0]}><coneGeometry args={[0.042, 0.1, 3]} /><meshStandardMaterial color={pink} roughness={0.8} /></mesh>
+            </group>
+            {/* 수염 셋 */}
+            {[-0.012, 0, 0.012].map((dy, i) => <Rod key={i} a={[k * 0.06, -0.045 + dy, 0.19]} b={[k * 0.2, -0.03 + dy * 2.5, 0.16]} r={0.0035} color="#fffdf8" />)}
+          </group>
+        ))}
+      </group>
+      {/* 꼬리 + 끝 */}
+      <mesh castShadow><tubeGeometry args={[tail, 40, 0.048, 10, false]} />{fur_()}</mesh>
+      <mesh position={[0.02, 0.06, 0.37]}><sphereGeometry args={[0.048, 10, 8]} />{fur_('#b4632a')}</mesh>
     </group>
   )
 }
@@ -112,9 +139,11 @@ const drawRattan = (g: CanvasRenderingContext2D, n: number) => {
   }
 }
 
-/** 라탄 의자: 둥근 좌판 + 뒤를 감싸는 반원 등받이(열린 원기둥 반쪽) + 다리 넷 */
-function RattanChair({ pos, rotY }: { pos: V3; rotY: number }) {
+/** 라탄 의자: 둥근 좌판 + 뒤를 감싸는 반원 등받이(열린 원기둥 반쪽, -z 쪽) + 다리 넷. 의자 앞(+z)이 테이블 가운데(원점)를 보게
+ *  y 축 회전 = atan2(-x, -z) — 회전 θ 뒤 앞 방향은 (sin θ, cos θ) 이므로 그것이 (−x, −z) 쪽이 되는 각. */
+function RattanChair({ pos }: { pos: V3 }) {
   const rattan = useCanvasTexture(drawRattan, [2, 1])
+  const rotY = Math.atan2(-pos[0], -pos[2])
   return (
     <group position={pos} rotation={[0, rotY, 0]}>
       <mesh position={[0, 0.62, 0]} castShadow>
@@ -143,8 +172,8 @@ function CafeSet() {
         <cylinderGeometry args={[0.28, 0.3, 0.05, 18]} />
         <Mat color="#3c3c3c" />
       </mesh>
-      <RattanChair pos={[-0.85, 0, 0.2]} rotY={-Math.PI / 2 + 0.25} />
-      <RattanChair pos={[0.75, 0, -0.45]} rotY={Math.PI / 2 + 0.6} />
+      <RattanChair pos={[-0.88, 0, 0.14]} />
+      <RattanChair pos={[0.88, 0, -0.14]} />
       {/* 에스프레소: 잔은 실제보다 크게(1.8배) 그려야 보인다 */}
       <group position={[0.12, 1.11, 0.1]} scale={1.8}>
         <mesh position={[0, 0.01, 0]}>

@@ -30,7 +30,7 @@ const Ticks = ({ value, mode }: { value: number | null; mode: ModeKey }) => (
 )
 
 /** 카드 가운데: 큰 3D 집을 얇은 원이 둘러싸고, 원 테두리를 종합 점수 비율(0~100%)만큼 채운다(12시 방향부터 시계 방향, 숫자 꼬리표 없음).
- *  원 아래에 점수. 집을 누르면 오른쪽에 크게 보기 창(HouseDetail). 둘레 장식은 라이프스타일(pref)·입지 요인으로 정해진다(house3d/spec.ts). */
+ *  원 아래에 점수. 집을 누르면 화면 가운데 정사각형 크게 보기 상자(HouseDetail). 둘레 장식은 라이프스타일(pref)·입지 요인으로 정해진다(house3d/spec.ts). */
 export function HouseRing({ value, rank, candidate, pref }: { value: number; rank: number; candidate: Candidate; pref?: Preference }) {
   const [open, setOpen] = useState(false)
   const spec = houseSpec(candidate, rank, pref)
@@ -79,7 +79,7 @@ class GLBoundary extends Component<{ fallback: ReactNode; children: ReactNode },
   render() { return this.state.failed ? this.props.fallback : this.props.children }
 }
 
-/** 집 크게 보기: 화면 오른쪽 창(계산 방식 창과 같은 .overlay/.drawer) + 뒤 배경 흐리게. 끌어서 돌리기·휠로 확대, 장식마다 까닭.
+/** 집 크게 보기: 화면 가운데 정사각형 상자(.overlay + .drawer 모양, 가운데 정렬) + 뒤 배경 흐리게. 끌어서 돌리기·휠로 확대, 장식마다 까닭.
  *  배경을 누르면 닫힘(Esc·× 도) — 단, 집을 돌리다 창 밖에서 손을 떼는 경우는 닫지 않는다(누르기 시작한 곳이 배경일 때만).
  *  창은 카드(Swipe) 안에서 열리므로(포털이어도 React 이벤트는 부모로 올라간다) pointerdown·click 은 맨 바깥에서 멈춘다 — Swipe 가 끌기를 시작하지 않고 집 원의 onClick 이 다시 열지 않게.
  *  pointermove·pointerup 은 멈추지 않는다: OrbitControls 가 document 에서 듣는다(멈추면 돌리기가 안 된다). */
@@ -95,7 +95,7 @@ function HouseDetail({ spec, candidate, rank, svg, onClose }: { spec: ReturnType
     <div className="overlay house-overlay"
       onPointerDown={(e) => { downOnBack.current = e.target === e.currentTarget; stop(e) }}
       onClick={(e) => { stop(e); if (e.target === e.currentTarget && downOnBack.current) onClose() }}>
-      <section className="glass drawer house-drawer" role="dialog" aria-modal="true" aria-label={t('집 크게 보기', 'View the house')}>
+      <section className="glass drawer house-box" role="dialog" aria-modal="true" aria-label={t('집 크게 보기', 'View the house')}>
         <div className="drawer-head">
           <div><small>{t('종합', 'Overall')} {rankText(rank)} · {spec.notes.kindLabel}</small><h2>{pn(candidate.name)}</h2><p className="hd-addr">{addr(candidate.address)}</p></div>
           <button className="close" aria-label={t('닫기', 'Close')} onClick={onClose}>×</button>

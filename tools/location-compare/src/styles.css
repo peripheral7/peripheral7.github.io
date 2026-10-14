@@ -811,22 +811,22 @@ input[type=number]::-webkit-inner-spin-button, input[type=number]::-webkit-outer
 .hr-circle[role=button] { cursor: pointer; border-radius: 50%; transition: transform 0.2s ease }
 .hr-circle[role=button]:hover { transform: scale(1.03) }
 .hr-circle[role=button]:focus-visible { outline: 2px solid var(--good); outline-offset: 4px }
-/* 집 크게 보기(HouseDetail): 오른쪽 창 + 뒤 배경 흐리게 */
-.house-overlay { background: rgba(24, 39, 56, 0.16); backdrop-filter: blur(6px); -webkit-backdrop-filter: blur(6px); animation: hd-fade 0.18s ease-out }
-.house-drawer { display: flex; flex-direction: column; height: 100%; overflow: hidden; animation: hd-slide 0.26s cubic-bezier(0.2, 0.8, 0.2, 1) }
-.house-drawer .drawer-head h2 { font-size: 22px }
+/* 집 크게 보기(HouseDetail): 화면 가운데 정사각형 상자 + 뒤 배경 흐리게 */
+.house-overlay { justify-content: center; align-items: center; background: rgba(24, 39, 56, 0.16); backdrop-filter: blur(6px); -webkit-backdrop-filter: blur(6px); animation: hd-fade 0.18s ease-out }
+.house-box { width: min(720px, calc(100vw - 48px), calc(100vh - 48px)); aspect-ratio: 1 / 1; max-height: none; display: flex; flex-direction: column; padding: 16px 18px 14px; overflow: hidden; box-shadow: 0 24px 64px rgba(24, 39, 56, 0.22); animation: hd-pop 0.22s cubic-bezier(0.2, 0.8, 0.2, 1) }
+.house-box .drawer-head h2 { font-size: 20px }
 .hd-addr { margin: 2px 0 0; font-size: 12px; color: var(--muted) }
-.hd-stage { position: relative; flex: 1; min-height: 300px; margin-top: 12px; border-radius: 16px; background: radial-gradient(circle at 50% 45%, #ffffff 0%, #f1f5f3 70%, #e9efec 100%); overflow: hidden }
+.hd-stage { position: relative; flex: 1; min-height: 0; margin-top: 10px; border-radius: 16px; background: radial-gradient(circle at 50% 45%, #ffffff 0%, #f1f5f3 70%, #e9efec 100%); overflow: hidden }
 .hd-stage > .house3d { position: absolute; inset: 0; margin: auto; width: 60%; height: 60% }
 .hd-hint { margin: 8px 0 0; text-align: center; font-size: 11px; color: var(--faint) }
-.hd-why { list-style: none; padding: 0; margin: 12px 0 0; display: grid; grid-template-columns: repeat(auto-fill, minmax(170px, 1fr)); gap: 6px }
-.hd-why li { display: grid; grid-template-columns: 22px minmax(0, 1fr); column-gap: 6px; align-items: center; margin: 0; padding: 7px 10px; border: 1px solid var(--line-2); border-radius: 12px; background: #fff }
+.hd-why { list-style: none; padding: 0; margin: 8px 0 0; display: flex; flex-wrap: wrap; justify-content: center; gap: 6px }
+.hd-why li { display: grid; grid-template-columns: 20px auto; column-gap: 6px; align-items: center; margin: 0; padding: 5px 10px 5px 8px; border: 1px solid var(--line-2); border-radius: 12px; background: #fff }
 .hd-why li span { grid-row: span 2; font-size: 17px; text-align: center }
 .hd-why li b { font-size: 12px; font-weight: 600 }
 .hd-why li small { font-size: 11px; color: var(--muted) }
 @keyframes hd-fade { from { opacity: 0 } }
-@keyframes hd-slide { from { transform: translateX(40px); opacity: 0 } }
-@media (prefers-reduced-motion: reduce) { .house-overlay, .house-drawer { animation: none } .hr-circle[role=button]:hover { transform: none } }
+@keyframes hd-pop { from { transform: scale(0.96); opacity: 0 } }
+@media (prefers-reduced-motion: reduce) { .house-overlay, .house-box { animation: none } .hr-circle[role=button]:hover { transform: none } }
 .hr-score { margin: 2px 0 0; display: flex; align-items: baseline; gap: 4px }
 .hr-score b { font-size: 34px; font-weight: 250; line-height: 1; font-variant-numeric: tabular-nums }
 .hr-score small { font-size: 12px; color: var(--faint) }
