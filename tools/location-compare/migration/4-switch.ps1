@@ -1,6 +1,6 @@
 ﻿# 4. 주소 전환 — 새 사이트가 동작하는 것을 확인한 뒤에 실행한다.
 #
-#   powershell -ExecutionPolicy Bypass -File tools\location-compare\migration\4-switch.ps1 -NewUrl https://whereto.pages.dev
+#   powershell -ExecutionPolicy Bypass -File tools\location-compare\migration\4-switch.ps1 -NewUrl https://whereto.mooncg0916.workers.dev
 #   (-Deploy 를 붙이면 Worker 배포, -Push 를 붙이면 블로그 커밋을 GitHub 에 올림 — 둘 다 없으면 파일만 바꾸고 멈춤)
 #
 # 하는 일
@@ -72,4 +72,4 @@ if ($Push) { git push -q origin main; Write-Host '   올림 완료' } else { Wri
 
 Write-Host '5) 이 PC 계산 서버 끄기'
 Get-CimInstance Win32_Process -Filter "Name='node.exe'" | Where-Object { $_.CommandLine -like '*analyze-server.mjs*' } | ForEach-Object { Stop-Process -Id $_.ProcessId -Force; Write-Host "   끔 (PID $($_.ProcessId))" }
-Write-Host '끝 — 네이버 콘솔 Web 서비스 URL 에 새 주소를 넣었는지 확인(2-pages-setup.md).'
+Write-Host '끝 — 네이버 콘솔 Web 서비스 URL 에 새 주소를 넣었는지 확인(2-cloudflare-setup.md).'

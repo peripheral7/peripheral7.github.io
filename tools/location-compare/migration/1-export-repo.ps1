@@ -78,9 +78,9 @@ workers/place-search/.dev.vars
 workers/place-search/.wrangler/
 '@ | Set-Content -Encoding utf8 .gitignore
 
-# Cloudflare Pages 배포(GitHub Actions) — 저장소 비밀값 CLOUDFLARE_API_TOKEN·CLOUDFLARE_ACCOUNT_ID, 변수 VITE_*
-New-Item -ItemType Directory -Force '.github\workflows' | Out-Null
-Copy-Item (Join-Path $Tool 'migration\deploy-pages.yml') '.github\workflows\deploy-pages.yml'
+# Cloudflare Workers 정적 자산 배포 설정(대시보드에서 저장소를 연결하면 Cloudflare 가 빌드·배포) — 2-cloudflare-setup.md
+Copy-Item (Join-Path $Tool 'migration\wrangler.jsonc') 'wrangler.jsonc'
+Set-Content -Encoding ascii '.node-version' '22'
 Remove-Item -Recurse -Force 'migration' -ErrorAction SilentlyContinue   # 이전 도구는 블로그 쪽에만
 
 git add -A
