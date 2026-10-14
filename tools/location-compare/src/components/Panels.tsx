@@ -1,7 +1,7 @@
 import { useEffect, useRef, useState } from 'react'
 import { fmt } from '../scoring'
 import { CAT_RADIUS_M, livePhotos, type CatIndex } from '../cats'
-import { LIBRARY_AT, OSM_AT, PEACE, PLACE_KEYS, PLACE_LABEL, PLACE_NOTE, placeSummary, type PlaceKey, type PlaceOn, type PlaceRow } from '../places'
+import { PEACE, PLACE_KEYS, PLACE_LABEL, PLACE_NOTE, placeSummary, type PlaceKey, type PlaceOn, type PlaceRow } from '../places'
 import { CATEGORIES, ENOUGH, NEED_WEIGHT, STDR_YM, WALK5, WANT_WEIGHT, setTier, tierOf, type CommercialIndex, type CommercialPrefs, type Tier } from '../commercial'
 
 // ── 오른쪽 위: 입지 요인(지수) ────────────────────────────────────────
@@ -166,7 +166,7 @@ function CatThumbs({ cat, onOpen, onRegister }: { cat: CatIndex | null; onOpen: 
         ? <p className="com-note">반경 {CAT_RADIUS_M}m 안에 올라온 사진이 없어요. <button type="button" className="link" onClick={onRegister}>현장에서 등록</button></p>
         : <div className="thumb-grid">{list.map(({ c, p }, i) => (
             <button type="button" key={c.id + p.at} onClick={() => onOpen(i)} title={c.name || '길고양이'} aria-label={`${c.name || '길고양이'} 사진 크게 보기`}>
-              <img src={p.data} alt="" loading="lazy" />
+              <img data-pin-nopin="true" src={p.data} alt="" loading="lazy" />
             </button>
           ))}</div>}
     </div>
@@ -193,12 +193,11 @@ function PlaceDetail({ k, r }: { k: PlaceKey; r: PlaceRow }) {
         {p.parks.length === 0 && <p className="com-note">500m 안에 공원이 없어요.</p>}
         {p.parks.map((x, i) => (
           <div className="place-line" key={x.name + i}>
-            <span>{x.waterside ? '🌊' : '🌳'} {x.name} <small>{x.type} · {x.dist}m · 산책로 {x.walkM ? `${(x.walkM / 1000).toFixed(1)}km` : '자료 없음'} · {x.areaHa}ha{x.linked ? ' · 길게 연결 ×1.8' : ''}{x.steep !== undefined && x.steep < 1 ? ` · 산길(고저차 ${x.relief}m) ×${x.steep}` : ''}</small></span>
-            <em title={`공원 점수 ${x.value} → 거리 반영 ${x.eff}`}>{fmt(x.eff)}</em>
+            <span>{x.waterside ? '🌊' : '🌳'} {x.name} <small>{x.type} · {x.dist}m</small></span>
+            <em>{fmt(x.eff)}</em>
           </div>
         ))}
-        <div className="place-line"><span>🌿 500m 안 녹지 비율 {p.green}%</span><em>+{p.greenBonus}</em></div>
-        <p className="com-note">더하기 방식. 공원마다 점수 = 공원 안 산책로 길이로(반달공원 0.4km ≈ 2점 · 신동수변공원 1.3km ≈ 7.6 · 글빛누리공원 1.5km ≈ 8 · 광교호수공원 32km = 10), 길게 이어져 양 끝이 상권에 닿으면 ×1.8, 산길(공원 안 고저차 10m 초과)이면 깎아 40m 이상에서 ×0.4. 후보지 점수 = 500m 안 가장 좋은 공원 + 두 번째 공원 10% + 녹지 15% 이상 +0.5 · 30% 이상 +1, 최대 10. 공원 경계·유형은 국토교통부 도시계획시설(공간시설), 산책로·이름은 OSM {OSM_AT}, 고도는 Copernicus DEM(30m).</p>
+        <div className="place-line"><span>🌿 녹지 {p.green}%</span><em>+{p.greenBonus}</em></div>
       </div>
     )
   }
@@ -206,11 +205,10 @@ function PlaceDetail({ k, r }: { k: PlaceKey; r: PlaceRow }) {
     <div className="com-picker place-detail">
       {r.library.near.map((l, i) => (
         <div className="place-line" key={l.name}>
-          <span>📚 {l.name} <small>{l.dist}m{l.seats ? ` · 좌석 ${l.seats.toLocaleString()}` : ''}{l.books ? ` · 책 ${l.books.toLocaleString()}권` : ''}</small></span>
+          <span>📚 {l.name} <small>{l.dist}m</small></span>
           {i === 0 && <em>{fmt(r.library.score)}</em>}
         </div>
       ))}
-      <p className="com-note">가장 가까운 공공도서관까지 직선거리: 500m 안 10점 → 1km 5점 → 2km 0점(사이는 직선). 작은도서관·어린이·학교·대학·전문 도서관은 뺌. 공공데이터포털 전국도서관표준데이터(기준일 {LIBRARY_AT}).</p>
     </div>
   )
 }

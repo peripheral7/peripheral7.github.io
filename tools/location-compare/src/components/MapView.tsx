@@ -87,8 +87,18 @@ function frame(candidates: Candidate[], hubs: Hub[], active: number, focusHubIds
   const cur = candidates[active]
   const main = hubs.filter((h) => focusHubIds.includes(h.id))
   const targets = main.length ? main : hubs
-  const pts = cur ? [cur, ...targets] : [...candidates, ...targets]
-  return pts.map((p) => [p.lat, p.lng])
+  const pts: [number, number][] = (cur ? [cur, ...targets] : [...candidates, ...targets]).map((p) => [p.lat, p.lng])
+  return withMinSpan(pts)
+}
+
+/** 후보지와 주 목적지가 아주 가까우면(수백 m) 지나치게 확대되지 않게, 가운데는 그대로 두고 최소 범위(약 700m)로 넓힌다 */
+const MIN_SPAN = 0.0065
+function withMinSpan(pts: [number, number][]): [number, number][] {
+  if (!pts.length) return pts
+  const la = pts.map((p) => p[0]), ln = pts.map((p) => p[1])
+  const cy = (Math.min(...la) + Math.max(...la)) / 2, cx = (Math.min(...ln) + Math.max(...ln)) / 2
+  const hy = Math.max(MIN_SPAN / 2, (Math.max(...la) - Math.min(...la)) / 2), hx = Math.max(MIN_SPAN * 0.65, (Math.max(...ln) - Math.min(...ln)) / 2)
+  return [...pts, [cy - hy, cx - hx], [cy + hy, cx + hx]]
 }
 
 export function MapView(props: Props) {
@@ -171,6 +181,7 @@ function NaverMap({ candidates, hubs, active, onSelect, focusKey, hubId, onHub, 
   const detail = zoom >= DETAIL_ZOOM
 
   // 언제나 부드럽게 맞춘다(panToBounds = 이동·확대를 한 번에 애니메이션). 이미 알맞게 보이면 가운데로 살짝 옮기기만 한다.
+  const fitToken = useRef(0) // 가장 최근 맞춤(늦게 온 확인은 버린다)
   const fit = (_force = false, all = false) => {
     const n = window.naver
     const pts = all ? allCands(candidates) : frame(candidates, hubs, active, focusHubIds)
@@ -178,9 +189,27 @@ function NaverMap({ candidates, hubs, active, onSelect, focusKey, hubId, onHub, 
     const b = new n.maps.LatLngBounds(new n.maps.LatLng(pts[0][0], pts[0][1]), new n.maps.LatLng(pts[0][0], pts[0][1]))
     pts.forEach(([la, ln]) => b.extend(new n.maps.LatLng(la, ln)))
     const pad = all ? PAD_ALL : PAD
-    const margin = all ? { top: pad, right: pad, bottom: pad, left: pad } : { top: pad + 40, right: pad, bottom: pad, left: pad }
-    const ease = { duration: 650, easing: 'easeOutCubic' }
-    try { map.current.panToBounds(b, ease, margin) } catch { map.current.fitBounds(b, margin) }
+    // 후보지 + 주 목적지가 화면 가운데에 균형 있게: 네 변 여백을 위아래·좌우 같게(검색창 몫만큼 위아래 모두 넉넉히)
+    const margin = all ? { top: pad, right: pad, bottom: pad, left: pad } : { top: pad + 40, right: pad + 20, bottom: pad + 40, left: pad + 20 }
+    // 목표 가운데 = 점들을 감싸는 네모의 가운데, 목표 확대 = 여백을 뺀 지도 크기에 네모가 들어가는 가장 큰 정수 단계(웹 메르카토르).
+    // 확대 단계가 같으면 panTo, 다르면 morph 로 부드럽게. (fitBounds 로 잰 뒤 되돌리는 방식은 연달아 고르면 애니메이션이 취소됐다)
+    const m = map.current, size = m.getSize()
+    const la = pts.map((p) => p[0]), ln = pts.map((p) => p[1])
+    const yOf = (lat: number) => Math.log(Math.tan(Math.PI / 4 + (lat * Math.PI) / 360))
+    const s0 = Math.min(...la), n0 = Math.max(...la), w0 = Math.min(...ln), e0 = Math.max(...ln)
+    const cy = (yOf(s0) + yOf(n0)) / 2, center = new n.maps.LatLng((2 * Math.atan(Math.exp(cy)) - Math.PI / 2) * 180 / Math.PI, (w0 + e0) / 2)
+    const W = Math.max(50, size.width - margin.left - margin.right), H = Math.max(50, size.height - margin.top - margin.bottom)
+    const zx = Math.log2((W * 360) / (256 * Math.max(1e-6, e0 - w0))), zy = Math.log2((H * 2 * Math.PI) / (256 * Math.max(1e-6, yOf(n0) - yOf(s0))))
+    const z1 = Math.max(6, Math.min(all ? 17 : 16, Math.floor(Math.min(zx, zy))))
+    if (m.getZoom() === z1) m.panTo(center, { duration: 700, easing: 'easeInOutCubic' })
+    else m.morph(center, z1, { duration: 800, easing: 'easeInOutCubic' })
+    // 애니메이션이 중간에 끊기면(다른 이동·탭 숨김으로 프레임이 멈춤 등) 끝날 시간 뒤 목표 자리로 바로 맞춘다
+    const token = ++fitToken.current
+    window.setTimeout(() => {
+      if (token !== fitToken.current || !map.current) return
+      const c = map.current.getCenter()
+      if (map.current.getZoom() !== z1 || Math.abs(c.lat() - center.lat()) > 1e-5 || Math.abs(c.lng() - center.lng()) > 1e-5) map.current.morph(center, z1, { duration: 0 })
+    }, 1000)
   }
 
   useEffect(() => onNaverAuthFailure(onFail), []) // eslint-disable-line react-hooks/exhaustive-deps
@@ -392,13 +421,12 @@ function fitSmart(map: L.Map, pts: [number, number][], _force = false, all = fal
   if (!pts.length) return
   const pad = all ? PAD_ALL : PAD
   const b = L.latLngBounds(pts)
-  const top = all ? pad : pad + 40
-  const target = Math.min(all ? 17 : 16, map.getBoundsZoom(b, false, L.point(pad * 2, pad + top)))
-  // 위쪽 여백이 더 크니(검색창) 가운데를 그만큼 위로 — 픽셀로 옮겨 계산
-  const c = map.unproject(map.project(b.getCenter(), target).subtract(L.point(0, (top - pad) / 2)), target)
+  // 균형: 위아래·좌우 여백을 같게 두어 후보지와 주 목적지의 가운데가 지도 가운데(검색창 몫만큼 위아래 모두 넉넉히)
+  const target = Math.min(all ? 17 : 16, map.getBoundsZoom(b, false, all ? L.point(pad * 2, pad * 2) : L.point(pad * 2 + 40, pad * 2 + 80)))
+  const c = b.getCenter()
   const z = map.getZoom()
-  if (Math.abs(z - target) < 0.01) map.panTo(c, { animate: true, duration: 0.5, easeLinearity: 0.3 })
-  else if (Math.abs(z - target) <= 3) map.flyTo(c, target, { duration: 0.6, easeLinearity: 0.3 })
+  if (Math.abs(z - target) < 0.01) map.panTo(c, { animate: true, duration: 0.6, easeLinearity: 0.25 })
+  else if (Math.abs(z - target) <= 3) map.flyTo(c, target, { duration: 0.8, easeLinearity: 0.25 })
   else map.setView(c, target, { animate: true })
 }
 

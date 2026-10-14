@@ -95,7 +95,7 @@ export function CatRegister({ state, onChange, onClose }: { state: CatState; onC
         <div className="cat-field">사진
           <input ref={file} type="file" accept="image/*" capture="environment" hidden onChange={(e) => { pick(e.target.files?.[0]); e.target.value = '' }} />
           <div className="cat-photo">
-            {photo ? <img src={photo} alt="등록할 고양이 사진" /> : <span className="muted">{busy ? '사진 줄이는 중…' : '카메라로 찍어 주세요'}</span>}
+            {photo ? <img data-pin-nopin="true" src={photo} alt="등록할 고양이 사진" /> : <span className="muted">{busy ? '사진 줄이는 중…' : '카메라로 찍어 주세요'}</span>}
             <button type="button" className="ghost" onClick={() => file.current?.click()} disabled={gps !== 'ok'}>{photo ? '다시 찍기' : '사진 찍기'}</button>
           </div>
           {photo && <small className="faint">줄인 크기 약 {kb(photo)}KB</small>}
@@ -139,7 +139,7 @@ export function CatGallery({ title, cats, user, onRemoveMine, onClose, start = 0
         <div className="drawer-head"><div><small>{title} · 반경 {CAT_RADIUS_M}m</small><h2>🐈 길고양이 사진</h2></div><button className="close" aria-label="닫기" onClick={onClose}>×</button></div>
         {!cur ? <p className="muted">유효한 사진이 없어요.</p> : (
           <>
-            <img className="cat-big" src={cur.p.data} alt={cur.c.name || '길고양이'} />
+            <img data-pin-nopin="true" className="cat-big" src={cur.p.data} alt={cur.c.name || '길고양이'} />
             <div className="cat-meta">
               <span>출몰 시간 {cur.c.times.length ? cur.c.times.join('·') : '미입력'}</span>
               <span>특징 {cur.c.traits || '미입력'}</span>

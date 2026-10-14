@@ -163,11 +163,12 @@ export default function App() {
   const deleteEdit = () => { if (editing && confirm('이 후보지를 삭제할까요?')) { update(removeCandidate(state, editing.id)); setEditing(null) } }
   const close = () => setPop('none')
   const weekSum = hubs.reduce((a, h) => a + (pref.weekly[h.id] ?? 0), 0)
-  // 주 목적지 = 주 방문 비율 50% 이상(보통 1곳, 반반이면 2곳). 횟수가 모두 0이면 전부.
+  // 주 목적지(지도 맞춤) = 주 방문이 가장 많은 곳 하나 — 같으면 학교·직장을 먼저. 후보지를 고르면 후보지와 이곳이 지도 가운데에 균형 있게.
   const mainHubIds = useMemo(() => {
-    const main = weekSum > 0 ? hubs.filter((h) => (pref.weekly[h.id] ?? 0) / weekSum >= 0.5) : hubs
-    return (main.length ? main : hubs).map((h) => h.id)
-  }, [hubs, pref.weekly, weekSum])
+    if (!hubs.length) return []
+    const rank = (h: (typeof hubs)[number]) => (pref.weekly[h.id] ?? 0) * 10 + (h.category === '학교' || h.category === '직장' ? 1 : 0)
+    return [[...hubs].sort((a, b) => rank(b) - rank(a))[0].id]
+  }, [hubs, pref.weekly])
   // 펼친 입지 요인을 지도에: 도서관 위치 · 평화로움 구분도 · 길고양이 사진
   const curPlace = placeFor(candidates[active], !!pref.bike)
   const mapLibraries = useMemo(() => (factorOpen === 'library' && curPlace ? curPlace.library.near.filter((l) => l.lat && l.lng).map((l) => ({ name: l.name, lat: l.lat!, lng: l.lng!, dist: l.dist })) : undefined), [factorOpen, curPlace])

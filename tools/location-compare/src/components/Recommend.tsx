@@ -9,7 +9,7 @@ import { LISTINGS, SPOTS, meters, naverMapUrl, nearest, type Listing } from '../
 // 오른쪽 카페·식당을 누르면 네이버지도 검색이 새 탭으로 열린다.
 
 const Thumb = ({ src, alt }: { src?: string; alt: string }) => (
-  <span className="rec-img" aria-hidden={!src}>{src && <img src={src} alt={alt} loading="lazy" />}</span>
+  <span className="rec-img" aria-hidden={!src}>{src && <img data-pin-nopin="true" src={src} alt={alt} loading="lazy" />}</span>
 )
 
 const Near = ({ p, candidates }: { p: { lat: number; lng: number }; candidates: Candidate[] }) => {

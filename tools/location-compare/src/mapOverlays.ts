@@ -73,7 +73,7 @@ export function catCalloutHtml(c: CatCallout): string {
   const slide = c.photos.length >= 3
   const n = c.photos.length
   // 슬라이드: 첫 사진만 보이고(.on), startCatSlides 가 2.4초마다 다음 사진으로 넘긴다
-  const imgs = c.photos.map((src, i) => `<img src="${src}" alt=""${i === 0 ? ' class="on"' : ''}>`).join('')
+  const imgs = c.photos.map((src, i) => `<img data-pin-nopin="true" src="${src}" alt=""${i === 0 ? ' class="on"' : ''}>`).join('')
   const L = Math.max(Math.abs(c.dx), Math.abs(c.dy)) + CAT_BOX
   return `<div class="cat-callout" data-start="${c.start}" title="${esc(c.name)} — 눌러서 크게 보기">`
     + `<svg class="cat-leader" width="${L * 2}" height="${L * 2}" style="left:${-L}px;top:${-L}px" aria-hidden><line x1="${L}" y1="${L}" x2="${L + c.dx}" y2="${L + c.dy}" /></svg>`
