@@ -22,7 +22,7 @@ import { ZONE_STYLE, catCalloutHtml, catCallouts, startCatSlides, zoneRects, typ
 // - 입지 요인을 펼치면 그 요인을 지도에도: 도서관 = 📚 위치, 평화로움 = 반경 50m 소음 구분도 + 30m(계산 반경) 선, 길고양이 = 사진 말풍선.
 // - 맞춤 이동은 언제나 부드럽게(네이버 panToBounds · Leaflet flyTo 짧게) — 이미 다 보여도 가운데로 옮긴다(예전엔 그대로 둬서 "눌러도 안 움직인다"로 보였다).
 // - 고른 후보지 → "장단점 기준" 목적지의 대중교통 경로(있으면 점선 직선 대신): 도보 = 점선, 버스·지하철 = 노선 색 선, 정류장 = 점 + 이름표(도보 N분).
-//   자료는 서울시 환승경로 + 경기 정류소 경유노선(버스 종류 색), 선 모양은 근사(TRANSIT.md).
+//   자료는 서울시 환승경로 + 경기 정류소 경유노선(버스 종류 색) + 경기 버스노선 궤적(실제 노선 선, 서울 버스·지하철은 근사) — TRANSIT.md.
 // - "산책"을 켜면 공원 점수가 일정 이상인 공원 경계(parkAreas)를 점수만큼 진한 초록으로 칠한다.
 //   효용이 높은 공원(칠한 공원)만 이름 핀을 항상 보이고, 낮은 공원은 색도 이름도 그리지 않는다(테두리 없이 칠만 한다).
 
@@ -135,7 +135,7 @@ export function MapView(props: Props) {
         {props.candidates.length > 1 && <button type="button" className="fit-all" onClick={() => setAllKey((k) => k + 1)}>후보지 한눈에</button>}
       </div>
       {props.transit && props.transit.legs.length > 0 && (
-        <p className="layer-note route-note" role="status" title="버스 선은 도로를 따라 그린 근사선이에요(실제 노선과 조금 다를 수 있음)">
+        <p className="layer-note route-note" role="status" title={props.transit.legs.some((l) => l.mode !== 'walk' && l.approx) ? '일부 선은 근사선이에요(서울 버스 = 도로 길찾기, 지하철 = 역 사이 직선)' : '경기 버스 실제 노선'}>
           🚌 {props.transit.label}까지 대중교통 <b>{props.transit.min}분</b> · {transitSummary(props.transit.legs)}
         </p>
       )}
