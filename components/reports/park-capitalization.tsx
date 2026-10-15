@@ -104,7 +104,7 @@ function Table({ spec }: { spec: StatTable }) {
                     key={`${i}-${h}`}
                     scope="col"
                     className={`border-b border-border px-4 py-2.5 text-[0.72rem] font-semibold text-muted-foreground ${
-                      i === 0 ? "text-left" : "text-right"
+                      i === 0 ? "whitespace-nowrap text-left" : "text-right"
                     }`}
                     style={i === 0 && spec.labelWidth ? { minWidth: spec.labelWidth } : undefined}
                   >
@@ -125,7 +125,7 @@ function Table({ spec }: { spec: StatTable }) {
                       row.strong || row.fit
                         ? "font-semibold text-foreground"
                         : "text-muted-foreground"
-                    } ${spec.labelWidth ? "whitespace-nowrap" : ""}`}
+                    } whitespace-nowrap`}
                     style={spec.labelWidth ? { minWidth: spec.labelWidth } : undefined}
                   >
                     {row.label}
@@ -240,7 +240,7 @@ export function ParkCapitalizationReport() {
       <SectionTitle n="01">공원은 가격에 자본화되는가</SectionTitle>
       <div className="mt-4">
         <p className="max-w-3xl text-[0.9rem] leading-relaxed text-muted-foreground">
-          가장 진한 초록이 대표공원, 작은 사각점이 분석 단지다. 거리는 대표공원의 진출입로까지 잰다.
+          가장 진한 초록이 대표공원, 작은 사각점이 분석 단지입니다. 거리는 대표공원의 진출입로까지 잽니다.
         </p>
         <MapLightbox maps={parkCapCoreMaps} />
       </div>
@@ -260,30 +260,30 @@ export function ParkCapitalizationReport() {
         ))}
       </div>
       <Table spec={parkCapHeadlineTable} />
-      <Callout title="같은 지구 안에서, 구역마다 따로 추정했다.">
-        동탄2 남부와 북부는 시행 주체 · 입주 시기 · 행정구역이 같고 대형공원의 배치만 다르다. 다섯 구역은
-        ㎡당 단가가 581만~1,036만원으로 서로 다른 시장이어서 합치지 않았다. 공원의 면적 순위(광교 132.8ha가
-        최대)와 효과의 크기는 대응하지 않는다.
+      <Callout title="같은 지구 안에서, 구역마다 따로 추정했습니다.">
+        동탄2 남부와 북부는 시행 주체 · 입주 시기 · 행정구역이 같고 대형공원의 배치만 다릅니다. 다섯 구역은
+        ㎡당 단가가 581만~1,036만원으로 서로 다른 시장이어서 합치지 않았습니다. 공원의 면적 순위(광교 132.8ha가
+        최대)와 효과의 크기는 대응하지 않습니다.
       </Callout>
 
       {/* 02 매개 · 조절 */}
       <SectionTitle n="02">상권을 거쳐 들어오는가</SectionTitle>
       <div className="mt-4">
         <p className="max-w-3xl text-[0.9rem] leading-relaxed text-muted-foreground">
-          빨간 육각형이 다빈도 생활업종 점포 밀도다(진할수록 밀집). 남색 점은 지하철역, 자홍 점은 대표공원
-          진출입로다. 남부는 상권이 호수공원에 붙어 있고, 북부는 공원이 아니라 동탄역을 따라 깔려 있다.
+          빨간 육각형이 다빈도 생활업종 점포 밀도입니다(진할수록 밀집). 남색 점은 지하철역, 자홍 점은 대표공원
+          진출입로입니다. 남부는 상권이 호수공원에 붙어 있고, 북부는 공원이 아니라 동탄역을 따라 깔려 있습니다.
         </p>
         <MapLightbox maps={parkCapHexMaps} />
       </div>
       <Table spec={parkCapMediationTable} />
-      <Callout title="매개는 공원과 상권이 겹치는 곳에서만 선다.">
-        동탄1은 총효과의 37%, 일월은 40%가 상권을 경유한다(부분매개). 남부는 상권이 가격을 설명하지 못하고(b),
-        북부는 상권이 역을 따라 생겨 공원과 무관하며(a), 광교는 둘 다 끊긴다.
+      <Callout title="매개는 공원과 상권이 겹치는 곳에서만 섭니다.">
+        동탄1은 총효과의 37%, 일월은 40%가 상권을 경유합니다(부분매개). 남부는 상권이 가격을 설명하지 못하고(b),
+        북부는 상권이 역을 따라 생겨 공원과 무관하며(a), 광교는 둘 다 끊깁니다.
       </Callout>
       <Table spec={parkCapModerationTable} />
-      <Callout title="상권은 공원의 가치를 키운다.">
-        광교는 매개가 없지만 상권이 큰 쪽(광교중앙역 상업지구)에서 공원 효과가 −0.211***로 커진다. 동탄1도
-        같다 — 공원과 상권은 보완 관계다.
+      <Callout title="상권은 공원의 가치를 키웁니다.">
+        광교는 매개가 없지만 상권이 큰 쪽(광교중앙역 상업지구)에서 공원 효과가 −0.211***로 커집니다. 동탄1도
+        같습니다 — 공원과 상권은 보완 관계입니다.
       </Callout>
 
       {/* 03 강건성 */}
