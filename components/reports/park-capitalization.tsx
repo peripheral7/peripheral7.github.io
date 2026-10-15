@@ -101,7 +101,7 @@ function Table({ spec }: { spec: StatTable }) {
               <tr className="bg-muted/60">
                 {spec.head.map((h, i) => (
                   <th
-                    key={h}
+                    key={`${i}-${h}`}
                     scope="col"
                     className={`border-b border-border px-4 py-2.5 text-[0.72rem] font-semibold text-muted-foreground ${
                       i === 0 ? "text-left" : "text-right"
@@ -166,6 +166,26 @@ function Table({ spec }: { spec: StatTable }) {
   )
 }
 
+function More({ title, children }: { title: string; children: React.ReactNode }) {
+  return (
+    <details className="group mt-4 rounded border border-border bg-card">
+      <summary className="cursor-pointer list-none px-4 py-3 text-[0.86rem] font-semibold [&::-webkit-details-marker]:hidden">
+        <span className="mr-2 inline-block font-mono text-accent transition-transform group-open:rotate-90">›</span>
+        {title}
+      </summary>
+      <div className="border-t border-border px-4 pb-5 pt-1">{children}</div>
+    </details>
+  )
+}
+
+function Callout({ title, children }: { title: string; children: React.ReactNode }) {
+  return (
+    <div className="mt-5 rounded border border-border border-l-[3px] border-l-accent bg-muted/40 px-4 py-3.5 text-[0.88rem] leading-relaxed">
+      <strong>{title}</strong> {children}
+    </div>
+  )
+}
+
 export function ParkCapitalizationReport() {
   return (
     <section aria-labelledby="park-cap-title">
@@ -216,258 +236,65 @@ export function ParkCapitalizationReport() {
         ))}
       </dl>
 
-      {/* 지도 — 다섯 구역의 대표공원과 분석 단지 */}
-      <div className="mt-10">
-        <p className="font-mono text-[0.62rem] uppercase tracking-[0.12em] text-muted-foreground">
-          다섯 구역의 대표공원과 분석 단지
-        </p>
-        <p className="mt-2 max-w-3xl text-[0.9rem] leading-relaxed text-muted-foreground">
-          가장 진한 초록이 각 구역의 대표공원, 옅은 초록이 2ha 이상의 다른 공원, 작은 사각점이
-          분석 단지다. 동탄2 남부는 대표공원이 시가지 한복판에 앉아 단지들이 그 둘레에 퍼져 있다.
-          북부는 하천을 따라 가늘게 뻗은 여울공원이 생활권 가장자리에, 청계중앙공원이 동탄역 시범단지
-          한가운데에 있다. 광교는 호수공원이 지구 남동쪽에 있고 북서쪽 가장자리가 광교중앙역 상업지구에
-          맞닿아 있으며, 일월은 촘촘한 기성시가지의 가장자리에 공원 하나가 놓여 있다.
+      {/* 01 공원 효과 */}
+      <SectionTitle n="01">공원은 가격에 자본화되는가</SectionTitle>
+      <div className="mt-4">
+        <p className="max-w-3xl text-[0.9rem] leading-relaxed text-muted-foreground">
+          가장 진한 초록이 대표공원, 작은 사각점이 분석 단지다. 거리는 대표공원의 진출입로까지 잰다.
         </p>
         <MapLightbox maps={parkCapCoreMaps} />
       </div>
-
-      {/* 00 한눈에 보기 */}
-      <SectionTitle n="00">한눈에 보기</SectionTitle>
-      <div className="mt-4 grid grid-cols-1 gap-px overflow-hidden rounded border border-border bg-border sm:grid-cols-2">
+      <div className="mt-6 grid grid-cols-1 gap-px overflow-hidden rounded border border-border bg-border sm:grid-cols-2">
         {parkCapFindings.map((f) => (
-          <div key={f.label} className="flex flex-col gap-2 bg-card p-5">
+          <div key={f.label} className="flex flex-col gap-1.5 bg-card p-4">
             <span className="text-[0.72rem] text-muted-foreground">{f.label}</span>
             <span
-              className={`font-mono text-[1.2rem] font-semibold ${
+              className={`font-mono text-[1.15rem] font-semibold ${
                 f.accent ? "text-accent" : "text-foreground"
               }`}
             >
               {f.value}
             </span>
-            <span className="text-[0.78rem] leading-relaxed text-muted-foreground">{f.note}</span>
+            <span className="text-[0.76rem] leading-relaxed text-muted-foreground">{f.note}</span>
           </div>
         ))}
       </div>
       <Table spec={parkCapHeadlineTable} />
+      <Callout title="같은 지구 안에서, 구역마다 따로 추정했다.">
+        동탄2 남부와 북부는 시행 주체 · 입주 시기 · 행정구역이 같고 대형공원의 배치만 다르다. 다섯 구역은
+        ㎡당 단가가 581만~1,036만원으로 서로 다른 시장이어서 합치지 않았다. 공원의 면적 순위(광교 132.8ha가
+        최대)와 효과의 크기는 대응하지 않는다.
+      </Callout>
 
-      <div className="mt-5 rounded border border-border border-l-[3px] border-l-accent bg-muted/40 px-4 py-3.5 text-[0.88rem] leading-relaxed">
-        <strong>같은 지구 안에서 비교했다.</strong> 동탄2 남부와 북부는 시행 주체도, 입주 시기도,
-        행정구역도 같다. 도시끼리 비교할 때 통제할 수 없는 제도·시장 요인이 여기서는 상당 부분
-        고정되고, 남는 차이는 대형공원의 배치다. 다만 남부에는 오산시 단지가 섞여 있어 택지지구 밖
-        더미로 분리해야 하고, 북부는 대표공원을 어떻게 정의하느냐에 결과가 민감하다.{" "}
-        <em className="not-italic text-accent">그리고 지역을 합치지 않았다</em> — 다섯 구역의 ㎡당
-        단가가 581만원에서 1,036만원까지 차이 나므로, 하나의 가격함수로 묶으면 그 평균값은 어느
-        구역의 것도 아니게 된다. 확인 삼아 지역 고정효과로 합쳐 보면 공원 기울기가 구역마다 달라(p=0.0001),
-        구역마다 따로 추정했다.
-      </div>
-
-      {/* 01 읽는 법 */}
-      <SectionTitle n="01">이 보고서를 읽는 법</SectionTitle>
-      <p className="mt-3 max-w-3xl text-[0.92rem] leading-relaxed">
-        구역별 표본이 28~73개로 작다. 계수에 별표가 몇 개 붙었는지보다 그 별표가 어떤 조건에서
-        붙었는지가 중요하다.
-      </p>
-      <div className="mt-5 flex flex-col gap-4">
-        {parkCapStatNotes.map((sn) => (
-          <div key={sn.tag} className="rounded border border-border bg-card px-4 py-3.5">
-            <div className="flex flex-wrap items-baseline gap-2">
-              <span className="rounded-sm bg-muted px-2 py-0.5 font-mono text-[0.62rem] font-semibold uppercase tracking-wide text-muted-foreground">
-                {sn.tag}
-              </span>
-              <strong className="text-[0.88rem]">{sn.title}</strong>
-            </div>
-            <p className="mt-1.5 text-[0.86rem] leading-relaxed text-muted-foreground">{sn.body}</p>
-          </div>
-        ))}
-      </div>
-
-      {/* 02 지역별 */}
-      <SectionTitle n="02">구역별로 본 공원 효과</SectionTitle>
-      <p className="mt-3 max-w-3xl text-[0.92rem] leading-relaxed">
-        구역마다 대표공원을 하나 지정하고 그 진출입로까지의 거리를 공원 변수로 넣는다. 통제변수는
-        구역마다 근거를 달아 조금씩 다르다(표 2 주). 효과가 뚜렷한 순서로 싣는다.
-      </p>
-
-      <div className="mt-6 flex flex-col gap-6">
-        {parkCapRegions.map((r) => (
-          <section key={r.name} className="overflow-hidden rounded border border-border bg-card">
-            <header className="flex flex-wrap items-center gap-3 border-b border-border px-5 py-3.5">
-              <Dot k={r.key} />
-              <h4 className="text-[1.02rem] font-bold">{r.name}</h4>
-              <Verdict v={r.verdict} />
-              <span className="ml-auto font-mono text-[0.72rem] tabular-nums text-muted-foreground">
-                단지 {r.n}개 · {r.park}
-              </span>
-            </header>
-
-            <div className="grid grid-cols-1 gap-5 px-5 py-4 lg:grid-cols-[1fr_16rem]">
-              <div>
-                <p className="text-[0.92rem] font-semibold leading-relaxed">{r.lead}</p>
-                <p className="mt-2.5 text-[0.88rem] leading-relaxed">{r.body}</p>
-                <p className="mt-2.5 text-[0.88rem] leading-relaxed text-muted-foreground">{r.why}</p>
-                <p className="mt-3 rounded border-l-[3px] border-l-accent bg-muted/40 px-3.5 py-2.5 text-[0.85rem] leading-relaxed">
-                  <strong>유의할 점 </strong>
-                  {r.caution}
-                </p>
-              </div>
-
-              <dl className="flex flex-col self-start rounded border border-border bg-muted/30 px-3.5 py-2">
-                <Fact k="계수 (HC1 t)" v={`${r.coef} (${r.t})`} />
-                <Fact k="p값" v={r.p} />
-                <Fact k="수정 R²" v={r.adjr2} />
-                <Fact k="최대 VIF" v={r.vif} />
-                <Fact k="대표공원 거리" v={r.dist} />
-                <Fact k="가격 수준" v={r.price} />
-                <Fact k="100m 가까이" v={r.money} />
-                <Fact k="거리 절반 95% 구간" v={r.moneyCI} />
-              </dl>
-            </div>
-          </section>
-        ))}
-      </div>
-
-      {/* 03 나란히 놓고 보기 */}
-      <SectionTitle n="03">다섯 구역을 나란히 놓으면</SectionTitle>
-      <p className="mt-3 max-w-3xl text-[0.92rem] leading-relaxed">
-        모형 전체를 비교하면 구역마다 가격을 움직이는 축이 다르다.
-      </p>
-      <Table spec={parkCapFullCoefTable} />
-      <Table spec={parkCapStdTable} />
-      <Table spec={parkCapMoneyTable} />
-
-      <div className="mt-5 rounded border border-border border-l-[3px] border-l-accent bg-muted/40 px-4 py-3.5 text-[0.88rem] leading-relaxed">
-        <strong>공원의 면적 순위와 효과의 크기가 어긋난다.</strong> 대표공원을 큰 순서로 놓으면
-        광교 132.8 → 동탄2 북부 50.7(두 공원) → 동탄2 남부 44.5 → 동탄1 36.8 → 일월 28.1ha인데, 탄력성은
-        동탄2 남부(−0.113)가 가장 크고 동탄1(−0.090) · 광교(−0.085) · 북부(−0.085)가 그다음이며,
-        가장 큰 광교와 가장 작은 일월(−0.071)의 차이는 크지 않다.
-        <br />
-        <br />
-        <em className="not-italic text-accent">가격을 지배하는 요인도 구역마다 다르다.</em> 동탄2
-        남부는 택지지구 밖 더미(오산시 단지)와 건축연령, 동탄2 북부는 지하철 거리, 동탄1 · 광교 · 일월은
-        건축연령이 1위다. 대표공원은 북부에서 2위, 남부 · 동탄1에서 3위이고 광교 · 일월에서는 그보다
-        아래다 — 공원은 가격의 주된 결정요인이라기보다 그 위에 얹히는 몫이다.
-      </div>
-
-      <p className="mt-6 max-w-3xl text-[0.92rem] leading-relaxed">
-        공원 효과의 크기는 비슷한데 경로와 지배 요인이 갈린다. 도시의 성격과 공원 배치, 상권이 무엇을
-        따라 생겼는지로 구역을 나란히 놓으면 다음과 같다.
-      </p>
-      <Table spec={parkCapStructureTable} />
-
-      {/* 04 매개와 공간 */}
-      <SectionTitle n="04">상권을 경유하는가, 결과는 흔들리지 않는가</SectionTitle>
-      <p className="mt-3 max-w-3xl text-[0.92rem] leading-relaxed">
-        공원이 상권을 끌어들이고 그 상권이 가격에 자본화된다면, 공원 효과의 일부는 상권을 경유한다.
-        Baron &amp; Kenny 단계적 회귀로 경로를 분리해 a·b 경로가 유의하고 상권을 통제했을 때 직접효과가
-        줄어드는지를 본다.
-      </p>
-      <div className="mt-6">
-        <p className="font-mono text-[0.62rem] uppercase tracking-[0.12em] text-muted-foreground">
-          공원과 생활상권의 겹침
-        </p>
-        <p className="mt-2 max-w-3xl text-[0.9rem] leading-relaxed text-muted-foreground">
-          같은 도판에 다빈도 생활업종 점포 밀도를 육각형으로 얹고 분석 단지를 사각점으로 함께 찍었다. 파랑이
-          진할수록 점포가 몰려 있다. 분석 범위(대표공원 경계 2km) 밖은 흐리게 덮고, 상권과 학교는 범위
-          안의 것만 그렸다. 동탄2 남부는 상권 덩어리가 대표공원에 붙어 있어 공원 거리가 상권 지수를
-          설명하는 a경로가 뚜렷하다(부분 R² 0.379). 동탄2 북부는 상권이 공원과 무관하게 동탄역을 따라
-          깔려 있다(0.000). 갈색 점은 지하철역, 자홍 점은 대표공원 진출입로, 주황 삼각형은 초등학교다.
-          동탄2 북부의 보라색 점선은 동탄순환대로 — 상권 덩어리가 공원이 아니라 역에 붙어 있는 것이 보인다.
+      {/* 02 매개 · 조절 */}
+      <SectionTitle n="02">상권을 거쳐 들어오는가</SectionTitle>
+      <div className="mt-4">
+        <p className="max-w-3xl text-[0.9rem] leading-relaxed text-muted-foreground">
+          빨간 육각형이 다빈도 생활업종 점포 밀도다(진할수록 밀집). 남색 점은 지하철역, 자홍 점은 대표공원
+          진출입로다. 남부는 상권이 호수공원에 붙어 있고, 북부는 공원이 아니라 동탄역을 따라 깔려 있다.
         </p>
         <MapLightbox maps={parkCapHexMaps} />
       </div>
-
       <Table spec={parkCapMediationTable} />
-      <div className="mt-5 rounded border border-border border-l-[3px] border-l-accent bg-muted/40 px-4 py-3.5 text-[0.88rem] leading-relaxed">
-        <strong>매개는 동탄1과 일월에서 성립한다.</strong> Baron &amp; Kenny의 세 조건이
-        서는 곳은 다섯 중 둘이다 —{" "}
-        <em className="not-italic text-accent">동탄1은 총효과 −0.144의 37%가, 일월은 −0.117의 40%가 상권을
-        경유하고(부트스트랩 구간이 0을 벗어난다), 상권을 통제해도 직접효과가 유의하게 남아 부분매개다.</em>{" "}
-        동탄1은 센트럴파크와 중심상업지구가 한 축으로 계획되었고, 일월은 구도심 상권의 일부가 공원 둘레에
-        붙어 있다. 나머지 세 구역은 끊기는 고리가 다르다 — 남부는 호수공원이 상권을 끌어오지만 그 상권이
-        가격을 설명하지 못하고(b), 북부는 상권이 역을 따라 생겨 공원과 무관하며(a), 광교는 둘 다 끊긴다.
-        공원이 상권을 거쳐 가격을 올리는 연결고리는 공원과 상권이 실제로 겹칠 때만 선다.
-      </div>
-      <p className="mt-6 max-w-3xl text-[0.92rem] leading-relaxed">
-        매개는 상권이 공원의 가치를 '나르는가'를 묻는다. 같은 자료로 상권이 큰 곳에서 공원의 가치가 더 '커지는가' —
-        공원 거리와 상권의 교차항(조절) — 도 따로 본다.
-      </p>
+      <Callout title="매개는 공원과 상권이 겹치는 곳에서만 선다.">
+        동탄1은 총효과의 37%, 일월은 40%가 상권을 경유한다(부분매개). 남부는 상권이 가격을 설명하지 못하고(b),
+        북부는 상권이 역을 따라 생겨 공원과 무관하며(a), 광교는 둘 다 끊긴다.
+      </Callout>
       <Table spec={parkCapModerationTable} />
-      <div className="mt-5 rounded border border-border border-l-[3px] border-l-accent bg-muted/40 px-4 py-3.5 text-[0.88rem] leading-relaxed">
-        <strong>광교는 매개가 없지만 조절은 뚜렷하다.</strong> 상권이 작은 쪽에서는 공원 효과가 없고(+0.031),
-        상권이 큰 쪽 — 광교중앙역 상업지구 쪽 — 에서 −0.211***다. 동탄1은 매개와 조절이 모두 있고, 일월은 매개만 있다.{" "}
-        <em className="not-italic text-accent">상권은 공원의 가치를 나르지 않아도 키울 수 있다 — 공원과 상권은 보완 관계다.</em>
-      </div>
-      <p className="mt-6 max-w-3xl text-[0.92rem] leading-relaxed">
-        가까운 단지끼리 모형이 설명하지 못한 부분을 공유하면 표준오차가 실제보다 작아진다. 직접효과
-        모형 잔차의 모란 지수로 확인했다.
-      </p>
-      <Table spec={parkCapSpatialTable} />
-      <p className="mt-6 max-w-3xl text-[0.92rem] leading-relaxed">
-        잔차의 자기상관은 일월에서만 남는다. 일월을 공간오차모형(SEM)으로 다시 추정하고, 확인 삼아
-        나머지 세 구역도 함께 추정했다.
-      </p>
-      <Table spec={parkCapSemTable} />
-      <div className="mt-5 rounded border border-border border-l-[3px] border-l-accent bg-muted/40 px-4 py-3.5 text-[0.88rem] leading-relaxed">
-        <strong>일월만 약해지고 나머지는 그대로다.</strong> 일월은 공원 계수가 −0.073~−0.056로 조금 작아지고
-        p가 0.04~0.13로 약해진다. 남부(−0.112), 북부(−0.086), 광교(−0.083)는 OLS와 거의 같고 모두
-        유의하다.{" "}
-        <em className="not-italic text-accent">택지개발지구가 없는 일월 기성시가지 단지들이 서로 닮은 잔차를 공유한다.</em>
-      </div>
+      <Callout title="상권은 공원의 가치를 키운다.">
+        광교는 매개가 없지만 상권이 큰 쪽(광교중앙역 상업지구)에서 공원 효과가 −0.211***로 커진다. 동탄1도
+        같다 — 공원과 상권은 보완 관계다.
+      </Callout>
 
-      <p className="mt-6 max-w-3xl text-[0.92rem] leading-relaxed">
-        동탄2 북부는 경부고속도로와 동탄순환대로가 시가지를 가르고, 생활권 가장자리의 여울공원과
-        시범단지 한가운데의 청계중앙공원이 함께 있다. 대표공원과 구역을 어떻게 보느냐에 따라 계수가
-        어떻게 움직이는지 확인한다.
-      </p>
-      <Table spec={parkCapNorthTable} />
-      <p className="mt-3 max-w-3xl text-[0.88rem] leading-relaxed text-muted-foreground">
-        구역 더미를 넣어도 공원 계수는 1% 수준에서 유지된다. 결정적인 것은 대표공원의 정의다 — 여울공원만 쓰면
-        −0.005으로 유의하지 않고, 시범단지 한가운데의 청계중앙공원을 함께 보아야 효과가 드러난다. 여울공원
-        진출입로는 현장에서 확인한 4곳을 쓴다(현장 확인 전의 자동 추출 4점으로 재면 −0.065***).
-      </p>
-
-      <p className="mt-6 max-w-3xl text-[0.92rem] leading-relaxed">
-        광교는 표본의 68%가 택지지구 밖이다. 지구 안(23개)과 밖(48개)의 가격 단층을 다른 구역과 같은
-        더미 하나로 흡수하는데, 그 처리에 따라 계수가 얼마나 움직이는지 확인한다.
-      </p>
-      <Table spec={parkCapGwanggyoTable} />
-      <p className="mt-3 max-w-3xl text-[0.88rem] leading-relaxed text-muted-foreground">
-        더미를 빼면 계수가 −0.116, 법정동 더미 아홉 개로 바꾸면 −0.209로 커진다. 크기는 처리에
-        민감하지만 부호와 유의성은 달라지지 않는다. 지구 밖을 어떻게 다루느냐가 광교에서 가장 큰
-        연구자 재량이다.
-      </p>
-
-      <p className="mt-6 max-w-3xl text-[0.92rem] leading-relaxed">
-        지금까지의 점검을 한 표로 모으면 공원 신호가 약한 곳이 드러난다.
-      </p>
+      {/* 03 강건성 */}
+      <SectionTitle n="03">결과는 흔들리지 않는가</SectionTitle>
       <Table spec={parkCapSignalTable} />
-      <div className="mt-5 rounded border border-border border-l-[3px] border-l-accent bg-muted/40 px-4 py-3.5 text-[0.88rem] leading-relaxed">
-        <strong>정의와 표본에 가장 민감한 곳은 동탄2 북부와 남부다.</strong> 북부는 대표공원에 청계중앙공원을
-        넣느냐에 유의성이 갈리고, 남부는 2km 안 28개 단지로 표본이 가장 작다. 동탄1은 경계 대신
-        진출입로로 재야 효과가 드러나고, 일월은 통제 전 상관이 약하며(−0.13) 공간모형에서 약해진다.{" "}
-        <em className="not-italic text-accent">공원 효과는 무엇을 대표공원으로, 어디를 입구로, 어디까지를 표본으로 보느냐는 측정의 정의 위에 서 있다.</em>
-      </div>
-
-      <p className="mt-6 max-w-3xl text-[0.92rem] leading-relaxed">
-        마지막으로 함수형을 바꿔 본다. 같은 신도시 호수공원을 다룬 이상준 외(2026)는 가격을 그대로 두고
-        거리만 로그로 둔 선형-로그를 썼다.
+      <p className="mt-4 max-w-3xl text-[0.88rem] leading-relaxed text-muted-foreground">
+        {parkCapConclusion.robustness}
       </p>
-      <Table spec={parkCapFormTable} />
-
-      <p className="mt-6 max-w-3xl text-[0.92rem] leading-relaxed">
-        제안서의 세 번째 단계였던 분위회귀로, 같은 공원 거리가 저가 단지와 고가 단지에서 다르게
-        자본화되는지 본다.
-      </p>
-      <Table spec={parkCapQuantileTable} />
-
-      <p className="mt-6 max-w-3xl text-[0.92rem] leading-relaxed">
-        상권 변수를 어떻게 만들지에 따라 매개 결과가 달라질 수 있다. 제안서의 '반경 500m 점포 수', 반경 · 감쇠를 바꾼
-        중력지수, 업종 정의와 도보권 반경을 바꾼 후보를 같은 사양에 넣어 비교했다.
-      </p>
-      <Table spec={parkCapCommerceSelTable} />
 
       {/* 04 결론 */}
-      <SectionTitle n="05">결론</SectionTitle>
+      <SectionTitle n="04">결론</SectionTitle>
       <div className="mt-4 rounded border border-border border-l-[3px] border-l-accent bg-card px-5 py-4">
         <p className="text-[1.02rem] font-semibold leading-relaxed">{parkCapConclusion.headline}</p>
       </div>
@@ -484,68 +311,126 @@ export function ParkCapitalizationReport() {
           </div>
         ))}
       </div>
-      <div className="mt-6 rounded border border-border bg-muted/30 px-4 py-3.5 text-[0.88rem] leading-relaxed">
-        <strong>강건성 </strong>
-        {parkCapConclusion.robustness}
-      </div>
       <p className="mt-6 max-w-3xl text-[0.9rem] leading-relaxed">{parkCapConclusion.contribution}</p>
 
-      <h4 className="mt-8 text-[0.95rem] font-bold">남은 질문</h4>
-      <ol className="mt-3 flex flex-col gap-4">
-        {parkCapConclusion.questions.map((q) => (
-          <li key={q.q} className="rounded border border-border bg-card px-4 py-3.5">
-            <strong className="block text-[0.88rem]">{q.q}</strong>
-            <p className="mt-1.5 text-[0.86rem] leading-relaxed text-muted-foreground">{q.body}</p>
-          </li>
-        ))}
-      </ol>
+      {/* 부록 — 접어 둔 세부 */}
+      <SectionTitle n="부록">자세히 보기</SectionTitle>
 
-      {/* 부록 A 자료 */}
-      <SectionTitle n="부록 A">자료와 방법</SectionTitle>
-      <p className="mt-3 max-w-3xl text-[0.92rem] leading-relaxed">
-        모두 공개 자료이며 좌표계는 EPSG:5179(UTM-K)로 통일한다. 공원 결정경계에는 이름 필드가
-        비어 있어, 대표공원은 OpenStreetMap 지명 폴리곤과 겹쳐 확정한다(동탄여울공원 90.2%).
-      </p>
-      <div className="mt-5 overflow-hidden rounded border border-border bg-card">
-        {parkCapSources.map((sc, i) => (
-          <div
-            key={sc.name}
-            className={`grid grid-cols-1 gap-1 px-4 py-3.5 sm:grid-cols-[5.5rem_1fr] sm:gap-4 ${
-              i === 0 ? "" : "border-t border-border"
-            }`}
-          >
-            <span className="font-mono text-[0.66rem] uppercase tracking-[0.1em] text-muted-foreground">
-              {sc.kind}
-            </span>
-            <div>
-              <strong className="text-[0.88rem]">{sc.name}</strong>
-              <span className="ml-2 text-[0.8rem] text-accent">{sc.org}</span>
-              <p className="mt-1 text-[0.82rem] leading-relaxed text-muted-foreground">{sc.detail}</p>
+      <More title="구역별 해설">
+        <div className="mt-4 flex flex-col gap-5">
+          {parkCapRegions.map((r) => (
+            <section key={r.name} className="overflow-hidden rounded border border-border">
+              <header className="flex flex-wrap items-center gap-3 border-b border-border px-4 py-3">
+                <Dot k={r.key} />
+                <h4 className="text-[0.98rem] font-bold">{r.name}</h4>
+                <Verdict v={r.verdict} />
+                <span className="ml-auto font-mono text-[0.72rem] tabular-nums text-muted-foreground">
+                  단지 {r.n}개 · {r.park}
+                </span>
+              </header>
+              <div className="grid grid-cols-1 gap-4 px-4 py-3.5 lg:grid-cols-[1fr_15rem]">
+                <div>
+                  <p className="text-[0.9rem] font-semibold leading-relaxed">{r.lead}</p>
+                  <p className="mt-2 text-[0.86rem] leading-relaxed">{r.body}</p>
+                  <p className="mt-2 text-[0.86rem] leading-relaxed text-muted-foreground">{r.why}</p>
+                  <p className="mt-2.5 text-[0.82rem] leading-relaxed text-muted-foreground">
+                    <strong className="text-foreground">유의할 점 </strong>
+                    {r.caution}
+                  </p>
+                </div>
+                <dl className="flex flex-col self-start rounded border border-border bg-muted/30 px-3.5 py-2">
+                  <Fact k="계수 (HC1 t)" v={`${r.coef} (${r.t})`} />
+                  <Fact k="p값" v={r.p} />
+                  <Fact k="수정 R²" v={r.adjr2} />
+                  <Fact k="대표공원 거리" v={r.dist} />
+                  <Fact k="100m 가까이" v={r.money} />
+                </dl>
+              </div>
+            </section>
+          ))}
+        </div>
+      </More>
+
+      <More title="회귀 전체 · 표준화 계수 · 금액 환산 · 도시구조">
+        <Table spec={parkCapFullCoefTable} />
+        <Table spec={parkCapStdTable} />
+        <Table spec={parkCapMoneyTable} />
+        <Table spec={parkCapStructureTable} />
+      </More>
+
+      <More title="공간자기상관 · 정의와 사양에 대한 점검">
+        <Table spec={parkCapSpatialTable} />
+        <Table spec={parkCapSemTable} />
+        <Table spec={parkCapNorthTable} />
+        <Table spec={parkCapGwanggyoTable} />
+        <Table spec={parkCapFormTable} />
+        <Table spec={parkCapQuantileTable} />
+        <Table spec={parkCapCommerceSelTable} />
+      </More>
+
+      <More title="읽는 법 · 자료와 방법">
+        <div className="mt-4 flex flex-col gap-3">
+          {parkCapStatNotes.map((sn) => (
+            <div key={sn.tag} className="rounded border border-border px-4 py-3">
+              <div className="flex flex-wrap items-baseline gap-2">
+                <span className="rounded-sm bg-muted px-2 py-0.5 font-mono text-[0.62rem] font-semibold uppercase tracking-wide text-muted-foreground">
+                  {sn.tag}
+                </span>
+                <strong className="text-[0.86rem]">{sn.title}</strong>
+              </div>
+              <p className="mt-1.5 text-[0.84rem] leading-relaxed text-muted-foreground">{sn.body}</p>
             </div>
-          </div>
-        ))}
-      </div>
-      <div className="mt-6 flex flex-col gap-4">
-        {parkCapMethodology.map((m) => (
-          <div key={m.title} className="rounded border border-border bg-card px-4 py-3.5">
-            <strong className="block text-[0.88rem]">{m.title}</strong>
-            <p className="mt-1.5 text-[0.86rem] leading-relaxed text-muted-foreground">{m.body}</p>
-          </div>
-        ))}
-      </div>
+          ))}
+        </div>
+        <div className="mt-5 overflow-hidden rounded border border-border">
+          {parkCapSources.map((sc, i) => (
+            <div
+              key={sc.name}
+              className={`grid grid-cols-1 gap-1 px-4 py-3 sm:grid-cols-[5.5rem_1fr] sm:gap-4 ${
+                i === 0 ? "" : "border-t border-border"
+              }`}
+            >
+              <span className="font-mono text-[0.66rem] uppercase tracking-[0.1em] text-muted-foreground">
+                {sc.kind}
+              </span>
+              <div>
+                <strong className="text-[0.86rem]">{sc.name}</strong>
+                <span className="ml-2 text-[0.8rem] text-accent">{sc.org}</span>
+                <p className="mt-1 text-[0.82rem] leading-relaxed text-muted-foreground">{sc.detail}</p>
+              </div>
+            </div>
+          ))}
+        </div>
+        <div className="mt-5 flex flex-col gap-3">
+          {parkCapMethodology.map((m) => (
+            <div key={m.title} className="rounded border border-border px-4 py-3">
+              <strong className="block text-[0.86rem]">{m.title}</strong>
+              <p className="mt-1.5 text-[0.84rem] leading-relaxed text-muted-foreground">{m.body}</p>
+            </div>
+          ))}
+        </div>
+      </More>
 
-      {/* 부록 B 한계 */}
-      <SectionTitle n="부록 B">한계</SectionTitle>
-      <ul className="mt-4 flex flex-col gap-3">
-        {parkCapLimits.map((l) => (
-          <li key={l.tag} className="grid grid-cols-[auto_1fr] gap-3">
-            <span className="mt-0.5 shrink-0 rounded-sm bg-muted px-2 py-0.5 font-mono text-[0.62rem] font-semibold uppercase tracking-wide text-muted-foreground">
-              {l.tag}
-            </span>
-            <span className="text-[0.88rem] leading-relaxed">{l.text}</span>
-          </li>
-        ))}
-      </ul>
+      <More title="한계와 남은 질문">
+        <ul className="mt-4 flex flex-col gap-3">
+          {parkCapLimits.map((l) => (
+            <li key={l.tag} className="grid grid-cols-[auto_1fr] gap-3">
+              <span className="mt-0.5 shrink-0 rounded-sm bg-muted px-2 py-0.5 font-mono text-[0.62rem] font-semibold uppercase tracking-wide text-muted-foreground">
+                {l.tag}
+              </span>
+              <span className="text-[0.86rem] leading-relaxed">{l.text}</span>
+            </li>
+          ))}
+        </ul>
+        <ol className="mt-5 flex flex-col gap-3">
+          {parkCapConclusion.questions.map((q) => (
+            <li key={q.q} className="rounded border border-border px-4 py-3">
+              <strong className="block text-[0.86rem]">{q.q}</strong>
+              <p className="mt-1.5 text-[0.84rem] leading-relaxed text-muted-foreground">{q.body}</p>
+            </li>
+          ))}
+        </ol>
+      </More>
 
       <footer className="mt-12 flex flex-col gap-3 border-t border-border pt-5 text-[0.72rem] leading-relaxed text-muted-foreground">
         <p>방법론 노트 · {parkCapFooter.method}</p>
