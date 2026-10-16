@@ -45,6 +45,8 @@ export const metadata: Metadata = {
   description:
     'A working notebook: research on land evaluation and photography. Filed, pinned, and cross-referenced.',
   generator: 'v0.app',
+  // 핀터레스트 저장(Pin it) 버튼·확장 프로그램이 이 사이트의 이미지에 뜨지 않게 한다.
+  other: { pinterest: 'nopin' },
   icons: {
     icon: [
       { url: '/icon-light-32x32.png', media: '(prefers-color-scheme: light)' },

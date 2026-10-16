@@ -3,6 +3,7 @@
 import Image from "next/image"
 import { useBoardFilter, type Filter } from "@/components/board-filter-context"
 import { SiteFeatures } from "@/components/site-features"
+import { FEATURES, STUDY_MATERIALS } from "@/lib/features"
 
 const nav: { label: string; value: Filter }[] = [
   { label: "Research", value: "RESEARCH" },
@@ -73,7 +74,10 @@ export function SiteHero() {
         </p>
 
         {/* 기능모음 — 넓은 화면(xl)에서는 오른쪽 가운데에 글자만 떠 있고, 좁은 화면에서는 문구 아래에 가운데 정렬로 쌓인다 */}
-        <SiteFeatures className="mt-8 w-full max-w-xs text-center xl:absolute xl:right-10 xl:top-1/2 xl:mt-0 xl:w-60 xl:max-w-none xl:-translate-y-1/2 xl:text-left" />
+        <div className="mt-8 flex w-full max-w-xs flex-col gap-6 text-center xl:absolute xl:right-10 xl:top-1/2 xl:mt-0 xl:w-60 xl:max-w-none xl:-translate-y-1/2 xl:text-left">
+          <SiteFeatures title="기능모음" items={FEATURES} />
+          <SiteFeatures title="평가사 학습자료" items={STUDY_MATERIALS} />
+        </div>
 
         <span className="mt-6 font-mono text-xs uppercase tracking-[0.2em] text-muted-foreground">
           Scroll to the board ↓
