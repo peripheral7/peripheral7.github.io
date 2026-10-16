@@ -23,6 +23,38 @@ export function SiteSidebar({ posts }: { posts: Post[] }) {
 
   if (current === "/") return null
 
+  // Photography 글에서는 평소 숨겨 두고, 화면 왼쪽 끝에 마우스를 올리면 Photography 목차만 배경 없이 위아래 가는 선과 함께 나타난다.
+  // 검은 배경을 가정해 흰 글자를 쓰되, mix-blend-difference 로 밝은 배경 페이지에서도 읽히게 한다.
+  if (currentCategory === "PHOTOGRAPHY") {
+    const photoPosts = posts.filter((p) => p.category === "PHOTOGRAPHY")
+    return (
+      <aside className="group fixed inset-y-0 left-0 z-40 hidden w-5 hover:w-72 focus-within:w-72 md:block">
+        <nav
+          aria-label="Photography"
+          className="absolute left-4 top-1/2 w-60 -translate-x-3 -translate-y-1/2 border-y border-white/30 py-5 text-white opacity-0 mix-blend-difference transition-all duration-300 group-hover:translate-x-0 group-hover:opacity-100 group-focus-within:translate-x-0 group-focus-within:opacity-100"
+        >
+          <p className="font-mono text-[0.7rem] uppercase tracking-[0.2em] text-white/60">{CATEGORY_LABELS.PHOTOGRAPHY}</p>
+          <ul className="mt-3 flex max-h-[65vh] flex-col gap-1.5 overflow-y-auto">
+            {photoPosts.map((post) => {
+              const isCurrent = post.id === currentPost?.id
+              return (
+                <li key={post.id}>
+                  <Link
+                    href={post.href ?? "/"}
+                    aria-current={isCurrent ? "page" : undefined}
+                    className={`block text-sm leading-snug transition-colors ${isCurrent ? "font-semibold text-white" : "text-white/60 hover:text-white"}`}
+                  >
+                    {post.title}
+                  </Link>
+                </li>
+              )
+            })}
+          </ul>
+        </nav>
+      </aside>
+    )
+  }
+
   return (
     <aside className="pointer-events-none fixed left-4 top-1/2 z-40 hidden max-h-[75vh] w-60 -translate-y-1/2 overflow-y-auto rounded-2xl border border-border/60 bg-background/95 shadow-xl backdrop-blur-sm nav:block">
       {/* the floating card overlaps page content instead of reserving space
