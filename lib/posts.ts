@@ -60,6 +60,7 @@ const PIN_CYCLE: Array<"pin" | "tape" | "clip"> = ["pin", "tape", "clip"]
 const BOARD_ROUTES: Record<string, string> = {
   "03_aqui": "/board/aqui",
   "02-cbr650f-2016": "/board/cbr650f",
+  "07-golden-smoking-hour": "/board/golden-smoking-hour",
 }
 
 // Deterministic pseudo-random "crooked pin" tilt derived from the filename,
