@@ -11,7 +11,7 @@ function Tape() {
   return (
     <span
       aria-hidden
-      className="tape pointer-events-none absolute -top-3 left-1/2 z-20 h-5 w-16 sm:-top-4 sm:h-7 sm:w-28 -translate-x-1/2 -rotate-2"
+      className="tape pointer-events-none absolute -top-4 left-1/2 z-20 h-6 w-20 sm:-top-4 sm:h-7 sm:w-28 -translate-x-1/2 -rotate-2"
     />
   )
 }
@@ -21,11 +21,11 @@ function CardBody({ post }: { post: Post }) {
   const previewText = post.body ?? post.meta
 
   return (
-    <div className="relative bg-card p-2 pb-3 sm:p-3 sm:pb-4 shadow-scrap ring-1 ring-black/5">
+    <div className="relative bg-card p-2.5 pb-3.5 sm:p-3 sm:pb-4 shadow-scrap ring-1 ring-black/5">
       <Tape />
 
       <div className="relative">
-        <span className="pointer-events-none absolute right-1 top-1 z-10 rounded-sm bg-background/70 px-1 py-0.5 font-mono text-[0.45rem] sm:right-1.5 sm:top-1.5 sm:px-1.5 sm:text-[0.58rem] font-medium uppercase tracking-[0.18em] text-muted-foreground/70 backdrop-blur-[1px]">
+        <span className="pointer-events-none absolute right-1 top-1 z-10 rounded-sm bg-background/70 px-1 py-0.5 font-mono text-[0.55rem] sm:right-1.5 sm:top-1.5 sm:px-1.5 sm:text-[0.58rem] font-medium uppercase tracking-[0.18em] text-muted-foreground/70 backdrop-blur-[1px]">
           {post.category}
         </span>
 
@@ -36,34 +36,34 @@ function CardBody({ post }: { post: Post }) {
               alt={post.imageAlt ?? post.title}
               fill
               quality={90}
-              sizes="(max-width: 640px) 48vw, (max-width: 1024px) 45vw, 30vw"
+              sizes="(max-width: 640px) 72vw, (max-width: 1024px) 45vw, 30vw"
               className="object-cover grayscale-[0.15] scale-100 transition-all duration-700 ease-[cubic-bezier(0.22,1,0.36,1)] group-hover:grayscale-0 group-hover:scale-[1.04]"
             />
           </div>
         ) : (
-          <p className="line-clamp-4 border border-dashed border-border bg-muted/30 px-2 py-3 pt-5 text-xs sm:line-clamp-6 sm:px-3 sm:py-4 sm:pt-6 sm:text-sm leading-relaxed text-card-foreground/85">
+          <p className="line-clamp-5 border border-dashed border-border bg-muted/30 px-2 py-3 pt-5 text-xs sm:line-clamp-6 sm:px-3 sm:py-4 sm:pt-6 sm:text-sm leading-relaxed text-card-foreground/85">
             {previewText}
           </p>
         )}
       </div>
 
-      <h3 className="text-balance px-0.5 pb-1 pt-2 font-sans text-[0.8rem] sm:pt-3 sm:text-base font-bold leading-tight text-card-foreground">
+      <h3 className="text-balance px-0.5 pb-1 pt-2.5 font-sans text-sm sm:pt-3 sm:text-base font-bold leading-tight text-card-foreground">
         {post.title}
       </h3>
 
-      <div className="flex items-center justify-between gap-1 px-0.5 pt-1.5 max-sm:flex-col max-sm:items-start sm:gap-2 sm:pt-2">
+      <div className="flex items-center justify-between gap-1 px-0.5 pt-1.5 sm:gap-2 sm:pt-2">
         <div className="flex flex-wrap items-center gap-1">
           {post.progressStorageKey && <ReviewProgressBadge storageKey={post.progressStorageKey} />}
           {post.tags?.map((tag) => (
             <span
               key={tag}
-              className="font-mono text-[0.5rem] uppercase tracking-wider sm:text-[0.6rem] text-muted-foreground"
+              className="font-mono text-[0.55rem] uppercase tracking-wider sm:text-[0.6rem] text-muted-foreground"
             >
               #{tag}
             </span>
           ))}
         </div>
-        <time className="shrink-0 font-mono text-[0.55rem] uppercase tracking-wider sm:text-[0.65rem] text-muted-foreground">
+        <time className="shrink-0 font-mono text-[0.6rem] uppercase tracking-wider sm:text-[0.65rem] text-muted-foreground">
           {post.date}
         </time>
       </div>

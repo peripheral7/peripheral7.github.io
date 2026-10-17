@@ -11,13 +11,6 @@ const filterOptions = [
   { label: "Study", value: "STUDY" }
 ] as const
 
-// 모바일 전용 세로 어긋남: post.id 해시로 정하는 결정적 값(Math.random 금지 — 하이드레이션 불일치)
-function scatterDy(id: string, i: number) {
-  let h = 0
-  for (let k = 0; k < id.length; k++) h = (h * 31 + id.charCodeAt(k)) >>> 0
-  return (h % 41) + (i % 2 === 1 ? 28 : 0)
-}
-
 export function ScrapbookBoard({ initialPosts }: { initialPosts: Post[] }) {
   const { filter, setFilter } = useBoardFilter()
 
@@ -63,15 +56,13 @@ export function ScrapbookBoard({ initialPosts }: { initialPosts: Post[] }) {
       {/* 반응형 그리드 — CSS 다단(columns)은 항목을 위→아래로 열 단위 채우기 때문에
           읽는 순서가 뒤섞이고, 열 높이 추정이 어긋나면 카드가 배경 밖으로 밀려나는
           문제가 있어(특히 태블릿 md:columns-3 구간) grid로 교체해 DOM 순서를 그대로 보존 */}
-      <div className="mx-auto grid max-w-7xl grid-cols-2 gap-x-3 gap-y-5 max-sm:pb-8 sm:gap-6 sm:grid-cols-2 md:grid-cols-3 xl:grid-cols-4">
+      <div className="mx-auto grid max-w-7xl grid-cols-1 gap-y-6 sm:gap-6 sm:grid-cols-2 md:grid-cols-3 xl:grid-cols-4">
         {filteredPosts.map((post, i) => (
           <div
             key={post.id}
-            className="animate-fade-up max-sm:mt-[var(--dy)]"
-            style={{
-              animationDelay: `${Math.min(i * 60, 480)}ms`,
-              ["--dy" as string]: `${scatterDy(post.id, i)}px`
-            }}
+            // 모바일: 한 줄에 한 장, 폭 72%로 왼쪽·오른쪽 번갈아 세로 나열
+            className={`animate-fade-up max-sm:w-[72%] ${i % 2 === 1 ? "max-sm:justify-self-end" : "max-sm:justify-self-start"}`}
+            style={{ animationDelay: `${Math.min(i * 60, 480)}ms` }}
           >
             <BoardItem post={post} />
           </div>
