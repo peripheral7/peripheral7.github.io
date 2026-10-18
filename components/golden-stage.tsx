@@ -10,7 +10,7 @@ type Photo = { src: string; alt: string }
 const GAP = "clamp(0.75rem, 2.5vw, 2.5rem)"
 const SIDE = "clamp(0.75rem, 5vw, 4rem)"
 const PHOTO_H = `min(calc(100svh - 11.5rem), calc((100vw - 2 * ${SIDE} - 2 * ${GAP}) / 3 * 4 / 3))`
-// 좁은 화면(1024px 미만): 한 장씩 보이고 좌우로 넘긴다(터치 스와이프 / 마우스 클릭 후 드래그) — 아래에 점·알약 표시.
+// 좁은 화면(1400px 미만): 한 장씩 보이고 좌우로 넘긴다(터치 스와이프 / 마우스 클릭 후 드래그) — 아래에 점·알약 표시.
 const PHOTO_H_MOBILE = `min(calc(100svh - 13.5rem), calc((100vw - 2 * ${SIDE}) * 4 / 3))`
 
 export function GoldenStage({ title, date, photos }: { title: string; date: string; photos: Photo[] }) {
@@ -69,7 +69,7 @@ export function GoldenStage({ title, date, photos }: { title: string; date: stri
   return (
     <div className="relative bg-black text-white">
       <div className="flex h-svh items-start justify-center overflow-hidden pt-5" style={{ paddingInline: SIDE }}>
-        <div className="flex w-full flex-col lg:w-auto" style={{ gap: "0.75rem" }}>
+        <div className="flex w-full flex-col min-[1400px]:w-auto" style={{ gap: "0.75rem" }}>
           <Link href="/" className="self-start font-mono text-xs uppercase tracking-[0.25em] text-white/80 transition-colors hover:text-white">
             ← Back to board
           </Link>
@@ -87,15 +87,15 @@ export function GoldenStage({ title, date, photos }: { title: string; date: stri
             onPointerMove={onPointerMove}
             onPointerUp={endDrag}
             onPointerCancel={endDrag}
-            className={`mt-2 flex w-full overflow-x-auto [scrollbar-width:none] lg:w-auto lg:cursor-auto lg:snap-none lg:items-center lg:justify-center lg:gap-[var(--gap)] lg:overflow-visible [&::-webkit-scrollbar]:hidden ${
+            className={`mt-2 flex w-full overflow-x-auto [scrollbar-width:none] min-[1400px]:w-auto min-[1400px]:cursor-auto min-[1400px]:snap-none min-[1400px]:items-center min-[1400px]:justify-center min-[1400px]:gap-[var(--gap)] min-[1400px]:overflow-visible [&::-webkit-scrollbar]:hidden ${
               dragging ? "cursor-grabbing select-none" : "cursor-grab snap-x snap-mandatory"
             }`}
             style={{ "--gap": GAP } as React.CSSProperties}
           >
             {photos.map((p) => (
-              <div key={p.src} className="flex w-full shrink-0 snap-center justify-center lg:w-auto">
+              <div key={p.src} className="flex w-full shrink-0 snap-center justify-center min-[1400px]:w-auto">
                 <div
-                  className="relative shrink-0 overflow-hidden h-[var(--ph-m)] lg:h-[var(--ph)]"
+                  className="relative shrink-0 overflow-hidden h-[var(--ph-m)] min-[1400px]:h-[var(--ph)]"
                   style={{ "--ph": PHOTO_H, "--ph-m": PHOTO_H_MOBILE, aspectRatio: "3 / 4" } as React.CSSProperties}
                 >
                   <Image
@@ -103,7 +103,7 @@ export function GoldenStage({ title, date, photos }: { title: string; date: stri
                     alt={p.alt}
                     fill
                     quality={80}
-                    sizes="(max-width: 1024px) 100vw, 40vh"
+                    sizes="(max-width: 1400px) 100vw, 40vh"
                     className="pointer-events-none select-none object-cover"
                     draggable={false}
                     priority
@@ -113,7 +113,7 @@ export function GoldenStage({ title, date, photos }: { title: string; date: stri
             ))}
           </div>
 
-          <div className="flex items-center justify-center gap-2 lg:hidden" role="tablist" aria-label="사진 선택">
+          <div className="flex items-center justify-center gap-2 min-[1400px]:hidden" role="tablist" aria-label="사진 선택">
             {photos.map((p, i) => (
               <button
                 key={p.src}
