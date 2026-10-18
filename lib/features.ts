@@ -30,4 +30,6 @@ export const MIDTERM: Feature[] = [
   { label: "BF 서술형 (Ch.2–7)", href: "/reports/midterm/BF_Midterm_ShortAnswer_Ch2-7_with_answers.pdf" },
   { label: "IA 객관식", href: "/reports/midterm/IA_Midterm_MultipleChoice_with_answers.pdf" },
   { label: "IA 서술형", href: "/reports/midterm/IA_Midterm_ShortAnswer_with_answers.pdf" },
+  { label: "계량 객관식", href: "/reports/midterm/Econometrics_Midterm_MultipleChoice_with_answers.pdf" },
+  { label: "계량 서술형", href: "/reports/midterm/Econometrics_Midterm_ShortAnswer_with_answers.pdf" },
 ]
