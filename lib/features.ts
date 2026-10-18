@@ -19,3 +19,15 @@ export const STUDY_MATERIALS: Feature[] = [
   { label: "실무 퀴즈", href: "/reports/appraisal-practice-quiz.html" },
   { label: "감정평가사 학습트리", href: "/appraiser" },
 ]
+
+// 사진 왼쪽(xl)에 보이는 "Midterm": 중간고사 요약노트·퀴즈 정답 포함 PDF(public/reports/midterm/). 좁은 화면에서는 오른쪽 열 아래에 쌓인다.
+export const MIDTERM: Feature[] = [
+  { label: "인쇄·다운로드 페이지", href: "/reports/midterm/" },
+  { label: "BF Cheat Sheet", href: "/reports/midterm/BF_Cheatsheet_Ch2-7.pdf" },
+  { label: "BF 재무비율 한 장 노트", href: "/reports/midterm/Business_Finance_Ratio_One_Page_Notes.pdf" },
+  { label: "IA Sub-Note", href: "/reports/midterm/Investment_Analysis_SubNote_Ch2-6.pdf" },
+  { label: "BF 객관식 (Ch.2–7)", href: "/reports/midterm/BF_Midterm_MultipleChoice_Ch2-7_with_answers.pdf" },
+  { label: "BF 서술형 (Ch.2–7)", href: "/reports/midterm/BF_Midterm_ShortAnswer_Ch2-7_with_answers.pdf" },
+  { label: "IA 객관식", href: "/reports/midterm/IA_Midterm_MultipleChoice_with_answers.pdf" },
+  { label: "IA 서술형", href: "/reports/midterm/IA_Midterm_ShortAnswer_with_answers.pdf" },
+]
