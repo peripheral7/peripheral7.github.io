@@ -26,6 +26,7 @@ export const MIDTERM: Feature[] = [
   { label: "BF Cheat Sheet", href: "/reports/midterm/BF_Cheatsheet_Ch2-7.pdf" },
   { label: "BF 재무비율 한 장 노트", href: "/reports/midterm/Business_Finance_Ratio_One_Page_Notes.pdf" },
   { label: "IA Sub-Note", href: "/reports/midterm/Investment_Analysis_SubNote_Ch2-6.pdf" },
+  { label: "계량 요약", href: "/reports/midterm/Econometrics_Exam_Summary.pdf" },
   { label: "BF 객관식 (Ch.2–7)", href: "/reports/midterm/BF_Midterm_MultipleChoice_Ch2-7_with_answers.pdf" },
   { label: "BF 서술형 (Ch.2–7)", href: "/reports/midterm/BF_Midterm_ShortAnswer_Ch2-7_with_answers.pdf" },
   { label: "IA 객관식", href: "/reports/midterm/IA_Midterm_MultipleChoice_with_answers.pdf" },
