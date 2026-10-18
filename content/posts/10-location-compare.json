@@ -14,5 +14,6 @@
     "Location",
     "Mobility",
     "Map"
-  ]
+  ],
+  "hideOnBoard": true
 }
