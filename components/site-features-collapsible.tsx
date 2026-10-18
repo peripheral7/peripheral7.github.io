@@ -1,11 +1,11 @@
 "use client"
 
 import { useEffect, useRef, useState } from "react"
-import type { Feature } from "@/lib/features"
+import type { FeatureGroup } from "@/lib/features"
 
 // 메인 화면 "Midterm": 제목 줄만 보이고, 누르면 목록이 제목 줄 아래로 내려오며 열린다(다시 누르면 접힘).
 // 목록은 absolute 로 아래 영역 위에 겹쳐 뜨므로 열려도 페이지(레이아웃) 높이는 변하지 않는다. 바깥을 누르거나 Esc 로도 닫는다.
-export function SiteFeaturesCollapsible({ title, items }: { title: string; items: Feature[] }) {
+export function SiteFeaturesCollapsible({ title, groups }: { title: string; groups: FeatureGroup[] }) {
   const [open, setOpen] = useState(false)
   const rootRef = useRef<HTMLElement>(null)
 
@@ -56,18 +56,27 @@ export function SiteFeaturesCollapsible({ title, items }: { title: string; items
           open ? "max-h-[32rem] opacity-100" : "max-h-0 border-b-0 opacity-0"
         }`}
       >
-        <ul className="flex flex-col gap-1 pb-4">
-          {items.map((feature) => (
-            <li key={feature.href}>
-              <a
-                href={feature.href}
-                className="text-sm leading-snug text-foreground/80 transition-colors hover:text-accent focus-visible:text-accent focus-visible:outline-none"
-              >
-                {feature.label}
-              </a>
-            </li>
+        <div className="flex flex-col gap-3 pb-4">
+          {groups.map((group, i) => (
+            <div key={group.heading ?? i}>
+              {group.heading && (
+                <p className="mb-1 font-mono text-[0.7rem] uppercase tracking-[0.2em] text-muted-foreground">{group.heading}</p>
+              )}
+              <ul className="flex flex-col gap-1">
+                {group.items.map((feature) => (
+                  <li key={feature.href}>
+                    <a
+                      href={feature.href}
+                      className="text-sm leading-snug text-foreground/80 transition-colors hover:text-accent focus-visible:text-accent focus-visible:outline-none"
+                    >
+                      {feature.label}
+                    </a>
+                  </li>
+                ))}
+              </ul>
+            </div>
           ))}
-        </ul>
+        </div>
       </div>
     </nav>
   )
