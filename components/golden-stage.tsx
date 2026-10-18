@@ -93,7 +93,7 @@ export function GoldenStage({ title, date, photos }: { title: string; date: stri
             style={{ "--gap": GAP } as React.CSSProperties}
           >
             {photos.map((p) => (
-              <div key={p.src} className="flex w-full shrink-0 snap-center justify-center min-[1400px]:w-auto">
+              <div key={p.src} className="flex w-full shrink-0 snap-start justify-start min-[1400px]:w-auto min-[1400px]:justify-center">
                 <div
                   className="relative shrink-0 overflow-hidden h-[var(--ph-m)] min-[1400px]:h-[var(--ph)]"
                   style={{ "--ph": PHOTO_H, "--ph-m": PHOTO_H_MOBILE, aspectRatio: "3 / 4" } as React.CSSProperties}
@@ -113,7 +113,7 @@ export function GoldenStage({ title, date, photos }: { title: string; date: stri
             ))}
           </div>
 
-          <div className="flex items-center justify-center gap-2 min-[1400px]:hidden" role="tablist" aria-label="사진 선택">
+          <div className="flex items-center justify-start gap-2 min-[1400px]:hidden" role="tablist" aria-label="사진 선택">
             {photos.map((p, i) => (
               <button
                 key={p.src}
