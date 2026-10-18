@@ -17,4 +17,5 @@ export const STUDY_MATERIALS: Feature[] = [
   { label: "행정법 기본문제", href: "/reports/admin-law-basic-problems-25.html" },
   { label: "법규 퀴즈", href: "/reports/appraisal-law-quiz.html" },
   { label: "실무 퀴즈", href: "/reports/appraisal-practice-quiz.html" },
+  { label: "감정평가사 학습트리", href: "/appraiser" },
 ]

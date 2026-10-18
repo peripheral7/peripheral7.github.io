@@ -6,7 +6,7 @@ export function SiteFeatures({ title, items, className = "" }: { title: string; 
   return (
     <nav aria-label={title} className={`border-y border-foreground/25 py-4 ${className}`}>
       <p className="font-sans text-sm font-extrabold tracking-[0.12em] text-foreground">{title}</p>
-      <ul className="mt-3 flex flex-col gap-1.5">
+      <ul className="mt-3 flex flex-col gap-1">
         {items.map((feature) => (
           <li key={feature.href}>
             <a

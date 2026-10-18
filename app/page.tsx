@@ -11,7 +11,7 @@ export default function Page() {
       <main className="min-h-screen bg-background text-foreground">
         <SiteHero />
         {/* 데이터를 props로 주입합니다 */}
-        <ScrapbookBoard initialPosts={posts} />
+        <ScrapbookBoard initialPosts={posts.filter((post) => !post.hideOnBoard)} />
       </main>
     </BoardFilterProvider>
   )

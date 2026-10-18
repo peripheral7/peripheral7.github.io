@@ -10,5 +10,6 @@
   "href": "/field-cam",
   "linkLabel": "앱 소개 · 열기",
   "date": "2026.09.25",
-  "tags": ["Field", "GPS", "PWA"]
+  "tags": ["Field", "GPS", "PWA"],
+  "hideOnBoard": true
 }

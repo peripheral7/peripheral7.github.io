@@ -32,6 +32,10 @@ export type Post = {
   // {correct, total}. When set, BoardItem shows a small "복습 N%" pill read
   // client-side from that key — purely per-browser, no server data involved.
   progressStorageKey?: string
+
+  // true 면 메인 게시판에 카드를 그리지 않는다(기능모음·평가사 학습자료 글자 목록으로 옮긴 것).
+  // JSON 은 지우지 않는다 — /field-cam 처럼 id 로 글을 찾아 쓰는 페이지가 있다.
+  hideOnBoard?: boolean
 }
 
 

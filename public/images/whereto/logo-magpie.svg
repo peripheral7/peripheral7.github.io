@@ -1,0 +1,50 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="38 33 222 222" role="img" aria-label="물까치">
+  <!-- 배경 투명: 틈·결 나눔은 흰색으로 덮지 않고 마스크로 뚫는다 -->
+  <defs>
+    <!-- 머리부터 꼬리 끝까지 하나로 이은 윤곽: 낮은 정수리, 가늘고 긴 꼬리 -->
+    <path id="mg-bird" d="M80 60 L101 51 C107 42 117 38 130 38 C139 38 145 44 147 58 C152 88 154 124 149 152 C148 182 150 214 156 250 L138 254 C136 220 134 186 130 160 C108 150 92 124 94 94 C96 78 102 70 102 64 Z"/>
+    <!-- 밝은 털: 목은 희게, 배로 갈수록 따뜻한 담황색 -->
+    <linearGradient id="mg-belly" x1="0" y1="60" x2="0" y2="170" gradientUnits="userSpaceOnUse">
+      <stop offset="0" stop-color="#F2ECE3"/>
+      <stop offset="1" stop-color="#E4CDB0"/>
+    </linearGradient>
+    <clipPath id="mg-clip"><use href="#mg-bird"/></clipPath>
+    <!-- 가지에서 새 둘레만큼 뚫음 -->
+    <mask id="mg-branch-cut" maskUnits="userSpaceOnUse" x="-64" y="-64" width="384" height="384">
+      <rect x="-64" y="-64" width="384" height="384" fill="#fff"/>
+      <use href="#mg-bird" transform="rotate(-12 128 160)" fill="#000" stroke="#000" stroke-width="7" stroke-linejoin="round"/>
+    </mask>
+    <!-- 새 안의 결 나눔·눈을 뚫음 -->
+    <mask id="mg-cut" maskUnits="userSpaceOnUse" x="-64" y="-64" width="384" height="384">
+      <rect x="-64" y="-64" width="384" height="384" fill="#fff"/>
+      <path d="M116 70 C104 106 110 148 136 172 C118 144 112 108 120 72 Z" fill="#000"/>
+      <g fill="none" stroke="#000" stroke-linecap="round">
+        <path d="M118 72 Q138 89 151 110" stroke-width="3"/>
+        <path d="M137 168 Q143 160 151 152" stroke-width="3"/>
+        <path d="M130 108 C128 128 132 146 140 158" stroke-width="2"/>
+      </g>
+      <circle cx="117" cy="49" r="3.4" fill="#000"/>
+    </mask>
+  </defs>
+  <!-- 나뭇가지: 왼쪽 위로 갈수록 가늘어져 끝이 위태로움 -->
+  <g fill="#8E7B69" mask="url(#mg-branch-cut)">
+    <path d="M244 236 C196 206 140 172 54 104 C138 176 194 212 242 243 Z"/>
+    <path d="M196 212 C200 200 206 192 216 186" fill="none" stroke="#8E7B69" stroke-width="3" stroke-linecap="round"/>
+  </g>
+  <!-- 새: 앞으로 살짝 기울어 위태롭게 앉음 -->
+  <g transform="rotate(-12 128 160)">
+    <g mask="url(#mg-cut)">
+      <g clip-path="url(#mg-clip)">
+        <!-- 밝은 배 -->
+        <rect width="256" height="256" fill="url(#mg-belly)"/>
+        <!-- 등(회색) -->
+        <path d="M116 70 Q138 88 156 116 V30 H116 Z" fill="#A19E99"/>
+        <!-- 날개·꼬리 -->
+        <path d="M116 70 C106 104 112 144 134 170 Q142 160 156 148 V116 Q138 88 116 70 Z" fill="#6E8399"/>
+        <path d="M134 170 Q142 160 156 148 H200 V256 H120 Z" fill="#6E8399"/>
+        <!-- 검은 머리깃 -->
+        <path d="M60 64 Q124 60 160 72 V0 H60 Z" fill="#262A31"/>
+      </g>
+    </g>
+  </g>
+</svg>

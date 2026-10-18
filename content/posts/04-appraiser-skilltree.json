@@ -10,5 +10,6 @@
   "href": "/appraiser",
   "linkLabel": "Open skill tree",
   "date": "2026.07.14",
-  "tags": ["Appraiser", "SkillTree", "StudyLog"]
+  "tags": ["Appraiser", "SkillTree", "StudyLog"],
+  "hideOnBoard": true
 }

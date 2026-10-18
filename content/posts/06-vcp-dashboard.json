@@ -9,5 +9,6 @@
   "href": "/reports/vcp_dashboard.html",
   "linkLabel": "리포트 열기",
   "date": "2026.07.23",
-  "tags": ["VCP", "Minervini", "Screener"]
+  "tags": ["VCP", "Minervini", "Screener"],
+  "hideOnBoard": true
 }
