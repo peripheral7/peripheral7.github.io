@@ -92,10 +92,10 @@ export function GoldenStage({ title, date, photos }: { title: string; date: stri
             }`}
             style={{ "--gap": GAP } as React.CSSProperties}
           >
-            {photos.map((p) => (
+            {photos.map((p, i) => (
               <div key={p.src} className="flex w-full shrink-0 snap-start justify-start min-[1400px]:w-auto min-[1400px]:justify-center">
                 <div
-                  className="relative shrink-0 overflow-hidden h-[var(--ph-m)] min-[1400px]:h-[var(--ph)]"
+                  className="group relative shrink-0 overflow-hidden h-[var(--ph-m)] min-[1400px]:h-[var(--ph)]"
                   style={{ "--ph": PHOTO_H, "--ph-m": PHOTO_H_MOBILE, aspectRatio: "3 / 4" } as React.CSSProperties}
                 >
                   <Image
@@ -108,6 +108,22 @@ export function GoldenStage({ title, date, photos }: { title: string; date: stri
                     draggable={false}
                     priority
                   />
+                  {i > 0 && (
+                    <button
+                      type="button"
+                      aria-label="이전 사진"
+                      onClick={() => goTo(i - 1)}
+                      className="absolute inset-y-0 left-0 z-10 w-1/4 bg-gradient-to-r from-black/60 to-transparent opacity-0 transition-opacity duration-300 hover:opacity-100 min-[1400px]:hidden"
+                    />
+                  )}
+                  {i < photos.length - 1 && (
+                    <button
+                      type="button"
+                      aria-label="다음 사진"
+                      onClick={() => goTo(i + 1)}
+                      className="absolute inset-y-0 right-0 z-10 w-1/4 bg-gradient-to-l from-black/60 to-transparent opacity-0 transition-opacity duration-300 hover:opacity-100 min-[1400px]:hidden"
+                    />
+                  )}
                 </div>
               </div>
             ))}
