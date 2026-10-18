@@ -21,6 +21,8 @@ export function WheretoPoster({ className = "" }: { className?: string }) {
   return (
     <a
       href={WHERETO_URL}
+      target="_blank"
+      rel="noopener noreferrer"
       className={`group block focus-visible:outline-none ${className}`}
       aria-label="여기살까? — 후보지 입지 비교 앱 열기"
     >

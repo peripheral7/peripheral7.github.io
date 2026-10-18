@@ -81,7 +81,7 @@ export function SiteHero() {
             </p>
           </div>
 
-          <aside className="mt-10 grid w-full max-w-xs gap-10 md:col-start-2 md:row-start-1 md:mt-0 md:max-w-none md:grid-rows-[auto_1fr] md:gap-y-8 xl:col-start-3 xl:w-60">
+          <aside className="mt-10 grid w-full max-w-xs gap-4 md:col-start-2 md:row-start-1 md:mt-0 md:max-w-none md:grid-rows-[auto_1fr] md:gap-y-3 xl:col-start-3 xl:w-60">
             <WheretoPoster className="mx-auto w-60 md:mx-0 md:w-full md:self-start" />
             <div className="flex flex-col gap-4 text-center md:self-end md:text-left">
               <SiteFeatures title="기능모음" items={FEATURES} />
