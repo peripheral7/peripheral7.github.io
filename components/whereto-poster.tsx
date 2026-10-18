@@ -1,6 +1,6 @@
 // 메인 화면 오른쪽 위의 "여기살까?" 작은 포스터.
 // 앞에는 물까치 로고(whereto 저장소 public/logo-magpie.svg 를 그대로 복사한 /images/whereto/logo-magpie.svg),
-// 뒤에는 앱 화면을 줄여 그린 것 — 지도 위 후보지 번호 마커·대중교통 경로와, 후보지 상세카드(종합평점) 하나가 열린 모습.
+// 뒤에는 앱 화면을 줄여 그린 것 — 지도 위 후보지 위치 마커(핀)·대중교통 경로와, 후보지 상세카드(종합평점, 고리 안 3D 집) 하나가 열린 모습.
 // 숫자·지명은 앱 소개 그림(og.jpg)의 예시값이다. 폭은 부르는 쪽이 정하고(기능모음 열과 같은 폭), 정사각형으로 늘어난다.
 
 const WHERETO_URL = "https://whereto.maverickway.workers.dev/"
@@ -8,6 +8,14 @@ const WHERETO_URL = "https://whereto.maverickway.workers.dev/"
 // 종합평점 고리: 7.2 / 10 만큼 채운 호
 const RING = { cx: 66, cy: 132, r: 27 }
 const RING_LEN = 2 * Math.PI * RING.r
+
+// 고리 안 집의 벽면 점: 왼쪽(앞) 벽은 x 50→64 에서 아래로 반 칸씩, 오른쪽 벽은 64→78 에서 위로 반 칸씩 기운다.
+// [x, 지붕선에서 내려온 거리] → "x,y" 목록
+function iso(pts: [number, number][], face: "L" | "R") {
+  return pts
+    .map(([x, d]) => `${x},${face === "L" ? 115 + (x - 50) * 0.5 + d : 122 - (x - 64) * 0.5 + d}`)
+    .join(" ")
+}
 
 export function WheretoPoster({ className = "" }: { className?: string }) {
   return (
@@ -56,17 +64,20 @@ export function WheretoPoster({ className = "" }: { className?: string }) {
             strokeWidth="3"
             strokeLinejoin="round"
           />
-          <circle cx="150" cy="112" r="4" fill="#fff" stroke="#D6242E" strokeWidth="2.5" />
 
-          {/* 후보지 번호 마커 */}
-          <g fontWeight="700" fontSize="8" textAnchor="middle">
-            <circle cx="170" cy="30" r="8" fill="#fff" stroke="#22262B" strokeWidth="1.4" />
-            <text x="170" y="33" fill="#22262B">1</text>
-            <circle cx="222" cy="74" r="8" fill="#fff" stroke="#22262B" strokeWidth="1.4" />
-            <text x="222" y="77" fill="#22262B">3</text>
-            <circle cx="160" cy="206" r="8" fill="#fff" stroke="#22262B" strokeWidth="1.4" />
-            <text x="160" y="209" fill="#22262B">4</text>
-          </g>
+          {/* 후보지 위치 마커(끝이 뾰족한 핀) — 고른 후보지만 초록 */}
+          {[
+            { x: 170, y: 38, color: "#22262B" },
+            { x: 222, y: 82, color: "#22262B" },
+            { x: 160, y: 214, color: "#22262B" },
+            { x: 196, y: 112, color: "#2E8B57" },
+          ].map((pin) => (
+            <g key={`${pin.x}-${pin.y}`} transform={`translate(${pin.x} ${pin.y})`}>
+              <ellipse cx="0" cy="0.5" rx="3.2" ry="1.2" fill="#000" opacity="0.18" />
+              <path d="M0 0 C-2 -4 -6.5 -7.5 -6.5 -12 A6.5 6.5 0 1 1 6.5 -12 C6.5 -7.5 2 -4 0 0 Z" fill={pin.color} stroke="#fff" strokeWidth="1" />
+              <circle cx="0" cy="-12" r="2.4" fill="#fff" />
+            </g>
+          ))}
 
           {/* 후보지 상세카드(종합평점) */}
           <g filter="url(#wt-shadow)">
@@ -101,6 +112,34 @@ export function WheretoPoster({ className = "" }: { className?: string }) {
             strokeDasharray={`${RING_LEN * 0.72} ${RING_LEN}`}
             transform={`rotate(-90 ${RING.cx} ${RING.cy})`}
           />
+
+          {/* 고리 안 3D 집(앱의 평지붕 주택을 등각 투영으로 줄여 그림) */}
+          <g transform="translate(66 133) scale(0.82) translate(-66 -128)">
+          <ellipse cx="66" cy="146" rx="21" ry="7" fill="#E8E4D8" />
+          <g strokeLinejoin="round">
+            <polygon points={iso([[50, 0], [64, 0], [64, 22], [50, 22]], "L")} fill="#EDE3D1" />
+            <polygon points={iso([[64, 0], [78, 0], [78, 22], [64, 22]], "R")} fill="#D2C3AA" />
+            <polygon points="64,108 78,115 64,122 50,115" fill="#F6F0E6" stroke="#C9BBA3" strokeWidth="0.8" />
+            <line x1="50" y1={115 + 11} x2="64" y2={122 + 11} stroke="#CDBFA6" strokeWidth="0.8" />
+            <line x1="64" y1={122 + 11} x2="78" y2={115 + 11} stroke="#B9A98E" strokeWidth="0.8" />
+            {[3, 14].map((d) => (
+              <g key={d}>
+                <polygon points={iso([[52.5, d], [56.5, d], [56.5, d + 5], [52.5, d + 5]], "L")} fill="#5F7A92" />
+                <polygon points={iso([[58, d], [62, d], [62, d + 5], [58, d + 5]], "L")} fill="#5F7A92" />
+                <polygon points={iso([[67, d], [71, d], [71, d + 5], [67, d + 5]], "R")} fill="#4E667C" />
+                <polygon points={iso([[73, d], [76, d], [76, d + 5], [73, d + 5]], "R")} fill="#4E667C" />
+              </g>
+            ))}
+            {/* 옥탑 물탱크 */}
+            <polygon points="68,110 72,112 72,116 68,114" fill="#4A8FC0" />
+            <polygon points="72,112 75,110.5 75,114.5 72,116" fill="#3A76A3" />
+            <polygon points="68,110 71,108.5 75,110.5 72,112" fill="#7DB3D9" />
+          </g>
+          {/* 나무 */}
+          <rect x="83.2" y="138" width="1.6" height="6" fill="#8E7B69" />
+          <circle cx="84" cy="135" r="4.6" fill="#6FA35E" />
+          <circle cx="46" cy="143" r="2.8" fill="#7FB36C" />
+          </g>
           <text x="62" y="177" fontSize="15" fontWeight="500" textAnchor="middle" fill="#22262B">
             7.2
           </text>
