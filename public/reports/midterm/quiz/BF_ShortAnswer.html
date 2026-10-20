@@ -675,7 +675,7 @@ function buildPrintSheet(){
     const q = QUESTIONS[qi];
     if(q.use && q.use !== last) html += `<div class="p-ex">${exhibitHTML(q.use, idx)}</div>`;
     last = q.use;
-    const lines = Math.min(12, Math.max(6, explLines(q.model).length + 2));
+    const lines = 3;                                               // print: about two handwritten sentences
     html += `<div class="p-q"><p>${q.n}. ${q.use ? `[Exhibit ${esc(q.use)}] ` : ''}${fm(q.text)}</p>` + (q.fig ? `<div class="p-fig">${tblHTML(q.fig)}</div>` : '') + `<div class="p-lines" style="--n:${lines}"></div></div>`;
   });
   html += `<section class="p-key"><h1>${esc(QUIZ_TITLE)} — Model answers</h1>` + idx.map(qi => { const q = QUESTIONS[qi]; return `<div class="p-s"><p><b>${q.n}.</b> ${fm(q.tag)}</p>${fmtExpl(q.model)}${q.kws.length ? `<p class="p-kw">Key results: ${q.kws.map(k => fm(k[0])).join(' · ')}</p>` : ''}</div>`; }).join('') + '</section>';
