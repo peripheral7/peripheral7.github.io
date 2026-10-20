@@ -1,0 +1,1699 @@
+<!DOCTYPE html>
+<!--
+  SHORT-ANSWER (서술형) QUIZ TEMPLATE, keyword auto-grading.  Adapted from the multiple-choice quiz template.
+  Make a quiz: copy this file and replace ONLY the text between <script type="text/plain" id="quizData"> and </script>.
+  Data format:
+    meta lines  title: / sub: / subject: / textbook:   then a line  ===
+    chapter     "# Chapter title" as its own block, then ===        (optional; 2+ chapters show the contents row)
+    question    5 lines, then ===:
+                1 tag (or "-" = same tag as the previous question)
+                2 question text: ask for a definition or concept, not a calculation
+                3 KEYWORDS used for auto-grading. Groups are separated by |   and the accepted wordings inside a group by " / "
+                  (space-slash-space). The first wording is shown as the label. Add Korean wordings too if students may answer in Korean.
+                  Example:   snapshot / 특정 시점|decreasing liquidity / liquid first / 유동성 순
+                  2-8 groups. A group counts as found when ANY of its wordings appears in the student's answer.
+                  RELAXED GRADING: keep keyword groups SHORT (one term or a short phrase). Do NOT require a whole formula or sentence
+                  (e.g. "assets = liabilities + stockholders' equity") - students cannot be expected to type it exactly.
+                  SELF-CHECK QUESTIONS: if the answer is a formula, a long definition or several linked conditions that keywords cannot judge fairly,
+                  write  ~  (a single tilde) on the keywords line. The question is then NOT graded (no verdict, not counted in Passed / Keywords /
+                  Review Not Passed); "Show answer" displays the answer with its key terms in **bold** so students compare it themselves.
+                  Short English terms (4 letters or fewer, e.g. ROE, APR, S&P) must appear as a whole word.
+                4 model answer on ONE line, with the keywords written in **bold** (shown bold on screen and in the printout)
+                  EXPLANATION STYLE (해설 원칙): explain the CORRECT answer only. Do not explain why wrong answers are wrong
+                  (오답 설명은 생략하고 정답 중심으로 작성). Mention a wrong idea ONLY when it carries an important concept,
+                  e.g. a common misconception the course stresses (중요 개념이 포함된 경우에만 오답 내용을 언급할 수 있음).
+                5 optional hints   term=definition; term=definition     (shown only when "Show Hints" is on)
+    figure      optional extra line:  @tbl Head1|Head2;;a|b;;c|d  (first row = header)   or   @img file.png  (PNG/JPG saved next to this HTML, or a data: URI)
+                shown in the right margin, vertically centred beside the question; click to enlarge. The "Review" box always stays at the card's top-right corner.
+    code        optional extra line:  @code line1;;line2  (R code shown under the question in a monospace font with R syntax colours; ;; = new line)
+    inline code in text / answers: wrap in backticks, e.g. `lm(y ~ x)`  -> monospace font
+    math        x^2  x^{n+1} (superscript)   P_t  P_{t-1} (subscript)   \pi \Delta \times \le \ge ... (symbols)
+    GRADING     the whole answer is graded (no bolding needed). A green underline marks each keyword found in the student's answer; a red underline marks each missing keyword in the (reference) answer (colours: --mk-ok / --mk-no).
+                The verdict label is blank when no keyword is found (only "0 of n keywords" is shown). A question passes when at least 60% of the groups are found (const PASS).
+    CHAPTER     every question shows its chapter as plain text ("Ch.3" - taken from "# Chapter 3: ..." or Week/Lecture N; otherwise the chapter title) before its tag whenever the quiz has 2+ chapters.
+                The label is also printed in front of each question and in the answer key. The chapter row under the header shows tabs (Ch.2, Ch.3 ...); the title appears as a tooltip.
+                When one chapter is shown, a "Next chapter" button sits below its last question (in single-question view the Next button becomes "Next chapter").
+    BUTTONS     "Check answer" (before checking) -> "Re-Check" / "Retry" / "Copy" (after checking).
+    TAB         Tab in an answer box moves to the next question's answer box (Shift+Tab: previous). The Memo panel closes when you click outside it.
+    DEFAULT VIEW  if the quiz title contains "midterm" or "final" (any case) and the quiz has 2+ chapters, the page opens in "All chapters" view; otherwise one chapter at a time.
+    PRINT       prints the questions currently shown (one chapter, all chapters, Review Not Passed, or the searched numbers), keeping their question numbers, with a blank answer area.
+                Blank space after each question = 2 text lines (change --ans-lines in the print CSS). Answer key: line spacing 1 inside each answer (--key-lh in the print CSS) and exactly one blank line between answers.
+    REVIEW MARK the "Review" box at the top right of each question marks it for later review; "Marked for Review (n)" shows only the marked
+                questions (also printable). Marks are kept by Save.
+    KEYBOARD    Enter in an answer box: check the answer. After checking, Enter re-checks if the answer was edited, otherwise moves to the next question.
+                The selected question is scrolled to the middle of the screen.
+    SEARCH      the box in the header takes question numbers (1, 2, 3, 15  /  1 3-5): only those questions are shown; Enter on an empty box or Clear returns to all.
+    CONDITIONS  every question must stand alone: restate any given numbers in the question text.
+  Mistakes in the data are listed in a red box at the top of the page.
+-->
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<!--DATA-START-->
+<script type="text/plain" id="quizData">
+title: Investment Analysis Midterm - Short Answer Quiz
+sub: Chapters 2–6 (to Section 6.4) · 87 questions
+subject: Investment Analysis, Prof. G. Lee
+textbook: Bodie, Kane & Marcus, Essentials of Investments, 12th ed.
+===
+# Chapter 2: Asset Classes and Financial Instruments
+===
+Money market instruments
+What defines a money market instrument? Explain why a Treasury note is not one, and name two money market instruments.
+short-term / short term / one year or less / 단기 / 1년 이하|highly marketable / marketable / liquid / 유동성 / 환금성|Treasury note / T-note / 1 to 10 years / 국채 / 중기채 / capital market / 자본시장|certificates of deposit / certificate of deposit / CD / banker's acceptance / commercial paper / 양도성예금증서 / 기업어음 / 은행인수어음
+Money market instruments are **short-term** (one year or less), **highly marketable** debt. A **Treasury note** has a maturity of 1 to 10 years, so it belongs to the capital market; negotiable **certificates of deposit**, banker's acceptances and commercial paper are money market instruments.
+money market=단기금융시장; T-note=재무부 중기채
+===
+Repurchase agreements
+In a repurchase agreement (repo), what does the dealer do, and why is a repo considered a very safe short-term loan?
+sells securities / sells government securities / 증권을 매도 / 증권을 판매|buy back / buy them back / buys them back / repurchase / 되사 / 환매|higher price / slightly higher / 더 높은 가격 / 웃돈|short-term / next day / overnight / 단기 / 익일|collateral / collateralized / 담보
+The dealer **sells government securities** to an investor and agrees to **buy them back** the next day at a slightly **higher price**; the difference is the interest. Because the securities serve as **collateral**, a repo is effectively a very safe **short-term** loan to the dealer.
+repo=환매조건부채권; reverse repo=투자자가 증권을 사고 되팔기로 약정
+===
+Eurodollars
+What are Eurodollars? Does the prefix "Euro" mean that the deposit must be held in Europe?
+dollar-denominated / U.S. dollar / dollar deposits / 달러 표시 / 달러 예금|foreign banks / foreign branches / outside the United States / 해외 은행 / 해외 지점|location / not necessarily Europe / not Europe / 위치 / 유럽이 아니
+Eurodollars are **dollar-denominated** deposits held at **foreign banks or foreign branches of U.S. banks**, outside U.S. bank regulation. The prefix refers to the **location** of the deposit, **not necessarily Europe**: a dollar deposit in a Tokyo bank is a Eurodollar deposit.
+Eurodollar=미국 밖 은행에 예치된 달러 예금
+===
+Mortgage-backed pass-throughs
+What is a mortgage-backed pass-through security, and how does securitization shift risk?
+ownership claim / claim on the pool / 소유권 / 청구권|pool of mortgages / mortgage pool / 모기지 풀 / 주택담보대출 집합|principal and interest / 원리금|passed through / pass through / pass-through / 전달|default and prepayment / default / prepayment / 채무불이행 / 조기상환
+A pass-through is an **ownership claim** on a **pool of mortgages**; the homeowners' monthly **principal and interest** are **passed through** to investors net of servicing fees. Securitization shifts **default and prepayment risk** from the originating banks to the investors.
+securitization=증권화; pass-through=원리금 전달 증권
+===
+Common stock
+Which two characteristics define common stock as a claim on the firm, and what does each mean?
+residual claim / residual claimant / 잔여청구권|paid last / after creditors / after bondholders / 마지막 / 채권자 이후|limited liability / 유한책임|amount invested / cannot lose more / 투자금액 / 투자한 금액
+Common stock is a **residual claim**: shareholders are **paid last**, after employees, suppliers and bondholders. It carries **limited liability**: the most a shareholder can lose is the **amount invested**.
+residual claim=잔여청구권; limited liability=유한책임
+===
+Preferred stock
+Why is preferred stock called a hybrid security? What happens if the firm skips a preferred dividend?
+hybrid / 혼성 / 하이브리드|fixed dividend / fixed payment / 고정 배당|not a legal obligation / no default / not bankruptcy / 법적 의무 / 부도가 아니|no voting / voting rights / 의결권|cumulative / arrears / 누적
+Preferred stock is a **hybrid**: like a bond it pays a **fixed dividend** and normally has **no voting rights**, but like equity the dividend is **not a legal obligation**, so skipping it does not trigger default; **cumulative** preferred must clear all arrears before any common dividend.
+preferred stock=우선주; cumulative=누적적
+===
+American Depositary Receipts
+What is an American Depositary Receipt (ADR), and what is its advantage for a U.S. investor?
+certificate / receipt / 예탁증서 / 증서|foreign shares / foreign firm / foreign company / 외국 기업 / 해외 주식|U.S. exchange / traded in U.S. / U.S. markets / 미국 시장 / 미국 거래소|dollar-denominated / dollars / 달러|depositary bank / U.S. bank / 예탁은행
+An **ADR** is a **dollar-denominated** **certificate** issued by a **depositary bank** that represents ownership of **foreign shares** and trades on a **U.S. exchange**, so U.S. investors trade and receive dividends in dollars without dealing in a foreign market or currency.
+ADR=미국예탁증서; depositary bank=예탁은행
+===
+Price-weighted index and stock splits
+A stock in a price-weighted index splits 2-for-1. Why must the divisor be changed, and what happens to that stock's weight in the index?
+divisor / 제수|index level unchanged / level unchanged / not change / 지수 수준 / 변하지 않|weight falls / lower weight / smaller weight / 비중이 감소 / 비중 하락|permanent / permanently / 영구
+A split lowers the stock's price, which would mechanically lower the index, so the **divisor** is reset to keep the **index level unchanged**. The split stock's **weight falls permanently**, a known distortion of price weighting.
+price-weighted index=가격가중 지수; divisor=제수
+===
+Equally weighted index
+What does an equally weighted index imply for an investor's portfolio, and why does maintaining it require trading?
+equal dollar / equal amount / same amount / 동일 금액 / 동일 비중|rebalancing / rebalance / 리밸런싱 / 재조정|selling outperformers / sell outperformers / 상승한 종목 매도|buying underperformers / buy underperformers / 하락한 종목 매수|trading costs / transaction costs / 거래비용
+It corresponds to investing an **equal dollar** amount in each stock. As prices move the weights drift, so it needs periodic **rebalancing**: **selling outperformers** and **buying underperformers**. This implies **trading costs** that value-weighted indexes do not have.
+equally weighted=동일가중
+===
+Call options
+What rights does the holder of a call option have, what is the holder's maximum loss, and what happens if the asset price ends below the exercise price?
+right to buy / right but not obligation / 매수할 권리 / 의무가 없|exercise price / strike price / strike / 행사가격|expires worthless / expire worthless / lets the option lapse / abandon / 소멸 / 행사하지 않|premium / 프리미엄 / 옵션 가격|maximum loss / limited loss / 최대 손실
+The holder has the **right to buy** at the **exercise price**, with no obligation. If the asset ends below that price the option **expires worthless**; the **maximum loss** is the **premium** paid, while the gain is open-ended. Unlimited loss describes the call writer, not the holder.
+call option=콜옵션; exercise price=행사가격; premium=옵션 프리미엄
+===
+Put options
+When is a put option in the money, and why is being in the money not the same as being profitable for the buyer?
+right to sell / 매도할 권리|in the money / 내가격|below the exercise price / below / 행사가격보다 낮|premium / 프리미엄 / 옵션 가격|cover the premium / recover / break even / 손익분기 / 회수
+A put gives the **right to sell** at the exercise price, so it is **in the money** when the asset price is **below the exercise price**. The buyer profits only if the price falls far enough to **cover the premium** paid; the writer's gain is capped at that premium.
+put option=풋옵션; in the money=내가격
+===
+Futures versus calls
+Distinguish a long futures position from a long call position in terms of right versus obligation, up-front payment and potential loss.
+obligation / 의무|right / option / 권리|premium / 프리미엄 / 옵션료|margin / performance bond / 증거금|losses / unlimited / 손실
+A long **futures** position is an **obligation** to take delivery (or settle) at the agreed price, so **losses** can be large if the price falls; a long **call** is a **right** that the holder abandons if unprofitable. A call requires a **premium** at purchase, while futures require no premium, only a **margin** deposit that acts as a performance bond.
+futures=선물; margin=증거금
+===
+Municipal bonds and tax brackets
+At what point is an investor indifferent between a taxable bond and a municipal bond, and why are municipal bonds mostly held by high-bracket investors?
+indifferent / 무차별|after-tax yields are equal / after-tax yield / after tax yield / 세후 수익률|marginal tax rate / tax bracket / 한계세율 / 세율|higher bracket / higher brackets / above / 높은 세율 / 고소득|tax-exempt / exempt / 면세 / 비과세
+The investor is **indifferent** when the **after-tax yields are equal**, r_{taxable}(1 − t) = r_{muni}, which defines a critical **marginal tax rate** t. Investors in **higher brackets** prefer the **tax-exempt** municipal bond; those below that rate prefer the taxable bond.
+municipal bond=지방채; marginal tax rate=한계세율
+===
+Bank discount yield
+State the two flaws of the bank discount yield as a measure of the return on a Treasury bill, and how the bond equivalent yield corrects them.
+bank discount yield / BDY / 은행할인수익률|360 days / 360 / 360일|face value / 액면가|price the investor paid / price paid / 지불한 가격 / 매입 가격|bond equivalent yield / BEY / 채권등가수익률|365 / 365일
+The **bank discount yield** has two flaws: "First, it assumes that the year has only **360 days**. Second, it computes the yield as a fraction of **face value** rather than of the **price the investor paid**." The **bond equivalent yield** corrects both: it uses a **365**-day year and divides by the price paid.
+BDY=은행할인수익률; BEY=채권등가수익률
+===
+Ranking BDY, BEY and EAY
+For the same Treasury bill, rank the bank discount yield, the bond equivalent yield and the effective annual yield from lowest to highest, and explain what drives each step.
+bank discount yield / BDY / 은행할인수익률|lowest / smallest / 가장 낮|price paid / 지불한 가격 / 매입 가격|bond equivalent yield / BEY / 채권등가수익률|effective annual yield / EAY / 유효연수익률|compounding / 복리|highest / largest / 가장 높
+The **bank discount yield** is the **lowest** because it divides by face value instead of the **price paid** and uses a 360-day year. The **bond equivalent yield** corrects both and is higher. The **effective annual yield** is the **highest** because it adds **compounding** of the sub-year return, so BDY < BEY < EAY.
+EAY=유효연수익률
+===
+Breaking the buck
+What does it mean for a money market fund to "break the buck," and what triggered it for the Reserve Primary Fund in 2008?
+share value at $1 / $1 / 1달러|below $1 / 1달러 미만|Lehman / 리먼|commercial paper / 기업어음|run / redemptions / 환매 / 인출
+Money market funds try to hold their **share value at $1** and pass along all earnings as interest. A fund "breaks the buck" when losses force its value per share **below $1**. After **Lehman** Brothers went bankrupt in September 2008, the Reserve Primary Fund, which held Lehman **commercial paper**, fell to $0.97, and the resulting wave of redemptions looked like a **run** on a bank.
+break the buck=주당 1달러 아래로 하락
+===
+Treasury Inflation Protected Securities
+How do TIPS protect an investor against inflation?
+principal / par / 원금|adjusted / indexed / 조정|Consumer Price Index / CPI / 소비자물가지수|real / inflation-adjusted / 실질
+The **principal** amount of a TIPS is **adjusted** in proportion to increases in the **Consumer Price Index**, so coupons paid on that principal rise with inflation. TIPS therefore provide a constant stream of income in **real** (inflation-adjusted) dollars.
+TIPS=물가연동국채; CPI=소비자물가지수
+===
+General obligation versus revenue bonds
+Distinguish general obligation bonds from revenue bonds. Which is riskier in terms of default?
+general obligation / 일반회계채|full faith and credit / taxing power / 과세권 / 징세권|revenue bond / 수익채|particular projects / project / 특정 사업|revenues from that project / project revenue / 사업 수익|riskier / more risk / 더 위험
+**General obligation bonds** are backed by the **full faith and credit** (the taxing power) of the issuer, while **revenue bonds** are issued to finance **particular projects** (airports, hospitals, turnpikes) and are backed by the **revenues from that project** or the agency operating it. Revenue bonds are **riskier** in terms of default.
+general obligation bond=일반회계채; revenue bond=수익채
+===
+Price-, value- and equally weighted indexes
+Compare price-weighted, value-weighted and equally weighted indexes. Which kind of stock dominates the first two?
+price-weighted / 가격가중|high-priced / 고가 / 주가가 높은|value-weighted / 가치가중 / 시가총액가중|large-cap / market capitalization / 시가총액 / 대형주|equally weighted / 동일가중
+A **price-weighted** index averages share prices, so a **high-priced** stock dominates it. A **value-weighted** index weights each stock by its **market capitalization**, so a **large-cap** firm dominates it. An **equally weighted** index is the simple average of each stock's return.
+price-weighted=가격가중; value-weighted=시가총액가중
+===
+# Chapter 3: Securities Markets
+===
+Primary and secondary markets
+In which market do the proceeds of a sale go to the issuing firm, and why does the secondary market still matter to firms?
+primary market / 발행시장|newly issued / new issues / 신규 발행|proceeds / raises capital / 조달|secondary market / 유통시장|liquidity / 유동성
+In the **primary market** a firm sells **newly issued** securities (for example an IPO) and receives the **proceeds**. Later trades between investors take place in the **secondary market** and raise no new capital, but the **liquidity** and prices it provides set the terms on which new issues can be sold.
+primary market=발행시장; secondary market=유통시장; IPO=기업공개
+===
+Underwriting arrangements
+Distinguish firm commitment from best efforts underwriting. Who bears the risk of an unsold issue in each?
+firm commitment / 총액인수|buys the entire issue / purchases the entire issue / buy the entire issue / 전량 인수|underwriter bears / bears the risk / 위험을 부담 / 인수업자가 부담|best efforts / 모집주선|agent / unsold shares / 미판매 / 발행회사에 반환
+In a **firm commitment** the syndicate **buys the entire issue** at a negotiated price and resells it; the spread is its pay and the **underwriter bears the risk** of a poor sale. In **best efforts** the bank only acts as an **agent** and unsold shares revert to the issuer.
+firm commitment=총액인수; best efforts=모집주선
+===
+IPO evidence
+What does the evidence say about average first-day and long-run IPO returns, and what explains the first-day pattern?
+underpriced / underpricing / 과소평가 / 저평가|first-day / first day / 첫날 / 초기 수익률|money left on the table / left on the table / 놓친 수익|book-building / winner's curse / institutional / 승자의 저주 / 기관투자자|underperform / long-run / lag / 장기 / 부진
+IPOs are on average **underpriced**: **first-day** returns are large and positive, **money left on the table** by the issuer. Explanations include compensating institutions for revealing demand in **book-building** and the **winner's curse**. Long-run returns reverse, as IPOs tend to **underperform** comparable non-issuing firms.
+underpricing=과소가격 결정; winner's curse=승자의 저주
+===
+Bid-asked spread
+A dealer quotes a bid of $34.75 and an asked price of $34.90. At which price does an investor buy, at which does she sell, and what does the spread represent?
+buys at the asked / pays the asked / buy at the ask / 매도호가에 매수|sells at the bid / receives the bid / sell at the bid / 매수호가에 매도|spread / 0.15 / 스프레드|immediacy / 즉시성|round-trip / transaction cost / 거래비용
+The investor **buys at the asked** price ($34.90) and **sells at the bid** ($34.75). The **spread** of $0.15 is the dealer's compensation for **immediacy** and a **round-trip** transaction cost for the investor on top of commissions.
+bid=매수호가; asked=매도호가; spread=호가 스프레드
+===
+Market orders and limit orders
+Compare a market order and a limit order in terms of certainty of execution and certainty of price.
+market order / 시장가 주문|executes immediately / immediate / 즉시 체결|best available price / price unknown / 가격 불확실|limit order / 지정가 주문|worst acceptable price / limit price / specified price / 지정한 가격|may never execute / unfilled / not execute / 체결되지 않
+A **market order** **executes immediately** at the **best available price**, so execution is certain but the price is not. A **limit order** names the **worst acceptable price**, so the price is controlled, but it **may never execute** and waits in the limit order book.
+market order=시장가 주문; limit order=지정가 주문
+===
+Limit buy below the market
+A stock trades at $50 and an investor places a limit buy order at $47. What happens to the order, and how does it relate to market liquidity?
+cannot be filled / not filled / unfilled / not executed / 체결되지 않|limit order book / the book / 호가창 / 주문장|falls to $47 / $47 or below / price falls / 47달러 이하|supply liquidity / liquidity / 유동성
+The order **cannot be filled** now; it sits in the **limit order book** and executes only if the price **falls to $47 or below** (it may expire unfilled). Such standing orders **supply liquidity** to investors who submit market orders.
+limit order book=지정가 주문 장부
+===
+Stop-loss orders
+What does a stop-loss sell order at $55 do for an investor who holds a stock trading at $60, and what does it not guarantee?
+dormant / triggered / 발동 / 작동|market order / 시장가 주문|at or below $55 / falls to $55 / 55달러 이하|limit further losses / limit losses / 손실을 제한 / 손실 한정|not guarantee / no guarantee / 보장하지 않 / below $55
+The order lies **dormant** until the stock trades **at or below $55**, then becomes a **market order** to sell, which helps **limit further losses**. It does **not guarantee** the price: in a fast-falling or gapping market the sale can be filled well below $55.
+stop-loss=손절 주문
+===
+High-frequency trading
+What is high-frequency trading, and what do proponents and critics argue about its effect on liquidity?
+computerized / algorithmic / 알고리즘 / 컴퓨터|small / tiny / fleeting price discrepancies / 미세한 가격 차이|milliseconds / fractions of a second / 밀리초 / 초단타|narrows spreads / narrow spreads / adds liquidity / 스프레드 / 유동성 공급|withdrawn / flash crash / stress / 유동성 철회 / 플래시 크래시
+High-frequency trading is **computerized** trading that exploits very **small, fleeting price discrepancies**, with positions held for **milliseconds**. Proponents say it **narrows spreads and adds liquidity**; critics note that the liquidity can be **withdrawn** under stress, as in the 2010 flash crash.
+HFT=초단타 매매
+===
+Buying on margin
+Explain how buying on margin affects an investor's return and risk, and who sets the initial margin requirement.
+magnifies / amplifies / leverage / 레버리지 / 확대|gains and losses / both gains and losses / 이익과 손실|interest accrues / interest / 이자|borrowing rate / earn more than / 차입 이자율|Federal Reserve / Fed / 연준
+Margin **magnifies both gains and losses** on the investor's equity because the loan is fixed while the collateral value moves. **Interest accrues** whatever the stock does, so the stock must earn more than the **borrowing rate** for leverage to pay. The initial margin requirement is set by the **Federal Reserve**, and brokers may be stricter.
+margin=증거금; leverage=지렛대 효과
+===
+Margin calls
+When does a margin call occur for a margin-purchased (long) position and for a short sale, and why do the two differ?
+long / purchase / 매수|price fall / price falls / falls / 가격 하락|short / 공매도|price rises / rises / 가격 상승|maintenance margin / 유지증거금|additional funds / sell shares / 추가 자금 / 추가증거금
+For a **long** margin purchase the loan is fixed, so a **price fall** cuts equity below the **maintenance margin**; for a **short** position the liability grows when the **price rises**, so the call comes on a rise. In both cases the broker demands **additional funds** or sells shares.
+maintenance margin=유지증거금; margin call=추가증거금 요구
+===
+Short selling
+Describe a short sale: what does the seller do, when does the position profit, and how do the maximum gain and loss compare?
+borrows / borrow shares / 빌려 / 차입|sells / sell them / 매도|buys back / buy back / repurchase / 되사|price falls / price declines / 가격 하락|capped / limited gain / cannot fall below zero / 이익은 제한|unlimited / 무제한 / 무한
+The short seller **borrows** shares and **sells** them, then **buys back** later to return them, profiting if the **price falls**. The gain is **capped** because the price cannot fall below zero, while the loss is **unlimited** because the price can rise without bound.
+short sale=공매도
+===
+Cash flows in a short sale
+In a short sale, what happens to the sale proceeds, what margin is required, and who receives the dividends paid on the borrowed shares?
+collateral / held in the account / 담보|additional margin / margin / 증거금|dividends / 배당|pay the lender / owed to the lender / remit / 대여자에게|carrying cost / cost of the trade / 비용
+The sale **proceeds stay in the account as collateral**, and the short seller must post **additional margin**. The lender keeps the economic rights of ownership, so the short seller must **pay the lender any dividends** the stock pays, a **carrying cost** of the trade.
+dividends owed=대여자에게 배당 지급 의무
+===
+Electronic trading: ECNs and algorithms
+How do ECNs and algorithmic (high-frequency) trading change the way securities are traded, and what are the benefits of electronic trading?
+ECN / ECNs / electronic communication network|no dealer / without a dealer / 딜러 없|algorithm / algorithms / 알고리즘|milliseconds / high-frequency / 초고속|lower trading costs / lower costs / 거래비용
+**ECNs** (electronic communication networks) match buy and sell orders directly with **no dealer** in the middle. **Algorithms** decide the timing, price and size of orders to cut cost and market impact, and ultra-fast high-frequency programs exploit tiny price gaps in **milliseconds**. The benefits are faster execution, **lower trading costs**, greater price transparency, anonymity for large orders and trading beyond exchange hours.
+ECN=전자거래 네트워크; algorithmic trading=알고리즘 매매
+===
+The four pillars of securities regulation
+Name the four pillars of securities regulation and state what each does.
+1933 / 1934 / 증권법|full disclosure / 공시|SEC|FINRA / self-regulation / 자율규제|Sarbanes-Oxley / SOX / 사베인스|material non-public information / insider / 내부자
+The **Securities Acts of 1933** and 1934 require **full disclosure** at issue and created the **SEC** to oversee markets. **Self-regulation (FINRA)** means industry bodies police member conduct and trading practices. **Sarbanes-Oxley** (2002) tightened corporate governance, auditing and financial reporting after major scandals. **Insider-trading** rules prohibit trading on **material non-public information**.
+SEC=증권거래위원회; FINRA=금융산업규제국
+===
+# Chapter 4: Mutual Funds and Other Investment Companies
+===
+Pro-rata claim
+What exactly does an investor who owns 2% of a mutual fund's shares own, and what is not guaranteed?
+proportional / pro-rata / pro rata / 비례|whole pooled portfolio / pooled portfolio / every asset / 전체 포트폴리오|income / 수익 / 배당|specific securities / guaranteed / 특정 증권 / 보장
+She owns a **proportional (pro-rata) claim** on the **whole pooled portfolio**, 2% of every asset, and receives 2% of its **income**. She does **not own specific securities**, and no return is **guaranteed**.
+pro-rata=지분 비례; investment company=투자회사
+===
+Core services of investment companies
+Name the four core services an investment company provides to small investors, and say whether a return above the market is one of them.
+record keeping / administration / 기록 관리 / 사무 관리|diversification / divisibility / 분산 / 분할|professional management / 전문 운용 / 전문적 관리|transaction costs / large blocks / 거래비용 / 대량 거래|guaranteed / not guaranteed / 보장
+The four services are **record keeping and administration**, **diversification and divisibility**, **professional management**, and lower **transaction costs** from trading in large blocks. A **guaranteed** return above the market is not among them; whether management beats the market is an empirical question.
+divisibility=소액 분할 투자 가능성
+===
+NAV and new shares
+How is a fund's net asset value (NAV) computed, which items are deducted, and why does issuing new shares at NAV leave NAV unchanged?
+market value of assets / assets / 자산의 시장가치 / 자산|liabilities / accrued fees / 부채|shares outstanding / per share / 발행 주식수 / 주당|at NAV / issued at NAV / NAV로 발행|proportion / no dilution / 비례 / 희석
+**NAV** = (**market value of assets** − **liabilities**, such as accrued management fees) ÷ **shares outstanding**. New shares are issued **at NAV**, so assets and shares rise in **proportion** and NAV is unchanged, with **no dilution** of existing holders.
+NAV=순자산가치
+===
+Open-end fund orders
+At what price is an order to buy open-end mutual fund shares at 10:00 a.m. filled, and how do closed-end funds and ETFs differ?
+NAV / net asset value / 순자산가치 / 기준가|4:00 p.m. / end of the day / market close / 마감 / 종가|same price / once a day / 하루에 한 번 / 동일한 가격|not know / unknown / 알 수 없|exchange / intraday / market price / 거래소 / 장중
+It is filled at the **NAV struck once a day at the 4:00 p.m. close**, the **same price** for every order that day, and the investor does **not know** it when ordering. Closed-end funds and ETFs trade on an **exchange** at intraday market prices.
+open-end fund=개방형 펀드
+===
+Closed-end funds
+Describe a closed-end fund: how its shares are issued, who trades with whom, and how its market price relates to NAV.
+fixed number / fixed / 고정|IPO / initial offering / 최초 공모|exchange / each other / 거래소 / 투자자끼리|supply and demand / 수요와 공급|premium or discount / premium / discount / 프리미엄 / 할인
+A closed-end fund has a **fixed number** of shares after its **IPO** and neither issues nor redeems them. Investors trade with each other on an **exchange**, so the price is set by **supply and demand** and can sit at a **premium or discount** to NAV.
+closed-end fund=폐쇄형 펀드; discount=NAV보다 낮은 시장가격
+===
+Unit investment trusts
+What is a unit investment trust (UIT), and why are its management fees very low?
+fixed / unmanaged / 고정 / 비운용|terminates / set date / self-liquidating / 만기 / 청산|sponsor / 운용사 / 설립자|no trading / little trading / 거래 거의 없|very low / low fees / 낮은 수수료
+A UIT is a **fixed, unmanaged** portfolio deposited in a trust by a **sponsor** and sold as redeemable units; it **terminates on a set date**. With essentially **no trading** after formation, **management fees are very low**.
+UIT=단위형 투자신탁
+===
+Hedge funds versus mutual funds
+How does a hedge fund differ from a mutual fund in who may invest, regulation, strategies, fees and redemptions?
+accredited / institutional / 적격 투자자 / 기관|Investment Company Act / exempt / 1940 Act / 규제 면제|short sales / derivatives / leverage / 공매도 / 파생상품|2 and 20 / higher fees / 성과보수 / 높은 수수료|lock-up / lock-ups / restricted redemption / 환매 제한 / 락업
+Hedge funds are private pools open only to **accredited and institutional** investors and largely **exempt from the Investment Company Act** of 1940. They use **short sales, derivatives and heavy leverage**, charge higher fees (**2 and 20**), and restrict redemptions through **lock-ups**.
+hedge fund=헤지펀드; accredited investor=적격 투자자
+===
+Balanced and asset allocation funds
+Distinguish a balanced fund from an asset allocation fund.
+balanced fund / 균형형 펀드|stocks and bonds / 주식과 채권|stable mix / relatively stable / fixed mix / 안정적 / 일정한 비중|asset allocation fund / 자산배분 펀드|shifts / actively change / market conditions / 조정 / 변경
+A **balanced fund** holds **stocks and bonds** in a relatively **stable mix**; an **asset allocation fund** actively **shifts** the mix across asset classes as market conditions change.
+balanced fund=균형형; asset allocation fund=자산배분형
+===
+Expense ratio
+Why do investors tend to underestimate a fund's expense ratio, and is the reported fund return before or after it?
+deducted / netted / 차감|daily / every day / 매일|from fund assets / before NAV / NAV 산정 전|never billed / no bill / 청구되지 않|net of / after / already net / 순수익 / 이미 반영
+Operating expenses are **deducted daily from fund assets** before NAV is struck, so the investor is **never billed** separately and the cost is easy to overlook. The reported return is already **net of** the expense ratio.
+expense ratio=총비용비율
+===
+12b-1 fees
+What is a 12b-1 fee, how large can it be, and why is it economically like a sales load?
+annual / yearly / 매년|marketing and distribution / marketing / distribution / 마케팅 / 판매|1% / one percent / 1%|expense ratio / reported inside / 총비용비율|load / sales charge / instalments / 판매수수료 / 분할
+A **12b-1 fee** is an **annual** charge of up to **1%** of assets that pays for **marketing and distribution** (including adviser compensation). It is reported inside the **expense ratio**, but economically it is a **load** paid in instalments.
+12b-1 fee=마케팅·판매 보수; load=판매수수료
+===
+Back-end loads
+What does a back-end load (CDSC) that declines each year do economically, and who receives it?
+CDSC / contingent deferred sales charge / back-end load / 후취수수료|declines / falls / decreases / 감소|early redemption / early exit / 조기 환매|locks investors in / lock in / 묶|selling broker / broker / 판매 증권사
+A **CDSC** is charged on redemption and **declines** each year until it disappears. It makes **early redemption** expensive and so **locks investors in**; it compensates the **selling broker**, not the fund.
+CDSC=조건부 이연판매수수료
+===
+Published returns and loads
+A fund reports an 11% one-year return and an investor paid a 5% front-end load. Does the reported return equal her return?
+overstates / higher than / 과대|not of loads / before loads / excludes loads / 판매수수료 반영 전|NAV / net asset value / 순자산가치|expense ratio / 총비용비율|reduces the amount invested / amount invested / 투자금액
+No: the reported return **overstates** her return. Published returns are computed from **NAV**, which is net of the **expense ratio** but **not of loads**; the load **reduces the amount invested**, so over one year a 5% load can consume almost half of an 11% return.
+front-end load=선취 판매수수료
+===
+Choosing a share class
+Class A shares charge a front-end load and a lower expense ratio; Class C shares charge no front-end load and a higher expense ratio. Which investor should prefer which class, and why?
+Class A / A shares / A클래스|Class C / C shares / C클래스|long / 장기|short / 단기|one-time / 일회성|every year / annual / 매년
+The load is a **one-time** cost but the higher expense ratio is paid **every year** and compounds. Over a **short** horizon the load dominates, so **Class C** wins; over a **long** horizon the annual fee dominates, so **Class A** wins.
+share class=수수료 구조별 클래스
+===
+ETF arbitrage
+An ETF trades above the value of its underlying basket. Describe what an authorized participant does and how this restores the ETF price.
+authorized participant / AP / 지정참가회사|buys the cheaper basket / buys the basket / buy the basket / 바스켓 매수|in kind / created / creates / 현물 / 설정|sells the ETF shares / sells ETF shares / 매도|back toward the basket value / toward NAV / 수렴
+The **authorized participant** **buys the cheaper basket**, swaps it **in kind** for newly **created** ETF shares, and **sells the ETF shares** on the exchange. The selling pressure pushes the ETF price **back toward the basket value**.
+AP=지정참가회사; creation=설정; redemption=환매
+===
+ETF tax efficiency
+Why do ETF holders generally avoid the capital gains distributions that mutual fund holders receive when other investors redeem?
+mutual fund / 뮤추얼펀드 / 펀드|redemptions force / redemptions / 환매|sell stock / realize gains / 주식 매도|ETF / 상장지수|exchange / another investor / buyer / 거래소 / 다른 투자자|in kind / not for cash / 현물
+In a **mutual fund**, **redemptions force** the fund to **sell stock**, realizing gains that are distributed to all holders. In an **ETF** the seller finds a buyer on the **exchange**, and creations and redemptions happen **in kind**, not for cash, so the fund does not need to sell.
+capital gains distribution=자본이득 분배
+===
+Leveraged ETFs
+What does a 2× leveraged ETF deliver, and why can its multi-period return differ widely from twice the index return?
+daily / 일일|twice / 2x / two times / 2배|resets / reset / 매일 재설정|compound / changing base / 복리|volatile / volatility / 변동성
+It aims for **twice the index's daily return**; the fund **resets** to 2× every day, so gains and losses **compound** on a changing base. In **volatile** markets it falls behind even if the index ends flat, so multi-period returns are not 2×.
+leveraged ETF=레버리지 ETF
+===
+Covered-call ETFs
+Where does the high distribution of a covered-call ETF come from, and what does the fund give up in return?
+sells call options / sell call options / writes calls / 콜옵션 매도|premium / 프리미엄|upside / capped / 상승 이익|downside / losses remain / 하락|not a dividend / not dividends / 배당이 아니
+The fund **sells call options** on shares it owns and distributes the **premium** received. That premium is the price of the **upside it gives away** (gains are capped above the strike) while the **downside remains open**; it is an option strategy, **not a dividend** and not insurance.
+covered call=커버드콜
+===
+The arithmetic of active management
+Why must the average actively managed dollar underperform the market after costs? Use the logic of passive and active investors.
+~
+**Passive** investors hold the market, so what remains for **active investors as a group** is also the market: their value-weighted average **gross return** equals the market return. After **fees** the average active dollar must **lag** the market. This says nothing about any single fund.
+passive=패시브; active=액티브
+===
+Performance persistence
+Of 164 U.S. large-cap funds in the top quartile in 2021, none were still in the top quartile in 2023, while chance alone would give 6.25%. What does this suggest about choosing funds by past returns?
+persistence / persist / 지속성|not a reliable / unreliable / no signal / 신뢰할 수 없|chance / random / 우연|skill / 실력|fee / fees / expense / 수수료 / 비용
+Past top performance is **not a reliable** signal of future top performance: if **skill** drove the rankings, winners would repeat more often than **chance**, not less. The evidence shows no **persistence**; the lasting signal is the **fee**, not past returns.
+performance persistence=성과 지속성
+===
+Break-even on a front-end load
+A fund charges a 5.75% front-end load and you invest $10,000. Why must the fund earn more than 5.75% just for you to break even?
+load / 판매수수료|net / amount invested / invested amount / 순투자 / 투자금액|9,425 / $9425|6.10% / 6.1%|break even / 손익분기
+A front-end **load** is deducted before investing, so a 5.75% load on $10,000 leaves only **$9,425** as the **net** amount invested. The load is 5.75% of the gross, but to get back to $10,000 you must earn **6.10%** on the net, i.e. you need more than the load percentage just to **break even**.
+front-end load=선취 판매수수료; break-even=손익분기
+===
+# Chapter 5: Risk, Return, and the Historical Record
+===
+Holding-period return
+Define the holding-period return (HPR), split it into its two components, and state which price is the denominator.
+capital gain yield / capital gain / 자본이득 / 가격 상승|dividend yield / dividend / 배당|purchase price / beginning price / initial price / 구입 가격 / 기초 가격|never the ending price / not the ending price / 기말 가격이 아니
+**HPR** = (ending price − beginning price + dividends) ÷ beginning price, the **capital gain yield** plus the **dividend yield**. The denominator is always the **purchase price**, **never the ending price**.
+HPR=보유기간수익률
+===
+Arithmetic and geometric averages
+Distinguish the arithmetic average from the geometric average of returns. Which one is the actual compound growth rate, and which is larger?
+arithmetic / 산술|geometric / 기하|compound / 복리 / 누적|smaller / lower / less than / 작|volatility / variance / 변동성 / 분산
+The **arithmetic** average is the simple mean of period returns; the **geometric** average is the constant **compound** growth rate that reproduces the actual ending wealth. The geometric average is **smaller** than the arithmetic one when returns fluctuate, by roughly ½σ^2, and the gap grows with **volatility**.
+arithmetic mean=산술평균; geometric mean=기하평균
+===
+Dollar-weighted and time-weighted returns
+How are the dollar-weighted and the time-weighted returns calculated, and when do they differ? Which one is better for judging a manager?
+IRR / internal rate of return / 내부수익률|cash flows / 현금흐름|geometric / sub-period / 기하평균 / 부분기간|differ / timing / contributions / withdrawals / 입출금 / 시점|manager / 매니저 / 운용자
+The **dollar-weighted** return is the **IRR** of all **cash flows** (purchases, dividends, sales); the time-weighted return is the **geometric** average of **sub-period** returns. They **differ** when money is added or withdrawn at different times, and the time-weighted figure ignores that timing, so it is better for judging the **manager**.
+dollar-weighted return=금액가중수익률; time-weighted return=시간가중수익률
+===
+Compounding frequency
+For a given APR, how does the compounding frequency affect the effective annual rate (EAR), and how is a continuously compounded rate related to the EAR?
+EAR / effective annual rate / 유효연이율|more frequent / frequency / 빈도|higher / larger / 더 높 / 더 크|continuous / continuously / 연속|natural log / ln / 자연로그
+For a given APR, **more frequent** compounding gives a **higher EAR**, EAR = (1 + APR/m)^m − 1. With **continuous** compounding the APR equals the **natural log** of (1 + EAR).
+EAR=유효연이율; APR=명목 연이율
+===
+Exact real return
+Why does the shortcut real return ≈ nominal − inflation overstate the real return, and what is the exact relation?
+Fisher / exact / 피셔 / 정확|approximation / shortcut / 근사|overstates / overstate / 과대|cross term / cross-product / product of / 곱
+The exact relation is the **Fisher** equation, 1 + r = (1 + R) ÷ (1 + i). The shortcut R − i is an **approximation** that **overstates** the real return by the **cross term** r × i, and the error grows when inflation is high.
+real return=실질수익률; Fisher equation=피셔 방정식
+===
+Reading a VaR number
+A bank reports a one-day 99% VaR of ₩40 million. What does the number mean, how often should it be exceeded, and is it the maximum possible loss?
+probability / 1% / 확률|exceeded / exceed / 초과|1 trading day in 100 / 1 day in 100 / one day in 100 / 100일 중 1일|not the maximum / not a maximum / 최대 손실이 아니|larger / how much larger / says nothing / 더 큰 손실
+**VaR** is the loss that is **exceeded** with a given **probability** over the horizon; here the loss should exceed ₩40 million on about **1 trading day in 100**. It is **not the maximum** loss: on the worst days losses can be **larger**, and VaR says nothing about how much larger.
+VaR=위험가치
+===
+Scaling VaR over time
+Under normally distributed returns, how is a one-day VaR scaled to a T-day horizon, and which common mistake does the rule avoid?
+square root / square root of time / √T / 제곱근|not multiplied by T / not proportional / not linear / T를 곱하지|z-value / z value / confidence level / 신뢰수준 / z값|volatility / σ / 변동성
+Under normal returns **VaR = V_0 × z × σ × √T**: the one-day figure is scaled by the **square root** of time because independent daily variances add, **not multiplied by T**, which would overstate the risk. The **z-value** reflects the **confidence level** (1.645 for 95%, 2.326 for 99%) and σ is the daily **volatility**.
+z-value=신뢰수준에 대응하는 표준정규 분위수
+===
+Sharpe ratio along the CAL
+As an investor changes the fraction y invested in the risky portfolio P, what happens to the Sharpe ratio of the complete portfolio, and why?
+unchanged / constant / does not depend on y / 변하지 않|risk premium / 위험프리미엄|standard deviation / 표준편차|scale / proportional / 비례|slope / capital allocation line / CAL / 자본배분선 / 기울기
+It is **unchanged** for every y: both the **risk premium** and the **standard deviation** of the complete portfolio **scale** with y, so their ratio equals the **slope** of the capital allocation line. This is why the choice of P and the choice of y can be solved separately.
+Sharpe ratio=위험 1단위당 초과수익; CAL=자본배분선
+===
+Equilibrium nominal interest rate
+How does the nominal interest rate respond to an increase in expected inflation, and what does this preserve?
+expected inflation / E(i) / 기대 인플레이션|nominal / 명목|real / real rate / 실질|rises / increases / 상승|preserve / 보전
+Investors need compensation for expected inflation, so the **nominal** rate **rises** with **expected inflation**: r_nom = r_real + E(i). The increase in the nominal rate is needed to **preserve** investors' **real** rate of return.
+Fisher equation=피셔 방정식; nominal rate=명목이자율
+===
+Skew and kurtosis
+Explain what skew and kurtosis measure, and why they matter when returns are not normal.
+skew / 왜도|asymmetr / 비대칭|kurtosis / 첨도|fat tails / 두꺼운 꼬리|extreme / 극단|normal distribution / 정규분포 / zero
+**Skew** measures the **asymmetry** of the return distribution. **Kurtosis** compares the frequency of **extreme** values with that of the **normal distribution** (whose kurtosis is zero), so it is called a measure of **fat tails**, which signal tail risk that the standard deviation alone understates.
+kurtosis=첨도; skew=왜도; tail risk=꼬리 위험
+===
+Historical simulation and Monte Carlo
+Compare historical simulation and Monte Carlo simulation as ways to obtain the return distribution for VaR.
+historical simulation / 역사적 시뮬레이션|actual past returns / past returns / 과거 수익률|no distribution / 분포를 가정하지|fat tails / 두꺼운 꼬리|Monte Carlo / 몬테카를로|assumed model / model risk / 모형 위험|options / non-linear / 옵션 / 비선형
+**Historical simulation** sorts the **actual past returns** and reads off the quantile; **no distribution** is assumed so **fat tails** come for free, but it needs a long sample. **Monte Carlo** simulation draws many paths from an **assumed model**, handles **options** and other non-linear payoffs, but carries model risk.
+historical simulation=역사적 시뮬레이션; Monte Carlo=몬테카를로 시뮬레이션
+===
+Expected shortfall
+Why is Expected Shortfall (ES) used alongside VaR, and how did Basel treat the two?
+cut-off / threshold / 임계|average loss / 평균 손실|beyond / past / 초과|coherent / subadditive / 부분가법|Basel / FRTB / 바젤|97.5%
+VaR marks the **cut-off** but says nothing about how bad the loss is beyond it. ES (also CVaR) is the **average loss** in the tail **beyond** VaR. ES is **coherent** (subadditive) where VaR is not, so merging books cannot manufacture risk, and **Basel FRTB** replaced the 99% VaR capital charge with **97.5%** expected shortfall.
+ES=기대부족액(CVaR); FRTB=바젤 시장위험 재설계
+===
+Sharpe ratio and its limits
+What does the Sharpe ratio measure, why is it unchanged when the investor mixes in the risk-free asset, and why is it the wrong tool for a single security?
+reward per unit / 단위 위험당 보상 / 변동성 단위당|slope of the CAL / slope / 기울기|unchanged / invariant / 불변|single security / individual security / 개별 증권 / 개별 종목|diversifiable risk / 분산 가능한 위험 / 분산가능
+The Sharpe ratio is the **reward per unit** of volatility, [E(r_P) − r_f] / σ_P. It equals the **slope of the CAL** and is **unchanged** however much of the risk-free asset is mixed in, so it measures the quality of the risky portfolio itself. It is the wrong tool for a **single security** because the denominator includes **diversifiable risk**.
+Sharpe ratio=샤프비율; CAL=자본배분선
+===
+Utility and risk aversion
+In the utility function U = E(r) − ½Aσ^2, what does A measure, and how do risk-averse, risk-neutral and risk-loving investors differ? What is a certainty equivalent?
+risk-averse / risk averse / 위험회피|risk-neutral / risk neutral / 위험중립|risk-loving / risk loving / 위험애호|penalty / 위험 페널티 / 위험 벌점|certainty equivalent / 확실성등가
+A **risk-averse** investor has A > 0, a **risk-neutral** investor has A = 0 and judges by E(r) alone, and a **risk-loving** investor has A < 0. The term ½Aσ^2 is the **penalty** for risk. The **certainty equivalent** is the rate that a risk-free investment would have to offer to give the same utility as the risky portfolio.
+certainty equivalent=확실성등가수익률; A=위험회피계수
+===
+Determinants of the optimal risky share y*
+In y* = [E(r_P) − r_f] ÷ (Aσ_P^2), how does the optimal fraction in the risky portfolio respond to the risk premium, the risk aversion A and the variance?
+maximizes utility / maximize utility / 효용을 극대화|rises with the risk premium / increases with the risk premium / 위험프리미엄|falls with risk aversion / decreases with risk aversion / 위험회피도|falls with variance / decreases with variance / 분산
+y* **maximizes utility** and **rises with the risk premium**, **falls with risk aversion** and **falls with variance**: a larger reward per unit of risk raises the risky share, while a larger risk penalty lowers it.
+y*=위험자산 최적 투자비율
+===
+The kink in the capital allocation line
+Why does the capital allocation line bend (kink) at the risky portfolio P when the investor can borrow only at a rate above the risk-free rate?
+lends / lending / 대출 / 운용|borrowing rate is higher / borrow at a higher rate / 차입 이자율이 더 높|slope falls / lower slope / 기울기가 낮|kink / 꺾
+To the left of P the investor **lends** at the risk-free rate. Beyond P she must borrow at a rate above r_f, and because the **borrowing rate is higher** the **slope falls** (the Sharpe ratio of leveraged positions is lower), so the CAL has a **kink** at P.
+CAL=자본배분선; kink=꺾이는 지점
+===
+Passive strategies, the CML and the free-rider argument
+What is the capital market line, how is passive investing defended, and what is the Grossman-Stiglitz paradox?
+capital market line / CML / 자본시장선|broad market index / 시장지수|free-rider / free rider / 무임승차|low cost / lower cost / low fee / 저비용 / 낮은 비용|who sets prices / 가격은 누가|Grossman / Stiglitz / 그로스만
+When a **broad market index** is used as the risky portfolio P, the resulting capital allocation line is the **capital market line** (CML). Passive investing is defended by the **free-rider** argument (the analysis of thousands of other investors is already in the price) and by **low cost** (index funds charge about 0.03-0.2% a year against 1% or more for active funds). The open question is **who sets prices** if everyone is passive, the **Grossman-Stiglitz** paradox.
+CML=자본시장선; Grossman-Stiglitz paradox=정보 수집 유인 역설
+===
+# Chapter 6: Efficient Diversification (to Section 6.4)
+===
+Systematic and firm-specific risk
+Distinguish systematic risk from firm-specific risk. Which can be diversified away, and which earns a risk premium?
+systematic / market risk / 체계적 / 시장위험|firm-specific / idiosyncratic / unique / 기업 고유 / 비체계적|diversified investors / well-diversified / 분산투자자 / 분산된|risk premium / 위험프리미엄
+Total variance is **systematic** plus **firm-specific** variance. Adding stocks shrinks **firm-specific** (diversifiable) risk toward zero but leaves systematic (market) risk. Prices are set by **diversified investors**, so only the systematic part earns a **risk premium**.
+systematic risk=체계적 위험; firm-specific risk=기업 고유 위험
+===
+The diversification floor
+Suppose every stock has the same standard deviation and every pair has a correlation of 0.30. What happens to an equally weighted portfolio's standard deviation as n grows without limit, and what does the floor represent?
+falls / decreases / 감소|floor / lower bound / limit / 하한|average covariance / covariance / 평균 공분산 / 공분산|market risk / systematic risk / 시장위험 / 체계적|cannot be diversified / non-diversifiable / 분산 불가능
+As n grows the firm-specific term (1/n)σ^2 vanishes and σ_P **falls toward a floor** equal to the square root of the **average covariance**. The floor is **market (systematic) risk**, which **cannot be diversified** away.
+average covariance=종목 간 평균 공분산
+===
+The interaction term
+In the two-asset portfolio variance formula, which term is the only one that can be negative, and why does it matter for diversification?
+interaction term / covariance term / 상호작용 항 / 공분산 항|negative / 음수|correlation / ρ / 상관계수|weighted average / 가중평균|squares / always positive / 제곱 / 항상 양수
+The **interaction (covariance) term** 2w_Sw_B·Cov is the only one that can be **negative**; the other two terms are **squares** and always positive. When the **correlation** is below +1 it shrinks the variance, and for ρ < 0 it pulls σ_P below the **weighted average** of the two standard deviations.
+covariance=공분산; correlation=상관계수
+===
+The perfect hedge
+When can two risky assets be combined into a zero-risk portfolio, and what determines the weights?
+perfect negative correlation / perfectly negatively correlated / 완전 음의 상관 / 완전한 음|zero risk / risk-free / 위험이 없 / 무위험|standard deviations / SD / 표준편차
+When the assets are **perfectly negatively correlated** (ρ = −1) a **zero-risk** portfolio exists: setting σ_P = |w_Sσ_S − w_Bσ_B| = 0 gives w_S = σ_B ÷ (σ_S + σ_B), so the weights are set by the **standard deviations**.
+perfect hedge=완전 헤지
+===
+Adding a riskier asset
+Starting from 100% in a bond fund with σ_B = 10%, when does adding a little of a riskier stock fund with σ_S = 20% reduce portfolio risk?
+correlation / ρ / 상관계수|below σ_B ÷ σ_S / below the ratio / lower than the ratio / 표준편차 비율|0.5 / 0.50 / 1/2|not required / need not be negative / 음의 상관이 필요 없
+Risk falls when the **correlation** is **below σ_B ÷ σ_S** (here 10 ÷ 20 = **0.5**), the point at which the minimum-variance stock weight becomes positive. A negative correlation is **not required**.
+minimum-variance weight=최소분산 비중
+===
+Minimum-variance versus optimal portfolio
+Why is the minimum-variance portfolio generally not the best risky portfolio to combine with T-bills, and which portfolio is chosen instead?
+ignores expected return / ignores return / 기대수익률을 무시|Sharpe ratio / 샤프비율|tangency / tangent / 접점|capital allocation line / CAL / 자본배분선|at least as high / highest / 최대
+The minimum-variance portfolio only minimizes risk and **ignores expected return**. The optimal risky portfolio is the **tangency** point where the **capital allocation line** is steepest, so it maximizes the **Sharpe ratio**, which is **at least as high** as that of any other mix, including the minimum-variance portfolio.
+tangency portfolio=접점 포트폴리오
+===
+Separation property
+What does the separation property imply about the optimal risky portfolio and about the role of risk aversion? When does it break down?
+same for every investor / same for all investors / identical / 모든 투자자에게 동일|risk aversion / 위험회피도|split / fraction / y / 비율|T-bills / risk-free / 무위험자산|different inputs / borrowing rate / taxes / 다른 입력 / 세금
+**One optimal risky portfolio is the same for every investor** who shares the same inputs; only the **split** between it and **T-bills** depends on **risk aversion**. The property breaks down with **different inputs, borrowing rates above lending rates, taxes** and human capital.
+separation property=분리 정리
+===
+Borrowing to leverage the optimal portfolio
+When does an investor hold more than 100% of her wealth in the optimal risky portfolio, and what does that mean for her financing?
+low risk aversion / risk-tolerant / risk tolerant / 위험회피도가 낮|above 1 / more than 1 / greater than 1 / exceeds 1 / 1보다 크 / 100% 초과|borrows / borrowing / 차입|risk-free rate / 무위험이자율|leveraged / leverage / 레버리지
+A **risk-tolerant** (low risk aversion) investor gets y* = [E(r_P) − r_f] ÷ (Aσ_P^2) **above 1**, so she **borrows** at the **risk-free rate** and invests more than her wealth in P, a **leveraged** position.
+y*=위험자산 투자 비율
+===
+The input-list problem
+Why is a full Markowitz optimization hard to implement for many securities, and what must be estimated?
+expected returns / 기대수익률|n variances / variances / 분산|covariances / 공분산|square of n / grows with the square / 제곱|estimation error / error / 추정 오차
+With n securities you must estimate **expected returns** for each, **n variances** and n(n − 1)/2 **covariances**, a total of n(n + 3)/2 that **grows with the square of n** (125,750 inputs for n = 500). Every estimate carries **estimation error**.
+input-list problem=입력 목록 문제
+===
+The insurance principle
+State the insurance principle. Why is holding mostly your employer's stock in a 401(k) plan the opposite of it?
+insurance principle / 보험의 원리|spreading exposure / spread / 분산|independent risk sources / independent / 독립|single firm / one firm / 단일 기업|doubling down / human capital / 이중 / 일자리
+"Risk reduction by **spreading exposure** across many **independent risk sources** is called the **insurance principle**." An employee who also holds company stock in her 401(k) is **doubling down** on the fortunes of a **single firm**, since her job and her savings depend on the same firm.
+insurance principle=보험의 원리; company stock=자사주
+===
+Covariance and correlation
+Define covariance and the correlation coefficient. Why is the correlation easier to interpret, and what values can it take?
+covariance / 공분산|percent square / 제곱|correlation coefficient / correlation / 상관계수|product of the standard deviations / standard deviations / 표준편차의 곱|between −1 and +1 / -1 and +1 / -1에서 +1
+**Covariance** measures how much two returns move together, but its units are "**percent square**," so its size is hard to interpret. The **correlation coefficient** rescales it by the **product of the standard deviations**, ρ = Cov ÷ (σ_Sσ_B), so Cov = ρσ_Sσ_B, and it lies **between −1 and +1**.
+covariance=공분산; correlation coefficient=상관계수
+===
+Why diversification is "cost-free"
+In the 50/50 portfolio of a stock fund and a bond fund (standard deviations 21.73% and 3.54%), in what sense is the benefit of diversification "cost-free"?
+weighted average / 가중평균|lost nothing / nothing lost / no sacrifice / 손실 없 / 희생 없|below / lower / smaller / 낮|correlation / 상관|diversification benefit / 분산효과 / 분산 효과
+The portfolio's expected return (8.00%) is exactly the **weighted average** of the two funds' returns, so you **lost nothing** in return. Yet the portfolio standard deviation (9.57%) is far **below** the weighted average of the two (12.64%). That 3.07-point gap is the **diversification benefit**, and it exists purely because the **correlation** is below +1.
+cost-free=기대수익률 희생 없이 위험 감소
+===
+No benefit when the correlation is +1
+In which single case is there no benefit from diversification, and what does the opportunity set look like?
+perfect positive correlation / 완전 양의 상관|only / 유일|weighted average / 가중평균|straight line / 직선|less than perfectly / ρ < 1 / 1보다 작
+**Perfect positive correlation** (ρ = +1) is the **only** case with no benefit from diversification: σ_P = w_Bσ_B + w_Sσ_S is a **weighted average** of the component standard deviations and the opportunity set is a **straight line** through the two assets. Whenever returns are **less than perfectly** positively correlated, σ_P is below that weighted average.
+opportunity set=투자기회집합
+===
+Efficient versus dominated portfolios
+On the opportunity set of two risky assets, which portfolios are efficient and which are dominated? Why?
+efficient / 효율적|upward-sloping / 우상향|minimum-variance portfolio / 최소분산 포트폴리오 / 최소분산|dominated / 지배|higher expected return / 더 높은 기대수익률 / 더 높은 평균
+The **upward-sloping** part of the opportunity set, starting at the **minimum-variance portfolio**, is the **efficient** part. Points below it are **dominated**, because a portfolio on the efficient part offers a **higher expected return** at the same standard deviation.
+dominated=지배당함; opportunity set=기회집합
+===
+The efficient frontier of risky assets
+Define the efficient frontier of risky assets and how it is found. Where do the individual assets lie relative to it?
+efficient frontier / 효율적 프런티어|highest expected return / highest return / 최대 기대수익률|minimizing variance / minimize variance / 분산을 최소화|target expected return / 목표 기대수익률|inside / dominated / 안쪽 / 지배
+The **efficient frontier** is the set of portfolios that offer the **highest expected return** for each level of risk. It is found by **minimizing variance** subject to each **target expected return**. Individual assets all lie **inside** the frontier, so every one of them is dominated.
+efficient frontier=효율적 프런티어
+===
+The four-step recipe and the separation property
+Describe the four-step recipe for building the optimal complete portfolio. Which step depends on who the investor is?
+inputs / 입력|efficient frontier / opportunity set / 효율적 프런티어 / 기회집합|Sharpe ratio / 샤프비율|y* / risk aversion / 위험회피|separation property / 분리 정리 / 분리 성질
+Step 1 collects the **inputs**: expected returns, standard deviations and covariances or correlations. Step 2 traces the **efficient frontier** (upper branch). Step 3 **maximizes the Sharpe ratio** to find the optimal risky portfolio P*. Step 4 sets **y*** from the investor's **risk aversion** and splits wealth between P* and the risk-free asset. Only step 4 depends on the investor; steps 1-3 are identical for everyone, the **separation property**.
+Markowitz model=마코위츠 모형; separation property=분리 성질
+===
+Home bias and the gains from crossing borders
+What is home bias, why does investing abroad lower portfolio risk, and what is the honest caveat?
+home bias / home-country bias / 자국 편중|overweight / 과대 비중|covariance / 공분산|correlations / 상관관계|below +1 / less than 1 / 1보다 작|currency / 환율
+Investors everywhere **overweight** their home country relative to its share of the world portfolio, a pattern called **home bias**. Adding foreign assets lowers the **covariance** term in the portfolio variance because countries' systematic shocks differ. The caveat is that global **correlations** have risen and **currency** risk adds another layer, yet the benefit is not zero as long as correlations stay **below +1**.
+home bias=자국 편향
+===
+</script>
+<!--DATA-END-->
+<title>Short-Answer Quiz Template</title>
+<style>
+  :root{
+    --bg:#F6F6F5; --surface:#FFFFFF; --border:#E1E3E6; --border-strong:#C7CBD1;
+    --ink:#1D232C; --ink-soft:#5B6270; --accent:#2B4A73; --accent-wash:rgba(43,74,115,0.07);
+    --wrong:#9B4A40; --wrong-bg:#F5EAE8; --correct:#3C6B4E; --correct-bg:#EAF0EA;
+    --part:#8A6414; --part-bg:#F7F0DE;
+    --mk-ok:#0BAA4F; --mk-no:#F0202A;
+    --accent-border-soft:rgba(43,74,115,0.65);
+    --serif:Georgia,"Times New Roman","Noto Serif KR",serif;
+  }
+  html.dark{
+    --bg:#14181E; --surface:#1C212B; --border:#2B313D; --border-strong:#3B4452;
+    --ink:#E8E9EA; --ink-soft:#9BA3B0; --accent:#6E97C9; --accent-wash:rgba(110,151,201,0.14);
+    --accent-border-soft:rgba(110,151,201,0.75);
+    --wrong:#D98A80; --wrong-bg:rgba(155,74,64,0.22); --correct:#8FC7A4; --correct-bg:rgba(60,107,78,0.22);
+    --part:#E0B965; --part-bg:rgba(224,185,101,0.16);
+    --mk-ok:#2BE07A; --mk-no:#FF4D4D;
+  }
+  *{box-sizing:border-box;}
+  body{margin:0; background:var(--bg); color:var(--ink); font-family:var(--serif); line-height:1.6; padding:0 0 80px;}
+  header{max-width:1000px; margin:0 auto; padding:52px 24px 0;}
+  header h1{font-weight:500; font-size:3rem; line-height:1.1; margin:0 0 14px; letter-spacing:-0.01em; text-align:center;}
+  header p.sub{margin:0 0 24px; color:var(--ink-soft); font-size:1.05rem; text-align:center;}
+  .howto{padding-bottom:22px; border-bottom:1px solid var(--border);}
+  .howto summary{cursor:pointer; font-size:0.9rem; color:var(--ink-soft); list-style:none; display:inline-flex; align-items:center; gap:6px;}
+  .howto summary::-webkit-details-marker{display:none;}
+  .howto summary::before{content:"›"; display:inline-block; font-size:1rem; transition:transform .15s ease;}
+  .howto[open] summary::before{transform:rotate(90deg);}
+  .howto summary:hover{color:var(--ink);}
+  .howto-body{display:flex; flex-wrap:wrap; gap:8px 22px; font-size:0.85rem; color:var(--ink-soft); margin-top:12px;}
+  .howto-body > span{white-space:normal; max-width:100%;}
+  .howto-body .key{white-space:nowrap;}
+  .header-toggles{display:flex; flex-wrap:wrap; align-items:center; gap:6px 20px; margin-top:14px; position:relative;}
+  .icon-btn{background:none; border:1px solid var(--border-strong); border-radius:6px; width:34px; height:30px; padding:0; font-size:1rem; line-height:1; color:var(--ink-soft); cursor:pointer; display:inline-flex; align-items:center; justify-content:center;}
+  .icon-btn:hover, .icon-btn[aria-expanded="true"]{border-color:var(--accent); color:var(--accent);}
+  .icon-btn[aria-expanded="true"]{background:none;}
+  .icons{display:inline-flex; align-items:center; gap:4px;}
+  .settings{display:none; position:absolute; left:0; top:calc(100% + 6px); z-index:15; flex-direction:column; align-items:flex-start; gap:10px; padding:12px 16px; border:1px solid var(--border-strong); border-radius:8px; background:var(--bg); box-shadow:0 6px 18px rgba(0,0,0,0.12);}   /* floats over the page: no extra space, opaque so nothing shows through */
+  .settings.open{display:flex;}
+  .sw{background:none; border:none; padding:0; font-family:var(--serif); font-size:0.9rem; color:var(--ink-soft); cursor:pointer; display:inline-flex; align-items:center; gap:8px;}
+  .sw:hover{color:var(--accent);}
+  .sw .box{flex:none; width:16px; height:16px; border:1px solid var(--border-strong); border-radius:3px; display:inline-flex; align-items:center; justify-content:center; font-size:11px; line-height:1; color:#fff;}
+  .sw.on{color:var(--ink);}
+  .sw.on .box{background:var(--accent); border-color:var(--accent);}
+  .sw.on .box::after{content:"✓";}
+  .text-toggle.on{color:var(--accent); text-shadow:0.45px 0 0 currentColor, -0.45px 0 0 currentColor;}   /* selected: colour + faux bold, so the width never changes */
+  .qrow{position:relative;}
+  sup, sub{font-size:0.72em; line-height:0;}
+  .copyq{margin-left:auto; font-size:0.82rem; color:var(--ink-soft); cursor:pointer; user-select:none;}
+  .copyq:hover{color:var(--accent);}
+  .ch-head{grid-column:1 / -1; font-size:0.82rem; letter-spacing:0.08em; text-transform:uppercase; color:var(--ink-soft); padding:26px 0 8px; border-bottom:1px solid var(--border-strong);}
+  .text-toggle{background:none; border:none; padding:0; display:inline-block; font-family:var(--serif); font-size:0.85rem; color:var(--ink-soft); cursor:pointer; text-decoration:underline; text-underline-offset:3px;}
+  .text-toggle:hover{color:var(--accent);}
+  .btn.danger{background:var(--wrong-bg); border-color:var(--wrong); color:var(--wrong);}
+  .btn.danger:hover{color:var(--wrong);}
+  .key{display:inline-block; border:1px solid var(--border-strong); border-bottom-width:2px; border-radius:4px; padding:1px 7px; font-family:var(--serif); font-size:0.82rem; background:var(--surface); margin:0 2px;}
+
+  .scorebar{position:sticky; top:0; z-index:10; background:var(--bg); border-bottom:1px solid var(--border); max-width:1000px; margin:0 auto; padding:14px 24px; display:flex; flex-wrap:wrap; gap:10px 16px; justify-content:space-between; align-items:center; font-size:0.88rem;}
+  .scorebar .left{display:flex; align-items:center; gap:18px; flex-wrap:wrap;}
+  .scorebar .tally{color:var(--ink-soft);}
+  .scorebar .tally b{color:var(--ink); font-weight:600;}
+  .scorebar .right-controls{display:flex; gap:8px; align-items:center; flex-wrap:wrap;}
+  .btn{background:var(--surface); border:1px solid var(--border-strong); border-radius:6px; padding:7px 14px; font-size:0.83rem; color:var(--ink-soft); cursor:pointer; font-family:var(--serif);}
+  .btn:hover{border-color:var(--accent); color:var(--accent);}
+  .btn.primary{border-color:var(--accent); color:#fff; background:var(--accent);}
+  .btn.primary:hover{opacity:0.88; color:#fff;}
+  .btn:disabled{opacity:0.4; cursor:default;}
+  .btn:disabled:hover{border-color:var(--border-strong); color:var(--ink-soft); opacity:0.4;}
+  .btn.active-mode{background:var(--accent); color:#fff; border-color:var(--accent);}
+
+  .review-banner{max-width:1000px; margin:20px auto 0; padding:0 24px; display:none;}
+  .review-banner.show{display:block;}
+  .review-banner .box{border:1px solid var(--accent); background:var(--accent-wash); border-radius:8px; padding:14px 18px; font-size:0.92rem; display:flex; justify-content:space-between; align-items:center; gap:16px; flex-wrap:wrap;}
+  .review-banner .box b{font-weight:600; font-size:1.02rem;}
+
+  main{max-width:1000px; margin:0 auto; padding:20px 24px 0;}
+
+  .qhead{display:flex; align-items:baseline; gap:12px; margin-bottom:12px;}
+  .qnum{flex:none; width:27px; height:27px; border-radius:50%; border:1px solid var(--ink); display:flex; align-items:center; justify-content:center; font-size:0.82rem; transition:background 0.15s, color 0.15s, border-color .15s; user-select:none;}
+  .qtag{font-size:0.82rem; color:var(--ink-soft);}
+  .qchap{flex:none; font-size:0.82rem; color:var(--ink-soft); white-space:nowrap;}
+  .qchap + .qtag::before{content:"· ";}
+  .qchap + .qtag{margin-left:-6px;}
+  .retry-pill{font-size:0.72rem; color:var(--wrong); background:var(--wrong-bg); border:1px solid var(--wrong); border-radius:20px; padding:1px 10px; margin-left:auto;}
+  .qtext{font-size:1.2rem; font-weight:500; margin:0 0 16px; max-width:62ch;}
+
+  .edtools{display:flex; align-items:center; gap:12px; max-width:62ch; margin-bottom:8px; flex-wrap:wrap;}
+  .edtools .boldbtn{padding:4px 12px;}
+  .edtools .boldbtn b{font-weight:800;}
+  .edhint{font-size:0.8rem; color:var(--ink-soft);}
+  .answer{display:block; width:100%; max-width:62ch; min-height:5em; background:var(--surface); color:var(--ink); border:none; border-radius:0; padding:4px 0; font-family:var(--serif); font-size:1rem; line-height:1.65; outline:none; overflow-wrap:anywhere;}
+  .answer:focus{box-shadow:none;}
+  .answer:empty::before{content:attr(data-placeholder); color:var(--ink-soft); opacity:0.7;}
+  .answer b, .model b{font-weight:800;}
+  .mk{text-decoration-line:underline; text-decoration-thickness:1px; text-underline-offset:3px;}
+  .mk.ok{text-decoration-color:var(--mk-ok);}
+  .mk.no{text-decoration-color:var(--mk-no);}
+.qsearch{margin-left:auto; margin-right:10px; position:relative; display:flex; align-items:center; gap:6px;}
+  .qsearch input{width:230px; font-family:var(--serif); font-size:0.85rem; color:var(--ink); background:none; border:none; border-bottom:1px solid var(--border-strong); border-radius:0; padding:4px 2px; outline:none;}
+  .qsearch input:focus{border-bottom-color:var(--accent);}
+  .qsearch input.bad{border-bottom-color:var(--wrong); background:none;}
+  .qsearch .qwarn{position:absolute; left:0; top:calc(100% + 3px); z-index:12; font-size:0.78rem; color:var(--wrong); white-space:nowrap; display:none;}
+  .qsearch .qwarn.show{display:block;}
+  .qsearch .text-toggle{visibility:hidden;}
+  .qsearch.active .text-toggle{visibility:visible;}
+  .actions{margin-top:12px; display:flex; gap:10px; align-items:center; flex-wrap:wrap;}
+  ul.kwlist{list-style:none; margin:10px 0 14px; padding:0; display:flex; flex-direction:column; gap:5px; font-size:0.95rem;}
+  ul.kwlist li{display:flex; gap:10px; align-items:baseline;}
+  ul.kwlist .mark{flex:none; width:1.2em; text-align:center; font-weight:700;}
+  ul.kwlist li.hit .mark{color:var(--correct);}
+  ul.kwlist li.miss .mark{color:var(--wrong);}
+  ul.kwlist li em{color:var(--ink-soft); font-size:0.85rem;}
+
+  .reviewbox{margin-top:18px; max-width:62ch;}
+  .rv-label{font-size:0.76rem; letter-spacing:0.06em; text-transform:uppercase; color:var(--ink-soft); margin-bottom:8px;}
+  .model{background:none; border:none; border-radius:0; padding:0; margin-bottom:16px;}
+  .model p{margin:0; font-size:0.97rem;}
+  ul.points{list-style:none; margin:0; padding:0; display:flex; flex-direction:column; gap:7px;}
+  ul.points label{display:flex; gap:11px; align-items:flex-start; background:var(--surface); border:1px solid var(--border-strong); border-radius:7px; padding:9px 13px; cursor:pointer; font-size:0.95rem; line-height:1.5;}
+  ul.points label:hover{border-color:var(--ink);}
+  ul.points input{margin-top:5px; flex:none; accent-color:var(--accent);}
+  ul.points li.on label{background:var(--correct-bg); border-color:var(--correct);}
+
+  .feedback{margin-top:12px; margin-bottom:10px; font-size:0.92rem; color:var(--ink-soft); display:none;}
+  .feedback.show{display:block;}
+  .feedback .verdict{font-weight:650; margin-right:4px;}
+  .feedback.right .verdict{color:var(--correct);}
+  .feedback.part .verdict{color:var(--part);}
+  .feedback.wrong .verdict{color:var(--wrong);}
+
+  .margin{padding-top:2px; display:none;}
+  body.show-keywords .margin{display:block;}
+  .margin-label{font-size:0.76rem; color:var(--ink-soft); margin-bottom:9px;}
+  .margin ul{margin:0; padding-left:16px; list-style:disc;}
+  .margin li{font-style:italic; font-size:0.9rem; color:var(--ink-soft); margin-bottom:8px; line-height:1.5;}
+  .margin li b{font-style:normal; color:var(--ink); font-weight:600;}
+  .margin.figbox{display:block; align-self:center; margin-block:34px;}
+  .figbox .fig{cursor:zoom-in; border:1px solid var(--border); border-radius:6px; padding:8px; background:var(--surface);}
+  .figbox .fig:hover{border-color:var(--accent);}
+  .fig table{border-collapse:collapse; width:100%; font-size:0.82rem; color:var(--ink);}
+  .fig th, .fig td{border:1px solid var(--border-strong); padding:4px 8px; text-align:center;}
+  .fig th{background:var(--accent-wash); font-weight:600;}
+  .lightbox{position:fixed; inset:0; z-index:40; background:rgba(15,20,30,0.78); display:none; align-items:center; justify-content:center; padding:24px; cursor:zoom-out;}
+  .lightbox.show{display:flex;}
+  .lightbox .lb-body{background:var(--surface); border-radius:8px; padding:18px; max-width:94vw; max-height:92vh; overflow:auto;}
+  .lightbox .lb-body table{font-size:1.05rem; min-width:min(520px, 80vw); border-collapse:collapse;}
+  .lightbox .lb-body th, .lightbox .lb-body td{border:1px solid var(--border-strong); padding:6px 12px; text-align:center;}
+
+  .data-errors{max-width:1000px; margin:16px auto 0; padding:12px 18px; border:1px solid var(--wrong); background:var(--wrong-bg); color:var(--wrong); border-radius:8px; font-size:0.88rem;}
+  .data-errors ul{margin:6px 0 0; padding-left:18px;}
+  .empty-state{max-width:1000px; margin:0 auto; padding:60px 24px; text-align:center; color:var(--ink-soft);}
+  .empty-state .big{font-size:1.3rem; font-weight:500; color:var(--ink); margin-bottom:8px;}
+
+  .list-view .qrow{display:grid; grid-template-columns:1fr; gap:0 28px; background:var(--surface); border:1px solid var(--border); border-radius:10px; padding:28px 30px; margin-bottom:14px;}
+  body.show-keywords .list-view .qrow{grid-template-columns:1fr 230px;}
+  .list-view .qrow.active{border-color:var(--accent-border-soft);}
+  .list-view .qrow.active .qnum{background:var(--accent); color:#fff; border-color:var(--accent);}
+
+  .single-shell{background:var(--surface); border:1px solid var(--border); border-radius:10px; padding:22px 30px; min-height:0; display:flex; flex-direction:column;}
+  .single-progress{flex:none; display:flex; align-items:center; justify-content:space-between; font-size:0.85rem; color:var(--ink-soft); margin-bottom:10px;}
+  .single-progress-bar{flex:none; height:3px; background:var(--border); border-radius:2px; overflow:hidden; margin-bottom:16px;}
+  .single-progress-bar i{display:block; height:100%; background:var(--accent); transition:width .2s ease;}
+  .single-body{flex:1 1 auto; overflow-y:auto; min-height:0;}
+  .single-body .qrow{display:grid; grid-template-columns:1fr; gap:0 28px;}
+  .single-body .answer{min-height:3.4em;}
+  .single-body .qtext{margin-bottom:12px;}
+  body.show-keywords .single-body .qrow{grid-template-columns:1fr 230px;}
+  body .list-view .qrow.has-fig, body .single-body .qrow.has-fig{grid-template-columns:1fr 300px;}
+  .single-body .qrow.active .qnum{background:var(--accent); color:#fff; border-color:var(--accent);}
+  .single-nav{flex:none; display:flex; align-items:center; justify-content:space-between; gap:12px; padding-top:14px; margin-top:12px; border-top:1px solid var(--border);}
+
+  @media (max-width:720px){
+    header h1{font-size:2.2rem;}
+    .list-view .qrow, body.show-keywords .list-view .qrow{grid-template-columns:1fr; padding:22px 18px;}
+    .single-body .qrow, body.show-keywords .single-body .qrow{grid-template-columns:1fr;}
+    body .list-view .qrow.has-fig, body .single-body .qrow.has-fig{grid-template-columns:1fr;}
+    .margin{border-top:1px dashed var(--border); margin-top:14px; padding-top:12px;}
+    .single-shell{min-height:0; padding:22px 18px;}
+  }
+  footer{max-width:1000px; margin:32px auto 0; padding:0 24px; color:var(--ink-soft); font-size:0.85rem;}
+
+  .toc{display:none;}
+  .toc.on{display:block; max-width:1000px; margin:14px auto 0; padding:0 24px;}
+  .toc-inner{display:flex; flex-wrap:wrap; align-items:flex-end; gap:4px; border-bottom:1px solid var(--border-strong);}
+  .toc button{background:none; border:1px solid transparent; border-bottom:1px solid transparent; border-radius:9px 9px 0 0; padding:6px 16px; margin-bottom:-1px; font-family:var(--serif); font-size:0.9rem; line-height:1.3; color:var(--ink-soft); cursor:pointer;}
+  .toc button:hover{color:var(--ink);}
+  .toc button.active{color:var(--accent); background:var(--bg); border-color:var(--border-strong); border-bottom-color:var(--bg); text-shadow:0.45px 0 0 currentColor, -0.45px 0 0 currentColor;}
+  .next-ch{display:flex; justify-content:flex-end; margin:4px 0 12px;}
+
+  :root{--memo-w:min(300px, 86vw);}
+  .memo{position:fixed; top:0; right:0; bottom:0; width:var(--memo-w); z-index:22; background:var(--surface); border-left:1px solid var(--border-strong); display:flex; flex-direction:column; transform:translateX(100%); transition:transform .2s ease; visibility:hidden;}
+  body.memo-open .memo{transform:none; visibility:visible;}
+  .memo-head{display:flex; align-items:center; justify-content:space-between; padding:16px 18px 10px; font-size:0.85rem; letter-spacing:0.08em; text-transform:uppercase; color:var(--ink-soft); border-bottom:1px solid var(--border);}
+  .memo-head .text-toggle{text-transform:none; letter-spacing:0;}
+  .memo-text{flex:1; overflow-y:auto; outline:none; white-space:pre-wrap; word-break:break-word; color:var(--ink); font-family:var(--serif); font-size:0.95rem; line-height:1.65; padding:14px 18px;}
+  .memo-text:empty::before{content:attr(data-placeholder); color:var(--ink-soft); opacity:0.6;}
+  .memo-text b{font-weight:700;}
+  .memo-head .memo-b{font-weight:700; text-decoration:none; margin-right:14px; font-size:0.95rem;}
+  .memo-tab{position:fixed; top:50%; right:0; z-index:22; transform:translateY(-50%); writing-mode:vertical-rl; background:var(--surface); border:1px solid var(--border-strong); border-right:none; border-radius:7px 0 0 7px; padding:14px 6px; font-family:var(--serif); font-size:0.82rem; letter-spacing:0.06em; color:var(--ink-soft); cursor:pointer;}
+  .memo-tab:hover{color:var(--accent); border-color:var(--accent);}
+  body.memo-open .memo-tab{display:none;}
+
+  .tip{position:fixed; z-index:30; transform:translateX(-50%); background:none; color:var(--ink); font-family:var(--serif); font-size:0.8rem; padding:0; opacity:0; pointer-events:none; transition:opacity .12s;}
+  .tip.show{opacity:1;}
+  .to-top{position:fixed; left:50%; bottom:22px; z-index:20; width:min(160px, calc(100vw - 48px)); text-align:center; background:var(--surface); border:1px solid var(--border-strong); border-radius:22px; padding:10px 0; font-family:var(--serif); font-size:0.88rem; color:var(--ink-soft); cursor:pointer; opacity:0; pointer-events:none; transform:translate(-50%, 6px); transition:opacity .25s, transform .25s;}
+  .to-top.show{opacity:1; pointer-events:auto; transform:translate(-50%, 0);}
+  .to-top:hover{border-color:var(--accent); color:var(--accent);}
+
+  /* ---- print sheet: ALL questions, one running number, blank answer space (no lines); model answers only in "Print with solution" ---- */
+  #printSheet{display:none;}
+  @page{size:A4 portrait; margin:22mm 22mm 20mm; @bottom-center{content:counter(page); font-family:"Times New Roman",Times,serif; font-size:10pt;}}
+  @media print{
+    html, body{background:#fff !important; color:#000 !important; padding:0 !important; margin:0 !important;}
+    body > *:not(#printSheet){display:none !important;}
+    #printSheet{--ans-lines:2; display:block; font-family:"Times New Roman",Times,"Noto Serif KR",serif; font-size:11pt; line-height:1.55; color:#000;}
+    #printSheet h1{font-size:14pt; font-weight:700; text-align:center; margin:0 0 9mm;}
+    #printSheet h2{font-size:11pt; font-weight:700; margin:7mm 0 3mm; break-after:avoid; page-break-after:avoid;}
+    #printSheet .p-q{break-inside:avoid; page-break-inside:avoid; margin:0; text-align:justify;}
+    #printSheet .p-q p{margin:0;}
+    #printSheet .p-fig{margin:2mm 0 3mm;}
+    #printSheet .p-fig table{border-collapse:collapse; font-size:10pt;}
+    #printSheet .p-fig th, #printSheet .p-fig td{border:1px solid #000; padding:1mm 4mm; text-align:center;}
+    #printSheet .p-blank{height:calc(var(--ans-lines) * 1.55em); border:0;}
+    #printSheet .p-sol{display:none;}
+
+    body.print-solution #printSheet .p-sol{display:block; margin-top:1.5mm; padding-left:5mm; border-left:0.6mm solid #000; font-size:10.5pt; text-align:left;}
+    body.print-solution #printSheet .p-sol b{font-weight:700;}
+    #printSheet .p-kw{font-size:9.5pt; margin-top:1mm !important;}
+  }
+
+/* Revised continuous print layout and vertical-order answer key. */
+#printSheet .p-answer-key{display:none;}
+@media print{
+  #printSheet .p-fig{max-width:100%; break-inside:avoid;}
+  #printSheet .p-fig table{width:auto; max-width:100%; margin:0 auto; table-layout:auto; font-size:9pt;}
+  #printSheet .p-fig th, #printSheet .p-fig td{padding:1mm 2mm; overflow-wrap:anywhere;}
+  #printSheet .p-answer-key{display:none;}
+  body.print-solution #printSheet .p-answer-key{display:block; break-before:page;}
+  #printSheet .p-answer-columns{display:flex; align-items:flex-start; gap:3mm;}
+  #printSheet .p-answer-column{flex:1 1 0; min-width:0;}
+  #printSheet .p-key-item{--key-lh:1; font-size:10pt; line-height:var(--key-lh); margin:0 0 calc(var(--key-lh) * 1em); overflow-wrap:anywhere; break-inside:avoid;}   /* line spacing 1 inside an answer; exactly one blank line between answers */
+  #printSheet .p-key-item code, #printSheet .p-key-item sub, #printSheet .p-key-item sup{line-height:0;}   /* inline code / sub / sup must not stretch the line */
+  #printSheet .p-qchap{font-weight:700; margin-right:1.5mm;}
+  #printSheet .p-key-item p{margin:0;}
+  #printSheet .p-key-item .p-kw{font-size:inherit; margin-top:0 !important;}
+}
+
+  .qflag{position:absolute; top:31px; right:30px; margin:0; display:inline-flex; align-items:center; gap:6px; font-size:0.82rem; color:var(--ink-soft); cursor:pointer; user-select:none; white-space:nowrap;}
+  .qflag input{margin:0; width:15px; height:15px; accent-color:var(--accent); cursor:pointer;}
+  .qflag:hover{color:var(--accent);}
+  .qflag.on{color:var(--accent);}
+  .codebox{margin:0 0 16px; padding:0; background:none; border:none; font-family:ui-monospace,SFMono-Regular,Consolas,"D2Coding",Menlo,monospace; font-size:0.9rem; line-height:1.55; white-space:pre-wrap; overflow-wrap:anywhere; color:var(--ink);}
+  :root{--c-com:#6a737d; --c-str:#22863a; --c-num:#b45309; --c-kw:#8250df; --c-fn:#0550ae; --c-arg:#0f766e; --c-op:#c2185b;}
+  html.dark{--c-com:#8b949e; --c-str:#7ee787; --c-num:#ffa657; --c-kw:#d2a8ff; --c-fn:#79c0ff; --c-arg:#56d4c4; --c-op:#ff7b9c;}
+  code.ic{font-family:ui-monospace,SFMono-Regular,Consolas,"D2Coding",Menlo,monospace; font-size:0.92em; background:none; padding:0; color:inherit;}
+  .hl-com{color:var(--c-com); font-style:italic;} .hl-str{color:var(--c-str);} .hl-num{color:var(--c-num);} .hl-kw{color:var(--c-kw); font-weight:600;}
+  .hl-fn{color:var(--c-fn);} .hl-arg{color:var(--c-arg);} .hl-op{color:var(--c-op);}
+  @media print{ #printSheet .p-code{font-family:Consolas,Menlo,"Courier New",monospace; font-size:9.5pt; line-height:1.35; white-space:pre-wrap; margin:1.5mm 0 2mm; break-inside:avoid;} }
+/* v4: Review box is pinned to the card's top-right corner in every layout; figure / table / image is centred in the right column. */
+.qhead{padding-right:88px;}
+.single-body .qrow .qflag{top:3px; right:0;}
+.figbox .fig{text-align:center;}
+.fig img{display:block; max-width:100%; height:auto; margin:0 auto;}
+.lightbox .lb-body img{display:block; max-width:90vw; max-height:84vh;}
+@media (max-width:720px){
+  .list-view .qrow .qflag{top:25px; right:18px;}
+  .margin.figbox{margin-block:14px;}
+}
+@media print{ #printSheet .p-fig img{max-width:100%; max-height:75mm;} }
+</style>
+</head>
+<body>
+
+<header>
+  <h1 id="quizTitle">Quiz Title</h1>
+  <p class="sub" id="quizSub">Course / scope description</p>
+  <details class="howto">
+    <summary>How to use</summary>
+    <div class="howto-body">
+      <span><span class="key">Print</span> / <span class="key">Print with solution</span> print the questions currently shown: a chapter, all chapters, Review Questions, or the questions found by the search</span>
+      <span><span class="key">Enter</span> check answer · <span class="key">Tab</span> next question · <span class="key">Ctrl</span> + <span class="key">Enter</span> new line · <span class="key">Enter</span> after checking: next question (re-check if you edited the answer) · <span class="key">Ctrl</span> + <span class="key">Q</span> memo</span>
+    </div>
+  </details>
+  <div class="header-toggles">
+    <span class="icons"><button class="icon-btn" id="menuBtn" type="button" aria-expanded="false" aria-controls="settings" title="Settings">☰</button></span>
+    <button class="text-toggle" id="allChBtn" type="button">All chapters</button>
+    <button class="text-toggle" id="printBtn" type="button">Print</button>
+    <button class="text-toggle" id="printSolBtn" type="button">Print with solution</button>
+    <form class="qsearch" id="qSearchForm" autocomplete="off">
+      <button class="text-toggle" id="qClear" type="button">Clear</button>
+      <input id="qSearch" type="text" inputmode="numeric" placeholder="Question no.  e.g. 1, 2, 3, 15" aria-label="Question numbers">
+      <div class="qwarn" id="qWarn" role="alert"></div>
+    </form>
+  <div class="settings" id="settings">
+    <button class="sw" id="layoutToggleBtn" type="button"><span class="box"></span>Single question view</button>
+    <button class="sw" id="keywordsToggleBtn" type="button"><span class="box"></span>Show hints</button>
+      <button class="sw" id="darkSw" type="button"><span class="box"></span>Night mode</button>
+  </div>
+  </div>
+
+</header>
+
+<nav class="toc" id="toc" aria-label="Chapters"></nav>
+
+<div class="scorebar">
+  <div class="left">
+    <div class="tally">Checked <b id="answeredCount">0</b>/<span id="totalCount">0</span> · Passed <b id="correctCount">0</b><span id="ptsWrap" hidden> · Keywords <b id="ptsCount">0</b></span></div>
+    <div class="tally" id="modeLabel"></div>
+  </div>
+  <div class="right-controls">
+    <button class="btn" id="allViewBtn">All Questions</button>
+    <button class="btn primary" id="reviewBtn" disabled>Review Not Passed (<span id="wrongCount">0</span>)</button>
+    <button class="btn" id="flagBtn" disabled>Marked for Review (0)</button>
+    <button class="btn" id="copyMissedBtn" disabled>Copy Not Passed #</button>
+    <button class="btn" id="saveBtn">Save</button>
+    <button class="btn" id="resetBtn">Restart</button>
+  </div>
+</div>
+
+<div class="review-banner" id="reviewBanner">
+  <div class="box">
+    <span><b id="reviewBannerText"></b></span>
+    <span id="reviewBannerActions"></span>
+  </div>
+</div>
+
+<main id="quiz"></main>
+
+<button class="memo-tab" id="memoTab" type="button" aria-expanded="false">Memo</button>
+<aside class="memo" id="memo" aria-label="Memo">
+  <div class="memo-head"><span>Memo</span><span><button class="text-toggle memo-b" id="memoBold" type="button" title="Bold (Ctrl+B)">B</button><button class="text-toggle" id="memoClose" type="button">Close</button></span></div>
+  <div class="memo-text" id="memoText" contenteditable="true" spellcheck="false" data-placeholder="Write notes here…  Ctrl+B bold"></div>
+</aside>
+
+<div id="printSheet"></div>
+<div class="lightbox" id="lightbox"><div class="lb-body" id="lbBody"></div></div>
+<button class="to-top" id="toTopBtn" type="button" aria-label="Back to top">↑ Top</button>
+<footer id="quizFooter"></footer>
+
+<script>
+const esc = t => String(t).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+const MATH = { alpha:'α', beta:'β', gamma:'γ', delta:'δ', epsilon:'ε', theta:'θ', lambda:'λ', mu:'μ', pi:'π', rho:'ρ', sigma:'σ', tau:'τ', phi:'φ', omega:'ω',
+  Delta:'Δ', Sigma:'Σ', Pi:'Π', Omega:'Ω', times:'×', div:'÷', pm:'±', le:'≤', ge:'≥', ne:'≠', approx:'≈', infty:'∞', to:'→', sqrt:'√', cdot:'·', deg:'°' };
+const fm0 = t => esc(t)
+  .replace(/\\([_^])/g, (m, c) => c === '_' ? '&#95;' : '&#94;')
+  .replace(/\\([A-Za-z]+)/g, (m, k) => MATH[k] || m)
+  .replace(/\^(\{[^}]*\}|-?[0-9A-Za-z])/g, (m, s) => `<sup>${s.replace(/^\{|\}$/g, '')}</sup>`)
+  .replace(/_(\{[^}]*\}|[0-9A-Za-z])/g, (m, s) => `<sub>${s.replace(/^\{|\}$/g, '')}</sub>`);
+const fm = t => String(t).split(/`([^`]+)`/).map((p, i) => i % 2 ? `<code class="ic">${esc(p)}</code>` : fm0(p)).join('');   // `code` -> monospace
+const fmb = t => fm(t).replace(/\*\*(.+?)\*\*/g, '<b>$1</b>');          // **keyword** -> bold in model answers
+
+function parseQuizData(raw){
+  const blocks = raw.replace(/\r\n?/g, '\n').trim().split(/\n===\n?/).filter(b => b.trim());
+  const meta = {};
+  blocks.shift().split('\n').forEach(l => { const i = l.indexOf(':'); if(i > 0) meta[l.slice(0, i).trim()] = l.slice(i + 1).trim(); });
+  let prevTag = '';
+  const questions = [], chapters = [], errs = [];
+  if(!meta.title) errs.push('meta block: title: is missing');
+  blocks.forEach(block => {
+    const L = block.trim().split('\n');
+    if(L.length === 1 && L[0].startsWith('# ')){ chapters.push({ title: L[0].slice(2).trim(), idx: [] }); return; }
+    if(!chapters.length) chapters.push({ title: meta.title || 'Quiz', idx: [] });
+    const ch = chapters.length - 1;
+    chapters[ch].seen = (chapters[ch].seen || 0) + 1;
+    const who = `${chapters[ch].title} · Q${chapters[ch].seen}`;
+    if(L.length < 4){ errs.push(`${who}: needs at least 4 lines (tag, question, keywords, model answer), found ${L.length} - check for a missing ===`); return; }
+    if(L[0].trim() === '-' && !prevTag) errs.push(`${who}: tag "-" has no previous tag`);
+    const tag = L[0].trim() === '-' ? prevTag : L[0].trim();
+    prevTag = tag;
+    const isSelf = L[2].trim() === '~';                      // "~" = self-check question: not graded, the answer is only shown
+    const kws = isSelf ? [] : L[2].split('|').map(g => g.split(' / ').map(s => s.trim()).filter(Boolean));
+    if(!isSelf && kws.length < 2 || kws.length > 8) errs.push(`${who}: ${kws.length} keyword groups (use 2-8)`);
+    if(kws.some(g => !g.length) || !L[1].trim() || !L[3].trim()) errs.push(`${who}: empty keyword group, question or model answer`);
+    if(!/\*\*.+?\*\*/.test(L[3])) errs.push(`${who}: model answer has no **bold** keywords`);
+    const extra = L.slice(4), figLine = extra.find(l => /^@(tbl|img)\s/.test(l)), codeLine = extra.find(l => l.startsWith('@code')), termLine = extra.find(l => !l.startsWith('@')) || '';
+    let fig = null;
+    const fmt = figLine && figLine.match(/^@(tbl|img)\s+(.+)$/);
+    extra.filter(l => l.startsWith('@') && !/^@(tbl|img|code)\s/.test(l)).forEach(l => errs.push(`${who}: unknown line starting with @ (use "@tbl ..." or "@code line1;;line2")`));
+    const code = codeLine ? codeLine.replace(/^@code\s+/, '').split(';;') : null;
+    if(fmt && fmt[1] === 'img') fig = { type: 'img', src: fmt[2].trim() };
+    else if(fmt){ const rr = fmt[2].split(';;').map(r => r.split('|').length); if(rr.length < 2 || new Set(rr).size !== 1) errs.push(`${who}: @tbl needs a header row + at least 1 row, same number of columns`);
+      fig = { type: 'tbl', rows: fmt[2].split(';;').map(r => r.split('|').map(c => c.trim())) }; }
+    const vocab = termLine.split(';').map(x => x.trim()).filter(Boolean).map(pair => { const i = pair.indexOf('='); return i < 0 ? [pair, ''] : [pair.slice(0, i).trim(), pair.slice(i + 1).trim()]; });
+    chapters[ch].idx.push(questions.length);
+    questions.push({ tag, self: isSelf, text: L[1].trim(), kws, model: L[3].trim(), vocab, fig, code, ch, n: questions.length + 1 });   // n = running number across ALL chapters
+  });
+  chapters.filter(c => !c.idx.length).forEach(c => errs.push(`chapter "${c.title}" has no questions`));
+  if(!questions.length) errs.push('no questions found');
+  const good = chapters.filter(c => c.idx.length);
+  return { meta, questions, chapters: good.length ? good : [{ title: meta.title || 'Quiz', idx: [] }], errs };
+}
+
+const PARSED = parseQuizData(document.getElementById('quizData').textContent);
+const META = PARSED.meta, QUIZ_TITLE = META.title || 'Quiz', QUESTIONS = PARSED.questions, CHAPTERS = PARSED.chapters;
+if(PARSED.errs.length){
+  const box = document.createElement('div');
+  box.className = 'data-errors';
+  box.innerHTML = '<b>Quiz data needs fixing</b><ul>' + PARSED.errs.slice(0, 10).map(e => `<li>${esc(e)}</li>`).join('') + '</ul>' + (PARSED.errs.length > 10 ? `<div>… and ${PARSED.errs.length - 10} more</div>` : '');
+  document.body.insertBefore(box, document.querySelector('header'));
+}
+let activeCh = 0, viewAll = false;
+let pickNums = null;                                  // question numbers typed in the search box (null = all)
+const baseIdx = () => viewAll ? QUESTIONS.map((_, i) => i) : CHAPTERS[activeCh].idx;
+const scopeIdx = () => pickNums ? baseIdx().filter(i => pickNums.has(QUESTIONS[i].n)) : baseIdx();
+
+document.getElementById('quizTitle').textContent = QUIZ_TITLE;
+document.getElementById('quizSub').textContent = META.sub || '';
+document.title = QUIZ_TITLE;
+document.getElementById('quizFooter').textContent = `Source: ${META.subject || ''} — ${META.textbook || ''}`;
+
+let current = 0;
+let filterMode = 'all', layoutMode = 'list', reviewList = [];
+const N = QUESTIONS.length;
+const PASS = 0.6;                                          // share of keyword groups needed to pass
+let drafts = new Array(N).fill('');                        // the student's answer (sanitised HTML: text, <b>, <br>)
+let snap = new Array(N).fill(null);                        // the answer as it was when "Check answer" was pressed
+let gradeMode = 'all';                                    // 'bold' = only bold text is graded, 'all' = the whole answer
+const missed = new Set();
+const flagged = new Set();                                 // questions ticked "Review" (top right of each question)
+let flagList = [];                                         // marked questions shown in "Marked for Review" mode (kept while unticking)
+
+/* ---------- rich answer helpers ---------- */
+function richHtml(node){                                   // keep only text, <b> and line breaks
+  const out = n => [...n.childNodes].map(c => c.nodeType === 3 ? esc(c.nodeValue.replace(/​/g, '')) : c.nodeName === 'BR' ? '<br>' :
+    ['B', 'STRONG'].includes(c.nodeName) ? `<b>${out(c)}</b>` : (c.nodeName === 'DIV' || c.nodeName === 'P') ? '<div>' + out(c) + '</div>' : out(c)).join('');
+  return out(node);
+}
+function cleanHtml(s){ const d = document.createElement('div'); d.innerHTML = s; return richHtml(d); }
+function htmlToText(html){ const d = document.createElement('div'); d.innerHTML = html.replace(/<br\s*\/?>/gi, ' ').replace(/<\/(div|p)>/gi, ' '); return d.textContent; }
+function boldSegs(html){ const d = document.createElement('div'); d.innerHTML = html; return [...d.querySelectorAll('b,strong')].map(e => e.textContent); }
+
+/* ---------- keyword matching ---------- */
+const norm = s => s.toLowerCase().replace(/[^a-z0-9가-힣]/g, '');
+const reEsc = s => s.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+function altMatch(alt, texts){
+  const n = norm(alt);
+  if(!n) return false;
+  if(/^[\x00-\x7f]+$/.test(alt) && n.length <= 4){          // short English term (ROE, APR, S&P): whole word only
+    const re = new RegExp('(^|[^a-z0-9])' + reEsc(alt.toLowerCase()).replace(/\s+/g, '\\s*') + '($|[^a-z0-9])', 'i');
+    return texts.some(t => re.test(t));
+  }
+  return texts.some(t => norm(t).includes(n));
+}
+function grade(qi){
+  const h = snap[qi];
+  if(h === null) return null;
+  if(QUESTIONS[qi].self) return { hits: [], found: [], n: 0, t: 0, self: true };
+  const full = htmlToText(h), segs = gradeMode === 'bold' ? boldSegs(h) : [full];
+  const hits = [], found = [];
+  QUESTIONS[qi].kws.forEach(g => { hits.push(g.some(a => altMatch(a, segs))); found.push(g.some(a => altMatch(a, [full]))); });
+  return { hits, found, n: hits.filter(Boolean).length, t: hits.length };
+}
+// 2 = passed (>= PASS of the keywords), 1 = partly, 0 = none, null = not checked yet
+function resultOf(qi){ const g = grade(qi); if(!g) return null; if(g.self) return 2; const r = g.n / g.t; return r >= PASS ? 2 : g.n > 0 ? 1 : 0; }
+
+const quizEl = document.getElementById('quiz');
+const answeredCountEl = document.getElementById('answeredCount'), correctCountEl = document.getElementById('correctCount'), ptsCountEl = document.getElementById('ptsCount'), wrongCountEl = document.getElementById('wrongCount');
+const reviewBtn = document.getElementById('reviewBtn'), allViewBtn = document.getElementById('allViewBtn'), layoutToggleBtn = document.getElementById('layoutToggleBtn');
+const keywordsToggleBtn = document.getElementById('keywordsToggleBtn'), darkModeBtn = document.getElementById('darkModeBtn'), resetBtn = document.getElementById('resetBtn');
+const copyMissedBtn = document.getElementById('copyMissedBtn'), toTopBtn = document.getElementById('toTopBtn'), modeLabel = document.getElementById('modeLabel');
+
+const reviewBanner = document.getElementById('reviewBanner'), reviewBannerText = document.getElementById('reviewBannerText'), reviewBannerActions = document.getElementById('reviewBannerActions');
+
+const wrongIndices = () => scopeIdx().filter(i => snap[i] !== null && resultOf(i) < 2);
+const visibleIndices = () => filterMode === 'review' ? reviewList : filterMode === 'flagged' ? flagList : scopeIdx();
+
+function figHTML(f){ if(f.type === 'img') return `<img src="${esc(f.src)}" alt="Figure">`; return '<table>' + f.rows.map((r, i) => '<tr>' + r.map(c => i ? `<td>${fm(c)}</td>` : `<th>${fm(c)}</th>`).join('') + '</tr>').join('') + '</table>'; }
+const lightbox = document.getElementById('lightbox'), lbBody = document.getElementById('lbBody');
+const closeLightbox = () => lightbox.classList.remove('show');
+lightbox.addEventListener('click', closeLightbox);
+function openLightbox(f){ lbBody.innerHTML = figHTML(f); lightbox.classList.add('show'); }
+
+
+/* ---------- keyword marks: green underline = keyword found in the student's answer; red underline = keyword missing (shown in the model answer) ---------- */
+function findRange(alt, full){                             // [start, end) of the first match of one wording in the original text, or null
+  const n = norm(alt);
+  if(!n) return null;
+  if(/^[\x00-\x7f]+$/.test(alt) && n.length <= 4){
+    const m = new RegExp('(^|[^a-z0-9])' + reEsc(alt.toLowerCase()).replace(/\s+/g, '\\s*') + '($|[^a-z0-9])', 'i').exec(full);
+    return m ? [m.index + m[1].length, m.index + m[0].length - m[2].length] : null;
+  }
+  let ns = '';
+  const idx = [];
+  for(let i = 0; i < full.length; i++){ const c = full[i].toLowerCase(); if(/[a-z0-9가-힣]/.test(c)){ ns += c; idx.push(i); } }
+  const p = ns.indexOf(n);
+  return p < 0 ? null : [idx[p], idx[p + n.length - 1] + 1];
+}
+function markHits(ed, qi){
+  const g = grade(qi);
+  if(!g) return;
+  const nodes = [], w = document.createTreeWalker(ed, NodeFilter.SHOW_TEXT);
+  while(w.nextNode()) nodes.push(w.currentNode);
+  const starts = [];
+  let full = '';
+  nodes.forEach(n => { starts.push(full.length); full += n.nodeValue + '\n'; });
+  const ranges = [];
+  QUESTIONS[qi].kws.forEach((grp, i) => {
+    if(!g.hits[i]) return;
+    for(const a of grp){ const r = findRange(a, full); if(r){ ranges.push(r); break; } }
+  });
+  ranges.sort((a, b) => b[0] - a[0]);
+  let limit = Infinity;                                    // skip a range that overlaps one already marked
+  ranges.forEach(([s, e]) => {
+    if(e > limit) return;
+    limit = s;
+    for(let k = nodes.length - 1; k >= 0; k--){            // underline the part of the range inside each text node
+      const ns = starts[k], len = nodes[k].nodeValue.length;
+      const a = Math.max(s, ns) - ns, b = Math.min(e, ns + len) - ns;
+      if(b <= a) continue;
+      let node = nodes[k];
+      if(b < len) node.splitText(b);
+      if(a > 0) node = node.splitText(a);
+      const sp = document.createElement('span');
+      sp.className = 'mk ok';
+      node.parentNode.insertBefore(sp, node);
+      sp.appendChild(node);
+    }
+  });
+}
+const stripTags = h => h.replace(/<[^>]+>/g, '').replace(/&lt;/g, '<').replace(/&gt;/g, '>').replace(/&amp;/g, '&');
+function modelMarked(q, g){                                // answer text with a red underline under each keyword the student missed
+  return fm(q.model).replace(/\*\*(.+?)\*\*/g, (m, seg) => {
+    const gi = q.kws.findIndex(grp => grp.some(a => altMatch(a, [stripTags(seg)])));
+    return gi > -1 && !g.hits[gi] ? `<b><span class="mk no">${seg}</span></b>` : `<b>${seg}</b>`;
+  });
+}
+
+/* ---------- R syntax colouring for @code lines (comments, strings, numbers, keywords, function names, named arguments, operators) ---------- */
+function rHL(src){
+  const RX = /(#.*$)|("(?:[^"\\]|\\.)*"|'(?:[^'\\]|\\.)*')|(\b\d+\.?\d*(?:[eE][-+]?\d+)?\b)|(\b(?:function|if|else|for|while|repeat|in|break|next|return|TRUE|FALSE|NULL|NA|NaN|Inf)\b)|([A-Za-z_.][\w.]*)(?=\s*\()|([A-Za-z_.][\w.]*)(?=\s*=(?!=))|(<-|->|%[^%\s]*%|\|>|[~$:])/g;
+  return src.split('\n').map(line => {
+    let out = '', last = 0, m;
+    RX.lastIndex = 0;
+    while((m = RX.exec(line))){
+      out += esc(line.slice(last, m.index));
+      const cls = m[1] ? 'com' : m[2] ? 'str' : m[3] ? 'num' : m[4] ? 'kw' : m[5] ? 'fn' : m[6] ? 'arg' : 'op';
+      out += `<span class="hl-${cls}">${esc(m[0])}</span>`;
+      last = m.index + m[0].length;
+    }
+    return out + esc(line.slice(last));
+  }).join('\n');
+}
+function qaText(qi){
+  const q = QUESTIONS[qi], g = grade(qi);
+  const ch = CHAPTERS.length > 1 ? `[${CHAPTERS[q.ch].title}] ` : '';
+  return `${ch}Q${q.n}. ${q.text}\n` + (q.code ? q.code.join('\n') + '\n' : '') + (drafts[qi].trim() ? `My answer: ${htmlToText(drafts[qi]).trim()}\n` : '') +
+    (g && !g.self ? `Keywords (${g.n}/${g.t}):\n` + q.kws.map((k, i) => `${g.hits[i] ? '[x]' : '[ ]'} ${k[0]}`).join('\n') + '\n' : '') +
+    `Answer: ${q.model.replace(/\*\*/g, '')}`;
+}
+
+const chLabel = ci => { const t = CHAPTERS[ci].title, m = /^\s*(?:chapter|ch\.?|week|lecture)\s*(\d+)/i.exec(t); return m ? 'Ch.' + m[1] : t; };   // "Chapter 3: Markets" -> "Ch.3"
+function verdictHTML(g){
+  const r = g.n / g.t;
+  const label = r >= PASS ? 'Passed.' : g.n > 0 ? 'Partly covered.' : '';
+  return { cls: 'feedback show ' + (r >= PASS ? 'right' : g.n > 0 ? 'part' : 'wrong'), html: (label ? `<span class="verdict">${label}</span> ` : '') + `${g.n} of ${g.t} keywords`  };
+}
+
+function buildRow(qi, { showRetryPill }){
+  const q = QUESTIONS[qi];
+  const row = document.createElement('div');
+  row.className = 'qrow' + (qi === current ? ' active' : '') + (flagged.has(qi) ? ' flagged' : '') + (q.fig ? ' has-fig' : '');
+  row.dataset.index = qi;
+  if(layoutMode === 'list'){
+    row.addEventListener('click', () => {
+      if(String(window.getSelection())) return;
+      if(current === qi) return;
+      current = qi;
+      quizEl.querySelectorAll('.qrow').forEach(r => r.classList.toggle('active', Number(r.dataset.index) === qi));
+      centerRow(row);                                      // selected question -> middle of the screen
+    });
+  }
+  const qmain = document.createElement('div');
+  qmain.className = 'qmain';
+
+  const qhead = document.createElement('div');
+  qhead.className = 'qhead';
+  qhead.innerHTML = `<div class="qnum">${q.n}</div>` + (CHAPTERS.length > 1 ? `<div class="qchap">${esc(chLabel(q.ch))}</div>` : '') + `<div class="qtag">${fm(q.tag)}</div>` + (showRetryPill ? `<span class="retry-pill">Retry</span>` : '');
+  const fl = document.createElement('label');
+  fl.className = 'qflag' + (flagged.has(qi) ? ' on' : '');
+  fl.title = 'Mark this question for review';
+  fl.innerHTML = `<input type="checkbox"${flagged.has(qi) ? ' checked' : ''}>Review`;
+  fl.addEventListener('click', e => e.stopPropagation());
+  fl.querySelector('input').addEventListener('change', e => {
+    e.target.checked ? flagged.add(qi) : flagged.delete(qi);
+    fl.classList.toggle('on', e.target.checked);
+    row.classList.toggle('flagged', e.target.checked);
+    updateChrome();
+  });
+  qhead.appendChild(fl);
+  qmain.appendChild(qhead);
+
+  const qtext = document.createElement('p');
+  qtext.className = 'qtext';
+  qtext.innerHTML = fm(q.text);
+  qmain.appendChild(qtext);
+  if(q.code){
+    const pre = document.createElement('pre');
+    pre.className = 'codebox';
+    pre.innerHTML = rHL(q.code.join('\n'));
+    qmain.appendChild(pre);
+  }
+
+
+  const ed = document.createElement('div');
+  ed.addEventListener('keydown', e => { if((e.ctrlKey || e.metaKey) && !e.altKey && e.key.toLowerCase() === 'b') e.preventDefault(); });   // no Ctrl+B: bold only with the B button
+  ed.className = 'answer';
+  ed.contentEditable = 'true';
+  ed.spellcheck = false;
+  ed.setAttribute('role', 'textbox'); ed.setAttribute('aria-multiline', 'true'); ed.setAttribute('aria-label', `Answer to question ${q.n}`);
+  ed.innerHTML = drafts[qi];
+  ed.addEventListener('input', () => { drafts[qi] = richHtml(ed); });
+  ed.addEventListener('paste', e => { e.preventDefault(); document.execCommand('insertText', false, (e.clipboardData || window.clipboardData).getData('text')); });
+  qmain.appendChild(ed);
+  if(snap[qi] !== null) markHits(ed, qi);
+
+  const act = document.createElement('div');
+  act.className = 'actions';
+  const checked = snap[qi] !== null;
+  const cb = document.createElement('button');
+  cb.type = 'button'; cb.className = 'btn primary'; cb.textContent = q.self ? 'Show answer' : checked ? 'Re-Check' : 'Check answer';
+  const doCheck = () => { drafts[qi] = richHtml(ed); snap[qi] = drafts[qi]; current = qi; render(); };
+  cb.addEventListener('click', e => { e.stopPropagation(); doCheck(); });
+  ed.addEventListener('keydown', e => {                     // Enter = check (or next question once checked); Ctrl+Enter = new line
+    if(e.key === 'Tab' && !e.ctrlKey && !e.altKey && !e.metaKey && !e.isComposing){       // Tab / Shift+Tab: next / previous question's answer box
+      const v = visibleIndices(), t = v.indexOf(qi) + (e.shiftKey ? -1 : 1);
+      if(v.indexOf(qi) > -1 && t >= 0 && t < v.length){ e.preventDefault(); drafts[qi] = richHtml(ed); setActive(v[t]); focusCurrent(); }
+      return;
+    }
+    if(e.key !== 'Enter' || e.isComposing || e.keyCode === 229 || e.altKey || e.shiftKey) return;
+    e.preventDefault();
+    if(e.ctrlKey || e.metaKey){ document.execCommand('insertLineBreak'); drafts[qi] = richHtml(ed); return; }
+    if(snap[qi] !== null && richHtml(ed) === snap[qi]){ goNext(); focusCurrent(); }   // checked and not edited since: next question
+    else doCheck();                                                                    // not checked yet, or edited after checking: (re-)check
+  });
+  act.appendChild(cb);
+  if(checked){
+    const rb = document.createElement('button');
+    rb.type = 'button'; rb.className = 'btn'; rb.textContent = 'Retry';
+    rb.addEventListener('click', e => { e.stopPropagation(); drafts[qi] = richHtml(ed); snap[qi] = null; render(); });
+    act.appendChild(rb);
+    const cp = document.createElement('button');
+    cp.type = 'button'; cp.className = 'btn'; cp.textContent = 'Copy';
+    cp.title = 'Copy question, my answer, keyword result and model answer';
+    cp.addEventListener('click', e => { e.stopPropagation(); copyText(qaText(qi)).then(() => showTip(cp, 'Copied'), () => showTip(cp, 'Copy failed')); });
+    act.appendChild(cp);
+  }
+  qmain.appendChild(act);
+
+  if(checked){
+    const g = grade(qi), v = g.self ? null : verdictHTML(g);
+    const rv = document.createElement('div');
+    rv.className = 'reviewbox';
+    const fb = document.createElement('div');
+    if(v){ fb.className = v.cls; fb.innerHTML = v.html; rv.appendChild(fb); }
+    const m = document.createElement('div');
+    m.className = 'model';
+    m.innerHTML = `<p>${g.self ? fmb(q.model) : modelMarked(q, g)}</p>`;
+    rv.appendChild(m);
+    qmain.appendChild(rv);
+  }
+  row.appendChild(qmain);
+
+  const margin = document.createElement('div');
+  margin.className = 'margin' + (q.fig ? ' figbox' : '');
+  if(q.fig){
+    margin.innerHTML = `<div class="fig" role="button">${figHTML(q.fig)}</div>`;
+    margin.querySelector('.fig').addEventListener('click', () => { if(!String(window.getSelection())) openLightbox(q.fig); });
+    row.appendChild(margin);
+    return row;
+  }
+  const label = document.createElement('div');
+  label.className = 'margin-label';
+  label.textContent = 'Hints';
+  margin.appendChild(label);
+  const ul = document.createElement('ul');
+  q.vocab.forEach(([term, def]) => { const li = document.createElement('li'); li.innerHTML = `<b>${fm(term)}</b>${def ? ' — ' + fm(def) : ''}`; ul.appendChild(li); });
+  margin.appendChild(ul);
+  row.appendChild(margin);
+  return row;
+}
+
+function render(){
+  ignoreScrollUntil = performance.now() + 400;
+  const scrollY0 = window.scrollY;
+  quizEl.innerHTML = '';
+  const visible = visibleIndices();
+  if(visible.length === 0){
+    const empty = document.createElement('div');
+    empty.className = 'empty-state';
+    empty.innerHTML = filterMode === 'flagged' ? `<div class="big">No questions marked for review.</div>`
+      : `<div class="big">Nothing to review.</div><div>Every checked question passed — switch back to "All Questions".</div>`;
+    quizEl.appendChild(empty);
+    updateChrome();
+    return;
+  }
+  if(layoutMode === 'single'){
+    quizEl.classList.remove('list-view');
+    const pos = Math.max(0, visible.indexOf(current));
+    const qi = visible[pos] !== undefined ? visible[pos] : visible[0];
+    current = qi;
+    const shell = document.createElement('div');
+    shell.className = 'single-shell';
+    const progress = document.createElement('div');
+    progress.className = 'single-progress';
+    progress.innerHTML = `<span>Question ${pos+1} of ${visible.length}</span><span>${[viewAll && CHAPTERS.length > 1 ? esc(CHAPTERS[QUESTIONS[qi].ch].title) : '', filterMode === 'review' ? 'Review mode' : ''].filter(Boolean).join(' · ')}</span>`;
+    shell.appendChild(progress);
+    const bar = document.createElement('div');
+    bar.className = 'single-progress-bar';
+    bar.innerHTML = `<i style="width:${((pos+1)/visible.length*100).toFixed(1)}%"></i>`;
+    shell.appendChild(bar);
+    const body = document.createElement('div');
+    body.className = 'single-body';
+    body.appendChild(buildRow(qi, { showRetryPill: filterMode === 'review' }));
+    shell.appendChild(body);
+    const nav = document.createElement('div');
+    nav.className = 'single-nav';
+    const prevBtn = document.createElement('button');
+    prevBtn.className = 'btn'; prevBtn.textContent = '← Previous'; prevBtn.disabled = pos === 0;
+    prevBtn.addEventListener('click', goPrev);
+    const nextBtn = document.createElement('button');
+    const nc = nextChapterIdx(), lastQ = pos === visible.length - 1;
+    nextBtn.className = 'btn primary'; nextBtn.textContent = lastQ && nc > -1 ? `Next chapter: ${chLabel(nc)} →` : 'Next →'; nextBtn.disabled = lastQ && nc < 0;
+    nextBtn.addEventListener('click', () => { if(lastQ && nc > -1) switchChapter(nc); else goNext(); });
+    nav.appendChild(prevBtn); nav.appendChild(nextBtn);
+    shell.appendChild(nav);
+    quizEl.appendChild(shell);
+  } else {
+    quizEl.classList.add('list-view');
+    let prevCh = -1;
+    visible.forEach(qi => {
+      if(viewAll && CHAPTERS.length > 1 && QUESTIONS[qi].ch !== prevCh){
+        const h = document.createElement('div'); h.className = 'ch-head'; h.textContent = CHAPTERS[QUESTIONS[qi].ch].title; quizEl.appendChild(h);
+      }
+      prevCh = QUESTIONS[qi].ch;
+      quizEl.appendChild(buildRow(qi, { showRetryPill: filterMode === 'review' }));
+    });
+    const nc = nextChapterIdx();
+    if(nc > -1){                                              // one chapter shown: button below its last question
+      const w = document.createElement('div'); w.className = 'next-ch';
+      const nb = document.createElement('button'); nb.type = 'button'; nb.className = 'btn primary'; nb.textContent = `Next chapter: ${chLabel(nc)} →`; nb.title = CHAPTERS[nc].title;
+      nb.addEventListener('click', () => switchChapter(nc));
+      w.appendChild(nb); quizEl.appendChild(w);
+    }
+    window.scrollTo(0, scrollY0);
+  }
+  updateChrome();
+}
+
+const nextChapterIdx = () => (!viewAll && !pickNums && filterMode === 'all' && CHAPTERS.length > 1 && activeCh < CHAPTERS.length - 1) ? activeCh + 1 : -1;
+function setActive(qi){
+  const visible = visibleIndices();
+  if(visible.length === 0) return;
+  if(!visible.includes(qi)) qi = visible[0];
+  current = qi;
+  render();
+  scrollToActive();
+}
+function smoothTop(){ ignoreScrollUntil = performance.now() + 1500; window.scrollTo({top:0, behavior:'smooth'}); }
+function centerRow(el){                                   // scroll a question to the middle of the screen (top below the score bar if it is taller than the screen)
+  if(!el || layoutMode === 'single') return;
+  const r = el.getBoundingClientRect(), bar = document.querySelector('.scorebar').offsetHeight;
+  const room = window.innerHeight - bar;
+  const top = r.height > room - 24 ? window.scrollY + r.top - bar - 12 : window.scrollY + r.top - bar - (room - r.height) / 2;
+  ignoreScrollUntil = performance.now() + 1200;
+  window.scrollTo({ top: Math.max(0, top), behavior: 'smooth' });
+}
+function scrollToActive(){
+  if(layoutMode === 'single') return;
+  centerRow(quizEl.querySelector(`.qrow[data-index="${current}"]`));
+}
+function focusCurrent(){ const ed = quizEl.querySelector(`.qrow[data-index="${current}"] .answer`); if(ed) ed.focus({ preventScroll: true }); }
+function goNext(){ const v = visibleIndices(), p = v.indexOf(current); if(p === -1){ if(v.length) setActive(v[0]); return; } if(p < v.length - 1) setActive(v[p+1]); }
+function goPrev(){ const v = visibleIndices(), p = v.indexOf(current); if(p > 0) setActive(v[p-1]); }
+
+function enterReviewMode(){
+  const wl = wrongIndices();
+  if(wl.length === 0) return;
+  reviewList = wl;
+  wl.forEach(i => { missed.add(i); snap[i] = null; });        // typed answers stay in the box
+  filterMode = 'review';
+  current = wl[0];
+  render();
+  scrollToActive();
+}
+function exitReviewMode(){ filterMode = 'all'; render(); if(layoutMode === 'list') smoothTop(); }
+
+function updateChrome(){
+  const ids = scopeIdx();
+  document.getElementById('totalCount').textContent = ids.length;
+  const done = ids.filter(i => snap[i] !== null);
+  answeredCountEl.textContent = done.length;
+  correctCountEl.textContent = ids.filter(i => resultOf(i) === 2 && !QUESTIONS[i].self).length;
+  let a = 0, b = 0;
+  done.forEach(i => { const g = grade(i); a += g.n; b += g.t; });
+  ptsCountEl.textContent = `${a}/${b}`;
+  document.getElementById('ptsWrap').hidden = b === 0;                   // no "Keywords 0/0" before anything is graded
+
+  const wl = wrongIndices();
+  const stillIncomplete = filterMode === 'review' ? reviewList.filter(i => snap[i] !== null && resultOf(i) < 2) : [];
+  wrongCountEl.textContent = wl.length;
+  copyMissedBtn.disabled = !ids.some(i => missed.has(i) || (snap[i] !== null && resultOf(i) < 2));
+  reviewBtn.disabled = wl.length === 0 || filterMode === 'review';
+  reviewBtn.textContent = filterMode === 'review' ? 'Reviewing…' : `Review Not Passed (${wl.length})`;
+  allViewBtn.classList.toggle('active-mode', filterMode === 'all');
+  const fc = scopeIdx().filter(i => flagged.has(i)).length;
+  flagBtn.textContent = `Marked for Review (${fc})`;
+  flagBtn.disabled = fc === 0 && filterMode !== 'flagged';
+  flagBtn.classList.toggle('active-mode', filterMode === 'flagged');
+  modeLabel.textContent = filterMode === 'review' ? `Review mode — ${reviewList.length} question(s) not passed before` : filterMode === 'flagged' ? `Marked for review — ${flagList.length} question(s)` : '';
+
+  const reviewDoneCount = reviewList.filter(i => snap[i] !== null).length;
+  const reviewDone = filterMode === 'review' && reviewDoneCount === reviewList.length && reviewList.length > 0;
+  if(reviewDone){
+    reviewBanner.classList.add('show');
+    reviewBannerActions.innerHTML = '';
+    const backBtn = document.createElement('button');
+    backBtn.className = 'btn'; backBtn.textContent = 'Back to All Questions';
+    backBtn.addEventListener('click', exitReviewMode);
+    if(stillIncomplete.length === 0){
+      reviewBannerText.textContent = `Review complete — all ${reviewList.length} question(s) passed.`;
+      backBtn.className = 'btn primary';
+      reviewBannerActions.appendChild(backBtn);
+    } else {
+      reviewBannerText.textContent = `Review complete — ${stillIncomplete.length} of ${reviewList.length} still not passed.`;
+      const retryBtn = document.createElement('button');
+      retryBtn.className = 'btn primary'; retryBtn.textContent = 'Retry Remaining';
+      retryBtn.addEventListener('click', () => {
+        reviewList = stillIncomplete;
+        stillIncomplete.forEach(i => { snap[i] = null; });
+        current = reviewList[0];
+        reviewBanner.classList.remove('show');
+        render(); scrollToActive();
+      });
+      reviewBannerActions.appendChild(retryBtn);
+      reviewBannerActions.appendChild(backBtn);
+    }
+  } else reviewBanner.classList.remove('show');
+}
+
+document.addEventListener('keydown', e => {
+  if(e.target && e.target.closest && e.target.closest('textarea, input, button, summary, [contenteditable]')) return;   // typing / pressing a control
+  if(lightbox.classList.contains('show')){ if(e.key === 'Escape' || e.key === 'Enter' || e.key === ' '){ e.preventDefault(); closeLightbox(); } return; }
+  if(visibleIndices().length === 0) return;
+  if(e.key === 'Enter' || e.key === ' ' || e.key === 'ArrowDown'){ if(e.altKey || e.ctrlKey || e.metaKey) return; e.preventDefault(); goNext(); if(e.key === 'Enter') focusCurrent(); }
+  else if(e.key === 'ArrowUp'){ if(e.altKey || e.ctrlKey || e.metaKey) return; e.preventDefault(); goPrev(); }
+});
+
+reviewBtn.addEventListener('click', enterReviewMode);
+const flagBtn = document.getElementById('flagBtn');
+flagBtn.addEventListener('click', () => {                  // show only the questions ticked "Review"
+  flagList = scopeIdx().filter(i => flagged.has(i));
+  if(!flagList.length) return;
+  filterMode = 'flagged'; reviewList = [];
+  reviewBanner.classList.remove('show');
+  if(!flagList.includes(current)) current = flagList[0];
+  render(); smoothTop();
+});
+allViewBtn.addEventListener('click', exitReviewMode);
+layoutToggleBtn.addEventListener('click', () => { layoutMode = layoutMode === 'list' ? 'single' : 'list'; setOn(layoutToggleBtn, layoutMode === 'single'); render(); });
+keywordsToggleBtn.addEventListener('click', () => { const s = document.body.classList.toggle('show-keywords'); setOn(keywordsToggleBtn, s); });
+const darkSw = document.getElementById('darkSw');
+function setDark(d){ document.documentElement.classList.toggle('dark', d); setOn(darkSw, d); }
+darkSw.addEventListener('click', () => setDark(!document.documentElement.classList.contains('dark')));
+const setOn = (btn, on) => { btn.classList.toggle('on', on); btn.setAttribute('aria-pressed', String(on)); };
+const menuBtn = document.getElementById('menuBtn'), settingsEl = document.getElementById('settings');
+document.addEventListener('click', e => { if(settingsEl.classList.contains('open') && !e.target.closest('#settings, #menuBtn')){ settingsEl.classList.remove('open'); menuBtn.setAttribute('aria-expanded', 'false'); } });
+menuBtn.addEventListener('click', () => { const on = settingsEl.classList.toggle('open'); menuBtn.setAttribute('aria-expanded', String(on)); });
+function setGradeLabel(){}
+
+
+/* ---------- question-number search: "1, 2, 3, 15" / "1 2 3" / "1, 3-5" ---------- */
+const qSearch = document.getElementById('qSearch'), qWarn = document.getElementById('qWarn'), qForm = document.getElementById('qSearchForm');
+function qBad(msg){ qWarn.textContent = msg; qWarn.classList.toggle('show', !!msg); qSearch.classList.toggle('bad', !!msg); }
+function parseNums(txt){                              // spaces are optional
+  const t = txt.replace(/[，、;；]/g, ',').replace(/[–—~～]/g, '-').replace(/\s*-\s*/g, '-').trim();
+  if(!t) return { empty: true };
+  const out = new Set();
+  for(const tok of t.split(/[\s,]+/).filter(Boolean)){
+    let m;
+    if(/^\d+$/.test(tok)) out.add(+tok);
+    else if((m = tok.match(/^(\d+)-(\d+)$/)) && +m[1] <= +m[2] && +m[2] - +m[1] < 1000){ for(let k = +m[1]; k <= +m[2]; k++) out.add(k); }
+    else return { err: `Not recognised: "${tok}" — type numbers like 1, 2, 3, 15` };
+  }
+  return { set: out };
+}
+function clearPick(silent){
+  pickNums = null; qSearch.value = ''; qBad(''); qForm.classList.remove('active');
+  if(!silent){ filterMode = 'all'; reviewList = []; reviewBanner.classList.remove('show'); current = scopeIdx()[0]; render(); smoothTop(); }
+}
+qForm.addEventListener('submit', e => {
+  e.preventDefault();
+  const r = parseNums(qSearch.value);
+  if(r.empty){ clearPick(false); return; }              // empty box + Enter = back to all questions
+  if(r.err){ qBad(r.err); return; }                     // not recognised: warning under the box
+  const have = new Set(baseIdx().map(i => QUESTIONS[i].n));
+  const miss = [...r.set].filter(n => !have.has(n)).sort((a, b) => a - b);
+  if(miss.length){ qBad(`No question ${miss.slice(0, 6).join(', ')}${miss.length > 6 ? '…' : ''} here (${viewAll ? 'all chapters' : 'this chapter'} has ${Math.min(...have)}–${Math.max(...have)})`); return; }
+  qBad(''); pickNums = r.set; qForm.classList.add('active');
+  qSearch.value = [...r.set].sort((a, b) => a - b).join(', ');
+  filterMode = 'all'; reviewList = []; reviewBanner.classList.remove('show');
+  current = scopeIdx()[0]; render(); smoothTop();
+});
+qSearch.addEventListener('input', () => qBad(''));
+document.getElementById('qClear').addEventListener('click', () => clearPick(false));
+
+const allChBtn = document.getElementById('allChBtn');
+if(CHAPTERS.length < 2) allChBtn.remove();
+function setViewAll(on){
+  viewAll = on;
+  clearPick(true);
+  setOn(allChBtn, on);
+  filterMode = 'all'; reviewList = [];
+  reviewBanner.classList.remove('show');
+  if(!scopeIdx().includes(current)) current = scopeIdx()[0];
+  renderToc();
+}
+allChBtn.addEventListener('click', () => { setViewAll(!viewAll); render(); smoothTop(); });
+document.getElementById('printBtn').addEventListener('click', () => { document.body.classList.remove('print-solution'); window.print(); });
+document.getElementById('printSolBtn').addEventListener('click', () => { document.body.classList.add('print-solution'); window.print(); });
+
+/* ---------- print: ALL questions, one running number, blank answer space (no lines) ---------- */
+function buildPrintSheet(){
+  let html = `<h1>${esc(QUIZ_TITLE)}</h1>`;
+  const shown = visibleIndices().map(i => QUESTIONS[i]);       // print what is on screen: chapter / all chapters / not passed / searched numbers
+  shown.forEach(q => {
+    html += `<div class="p-q"><p class="p-t">${q.n}. ${CHAPTERS.length > 1 ? `<span class="p-qchap">[${esc(chLabel(q.ch))}]</span>` : ''}${fm(q.text)}</p>` + (q.code ? `<pre class="p-code">${rHL(q.code.join('\n'))}</pre>` : '') + (q.fig ? `<div class="p-fig">${figHTML(q.fig)}</div>` : '') + `<div class="p-blank"></div></div>`;
+  });
+  html += `<section class="p-answer-key"><h2>Answers</h2>`;
+  shown.forEach(q => {
+    html += `<div class="p-key-item"><p><strong>${q.n}.</strong>${CHAPTERS.length > 1 ? ` <strong>[${esc(chLabel(q.ch))}]</strong>` : ''} ${fmb(q.model)}</p>${q.kws.length ? `<p class="p-kw"><strong>Keywords: ${q.kws.map(k => fm(k[0])).join(' · ')}</strong></p>` : ''}</div>`;
+  });
+  html += `</section>`;
+  document.getElementById('printSheet').innerHTML = html;
+}
+buildPrintSheet();
+window.addEventListener('beforeprint', buildPrintSheet);
+window.addEventListener('afterprint', () => { document.body.classList.remove('print-solution'); });
+
+function copyText(t){
+  if(navigator.clipboard && window.isSecureContext) return navigator.clipboard.writeText(t);
+  return new Promise((ok, fail) => {
+    const ta = document.createElement('textarea');
+    ta.value = t; ta.style.cssText = 'position:fixed;opacity:0';
+    document.body.appendChild(ta); ta.select();
+    let done = false;
+    try{ done = document.execCommand('copy'); }catch(e){}
+    ta.remove(); done ? ok() : fail();
+  });
+}
+copyMissedBtn.addEventListener('click', () => {
+  const chs = viewAll ? CHAPTERS.map((c, ci) => ci) : [activeCh];
+  const lines = chs.map(ci => {
+    const nums = QUESTIONS.map((q, i) => i).filter(i => QUESTIONS[i].ch === ci && (missed.has(i) || (snap[i] !== null && resultOf(i) < 2))).map(i => QUESTIONS[i].n).sort((a, b) => a - b);
+    return nums.length ? `${CHAPTERS.length > 1 ? CHAPTERS[ci].title : QUIZ_TITLE} not passed: ${nums.join(', ')}` : '';
+  }).filter(Boolean);
+  if(!lines.length) return;
+  copyText(lines.join('\n')).then(() => showTip(copyMissedBtn, 'Copied'), () => showTip(copyMissedBtn, 'Copy failed'));
+});
+
+const liveTips = [];
+function placeTip(t){
+  const r = t.anchor.getBoundingClientRect(), h = t.el.offsetHeight;
+  let top = r.top - 8 - h;
+  if(top < 4) top = r.bottom + 8;
+  t.el.style.left = (r.left + r.width / 2) + 'px';
+  t.el.style.top = top + 'px';
+}
+function showTip(anchor, msg, ms = 700){
+  const el = document.createElement('div');
+  el.className = 'tip'; el.textContent = msg;
+  document.body.appendChild(el);
+  const t = { el, anchor };
+  liveTips.push(t); placeTip(t);
+  requestAnimationFrame(() => el.classList.add('show'));
+  t.hide = () => { clearTimeout(t.timer); el.classList.remove('show'); setTimeout(() => { el.remove(); const i = liveTips.indexOf(t); if(i > -1) liveTips.splice(i, 1); }, 130); };
+  t.timer = setTimeout(t.hide, ms);
+  return t;
+}
+window.addEventListener('scroll', () => liveTips.forEach(placeTip), { passive: true });
+window.addEventListener('resize', () => liveTips.forEach(placeTip));
+
+const TOP_REVEAL = 30;
+const topThreshold = () => Math.max(900, window.innerHeight * 1.5);
+let lastY = window.scrollY, upAcc = 0, topHideTimer = null, lastUserScroll = 0, pointerOnScrollbar = false, ignoreScrollUntil = 0;
+const hideTop = () => { toTopBtn.classList.remove('show'); upAcc = 0; };
+const markUser = () => { lastUserScroll = performance.now(); };
+window.addEventListener('wheel', markUser, { passive: true });
+window.addEventListener('touchmove', markUser, { passive: true });
+window.addEventListener('keydown', e => { if(e.defaultPrevented) return; if(['ArrowUp','ArrowDown','PageUp','PageDown','Home','End'].includes(e.key)) markUser(); });
+window.addEventListener('pointerdown', e => { if(e.target === document.documentElement) pointerOnScrollbar = true; });
+window.addEventListener('pointerup', () => { pointerOnScrollbar = false; });
+window.addEventListener('scroll', () => {
+  const y = window.scrollY, d = y - lastY;
+  lastY = y;
+  const byUser = pointerOnScrollbar || performance.now() - lastUserScroll < 700;
+  if(!byUser || performance.now() < ignoreScrollUntil) return;
+  if(d > 0 || y <= topThreshold()){ clearTimeout(topHideTimer); hideTop(); return; }
+  upAcc -= d;
+  if(upAcc >= TOP_REVEAL){ toTopBtn.classList.add('show'); clearTimeout(topHideTimer); topHideTimer = setTimeout(hideTop, 2200); }
+}, { passive: true });
+toTopBtn.addEventListener('mouseenter', () => clearTimeout(topHideTimer));
+toTopBtn.addEventListener('mouseleave', () => { topHideTimer = setTimeout(hideTop, 1200); });
+toTopBtn.addEventListener('click', () => window.scrollTo({ top: 0, behavior: 'smooth' }));
+
+let resetArmed = false, resetArmTimer = null, resetTip = null;
+resetBtn.addEventListener('click', () => {
+  if(!resetArmed){
+    resetArmed = true; resetBtn.classList.add('danger');
+    resetTip = showTip(resetBtn, 'Restart? (clears answers)', 4000);
+    clearTimeout(resetArmTimer); resetArmTimer = setTimeout(disarmReset, 4000);
+    return;
+  }
+  clearTimeout(resetArmTimer); disarmReset(); resetChapter(); smoothTop();
+});
+function resetChapter(){
+  scopeIdx().forEach(i => { drafts[i] = ''; snap[i] = null; missed.delete(i); });
+  current = scopeIdx()[0];
+  filterMode = 'all'; reviewList = [];
+  reviewBanner.classList.remove('show');
+  render();
+}
+function disarmReset(){ resetArmed = false; resetBtn.classList.remove('danger'); if(resetTip){ resetTip.hide(); resetTip = null; } }
+
+// ---- memo ----
+const memoEl = document.getElementById('memoText'), memoTab = document.getElementById('memoTab');
+function setMemoOpen(on){ document.body.classList.toggle('memo-open', on); memoTab.setAttribute('aria-expanded', String(on)); }
+function setMemo(s){ memoEl.innerHTML = cleanHtml(s); }
+memoEl.addEventListener('paste', e => { e.preventDefault(); document.execCommand('insertText', false, (e.clipboardData || window.clipboardData).getData('text')); });
+const memoBoldBtn = document.getElementById('memoBold');
+memoBoldBtn.addEventListener('mousedown', e => e.preventDefault());
+memoBoldBtn.addEventListener('click', () => { memoEl.focus(); document.execCommand('bold'); });
+function toggleMemo(){ const on = !document.body.classList.contains('memo-open'); setMemoOpen(on); if(on) memoEl.focus(); else memoEl.blur(); }
+memoTab.addEventListener('click', toggleMemo);
+document.addEventListener('mousedown', e => { if(document.body.classList.contains('memo-open') && !e.target.closest('#memo, #memoTab')) setMemoOpen(false); });   // click anywhere outside the memo closes it
+window.addEventListener('keydown', e => { if(e.ctrlKey && !e.altKey && !e.shiftKey && e.key.toLowerCase() === 'q'){ e.preventDefault(); toggleMemo(); } });
+document.getElementById('memoClose').addEventListener('click', () => setMemoOpen(false));
+
+// ---- Save / restore (answers, results, grading mode, memo) in this browser ----
+const saveBtn = document.getElementById('saveBtn');
+const hashStr = t => { let h = 5381; for(let i = 0; i < t.length; i++) h = ((h << 5) + h + t.charCodeAt(i)) | 0; return String(h); };
+const SAVE_KEY = 'shortAnswerKeywordProgress:' + QUIZ_TITLE;
+const SAVE_SIG = hashStr(QUESTIONS.map(q => q.text + '|' + q.kws.map(k => k.join('/')).join('|')).join('\n'));
+function setSaveTitle(t){ saveBtn.title = t ? 'Last saved ' + new Date(t).toLocaleString() : 'Save answers in this browser'; }
+function saveProgress(){
+  try{
+    const t = Date.now();
+    localStorage.setItem(SAVE_KEY, JSON.stringify({ sig: SAVE_SIG, t, drafts, snap, gradeMode, missed: [...missed], flagged: [...flagged], activeCh, current, memo: richHtml(memoEl), memoOpen: document.body.classList.contains('memo-open') }));
+    setSaveTitle(t); showTip(saveBtn, 'Saved');
+  }catch(e){ showTip(saveBtn, 'Save failed'); }
+}
+function loadProgress(){
+  let d;
+  try{ d = JSON.parse(localStorage.getItem(SAVE_KEY) || 'null'); }catch(e){ return false; }
+  if(!d) return false;
+  setSaveTitle(d.t);
+  if(typeof d.memo === 'string') setMemo(d.memo);
+  if(d.memoOpen) setMemoOpen(true);
+  if(d.sig !== SAVE_SIG || !Array.isArray(d.drafts) || d.drafts.length !== N) return 'mismatch';
+  drafts = d.drafts.map(cleanHtml);
+  snap = d.snap.map(s => s === null ? null : cleanHtml(s));
+  gradeMode = 'all';
+  (d.missed || []).forEach(i => missed.add(i));
+  (d.flagged || []).forEach(i => { if(i >= 0 && i < N) flagged.add(i); });
+  activeCh = CHAPTERS[d.activeCh] ? d.activeCh : 0;
+  current = scopeIdx().includes(d.current) ? d.current : scopeIdx()[0];
+  return true;
+}
+saveBtn.addEventListener('click', saveProgress);
+setSaveTitle(0);
+let restored = false;
+try{ restored = loadProgress(); }catch(e){ restored = false; }
+setGradeLabel();
+
+const tocEl = document.getElementById('toc');
+function renderToc(){
+  tocEl.classList.toggle('on', CHAPTERS.length > 1);
+  if(CHAPTERS.length < 2) return;
+  tocEl.innerHTML = '<div class="toc-inner"></div>';
+  const inner = tocEl.firstChild;
+  CHAPTERS.forEach((c, ci) => {
+    const b = document.createElement('button');
+    b.type = 'button'; b.textContent = chLabel(ci); b.title = c.title;
+    if(ci === activeCh && !viewAll) b.className = 'active';
+    b.addEventListener('click', () => switchChapter(ci));
+    inner.appendChild(b);
+  });
+}
+function switchChapter(ci){
+  if(ci === activeCh && !viewAll) return;
+  clearPick(true);
+  if(viewAll) setViewAll(false);
+  activeCh = ci; filterMode = 'all'; reviewList = [];
+  reviewBanner.classList.remove('show');
+  current = CHAPTERS[ci].idx[0];
+  renderToc(); render(); smoothTop();
+}
+
+if(CHAPTERS.length > 1 && /midterm|final/i.test(QUIZ_TITLE)) setViewAll(true);   // title contains "midterm" / "final": All chapters is the default view
+renderToc();
+render();
+if(restored === true) showTip(saveBtn, 'Progress restored');
+else if(restored === 'mismatch') showTip(saveBtn, 'Saved data is from another version');
+</script>
+</body>
+</html>

@@ -1,0 +1,1214 @@
+<!DOCTYPE html>
+<!--
+  CASE-STUDY QUIZ TEMPLATE (multiple choice) - textbook page with side notes.
+  Make a quiz: copy this file and replace ONLY the text between <script type="text/plain" id="quizData"> and </script>. Do not edit anything else.
+
+  SIDE NOTE   the explanation starts level with option 1 of its question (alignNotes).
+  CURRENT     the question being worked on has its number underlined and is scrolled to the middle of the screen.
+  PAGE        the questions sit on a centred paper column ("the page", 760 px — same width as the written template). Explanations are SIDE NOTES printed OUTSIDE the page,
+              in the right margin, next to their question (university-textbook style). The page stays centred; the margin is extra space.
+              A shared exhibit (balance sheet, income statement ...) is a separate sheet in the LEFT margin, sticky while its questions scroll.
+              Narrow screens: the exhibit moves onto the page above its questions (below 1340 px); side notes move under each question (below 1000 px).
+              Style: simple and analog - one serif font everywhere (Source Serif 4 from Google Fonts, Georgia fallback offline), hairline rules only inside the page, no boxes, no coloured bars, no buttons as labels.
+              Exhibit tables are plain: one size, one weight, one colour; only hairlines and spacing separate rows, and no cell ever wraps.
+              Each table is a clear block: its caption is set larger than the cells, and a dark rule runs above the header and below the last row.
+              If an exhibit does not fit in the margin without wrapping, it moves onto the page above its questions automatically;
+              on the page the tables sit side by side or one under the other, never wrapping a row (a too-narrow screen scrolls the exhibit sideways).
+              Settings: a text link with a small drop-down list under it (single question view, exam mode, night mode); it floats, so the page never shifts.
+              The score bar has the width of the page.
+
+  WHAT GOES HERE   concepts and short one-step calculations. Multi-step calculations go to the short-answer template (formula-writing practice).
+              Do not ask how to operate the calculator (keystrokes, clearing, BGN, error codes): the calculator solution is written in every explanation instead.
+
+  DATA FORMAT (blocks separated by a line that is only ===)
+    meta        title: / sub: / subject: / textbook:   then ===
+                sub: = course scope and number of questions only (e.g. "Chapters 2-7 · 60 questions").
+    chapter     "# Chapter 3: Title" as its own block (optional; 2+ chapters show chapter tabs). Without chapters, put the chapter in the tag ("Ch.3 · Ratios").
+    exhibit     a block that starts with   @case ID   (ID = short label such as A, B)
+                line 2   exhibit title, e.g.  Harborview Outfitters, Inc.
+                then one or more table lines:
+                  @tbl Caption :: Head1|Head2|Head3;;row;;row ...
+                  row prefixes:  !Text = section heading row      =Label|1|2 = total row (bold, rule above)
+                Questions that use the same exhibit must be CONSECUTIVE; they are shown beside the exhibit as one case section.
+    question    lines, then ===:
+                1 tag (or "-" = same tag as the previous question)
+                2 question text
+                3 options  a|b|*c|d   (* marks the correct one; 2-4 options; never put | inside an option)
+                4 explanation (one line) - shown as a side note after answering
+                5+ optional lines:  @use ID (uses exhibit ID; shown as a small light "Exhibit A" next to the tag)
+                                    @tbl Caption :: H1|H2;;a|b (small table under the question)   @img file.png
+                Any other line is ignored.
+
+  EXPLANATION STYLE (해설 원칙)
+                explain the CORRECT answer only. For calculation questions write BOTH the formula with the substituted numbers AND the
+                calculator solution. Write one item per step, separated by "; " - every "; " becomes a line break in the side note, and
+                a leading label before " = " or ":" (e.g. "PM = ...", "BA II Plus: ...") is set in semibold. Example:
+                  PM = 948 / 4,800 = 19.75%; TAT = 4,800 / 6,400 = 0.75; EM = 6,400 / 3,700 = 1.73; ROE = 0.1975 × 0.75 × 1.73 = 25.62%
+                A sentence starting with "BA II Plus:", "Formula:" or "ICONV:" also starts a new line. Keep labels short (≤ 30 characters).
+    CONDITIONS  every question must stand alone (printed or copied by itself): restate the numbers it needs, or point to its exhibit with @use.
+
+  SUPERSCRIPTS / SUBSCRIPTS (위첨자·아래첨자 - follow exactly)
+                ^ takes ONE following character:  (1 + r)^t   (1.08)^5   (1 + APR/m)^m
+                ^{..} braces for TWO OR MORE characters:  (1.005)^{48}   (1.10)^{-3}   (FV ÷ PV)^{1/t}     WRONG: (1.005)^48
+                _ takes ONE following character:  D_0  D_1  C_1  P_0  P_t  CF_t
+                _{..} braces for TWO OR MORE characters:  D_{t+1}  P_{t-1}                          WRONG: D0, D1, Pt as plain text for math variables
+                Calculator register and key names are labels, not math: write CF0, C01, F01, P1, P2, I/Y, P/Y plainly (no _). y^x renders as the key label.
+                Write \_ or \^ for a literal underscore or caret. Symbols: \pi \Delta \times \le \ge \ne \approx \sigma \mu \infty \to \sqrt.
+                Inline code: `text` in backticks.
+
+  REVIEW / COPY  each question has two small text marks at the top right: "copy" (after answering) and "review" (click to mark; a dot appears).
+  PRINT       always the same exam-paper layout: each exhibit is printed once, full width, immediately before its questions, with
+              "Used in questions 1–8"; each linked question is marked [Exhibit A]. Answer key on a new page; "Print with solution"
+              prints the formatted explanations in two columns.
+  FEATURES    exam mode, review incorrect, mark for review, question-number search (1, 3-5), memo (Ctrl+Q), save in browser, night mode, single-question view.
+  Mistakes in the data are listed in a red box at the top of the page.
+-->
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<!--DATA-START-->
+<script type="text/plain" id="quizData">
+title: Business Finance Midterm
+sub: Multiple Choice · Chapters 2–7 · 70 questions
+subject: Business Finance, Prof. Gemma Lee, Kyung Hee University
+textbook: Business Finance lecture notes (Chapters 2–7) and chapter practice questions (RWJ, Essentials of Corporate Finance)
+===
+@case A
+Harborview Outfitters, Inc.
+@tbl Balance sheets, December 31 ($ millions) :: Item|2024|2025;;!Assets;;Cash|150|200;;Accounts receivable|600|700;;Inventory|850|900;;=Total current assets|1,600|1,800;;Net fixed assets|4,400|4,600;;=Total assets|6,000|6,400;;!Liabilities and owners' equity;;Accounts payable|520|560;;Notes payable|280|240;;=Total current liabilities|800|800;;Long-term debt|1,800|1,900;;Common stock and paid-in surplus|1,400|1,500;;Retained earnings|2,000|2,200;;=Total owners' equity|3,400|3,700;;=Total liabilities and owners' equity|6,000|6,400
+@tbl 2025 income statement ($ millions) :: Item|2025;;Net sales|4,800;;Cost of goods sold|2,900;;Depreciation|500;;=Earnings before interest and taxes|1,400;;Interest paid|200;;=Taxable income|1,200;;Taxes (21%)|252;;=Net income|948;;Dividends|748;;Addition to retained earnings|200
+===
+Ch.3 · Market value measures
+Harborview Outfitters, Inc. ($ millions). The firm has 100 million shares outstanding and the share price is $74. What are its P/E, price-sales and market-to-book ratios?
+P/E 9.48; P/S 1.54; M/B 2.00|*P/E 7.81; P/S 1.54; M/B 2.00|P/E 7.81; P/S 0.65; M/B 0.50|P/E 7.81; P/S 1.54; M/B 0.50
+EPS = 948 / 100 = 9.48, so P/E = 74 / 9.48 = 7.81; sales per share = 4,800 / 100 = 48, so P/S = 74 / 48 = 1.54; book value per share = 3,700 / 100 = 37, so M/B = 74 / 37 = 2.00.
+@use A
+===
+Ch.3 · Coverage ratios
+Harborview Outfitters, Inc. ($ millions). What are the firm's 2025 times interest earned and cash coverage ratios?
+TIE 9.50; cash coverage 7.00|*TIE 7.00; cash coverage 9.50|TIE 7.00; cash coverage 4.50|TIE 6.00; cash coverage 8.50
+TIE = EBIT / interest = 1,400 / 200 = 7.00; cash coverage = (EBIT + depreciation) / interest = 1,900 / 200 = 9.50.
+@use A
+===
+Ch.3 · Common-size statements
+Harborview Outfitters, Inc. ($ millions). On the 2025 common-size statements, what percentages are shown for inventory and for net income?
+Inventory 18.75%; net income 14.81%|*Inventory 14.06%; net income 19.75%|Inventory 50.00%; net income 25.62%|Inventory 14.06%; net income 14.81%
+Common-size balance sheet items are divided by total assets: 900 / 6,400 = 14.06%; common-size income statement items are divided by sales: 948 / 4,800 = 19.75%.
+@use A
+===
+Ch.3 · EBITDA ratio
+Harborview Outfitters, Inc. ($ millions). The firm has 100 million shares at $74 each. Enterprise value uses the book value of all liabilities. What is its EV/EBITDA ratio?
+*5.21|5.32|3.89|7.07
+EV = 7,400 + 2,700 − 200 = 9,900 (total liabilities = 6,400 − 3,700 = 2,700); EBITDA = 1,400 + 500 = 1,900; EV/EBITDA = 9,900 / 1,900 = 5.21.
+@use A
+===
+Ch.7 · Valuation with multiples (P/E)
+Harborview Outfitters, Inc. ($ millions). The firm has 100 million shares outstanding. Comparable outdoor-retail firms trade at 12 times earnings. What is the estimated share price?
+*$113.76|$88.80|$57.60|$9.48
+EPS = 948 / 100 = 9.48; price = EPS × benchmark P/E = 9.48 × 12 = $113.76. BA II Plus: 948 ÷ 100 = 9.48, × 12 = 113.76.
+@use A
+===
+Ch.3 · Turnover ratios
+Harborview Outfitters, Inc. ($ millions). Using 2025 year-end balances, what are inventory turnover, receivables turnover and total asset turnover?
+*3.22; 6.86; 0.75|5.33; 6.86; 0.75|3.22; 4.14; 1.33|3.22; 6.86; 1.33
+Inventory turnover = COGS / inventory = 2,900 / 900 = 3.22; receivables turnover = sales / AR = 4,800 / 700 = 6.86; total asset turnover = sales / total assets = 4,800 / 6,400 = 0.75.
+@use A
+===
+Ch.3 · Sources and uses of cash
+Harborview Outfitters, Inc. ($ millions). During 2025, which net effect on cash comes from the changes in accounts receivable and accounts payable alone?
+$140 source of cash|$140 use of cash|$60 source of cash|*$60 use of cash
+Accounts receivable rose by 100 (an increase in an asset is a use of cash); accounts payable rose by 40 (an increase in a liability is a source of cash); net effect = −100 + 40 = $60 use of cash.
+@use A
+===
+Ch.6 · Bond basics
+Which statement about a bond that is already outstanding is correct?
+The coupon rate is reset whenever market rates change|*The coupon rate is fixed at issue, while the yield to maturity changes with the market every day|The yield to maturity is fixed at issue, while the coupon rate moves with the market|The face value rises when market rates fall
+The coupon rate (annual coupon ÷ face value) is fixed when the bond is issued; the YTM is the market's required return and changes daily, so the price is whatever makes the two consistent.
+===
+Ch.2 · Balance sheet
+On a balance sheet prepared under US GAAP (the RWJ textbook format), how are the items ordered?
+*Assets in order of decreasing liquidity; liabilities in ascending order of when they are due|Assets in order of increasing liquidity; liabilities in descending order of when they are due|Non-current assets first, then current assets; non-current liabilities first|Assets and liabilities in order of size
+GAAP lists the most liquid assets first and the liabilities due soonest first; IFRS / K-IFRS flips the order and lists non-current items first, with the same financial logic.
+===
+Ch.2 · Market vs. book value
+Hanwoo Corp.'s balance sheet shows shareholders' equity of $80 million, while its 20 million shares trade at $12 each. Which statement is correct?
+The market value of equity is $80 million|*The market value of equity exceeds book value by $160 million|Book value is the better estimate of what shareholders would receive if they sold today|The difference implies an accounting error in the balance sheet
+Market value of equity = 20 million × $12 = $240 million versus book value of $80 million, a difference of $160 million; book values rest on historical cost, so a gap is normal and market value is what matters for decisions.
+===
+Ch.6 · Premium bonds over time
+A bond's coupon rate is above the market yield, and the yield stays unchanged until maturity. What happens to its price over time?
+It rises further above par as maturity approaches|*It falls toward par and equals the face value at maturity|It stays at the same premium until the final coupon|It drops below par halfway through its life
+The premium is given back to the holder as a capital loss over the remaining life, so the price drifts down to par and equals the face value at maturity.
+===
+Ch.5 · Loan payment
+You take a $250,000 mortgage for 30 years at 6%, compounded monthly. What is the monthly payment?
+$1,513.52|*$1,498.88|$8,994.73|$15,000.00
+r = 0.5% per month, t = 360: 250,000 = C × [1 − 1/(1.005)^{360}] / 0.005, so C = $1,498.88 (360 N, 0.5 I/Y, 250000 PV, 0 FV, CPT PMT).
+===
+Ch.7 · Components of return
+A stock sells for $50.00. Its next dividend will be $2.00, and dividends are expected to grow at 6% a year forever. What are its dividend yield, capital gains yield and required return?
+*4.0%; 6.0%; 10.0%|4.0%; 4.0%; 8.0%|6.0%; 4.0%; 10.0%|4.24%; 6.0%; 10.24%
+Dividend yield = D_1 / P_0 = 2.00 / 50.00 = 4.0%; under constant growth the price grows at g, so the capital gains yield = 6.0%; R = 4.0% + 6.0% = 10.0%. BA II Plus: 2 ÷ 50 = 0.04, + 0.06 = 0.10.
+===
+Ch.6 · Interest rate risk
+Four bonds have the same yield to maturity. Which one's price is most sensitive to a change in interest rates?
+A 2-year bond with a 10% coupon|A 30-year bond with a 10% coupon|A 2-year zero coupon bond|*A 30-year zero coupon bond
+Interest rate risk is greater for a longer maturity and for a lower coupon; a zero coupon bond is the extreme case because all of its value sits at maturity, so the 30-year zero is the most rate-sensitive.
+===
+Ch.7 · Preferred stock
+Which feature shows that preferred stock is equity rather than debt?
+It pays a fixed periodic dividend|It ranks ahead of common stock in liquidation|It is often callable by the issuer|*Skipping a preferred dividend is not a default and cannot trigger bankruptcy
+Preferred stock looks like debt (fixed dividend, no vote, ranks ahead of common, often callable), but missing a dividend is not a default, the dividend is not tax-deductible and holders rank behind every creditor, so it is equity.
+===
+Ch.2 · Net working capital
+In computing cash flow from assets, how is an increase in net working capital during the year treated?
+*It is subtracted, because the firm tied up additional cash in working capital|It is added, because the firm holds more liquid assets|It is ignored, because NWC is a balance-sheet item|It is added to operating cash flow as a source of cash
+An increase in NWC is a cash outflow: the firm invested cash in current assets net of current liabilities, so CFFA = OCF − NCS − ΔNWC.
+===
+Ch.6 · Fisher effect
+A bond offers a nominal return of 8% for one year, and expected inflation is 3%. What is the real rate of return?
+5.00%|*4.85%|11.24%|5.15%
+Fisher: 1 + R = (1 + r)(1 + h), so r = 1.08 / 1.03 − 1 = 4.85%. BA II Plus: 1.08 ÷ 1.03 = 1.04854, − 1 = 0.0485.
+===
+Ch.6 · Clean and dirty prices
+A $1,000 bond pays a 6% coupon semiannually ($30 per coupon). Four months have passed since the last coupon, and the bond is quoted at $1,012. What is the invoice (dirty) price?
+*$1,032.00|$1,022.00|$1,012.00|$1,042.00
+Accrued interest = 30 × (4 / 6) = 20; dirty price = clean price + accrued interest = 1,012 + 20 = $1,032.00. BA II Plus: 30 × 4 ÷ 6 = 20, + 1012 = 1,032.
+===
+Ch.5 · Annuity future value
+You put $250 into an account at the end of every month for 20 years. The account pays 4.8%, compounded monthly. What will you have at the end?
+*$100,418.76|$97,126.75|$100,820.43|$60,000.00
+r = 0.4%, t = 240: FV = 250 × [(1.004)^{240} − 1] / 0.004 = $100,418.76 (240 N, 0.4 I/Y, −250 PMT, 0 PV, CPT FV).
+===
+Ch.3 · Leverage and ROE
+Which statement about using financial leverage to raise ROE is correct?
+Higher leverage raises ROE without any effect on risk|*Higher leverage raises ROE only when assets earn more than the after-tax cost of debt, and it increases the risk borne by shareholders|Leverage changes ROA but leaves ROE unchanged|Leverage raises ROE only for firms with high profit margins
+Leverage enters ROE through the equity multiplier (ROE = ROA × EM); it magnifies returns in both directions, so it raises ROE when assets earn more than debt costs and lowers it further when they earn less.
+===
+Ch.7 · Valuation with multiples (price-sales)
+A loss-making firm has sales of $12.00 per share. Comparable firms trade at 1.8 times sales. What is the estimated share price?
+$6.67|*$21.60|$13.80|$0.00
+Price = sales per share × benchmark price-sales ratio = 12.00 × 1.8 = $21.60. BA II Plus: 12 × 1.8 = 21.60.
+===
+Ch.6 · Municipal bonds
+An investor in the 25% tax bracket considers a municipal bond yielding 4.5%. What is its equivalent taxable yield?
+3.38%|*6.00%|5.63%|4.50%
+Equivalent taxable yield = muni yield / (1 − t) = 4.5% / 0.75 = 6.00%. BA II Plus: 4.5 ÷ 0.75 = 6.00.
+===
+Ch.2 · Paid-in capital
+A firm issues 5,000 shares of common stock with a par value of $1 at $15 per share. How much is recorded as additional paid-in capital (paid-in surplus)?
+$75,000|*$70,000|$5,000|$80,000
+Paid-in surplus = (issue price − par) × shares = (15 − 1) × 5,000 = $70,000; the $5,000 of par goes to the common stock line.
+===
+Ch.5 · Ch.7 · Perpetuity (preferred stock)
+A preferred share pays $1.25 every quarter forever. Investors require 8%, compounded quarterly. What is the share worth?
+$15.63|$250.00|$60.66|*$62.50
+The dividend and the rate must be on the same basis: r = 8% / 4 = 2% per quarter; PV = C / r = 1.25 / 0.02 = $62.50. BA II Plus: 1.25 ÷ 0.02 = 62.50.
+===
+Ch.5 · Rate on a lease (annuity due)
+A $36,000 machine can be leased for 36 payments of $1,150, each due at the beginning of the month. What annual rate, compounded monthly, does the lease charge?
+0.82%|10.33%|9.31%|*9.87%
+BGN mode: 36 N, 36000 PV, −1150 PMT, 0 FV, CPT I/Y = 0.8227% per month; quoted rate = 0.8227 × 12 = 9.87%; switch BGN off afterwards. Formula: 36,000 = 1,150 × [1 − 1/(1 + r)^{36}] / r × (1 + r), solved by iteration.
+===
+Ch.2 · Operating cash flow
+Why is interest expense not deducted when computing operating cash flow?
+Because interest is a noncash expense|*Because interest is a financing cost paid to creditors, not an operating cost|Because interest is already included in depreciation|Because interest is not tax-deductible
+OCF = EBIT + depreciation − taxes measures the cash generated by operations before financing; interest belongs to the cash flow to creditors.
+===
+Ch.5 · APR vs. EAR
+Holding the quoted APR constant, what happens to the effective annual rate as compounding becomes more frequent?
+It falls|It stays equal to the APR|*It rises|It rises only if the APR exceeds 10%
+More frequent compounding pays interest on interest more often, so the EAR = (1 + APR/m)^m − 1 rises with m (15% APR: 15.00% annual, 16.08% monthly, 16.18% daily).
+===
+Ch.6 · Par, premium and discount
+A bond's coupon rate is above the current yield to maturity on comparable bonds. How does it sell?
+At par|At a discount|*At a premium|It cannot be determined without the maturity
+If the coupon rate exceeds the yield, the coupon is generous in the market and investors bid the price above face value; the premium is given back as a capital loss over the remaining life.
+===
+Ch.2 · Net income vs. operating cash flow
+Why does net income generally differ from operating cash flow?
+Net income is measured before taxes, whereas OCF is measured after taxes|*Net income subtracts noncash charges such as depreciation and also subtracts interest, a financing cost|Net income excludes cost of goods sold, whereas OCF includes it|Net income uses cash-basis accounting, whereas OCF uses accrual accounting
+OCF = EBIT + depreciation − taxes adds depreciation back and leaves interest out, because it measures the cash generated by operations before financing; net income is an accrual figure after both.
+===
+Ch.2 · Net income
+A firm reports sales of $850,000, costs of $610,000, depreciation of $95,000 and interest expense of $32,000. The tax rate is 21%. What is net income?
+$113,000|*$89,270|$114,550|$145,000
+EBIT = 850,000 − 610,000 − 95,000 = 145,000; taxable income = 145,000 − 32,000 = 113,000; taxes = 0.21 × 113,000 = 23,730; net income = 113,000 − 23,730 = $89,270.
+===
+Ch.5 · Present value of an uneven stream
+An investment pays $2,000 at the end of quarter 1, $3,000 at the end of quarter 2, nothing in quarter 3 and $4,000 at the end of quarter 4. The required return is 8%, compounded quarterly. What is it worth today?
+*$8,539.67|$8,613.58|$7,363.99|$9,000.00
+r = 2% per quarter: PV = 2,000/1.02 + 3,000/(1.02)^2 + 0/(1.02)^3 + 4,000/(1.02)^4 = $8,539.67. BA II Plus: CF, CF0 = 0, C01 = 2000, C02 = 3000, C03 = 0, C04 = 4000, NPV I = 2, CPT = 8,539.67.
+===
+Ch.6 · Current yield and ranking of yields
+A $1,000 bond with a 7% annual coupon and 10 years to maturity is priced at $1,075, which implies a YTM of 5.98%. What is its current yield, and how do the three yield measures rank?
+*Current yield 6.51%; YTM < current yield < coupon rate|Current yield 6.51%; coupon rate < current yield < YTM|Current yield 7.53%; YTM < coupon rate < current yield|Current yield 7.00%; all three are equal
+Current yield = 70 / 1,075 = 6.51%; for a premium bond the ordering is the reverse of a discount bond: YTM (5.98%) < current yield (6.51%) < coupon rate (7.00%). BA II Plus: 70 ÷ 1075 = 0.0651; the YTM comes from 10 N, −1075 PV, 70 PMT, 1000 FV, CPT I/Y = 5.98.
+===
+Ch.3 · Common-size denominators
+On a common-size balance sheet and a common-size income statement, every item is expressed as a percentage of:
+Total equity and net income|Total assets and net income|*Total assets and sales|Sales and total assets
+Common-size balance sheets divide every account by total assets; common-size income statements divide every line by sales, which allows comparison over time and across firms of different sizes.
+===
+Ch.5 · Number of periods (annuity)
+You save $300 at the end of every month in an account paying 7.2%, compounded monthly. How many years until the balance reaches $50,000?
+115.87 years|9.97 years|13.89 years|*9.66 years
+r = 0.6%: 0.6 I/Y, −300 PMT, 0 PV, 50000 FV, CPT N = 115.87 months; 115.87 / 12 = 9.66 years. Formula: 50,000 = 300 × [(1.006)^t − 1] / 0.006, t in months.
+===
+Ch.7 · Why stocks are harder to value
+Which of the following is NOT a reason why a stock is harder to value than a bond?
+Dividends are paid at the board's discretion, while coupons are contractual|A stock has no maturity date|Both the required return and the growth rate must be estimated|*A stock's value is not the present value of its future cash flows
+The discounting principle is identical for stocks and bonds: the value of any financial asset is the PV of the cash flows it delivers; what is harder is the inputs (discretionary dividends, no maturity, estimated R and g).
+===
+Ch.6 · Call provision
+Why does a call provision lower a bond's value to investors?
+Because the call premium is paid to the issuer|*Because the issuer calls the bond when rates have fallen, exactly when holders would like to keep the high coupon, so investors demand a higher yield|Because callable bonds cannot be traded in the secondary market|Because a call provision raises the bond's default risk
+The call option belongs to the issuer, who uses it when rates fall; investors are left reinvesting at lower rates, so they require a higher yield (a lower price) on a callable bond. A put provision is the mirror image and raises a bond's value.
+===
+Ch.2 · EPS, DPS and retained earnings
+A firm reports net income of $640,000 with 200,000 shares outstanding and pays total dividends of $240,000. What are earnings per share, dividends per share and the addition to retained earnings?
+*$3.20; $1.20; $400,000|$3.20; $1.20; $640,000|$2.00; $1.20; $400,000|$3.20; $0.375; $400,000
+EPS = 640,000 / 200,000 = $3.20; DPS = 240,000 / 200,000 = $1.20; addition to retained earnings = 640,000 − 240,000 = $400,000.
+===
+Ch.6 · Inflation and bond prices
+Expected inflation rises, while nothing changes about an issuer's creditworthiness or the real return investors require. What happens to the issuer's outstanding fixed-coupon bonds?
+Their prices rise because nominal coupons are worth more|Their prices are unaffected because default risk is unchanged|*Nominal yields rise with expected inflation (Fisher effect), so their prices fall|Their coupon rates are reset upward
+Bond yields are nominal: 1 + R = (1 + r)(1 + h), so a higher h raises the required nominal yield and lowers the price of a fixed-coupon bond.
+===
+Ch.5 · Lease payment (annuity due)
+A company leases equipment worth $60,000. Payments are due at the beginning of each month for 3 years, and the lessor charges 9%, compounded monthly. What is the monthly lease payment?
+$1,907.98|$5,654.10|*$1,893.78|$1,666.67
+r = 0.75%, t = 36: 60,000 = C × [1 − 1/(1.0075)^{36}] / 0.0075 × 1.0075, so C = $1,893.78 (BGN mode: 36 N, 0.75 I/Y, 60000 PV, 0 FV, CPT PMT; switch BGN off afterwards).
+===
+Ch.6 · Bond ratings
+Which rating is the lowest investment-grade rating?
+Aa / AA|A / A|*Baa3 / BBB−|Ba1 / BB+
+Investment grade runs from Aaa/AAA down to Baa3/BBB−; anything below is speculative grade (junk). Ratings measure default risk, not interest rate risk.
+===
+Ch.3 · Ratio benchmarks and cautions
+Which statement is NOT one of the cautions about financial ratio analysis?
+Firms may use different accounting methods such as FIFO or LIFO|Different fiscal year-ends mean balance sheets are snapshots on different dates|*Each industry has a single theoretically correct value for every ratio|Firms may window-dress items around reporting dates
+There is no underlying theory giving a single correct value; a ratio needs a benchmark (time-trend or peer-group analysis), and comparisons can be distorted by accounting methods, fiscal year-ends, conglomerates, capital structure, seasonality and window dressing.
+===
+Ch.5 · Saving toward a target
+You want $1,000,000 in 25 years. Your account pays 6%, compounded monthly. How much must you deposit at the end of every month?
+$1,518.89|$1,435.83|*$1,443.01|$3,333.33
+r = 0.5%, t = 300: 1,000,000 = C × [(1.005)^{300} − 1] / 0.005, so C = $1,443.01 (300 N, 0.5 I/Y, 0 PV, 1000000 FV, CPT PMT).
+===
+Ch.7 · Growth model conditions
+In the dividend growth model P_0 = D_1 / (R − g), what happens if the assumed growth rate g is greater than or equal to R?
+The share is worth an infinite amount, which is a realistic result for growth firms|*The formula breaks down (negative or infinite price), signalling that such growth cannot last forever|The model still works if D_0 is used instead of D_1|The price equals D_1 / g
+The model requires R > g; if g ≥ R the algebra returns a negative or infinite value, which means the growth assumption is impossible to sustain indefinitely. The g in the model is the rate the firm can sustain forever.
+===
+Ch.2 · Flat vs. progressive taxes
+Which statement about tax rates is correct?
+The average tax rate is the one used for investment decisions|*Under the U.S. flat 21% corporate tax, the marginal and average rates are equal at every income level|Under a progressive schedule the average rate exceeds the marginal rate|The marginal rate is total taxes divided by taxable income
+The marginal rate (on the next dollar) is used for decisions; with a flat rate marginal = average, and with a progressive schedule (e.g. Korea) the marginal rate is above the average rate.
+===
+Ch.3 · Equity multiplier
+A firm has a total debt ratio of 0.60. What are its debt-equity ratio and equity multiplier?
+*D/E 1.50; EM 2.50|D/E 0.60; EM 1.60|D/E 2.50; EM 1.50|D/E 1.50; EM 1.67
+Equity is 0.40 of assets: EM = TA / TE = 1 / 0.40 = 2.50; D/E = 0.60 / 0.40 = 1.50, and EM = 1 + D/E.
+===
+Ch.5 · Annuity due (future value)
+You deposit $500 at the beginning of every month for 15 years. The account pays 6%, compounded monthly. What will you have at the end of 15 years?
+*$146,136.40|$145,409.36|$148,035.17|$90,000.00
+r = 0.5%, t = 180: ordinary FV = 500 × [(1.005)^{180} − 1] / 0.005 = 145,409.36; annuity due = 145,409.36 × 1.005 = $146,136.40. BA II Plus: 180 N, 0.5 I/Y, −500 PMT, 0 PV, CPT FV = 145,409.36, × 1.005 = 146,136.40 (or BGN mode; switch BGN off afterwards).
+===
+Ch.7 · Discounting the terminal price
+In a nonconstant-growth valuation, dividends become constant-growth after date t, and the terminal price P_t = D_{t+1} / (R − g) is computed. By how many periods should P_t be discounted to get today's value?
+t + 1 periods, because it is based on D_{t+1}|*t periods, because P_t is a price at date t|One period, because the model already discounts the dividends|It should not be discounted; it is added to P_0 directly
+P_t is the value at date t of all dividends from t + 1 onward, so it is discounted by (1 + R)^t; discounting by t + 1 is the most common mistake.
+===
+Ch.6 · Covenants
+Which of the following is a positive covenant in a bond indenture?
+Limit the dividends the firm may pay|Prohibit mergers without creditor consent|*Maintain working capital above a stated level|Forbid the issue of additional long-term debt
+Positive covenants state what the firm must do (maintain working capital or ratios, furnish audited statements, keep collateral in good condition); the others are negative covenants. Firms accept covenants because the lower yield is worth more than the lost flexibility.
+===
+Ch.7 · Primary and secondary markets
+Which statement is correct?
+The firm receives cash every time its shares trade on the NYSE|*In the secondary market investors trade existing shares and the firm receives nothing|In the primary market investors trade shares among themselves|An IPO is a secondary-market transaction
+In the primary market the issuer sells securities for the first time and raises money; in the secondary market existing shares change hands between investors, and the firm receives nothing.
+===
+Ch.4 · Compound interest
+Why does a balance grow faster under compound interest than under simple interest?
+Because the interest rate rises each year|*Because interest is earned on previously earned interest as well as on the principal|Because simple interest is paid only at maturity|Because compounding uses the APR instead of the EAR
+Simple interest is paid only on the original principal; compound interest pays interest on principal and accumulated interest, so FV = PV × (1 + r)^t grows faster and faster.
+===
+Ch.6 · Determinants of bond yields
+Which component of a corporate bond's nominal yield is bond-specific rather than part of the term structure?
+Real rate|Inflation premium|Interest rate risk premium|*Default risk premium
+The term structure (real rate + inflation premium + interest rate risk premium) is the same for every bond of a given maturity; the default risk, taxability and liquidity premiums are specific to each bond.
+===
+Ch.5 · Time to a target (annuity due)
+You deposit $1,000 at the beginning of every quarter into an account paying 8%, compounded quarterly. How many years until the balance reaches $100,000?
+54.81 years|*13.70 years|13.87 years|25.00 years
+r = 2% per quarter, BGN mode: 2 I/Y, −1000 PMT, 0 PV, 100000 FV, CPT N = 54.81 quarters; 54.81 / 4 = 13.70 years; switch BGN off afterwards. Formula: 100,000 = 1,000 × [(1.02)^t − 1] / 0.02 × 1.02, t in quarters.
+===
+Ch.3 · DuPont comparison
+Coca-Cola and PepsiCo both earn an ROE of about 40%. According to the DuPont breakdown in the lecture, which statement is correct?
+*Coca-Cola gets there through a high profit margin; PepsiCo relies on faster asset turnover and greater financial leverage|PepsiCo gets there through a high profit margin; Coca-Cola relies on leverage|Both firms have nearly identical margins, turnover and leverage|Coca-Cola has the higher asset turnover because it owns more plants
+KO: profit margin 27.34%, asset turnover 0.46, equity multiplier 3.26; PEP: 8.77%, 0.87, 5.26. Same ROE, different routes: KO's asset-light concentrate model gives high margins.
+===
+Ch.5 · Working backwards to an APR
+You want to earn an effective annual rate of 8% with monthly compounding. What APR must you be quoted?
+8.00%|*7.72%|8.30%|0.64%
+APR = 12 × [(1.08)^{1/12} − 1] = 12 × 0.6434% = 7.72% (ICONV: EFF = 8, C/Y = 12, CPT NOM).
+===
+Ch.7 · Dealers, brokers and the spread
+A dealer quotes a stock at bid $49.90 / ask $50.10. Which statement is correct?
+*You can sell to the dealer at $49.90 and buy from the dealer at $50.10; the $0.20 spread is the dealer's compensation|You can buy at $49.90 and sell at $50.10|A broker would quote the same prices and hold the stock in inventory|The spread is a commission the dealer pays to the exchange
+The bid is the price the dealer pays (you sell), the ask is the price the dealer accepts (you buy), and the spread compensates the dealer for making a market and bearing inventory risk; a broker only matches trades for a commission.
+===
+Ch.6 · Accrued interest
+Why does a bond buyer pay the seller accrued interest on top of the quoted (clean) price?
+Because the dealer adds a commission to every trade|*Because the next coupon is paid in full to whoever holds the bond on the payment date, so the buyer reimburses the seller for the part the seller earned|Because accrued interest is a tax collected at settlement|Because the clean price already includes the next coupon
+The dirty (invoice) price = clean price + accrued interest, where accrued interest = coupon × days since last coupon ÷ days in the coupon period.
+===
+Ch.2 · Negative cash flow from assets
+A firm reports negative cash flow from assets for the year. Which interpretation is most appropriate?
+The firm is necessarily in financial distress|The firm must have reported a net loss|*The firm raised funds externally during the year, possibly to finance growth|The firm's cash flow to creditors must be negative
+Negative CFFA means operations plus asset purchases used more cash than they generated, so the gap was financed by new debt or equity; this is routine for fast-growing firms making heavy investments.
+===
+Ch.5 · Amortizing loans
+In a loan repaid with equal payments, how does each payment change over time?
+The interest portion rises and the principal portion falls|*The payment is constant, the interest portion falls and the principal portion rises|Both the interest and principal portions are constant|The payment falls each period as the balance falls
+Interest each period = rate × beginning balance; as the balance falls, interest falls and, with a constant payment, the principal portion rises.
+===
+Ch.7 · Common stock and the NASDAQ
+Which statement about NASDAQ is correct?
+It is an auction market organized around designated market makers on a trading floor|*It is a dealer market: a computer network in which several market makers compete in the same stock|It has no market makers; all trades are matched between customers|It lists only preferred stock
+NASDAQ has no physical floor; trades are executed against competing market makers, whose competition narrows the spread. The NYSE is a hybrid auction market with DMMs, now largely electronic.
+===
+Ch.3 · Quick ratio
+Why is inventory subtracted from current assets in the quick (acid-test) ratio?
+Because inventory is not a current asset|*Because inventory is the least liquid current asset and its book value is the least reliable|Because inventory is already counted in cash|Because inventory is financed with long-term debt
+Quick ratio = (current assets − inventory) / current liabilities; inventory may not be sold quickly at book value, especially when a firm is in trouble.
+===
+Ch.6 · Yield to maturity assumptions
+Which of the following is NOT one of the assumptions behind a bond's yield to maturity?
+The bond is held to maturity|There is no default|Coupons are reinvested at the YTM|*Coupons are reinvested at the coupon rate
+YTM is the bond's internal rate of return; it is a promised yield that assumes the bond is held to maturity, no default occurs and coupons are reinvested at the YTM itself.
+===
+Ch.5 · The rate earned by an account
+You deposited $200 at the end of every month for 10 years, and the account is now worth $40,000. What annual rate, compounded monthly, did it earn?
+*9.58%|0.80%|10.01%|6.67%
+120 N, −200 PMT, 0 PV, 40000 FV, CPT I/Y = 0.7984% per month; quoted rate = 0.7984 × 12 = 9.58% (the EAR would be 10.01%). Formula: 40,000 = 200 × [(1 + r)^{120} − 1] / r, solved by iteration.
+===
+Ch.2 · Tax treatment of financing costs
+Which statement about the tax treatment of financing costs is correct?
+Both interest and dividends are tax-deductible to the paying corporation|*Interest is tax-deductible to the corporation; dividends are not|Dividends are tax-deductible to the corporation; interest is not|Neither affects the corporation's tax bill
+Interest is deducted before computing taxable income; dividends are paid out of after-tax profit, which gives debt a tax advantage at the corporate level.
+===
+Ch.5 · Loan size
+Your budget allows a car payment of $520 per month for 5 years. The bank charges 9.6%, compounded monthly. How large a loan can you take?
+$5,394.53|$2,538.75|$31,200.00|*$24,702.19
+r = 9.6% / 12 = 0.8% per month, t = 60: PV = 520 × [1 − 1/(1.008)^{60}] / 0.008 = $24,702.19 (60 N, 0.8 I/Y, −520 PMT, 0 FV, CPT PV).
+===
+Ch.7 · Cumulative preferred
+A firm skipped two years of dividends on its cumulative preferred stock. Which statement is correct?
+The firm is in default and the preferred holders can force bankruptcy|*The arrears must be paid before any dividend is paid on common stock|The skipped dividends are forgiven when the board resumes payments|Preferred holders immediately become creditors
+Cumulative preferred dividends accumulate as arrearages; no common dividend can be paid until they are cleared, but skipping them is not a default.
+===
+Ch.5 · Effective annual rates
+A loan is quoted at 12%, compounded quarterly. What is the effective annual rate?
+*12.55%|12.00%|3.00%|12.68%
+EAR = (1 + 0.12/4)^4 − 1 = (1.03)^4 − 1 = 12.55% (ICONV: NOM = 12, C/Y = 4, CPT EFF).
+===
+Ch.3 · Liquidity in context
+PepsiCo's current ratio is 0.85. According to the lecture, how should this be read?
+As a clear sign of imminent financial distress|*Not necessarily a red flag: steady cash sales fund working capital, long supplier terms inflate payables, and strong credit lets it roll short-term debt|As evidence that PepsiCo holds too much idle cash|As proof that PepsiCo's ROE must be lower than Coca-Cola's
+A current ratio below 1 can be normal for a firm with steady cash sales, large payables and cheap access to short-term credit; a big current-asset cushion would only sit idle.
+===
+Ch.7 · Dividend discount model
+What is the value of a firm that is not paying dividends today?
+Zero, because the dividend discount model only values dividends already paid|*It has value only because it is expected to pay dividends (or be bought by someone who will) at some point in the future|It equals its book value per share|It can only be valued with the P/E ratio of the same firm
+The price of a share is the PV of all future dividends; a firm paying nothing now must be expected to pay eventually, otherwise its shares are worthless.
+===
+Ch.2 · Fixed and variable costs
+In the short run, which of the following is best described as a fixed cost?
+Raw materials consumed in production|Sales commissions paid per unit sold|*A lease payment on a warehouse under a five-year contract|Hourly wages of temporary production workers
+A fixed cost does not vary with output over the short-run horizon; a contractual lease payment must be paid whatever the output level.
+===
+Ch.6 · Put provision
+How does a put provision affect a bond compared with an otherwise identical bond without one?
+It lowers the bond's value because the issuer can buy it back early|*It raises the bond's value because the holder may force the issuer to buy it back at a stated price|It has no effect on value|It converts the bond into equity
+A put gives the option to the holder, the mirror image of a call provision, so it raises the bond's value (lowers its yield).
+===
+</script>
+<!--DATA-END-->
+<title>Business Finance Midterm Exam: Multiple Choice</title>
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Source+Serif+4:ital,opsz,wght@0,8..60,400;0,8..60,600;1,8..60,400&family=Noto+Serif+KR:wght@400;600&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --serif:"Source Serif 4","Noto Serif KR",Georgia,"Times New Roman",serif;
+    --bg:#F6F5F3; --paper:#FFFFFF; --ink:#1D1D1F; --ink-soft:#6E6E73; --faint:#A1A1A6; --rule:#E6E5E1;
+    --correct:#2F6B47; --wrong:#A3402F;
+    --paper-w:760px; --pad:64px; --note-w:250px; --ex-w:440px; --gap:30px; --bar-h:52px;
+  }
+  html.dark{
+    --bg:#1A1A1C; --paper:#262628; --ink:#ECECEE; --ink-soft:#A1A1A6; --faint:#6E6E73; --rule:#38383B;
+    --correct:#8CC6A0; --wrong:#E39A8C;
+  }
+  *{box-sizing:border-box;}
+  button, input, select, textarea, code, pre, kbd, table, caption{font-family:inherit;}
+  html{-webkit-font-smoothing:antialiased;}
+  body{margin:0; background:var(--bg); color:var(--ink); font-family:var(--serif); font-optical-sizing:auto; -webkit-font-smoothing:antialiased; text-rendering:optimizeLegibility; line-height:1.6; padding:0 0 60px;}
+  sup, sub{font-size:0.72em; line-height:0;}
+  code.ic{font-size:0.95em; background:rgba(128,128,128,0.10); border-radius:3px; padding:0 3px;}
+
+  .sheet{position:relative; isolation:isolate;}
+  .sheet::before{content:""; position:absolute; z-index:-1; top:0; bottom:0; left:50%; width:var(--paper-w); transform:translateX(-50%); background:var(--paper); box-shadow:0 0 0 1px rgba(0,0,0,0.03), 0 10px 40px rgba(0,0,0,0.05);}
+  .pg{display:grid; grid-template-columns:minmax(0,1fr) var(--paper-w) minmax(0,1fr);}
+  .pg > *{grid-column:2;}
+  .inpage{padding-left:var(--pad); padding-right:var(--pad);}
+
+  header{padding-top:64px; padding-bottom:18px; text-align:center;}
+  header h1{font-weight:400; font-size:3.5rem; line-height:1.08; margin:0 0 16px; letter-spacing:-0.015em; text-wrap:balance;}
+  header p.sub{margin:0; color:var(--ink-soft); font-size:0.95rem;}
+  .tools{display:flex; flex-wrap:wrap; justify-content:center; align-items:center; gap:4px 18px; margin-top:22px; font-size:0.85rem; position:relative;}
+  .link{background:none; border:none; padding:0; font-size:0.85rem; color:var(--ink-soft); cursor:pointer;}
+  .link:hover{color:var(--ink);}
+  .link.on{color:var(--ink); text-decoration:underline; text-underline-offset:4px; text-decoration-thickness:1px;}
+  .link:disabled{color:var(--faint); cursor:default;}
+  .qsearch{position:relative; display:inline-flex; align-items:center; gap:8px;}
+  .setwrap{position:relative; display:inline-block;}
+  .setrow{display:none; position:absolute; z-index:20; top:calc(100% + 8px); left:50%; transform:translateX(-50%); flex-direction:column; align-items:flex-start; gap:7px; padding:12px 18px; white-space:nowrap; background:var(--paper); border:1px solid var(--rule); box-shadow:0 8px 24px rgba(0,0,0,0.06);}
+  .setrow.open{display:flex;}
+  .qsearch input{width:150px; font-size:0.85rem; color:var(--ink); background:none; border:none; border-bottom:1px solid var(--rule); padding:2px 0; outline:none; text-align:center;}
+  .qsearch input:focus{border-bottom-color:var(--ink-soft);}
+  .qsearch input.bad{border-bottom-color:var(--wrong);}
+  .qwarn{position:absolute; left:50%; transform:translateX(-50%); top:calc(100% + 4px); font-size:0.75rem; color:var(--wrong); white-space:nowrap; display:none;}
+  .qwarn.show{display:block;}
+  #qClear{visibility:hidden;} .qsearch.active #qClear{visibility:visible;}
+  .howto{font-size:0.8rem; color:var(--faint); text-align:center; margin-top:12px;}
+  .toc{display:none;} .toc.on{display:flex; flex-wrap:wrap; justify-content:center; gap:4px 16px; padding-bottom:10px;}
+
+  .scorebar{position:sticky; top:0; z-index:10; width:var(--paper-w); max-width:100%; margin:0 auto; background:var(--paper); border-bottom:1px solid var(--rule);}
+  .scorebar .in{padding:12px var(--pad) 11px; display:flex; flex-wrap:wrap; gap:4px 14px; justify-content:space-between; align-items:baseline; font-size:0.8rem;}
+  .scorebar .link{font-size:0.8rem;}
+  .tally{color:var(--ink-soft);} .tally b{color:var(--ink); font-weight:600;}
+  .bar-links{display:flex; flex-wrap:wrap; gap:4px 13px;}
+  .link.danger{color:var(--wrong);}
+
+  .banner{display:none; padding-top:18px; padding-bottom:4px; font-size:0.9rem; color:var(--ink-soft); text-align:center;}
+  .banner.show{display:block;}
+  .banner .link{margin-left:14px;}
+  .exam-result{display:none; padding-top:26px; text-align:center;}
+  .exam-result.show{display:block;}
+  .er-score{font-size:2.4rem; line-height:1.2;}
+  .er-score small{font-size:1rem; color:var(--ink-soft);}
+  .er-detail{font-size:0.85rem; color:var(--ink-soft);}
+  .exam-bar{display:none; padding-top:26px; padding-bottom:30px; text-align:center; font-size:0.88rem; color:var(--ink-soft);}
+  .exam-bar.show{display:block;}
+  .exam-bar .link{display:block; margin:10px auto 0; font-size:1rem; color:var(--ink);}
+
+  main{padding-top:6px;}
+  .ch-head{padding-top:40px; padding-bottom:4px; font-size:0.78rem; letter-spacing:0.12em; text-transform:uppercase; color:var(--ink-soft); text-align:center;}
+
+  .qmain{position:relative; padding-top:28px; padding-bottom:24px;}
+  .qmain::before{content:""; position:absolute; top:0; left:var(--pad); right:var(--pad); border-top:1px solid var(--rule);}
+  .qmain.first::before{display:none;}
+  .qhead{display:flex; align-items:baseline; gap:10px; margin-bottom:6px; font-size:0.82rem; color:var(--ink-soft);}
+  .qmain.cur .qnum{text-decoration:underline; text-decoration-thickness:1px; text-underline-offset:5px;}   /* the question being worked on */
+  .qnum{font-weight:400; color:var(--ink); font-size:0.95rem; min-width:1.4em;}
+  .exref{color:var(--faint); font-size:0.78rem;}
+  .retry{color:var(--wrong); font-size:0.78rem;}
+  .qtools{margin-left:auto; display:inline-flex; align-items:baseline; gap:14px;}
+  .qcopy, .qflag{cursor:pointer; user-select:none; color:var(--faint); font-size:0.78rem; transition:color .2s;}
+  .qcopy:hover, .qflag:hover{color:var(--ink-soft);}
+  .qflag.on{color:var(--ink); animation:flagpop .3s ease;}
+  .qflag.on::before{content:"●"; display:inline-block; font-size:0.62em; margin-right:5px; vertical-align:0.18em; color:#B9822A;}
+  @keyframes flagpop{0%{opacity:.25; letter-spacing:0.08em;} 100%{opacity:1; letter-spacing:0;}}
+  .qtext{font-size:1.08rem; margin:0 0 12px;}
+  .qfig{margin:0 0 14px;}
+  .options{display:flex; flex-direction:column;}
+  .opt{display:flex; gap:8px; padding:3px 0; cursor:pointer; user-select:text;}
+  .opt:hover > span:last-child{text-decoration:underline; text-decoration-thickness:1px; text-underline-offset:4px; text-decoration-color:var(--faint);}
+  .optnum{flex:none; color:var(--ink-soft); min-width:1.3em; user-select:none;}
+  .optnum::after{content:".";}
+  .opt.correct{color:var(--correct);} .opt.correct .optnum{color:var(--correct);}
+  .opt.incorrect{color:var(--wrong);} .opt.incorrect > span:last-child{text-decoration:line-through; text-decoration-thickness:1px;}
+  .opt.dim{color:var(--faint);} .opt.dim .optnum{color:var(--faint);}
+  .opt.picked{text-decoration:underline; text-underline-offset:4px; text-decoration-thickness:1px;}
+
+  .qside{grid-column:3; align-self:start; padding-top:28px; margin-left:var(--gap); max-width:var(--note-w); font-size:0.8rem; line-height:1.55; color:#2C2C2E;}
+  html.dark .qside{color:#D8D8DC;}
+  .sn-head{color:var(--ink-soft); font-size:0.74rem; letter-spacing:0.04em; margin-bottom:4px;}
+  .sn-head .ok{color:var(--correct);} .sn-head .no{color:var(--wrong);}
+  .sn-line{margin:0 0 3px;}
+  .sn-line .lb{font-weight:400; color:var(--ink); text-shadow:0.35px 0 0 currentColor;}
+
+  table.t{border-collapse:collapse; width:100%; font-variant-numeric:tabular-nums lining-nums; font-size:0.86rem; line-height:1.45; color:var(--ink);}
+  table.t caption{caption-side:top; text-align:left; font-size:1rem; line-height:1.3; color:var(--ink); padding:0 0 8px;}
+  table.t thead th{border-top:1px solid var(--ink);}
+  table.t tbody tr:last-child td{border-bottom:1px solid var(--ink);}
+  table.t th, table.t td{font-weight:400; font-style:normal; color:var(--ink); padding:2px 6px; text-align:right; white-space:nowrap;}
+  table.t th{border-bottom:1px solid var(--rule);}
+  table.t th:first-child, table.t td:first-child{text-align:left; padding-left:0;}
+  table.t td:last-child, table.t th:last-child{padding-right:0;}
+  table.t tr.sec td{padding-top:10px;}
+  table.t tr.tot td{border-top:1px solid var(--rule);}
+  .zoomable{cursor:zoom-in;}
+
+  .case{grid-column:1 / -1;}
+  .case-ex{grid-column:1; grid-row:1 / span var(--n, 1); align-self:start; justify-self:end; position:sticky; top:calc(var(--bar-h) + 12px);
+    width:min(var(--ex-w), calc(100% - var(--gap) - 16px)); margin:20px var(--gap) 0 0; max-height:calc(100vh - var(--bar-h) - 24px); overflow:auto;
+    padding:1px 1px 12px; scrollbar-width:thin; scrollbar-color:transparent transparent;}
+  .case-ex:hover{scrollbar-color:var(--rule) transparent;}
+  .case-ex::-webkit-scrollbar{width:5px; height:5px;} .case-ex::-webkit-scrollbar-thumb{background:transparent; border-radius:3px;} .case-ex:hover::-webkit-scrollbar-thumb{background:var(--rule);}
+  .case-ex .tables{display:flex; flex-direction:column; gap:14px;}
+  .case-ex .exbox{background:var(--paper); padding:22px 16px; box-shadow:0 0 0 1px rgba(0,0,0,0.05);}
+  .case-ex .exbox table.t{margin-bottom:0; line-height:1.38;}
+  .case-ex h2{font-size:1.2rem; font-weight:400; margin:0;}
+  .case-ex .uses{font-size:0.76rem; color:var(--faint); margin:2px 0 14px;}
+  .case-ex table.t{margin-bottom:30px;}
+  .case-ex .tables > table.t:last-child{margin-bottom:0;}
+  .case-ex .tables{min-width:0;}
+  .case.stacked .case-ex, .case-ex.flow{overflow-x:auto;}
+  .case.stacked .case-ex{grid-column:2; grid-row:auto; position:static; justify-self:stretch; width:auto; max-height:none; overflow-x:auto; overflow-y:visible; margin:0; box-shadow:none; padding:28px var(--pad) 6px;}
+  .case.stacked .case-ex .tables{flex-direction:row; flex-wrap:wrap; align-items:flex-start; gap:0 28px;}
+  .case.stacked .case-ex .exbox{display:contents;}
+  .case.stacked .case-ex h2, .case.stacked .case-ex .uses{flex:0 0 100%;}
+  .case.stacked .case-ex table.t{flex:1 1 auto; width:auto; margin-bottom:30px;}
+  .case.stacked .case-ex{scrollbar-width:auto; scrollbar-color:auto;}
+
+  .single-nav{display:flex; justify-content:space-between; padding-top:16px; padding-bottom:30px;}
+  .single-nav .link{font-size:0.9rem;}
+  .single-progress{padding-top:20px; font-size:0.8rem; color:var(--faint); text-align:center;}
+  .next-ch{padding-top:10px; padding-bottom:30px; text-align:right;}
+
+  .data-errors{max-width:var(--paper-w); margin:16px auto 0; padding:12px 18px; color:var(--wrong); font-size:0.88rem; background:var(--paper);}
+  .empty-state{padding-top:60px; padding-bottom:60px; text-align:center; color:var(--ink-soft);}
+  footer{padding-top:28px; padding-bottom:40px; color:var(--faint); font-size:0.78rem; text-align:center;}
+
+  .lightbox{position:fixed; inset:0; z-index:40; background:rgba(20,20,22,0.6); display:none; align-items:center; justify-content:center; padding:24px; cursor:zoom-out;}
+  .lightbox.show{display:flex;}
+  .lightbox .lb-body{background:var(--paper); padding:26px 30px; max-width:94vw; max-height:92vh; overflow:auto; min-width:min(560px,90vw);}
+  .lightbox table.t{font-size:1rem;}
+  .lightbox img{max-width:90vw; max-height:84vh;}
+
+  :root{--memo-w:min(300px,86vw);}
+  .memo{position:fixed; top:0; right:0; bottom:0; width:var(--memo-w); z-index:22; background:var(--paper); box-shadow:-10px 0 40px rgba(0,0,0,0.08); display:flex; flex-direction:column; transform:translateX(100%); transition:transform .2s; visibility:hidden;}
+  body.memo-open .memo{transform:none; visibility:visible;}
+  .memo-head{display:flex; justify-content:space-between; align-items:center; padding:16px 20px 10px; font-size:0.8rem; letter-spacing:0.1em; text-transform:uppercase; color:var(--ink-soft);}
+  .memo-head .link{text-transform:none; letter-spacing:0; margin-left:14px;}
+  .memo-text{flex:1; overflow-y:auto; outline:none; white-space:pre-wrap; word-break:break-word; font-size:0.95rem; padding:6px 20px 16px;}
+  .memo-text:empty::before{content:attr(data-placeholder); color:var(--faint);}
+  .memo-tab{position:fixed; top:50%; right:0; z-index:22; transform:translateY(-50%); writing-mode:vertical-rl; background:var(--paper); border:none; box-shadow:0 0 0 1px var(--rule); padding:14px 6px; font-size:0.78rem; color:var(--ink-soft); cursor:pointer;}
+  body.memo-open .memo-tab{display:none;}
+  .tip{position:fixed; z-index:30; transform:translateX(-50%); font-size:0.78rem; color:var(--ink-soft); opacity:0; pointer-events:none; transition:opacity .12s;}
+  .tip.show{opacity:1;}
+  .to-top{position:fixed; left:50%; bottom:20px; z-index:20; transform:translateX(-50%); background:var(--paper); border:none; box-shadow:0 4px 20px rgba(0,0,0,0.1); border-radius:20px; padding:8px 22px; font-size:0.85rem; color:var(--ink-soft); cursor:pointer; opacity:0; pointer-events:none; transition:opacity .25s;}
+  .to-top.show{opacity:1; pointer-events:auto;}
+
+  @media (max-width:1420px){
+    .case-ex{grid-column:2; grid-row:auto; position:static; justify-self:stretch; width:auto; max-height:none; overflow-x:auto; overflow-y:visible; margin:0; box-shadow:none; padding:28px var(--pad) 6px;}
+    .case-ex .tables{flex-direction:row; flex-wrap:wrap; align-items:flex-start; gap:0 28px;}
+    .case-ex .exbox{display:contents;}
+    .case-ex h2, .case-ex .uses{flex:0 0 100%;}
+    .case-ex table.t{flex:1 1 auto; width:auto; margin-bottom:30px;}
+    .case-ex{scrollbar-width:auto; scrollbar-color:auto;}
+  }
+  @media (max-width:1180px){
+    .qside{grid-column:2; margin:-10px 0 0; max-width:none; padding:0 var(--pad) 20px;}
+    .qside:empty{display:none;}
+  }
+  @media (max-width:820px){
+    :root{--paper-w:100vw; --pad:20px;}
+    .sheet::before{box-shadow:none;}
+    header{padding-top:40px;} header h1{font-size:2.5rem;}
+  }
+
+  #printSheet{display:none;}
+  @page{size:A4 portrait; margin:22mm 20mm 20mm; @bottom-center{content:counter(page); font-family:"Source Serif 4",Georgia,"Times New Roman",serif; font-size:9pt;}}
+  @media print{
+    html, body{background:#fff !important; color:#000 !important; padding:0 !important; margin:0 !important;}
+    body > *:not(#printSheet){display:none !important;}
+    #printSheet{display:block; font-family:var(--serif); font-size:10.5pt; line-height:1.5; color:#000;}
+    #printSheet h1{font-size:13pt; font-weight:400; text-align:center; margin:0 0 9mm;}
+    #printSheet .p-sub{text-align:center; font-size:10pt; margin:-7mm 0 9mm;}
+    #printSheet .p-q{break-inside:avoid; page-break-inside:avoid; margin:0 0 5mm;}
+    #printSheet .p-q p{margin:0;}
+    #printSheet .p-ref{color:#444;}
+    #printSheet .p-opt{margin:0 0 0 5mm !important;}
+    #printSheet .p-fig{margin:1.5mm 0 2mm; max-width:120mm;}
+    #printSheet .p-ex{break-inside:avoid; page-break-inside:avoid; border-top:0.3mm solid #000; border-bottom:0.3mm solid #000; padding:3mm 0 1mm; margin:2mm 0 6mm;}
+    #printSheet .p-ex h2{font-size:12.5pt; font-weight:400; margin:0;}
+    #printSheet .p-ex .uses{font-size:9pt; margin:0 0 3mm; font-style:italic; color:#333;}
+    #printSheet .p-ex .tables{display:flex; gap:8mm; align-items:flex-start;}
+    #printSheet .p-ex .tables > table{flex:1 1 0;}
+    #printSheet table.t{font-size:9.3pt; color:#000;}
+    #printSheet table.t caption{color:#000; font-size:10.5pt; padding-bottom:1.5mm;}
+    #printSheet table.t thead th{border-top:0.35mm solid #000;}
+    #printSheet table.t tbody tr:last-child td{border-bottom:0.35mm solid #000;}
+    #printSheet table.t th, #printSheet table.t td{color:#000;}
+    #printSheet table.t th{ border-bottom:0.3mm solid #000; padding:0.8mm 1.5mm;}
+    #printSheet table.t td{padding:0.4mm 1.5mm; border-bottom:0.1mm solid #ddd;}
+    #printSheet table.t tr.sec td{color:#000; border-bottom:none; padding-top:2mm;}
+    #printSheet table.t tr.tot td{border-top:0.25mm solid #000;}
+    #printSheet .p-key{break-before:page; page-break-before:always;}
+    #printSheet .p-grid{columns:4; font-size:10pt;}
+    #printSheet .p-sol{display:none;}
+    body.print-solution #printSheet .p-grid{display:none;}
+    body.print-solution #printSheet .p-sol{display:block; column-count:2; column-gap:9mm; font-size:9pt; line-height:1.3;}
+    #printSheet .p-s{break-inside:avoid; margin:0 0 3mm;}
+    #printSheet .p-s p{margin:0;}
+    #printSheet .sn-line .lb{font-weight:400; text-shadow:0.3px 0 0 currentColor;}
+  }
+</style>
+</head>
+<body>
+
+<div class="sheet" id="sheet">
+  <header class="pg"><div class="inpage">
+    <h1 id="quizTitle">Quiz</h1>
+    <p class="sub" id="quizSub"></p>
+    <div class="tools">
+      <button class="link" id="allChBtn" type="button">All chapters</button>
+      <button class="link" id="printBtn" type="button">Print</button>
+      <button class="link" id="printSolBtn" type="button">Print with solution</button>
+      <span class="setwrap"><button class="link" id="menuBtn" type="button" aria-expanded="false">Settings</button>
+<div class="setrow" id="settings">
+        <button class="link" id="layoutToggleBtn" type="button">Single question view</button>
+        <button class="link" id="examModeBtn" type="button">Exam mode</button>
+        <button class="link" id="darkSw" type="button">Night mode</button>
+      </div></span>
+      <form class="qsearch" id="qSearchForm" autocomplete="off">
+        <input id="qSearch" type="text" inputmode="numeric" placeholder="Go to no. (1, 3-5)" aria-label="Question numbers">
+        <button class="link" id="qClear" type="button">Clear</button>
+        <div class="qwarn" id="qWarn" role="alert"></div>
+      </form>
+
+    </div>
+    <div class="howto">1–4 answer · Enter / ↓ next · ↑ previous · Ctrl+Q memo · click a table to enlarge</div>
+  </div></header>
+
+  <nav class="pg"><div class="toc inpage" id="toc" aria-label="Chapters"></div></nav>
+  <div class="pg"><div class="exam-result inpage" id="examResult"></div></div>
+
+  <div class="scorebar" id="scorebar"><div class="in">
+    <div class="tally">Answered <b id="answeredCount">0</b>/<span id="totalCount">0</span> · Correct <b id="correctCount">0</b> <span id="modeLabel"></span></div>
+    <div class="bar-links">
+      <button class="link on" id="allViewBtn" type="button">All</button>
+      <button class="link" id="reviewBtn" type="button" disabled>Review incorrect (0)</button>
+      <button class="link" id="flagBtn" type="button" disabled>Marked (0)</button>
+      <button class="link" id="copyMissedBtn" type="button" disabled>Copy incorrect #</button>
+      <button class="link" id="saveBtn" type="button">Save</button>
+      <button class="link" id="resetBtn" type="button">Restart</button>
+    </div>
+  </div></div>
+
+  <div class="pg"><div class="banner inpage" id="reviewBanner"><span id="reviewBannerText"></span><span id="reviewBannerActions"></span></div></div>
+  <main class="pg" id="quiz"></main>
+  <div class="pg"><div class="exam-bar inpage" id="examBar"><span id="examInfo"></span><button class="link" id="gradeBtn" type="button">Grade exam →</button></div></div>
+  <footer class="pg"><div class="inpage" id="quizFooter"></div></footer>
+</div>
+
+<button class="memo-tab" id="memoTab" type="button">Memo</button>
+<aside class="memo" id="memo" aria-label="Memo">
+  <div class="memo-head"><span>Memo</span><span><button class="link" id="memoBold" type="button" style="font-weight:700">B</button><button class="link" id="memoClose" type="button">Close</button></span></div>
+  <div class="memo-text" id="memoText" contenteditable="true" spellcheck="false" data-placeholder="Notes…  Ctrl+B bold"></div>
+</aside>
+
+<div id="printSheet"></div>
+<div class="lightbox" id="lightbox"><div class="lb-body" id="lbBody"></div></div>
+<button class="to-top" id="toTopBtn" type="button">↑ Top</button>
+
+<script>
+const esc = t => String(t).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+const MATH = { alpha:'α', beta:'β', gamma:'γ', delta:'δ', epsilon:'ε', theta:'θ', lambda:'λ', mu:'μ', pi:'π', rho:'ρ', sigma:'σ', tau:'τ', phi:'φ', omega:'ω',
+  Delta:'Δ', Sigma:'Σ', Pi:'Π', Omega:'Ω', times:'×', div:'÷', pm:'±', le:'≤', ge:'≥', ne:'≠', approx:'≈', infty:'∞', to:'→', sqrt:'√', cdot:'·', deg:'°' };
+const mathFm = t => esc(t)
+  .replace(/\\([_^])/g, (m, c) => c === '_' ? '&#95;' : '&#94;')
+  .replace(/\\([A-Za-z]+)/g, (m, k) => MATH[k] || m)
+  .replace(/\^(\{[^}]*\}|-?[0-9A-Za-z])/g, (m, s) => `<sup>${s.replace(/^\{|\}$/g, '')}</sup>`)
+  .replace(/_(\{[^}]*\}|[0-9A-Za-z])/g, (m, s) => `<sub>${s.replace(/^\{|\}$/g, '')}</sub>`);
+const fm = t => String(t).split(/`([^`]+)`/).map((p, i) => i % 2 ? `<code class="ic">${esc(p)}</code>` : mathFm(p)).join('');
+
+/* explanation -> one line per item; a short leading label in semibold */
+const explLines = t => String(t).split(/;\s+|\.\s+(?=(?:BA II Plus|Formula|ICONV|CF worksheet)\b)/).map(s => s.trim()).filter(Boolean);
+function fmtExpl(t){
+  return explLines(t).map(line => {
+    const m = line.match(/^([A-Za-zΔ(][^=:]{0,30}?)(\s=\s|:\s)([\s\S]*)$/);
+    if(m && !m[1].includes(',')) return `<p class="sn-line"><span class="lb">${fm(m[1])}</span>${m[2] === ': ' ? ': ' : ' = '}${fm(m[3])}</p>`;
+    return `<p class="sn-line">${fm(line)}</p>`;
+  }).join('');
+}
+
+function parseTbl(src){
+  let cap = '', body = src;
+  const k = src.indexOf('::');
+  if(k > -1){ cap = src.slice(0, k).trim(); body = src.slice(k + 2); }
+  const rows = body.split(';;').map(r => r.trim()).filter(Boolean);
+  const head = rows.shift().split('|').map(c => c.trim());
+  return { cap, head, rows: rows.map(r => r[0] === '!' ? { sec: r.slice(1).trim() } : r[0] === '=' ? { tot: true, cells: r.slice(1).split('|').map(c => c.trim()) } : { cells: r.split('|').map(c => c.trim()) }) };
+}
+function tblHTML(t){
+  const n = t.head.length;
+  return `<table class="t">${t.cap ? `<caption>${fm(t.cap)}</caption>` : ''}<thead><tr>${t.head.map(h => `<th>${fm(h)}</th>`).join('')}</tr></thead><tbody>` +
+    t.rows.map(r => r.sec ? `<tr class="sec"><td colspan="${n}">${fm(r.sec)}</td></tr>` : `<tr${r.tot ? ' class="tot"' : ''}>${r.cells.map(c => `<td>${fm(c)}</td>`).join('')}</tr>`).join('') + '</tbody></table>';
+}
+const tblText = t => (t.cap ? t.cap + '\n' : '') + t.head.join(' | ') + '\n' + t.rows.map(r => r.sec ? '-- ' + r.sec : r.cells.join(' | ')).join('\n');
+
+function parseQuizData(raw){
+  const blocks = raw.replace(/\r\n?/g, '\n').trim().split(/\n===\n?/).filter(b => b.trim() && b.trim() !== '===');
+  const meta = {};
+  blocks.shift().split('\n').forEach(l => { const i = l.indexOf(':'); if(i > 0) meta[l.slice(0, i).trim()] = l.slice(i + 1).trim(); });
+  const questions = [], chapters = [], cases = {}, errs = [];
+  let prevTag = '';
+  if(!meta.title) errs.push('meta block: title: is missing');
+  blocks.forEach(block => {
+    const L = block.trim().split('\n').map(l => l.trim()).filter(l => l);
+    if(L.length === 1 && L[0].startsWith('# ')){ chapters.push({ title: L[0].slice(2).trim(), idx: [] }); return; }
+    if(L[0].startsWith('@case ')){
+      const id = L[0].slice(6).trim();
+      const tbls = L.filter(l => l.startsWith('@tbl ')).map(l => parseTbl(l.slice(5)));
+      if(!tbls.length) errs.push(`exhibit ${id}: needs at least one @tbl line`);
+      cases[id] = { id, title: (L[1] && !L[1].startsWith('@')) ? L[1] : 'Exhibit ' + id, tbls };
+      return;
+    }
+    if(!chapters.length) chapters.push({ title: meta.title || 'Quiz', idx: [] });
+    const ch = chapters.length - 1;
+    chapters[ch].seen = (chapters[ch].seen || 0) + 1;
+    const who = `${chapters[ch].title} · Q${chapters[ch].seen}`;
+    if(L.length < 4){ errs.push(`${who}: needs at least 4 lines (tag, question, options, explanation) - check for a missing ===`); return; }
+    if(L[0] === '-' && !prevTag) errs.push(`${who}: tag "-" has no previous tag`);
+    const tag = L[0] === '-' ? prevTag : L[0];
+    prevTag = tag;
+    let correct = 0;
+    const raw3 = L[2].split('|');
+    const options = raw3.map((o, i) => { o = o.trim(); if(o.startsWith('*')){ correct = i; return o.slice(1).trim(); } return o; });
+    const stars = raw3.filter(o => o.trim().startsWith('*')).length;
+    if(stars !== 1) errs.push(`${who}: exactly one option must start with * (found ${stars})`);
+    if(options.length < 2 || options.length > 4) errs.push(`${who}: ${options.length} options (use 2-4)`);
+    if(options.some(o => !o)) errs.push(`${who}: empty option`);
+    let use = null, fig = null;
+    L.slice(4).forEach(l => {
+      if(l.startsWith('@use ')) use = l.slice(5).trim();
+      else if(l.startsWith('@tbl ')) fig = { type: 'tbl', t: parseTbl(l.slice(5)) };
+      else if(l.startsWith('@img ')) fig = { type: 'img', src: l.slice(5).trim() };
+      else if(l.startsWith('@')) errs.push(`${who}: unknown line "${l.slice(0, 12)}…" (use @use, @tbl or @img)`);
+    });
+    chapters[ch].idx.push(questions.length);
+    questions.push({ tag, text: L[1], options, correct, explain: L[3], fig, use, ch, n: chapters[ch].idx.length });
+  });
+  questions.forEach(q => { if(q.use && !cases[q.use]) errs.push(`question ${q.n}: @use ${q.use} but no "@case ${q.use}" block exists`); });
+  chapters.filter(c => !c.idx.length).forEach(c => errs.push(`chapter "${c.title}" has no questions`));
+  if(!questions.length) errs.push('no questions found');
+  const good = chapters.filter(c => c.idx.length);
+  return { meta, questions, cases, chapters: good.length ? good : [{ title: meta.title || 'Quiz', idx: [] }], errs };
+}
+
+const PARSED = parseQuizData(document.getElementById('quizData').textContent);
+const META = PARSED.meta, QUIZ_TITLE = META.title || 'Quiz', QUESTIONS = PARSED.questions, CHAPTERS = PARSED.chapters, CASES = PARSED.cases;
+if(PARSED.errs.length){
+  const box = document.createElement('div'); box.className = 'data-errors';
+  box.innerHTML = '<b>Quiz data needs fixing</b><ul>' + PARSED.errs.slice(0, 12).map(e => `<li>${esc(e)}</li>`).join('') + '</ul>';
+  document.body.insertBefore(box, document.body.firstChild);
+}
+const $ = id => document.getElementById(id);
+$('quizTitle').textContent = QUIZ_TITLE;
+$('quizSub').textContent = META.sub || '';
+document.title = QUIZ_TITLE + (META.sub ? ' · ' + META.sub.split(' · ')[0] : '');
+$('quizFooter').textContent = `${META.subject || ''} — ${META.textbook || ''}`;
+
+let activeCh = 0, viewAll = false, pickNums = null;
+const baseIdx = () => viewAll ? QUESTIONS.map((_, i) => i) : CHAPTERS[activeCh].idx;
+const scopeIdx = () => pickNums ? baseIdx().filter(i => pickNums.has(QUESTIONS[i].n)) : baseIdx();
+const chLabel = ci => { const t = CHAPTERS[ci].title, m = /^\s*(?:chapter|ch\.?|week|lecture)\s*(\d+)/i.exec(t); return m ? 'Ch.' + m[1] : t; };
+
+let current = 0, filterMode = 'all', layoutMode = 'list', reviewList = [], flagList = [];
+let answered = new Array(QUESTIONS.length).fill(null);
+const missed = new Set(), flagged = new Set();
+let examMode = false;
+let examPick = new Array(QUESTIONS.length).fill(null), examGraded = new Array(QUESTIONS.length).fill(false), examRes = new Array(QUESTIONS.length).fill(null);
+const examActive = qi => examMode && !examGraded[qi];
+const shownAns = qi => examActive(qi) ? examPick[qi] : answered[qi];
+const setOn = (btn, on) => { btn.classList.toggle('on', on); btn.setAttribute('aria-pressed', String(on)); };
+const quizEl = $('quiz'), reviewBtn = $('reviewBtn'), flagBtn = $('flagBtn'), copyMissedBtn = $('copyMissedBtn'), reviewBanner = $('reviewBanner');
+const wrongIndices = () => scopeIdx().filter(i => answered[i] !== null && answered[i] !== QUESTIONS[i].correct);
+const visibleIndices = () => filterMode === 'review' ? reviewList : filterMode === 'flagged' ? flagList : scopeIdx();
+
+function ranges(nums){
+  const a = [...nums].sort((x, y) => x - y), out = [];
+  for(let i = 0; i < a.length; i++){ let j = i; while(j + 1 < a.length && a[j + 1] === a[j] + 1) j++; out.push(j > i ? `${a[i]}–${a[j]}` : `${a[i]}`); i = j; }
+  return out.join(', ');
+}
+function exhibitHTML(id, idx, boxed){
+  const c = CASES[id], nums = idx.filter(i => QUESTIONS[i].use === id).map(i => QUESTIONS[i].n);
+  const head = `<h2>Exhibit ${esc(id)} · ${fm(c.title)}</h2><p class="uses">Used in question${nums.length > 1 ? 's' : ''} ${ranges(nums)}</p>`;
+  if(boxed) return `<div class="tables">${c.tbls.map((t, i) => `<div class="exbox">${i ? '' : head}${tblHTML(t)}</div>`).join('')}</div>`;   /* screen: each statement on its own card */
+  return head + `<div class="tables">${c.tbls.map(tblHTML).join('')}</div>`;
+}
+const lightbox = $('lightbox'), lbBody = $('lbBody');
+lightbox.addEventListener('click', () => lightbox.classList.remove('show'));
+function openLightbox(html){ lbBody.innerHTML = html; lightbox.classList.add('show'); }
+const figHTML = f => f.type === 'img' ? `<img src="${esc(f.src)}" alt="Figure" style="max-width:100%">` : tblHTML(f.t);
+
+function qaText(qi){
+  const q = QUESTIONS[qi], L = i => String.fromCharCode(97 + i);
+  const ex = q.use ? `[Exhibit ${q.use}: ${CASES[q.use].title}]\n` + CASES[q.use].tbls.map(tblText).join('\n') + '\n' : '';
+  return ex + `Q${q.n}. ${q.text}\n` + (q.fig && q.fig.type === 'tbl' ? tblText(q.fig.t) + '\n' : '') + q.options.map((o, i) => `${L(i)}. ${o}`).join('\n') +
+    `\nAnswer: ${L(q.correct)}. ${q.options[q.correct]}\nExplanation:\n${explLines(q.explain).join('\n')}`;
+}
+
+/* one question = a block on the page (.qmain, column 2) + a side note in the margin (.qside, column 3) */
+function questionNodes(qi, first, retry){
+  const q = QUESTIONS[qi];
+  const main = document.createElement('div');
+  main.className = 'qmain inpage' + (first ? ' first' : '');
+  main.dataset.index = qi;
+  main.addEventListener('click', () => { if(!String(window.getSelection())){ current = qi; markCurrent(); } });
+  const head = document.createElement('div');
+  head.className = 'qhead';
+  head.innerHTML = `<span class="qnum">${q.n}</span>` + (CHAPTERS.length > 1 ? `<span>${esc(chLabel(q.ch))} ·</span>` : '') + `<span class="qtag">${fm(q.tag)}</span>` +
+    (q.use ? `<span class="exref">· Exhibit ${esc(q.use)}</span>` : '') + (retry ? '<span class="retry">· retry</span>' : '');
+  const tools = document.createElement('span'); tools.className = 'qtools';
+  if(!examActive(qi) && answered[qi] !== null){
+    const cp = document.createElement('span'); cp.className = 'qcopy'; cp.setAttribute('role', 'button'); cp.textContent = 'copy'; cp.title = 'Copy question, answer and explanation';
+    cp.addEventListener('click', e => { e.stopPropagation(); copyText(qaText(qi)).then(() => showTip(cp, 'Copied'), () => showTip(cp, 'Copy failed')); });
+    tools.appendChild(cp);
+  }
+  const fl = document.createElement('span');
+  fl.className = 'qflag' + (flagged.has(qi) ? ' on' : ''); fl.setAttribute('role', 'button'); fl.textContent = 'review'; fl.title = 'Mark for review';
+  fl.addEventListener('click', e => { e.stopPropagation(); const on = !flagged.has(qi); on ? flagged.add(qi) : flagged.delete(qi); fl.classList.toggle('on', on); updateChrome(); });
+  tools.appendChild(fl); head.appendChild(tools);
+  main.appendChild(head);
+  const p = document.createElement('p'); p.className = 'qtext'; p.innerHTML = fm(q.text); main.appendChild(p);
+  if(q.fig){
+    const f = document.createElement('div'); f.className = 'qfig zoomable'; f.innerHTML = figHTML(q.fig);
+    f.addEventListener('click', e => { e.stopPropagation(); openLightbox(figHTML(q.fig)); });
+    main.appendChild(f);
+  }
+  const opts = document.createElement('div'); opts.className = 'options';
+  q.options.forEach((o, oi) => {
+    const b = document.createElement('div'); b.className = 'opt'; b.setAttribute('role', 'button');
+    b.innerHTML = `<span class="optnum">${oi + 1}</span><span>${fm(o)}</span>`;
+    if(examActive(qi)){ if(examPick[qi] === oi) b.classList.add('picked'); }
+    else if(answered[qi] !== null){ b.classList.add(oi === q.correct ? 'correct' : oi === answered[qi] ? 'incorrect' : 'dim'); }
+    b.addEventListener('click', () => { if(String(window.getSelection())) return; selectAnswer(qi, oi); });
+    opts.appendChild(b);
+  });
+  main.appendChild(opts);
+
+  const side = document.createElement('aside');
+  side.className = 'qside';
+  if(!examActive(qi) && answered[qi] !== null){
+    const ok = answered[qi] === q.correct;
+    side.innerHTML = `<div class="sn-head"><span class="${ok ? 'ok' : 'no'}">${ok ? 'Correct' : answered[qi] === -1 ? 'Not answered' : 'Incorrect'}</span> · answer ${q.correct + 1}</div>${fmtExpl(q.explain)}`;
+  }
+  return [main, side];
+}
+
+function caseSection(id, qis, idxForNums, retry){
+  const sec = document.createElement('section'); sec.className = 'case pg';
+  const ex = document.createElement('div'); ex.className = 'case-ex'; ex.innerHTML = exhibitHTML(id, idxForNums, true);
+  ex.style.setProperty('--n', String(qis.length + 1));
+  ex.querySelectorAll('table').forEach(t => { t.classList.add('zoomable'); t.addEventListener('click', () => openLightbox(t.outerHTML)); });
+  sec.appendChild(ex);
+  qis.forEach(qi => questionNodes(qi, false, retry).forEach(n => sec.appendChild(n)));
+  return sec;
+}
+
+function fitExhibits(){   /* an exhibit that cannot fit in the margin without wrapping goes onto the page above its questions */
+  document.querySelectorAll('.case').forEach(sec => {
+    sec.classList.remove('stacked');
+    const ex = sec.querySelector('.case-ex');
+    if(!ex) return;
+    const cs = getComputedStyle(ex); if(cs.position !== 'sticky') return;
+    const inner = ex.clientWidth - parseFloat(cs.paddingLeft) - parseFloat(cs.paddingRight);
+    const tooWide = [...ex.querySelectorAll('table')].some(t => { const p = t.parentElement, ps = getComputedStyle(p); return t.scrollWidth > p.clientWidth - parseFloat(ps.paddingLeft) - parseFloat(ps.paddingRight) + 1; });
+    if(tooWide || ex.scrollWidth > ex.clientWidth + 1) sec.classList.add('stacked');
+  });
+}
+window.addEventListener('resize', fitExhibits);
+function alignNotes(){   /* a side note starts level with option 1 of its question */
+  quizEl.querySelectorAll('.qside').forEach(side => {
+    side.style.paddingTop = '';
+    const main = side.previousElementSibling, opt = main && main.classList.contains('qmain') && main.querySelector('.opt');
+    if(!opt || side.getBoundingClientRect().left < main.getBoundingClientRect().right) return;   /* note sits below the question on narrow screens */
+    const lh = el => parseFloat(getComputedStyle(el).lineHeight) || 0;
+    const top = opt.getBoundingClientRect().top - main.getBoundingClientRect().top + parseFloat(getComputedStyle(opt).paddingTop) + (lh(opt) - lh(side)) / 2;
+    side.style.paddingTop = Math.max(0, Math.round(top)) + 'px';
+  });
+}
+window.addEventListener('resize', alignNotes);
+if(document.fonts && document.fonts.ready) document.fonts.ready.then(() => alignNotes());
+
+const nextChapterIdx = () => (!viewAll && !pickNums && filterMode === 'all' && CHAPTERS.length > 1 && activeCh < CHAPTERS.length - 1) ? activeCh + 1 : -1;
+function render(){
+  ignoreScrollUntil = performance.now() + 400;
+  const y0 = window.scrollY;
+  quizEl.innerHTML = '';
+  const vis = visibleIndices(), retry = filterMode === 'review';
+  if(!vis.length){
+    quizEl.innerHTML = `<div class="empty-state inpage">${filterMode === 'flagged' ? 'No questions marked for review.' : 'Nothing to review.'}</div>`;
+    updateChrome(); return;
+  }
+  if(layoutMode === 'single'){
+    const pos = Math.max(0, vis.indexOf(current)), qi = vis[pos];
+    current = qi;
+    const pr = document.createElement('div'); pr.className = 'single-progress inpage'; pr.textContent = `${pos + 1} / ${vis.length}`; quizEl.appendChild(pr);
+    const q = QUESTIONS[qi];
+    if(q.use){ const sec = caseSection(q.use, [qi], vis, retry); sec.querySelector('.qmain').classList.add('first'); quizEl.appendChild(sec); }
+    else questionNodes(qi, true, retry).forEach(n => quizEl.appendChild(n));
+    const nav = document.createElement('div'); nav.className = 'single-nav inpage';
+    const prev = document.createElement('button'); prev.className = 'link'; prev.textContent = '← Previous'; prev.disabled = pos === 0; prev.addEventListener('click', goPrev);
+    const nc = nextChapterIdx(), last = pos === vis.length - 1;
+    const next = document.createElement('button'); next.className = 'link'; next.style.color = 'var(--ink)'; next.textContent = last && nc > -1 ? `Next chapter: ${chLabel(nc)} →` : 'Next →'; next.disabled = last && nc < 0;
+    next.addEventListener('click', () => { if(last && nc > -1) switchChapter(nc); else goNext(); });
+    nav.appendChild(prev); nav.appendChild(next); quizEl.appendChild(nav);
+  } else {
+    let prevCh = -1, first = true;
+    for(let k = 0; k < vis.length; ){
+      const qi = vis[k], q = QUESTIONS[qi];
+      if(viewAll && CHAPTERS.length > 1 && q.ch !== prevCh){ const h = document.createElement('div'); h.className = 'ch-head inpage'; h.textContent = CHAPTERS[q.ch].title; quizEl.appendChild(h); prevCh = q.ch; first = true; }
+      if(q.use){
+        const group = [];
+        while(k < vis.length && QUESTIONS[vis[k]].use === q.use && QUESTIONS[vis[k]].ch === q.ch){ group.push(vis[k]); k++; }
+        const sec = caseSection(q.use, group, vis, retry);
+        if(first) sec.querySelector('.qmain').classList.add('first');
+        quizEl.appendChild(sec);
+      } else { questionNodes(qi, first, retry).forEach(n => quizEl.appendChild(n)); k++; }
+      first = false;
+    }
+    const nc = nextChapterIdx();
+    if(nc > -1){ const w = document.createElement('div'); w.className = 'next-ch inpage'; const b = document.createElement('button'); b.className = 'link'; b.textContent = `Next chapter: ${chLabel(nc)} →`; b.addEventListener('click', () => switchChapter(nc)); w.appendChild(b); quizEl.appendChild(w); }
+    window.scrollTo(0, y0);
+  }
+  fitExhibits();
+  updateChrome();
+  markCurrent();
+  alignNotes();
+}
+
+function selectAnswer(qi, oi){
+  if(examActive(qi)){ if(examPick[qi] === oi) return; examPick[qi] = oi; current = qi; render(); return; }
+  if(answered[qi] === oi) return;
+  answered[qi] = oi;
+  if(oi !== QUESTIONS[qi].correct) missed.add(qi);
+  current = qi; render(); scrollToActive();
+}
+function markCurrent(){ quizEl.querySelectorAll('.qmain').forEach(m => m.classList.toggle('cur', +m.dataset.index === current)); }
+function setActive(qi){ const v = visibleIndices(); if(!v.length) return; if(!v.includes(qi)) qi = v[0]; current = qi; render(); scrollToActive(); }
+function smoothTop(){ ignoreScrollUntil = performance.now() + 1500; window.scrollTo({ top: 0, behavior: 'smooth' }); }
+function scrollToActive(){
+  if(layoutMode === 'single') return;
+  const el = quizEl.querySelector(`.qmain[data-index="${current}"]`);
+  ignoreScrollUntil = performance.now() + 1200;
+  if(el) el.scrollIntoView({ behavior: 'smooth', block: 'center' });
+}
+function goNext(){ const v = visibleIndices(), p = v.indexOf(current); if(p === -1){ if(v.length) setActive(v[0]); return; } if(p < v.length - 1) setActive(v[p + 1]); }
+function goPrev(){ const v = visibleIndices(), p = v.indexOf(current); if(p > 0) setActive(v[p - 1]); }
+function enterReviewMode(){ const wl = wrongIndices(); if(!wl.length) return; reviewList = wl; wl.forEach(i => answered[i] = null); filterMode = 'review'; current = wl[0]; render(); scrollToActive(); }
+function exitReviewMode(){ filterMode = 'all'; render(); smoothTop(); }
+
+function updateChrome(){
+  const ids = scopeIdx(), ex = examMode && ids.some(i => !examGraded[i]);
+  const ansN = ids.filter(i => shownAns(i) !== null && shownAns(i) !== -1).length;
+  $('totalCount').textContent = ids.length;
+  $('answeredCount').textContent = ansN;
+  $('correctCount').textContent = ex ? '–' : ids.filter(i => answered[i] === QUESTIONS[i].correct).length;
+  const res = examMode && ids.length && ids.every(i => examGraded[i]) ? { c: ids.filter(i => examRes[i] === 'c').length, u: ids.filter(i => examRes[i] === 'u').length, n: ids.length } : null;
+  const er = $('examResult'); er.classList.toggle('show', !!res);
+  if(res){
+    er.innerHTML = `<div class="er-detail">Exam score</div><div class="er-score">${res.c}<small> / ${res.n} · ${Math.round(res.c / res.n * 100)}%</small></div><div class="er-detail">${res.n - res.c - res.u} incorrect · ${res.u} unanswered (counted as incorrect)</div><button class="link" id="retakeBtn" type="button" style="margin-top:8px">Retake exam</button>`;
+    $('retakeBtn').addEventListener('click', () => { resetScope(); smoothTop(); });
+  }
+  $('examBar').classList.toggle('show', ex);
+  if(ex){ const left = ids.length - ansN; $('examInfo').textContent = `${ansN} of ${ids.length} answered` + (left ? ` · ${left} unanswered will count as incorrect` : ''); }
+  const wl = wrongIndices();
+  reviewBtn.disabled = ex || !wl.length || filterMode === 'review';
+  reviewBtn.textContent = filterMode === 'review' ? 'Reviewing…' : `Review incorrect (${wl.length})`;
+  setOn(reviewBtn, filterMode === 'review');
+  copyMissedBtn.disabled = ex || !ids.some(i => missed.has(i));
+  setOn($('allViewBtn'), filterMode === 'all');
+  const fc = ids.filter(i => flagged.has(i)).length;
+  flagBtn.textContent = `Marked (${fc})`; flagBtn.disabled = !fc && filterMode !== 'flagged'; setOn(flagBtn, filterMode === 'flagged');
+  $('modeLabel').textContent = ex ? '· exam in progress' : '';
+  const still = filterMode === 'review' ? reviewList.filter(i => answered[i] !== null && answered[i] !== QUESTIONS[i].correct) : [];
+  const done = filterMode === 'review' && reviewList.length && reviewList.every(i => answered[i] !== null);
+  reviewBanner.classList.toggle('show', !!done);
+  if(done){
+    $('reviewBannerText').textContent = still.length ? `Review complete — ${still.length} of ${reviewList.length} still incorrect.` : `Review complete — all ${reviewList.length} correct.`;
+    const a = $('reviewBannerActions'); a.innerHTML = '';
+    if(still.length){ const r = document.createElement('button'); r.className = 'link'; r.textContent = 'Retry remaining'; r.addEventListener('click', () => { reviewList = still; still.forEach(i => answered[i] = null); current = still[0]; render(); scrollToActive(); }); a.appendChild(r); }
+    const b = document.createElement('button'); b.className = 'link'; b.textContent = 'Back to all'; b.addEventListener('click', exitReviewMode); a.appendChild(b);
+  }
+  document.documentElement.style.setProperty('--bar-h', $('scorebar').offsetHeight + 'px');
+}
+
+document.addEventListener('keydown', e => {
+  if(e.target.closest && e.target.closest('textarea, input, [contenteditable]')) return;
+  if(lightbox.classList.contains('show')){ if(['Escape', 'Enter', ' '].includes(e.key)){ e.preventDefault(); lightbox.classList.remove('show'); } return; }
+  if(!visibleIndices().length) return;
+  if(e.key >= '1' && e.key <= '4'){ const oi = +e.key - 1; if(QUESTIONS[current] && oi < QUESTIONS[current].options.length){ e.preventDefault(); selectAnswer(current, oi); } }
+  else if(e.key === 'Enter' || e.key === ' ' || e.key === 'ArrowDown'){ if(e.target.closest && e.target.closest('button')) return; if(e.altKey || e.ctrlKey || e.metaKey) return; e.preventDefault(); goNext(); }
+  else if(e.key === 'ArrowUp'){ if(e.altKey || e.ctrlKey || e.metaKey) return; e.preventDefault(); goPrev(); }
+});
+
+reviewBtn.addEventListener('click', enterReviewMode);
+$('allViewBtn').addEventListener('click', exitReviewMode);
+flagBtn.addEventListener('click', () => { flagList = scopeIdx().filter(i => flagged.has(i)); if(!flagList.length) return; filterMode = 'flagged'; reviewList = []; if(!flagList.includes(current)) current = flagList[0]; render(); smoothTop(); });
+$('layoutToggleBtn').addEventListener('click', () => { layoutMode = layoutMode === 'list' ? 'single' : 'list'; setOn($('layoutToggleBtn'), layoutMode === 'single'); render(); });
+$('darkSw').addEventListener('click', () => setOn($('darkSw'), document.documentElement.classList.toggle('dark')));
+const examModeBtn = $('examModeBtn');
+examModeBtn.addEventListener('click', () => { examMode = !examMode; setOn(examModeBtn, examMode); if(examMode){ filterMode = 'all'; reviewList = []; } render(); });
+$('gradeBtn').addEventListener('click', () => {
+  scopeIdx().filter(i => !examGraded[i]).forEach(i => {
+    missed.delete(i); examGraded[i] = true; const p = examPick[i];
+    if(p === null){ examRes[i] = 'u'; answered[i] = -1; missed.add(i); }
+    else { answered[i] = p; if(p === QUESTIONS[i].correct) examRes[i] = 'c'; else { examRes[i] = 'w'; missed.add(i); } }
+  });
+  filterMode = 'all'; reviewList = []; current = scopeIdx()[0]; render(); smoothTop();
+});
+
+const qSearch = $('qSearch'), qWarn = $('qWarn'), qForm = $('qSearchForm');
+function qBad(m){ qWarn.textContent = m; qWarn.classList.toggle('show', !!m); qSearch.classList.toggle('bad', !!m); }
+function parseNums(txt){
+  const t = txt.replace(/[，、;；]/g, ',').replace(/[–—~～]/g, '-').replace(/\s*-\s*/g, '-').trim();
+  if(!t) return { empty: true };
+  const out = new Set();
+  for(const tok of t.split(/[\s,]+/).filter(Boolean)){
+    let m;
+    if(/^\d+$/.test(tok)) out.add(+tok);
+    else if((m = tok.match(/^(\d+)-(\d+)$/)) && +m[1] <= +m[2]){ for(let k = +m[1]; k <= +m[2]; k++) out.add(k); }
+    else return { err: `Not recognised: "${tok}"` };
+  }
+  return { set: out };
+}
+function clearPick(silent){ pickNums = null; qSearch.value = ''; qBad(''); qForm.classList.remove('active'); if(!silent){ filterMode = 'all'; current = scopeIdx()[0]; render(); smoothTop(); } }
+qForm.addEventListener('submit', e => {
+  e.preventDefault();
+  const r = parseNums(qSearch.value);
+  if(r.empty){ clearPick(false); return; }
+  if(r.err){ qBad(r.err); return; }
+  const have = new Set(baseIdx().map(i => QUESTIONS[i].n)), miss = [...r.set].filter(n => !have.has(n));
+  if(miss.length){ qBad(`No question ${miss.slice(0, 6).join(', ')} (1–${Math.max(...have)})`); return; }
+  qBad(''); pickNums = r.set; qForm.classList.add('active'); qSearch.value = [...r.set].sort((a, b) => a - b).join(', ');
+  filterMode = 'all'; reviewList = []; current = scopeIdx()[0]; render(); smoothTop();
+});
+qSearch.addEventListener('input', () => qBad(''));
+$('qClear').addEventListener('click', () => clearPick(false));
+
+const allChBtn = $('allChBtn'), tocEl = $('toc');
+if(CHAPTERS.length < 2) allChBtn.remove();
+function setViewAll(on){ viewAll = on; clearPick(true); setOn(allChBtn, on); filterMode = 'all'; reviewList = []; if(!scopeIdx().includes(current)) current = scopeIdx()[0]; renderToc(); }
+allChBtn.addEventListener('click', () => { setViewAll(!viewAll); render(); smoothTop(); });
+function renderToc(){
+  tocEl.classList.toggle('on', CHAPTERS.length > 1);
+  if(CHAPTERS.length < 2) return;
+  tocEl.innerHTML = '';
+  CHAPTERS.forEach((c, ci) => { const b = document.createElement('button'); b.type = 'button'; b.className = 'link' + (ci === activeCh && !viewAll ? ' on' : ''); b.textContent = chLabel(ci); b.title = c.title; b.addEventListener('click', () => switchChapter(ci)); tocEl.appendChild(b); });
+}
+function switchChapter(ci){ if(ci === activeCh && !viewAll) return; clearPick(true); if(viewAll) setViewAll(false); activeCh = ci; filterMode = 'all'; reviewList = []; current = CHAPTERS[ci].idx[0]; renderToc(); render(); smoothTop(); }
+
+$('printBtn').addEventListener('click', () => { document.body.classList.remove('print-solution'); window.print(); });
+$('printSolBtn').addEventListener('click', () => { document.body.classList.add('print-solution'); window.print(); });
+function sheetHtml(title, idx){
+  const L = i => String.fromCharCode(97 + i);
+  let html = `<h1>${esc(title)}</h1>${META.sub ? `<p class="p-sub">${esc(META.sub)}</p>` : ''}`, lastCase = null;
+  idx.forEach(qi => {
+    const q = QUESTIONS[qi];
+    if(q.use && q.use !== lastCase) html += `<div class="p-ex">${exhibitHTML(q.use, idx)}</div>`;
+    lastCase = q.use;
+    html += `<div class="p-q"><p>${q.n}. ${q.use ? `<span class="p-ref">[Exhibit ${esc(q.use)}]</span> ` : ''}${fm(q.text)}</p>` + (q.fig ? `<div class="p-fig">${figHTML(q.fig)}</div>` : '') +
+      q.options.map((o, oi) => `<p class="p-opt">${L(oi)}. ${fm(o)}</p>`).join('') + '</div>';
+  });
+  html += `<div class="p-key"><h1>${esc(title)} — Answers</h1><div class="p-grid">` + idx.map(qi => `<div>${QUESTIONS[qi].n}. ${L(QUESTIONS[qi].correct)}</div>`).join('') +
+    '</div><div class="p-sol">' + idx.map(qi => `<div class="p-s"><p><b>${QUESTIONS[qi].n}. ${L(QUESTIONS[qi].correct)}</b>${QUESTIONS[qi].use ? ` [Exhibit ${esc(QUESTIONS[qi].use)}]` : ''}</p>${fmtExpl(QUESTIONS[qi].explain)}</div>`).join('') + '</div></div>';
+  return html;
+}
+function buildPrintSheet(sel){
+  sel = sel || scopeIdx();
+  $('printSheet').innerHTML = viewAll && CHAPTERS.length > 1
+    ? CHAPTERS.map((c, ci) => ({ c, ix: sel.filter(i => QUESTIONS[i].ch === ci) })).filter(o => o.ix.length).map(o => `<section>${sheetHtml(o.c.title, o.ix)}</section>`).join('')
+    : sheetHtml(CHAPTERS.length > 1 ? CHAPTERS[activeCh].title : QUIZ_TITLE, sel);
+}
+window.addEventListener('beforeprint', () => buildPrintSheet(visibleIndices()));
+window.addEventListener('afterprint', () => document.body.classList.remove('print-solution'));
+
+function copyText(t){
+  if(navigator.clipboard && window.isSecureContext) return navigator.clipboard.writeText(t);
+  return new Promise((ok, fail) => { const ta = document.createElement('textarea'); ta.value = t; ta.style.cssText = 'position:fixed;opacity:0'; document.body.appendChild(ta); ta.select(); let d = false; try{ d = document.execCommand('copy'); }catch(e){} ta.remove(); d ? ok() : fail(); });
+}
+copyMissedBtn.addEventListener('click', () => {
+  const nums = [...missed].filter(i => scopeIdx().includes(i)).map(i => QUESTIONS[i].n);
+  if(!nums.length) return;
+  copyText(`${QUIZ_TITLE} incorrect: ${nums.sort((a, b) => a - b).join(', ')}`).then(() => showTip(copyMissedBtn, 'Copied'), () => showTip(copyMissedBtn, 'Copy failed'));
+});
+function showTip(anchor, msg, ms = 800){
+  const el = document.createElement('div'); el.className = 'tip'; el.textContent = msg; document.body.appendChild(el);
+  const r = anchor.getBoundingClientRect(); el.style.left = (r.left + r.width / 2) + 'px'; el.style.top = Math.max(4, r.top - 22) + 'px';
+  requestAnimationFrame(() => el.classList.add('show'));
+  setTimeout(() => { el.classList.remove('show'); setTimeout(() => el.remove(), 150); }, ms);
+}
+
+const toTopBtn = $('toTopBtn');
+let lastY = window.scrollY, upAcc = 0, topTimer = null, lastUser = 0, ignoreScrollUntil = 0;
+['wheel', 'touchmove'].forEach(ev => window.addEventListener(ev, () => lastUser = performance.now(), { passive: true }));
+window.addEventListener('scroll', () => {
+  const y = window.scrollY, d = y - lastY; lastY = y;
+  if(performance.now() - lastUser > 700 || performance.now() < ignoreScrollUntil) return;
+  if(d > 0 || y < 900){ toTopBtn.classList.remove('show'); upAcc = 0; return; }
+  upAcc -= d;
+  if(upAcc > 30){ toTopBtn.classList.add('show'); clearTimeout(topTimer); topTimer = setTimeout(() => { toTopBtn.classList.remove('show'); upAcc = 0; }, 2200); }
+}, { passive: true });
+toTopBtn.addEventListener('click', () => window.scrollTo({ top: 0, behavior: 'smooth' }));
+window.addEventListener('resize', () => document.documentElement.style.setProperty('--bar-h', $('scorebar').offsetHeight + 'px'));
+
+const resetBtn = $('resetBtn'); let armed = false, armTimer = null;
+resetBtn.addEventListener('click', () => {
+  if(!armed){ armed = true; resetBtn.classList.add('danger'); resetBtn.textContent = 'Click again to restart'; armTimer = setTimeout(disarm, 4000); return; }
+  clearTimeout(armTimer); disarm(); resetScope(); smoothTop();
+});
+function disarm(){ armed = false; resetBtn.classList.remove('danger'); resetBtn.textContent = 'Restart'; }
+function resetScope(){ scopeIdx().forEach(i => { answered[i] = null; examPick[i] = null; examGraded[i] = false; examRes[i] = null; missed.delete(i); }); current = scopeIdx()[0]; filterMode = 'all'; reviewList = []; render(); }
+
+const memoEl = $('memoText'), memoTab = $('memoTab');
+function setMemoOpen(on){ document.body.classList.toggle('memo-open', on); }
+function memoHtml(){ const out = n => [...n.childNodes].map(c => c.nodeType === 3 ? esc(c.nodeValue) : c.nodeName === 'BR' ? '<br>' : ['B', 'STRONG'].includes(c.nodeName) ? `<b>${out(c)}</b>` : ['DIV', 'P'].includes(c.nodeName) ? `<div>${out(c)}</div>` : out(c)).join(''); return out(memoEl); }
+memoEl.addEventListener('paste', e => { e.preventDefault(); document.execCommand('insertText', false, (e.clipboardData || window.clipboardData).getData('text')); });
+$('memoBold').addEventListener('mousedown', e => e.preventDefault());
+$('memoBold').addEventListener('click', () => { memoEl.focus(); document.execCommand('bold'); });
+memoTab.addEventListener('click', () => { setMemoOpen(true); memoEl.focus(); });
+$('memoClose').addEventListener('click', () => setMemoOpen(false));
+document.addEventListener('mousedown', e => { if(document.body.classList.contains('memo-open') && !e.target.closest('#memo, #memoTab')) setMemoOpen(false); });
+window.addEventListener('keydown', e => { if(e.ctrlKey && !e.altKey && e.key.toLowerCase() === 'q'){ e.preventDefault(); const on = !document.body.classList.contains('memo-open'); setMemoOpen(on); if(on) memoEl.focus(); } });
+
+const saveBtn = $('saveBtn');
+const hashStr = t => { let h = 5381; for(let i = 0; i < t.length; i++) h = ((h << 5) + h + t.charCodeAt(i)) | 0; return String(h); };
+const SAVE_KEY = 'caseQuizProgress:' + QUIZ_TITLE, SAVE_SIG = hashStr(QUESTIONS.map(q => q.text + '|' + q.options.join('|') + '|' + q.correct).join('\n'));
+saveBtn.addEventListener('click', () => {
+  try{ localStorage.setItem(SAVE_KEY, JSON.stringify({ sig: SAVE_SIG, t: Date.now(), answered, missed: [...missed], flagged: [...flagged], activeCh, current, examMode, examPick, examGraded, examRes, memo: memoHtml() })); showTip(saveBtn, 'Saved'); }
+  catch(e){ showTip(saveBtn, 'Save failed'); }
+});
+function loadProgress(){
+  let d; try{ d = JSON.parse(localStorage.getItem(SAVE_KEY) || 'null'); }catch(e){ return false; }
+  if(!d) return false;
+  if(typeof d.memo === 'string'){ memoEl.innerHTML = d.memo; memoEl.innerHTML = memoHtml(); }
+  if(d.sig !== SAVE_SIG || !Array.isArray(d.answered) || d.answered.length !== QUESTIONS.length) return 'mismatch';
+  answered = d.answered; (d.missed || []).forEach(i => missed.add(i)); (d.flagged || []).forEach(i => flagged.add(i));
+  if(Array.isArray(d.examPick) && d.examPick.length === QUESTIONS.length){ examPick = d.examPick; examGraded = d.examGraded || examGraded; examRes = d.examRes || examRes; }
+  examMode = !!d.examMode; setOn(examModeBtn, examMode);
+  activeCh = CHAPTERS[d.activeCh] ? d.activeCh : 0;
+  current = QUESTIONS[d.current] ? d.current : 0;
+  return true;
+}
+let restored = false; try{ restored = loadProgress(); }catch(e){}
+
+if(CHAPTERS.length > 1 && /midterm|final/i.test(QUIZ_TITLE)) setViewAll(true);
+if(!scopeIdx().includes(current)) current = scopeIdx()[0];
+renderToc();
+render();
+if(restored === true) showTip(saveBtn, 'Progress restored');
+else if(restored === 'mismatch') showTip(saveBtn, 'Saved data is from another version');
+const menuBtn = document.getElementById('menuBtn'), settingsEl = document.getElementById('settings');
+menuBtn.addEventListener('click', e => { e.stopPropagation(); const on = settingsEl.classList.toggle('open'); menuBtn.setAttribute('aria-expanded', String(on)); menuBtn.classList.toggle('on', on); });
+document.addEventListener('click', e => { if(settingsEl.classList.contains('open') && !e.target.closest('.setwrap')){ settingsEl.classList.remove('open'); menuBtn.classList.remove('on'); menuBtn.setAttribute('aria-expanded', 'false'); } });
+</script>
+</body>
+</html>

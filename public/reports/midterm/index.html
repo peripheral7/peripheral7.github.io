@@ -19,6 +19,7 @@
   .name span{ display:block; color:var(--muted); font-size:.85rem; }
   .act{ display:flex; gap:.4rem; flex-shrink:0; }
   .act a, .act button{ font:inherit; font-size:.85rem; padding:.3rem .7rem; border:1px solid var(--line); border-radius:6px; background:var(--btn); color:var(--ink); text-decoration:none; cursor:pointer; }
+  .act a.solve{ border-color:var(--link); color:var(--link); background:transparent; }
   .act button{ background:var(--ink); color:var(--bg); border-color:var(--ink); }
   li.all .name a{ color:var(--link); }
   .tpl{ color:var(--muted); font-size:.9rem; margin:0 0 .75rem; }
@@ -28,49 +29,41 @@
 </head>
 <body>
 <h1>Midterm</h1>
-<p class="sub">인쇄: 바로 프린트 대화상자를 엽니다(안 되는 브라우저는 새 탭에서 PDF를 열어 인쇄).</p>
+<p class="sub">풀기: 웹에서 바로 문제 풀기(채점·해설, 진행 상황은 이 브라우저에 저장). 인쇄: 정답 포함 PDF를 바로 프린트(안 되는 브라우저는 새 탭에서 열림).</p>
 
 <h2>Business Finance</h2>
 <ul>
-  <li class="all"><div class="name"><a href="All_BusinessFinance.pdf" target="_blank">Business Finance 전체 합본</a><span>요약노트 2 + 퀴즈 2 · 34쪽</span></div>
-    <div class="act"><button type="button" data-pdf="All_BusinessFinance.pdf">전체 인쇄</button><a href="All_BusinessFinance.pdf" download>다운로드</a></div></li>
-  <li><div class="name"><a href="BF_Cheatsheet_Ch2-7.pdf" target="_blank">Cheat Sheet (Ch.2–7)</a><span>요약노트 · 7쪽</span></div>
-    <div class="act"><button type="button" data-pdf="BF_Cheatsheet_Ch2-7.pdf">인쇄</button><a href="BF_Cheatsheet_Ch2-7.pdf" download>다운로드</a></div></li>
-  <li><div class="name"><a href="Business_Finance_Ratio_One_Page_Notes.pdf" target="_blank">Financial Ratios 한 장 노트</a><span>요약노트 · 1쪽</span></div>
-    <div class="act"><button type="button" data-pdf="Business_Finance_Ratio_One_Page_Notes.pdf">인쇄</button><a href="Business_Finance_Ratio_One_Page_Notes.pdf" download>다운로드</a></div></li>
-  <li><div class="name"><a href="BF_Midterm_MultipleChoice_Ch2-7_with_answers.pdf" target="_blank">객관식 (Ch.2–7) — 정답 포함</a><span>70문항 · 16쪽</span></div>
-    <div class="act"><button type="button" data-pdf="BF_Midterm_MultipleChoice_Ch2-7_with_answers.pdf">인쇄</button><a href="BF_Midterm_MultipleChoice_Ch2-7_with_answers.pdf" download>다운로드</a></div></li>
-  <li><div class="name"><a href="BF_Midterm_ShortAnswer_Ch2-7_with_answers.pdf" target="_blank">계산 서술형 (Ch.2–7) — 모범답안 포함</a><span>15문항 · 10쪽</span></div>
-    <div class="act"><button type="button" data-pdf="BF_Midterm_ShortAnswer_Ch2-7_with_answers.pdf">인쇄</button><a href="BF_Midterm_ShortAnswer_Ch2-7_with_answers.pdf" download>다운로드</a></div></li>
+  <li class="all"><div class="name"><a href="All_BusinessFinance.pdf" target="_blank">Business Finance 전체 합본 (정답 포함)</a><span>객관식 + 서술형 · 26쪽</span></div>
+    <div class="act"><button type="button" data-pdf="All_BusinessFinance.pdf">전체 인쇄</button><a href="All_BusinessFinance.pdf" download>PDF</a></div></li>
+  <li><div class="name"><a href="quiz/BF_MultipleChoice.html">객관식 (Ch.2–7)</a><span>70문항 · PDF 16쪽</span></div>
+    <div class="act"><a class="solve" href="quiz/BF_MultipleChoice.html">풀기</a><button type="button" data-pdf="BF_Midterm_MultipleChoice_Ch2-7_with_answers.pdf">인쇄</button><a href="BF_Midterm_MultipleChoice_Ch2-7_with_answers.pdf" download>PDF</a></div></li>
+  <li><div class="name"><a href="quiz/BF_ShortAnswer.html">계산 서술형 (Ch.2–7)</a><span>15문항 · PDF 10쪽</span></div>
+    <div class="act"><a class="solve" href="quiz/BF_ShortAnswer.html">풀기</a><button type="button" data-pdf="BF_Midterm_ShortAnswer_Ch2-7_with_answers.pdf">인쇄</button><a href="BF_Midterm_ShortAnswer_Ch2-7_with_answers.pdf" download>PDF</a></div></li>
 </ul>
 
 <h2>Investment Analysis</h2>
 <ul>
-  <li class="all"><div class="name"><a href="All_InvestmentAnalysis.pdf" target="_blank">Investment Analysis 전체 합본</a><span>요약노트 1 + 퀴즈 2 · 57쪽</span></div>
-    <div class="act"><button type="button" data-pdf="All_InvestmentAnalysis.pdf">전체 인쇄</button><a href="All_InvestmentAnalysis.pdf" download>다운로드</a></div></li>
-  <li><div class="name"><a href="Investment_Analysis_SubNote_Ch2-6.pdf" target="_blank">Sub-Note (Ch.2–6)</a><span>요약노트 · 13쪽</span></div>
-    <div class="act"><button type="button" data-pdf="Investment_Analysis_SubNote_Ch2-6.pdf">인쇄</button><a href="Investment_Analysis_SubNote_Ch2-6.pdf" download>다운로드</a></div></li>
-  <li><div class="name"><a href="IA_Midterm_MultipleChoice_with_answers.pdf" target="_blank">객관식 — 정답 포함</a><span>96문항 · 28쪽</span></div>
-    <div class="act"><button type="button" data-pdf="IA_Midterm_MultipleChoice_with_answers.pdf">인쇄</button><a href="IA_Midterm_MultipleChoice_with_answers.pdf" download>다운로드</a></div></li>
-  <li><div class="name"><a href="IA_Midterm_ShortAnswer_with_answers.pdf" target="_blank">서술형 — 정답 포함</a><span>87문항 · 16쪽</span></div>
-    <div class="act"><button type="button" data-pdf="IA_Midterm_ShortAnswer_with_answers.pdf">인쇄</button><a href="IA_Midterm_ShortAnswer_with_answers.pdf" download>다운로드</a></div></li>
+  <li class="all"><div class="name"><a href="All_InvestmentAnalysis.pdf" target="_blank">Investment Analysis 전체 합본 (정답 포함)</a><span>객관식 + 서술형 · 44쪽</span></div>
+    <div class="act"><button type="button" data-pdf="All_InvestmentAnalysis.pdf">전체 인쇄</button><a href="All_InvestmentAnalysis.pdf" download>PDF</a></div></li>
+  <li><div class="name"><a href="quiz/IA_MultipleChoice.html">객관식</a><span>96문항 · PDF 28쪽</span></div>
+    <div class="act"><a class="solve" href="quiz/IA_MultipleChoice.html">풀기</a><button type="button" data-pdf="IA_Midterm_MultipleChoice_with_answers.pdf">인쇄</button><a href="IA_Midterm_MultipleChoice_with_answers.pdf" download>PDF</a></div></li>
+  <li><div class="name"><a href="quiz/IA_ShortAnswer.html">서술형</a><span>87문항 · PDF 16쪽</span></div>
+    <div class="act"><a class="solve" href="quiz/IA_ShortAnswer.html">풀기</a><button type="button" data-pdf="IA_Midterm_ShortAnswer_with_answers.pdf">인쇄</button><a href="IA_Midterm_ShortAnswer_with_answers.pdf" download>PDF</a></div></li>
 </ul>
 
 <h2>Econometrics</h2>
 <ul>
-  <li class="all"><div class="name"><a href="All_Econometrics.pdf" target="_blank">Econometrics 전체 합본</a><span>요약노트 1 + 퀴즈 2 · 30쪽</span></div>
-    <div class="act"><button type="button" data-pdf="All_Econometrics.pdf">전체 인쇄</button><a href="All_Econometrics.pdf" download>다운로드</a></div></li>
-  <li><div class="name"><a href="Econometrics_Exam_Summary.pdf" target="_blank">시험 전날 요약 (Ch.1–6)</a><span>요약노트 · 3쪽</span></div>
-    <div class="act"><button type="button" data-pdf="Econometrics_Exam_Summary.pdf">인쇄</button><a href="Econometrics_Exam_Summary.pdf" download>다운로드</a></div></li>
-  <li><div class="name"><a href="Econometrics_Midterm_MultipleChoice_with_answers.pdf" target="_blank">객관식 — 정답 포함</a><span>54문항 · 12쪽</span></div>
-    <div class="act"><button type="button" data-pdf="Econometrics_Midterm_MultipleChoice_with_answers.pdf">인쇄</button><a href="Econometrics_Midterm_MultipleChoice_with_answers.pdf" download>다운로드</a></div></li>
-  <li><div class="name"><a href="Econometrics_Midterm_ShortAnswer_with_answers.pdf" target="_blank">서술형 — 정답 포함</a><span>37문항 · 15쪽</span></div>
-    <div class="act"><button type="button" data-pdf="Econometrics_Midterm_ShortAnswer_with_answers.pdf">인쇄</button><a href="Econometrics_Midterm_ShortAnswer_with_answers.pdf" download>다운로드</a></div></li>
+  <li class="all"><div class="name"><a href="All_Econometrics.pdf" target="_blank">Econometrics 전체 합본 (정답 포함)</a><span>객관식 + 서술형 · 27쪽</span></div>
+    <div class="act"><button type="button" data-pdf="All_Econometrics.pdf">전체 인쇄</button><a href="All_Econometrics.pdf" download>PDF</a></div></li>
+  <li><div class="name"><a href="quiz/Econometrics_MultipleChoice.html">객관식</a><span>54문항 · PDF 12쪽</span></div>
+    <div class="act"><a class="solve" href="quiz/Econometrics_MultipleChoice.html">풀기</a><button type="button" data-pdf="Econometrics_Midterm_MultipleChoice_with_answers.pdf">인쇄</button><a href="Econometrics_Midterm_MultipleChoice_with_answers.pdf" download>PDF</a></div></li>
+  <li><div class="name"><a href="quiz/Econometrics_ShortAnswer.html">서술형</a><span>37문항 · PDF 15쪽</span></div>
+    <div class="act"><a class="solve" href="quiz/Econometrics_ShortAnswer.html">풀기</a><button type="button" data-pdf="Econometrics_Midterm_ShortAnswer_with_answers.pdf">인쇄</button><a href="Econometrics_Midterm_ShortAnswer_with_answers.pdf" download>PDF</a></div></li>
 </ul>
 
 <h2>모든 과목</h2>
 <ul>
-  <li><div class="name"><a href="Midterm_All.zip" download>개별 PDF 10개 — ZIP</a><span>3과목 전부 · 약 1.6MB</span></div>
+  <li><div class="name"><a href="Midterm_All.zip" download>정답 포함 PDF 6개 — ZIP</a><span>3과목 객관식·서술형 · 약 1.2MB</span></div>
     <div class="act"><a href="Midterm_All.zip" download>ZIP 다운로드</a></div></li>
 </ul>
 

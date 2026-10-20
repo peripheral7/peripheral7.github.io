@@ -3,9 +3,8 @@
 import Image from "next/image"
 import { useBoardFilter, type Filter } from "@/components/board-filter-context"
 import { SiteFeatures } from "@/components/site-features"
-import { SiteFeaturesCollapsible } from "@/components/site-features-collapsible"
 import { WheretoPoster } from "@/components/whereto-poster"
-import { FEATURES, MIDTERM, STUDY_MATERIALS } from "@/lib/features"
+import { FEATURES, STUDY_MATERIALS } from "@/lib/features"
 
 const nav: { label: string; value: Filter }[] = [
   { label: "Research", value: "RESEARCH" },
@@ -89,11 +88,6 @@ export function SiteHero() {
               <SiteFeatures title="평가사 학습자료" items={STUDY_MATERIALS} />
             </div>
           </aside>
-
-          {/* Midterm: xl 은 사진 왼쪽 열 아래쪽(오른쪽 정렬), md~lg 는 오른쪽 열 아래(제목 줄), 휴대폰은 맨 아래에 가운데 정렬로 쌓인다. */}
-          <div className="mt-10 w-full max-w-xs text-center md:col-start-2 md:row-start-2 md:mt-3 md:max-w-none md:self-start md:text-left xl:col-start-1 xl:row-start-1 xl:mt-0 xl:w-60 xl:self-end xl:justify-self-end xl:text-right">
-            <SiteFeaturesCollapsible title="Midterm" groups={MIDTERM} />
-          </div>
         </div>
 
         <span className="mt-6 font-mono text-xs uppercase tracking-[0.2em] text-muted-foreground">

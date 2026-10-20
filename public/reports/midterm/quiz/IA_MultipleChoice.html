@@ -1,0 +1,2006 @@
+<!DOCTYPE html>
+<!--
+  QUIZ TEMPLATE - no script needed. Make a quiz: copy this file to a new name and replace ONLY the text between
+  <script type="text/plain" id="quizData"> and </script> with your data. Do not edit or re-read anything else.
+  Data format (the sample block below shows it):
+    meta lines  title: / sub: / subject: / textbook:   then a line  ===
+    chapter     "# Chapter title" as its own block, then ===        (optional; 2+ chapters show the contents row)
+    question    5 lines, then ===:
+                1 tag (or "-" = same tag as the previous question)
+                2 question text
+                3 options  a|b|*c|d   (* marks the correct one; 2-4 options)
+                4 one-line explanation
+                5 optional keywords   term=definition; term=definition
+    figure      optional extra line:  @img file.png  (PNG/JPG saved next to this HTML; a data: URI also works)
+                                  or  @tbl Head1|Head2;;a|b;;c|d  (first row = header)
+                shown in the right margin, click to enlarge; that question hides its keywords.
+    Graph-drawing questions (graphs as answer choices, graph rules): use quiz_template_graph.html instead of this file.
+    math        in any text: x^2  x^{n+1}  (superscript)   P_t  P_{t-1}  (subscript, use braces for 2+ characters)
+                \pi \Delta \times \le \ge \ne \approx \alpha \beta \sigma \mu \infty \to \sqrt ... = symbols; write \_ or \^ for a literal _ or ^
+    code        INLINE: wrap code in backticks  `x = 3`  - it is shown in a monospace (coding) font. Works in every text line.
+                BLOCK (several lines of code): put it inside the question block, after the question text, between fence lines:
+                    ```python
+                    for i in range(3):
+                        print(i)
+                    ```
+                ALWAYS identify the language of the code and write it after the opening ``` - it switches on the colour highlighting
+                (keywords, strings, comments, numbers, function names). Known: python, js / ts, java, c / cpp / cs / go / rust, sql, r, sh.
+                Any other name (html, css ...) is shown in the monospace font without colours; with no name the page guesses the language.
+                The block is shown under the question on screen and in print. Never put a line that is only === inside the code.
+    TITLE/SUB   sub: = course scope and number of questions only (e.g. "Chapters 2-6 (to Section 6.4) · 87 questions"); say nothing about the template or how it works.
+    CHAPTER     with 2+ chapters every question shows its chapter as plain text ("Ch.3" - from "# Chapter 3: ...", Week N or Lecture N; otherwise the chapter title) before its tag; the chapter row shows tabs (Ch.2, Ch.3 ...) with the full title as tooltip.
+                While one chapter is shown, a "Next chapter" button sits below its last question (in single-question view the Next button of the last question becomes "Next chapter").
+    DEFAULT VIEW  a title that contains "midterm" or "final" (any case) opens in the "All chapters" view; any other title opens one chapter at a time.
+    REVIEW MARK the "Review" box at the top right of each question marks it (no border or colour is added); "Marked for Review (n)" shows only the marked questions (also printable). Marks are kept by Save.
+    KEYBOARD    1-4 answer / Enter, Space, Down next / Up previous / Tab next, Shift+Tab previous (when no button has focus) / Ctrl+Q memo. Clicking outside the memo closes it.
+    PRINT       answer key: line spacing 1 inside each answer, exactly one blank line between answers.
+    CONDITIONS  every question must stand alone (shuffled, reviewed, printed or copied by itself). If a question continues from a
+                previous one ("in the previous question..."), restate its given conditions/numbers in the question text; never say
+                "same as above". For a shared scenario, repeat the full scenario in each question that uses it.
+  Mistakes in the data (missing *, wrong line count, ...) are listed in a red box at the top of the page.
+-->
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<!--DATA-START-->
+<script type="text/plain" id="quizData">
+title: Investment Analysis Midterm - Multiple Choice Quiz
+sub: Chapters 2–6 (to Section 6.4) · 96 questions
+subject: Investment Analysis, Prof. G. Lee
+textbook: Bodie, Kane & Marcus, Essentials of Investments, 12th ed.
+===
+# Chapter 2: Asset Classes and Financial Instruments
+===
+T-bill yields
+A Treasury bill with a face value of $10,000 and 120 days to maturity is selling for $9,780. What are its bank discount yield (BDY) and bond equivalent yield (BEY)?
+*BDY 6.60%; BEY 6.84%|BDY 6.84%; BEY 6.60%|BDY 6.69%; BEY 6.84%|BDY 6.60%; BEY 6.69%
+BDY = [(F − P) ÷ F] × (360 ÷ n) = (220 ÷ 10,000) × (360 ÷ 120) = 6.60%; BEY = [(F − P) ÷ P] × (365 ÷ n) = (220 ÷ 9,780) × (365 ÷ 120) = 6.84%.
+bank discount yield=discount divided by face value times 360 over days; bond equivalent yield=discount divided by price times 365 over days
+===
+Money-market yield conventions
+For the same Treasury bill, which ordering of the three yield measures is correct?
+Effective annual yield < bond equivalent yield < bank discount yield|Bond equivalent yield < bank discount yield < effective annual yield|*Bank discount yield < bond equivalent yield < effective annual yield|All three are equal because they describe the same bill
+BDY divides by face value over 360 days, BEY divides by the lower purchase price over 365 days, and EAY also compounds, so accuracy and size rise BDY → BEY → EAY.
+BDY BEY EAY=three yield conventions for one discount bill; to compare instruments convert to BEY or EAY
+===
+Quoting conventions
+Which of the following money market instruments is quoted on an interest-bearing (add-on) basis rather than on a discount basis?
+*Negotiable certificate of deposit|Treasury bill|Commercial paper|Banker's acceptance
+T-bills, commercial paper and bankers’ acceptances are sold below face value (discount basis), whereas CDs, repos, federal funds and Eurodollar deposits pay principal plus interest at maturity (add-on).
+discount basis=sold below face with no coupon; add-on basis=principal plus interest paid at maturity
+===
+Repurchase agreements
+In a repurchase agreement (repo), the dealer:
+Buys securities from an investor with an agreement to sell them back later at a lower price|*Sells securities to an investor with an agreement to buy them back the next day at a higher price|Lends securities to an investor in exchange for an unsecured promissory note|Exchanges dollar deposits for foreign-currency deposits at an agreed forward rate
+A repo is a short-term, often overnight, collateralized loan to the dealer; the higher repurchase price is the interest, and in a reverse repo the investor lends cash and holds the collateral.
+repo=sale of securities with an agreement to buy back later at a higher price; reverse repo=the mirror image
+===
+Municipal bonds
+A municipal bond yields 3.2% and a taxable corporate bond of comparable risk yields 4.5%. For an investor in the 32% marginal tax bracket, what is the equivalent taxable yield of the municipal bond, and which bond is better?
+Equivalent taxable yield 4.71%; the corporate bond|Equivalent taxable yield 2.18%; the corporate bond|*Equivalent taxable yield 4.71%; the municipal bond|Equivalent taxable yield 4.22%; the municipal bond
+Equivalent taxable yield = 3.2% ÷ (1 − 0.32) = 4.71%, which exceeds the corporate bond’s 4.5%, so the municipal bond leaves more after tax (3.2% versus 4.5% × 0.68 = 3.06%).
+equivalent taxable yield=municipal yield divided by one minus the tax rate
+===
+Municipal bonds
+A taxable corporate bond yields 7.0% and a comparable-risk municipal bond yields 4.2%. At what marginal tax rate would an investor be indifferent between the two?
+28%|35%|*40%|60%
+Set after-tax yields equal: 7.0% × (1 − t) = 4.2%, so t = 1 − 4.2 ÷ 7.0 = 40%; investors above this bracket prefer the muni, those below prefer the taxable bond.
+indifference tax rate=bracket at which after-tax yields of muni and taxable bond are equal
+===
+Treasury quotes
+A Treasury bond with a par value of $1,000 is quoted at an asked price of 103-12. What is the dollar price of the bond?
+$1,031.20|$1,031.88|*$1,033.75|$1,037.50
+The digits after the dash are 32nds of a point: 103 + 12/32 = 103.375% of par, i.e. $1,033.75 per $1,000.
+Treasury quote=price as a percentage of par with digits after the dash in 32nds not cents
+===
+TIPS
+A TIPS bond has a par value of $1,000 and a coupon rate of 2.0%. Inflation over the year is 3.5%, and the principal is adjusted accordingly. What coupon payment does the holder receive for the year?
+$20.00|*$20.70|$35.00|$55.70
+TIPS pay the coupon on the inflation-adjusted principal: $1,000 × 1.035 = $1,035, and $1,035 × 2.0% = $20.70.
+TIPS=Treasury bond whose principal is adjusted for inflation and whose coupon is paid on the adjusted principal
+===
+Common stock
+Which pair of characteristics best describes common stock?
+Fixed claim and unlimited liability|Residual claim and unlimited liability|*Residual claim and limited liability|Fixed claim and limited liability
+Shareholders are last in line, receiving only what remains after creditors and preferred holders are paid, and they can lose no more than the amount invested because personal assets are shielded.
+residual claim=right to what is left after creditors and preferred holders are paid; limited liability=loss capped at the amount invested
+===
+Preferred stock
+Preferred stock is often called a hybrid of debt and equity because:
+It can be converted into the firm’s bonds at the holder’s discretion at any time and pays interest instead of dividends|It carries full voting rights like common stock and a guaranteed maturity date like a bond|*It pays a fixed dividend like a perpetual bond with no maturity, yet it is equity that ranks below bondholders and above common stockholders|Its dividend is tax-deductible for the issuer, like interest, and rises automatically with the firm’s earnings
+Preferred pays a fixed, often cumulative dividend and has priority over common but ranks below debt; unlike bond interest, its dividends are not tax-deductible for the issuer.
+cumulative preferred=skipped dividends accrue and must be paid before common dividends
+===
+ADRs
+A foreign company’s common share trades at KRW 540,000 in Seoul. One ADR represents 1/10 of a common share, and the exchange rate is KRW 1,350 per U.S. dollar. Ignoring costs, what is the ADR’s approximate dollar price?
+$4.00|*$40.00|$400.00|$54,000
+ADR price = share price × ratio ÷ exchange rate = 540,000 × 1/10 ÷ 1,350 = $40.00.
+deposit ratio=fraction or multiple of a home share that one ADR represents
+===
+Price-weighted index
+Consider the three stocks in the table, where Pt is the price and Qt the shares outstanding at time t. Stock C splits two-for-one in the last period (its price falls from 132 to 70 after the split). What is the rate of return on a price-weighted index for the first period (t = 0 to t = 1), and what must the divisor become for the second period so that the split does not change the index level?
+Return 3.20%; new divisor 2.24|Return 6.12%; new divisor 3.00|*Return 6.12%; new divisor 2.24|Return 6.12%; new divisor 2.38
+Price-weighted return = (86 + 42 + 132) ÷ (80 + 45 + 120) − 1 = 260 ÷ 245 − 1 = 6.12%; just before the split the index is (86 + 42 + 132) ÷ 3 = 86.67, and after it the sum is 86 + 42 + 66 = 194, so the divisor must be d = 194 ÷ 86.67 = 2.24.
+price-weighted index=sum of prices divided by a divisor; divisor adjustment=keeps the index level unchanged after a split
+@tbl Stock|P0|Q0|P1|Q1|P2|Q2;;A|80|150|86|150|89|150;;B|45|300|42|300|40|300;;C|120|100|132|100|70|200
+===
+Equally and value-weighted indexes
+Using the three stocks in the table (stock C splits two-for-one in the last period), what are the first-period returns (t = 0 to t = 1) on an equally weighted index and on a value-weighted index?
+*Equally weighted 3.61%; value-weighted 3.20%|Equally weighted 3.20%; value-weighted 3.61%|Equally weighted 3.61%; value-weighted 6.12%|Equally weighted 6.12%; value-weighted 3.20%
+Equally weighted = average of the three returns = (7.50% − 6.67% + 10.00%) ÷ 3 = 3.61%; value-weighted = total market value growth = (86×150 + 42×300 + 132×100) ÷ (80×150 + 45×300 + 120×100) − 1 = 38,700 ÷ 37,500 − 1 = 3.20%.
+equally weighted index=average of the stock returns; value-weighted index=return on the total market capitalization
+@tbl Stock|P0|Q0|P1|Q1|P2|Q2;;A|80|150|86|150|89|150;;B|45|300|42|300|40|300;;C|120|100|132|100|70|200
+===
+Equally weighted index
+Which statement about an equally weighted index is correct?
+It corresponds to a buy-and-hold strategy, so no trading is needed as prices change|It gives the greatest weight to the highest-priced stocks, as the Dow Jones Industrial Average does|It gives the greatest weight to the largest-capitalization firms, as the S&P 500 does|*Maintaining it requires periodic rebalancing — selling stocks that have risen and buying stocks that have fallen
+An equally weighted index averages stock returns, i.e. an equal dollar amount in each stock; prices drift the weights apart, so the investor must keep trading back to equal dollars.
+rebalancing=trading to restore target weights after prices move
+===
+Options
+Which statement about a call option is correct?
+The holder is obligated to buy the asset at expiration regardless of the asset’s price|*The holder has the right but not the obligation to buy the asset at the exercise price, and loses at most the premium paid|The holder’s loss is unlimited, because the asset price can rise without bound and the holder must deliver at the strike|A call is exercised only when the market price falls below the strike price at or before expiration
+The buyer pays a premium for a right: the loss is capped at the premium and the gain is open-ended, and the call is exercised only when the market price is above the strike.
+call=right to buy at the strike price; premium=price paid up front for the option
+===
+Option payoffs
+You buy a call option with a strike price of $50 for a premium of $3 per share, and the stock trades at $57 at expiration. You also buy a put option with a strike price of $60 for a premium of $4. What is your profit per share on the call, and at what stock price does the put break even?
+Call profit $7; put break-even $56|Call profit $4; put break-even $64|Call profit $10; put break-even $60|*Call profit $4; put break-even $56
+Call profit = max(57 − 50, 0) − 3 = $4; a put pays K − S_T, so the premium is recovered when S_T = K − premium = 60 − 4 = $56.
+option profit=payoff minus premium paid; put break-even=strike minus premium
+===
+Futures and options
+Which statement correctly distinguishes a long futures position from a long call position?
+The futures buyer has the right but not the obligation to take delivery, while the call buyer is obligated to buy|Both positions require an up-front premium payment of the same size|The futures buyer’s maximum loss is limited to the initial margin posted|*The futures buyer is obligated to settle at the futures price, while the call buyer will exercise only if it is profitable
+An option is a right, bought for a premium, with a capped loss; a futures contract is an obligation with no premium (margin only), marked to market daily, so a move against you must still be settled.
+futures=obligation to trade at a set price on a future date; marked to market=gains and losses settled daily
+===
+# Chapter 3: Securities Markets
+===
+Primary market
+Which of the following transactions takes place in the primary market?
+An investor buys 100 shares of Samsung Electronics from another investor on the exchange|A mutual fund sells its holdings of Toyota stock to a pension fund|*A firm sells newly issued shares to the public in an initial public offering|A dealer buys shares into inventory from a customer
+The primary market is where new securities are issued and the issuing firm receives the proceeds; every later trade among investors is a secondary-market trade that brings the firm no new money.
+primary market=market where new securities are sold and the issuer receives the proceeds; secondary market=trading of existing securities among investors
+===
+Underwriting
+In a firm commitment underwriting, the investment bank:
+Acts only as an agent and returns any unsold shares to the issuer|Guarantees the issuing firm a minimum share price for one year after the offering|*Buys the entire issue from the firm and bears the placement risk of reselling it to the public|Lends the issuing firm the offering proceeds, to be repaid out of future earnings
+The underwriter sets an offer price from book-building demand and, under a firm commitment, bears the placement risk; its compensation is the spread between the price it pays and the price it charges.
+firm commitment=underwriter buys the whole issue and bears the placement risk; book-building=gauging investor demand before setting the offer price
+===
+IPO cost
+A firm sells 200,000 shares in an initial public offering at an offer price of $25. The underwriter’s explicit fees are $150,000, and the share price closes at $28 on the first day of trading. What is the best estimate of the total cost of the equity issue to the firm?
+$150,000|$600,000|*$750,000|$4,850,000
+Cost = explicit fee + money left on the table = $150,000 + (28 − 25) × 200,000 = $750,000.
+money left on the table=first-day price gain times shares sold, a hidden cost to the issuer
+===
+Limit-order book
+The sell side of a limit-order book for a stock shows the orders in the table. You submit a market order to buy 700 shares. What total amount will you pay, ignoring commissions?
+$21,980|*$22,000|$22,015|$22,085
+A market buy fills against the lowest asks first: 300 × $31.40 + 400 × $31.45 = $22,000 (an average of $31.43).
+market order=executes immediately at the best available prices, sweeping several book levels if needed
+@tbl Ask price|Shares offered;;$31.40|300;;$31.45|500;;$31.55|600
+===
+Market vs. limit orders
+Which statement correctly contrasts a market order with a limit order?
+A market order guarantees a price but not execution; a limit order guarantees execution but not price|*A market order executes immediately at the best available price; a limit order executes only at the specified price or better, and may never execute|Both orders execute immediately at the quoted price, but a limit order pays a lower commission|A limit order can only be used to buy, while a market order can be used to buy or sell and is the only order allowed during trading hours
+A market order buys certainty of execution but not of price; a limit order buys certainty of price but not of execution, and you rarely get both.
+limit order=buy at or below, or sell at or above, a price you set
+===
+Stop orders
+You own a stock at $120 and place a stop-loss order at $108. Overnight, bad news makes the stock open the next morning at $102. What happens?
+The shares are sold at exactly $108, because a stop-loss order guarantees the stop price|The order is never triggered, because the price skipped over $108 without trading at it|*The stop is triggered and a market order sells the shares near the $102 opening price|The order becomes a limit order at $108, which cannot be filled at the lower opening price
+A stop-loss guarantees execution, not price, so after a gap down it fills near the opening price; a stop-limit order, by contrast, would guarantee the price but might not fill at all.
+gap-down risk=price jumps past the stop so the fill is far below it; stop-limit=becomes a limit order at the trigger and may not fill
+===
+Market structure
+Which statement correctly contrasts the NYSE and Nasdaq?
+*The NYSE is an auction, order-driven market with a central limit-order book, while Nasdaq is a dealer, quote-driven market with competing market makers|The NYSE is a dealer market with competing market makers, while Nasdaq is an auction market with a central limit-order book|Both are pure dealer markets with no limit-order book|Nasdaq has a physical trading floor, while the NYSE has no human oversight at all
+The NYSE uses a central limit-order book with price–time priority (with human oversight at the open and close); Nasdaq has no trading floor and liquidity comes from multiple dealers posting quotes.
+auction market=all traders converge on one place and price; dealer market=dealers quote bid and ask and trade from inventory
+===
+Buying power
+You have $15,000 of cash and the initial margin requirement is 40%. What is the maximum value of stock you can buy, and how much do you borrow? (Ignore commissions.)
+Buy $37,500; borrow $15,000|*Buy $37,500; borrow $22,500|Buy $30,000; borrow $15,000|Buy $25,000; borrow $10,000
+Buying power = cash ÷ initial margin = $15,000 ÷ 0.40 = $37,500; the loan is $37,500 − $15,000 = $22,500.
+buying power=cash divided by the initial margin requirement
+===
+Margin call
+An investor buys 800 shares at $25 per share using the maximum allowable initial margin of 50%, so the margin loan is $10,000. The maintenance margin is 35%. At what share price will the investor receive a margin call?
+$8.75|$12.50|$16.25|*$19.23
+Margin = (800P − 10,000) ÷ 800P = 0.35 → 800P × 0.65 = 10,000, so P = $19.23; below this price a margin call is issued.
+maintenance margin=minimum equity ratio; falling below it triggers a margin call
+===
+Return on margin
+An investor buys 300 shares at $60 per share, borrowing 40% of the purchase price at an interest rate of 7% per year. One year later the shares are sold at $66. The stock pays no dividends and commissions are ignored. What is the rate of return on the investor’s equity?
+9.67%|10.00%|*12.00%|16.67%
+Position = 300 × $60 = $18,000; equity = $10,800, loan = $7,200; ending equity = 300 × $66 − $7,200 × 1.07 = $12,096, so the return is 12,096 ÷ 10,800 − 1 = 12.00% (versus 10.00% unlevered).
+leverage=borrowing magnifies returns up or down; interest accrues on the loan whatever the stock does
+===
+Margin trading
+Which statement about buying stock on margin is correct?
+Margin reduces the volatility of the investor’s return because the loan is a fixed obligation|*Margin magnifies both gains and losses on the investor’s equity, and interest on the loan accrues whatever the stock does|The investor’s maximum loss on a margined position equals the loss on an unmargined position|The initial margin requirement is set by each individual broker and cannot be changed by regulators
+The shares are collateral for a fixed loan, so all price variation falls on the investor’s equity; leverage scales the return up and down, and Reg T sets initial margin at a minimum of 50% equity.
+Reg T=Federal Reserve rule requiring at least 50% equity to open a margin position
+===
+Short-sale mechanics
+Which statement about the cash flows and obligations in a short sale is correct?
+*The proceeds are held in the account as collateral, additional margin must be posted, and the short seller must reimburse any dividends the stock pays|The short seller receives the sale proceeds in cash and may withdraw them immediately to invest elsewhere, with no further obligation|The short seller is entitled to receive any dividends paid on the borrowed shares, because the seller is the owner of record|The position requires no margin because the shares were sold rather than bought, so no capital is at risk
+Short sales must be done in a margin account: the proceeds are not withdrawn, the investor also deposits initial margin, and dividends and borrow fees are costs of staying short.
+payment in lieu=reimbursing the lender for dividends paid while short
+===
+Short-sale margin call
+An investor sells short 200 shares at $40 per share and deposits the required initial margin of 50% in cash. The maintenance margin is 35%. At what share price will the investor receive a margin call?
+$39.00|*$44.44|$54.00|$60.00
+Collateral = proceeds $8,000 + margin $4,000 = $12,000; margin = (12,000 − 200P) ÷ 200P = 0.35, so P = 12,000 ÷ (200 × 1.35) = $44.44; for a short position the call comes when the price rises.
+short margin=equity divided by the value of shares owed; equity shrinks as the price rises
+===
+Short-sale return
+An investor sells short 500 shares at $60 per share and deposits an initial margin of 50% of the short value. One year later the investor covers at $54, after the stock paid a dividend of $1.50 per share. Treating the initial margin as the amount invested, what is the rate of return on the short position?
+7.50%|*15.00%|20.00%|25.00%
+Profit = (60 − 54 − 1.50) × 500 = $2,250 (the dividend must be reimbursed); the investment is the margin of $15,000, so the return is 2,250 ÷ 15,000 = 15.00%.
+return on a short=profit divided by the margin deposited; dividends paid are a cost
+===
+Regulation
+Which statement about U.S. securities regulation is correct?
+The Securities Exchange Act of 1934 tightened governance after the 2002 scandals, and the CFTC regulates futures|*The Sarbanes–Oxley Act of 2002 tightened auditing and governance standards after accounting scandals, and the CFTC regulates futures|The Sarbanes–Oxley Act of 2002 tightened governance, and FINRA is the government agency that regulates futures|The Securities Act of 1933 tightened governance after the 2002 scandals, and the SEC regulates futures
+Sarbanes–Oxley (2002) responded to the accounting scandals; the SEC oversees securities and security options, the CFTC oversees futures, and FINRA is the industry self-regulatory body.
+Sarbanes–Oxley Act=2002 law tightening corporate governance, auditing and reporting; CFTC=regulator of futures and commodity derivatives
+===
+# Chapter 4: Mutual Funds and Other Investment Companies
+===
+Core services
+Which of the following is NOT one of the four core services an investment company provides to small investors?
+Diversification and divisibility|Lower transaction costs from trading in large blocks|Record keeping and administration|*A guaranteed return above the market index
+The four services are record keeping and administration, diversification and divisibility, professional management and lower transaction costs; whether managers succeed on average is an empirical question.
+four core services=record keeping, diversification and divisibility, professional management, lower transaction costs
+===
+Computing NAV
+A fund holds 120,000 shares of A at $52, 200,000 shares of B at $18, 90,000 shares of C at $64, and 350,000 shares of D at $9.50. Liabilities are $0.9 million and there are 2.2 million fund shares outstanding. What is the NAV per share?
+$6.68|*$8.19|$8.60|$9.01
+Assets = 120,000×52 + 200,000×18 + 90,000×64 + 350,000×9.5 = $18,925,000; NAV = (18,925,000 − 900,000) ÷ 2,200,000 = $8.19.
+NAV=(market value of assets minus liabilities) divided by shares outstanding
+===
+New shares at NAV
+An open-end fund has a NAV of $32.00. An investor buys $1.6 million of the fund. How many new shares are issued, and what is NAV afterward?
+50,000 shares; NAV rises to $32.80|1,600,000 shares; NAV stays at $32.00|No new shares; NAV rises|*50,000 shares; NAV stays at $32.00
+New shares = $1,600,000 ÷ $32.00 = 50,000; assets and shares rise in proportion, so NAV stays at $32.00.
+issuance at NAV=new investors buy in at NAV, so existing holders are not diluted
+===
+Open-end orders
+You place an order to buy shares of an open-end mutual fund at 10:30 a.m. At what price is the order filled?
+At the last NAV published before 10:30 a.m.|At the market price quoted on the exchange at 10:30 a.m.|At any limit price you specify, if the market reaches it|*At the NAV struck at the 4:00 p.m. close that day
+Open-end funds transact only at NAV, struck once daily at 4:00 p.m. ET, so every order that day gets the same price and you do not know it when you order; intraday prices and limit orders belong to ETFs and closed-end funds.
+struck NAV=the single daily price at which open-end funds trade
+===
+Closed-end funds
+Which statement about closed-end funds is correct?
+*Shares outstanding are fixed after the IPO, and the market price can differ from NAV|Investors redeem shares directly with the fund at NAV whenever they wish|Shares outstanding change daily as investors buy new shares from, and redeem them to, the fund|The market price is required by law to equal NAV at the close of each trading day
+A closed-end fund neither issues nor redeems shares after its IPO; investors trade with each other on an exchange, so supply and demand set a price that may be at a premium or discount to NAV.
+closed-end fund=fixed number of shares traded on an exchange at a market price
+===
+Closed-end fund return
+You buy a closed-end fund at $21.00 when its NAV is $24.00. One year later NAV is still $24.00, the price is $22.50, and the fund distributed $1.05 per share. What is your rate of return?
+4.38%|7.14%|11.33%|*12.14%
+Return = (22.50 − 21.00 + 1.05) ÷ 21.00 = 12.14%, measured on the market price actually paid.
+discount narrowing=price rising toward NAV, an extra gain to the buyer
+===
+Unit investment trusts
+Which feature describes a unit investment trust (UIT)?
+An actively managed portfolio overseen by a board of directors|A private pool open only to accredited investors|*A fixed, unmanaged portfolio that terminates on a set date|A fund that trades continuously on an exchange at NAV
+A sponsor deposits a fixed portfolio into a trust and sells redeemable units; with essentially no trading afterwards, management fees are very low and the trust is self-liquidating.
+UIT=unit investment trust with a fixed unmanaged portfolio; sponsors typically charge NAV plus a 1 to 4 percent markup
+===
+Hedge funds
+Compared with a mutual fund, a hedge fund typically:
+Offers daily redemption at NAV to the general public, like an open-end mutual fund|Faces tighter limits on leverage and short sales because it is regulated more heavily|*Is open only to accredited or institutional investors and is largely exempt from the Investment Company Act|Charges a lower fee than a mutual fund because it is less regulated and pays no incentive fee
+Hedge funds are private pools that disclose little, may use short sales, derivatives and heavy leverage, impose lock-up periods, and charge about “2 and 20”.
+hedge fund=private pool for accredited or institutional investors; 2 and 20=about 2 percent of assets plus 20 percent of profits
+===
+12b-1 fees
+Which statement about 12b-1 fees is correct?
+They are one-time charges paid when shares are purchased, and are deducted from the amount invested|*They are annual distribution fees of up to 1% of assets and work like a sales load spread over time|They are paid to portfolio managers as a performance bonus when the fund beats its benchmark|They are charged only on redemption within the first five years, and decline by one point annually
+Named for SEC Rule 12b-1, this annual charge (maximum 1% of assets) pays for marketing and adviser compensation; it is included in the expense ratio but economically it is a load paid in instalments.
+12b-1 fee=annual distribution fee of at most 1 percent of assets
+===
+Published returns and loads
+A fund reports a one-year return of 9%. For an investor who bought Class A shares with a 4% front-end load, the reported return:
+Understates her return, because loads are refunded after one year|Equals her return, because loads are included in the expense ratio|Equals her return, because loads are deducted from NAV|*Overstates her return, because published returns are computed before loads
+Reported returns are computed from NAV, which is net of expenses but not of loads, so a load-fund investor earns less than the published figure.
+load=sales commission paid to the selling broker, not to the fund
+===
+Front-end load
+You invest $30,000 in a fund with a 6% front-end load. How much is actually invested in the fund, and what return must the fund earn for you to get back to $30,000?
+$28,200 invested; 6.00% return needed|$28,302 invested; 6.00% return needed|$31,800 invested; 5.66% return needed|*$28,200 invested; 6.38% return needed
+The load is a percentage of the gross amount paid: $30,000 × (1 − 0.06) = $28,200; to recover $30,000 the fund must earn 30,000 ÷ 28,200 − 1 = 6.38%, because the load is 6% of the gross but 6.38% of the net amount invested.
+front-end load=sales charge deducted from the amount invested; it is a percentage of the gross purchase
+===
+Return of a load investor
+You invest $20,000 in Class A shares with a 4% front-end load. The fund’s reported return for the year is 12.0%. What is your return?
+*7.52%|8.00%|11.54%|12.00%
+Amount invested = 20,000 × 0.96 = $19,200; end value = 19,200 × 1.12 = $21,504; return = 21,504 ÷ 20,000 − 1 = 7.52%.
+published return=computed from NAV so it is before loads
+===
+Back-end load
+A fund charges a CDSC of 5%, 4%, 3%, 2% and 1% in years 1–5 and 0% thereafter. You redeem shares worth $22,000 during year 4. If the charge applies to the redemption value, what is it?
+$220|*$440|$660|$880
+The year-4 charge is 2%: 2% × $22,000 = $440.
+CDSC schedule=redemption charge that falls each year of ownership
+===
+Fund return
+A fund’s NAV rises from $24.60 to $25.90 during the year. It pays income distributions of $0.45 and capital gain distributions of $0.95 per share, and its expense ratio is 1.25%. What are its net return and approximate gross return?
+*Net 10.98%; gross 12.23%|Net 5.28%; gross 6.53%|Net 10.42%; gross 11.67%|Net 10.98%; gross 9.73%
+Net return = (25.90 − 24.60 + 0.45 + 0.95) ÷ 24.60 = 10.98%, since distributions must be added back and the denominator is the beginning NAV; gross return ≈ net return + expense ratio = 10.98% + 1.25% = 12.23%.
+net return=NAV change plus distributions over beginning NAV; gross return=net return plus expense ratio
+===
+Share classes
+You invest $10,000 in a fund with a gross return of 8% a year. The two share classes are shown in the table. Which class leaves you with more after 1 year, and which after 10 years?
+1 year: Class A ($10,242); 10 years: Class A ($19,230)|1 year: Class C ($10,548); 10 years: Class C ($18,860)|*1 year: Class C ($10,548); 10 years: Class A ($19,230)|1 year: Class A ($10,725); 10 years: Class C ($18,860)
+Net growth: A = 8% − 0.75% = 7.25%, C = 8% − 1.45% = 6.55%; after 1 year A = 10,000 × 0.955 × 1.0725 = $10,242 and C = 10,000 × 0.99 × 1.0655 = $10,548 (the 1% CDSC applies in year 1); after 10 years A = 10,000 × 0.955 × 1.0725^10 = $19,230 and C = 10,000 × 1.0655^10 = $18,860.
+share-class choice=a one-time front-end load versus an annual expense that compounds; Class A wins at long horizons
+@tbl Feature|Class A|Class C;;Front-end load|4.5%|none;;Expense ratio|0.75%|1.45%;;CDSC|none|1% if redeemed in year 1
+===
+ETF tax efficiency
+Why do ETF holders generally avoid the capital gains distributions that mutual fund holders receive when other investors redeem?
+ETFs are exempt from capital gains tax by law, so no gains are ever distributed|ETFs hold only bonds, which by their nature do not produce capital gains|*ETF sellers trade with other investors on the exchange, so the fund does not have to sell stock to raise cash|ETF managers never sell securities for any reason, not even to rebalance the index
+In a mutual fund a redemption forces the fund to sell stock and realize gains that land on holders who sold nothing, whereas an ETF seller simply finds a buyer on the exchange.
+ETF=exchange-traded fund; mutual fund investors transact with the fund, ETF investors transact with each other
+===
+AP arbitrage profit
+An ETF trades at $75.60 while its underlying basket is worth $75.00 per ETF share. Creation units are 20,000 shares. Ignoring trading costs, what is the AP’s profit from one creation, and what does the AP do?
+$12,000 — buy ETF shares, redeem them, sell the basket|*$12,000 — buy the basket, create ETF shares, sell them|$1,200 — buy the basket, create ETF shares, sell them|$24,000 — buy ETF shares, redeem them, sell the basket
+The ETF is rich relative to the basket, so the AP buys the basket and creates ETF shares to sell; profit = (75.60 − 75.00) × 20,000 = $12,000.
+creation=AP delivers the basket and receives new ETF shares; redemption=the reverse
+===
+Leveraged ETF decay
+An index moves +8%, −8%, +8%, −8% on four consecutive days, starting at 100. A 2× daily leveraged ETF also starts at 100. What are the ending values?
+*Index 98.72; 2× ETF 94.95|Index 98.72; 2× ETF 97.45|Index 100.00; 2× ETF 100.00|Index 98.72; 2× ETF 98.72
+Index: 100 × 1.08 × 0.92 × 1.08 × 0.92 = 98.72 (−1.28%); 2× ETF: 100 × 1.16 × 0.84 × 1.16 × 0.84 = 94.95 (−5.05%), about four times the index’s loss rather than twice.
+volatility drag=compounding of daily resets makes the 2× fund lose more than twice the index’s loss
+===
+Covered call
+You own a stock at $40 and sell a call with a $44 strike for a $1.20 premium. What is your profit per share on the covered call if the stock ends at $50, and if it ends at $35?
+$10.00 at $50; −$5.00 at $35|$11.20 at $50; $1.20 at $35|*$5.20 at $50; −$3.80 at $35|$5.20 at $50; −$6.20 at $35
+At $50 the stock is called away at $44: profit = (44 − 40) + 1.20 = $5.20, so the upside above $44 was sold for the premium; at $35 the call expires worthless: profit = (35 − 40) + 1.20 = −$3.80, because the premium only softens the loss by $1.20 and is not protection.
+covered call=own the stock and sell a call on it; the premium is the price of the upside given away
+===
+Active management
+Why must the average actively managed dollar underperform the market after costs?
+Active managers are, on average, less skilled than the managers who build index funds|*Before costs, active investors as a group hold the market, so their average gross return equals the market return|Active funds hold more cash than the market does, which drags returns in rising years|Regulations force active funds to hold riskier stocks than the index contains
+Passive investors hold the market in proportion, so what remains for active investors is also the market; subtract their higher fees and the average must lag, though this says nothing about any single fund.
+average active return=market return minus costs, an identity not a judgment of skill
+===
+Performance persistence
+Of 164 U.S. large-cap funds in the top quartile in 2021, 20.1% were still in the top quartile in 2022 and 0.0% in 2023, while pure chance would give 6.25%. What does this suggest?
+Ranking funds by past returns is a good way to choose a fund|*Past top performance is not a reliable signal of future top performance|Top funds deliberately take less risk after a good year|The result is caused by survivorship bias inflating the winners
+If skill drove rankings, winners would repeat more often than chance; the evidence shows no persistence, so past winners are not a dependable guide.
+persistence=tendency of top-ranked funds to stay top-ranked; survivorship bias=failed funds disappear from the list you see
+===
+# Chapter 5: Risk, Return, and the Historical Record
+===
+Holding-period return
+You buy a share at KRW 52,000. One year later it trades at KRW 57,200, and you received a cash dividend of KRW 1,300. What is the holding-period return?
+2.50%|10.00%|11.36%|*12.50%
+HPR = (57,200 − 52,000 + 1,300) ÷ 52,000 = 12.50%, i.e. capital gain yield 10.00% plus dividend yield 2.50%.
+HPR=(ending price minus beginning price plus dividend) divided by beginning price
+===
+Arithmetic vs. geometric average
+A fund returns +30%, −25%, +15% and −10% in four consecutive years. What are its arithmetic and geometric average returns?
+Arithmetic 2.50%, geometric 2.50%|Arithmetic 0.23%, geometric 2.50%|Arithmetic 2.50%, geometric 0.91%|*Arithmetic 2.50%, geometric 0.23%
+Arithmetic = (30 − 25 + 15 − 10) ÷ 4 = 2.50%; geometric = (1.30 × 0.75 × 1.15 × 0.90)^(1/4) − 1 = 0.23%, always below the arithmetic mean.
+arithmetic average=simple mean, best for forecasting; geometric average=realized compound growth rate, for grading performance
+===
+Dollar-weighted and time-weighted returns
+At t = 0 you buy one share at KRW 50,000. At t = 1 the share pays a KRW 1,500 dividend and you buy a second share at KRW 56,000. At t = 2 each share pays a KRW 1,500 dividend and you sell both shares at KRW 54,000. What are your dollar-weighted and time-weighted (geometric) returns?
+*Dollar-weighted 4.15%; time-weighted 6.76%|Dollar-weighted 6.76%; time-weighted 4.15%|Dollar-weighted 4.15%; time-weighted 7.05%|Dollar-weighted 15.00%; time-weighted 6.76%
+Net cash flows: t0 = −50,000; t1 = −56,000 + 1,500 = −54,500; t2 = 2 × 1,500 + 2 × 54,000 = +111,000, whose IRR is the dollar-weighted return, 4.15%. Period returns: year 1 = (56,000 − 50,000 + 1,500) ÷ 50,000 = 15.00%, year 2 = (54,000 − 56,000 + 1,500) ÷ 56,000 = −0.89%, so the time-weighted return = (1.15 × 0.99107)^(1/2) − 1 = 6.76%; the dollar-weighted return is lower because more money was invested in the weaker second year.
+dollar-weighted return=IRR of the investor’s own cash flows; time-weighted return=geometric average of period returns, independent of cash-flow timing
+@tbl Time|Share price|Dividend per share|Trade;;t = 0|KRW 50,000|–|Buy 1 share;;t = 1|KRW 56,000|KRW 1,500|Buy 1 more share;;t = 2|KRW 54,000|KRW 1,500|Sell both shares
+===
+APR to EAR
+A deposit quotes 9% compounded monthly. What is the effective annual rate?
+0.75%|9.00%|9.31%|*9.38%
+EAR = (1 + 0.09/12)^12 − 1 = 9.38%.
+EAR=(1 plus APR over n) to the power n, minus one; APR=simple scaling that ignores compounding
+===
+Continuous compounding
+An investment has an effective annual rate of 12%. What is the equivalent continuously compounded annual rate?
+*11.33%|11.39%|12.00%|12.75%
+APR (continuous) = ln(1 + EAR) = ln(1.12) = 11.33%.
+continuous compounding=EAR equals e to the APR minus one, so APR equals ln of one plus EAR
+===
+Real return
+A bond earns a nominal return of 7.5% while inflation is 3.2%. What is the exact real return?
+4.08%|*4.17%|4.30%|10.94%
+Fisher equation: 1 + R = (1 + r)(1 + i), so r = 1.075 ÷ 1.032 − 1 = 4.17%.
+Fisher equation=one plus nominal equals (one plus real) times (one plus inflation)
+===
+Scenario analysis
+A portfolio returns 40% in a boom (probability 0.25), 12% in a normal year (0.45), and −18% in a bust (0.30). What are its expected return and standard deviation?
+*E(r) = 10.00%, σ = 21.49%|E(r) = 10.00%, σ = 4.62%|E(r) = 11.33%, σ = 23.68%|E(r) = 10.00%, σ = 41.09%
+E(r) = 0.25(40) + 0.45(12) + 0.30(−18) = 10.00%; σ² = 0.25(30)² + 0.45(2)² + 0.30(−28)² = 462, so σ = √462 = 21.49%.
+expected return=probability-weighted average of state returns; standard deviation=square root of the probability-weighted squared deviations
+@tbl State|Probability|Return;;Boom|0.25|40%;;Normal|0.45|12%;;Bust|0.30|−18%
+===
+Skewness
+Two return distributions have the same mean and standard deviation. Distribution N is symmetric, while distribution L has negative skew. Which statement about L is correct?
+It has a long right tail, so upside surprises are more frequent than in N|Its mean, median and mode coincide, as they do in the symmetric distribution N|*It has a long left tail (mean < median < mode), so the standard deviation understates its downside risk|Its standard deviation overstates the risk of large losses, since the left tail is long
+With negative skew the left tail is long and the mean falls below the median and mode; equity returns are typically left-skewed, so σ alone understates their risk.
+skewness=asymmetry of the distribution, measured by the third standardized moment
+===
+Kurtosis
+Compared with a normal distribution having the same mean and standard deviation, a return distribution with positive excess kurtosis has:
+Thinner tails, so extreme returns are rarer than normality predicts|A long left tail only, so the mean lies below the median and mode|*A taller peak and heavier tails on both sides, so extreme returns occur more often than normality predicts|A larger standard deviation by construction, since kurtosis is defined from the variance
+Fat tails mean extremes arrive far more often than a normal distribution implies (Black Monday 1987 was about a −20σ day), so normality understates the chance of crashes.
+excess kurtosis=fourth standardized moment minus 3; zero for a normal distribution
+===
+Value at risk
+A portfolio worth ₩5 billion has a daily volatility of 1.4%. Assuming normal returns, what are its one-day 95% VaR and its 10-day 99% VaR? (Use z = 1.645 for 95% and z = 2.326 for 99%.)
+₩115.15 million and ₩162.82 million|₩115.15 million and ₩364.14 million|₩115.15 million and ₩1,628.20 million|*₩115.15 million and ₩514.88 million
+VaR = V0 × z × σ × √T. One-day 95%: ₩5,000 million × 1.645 × 0.014 × 1 = ₩115.15 million; 10-day 99%: ₩5,000 million × 2.326 × 0.014 × √10 = ₩514.88 million.
+parametric VaR=V0 times z times sigma times the square root of T; square-root-of-time rule=sigma scales with the square root of the horizon
+===
+Reading a VaR number
+A bank reports a one-day 95% VaR of ₩30 million. Which statement is correct?
+The largest loss the bank can suffer in one day is ₩30 million|The bank expects to lose ₩30 million per day on average|On 95 days out of 100, the bank will lose exactly ₩30 million|*On about 5 trading days in 100, the loss is expected to exceed ₩30 million
+VaR is the loss exceeded with probability 5% over the stated horizon; it is not a maximum loss and says nothing about how large the loss is on those worst days.
+VaR=the loss that will be exceeded with probability alpha over a stated horizon
+===
+VaR and expected shortfall
+Which statement correctly distinguishes value at risk (VaR) from expected shortfall (ES)?
+VaR measures the average loss beyond the cut-off, while ES only marks the cut-off at a given confidence level|*VaR marks the cut-off loss at a confidence level, while ES measures how large the loss is on average once that cut-off is passed|VaR and ES always give the same number when returns are normally distributed at any confidence level|ES ignores losses beyond the cut-off, which is why regulators prefer it to VaR for capital rules
+VaR says nothing about the size of losses past the cut-off; ES (also CVaR) answers that and is coherent, and Basel FRTB replaced the 99% VaR charge with a 97.5% expected shortfall.
+expected shortfall=average loss in the tail beyond the VaR cut-off, also called CVaR
+===
+Sharpe ratio
+Fund A has E(r) = 14% and σ = 24%; Fund B has E(r) = 9% and σ = 10%. The risk-free rate is 3%. Which fund has the higher Sharpe ratio?
+Fund B: 0.90 versus 0.58|Fund A: 0.46 versus 0.60, because it earns more|Fund A: 2.18 versus 1.67|*Fund B: 0.60 versus 0.46
+Sharpe = (E(r) − rf) ÷ σ: A = (14 − 3) ÷ 24 = 0.46; B = (9 − 3) ÷ 10 = 0.60, so B gives more reward per unit of volatility.
+Sharpe ratio=excess return per unit of volatility, the slope of the capital allocation line
+===
+Sharpe ratio
+As the investor changes y (the fraction of wealth in risky portfolio P, with the rest in the risk-free asset), what happens to the Sharpe ratio of the complete portfolio?
+*It is unchanged for every y|It rises as y rises|It falls as y rises|It rises until y = 1 and then falls
+Both the risk premium and σC scale with y, so their ratio stays equal to the slope of the CAL; this is why choosing P and choosing y can be solved separately (the separation property).
+separation property=choose the risky portfolio and the risky weight y independently
+===
+Historical record
+Over 1928–2021 the S&P 500 had an arithmetic average return of 11.82% and 3-month T-bills averaged 3.38%. What is the equity risk premium over T-bills?
+3.50%|6.60%|*8.44%|15.20%
+The equity risk premium is 11.82% − 3.38% = 8.44 percentage points.
+equity risk premium=average stock return minus the risk-free rate
+===
+Complete portfolio
+Risky portfolio P has E(rP) = 15% and σP = 24%; the risk-free rate is 5%. An investor places y = 0.8 of her wealth in P and the rest in the risk-free asset. What are the expected return, standard deviation and Sharpe ratio of the complete portfolio?
+E(rC) = 13.00%; σC = 24.00%; Sharpe 0.33|*E(rC) = 13.00%; σC = 19.20%; Sharpe 0.42|E(rC) = 12.00%; σC = 19.20%; Sharpe 0.36|E(rC) = 13.00%; σC = 19.20%; Sharpe 0.68
+E(rC) = rf + y[E(rP) − rf] = 5% + 0.8 × 10% = 13.00%; σC = y·σP = 0.8 × 24% = 19.20%; Sharpe = (13.00 − 5) ÷ 19.20 = 0.42, identical to P’s 10 ÷ 24, because the risk premium and σC both scale with y.
+complete portfolio=risky portfolio P mixed with the risk-free asset; y=fraction of wealth in P
+===
+Asset allocation
+Wealth is KRW 30 million, y = 0.6, and risky portfolio P is 55% equities and 45% bonds. How is the money actually allocated?
+Equities KRW 16.5m, bonds KRW 13.5m, T-bills KRW 0.0m|*Equities KRW 9.9m, bonds KRW 8.1m, T-bills KRW 12.0m|Equities KRW 18.0m, bonds KRW 0.0m, T-bills KRW 12.0m|Equities KRW 6.6m, bonds KRW 5.4m, T-bills KRW 18.0m
+T-bills = 30m × 0.4 = KRW 12.0m; P = 30m × 0.6 = KRW 18.0m, of which equities = 18.0 × 0.55 = KRW 9.9m and bonds = 18.0 × 0.45 = KRW 8.1m.
+allocation=amounts in each asset class, with P’s weights applied only to the risky part
+===
+Choice by risk aversion
+The portfolios in the table are available to investors with utility U = E(r) − ½·A·σ² and A = 2, 5 and 10. Which portfolio does each investor choose?
+A = 2: Conservative; A = 5: Moderate; A = 10: Aggressive|All three investors choose Aggressive (highest E(r))|A = 2: Moderate; A = 5: Moderate; A = 10: Aggressive|*A = 2: Aggressive; A = 5: Moderate; A = 10: Conservative
+Utilities (A = 2 / 5 / 10): Conservative 5.84 / 5.60 / 5.20; Moderate 8.56 / 6.40 / 2.80; Aggressive 10.16 / 2.90 / −9.20, so more risk aversion means a safer choice.
+risk profiling=choosing the portfolio that matches the investor’s A
+@tbl Portfolio|E(r)|σ;;Conservative|6%|4%;;Moderate|10%|12%;;Aggressive|15%|22%
+===
+Certainty equivalent
+Portfolio Z has E(r) = 14% and σ = 24%. An investor with A = 4 can instead hold a 3% T-bill. What is Z’s certainty equivalent, and what does she hold?
+*Certainty equivalent 2.48%; she holds the T-bill|Certainty equivalent 2.48%; she holds Z because E(r) = 14% is higher|Certainty equivalent −9.04%; she holds the T-bill|Certainty equivalent 25.52%; she holds Z
+U = 0.14 − ½ × 4 × 0.24² = 2.48%, below the 3% certain return of the T-bill, so she holds the T-bill; a risk-free asset has σ = 0, so its certainty equivalent is its own return.
+certainty equivalent=guaranteed return that gives the same utility as the risky portfolio
+===
+Optimal allocation
+E(rP) = 12%, σP = 20%, rf = 3% and the investor’s risk aversion is A = 4. What are the optimal risky weight y*, and the resulting E(rC), σC and utility U = E(r) − ½Aσ²?
+y* = 1.1250; E(rC) = 13.12%; σC = 22.50%; U = 3.00%|*y* = 0.5625; E(rC) = 8.06%; σC = 11.25%; U = 5.53%|y* = 0.1125; E(rC) = 4.01%; σC = 2.25%; U = 3.91%|y* = 0.5625; E(rC) = 8.06%; σC = 11.25%; U = 8.06%
+y* = [E(rP) − rf] ÷ (A·σP²) = 0.09 ÷ (4 × 0.04) = 0.5625; E(rC) = 3% + 0.5625 × 9% = 8.06%; σC = 0.5625 × 20% = 11.25%; U = 0.0806 − ½ × 4 × 0.1125² = 5.53%.
+optimal allocation y*=risk premium divided by (A times variance of P); utility=expected return minus half of A times variance
+===
+Optimal allocation y*
+Risky portfolio P has E(rP) = 12% and σP = 20%; the risk-free rate is 3%. An investor with A = 2 has optimal weight y* = 1.125 and wealth of KRW 16 million. Assuming she can borrow at the risk-free rate, what does she do?
+Invests KRW 2.0m in P and holds the rest in T-bills|Borrows KRW 18.0m and invests KRW 34.0m in P|*Borrows KRW 2.0m and invests KRW 18.0m in P|Holds KRW 18.0m in P and KRW 2.0m in T-bills
+y* = 1.125 > 1: she invests 1.125 × 16m = KRW 18.0m in P, financed by her own 16.0m plus KRW 2.0m borrowed at the risk-free rate.
+borrowing at rf=an assumption; with a higher borrowing rate y* falls
+===
+Optimal allocation y*
+Holding everything else fixed, which change would make the optimal risky weight y* smaller?
+A rise in the risk premium E(rP) − rf|A fall in the coefficient of risk aversion A|A fall in the variance of the risky portfolio|*A rise in the variance of the risky portfolio
+y* = [E(rP) − rf] ÷ (A·σP²): a bigger reward invites a bigger bet, while more risk aversion or more variance shrinks it.
+y*=risk premium divided by A times variance
+===
+Risk aversion
+In U = E(r) − ½·A·σ², which statement about A is correct?
+A < 0 describes a risk-averse investor|*A = 0 describes a risk-neutral investor who judges by E(r) alone|A larger A means the investor is more tolerant of risk|A has no effect when σ is below 20%
+A > 0 is risk averse (empirically about 2 to 4), A = 0 is risk neutral and A < 0 is risk loving; the penalty ½·A·σ² grows with both A and σ.
+risk neutral=judges by expected return alone; risk loving=derives utility from risk
+===
+Capital allocation line
+Risky portfolio P has E(rP) = 15% and σP = 25%; the risk-free rate is 5%. What is the slope of the capital allocation line, and where does it cross σ = 0?
+Slope 0.60; intercept 5%|*Slope 0.40; intercept 5%|Slope 0.40; intercept 0%|Slope 2.50; intercept 15%
+Slope = (E(rP) − rf) ÷ σP = (15 − 5) ÷ 25 = 0.40, the Sharpe ratio, and the line starts at rf = 5% where σ = 0.
+capital allocation line=straight line from rf through P with slope equal to the Sharpe ratio
+===
+Capital market line
+What is the capital market line (CML)?
+The line joining the lowest-risk and highest-return securities in the market|The capital allocation line of the best-performing active fund over the sample period|A line showing the mean and variance of every individual stock in the market|*The capital allocation line that uses a broad market index as the risky portfolio P
+A passive strategy holds a broad market index without security analysis or market timing; when that index is P, the resulting CAL is called the CML.
+passive strategy=holding a broad market index without security analysis or market timing
+===
+# Chapter 6: Optimal Risky Portfolios
+===
+Diversification and the floor
+Each of n stocks has a standard deviation of 30% and every pair has a correlation of 0.25. An investor holds them with equal weights. What is the portfolio standard deviation when n = 20, and what does it converge to as n grows without limit?
+15.00% at n = 20; floor 16.09%|6.71% at n = 20; floor 0.00%|16.09% at n = 20; floor 7.50%|*16.09% at n = 20; floor 15.00%
+Average covariance = 0.25 × 30² = 225; variance = (1/20) × 900 + (1 − 1/20) × 225 = 258.75, so σ = 16.09%; as n → ∞ the first term vanishes and σ → √225 = 15.00%, the systematic risk that diversification cannot remove.
+diversification floor=square root of the average covariance, the common risk all stocks share
+===
+Two components of risk
+Which of the following is an example of firm-specific (diversifiable) risk?
+The central bank unexpectedly raises interest rates for the whole economy|A pandemic lowers the earnings of nearly all listed firms at once|*A pharmaceutical company announces that its main drug failed its clinical trial|The won depreciates sharply against the dollar, hurting importers and exporters alike
+Firm-specific risk arises from events affecting one company or industry and cancels out in a large portfolio; interest rates, pandemics and exchange rates hit every firm at once, so they are market (systematic) risk.
+firm-specific risk=unique, idiosyncratic, diversifiable risk that the market does not reward; market risk=non-diversifiable risk that drives expected return
+===
+Total variance decomposition
+A stock has a total return variance of 0.0400 (σ = 20%), of which 0.0256 (σ = 16%) is systematic. What is the standard deviation attributable to firm-specific risk?
+1.44%|4.00%|*12.00%|25.61%
+Var(total) = Var(systematic) + Var(firm-specific) because the two parts are uncorrelated, so firm-specific variance = 0.0400 − 0.0256 = 0.0144 and σ = √0.0144 = 12.00%.
+variances add when the parts are uncorrelated, standard deviations do not
+===
+Covariance and correlation
+Four equally likely states produce the returns in the table. What are the covariance (in %²) and correlation between the stock and bond returns?
+*Cov = −64.5; ρ = −0.96|Cov = 64.5; ρ = 0.96|Cov = −27.0; ρ = −0.40|Cov = −64.5; ρ = −2.93
+E(S) = 8% and E(B) = 5%; Cov = Σ p × (dev S) × (dev B) = −64.5; σS = 18.35% and σB = 3.67%, so ρ = −64.5 ÷ (18.35 × 3.67) = −0.96; the stock does worst exactly when the bond does best.
+covariance=probability-weighted product of the two deviations from their means; correlation=covariance divided by the product of the standard deviations
+@tbl State|Prob.|Stock return|Bond return;;Severe recession|0.25|−20%|+11%;;Mild recession|0.25|+4%|+5%;;Normal growth|0.25|+16%|+2%;;Boom|0.25|+30%|+2%
+===
+Two-asset portfolio
+A stock fund has E(r) = 11% and σ = 22%; a bond fund has E(r) = 5% and σ = 8%; their correlation is 0.3. What are the expected return and standard deviation of a portfolio with 70% in stocks and 30% in bonds?
+E(rP) = 9.20%, σP = 17.80%|E(rP) = 9.20%, σP = 15.59%|E(rP) = 8.00%, σP = 12.78%|*E(rP) = 9.20%, σP = 16.28%
+E(rP) = 0.7(11) + 0.3(5) = 9.20%; variance = 0.49(484) + 0.09(64) + 2(0.7)(0.3)(52.8) = 265.10, so σP = 16.28%.
+portfolio variance=wS² σS² plus wB² σB² plus 2 wS wB Cov; expected return is linear in the weights
+===
+Zero-risk mix
+A stock fund (E(r) = 14%, σ = 30%) and a bond fund (E(r) = 6%, σ = 10%) have a correlation of −1. What weight in stocks creates a zero-risk portfolio, and what is its expected return?
+75.0% in stocks; E(r) = 12.0%|*25.0% in stocks; E(r) = 8.0%|33.3% in stocks; E(r) = 8.7%|50.0% in stocks; E(r) = 10.0%
+Set wSσS = wBσB: 30w = 10(1 − w), so w = 10 ÷ (30 + 10) = 0.25; E(r) = 0.25(14) + 0.75(6) = 8.0%, with zero standard deviation.
+zero-risk mix=weights that make the two risky positions offset each other when rho is minus one
+===
+Minimum-variance portfolio
+Stock fund σS = 24%, bond fund σB = 8%, correlation 0.1. What is the weight in stocks of the minimum-variance portfolio, and its standard deviation?
+10.00% in stocks; σ = 7.81%|92.55% in stocks; σ = 22.28%|7.45% in stocks; σ = 8.00%|*7.45% in stocks; σ = 7.79%
+Cov = 0.1 × 24 × 8 = 19.2; wS = (σB² − Cov) ÷ (σS² + σB² − 2Cov) = (64 − 19.2) ÷ (576 + 64 − 38.4) = 0.0745; σ = 7.79%, below the bond fund’s own 8%.
+minimum-variance portfolio=the mix with the lowest possible standard deviation, found with the closed-form weight formula
+===
+Diversification condition
+A portfolio is 100% in a bond fund with σB = 12%. A stock fund has σS = 30%. For which correlation with the bond fund does adding a small amount of stock reduce the portfolio’s risk?
+*ρ = 0.25|ρ = 0.40|ρ = 0.60|ρ = 0.90
+Adding the riskier asset lowers risk whenever ρ < σB/σS = 12/30 = 0.40; ρ = 0.25 satisfies this, while ρ = 0.40 is exactly the break-even and higher correlations raise risk.
+risk-reducing condition=correlation below the ratio of the safer asset’s sd to the riskier asset’s sd
+===
+Opportunity set
+As the correlation between two risky assets decreases while the expected returns and standard deviations stay the same, what happens to the portfolio opportunity set?
+It becomes a straight line between the two assets|It shifts upward, so every mix earns a higher expected return|*It bows further to the left, so a given expected return can be earned at lower risk|It is unchanged, because expected returns are linear in the weights
+Expected return depends only on the weights, so diversification shows up as a leftward bow; at ρ = +1 the set is a straight line, and at ρ = −1 it touches the vertical axis.
+opportunity set=all risk-return combinations from mixing the assets in different weights
+===
+Efficient and dominated portfolios
+On the opportunity set of two risky assets, which portfolios are efficient?
+*Those on the upward-sloping part starting at the minimum-variance portfolio|Those on the downward-sloping part below the minimum-variance portfolio|Every portfolio on the curve|Only the two single-asset portfolios
+Points below the minimum-variance portfolio are dominated by points above it with the same risk but a higher expected return, so only the upper branch is efficient.
+efficient portfolio=highest expected return for a given risk; dominated portfolios are beaten on both return and risk
+===
+Optimal risky portfolio
+Stock fund: E(r) = 13%, σ = 24%; bond fund: E(r) = 5%, σ = 9%; correlation 0.25; rf = 2%. What are the weights, expected return, standard deviation and Sharpe ratio of the optimal risky portfolio?
+*Stocks 39.13%, bonds 60.87%; E(rP) = 8.13%, σP = 12.00%, Sharpe 0.511|Stocks 4.92%, bonds 95.08%; E(rP) = 5.39%, σP = 8.93%, Sharpe 0.380|Stocks 34.02%, bonds 65.98%; E(rP) = 7.72%, σP = 11.23%, Sharpe 0.509|Stocks 60.87%, bonds 39.13%; E(rP) = 9.87%, σP = 15.86%, Sharpe 0.496
+Cov = 54.0; RS = 11, RB = 3; wS* = [11(81) − 3(54.0)] ÷ [11(81) + 3(576) − 14(54.0)] = 729 ÷ 1863 = 0.3913; E(rP) = 0.3913(13) + 0.6087(5) = 8.13%; σP² = 143.93, so σP = 12.00%; Sharpe = (8.13 − 2) ÷ 12.00 = 0.511.
+optimal risky portfolio=the mix with the highest Sharpe ratio (tangency portfolio)
+===
+Steepest CAL
+rf = 2%. Which of the candidate risky portfolios in the table gives the steepest capital allocation line?
+Minimum-variance portfolio (lowest risk)|All stocks (highest expected return)|All bonds (simplest low-risk choice)|*Optimal risky portfolio (highest Sharpe ratio)
+Sharpe ratios: All bonds 0.333; Minimum-variance portfolio 0.380; 60 / 40 portfolio 0.497; All stocks 0.458; Optimal risky portfolio 0.511; the CAL slope is the Sharpe ratio, and neither the lowest-risk nor the highest-return portfolio maximizes it.
+CAL slope=Sharpe ratio of the risky portfolio; steeper means more expected return at every risk level
+@tbl Candidate portfolio|w in stocks|E(rP)|σP;;All bonds|0.00%|5.00%|9.00%;;Minimum-variance portfolio|4.92%|5.39%|8.93%;;60 / 40 portfolio|60.00%|9.80%|15.69%;;All stocks|100.00%|13.00%|24.00%;;Optimal risky portfolio|39.13%|8.13%|12.00%
+===
+Complete portfolio
+The optimal risky portfolio has E(rP) = 8.13%, σP = 12.00% with 39.13% in the stock fund; rf = 2%. What fraction of total wealth should an investor with A = 5 hold in the stock fund?
+14.81%|*33.33%|39.13%|85.19%
+y* = [E(rP) − rf] ÷ (A·σP²) = 0.0613 ÷ (5 × 0.014393) = 0.8519; stocks = y* × wS* = 0.8519 × 0.3913 = 33.33% of total wealth (look-through).
+look-through weight=y* times the weight inside the risky portfolio
+===
+Separation property
+Two clients with risk aversion A = 3 and A = 8 face the same inputs and can lend and borrow at the same risk-free rate. According to the separation property:
+*They hold the same stock-to-bond ratio inside the risky portfolio but different amounts of T-bills|They hold different risky portfolios, with the more risk-averse client holding more bonds inside P|They hold the same total allocation to risky assets|The client with A = 8 holds no risky assets
+The tangency portfolio is the same for everyone; only y* differs, so the more risk-averse client simply puts more in T-bills while keeping the identical mix within P.
+separation property=portfolio choice splits into a technical task (find P) and a personal task (choose y)
+===
+Limits of separation
+Which of the following is a reason why the separation property breaks down in practice?
+All investors face identical taxes and the same constraints|Investors agree on the input list and hold the same expectations|Human capital is the same for every investor in the economy|*Borrowing rates exceed lending rates, which kinks the CAL
+The other limits listed in the slides are tax differences, human capital (a semiconductor engineer should tilt away from semiconductors), disagreement over the input list, and binding constraints.
+kinked CAL=a higher borrowing rate than lending rate, so the line bends at P
+===
+Efficient frontier with many assets
+Which statement about the Markowitz efficient frontier of n risky assets is correct?
+Each individual asset lies on the efficient frontier, since single securities are its building blocks|*Individual assets lie inside the frontier, and only the branch above the minimum-variance portfolio is efficient|The entire frontier is efficient, including the part below the minimum-variance portfolio|The tangency portfolio is found by minimizing variance for a zero expected return
+The frontier is found by minimizing variance for each target return; single assets are dominated, and the tangency portfolio P* remains the unique Sharpe-maximizing portfolio.
+efficient frontier=lowest risk for each expected return among all portfolios of n assets
+===
+Input list
+To run the Markowitz optimization on n = 200 securities, how many estimates are needed in total, and how many of them are covariances?
+19,900 in total; 19,900 covariances|20,300 in total; 39,800 covariances|*20,300 in total; 19,900 covariances|40,000 in total; 19,900 covariances
+Total = n expected returns + n variances + n(n − 1)/2 covariances = 200 + 200 + 19,900 = 20,300 = n(n + 3)/2; covariances are symmetric, so only n(n − 1)/2 = 19,900 are distinct.
+input list=expected returns, variances and covariances for all securities
+===
+Home bias
+Korean households hold mostly domestic equities, although Korea is a small share of world market capitalization. Why would adding foreign equities usually reduce risk?
+Foreign equities always earn higher expected returns than domestic equities|Correlations between countries are exactly zero, so foreign risk is fully independent|Adding foreign equities removes market risk entirely, because currencies offset equity moves|*Foreign markets have different industrial structures, so their correlation with domestic stocks is below +1
+The benefit is a covariance argument, not a forecasting argument: as long as cross-border correlations are below +1 the interaction term helps, although correlations have risen over recent decades and currency risk must be handled separately.
+home-bias puzzle=holding mostly domestic assets despite the diversification benefit of foreign ones
+===
+</script>
+<!--DATA-END-->
+<title>Quiz Template</title>
+<style>
+  :root{
+    --bg:#F6F6F5;
+    --surface:#FFFFFF;
+    --border:#E1E3E6;
+    --border-strong:#C7CBD1;
+    --ink:#1D232C;
+    --ink-soft:#5B6270;
+    --accent:#2B4A73;
+    --accent-wash: rgba(43,74,115,0.07);
+    --wrong:#9B4A40;
+    --wrong-bg:#F5EAE8;
+    --correct:#3C6B4E;
+    --correct-bg:#EAF0EA;
+    --accent-border-soft: rgba(43,74,115,0.65);
+    --serif: Georgia,"Times New Roman","Noto Serif KR",serif;
+  }
+  html.dark{
+    --bg:#14181E;
+    --surface:#1C212B;
+    --border:#2B313D;
+    --border-strong:#3B4452;
+    --ink:#E8E9EA;
+    --ink-soft:#9BA3B0;
+    --accent:#6E97C9;
+    --accent-wash: rgba(110,151,201,0.14);
+    --accent-border-soft: rgba(110,151,201,0.75);
+    --wrong:#D98A80;
+    --wrong-bg: rgba(155,74,64,0.22);
+    --correct:#8FC7A4;
+    --correct-bg: rgba(60,107,78,0.22);
+  }
+  *{box-sizing:border-box;}
+  body{margin:0; background:var(--bg); color:var(--ink); font-family:var(--serif); line-height:1.6; padding:0 0 80px;}
+  header{max-width:1000px; margin:0 auto; padding:52px 24px 0;}
+  header h1{font-weight:500; font-size:3.75rem; line-height:1.04; margin:0 0 14px; letter-spacing:-0.01em; text-align:center;}
+  header p.sub{margin:0 0 24px; color:var(--ink-soft); font-size:1.05rem; text-align:center;}
+  .howto{padding-bottom:22px; border-bottom:1px solid var(--border);}
+  .howto summary{cursor:pointer; font-size:0.9rem; color:var(--ink-soft); list-style:none; display:inline-flex; align-items:center; gap:6px;}
+  .howto summary::-webkit-details-marker{display:none;}
+  .howto summary::before{content:"›"; display:inline-block; font-size:1rem; transition:transform .15s ease;}
+  .howto[open] summary::before{transform:rotate(90deg);}
+  .howto summary:hover{color:var(--ink);}
+  .howto-body{display:flex; flex-wrap:wrap; gap:8px 22px; font-size:0.85rem; color:var(--ink-soft); margin-top:12px;}
+  .howto-body > span{white-space:normal;}
+  .howto-body .kg{white-space:nowrap;}
+  .howto-body .sl{color:var(--ink-soft); margin:0 2px;}
+  .header-toggles{display:flex; flex-wrap:wrap; align-items:center; gap:6px 20px; margin-top:14px; position:relative;}
+  .icon-btn{background:none; border:1px solid var(--border-strong); border-radius:6px; width:34px; height:30px; padding:0; font-size:1rem; line-height:1; color:var(--ink-soft); cursor:pointer; display:inline-flex; align-items:center; justify-content:center;}
+  .icon-btn:hover, .icon-btn[aria-expanded="true"]{border-color:var(--accent); color:var(--accent);}
+  .icon-btn[aria-expanded="true"]{background:none;}
+  .icons{display:inline-flex; align-items:center; gap:4px;}
+  .settings{display:none; position:absolute; left:0; top:calc(100% + 6px); z-index:15; flex-direction:column; align-items:flex-start; gap:10px; padding:12px 16px; border:1px solid var(--border-strong); border-radius:8px; background:var(--bg); box-shadow:0 6px 18px rgba(0,0,0,0.12);}   /* floats over the page: no extra space, opaque so nothing shows through */
+  .settings.open{display:flex;}
+  .qsearch{margin-left:auto; margin-right:10px; position:relative; display:flex; align-items:center; gap:6px;}
+  .qsearch input{width:230px; font-family:var(--serif); font-size:0.85rem; color:var(--ink); background:none; border:none; border-bottom:1px solid var(--border-strong); border-radius:0; padding:4px 2px; outline:none;}
+  .qsearch input:focus{border-bottom-color:var(--accent);}
+  .qsearch input.bad{border-bottom-color:var(--wrong); background:none;}
+  .qsearch .qwarn{position:absolute; left:0; top:calc(100% + 3px); z-index:12; font-size:0.78rem; color:var(--wrong); white-space:nowrap; display:none;}
+  .qsearch .qwarn.show{display:block;}
+  .qsearch .text-toggle{visibility:hidden;}
+  .qsearch.active .text-toggle{visibility:visible;}
+  .sw{background:none; border:none; padding:0; font-family:var(--serif); font-size:0.9rem; color:var(--ink-soft); cursor:pointer; display:inline-flex; align-items:center; gap:8px;}
+  .sw:hover{color:var(--accent);}
+  .sw .box{flex:none; width:16px; height:16px; border:1px solid var(--border-strong); border-radius:3px; display:inline-flex; align-items:center; justify-content:center; font-size:11px; line-height:1; color:#fff;}
+  .sw.on{color:var(--ink);}
+  .sw.on .box{background:var(--accent); border-color:var(--accent);}
+  .sw.on .box::after{content:"✓";}
+  .text-toggle.on{color:var(--accent); text-shadow:0.45px 0 0 currentColor, -0.45px 0 0 currentColor;}   /* selected: colour + faux bold, so the width never changes */
+  .qrow{position:relative;}
+  sup, sub{font-size:0.72em; line-height:0;}
+  .copyq{margin-left:auto; font-size:0.82rem; color:var(--ink-soft); cursor:pointer; user-select:none;}
+  .copyq:hover{color:var(--accent);}
+  .ch-head{grid-column:1 / -1; font-size:0.82rem; letter-spacing:0.08em; text-transform:uppercase; color:var(--ink-soft); padding:26px 0 8px; border-bottom:1px solid var(--border-strong);}
+  .text-toggle{background:none; border:none; padding:0; display:inline-block; font-family:var(--serif); font-size:0.85rem; color:var(--ink-soft); cursor:pointer; text-decoration:underline; text-underline-offset:3px;}
+  .text-toggle:hover{color:var(--accent);}
+  .text-toggle:disabled{opacity:.4; cursor:default; color:var(--ink-soft);}
+  .btn.danger{background:var(--wrong-bg); border-color:var(--wrong); color:var(--wrong);}
+  .btn.danger:hover{color:var(--wrong);}
+  .key{display:inline-block; border:1px solid var(--border-strong); border-bottom-width:2px; border-radius:4px; padding:1px 7px; font-family:var(--serif); font-size:0.82rem; background:var(--surface); margin:0 2px;}
+
+  .scorebar{position:sticky; top:0; z-index:10; background:var(--bg); border-bottom:1px solid var(--border); max-width:1000px; margin:0 auto; padding:14px 24px; display:flex; flex-wrap:wrap; gap:10px 16px; justify-content:space-between; align-items:center; font-size:0.88rem;}
+  .scorebar .left{display:flex; align-items:center; gap:18px; flex-wrap:wrap;}
+  .scorebar .tally{color:var(--ink-soft);}
+  .scorebar .tally b{color:var(--ink); font-weight:600;}
+  .scorebar .right-controls{display:flex; gap:8px; align-items:center; flex-wrap:wrap;}
+  .btn{background:var(--surface); border:1px solid var(--border-strong); border-radius:6px; padding:7px 14px; font-size:0.83rem; color:var(--ink-soft); cursor:pointer; font-family:var(--serif);}
+  .btn:hover{border-color:var(--accent); color:var(--accent);}
+  .btn.primary{border-color:var(--accent); color:#fff; background:var(--accent);}
+  .btn.primary:hover{opacity:0.88; color:#fff;}
+  .btn:disabled{opacity:0.4; cursor:default;}
+  .btn:disabled:hover{border-color:var(--border-strong); color:var(--ink-soft); opacity:0.4;}
+  .btn.active-mode{background:var(--accent); color:#fff; border-color:var(--accent);}
+
+  .review-banner{max-width:1000px; margin:20px auto 0; padding:0 24px; display:none;}
+  .review-banner.show{display:block;}
+  .review-banner .box{border:1px solid var(--accent); background:var(--accent-wash); border-radius:8px; padding:14px 18px; font-size:0.92rem; display:flex; justify-content:space-between; align-items:center; gap:16px; flex-wrap:wrap;}
+  .review-banner .box b{font-weight:600; font-size:1.02rem;}
+
+  main{max-width:1000px; margin:0 auto; padding:20px 24px 0;}
+
+  /* ---- shared question row ---- */
+  .qhead{display:flex; align-items:baseline; gap:12px; margin-bottom:12px;}
+  .qnum{flex:none; width:27px; height:27px; border-radius:50%; border:1px solid var(--ink); display:flex; align-items:center; justify-content:center; font-size:0.82rem; transition:background 0.15s, color 0.15s, border-color .15s;}
+  .qtag{font-size:0.82rem; color:var(--ink-soft);}
+  .qchap{flex:none; font-size:0.82rem; color:var(--ink-soft); white-space:nowrap;}
+  .qchap + .qtag::before{content:"· ";}
+  .qchap + .qtag{margin-left:-6px;}
+  .retry-pill{font-size:0.72rem; color:var(--wrong); background:var(--wrong-bg); border:1px solid var(--wrong); border-radius:20px; padding:1px 10px; margin-left:auto;}
+  .qtext{font-size:1.25rem; font-weight:500; margin:0 0 18px; max-width:60ch;}
+  .options{display:flex; flex-direction:column; gap:3px; max-width:60ch;}
+  .opt{user-select:text; -webkit-user-select:text; display:flex; align-items:flex-start; gap:8px; text-align:left; background:none; border:none; border-radius:0; padding:5px 0; cursor:pointer; font-size:1rem; font-family:var(--serif); color:var(--ink); transition:opacity 0.12s;}   /* plain text choices: no box */
+  .opt:hover > span:last-child{text-decoration-line:underline; text-decoration-thickness:1px; text-underline-offset:4px; text-decoration-color:rgba(128,128,128,0.55);}   /* faint underline on hover */
+  .opt .optnum{flex:none; font-size:1rem; color:var(--ink-soft); min-width:1.3em; text-align:left;}
+  .opt .optnum::after{content:".";}
+  .optnum, .qnum{user-select:none; -webkit-user-select:none;}
+  .opt.correct{color:var(--correct); font-weight:600;}
+  .opt.correct .optnum{color:var(--correct);}
+  .opt.incorrect{color:var(--wrong);}
+  .opt.incorrect > span:last-child, .opt.incorrect:hover > span:last-child{text-decoration-line:line-through; text-decoration-thickness:1px; text-decoration-color:currentColor;}
+  .opt.incorrect .optnum{color:var(--wrong);}
+  .opt.dim{opacity:0.5;}
+  .opt.picked{color:var(--accent); font-weight:600;}
+  .opt.picked .optnum{color:var(--accent);}
+
+  /* ---- exam mode ---- */
+  .exam-result{display:none; max-width:1000px; margin:22px auto 0; padding:0 24px;}
+  .exam-result.show{display:block;}
+  .exam-result .er-inner{border-top:2px solid var(--accent); border-bottom:2px solid var(--accent); padding:20px 0 18px; text-align:center;}
+  .exam-result .er-label{font-size:0.8rem; letter-spacing:0.14em; text-transform:uppercase; color:var(--ink-soft);}
+  .exam-result .er-score{font-size:3rem; line-height:1.2; margin:6px 0 2px; font-weight:600; color:var(--accent);}
+  .exam-result .er-score small{font-size:1.15rem; font-weight:400; color:var(--ink-soft); margin-left:3px;}
+  .exam-result .er-pct{font-size:1.3rem; font-weight:600;}
+  .exam-result .er-detail{font-size:0.9rem; color:var(--ink-soft); margin-top:6px;}
+  .exam-result .btn{margin-top:14px;}
+  .exam-bar{display:none; max-width:1000px; margin:10px auto 0; padding:22px 24px 0; text-align:center; border-top:1px solid var(--border);}
+  .exam-bar.show{display:block;}
+  .exam-bar .eb-info{font-size:0.88rem; color:var(--ink-soft); margin-bottom:12px;}
+  .exam-bar .btn{padding:10px 36px; font-size:0.95rem;}
+
+  .feedback{margin-top:13px; max-width:60ch; font-size:0.92rem; color:var(--ink-soft); display:none;}
+  .feedback.show{display:block;}
+  .feedback.right .verdict{color:var(--correct);}
+  .feedback.wrong .verdict{color:var(--wrong);}
+  .feedback .verdict{font-weight:650; margin-right:4px;}
+
+  .margin{padding-top:2px; display:none;}
+  body.show-keywords .margin{display:block;}
+  .margin-label{font-size:0.76rem; color:var(--ink-soft); margin-bottom:9px;}
+  .margin ul{margin:0; padding-left:16px; list-style:disc;}
+  .margin li{font-style:italic; font-size:0.9rem; color:var(--ink-soft); margin-bottom:8px; line-height:1.5;}
+  .margin li b{font-style:normal; color:var(--ink); font-weight:600;}
+
+  /* figure / table in the right margin (replaces keywords for that question) */
+  .margin.figbox{display:block; align-self:center;}   /* figure/table centred vertically beside the question */
+  .figbox .fig{cursor:zoom-in; border:1px solid var(--border); border-radius:6px; padding:8px; background:var(--surface);}
+  .figbox .fig:hover{border-color:var(--accent);}
+  .fig img{display:block; max-width:100%; height:auto;}
+  .fig table{border-collapse:collapse; width:100%; font-size:0.82rem; color:var(--ink);}
+  .fig th, .fig td{border:1px solid var(--border-strong); padding:4px 8px; text-align:center;}
+  .fig th{background:var(--accent-wash); font-weight:600;}
+  .lightbox{position:fixed; inset:0; z-index:40; background:rgba(15,20,30,0.78); display:none; align-items:center; justify-content:center; padding:24px; cursor:zoom-out;}
+  .lightbox.show{display:flex;}
+  .lightbox .lb-body{background:var(--surface); border-radius:8px; padding:18px; max-width:94vw; max-height:92vh; overflow:auto;}
+  .lightbox .lb-body img{display:block; max-width:90vw; max-height:84vh;}
+  .lightbox .lb-body table{font-size:1.05rem; min-width:min(520px, 80vw);}
+
+  .data-errors{max-width:1000px; margin:16px auto 0; padding:12px 18px; border:1px solid var(--wrong); background:var(--wrong-bg); color:var(--wrong); border-radius:8px; font-size:0.88rem;}
+  .data-errors ul{margin:6px 0 0; padding-left:18px;}
+
+  .empty-state{max-width:1000px; margin:0 auto; padding:60px 24px; text-align:center; color:var(--ink-soft);}
+  .empty-state .big{font-size:1.3rem; font-weight:500; color:var(--ink); margin-bottom:8px;}
+
+  /* ---- list view ---- */
+  .list-view .qrow{
+    display:grid;
+    grid-template-columns: 1fr;
+    gap:0 28px;
+    background:var(--surface);
+    border:1px solid var(--border);
+    border-radius:10px;
+    padding:28px 30px;
+    margin-bottom:14px;
+  }
+  body.show-keywords .list-view .qrow{grid-template-columns: 1fr 230px;}
+  .list-view .qrow.active{
+    border-color:var(--accent-border-soft);
+    background:var(--surface);
+  }
+  .list-view .qrow.active .qnum{background:var(--accent); color:#fff; border-color:var(--accent);}
+
+  /* ---- single view ---- */
+  .single-shell{
+    background:var(--surface);
+    border:1px solid var(--border);
+    border-radius:10px;
+    padding:22px 30px;
+    min-height:0;
+    display:flex;
+    flex-direction:column;
+  }
+  .single-progress{
+    flex:none;
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+    font-size:0.85rem;
+    color:var(--ink-soft);
+    margin-bottom:10px;
+  }
+  .single-progress-bar{
+    flex:none;
+    height:3px;
+    background:var(--border);
+    border-radius:2px;
+    overflow:hidden;
+    margin-bottom:16px;
+  }
+  .single-progress-bar i{
+    display:block;
+    height:100%;
+    background:var(--accent);
+    transition:width .2s ease;
+  }
+  .single-body{
+    flex:1 1 auto;
+    overflow-y:auto;
+    min-height:0;
+  }
+  .single-body .qtext{margin-bottom:14px;}
+  .single-body .qrow{
+    display:grid;
+    grid-template-columns: 1fr;
+    gap:0 28px;
+  }
+  body.show-keywords .single-body .qrow{grid-template-columns: 1fr 230px;}
+  body .list-view .qrow.has-fig, body .single-body .qrow.has-fig{grid-template-columns: 1fr 300px;}
+  .single-nav{
+    flex:none;
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+    gap:12px;
+    padding-top:14px;
+    margin-top:12px;
+    border-top:1px solid var(--border);
+  }
+
+  @media (max-width: 720px){
+    header h1{font-size:2.5rem;}
+    .list-view .qrow, body.show-keywords .list-view .qrow{grid-template-columns:1fr;}
+    .single-body .qrow, body.show-keywords .single-body .qrow{grid-template-columns:1fr;}
+    body .list-view .qrow.has-fig, body .single-body .qrow.has-fig{grid-template-columns:1fr;}
+    .margin{border-top:1px dashed var(--border); margin-top:14px; padding-top:12px;}
+    .single-shell{min-height:0; padding:22px 18px;}
+  }
+
+  footer{max-width:1000px; margin:32px auto 0; padding:0 24px; color:var(--ink-soft); font-size:0.85rem;}
+
+  /* ---- contents: no background, no side lines — top/bottom rules + text only; same horizontal layout at every screen width ---- */
+  .toc{display:none;}
+  .toc.on{display:block; max-width:1000px; margin:14px auto 0; padding:0 24px;}
+  .toc-inner{display:flex; flex-wrap:wrap; align-items:flex-end; gap:4px; border-bottom:1px solid var(--border-strong);}
+  .toc button{background:none; border:1px solid transparent; border-bottom:1px solid transparent; border-radius:9px 9px 0 0; padding:6px 16px; margin-bottom:-1px; font-family:var(--serif); font-size:0.9rem; line-height:1.3; color:var(--ink-soft); cursor:pointer;}
+  .toc button:hover{color:var(--ink);}
+  .toc button.active{color:var(--accent); background:var(--bg); border-color:var(--border-strong); border-bottom-color:var(--bg); text-shadow:0.45px 0 0 currentColor, -0.45px 0 0 currentColor;}   /* tab open at the bottom; faux bold: no width change */
+  .next-ch{display:flex; justify-content:flex-end; margin:4px 0 12px;}
+
+  /* ---- memo panel (right side) ---- */
+  :root{--memo-w:min(300px, 86vw);}
+  .memo{position:fixed; top:0; right:0; bottom:0; width:var(--memo-w); z-index:22; background:var(--surface); border-left:1px solid var(--border-strong); display:flex; flex-direction:column; transform:translateX(100%); transition:transform .2s ease; visibility:hidden;}
+  body.memo-open .memo{transform:none; visibility:visible;}
+  .memo-head{display:flex; align-items:center; justify-content:space-between; padding:16px 18px 10px; font-size:0.85rem; letter-spacing:0.08em; text-transform:uppercase; color:var(--ink-soft); border-bottom:1px solid var(--border);}
+  .memo-head .text-toggle{text-transform:none; letter-spacing:0;}
+  .memo-text{flex:1; overflow-y:auto; outline:none; white-space:pre-wrap; word-break:break-word; color:var(--ink); font-family:var(--serif); font-size:0.95rem; line-height:1.65; padding:14px 18px;}
+  .memo-text:empty::before{content:attr(data-placeholder); color:var(--ink-soft); opacity:0.6;}
+  .memo-text b{font-weight:700;}
+  .memo-text sup, .memo-text sub{font-size:0.72em; line-height:0;}
+  .memo-head .memo-b{font-weight:700; text-decoration:none; margin-right:14px; font-size:0.95rem;}
+  .memo-foot{padding:9px 18px 12px; font-size:0.74rem; color:var(--ink-soft); border-top:1px solid var(--border);}
+  .memo-tab{position:fixed; top:50%; right:0; z-index:22; transform:translateY(-50%); writing-mode:vertical-rl; background:var(--surface); border:1px solid var(--border-strong); border-right:none; border-radius:7px 0 0 7px; padding:14px 6px; font-family:var(--serif); font-size:0.82rem; letter-spacing:0.06em; color:var(--ink-soft); cursor:pointer; transition:right .2s ease;}
+  .memo-tab:hover{color:var(--accent); border-color:var(--accent);}
+  body.memo-open .memo-tab{display:none;}                    /* the panel has its own Close */
+
+  .tip{position:fixed; z-index:30; transform:translateX(-50%); background:none; color:var(--ink); font-family:var(--serif); font-size:0.8rem; padding:0; opacity:0; pointer-events:none; transition:opacity .12s;}
+  .tip.show{opacity:1;}
+
+  .to-top{position:fixed; left:50%; bottom:22px; z-index:20; width:min(160px, calc(100vw - 48px)); text-align:center; background:var(--surface); border:1px solid var(--border-strong); border-radius:22px; padding:10px 0; font-family:var(--serif); font-size:0.88rem; color:var(--ink-soft); cursor:pointer; opacity:0; pointer-events:none; transform:translate(-50%, 6px); transition:opacity .25s, transform .25s;}
+  .to-top.show{opacity:1; pointer-events:auto; transform:translate(-50%, 0);}
+  .to-top:hover{border-color:var(--accent); color:var(--accent);}
+
+  /* ---- print sheet (exam-paper layout) ---- */
+  #printSheet{ display:none; }
+  @page{
+    size:A4 portrait;
+    margin:25mm 22mm 22mm;
+    @bottom-center{ content:counter(page); font-family:"Times New Roman",Times,serif; font-size:10pt; }
+  }
+  @media print{
+    html, body{ background:#fff !important; color:#000 !important; padding:0 !important; margin:0 !important; }
+    body > *:not(#printSheet){ display:none !important; }
+    #printSheet{
+      display:block;
+      font-family:"Times New Roman",Times,"Noto Serif KR",serif;
+      font-size:11pt; line-height:1.55; color:#000;
+    }
+    #printSheet h1{ font-size:13pt; font-weight:700; text-align:center; margin:0 0 14mm; }
+    #printSheet h2{ font-size:11pt; font-weight:700; margin:0 0 3mm; }
+    #printSheet .p-q{ break-inside:avoid; page-break-inside:avoid; margin:0 0 6mm; text-align:justify; }
+    .p-ch + .p-ch{ break-before:page; page-break-before:always; }
+    #printSheet .p-q p{ margin:0; }
+    #printSheet .p-fig{ margin:2mm 0 3mm; }
+    #printSheet .p-fig img{ max-width:100%; max-height:75mm; }
+    #printSheet .p-fig table{ border-collapse:collapse; font-size:10pt; }
+    #printSheet .p-fig th, #printSheet .p-fig td{ border:1px solid #000; padding:1mm 4mm; text-align:center; }
+    #printSheet .p-q .p-opt{ margin:0; }
+    #printSheet .p-key{ display:block; break-before:page; page-break-before:always; }
+    #printSheet .p-sol{ display:none; }
+    body.print-solution #printSheet .p-grid{ display:none; }
+    body.print-solution #printSheet .p-sol{ display:block; column-count:2; column-gap:10mm; column-rule:1px solid #ccc; text-align:left; font-size:10pt; line-height:1; }
+    /* solutions: no gap between the lines of one answer, exactly one blank line between answers */
+    #printSheet .p-sol .p-s{ break-inside:avoid; page-break-inside:avoid; margin:0 0 1em; padding:0; line-height:1; }   /* line spacing 1 inside an answer, one blank line between answers */
+    #printSheet .p-sol code, #printSheet .p-sol sub, #printSheet .p-sol sup{ line-height:0; }
+    #printSheet .p-sol .p-s:last-child{ margin-bottom:0; }
+    #printSheet .p-sol .p-s p{ margin:0; padding:0; line-height:inherit; }
+    #printSheet .p-key .p-grid{ display:block; }   /* one answer per line, top to bottom */
+    #printSheet .p-key .p-grid > div{ break-inside:avoid; page-break-inside:avoid; margin-bottom:2mm; }
+  }
+
+/* ---- code: `inline` in a monospace font; ```lang blocks coloured by language ---- */
+:root{--code-bg:#F7F8FA; --tk-k:#8A3FA0; --tk-s:#2F7A3B; --tk-c:#8A8F98; --tk-n:#B5541C; --tk-f:#2B5FA8;}
+html.dark{--code-bg:#161A22; --tk-k:#C792EA; --tk-s:#A5D6A7; --tk-c:#7F8794; --tk-n:#F2A66B; --tk-f:#82AAFF;}
+code.ic, pre.code{font-family:"JetBrains Mono","Fira Code",Consolas,"D2Coding","Courier New",monospace;}
+code.ic{font-size:0.86em; background:var(--accent-wash); border:1px solid var(--border); border-radius:4px; padding:0 4px; overflow-wrap:anywhere;}
+pre.code{position:relative; max-width:62ch; margin:0 0 16px; padding:24px 14px 12px; background:var(--code-bg); color:var(--ink); border:1px solid var(--border); border-radius:7px; font-size:0.86rem; line-height:1.5; overflow-x:auto; white-space:pre; tab-size:4;}
+pre.code .lang{position:absolute; top:4px; right:10px; font-family:var(--serif); font-size:0.68rem; letter-spacing:0.08em; text-transform:uppercase; color:var(--ink-soft); user-select:none;}
+.tk-k{color:var(--tk-k); font-weight:600;} .tk-s{color:var(--tk-s);} .tk-c{color:var(--tk-c); font-style:italic;} .tk-n{color:var(--tk-n);} .tk-f{color:var(--tk-f);}
+@media print{
+  #printSheet{--tk-k:#7A2E90; --tk-s:#24692F; --tk-c:#6B7079; --tk-n:#A04612; --tk-f:#1F4F96;}
+  #printSheet pre.code{max-width:100%; margin:1.5mm 0 2mm; padding:2mm 3mm; background:none; border:0.3mm solid #999; font-size:9pt; line-height:1.35; white-space:pre-wrap; overflow:visible; break-inside:avoid; -webkit-print-color-adjust:exact; print-color-adjust:exact;}
+  #printSheet pre.code .lang{display:none;}
+  #printSheet code.ic{background:none; border:0; padding:0; font-size:0.9em;}
+}
+/* Review box: pinned to the card's top-right corner in every layout (ticking it adds no border / colour to the question) */
+.qhead{padding-right:88px;}
+.qflag{position:absolute; top:31px; right:30px; margin:0; display:inline-flex; align-items:center; gap:6px; font-size:0.82rem; color:var(--ink-soft); cursor:pointer; user-select:none; white-space:nowrap;}
+.qflag input{margin:0; width:15px; height:15px; accent-color:var(--accent); cursor:pointer;}
+.qflag:hover, .qflag.on{color:var(--accent);}
+.single-body .qrow .qflag{top:3px; right:0;}
+@media (max-width:720px){ .list-view .qrow .qflag{top:25px; right:18px;} }
+/* ---- mobile: the question-number search takes its own full-width row ---- */
+@media (max-width:720px){
+  .qsearch{order:10; flex:1 1 100%; margin:6px 0 0;}
+  .qsearch input{flex:1 1 auto; width:auto; min-width:0; font-size:16px; padding:8px 12px;}
+  .qsearch .qwarn{right:0; white-space:normal;}
+  .qsearch .text-toggle{display:none;}                 /* Clear takes space only while a search is active */
+  .qsearch.active .text-toggle{display:inline-block;}
+  pre.code{font-size:0.8rem; padding:22px 12px 10px;}
+}
+</style>
+</head>
+<body>
+
+<header>
+  <h1 id="quizTitle">Quiz Title</h1>
+  <p class="sub" id="quizSub">Course / scope description</p>
+  <details class="howto">
+    <summary>How to use</summary>
+    <div class="howto-body">
+      <span><span class="key">Print</span> / <span class="key">Print with solution</span> print the questions currently shown: a chapter, all chapters, Review Questions, or the questions found by the search</span>
+      <span><span class="kg"><span class="key">1</span>–<span class="key">4</span> <span class="key">Enter</span> <span class="key">Space</span> <span class="key">↑</span> <span class="key">↓</span> solving question</span> <span class="sl">/</span> <span class="kg"><span class="key">Ctrl+Q</span> Memo</span></span>
+    </div>
+  </details>
+  <div class="header-toggles">
+    <span class="icons"><button class="icon-btn" id="menuBtn" type="button" aria-expanded="false" aria-controls="settings" title="Settings">☰</button></span>
+    <button class="text-toggle" id="allChBtn" type="button">All chapters</button>
+    <button class="text-toggle" id="printBtn" type="button">Print</button>
+    <button class="text-toggle" id="printSolBtn" type="button">Print with solution</button>
+    <form class="qsearch" id="qSearchForm" autocomplete="off">
+      <button class="text-toggle" id="qClear" type="button">Clear</button>
+      <input id="qSearch" type="text" inputmode="numeric" placeholder="Question no.  e.g. 1, 2, 3, 15" aria-label="Question numbers">
+      <div class="qwarn" id="qWarn" role="alert"></div>
+    </form>
+  <div class="settings" id="settings">
+    <button class="sw" id="layoutToggleBtn" type="button"><span class="box"></span>Single question view</button>
+    <button class="sw" id="examModeBtn" type="button"><span class="box"></span>Exam mode</button>
+    <button class="sw" id="keywordsToggleBtn" type="button"><span class="box"></span>Show keywords</button>
+      <button class="sw" id="darkSw" type="button"><span class="box"></span>Night mode</button>
+  </div>
+  </div>
+
+</header>
+
+<nav class="toc" id="toc" aria-label="Chapters"></nav>
+
+<div class="exam-result" id="examResult"></div>
+
+<div class="scorebar">
+  <div class="left">
+    <div class="tally">Answered <b id="answeredCount">0</b>/<span id="totalCount">0</span> · Correct <b id="correctCount">0</b></div>
+    <div class="tally" id="modeLabel"></div>
+  </div>
+  <div class="right-controls">
+    <button class="btn" id="allViewBtn">All Questions</button>
+    <button class="btn primary" id="reviewBtn" disabled>Review Incorrect (<span id="wrongCount">0</span>)</button>
+    <button class="btn" id="flagBtn" disabled>Marked for Review (0)</button>
+    <button class="btn" id="copyMissedBtn" disabled>Copy Incorrect #</button>
+    <button class="btn" id="saveBtn">Save</button>
+    <button class="btn" id="resetBtn">Restart</button>
+  </div>
+</div>
+
+<div class="review-banner" id="reviewBanner">
+  <div class="box">
+    <span><b id="reviewBannerText"></b></span>
+    <span id="reviewBannerActions"></span>
+  </div>
+</div>
+
+<main id="quiz"></main>
+
+<div class="exam-bar" id="examBar">
+  <div class="eb-info" id="examInfo"></div>
+  <button class="btn primary" id="gradeBtn" type="button">Grade Exam</button>
+</div>
+
+<button class="memo-tab" id="memoTab" type="button" aria-expanded="false">Memo</button>
+<aside class="memo" id="memo" aria-label="Memo">
+  <div class="memo-head"><span>Memo</span><span><button class="text-toggle memo-b" id="memoBold" type="button" title="Bold (Ctrl+B)">B</button><button class="text-toggle memo-b" id="memoSup" type="button" title="Superscript (Ctrl+.)" style="font-weight:400">x²</button><button class="text-toggle memo-b" id="memoSub" type="button" title="Subscript (Ctrl+,)" style="font-weight:400">x₂</button><button class="text-toggle" id="memoClose" type="button">Close</button></span></div>
+  <div class="memo-text" id="memoText" contenteditable="true" spellcheck="false" data-placeholder="Write notes here…  Ctrl+B bold · x^2 + space = x² · P_{t-1} · \pi + space = π"></div>
+</aside>
+
+<div id="printSheet"></div>
+
+<div class="lightbox" id="lightbox"><div class="lb-body" id="lbBody"></div></div>
+
+<button class="to-top" id="toTopBtn" type="button" aria-label="Back to top">↑ Top</button>
+
+<footer id="quizFooter"></footer>
+
+<script>
+const esc = t => String(t).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+// Math text: escape, then x^2 / x^{n+1} -> superscript, P_t / P_{t-1} -> subscript, \pi \Delta \times ... -> symbols. \^ and \_ stay literal.
+const MATH = { alpha:'α', beta:'β', gamma:'γ', delta:'δ', epsilon:'ε', theta:'θ', lambda:'λ', mu:'μ', pi:'π', rho:'ρ', sigma:'σ', tau:'τ', phi:'φ', omega:'ω',
+  Delta:'Δ', Sigma:'Σ', Pi:'Π', Omega:'Ω', times:'×', div:'÷', pm:'±', le:'≤', ge:'≥', ne:'≠', approx:'≈', infty:'∞', to:'→', sqrt:'√', cdot:'·', deg:'°' };
+const mathFm = t => esc(t)
+  .replace(/\\([_^])/g, (m, c) => c === '_' ? '&#95;' : '&#94;')
+  .replace(/\\([A-Za-z]+)/g, (m, k) => MATH[k] || m)
+  .replace(/\^(\{[^}]*\}|-?[0-9A-Za-z])/g, (m, s) => `<sup>${s.replace(/^\{|\}$/g, '')}</sup>`)
+  .replace(/_(\{[^}]*\}|[0-9A-Za-z])/g, (m, s) => `<sub>${s.replace(/^\{|\}$/g, '')}</sub>`);
+
+/* ---------- code: `inline` -> monospace; ```lang fenced block -> coloured <pre> ---------- */
+const CODE_ALIAS = { py:'python', python3:'python', javascript:'js', ts:'js', typescript:'js', jsx:'js', tsx:'js', node:'js',
+  'c++':'c', cpp:'c', cs:'c', csharp:'c', 'c#':'c', go:'c', kotlin:'java', swift:'c', rust:'c', bash:'sh', shell:'sh', zsh:'sh', mysql:'sql', postgresql:'sql', sqlite:'sql' };
+const CODE_KW = {
+  python:'and as assert async await break class continue def del elif else except False finally for from global if import in is lambda None nonlocal not or pass raise return True try while with yield self print len range',
+  js:'async await break case catch class const continue default delete do else export extends false finally for function if import in instanceof let new null of return static super switch this throw true try typeof undefined var void while yield console',
+  java:'abstract boolean break byte case catch char class continue default do double else enum extends final finally float for if implements import instanceof int interface long new null package private protected public return short static super switch this throw throws true false try void while var String System',
+  c:'auto bool break case char const continue default do double else enum extern false float for if int long nullptr return short signed sizeof static struct switch true typedef union unsigned void while class public private protected namespace using template typename new delete include define std cout cin endl vector string fn let mut func package import var',
+  sql:'select from where and or not insert into values update set delete create table drop alter join left right inner outer full on group by order having as distinct limit offset null is in like between count sum avg min max case when then else end primary key foreign references union all exists asc desc',
+  r:'function if else for while repeat break next return TRUE FALSE NULL NA in library',
+  sh:'if then else elif fi for while do done case esac in function return echo export local cd ls sudo'
+};
+function detectLang(s){
+  if(/^\s*(def |class \w+:|import \w|from \w+ import)|print\(|:\s*$/m.test(s) && !/[{};]\s*$/m.test(s)) return 'python';
+  if(/\b(select|insert into|update|create table)\b[\s\S]*\b(from|values|set|\()/i.test(s)) return 'sql';
+  if(/#include|std::|printf\(|cout\s*<</.test(s)) return 'c';
+  if(/\b(public|private)\s+(static\s+)?\w+|System\.out/.test(s)) return 'java';
+  if(/<-|\blibrary\(/.test(s)) return 'r';
+  if(/\b(const|let|function)\b|=>|console\./.test(s)) return 'js';
+  if(/^#!\/bin|^\s*(echo|export|sudo|cd) /m.test(s)) return 'sh';
+  return 'text';
+}
+function hl(code, lang){
+  const L = CODE_ALIAS[lang] || lang;
+  if(!CODE_KW[L]) return esc(code);
+  const kw = new Set(CODE_KW[L].split(' ')), ci = L === 'sql';
+  const com = ['python', 'r', 'sh'].includes(L) ? '#[^\\n]*' : L === 'sql' ? '--[^\\n]*|\\/\\*[\\s\\S]*?\\*\\/' : '\\/\\/[^\\n]*|\\/\\*[\\s\\S]*?\\*\\/';
+  const str = '"""[\\s\\S]*?"""|\'\'\'[\\s\\S]*?\'\'\'|"(?:\\\\.|[^"\\\\\\n])*"|\'(?:\\\\.|[^\'\\\\\\n])*\'' + (L === 'js' ? '|`(?:\\\\.|[^`\\\\])*`' : '');
+  const re = new RegExp('(' + com + ')|(' + str + ')|(\\b\\d+(?:\\.\\d+)?\\b)|([A-Za-z_]\\w*)(?=\\s*\\()|([A-Za-z_]\\w*)', 'g');
+  let out = '', last = 0, m;
+  while((m = re.exec(code))){
+    out += esc(code.slice(last, m.index)); last = re.lastIndex;
+    const t = esc(m[0]);
+    if(m[1]) out += `<span class="tk-c">${t}</span>`;
+    else if(m[2]) out += `<span class="tk-s">${t}</span>`;
+    else if(m[3]) out += `<span class="tk-n">${t}</span>`;
+    else { const w = m[4] || m[5]; out += kw.has(ci ? w.toLowerCase() : w) ? `<span class="tk-k">${t}</span>` : m[4] ? `<span class="tk-f">${t}</span>` : t; }
+  }
+  return out + esc(code.slice(last));
+}
+const codeHTML = c => `<pre class="code" data-lang="${esc(c.lang)}">${c.lang !== 'text' ? `<span class="lang">${esc(c.lang)}</span>` : ''}<code>${hl(c.text, c.lang)}</code></pre>`;
+const codeTxt = q => q.code ? '```' + q.code.lang + '\n' + q.code.text + '\n```\n' : '';
+const fm = t => {                                          // `inline code` is kept out of the math markup
+  const keep = [];
+  const s = String(t).replace(/`([^`]+)`/g, (m, c) => { keep.push(`<code class="ic">${esc(c)}</code>`); return `\u0000${keep.length - 1}\u0000`; });
+  return mathFm(s).replace(/\u0000(\d+)\u0000/g, (m, i) => keep[+i]);
+};
+
+/* Data lives in <script id="quizData"> at the top of this file (see DATA-START/END). */
+function parseQuizData(raw){
+  const blocks = raw.replace(/\r\n?/g, '\n').trim().split(/\n===\n?/).filter(b => b.trim());
+  const meta = {};
+  blocks.shift().split('\n').forEach(l => {
+    const i = l.indexOf(':');
+    if(i > 0) meta[l.slice(0, i).trim()] = l.slice(i + 1).trim();
+  });
+  let prevTag = '';
+  const questions = [], chapters = [], errs = [];
+  if(!meta.title) errs.push('meta block: title: is missing (first block = title:/sub:/subject:/textbook: lines, then ===)');
+  blocks.forEach(block => {
+    const L = [];                                           // ```lang ... ``` lines are taken out as the question's code block
+    let fence = null, fenceOpen = false;
+    block.replace(/^\n+|\s+$/g, '').split('\n').forEach(l => {
+      const f = l.trim().match(/^```\s*([\w+#.-]*)\s*$/);
+      if(f && !fenceOpen){ fenceOpen = true; if(fence) fence.lines.push(''); else fence = { lang: f[1].toLowerCase(), lines: [] }; return; }
+      if(f && fenceOpen){ fenceOpen = false; return; }
+      if(fenceOpen) fence.lines.push(l); else L.push(l.trim() ? l.replace(/^\s+/, '') : l);
+    });
+    while(L.length && !L[L.length - 1].trim()) L.pop();
+    if(L.length === 1 && L[0].startsWith('# ')){            // chapter marker: "# Chapter title"
+      chapters.push({ title: L[0].slice(2).trim(), idx: [] });
+      return;
+    }
+    if(!chapters.length) chapters.push({ title: meta.title || 'Quiz', idx: [] });
+    const ch = chapters.length - 1;
+    chapters[ch].seen = (chapters[ch].seen || 0) + 1;      // counts malformed blocks too, so error numbers match the data
+    const who = `${chapters[ch].title} · Q${chapters[ch].seen}`;
+    if(fenceOpen) errs.push(`${who}: code block has no closing line of three backticks`);
+    const qtext0 = fence ? fence.lines.join('\n').replace(/^\n+|\s+$/g, '') : '';
+    const qcode = qtext0 ? { lang: (fence.lang && (CODE_ALIAS[fence.lang] || fence.lang)) || detectLang(qtext0), text: qtext0 } : null;
+    if(L.length < 4){ errs.push(`${who}: needs at least 4 lines (tag, question, options, explanation), found ${L.length} - check for a missing ===`); return; }
+    if(L[0].trim() === '-' && !prevTag) errs.push(`${who}: tag "-" has no previous tag`);
+    const tag = L[0].trim() === '-' ? prevTag : L[0].trim();
+    prevTag = tag;
+    let correct = 0;
+    const options = L[2].split('|').map((o, i) => {
+      o = o.trim();
+      if(o.startsWith('*')){ correct = i; return o.slice(1).trim(); }
+      return o;
+    });
+    const stars = L[2].split('|').filter(o => o.trim().startsWith('*')).length;
+    if(stars !== 1) errs.push(`${who}: exactly one option must start with * (found ${stars})`);
+    if(options.length < 2 || options.length > 4) errs.push(`${who}: ${options.length} options (use 2-4)`);
+    if(options.some(o => !o) || !L[1].trim() || !L[3].trim()) errs.push(`${who}: empty option, question or explanation`);
+    const extra = L.slice(4), figLine = extra.find(l => l.startsWith('@')), termLine = extra.find(l => !l.startsWith('@')) || '';
+    let fig = null;
+    const fm = figLine && figLine.match(/^@(img|tbl)\s+(.+)$/);
+    if(figLine && !fm) errs.push(`${who}: unknown line starting with @ (use "@img file" or "@tbl H1|H2;;a|b")`);
+    if(fm && fm[1] === 'tbl'){ const rr = fm[2].split(';;').map(r => r.split('|').length); if(rr.length < 2 || new Set(rr).size !== 1) errs.push(`${who}: @tbl needs a header row + at least 1 row, all with the same number of columns`); }
+    if(fm) fig = fm[1] === 'img' ? { type: 'img', src: fm[2].trim() } : { type: 'tbl', rows: fm[2].split(';;').map(r => r.split('|').map(c => c.trim())) };
+    const vocab = termLine.split(';').map(x => x.trim()).filter(Boolean).map(pair => {
+      const i = pair.indexOf('=');
+      return i < 0 ? [pair, ''] : [pair.slice(0, i).trim(), pair.slice(i + 1).trim()];
+    });
+    chapters[ch].idx.push(questions.length);
+    questions.push({ tag, code: qcode, text: L[1].trim(), options, correct, explain: L[3].trim(), vocab, fig, ch, n: chapters[ch].idx.length });
+  });
+  chapters.filter(c => !c.idx.length).forEach(c => errs.push(`chapter "${c.title}" has no questions`));
+  if(!questions.length) errs.push('no questions found');
+  const good = chapters.filter(c => c.idx.length);
+  return { meta, questions, chapters: good.length ? good : [{ title: meta.title || 'Quiz', idx: [] }], errs };
+}
+
+const PARSED = parseQuizData(document.getElementById('quizData').textContent);
+const META = PARSED.meta;
+const QUIZ_TITLE = META.title || 'Quiz';
+const QUESTIONS = PARSED.questions;
+const CHAPTERS = PARSED.chapters;
+if(PARSED.errs.length){                           // data mistakes: show them instead of failing silently
+  const box = document.createElement('div');
+  box.className = 'data-errors';
+  box.innerHTML = '<b>Quiz data needs fixing</b><ul>' + PARSED.errs.slice(0, 10).map(e => `<li>${esc(e)}</li>`).join('') + '</ul>' + (PARSED.errs.length > 10 ? `<div>… and ${PARSED.errs.length - 10} more</div>` : '');
+  document.body.insertBefore(box, document.querySelector('header'));
+}
+let activeCh = 0;
+let viewAll = false;                                    // all-chapters view (not saved)
+let pickNums = null;                                  // question numbers typed in the search box (null = all)
+const baseIdx = () => viewAll ? QUESTIONS.map((_, i) => i) : CHAPTERS[activeCh].idx;
+const scopeIdx = () => pickNums ? baseIdx().filter(i => pickNums.has(QUESTIONS[i].n)) : baseIdx();
+const chLabel = ci => { const t = CHAPTERS[ci].title, m = /^\s*(?:chapter|ch\.?|week|lecture)\s*(\d+)/i.exec(t); return m ? 'Ch.' + m[1] : t; };   // "Chapter 3: Markets" -> "Ch.3"
+const printTitle = () => CHAPTERS.length > 1 ? CHAPTERS[activeCh].title : QUIZ_TITLE;
+
+document.getElementById('quizTitle').textContent = QUIZ_TITLE;
+document.getElementById('quizSub').textContent = META.sub || '';
+document.title = QUIZ_TITLE;
+document.getElementById('quizFooter').textContent = `Source: ${META.subject || ''} — ${META.textbook || ''}`;
+
+let current = 0;
+let answered = new Array(QUESTIONS.length).fill(null);
+let filterMode = 'all';   // 'all' | 'review' | 'flagged'
+const flagged = new Set();                                 // questions ticked "Review" (top right of each question)
+let flagList = [];                                         // marked questions shown in "Marked for Review" mode
+let layoutMode = 'list';  // 'list' | 'single'
+let reviewList = [];
+const missed = new Set();   // questions answered wrong at least once since Restart
+let examMode = false;                                   // exam mode: answers hidden until Grade
+let examPick = new Array(QUESTIONS.length).fill(null);  // ungraded exam selections
+let examGraded = new Array(QUESTIONS.length).fill(false);   // graded in exam mode (per question, so any chapter or all chapters can be graded)
+let examRes = new Array(QUESTIONS.length).fill(null);       // 'c' correct / 'w' wrong / 'u' unanswered, set when graded
+const examActive = qi => examMode && !examGraded[qi];
+const shownAns = qi => examActive(qi) ? examPick[qi] : answered[qi];
+const setOn = (btn, on) => { btn.classList.toggle('on', on); btn.setAttribute('aria-pressed', String(on)); };
+
+const quizEl = document.getElementById('quiz');
+const answeredCountEl = document.getElementById('answeredCount');
+const correctCountEl = document.getElementById('correctCount');
+const wrongCountEl = document.getElementById('wrongCount');
+const reviewBtn = document.getElementById('reviewBtn');
+const allViewBtn = document.getElementById('allViewBtn');
+const layoutToggleBtn = document.getElementById('layoutToggleBtn');
+const keywordsToggleBtn = document.getElementById('keywordsToggleBtn');
+const darkModeBtn = document.getElementById('darkModeBtn');
+const resetBtn = document.getElementById('resetBtn');
+const copyMissedBtn = document.getElementById('copyMissedBtn');
+const toTopBtn = document.getElementById('toTopBtn');
+const modeLabel = document.getElementById('modeLabel');
+const reviewBanner = document.getElementById('reviewBanner');
+const reviewBannerText = document.getElementById('reviewBannerText');
+const reviewBannerActions = document.getElementById('reviewBannerActions');
+
+function wrongIndices(){
+  return scopeIdx().filter(i => answered[i] !== null && answered[i] !== QUESTIONS[i].correct);
+}
+function visibleIndices(){
+  return filterMode === 'review' ? reviewList : filterMode === 'flagged' ? flagList : scopeIdx();
+}
+
+function figHTML(f){
+  return f.type === 'img' ? `<img src="${esc(f.src)}" alt="Figure">`
+    : '<table>' + f.rows.map((r, i) => '<tr>' + r.map(c => i ? `<td>${fm(c)}</td>` : `<th>${fm(c)}</th>`).join('') + '</tr>').join('') + '</table>';
+}
+const lightbox = document.getElementById('lightbox'), lbBody = document.getElementById('lbBody');
+const closeLightbox = () => lightbox.classList.remove('show');
+lightbox.addEventListener('click', closeLightbox);
+function openLightbox(f){ lbBody.innerHTML = figHTML(f); lightbox.classList.add('show'); }
+
+function qaText(qi){                               // question + options, answer, explanation (plain text for pasting)
+  const q = QUESTIONS[qi], L = i => String.fromCharCode(97 + i);
+  const ch = CHAPTERS.length > 1 ? `[${CHAPTERS.find(c => c.idx.includes(qi)).title}] ` : '';
+  return `${ch}Q${q.n}. ${q.text}\n` + codeTxt(q) + q.options.map((o, i) => `${L(i)}. ${o}`).join('\n') +
+    (q.fig && q.fig.type === 'tbl' ? '\n[Table]\n' + q.fig.rows.map(r => r.join(' | ')).join('\n') : '') +
+    `\nAnswer: ${L(q.correct)}. ${q.options[q.correct]}\nExplanation: ${q.explain}`;
+}
+
+function buildRow(qi, { showRetryPill }){
+  const q = QUESTIONS[qi];
+  const row = document.createElement('div');
+  row.className = 'qrow' + (qi === current ? ' active' : '') + (q.fig ? ' has-fig' : '');
+  row.dataset.index = qi;
+  if(layoutMode === 'list'){
+    row.addEventListener('click', () => {
+      if(String(window.getSelection())) return;           // user is selecting text
+      current = qi;
+      quizEl.querySelectorAll('.qrow').forEach(r => r.classList.toggle('active', Number(r.dataset.index) === qi));
+    });
+  }
+
+  const qmain = document.createElement('div');
+  qmain.className = 'qmain';
+
+  const qhead = document.createElement('div');
+  qhead.className = 'qhead';
+  qhead.innerHTML = `<div class="qnum">${q.n}</div>` + (CHAPTERS.length > 1 ? `<div class="qchap">${esc(chLabel(q.ch))}</div>` : '') + `<div class="qtag">${fm(q.tag)}</div>` + (showRetryPill ? `<span class="retry-pill">Retry</span>` : '');
+  const fl = document.createElement('label');
+  fl.className = 'qflag' + (flagged.has(qi) ? ' on' : '');
+  fl.title = 'Mark this question for review';
+  fl.innerHTML = `<input type="checkbox"${flagged.has(qi) ? ' checked' : ''}>Review`;
+  fl.addEventListener('click', e => e.stopPropagation());
+  fl.querySelector('input').addEventListener('change', e => {
+    e.target.checked ? flagged.add(qi) : flagged.delete(qi);
+    fl.classList.toggle('on', e.target.checked);
+    updateChrome();
+  });
+  qhead.appendChild(fl);
+  qmain.appendChild(qhead);
+
+  const qtext = document.createElement('p');
+  qtext.className = 'qtext';
+  qtext.innerHTML = fm(q.text);
+  qmain.appendChild(qtext);
+  if(q.code) qmain.insertAdjacentHTML('beforeend', codeHTML(q.code));
+
+  const opts = document.createElement('div');
+  opts.className = 'options';
+  q.options.forEach((optText, oi) => {
+    const btn = document.createElement('div');
+    btn.className = 'opt';
+    btn.setAttribute('role', 'button');
+    btn.innerHTML = `<span class="optnum">${oi+1}</span><span>${fm(optText)}</span>`;
+    if(examActive(qi)){
+      if(examPick[qi] === oi) btn.classList.add('picked');
+    } else if(answered[qi] !== null){
+      if(oi === q.correct) btn.classList.add('correct');
+      else if(oi === answered[qi]) btn.classList.add('incorrect');
+      else btn.classList.add('dim');
+    }
+    btn.addEventListener('click', () => { if(String(window.getSelection())) return; selectAnswer(qi, oi); });
+    opts.appendChild(btn);
+  });
+  qmain.appendChild(opts);
+
+  const fb = document.createElement('div');
+  const fbOn = !examActive(qi) && answered[qi] !== null;
+  fb.className = 'feedback' + (fbOn ? ' show ' + (answered[qi] === q.correct ? 'right' : 'wrong') : '');
+  if(fbOn){
+    const verdict = answered[qi] === q.correct ? 'Correct.' : (answered[qi] === -1 ? 'Not answered.' : 'Incorrect.');
+    fb.innerHTML = `<span class="verdict">${verdict}</span>${fm(q.explain)}`;
+  }
+  qmain.appendChild(fb);
+
+  row.appendChild(qmain);
+
+  if(!examActive(qi) && answered[qi] !== null){        // graded: copy button, end of the tag row
+    const cp = document.createElement('span');
+    cp.className = 'copyq'; cp.setAttribute('role', 'button'); cp.title = 'Copy question, answer and explanation'; cp.textContent = 'Copy';
+    cp.addEventListener('click', (e) => {
+      e.stopPropagation();
+      copyText(qaText(qi)).then(() => showTip(cp, 'Copied'), () => showTip(cp, 'Copy failed'));
+    });
+    qhead.appendChild(cp);
+  }
+
+  const margin = document.createElement('div');
+  margin.className = 'margin' + (q.fig ? ' figbox' : '');
+  if(q.fig){                                   // figure/table replaces the keywords for this question
+    margin.innerHTML = `<div class="fig" role="button">${figHTML(q.fig)}</div>`;
+    margin.querySelector('.fig').addEventListener('click', () => { if(!String(window.getSelection())) openLightbox(q.fig); });
+    row.appendChild(margin);
+    return row;
+  }
+  const label = document.createElement('div');
+  label.className = 'margin-label';
+  label.textContent = 'Key vocabulary';
+  margin.appendChild(label);
+  const ul = document.createElement('ul');
+  q.vocab.forEach(([term, def]) => {
+    const li = document.createElement('li');
+    li.innerHTML = `<b>${fm(term)}</b>${def ? ' — ' + fm(def) : ''}`;
+    ul.appendChild(li);
+  });
+  margin.appendChild(ul);
+  row.appendChild(margin);
+
+  return row;
+}
+
+function render(){
+  ignoreScrollUntil = performance.now() + 400;
+  quizEl.innerHTML = '';
+  const visible = visibleIndices();
+
+  if(visible.length === 0){
+    const empty = document.createElement('div');
+    empty.className = 'empty-state';
+    empty.innerHTML = filterMode === 'flagged' ? `<div class="big">No questions marked for review.</div>`
+      : `<div class="big">Nothing to review.</div><div>Every question was answered correctly — switch back to "All Questions".</div>`;
+    quizEl.appendChild(empty);
+    updateChrome();
+    return;
+  }
+
+  if(layoutMode === 'single'){
+    quizEl.classList.remove('list-view');
+    const pos = Math.max(0, visible.indexOf(current));
+    const qi = visible[pos] !== undefined ? visible[pos] : visible[0];
+    current = qi;
+
+    const shell = document.createElement('div');
+    shell.className = 'single-shell';
+
+    const progress = document.createElement('div');
+    progress.className = 'single-progress';
+    progress.innerHTML = `<span>Question ${pos+1} of ${visible.length}</span><span>${[viewAll && CHAPTERS.length > 1 ? esc(CHAPTERS[QUESTIONS[qi].ch].title) : '', filterMode === 'review' ? 'Review mode' : ''].filter(Boolean).join(' · ')}</span>`;
+    shell.appendChild(progress);
+
+    const bar = document.createElement('div');
+    bar.className = 'single-progress-bar';
+    bar.innerHTML = `<i style="width:${((pos+1)/visible.length*100).toFixed(1)}%"></i>`;
+    shell.appendChild(bar);
+
+    const body = document.createElement('div');
+    body.className = 'single-body';
+    body.appendChild(buildRow(qi, { showRetryPill: filterMode === 'review' }));
+    shell.appendChild(body);
+
+    const nav = document.createElement('div');
+    nav.className = 'single-nav';
+    const prevBtn = document.createElement('button');
+    prevBtn.className = 'btn';
+    prevBtn.textContent = '← Previous';
+    prevBtn.disabled = pos === 0;
+    prevBtn.addEventListener('click', goPrev);
+    const nextBtn = document.createElement('button');
+    nextBtn.className = 'btn primary';
+    const nc = nextChapterIdx(), lastQ = pos === visible.length - 1;
+    nextBtn.textContent = lastQ && nc > -1 ? `Next chapter: ${chLabel(nc)} →` : 'Next →';
+    nextBtn.disabled = lastQ && nc < 0;
+    nextBtn.addEventListener('click', () => { if(lastQ && nc > -1) switchChapter(nc); else goNext(); });
+    nav.appendChild(prevBtn);
+    nav.appendChild(nextBtn);
+    shell.appendChild(nav);
+
+    quizEl.appendChild(shell);
+  } else {
+    quizEl.classList.add('list-view');
+    let prevCh = -1;
+    visible.forEach((qi) => {
+      if(viewAll && CHAPTERS.length > 1 && QUESTIONS[qi].ch !== prevCh){
+        const h = document.createElement('div'); h.className = 'ch-head'; h.textContent = CHAPTERS[QUESTIONS[qi].ch].title; quizEl.appendChild(h);
+      }
+      prevCh = QUESTIONS[qi].ch;
+      quizEl.appendChild(buildRow(qi, { showRetryPill: filterMode === 'review' }));
+    });
+    const nc = nextChapterIdx();
+    if(nc > -1){                                              // one chapter shown: button below its last question
+      const w = document.createElement('div'); w.className = 'next-ch';
+      const nb = document.createElement('button'); nb.type = 'button'; nb.className = 'btn primary'; nb.textContent = `Next chapter: ${chLabel(nc)} →`; nb.title = CHAPTERS[nc].title;
+      nb.addEventListener('click', () => switchChapter(nc));
+      w.appendChild(nb); quizEl.appendChild(w);
+    }
+  }
+
+  updateChrome();
+}
+
+function selectAnswer(qi, oi){
+  if(examActive(qi)){
+    if(examPick[qi] === oi) return;
+    examPick[qi] = oi; current = qi; render(); return;
+  }
+  if(answered[qi] === oi) return;
+  answered[qi] = oi;
+  if(oi !== QUESTIONS[qi].correct) missed.add(qi);
+  current = qi;
+  render();
+}
+const nextChapterIdx = () => (!viewAll && !pickNums && filterMode === 'all' && CHAPTERS.length > 1 && activeCh < CHAPTERS.length - 1) ? activeCh + 1 : -1;
+function setActive(qi){
+  const visible = visibleIndices();
+  if(visible.length === 0) return;
+  if(!visible.includes(qi)) qi = visible[0];
+  current = qi;
+  render();
+  scrollToActive();
+}
+function smoothTop(){                          // page-caused scroll: must not reveal the Top button
+  ignoreScrollUntil = performance.now() + 1500;
+  window.scrollTo({top:0, behavior:'smooth'});
+}
+function scrollToActive(){
+  if(layoutMode === 'single') return;
+  const el = quizEl.querySelector(`.qrow[data-index="${current}"]`);
+  ignoreScrollUntil = performance.now() + 1200;   // page-caused smooth scroll must not count as user scrolling
+  if(el) el.scrollIntoView({behavior:'smooth', block:'center'});
+}
+function goNext(){
+  const visible = visibleIndices();
+  const pos = visible.indexOf(current);
+  if(pos === -1){ if(visible.length) setActive(visible[0]); return; }
+  if(pos < visible.length - 1){ setActive(visible[pos+1]); }
+}
+function goPrev(){
+  const visible = visibleIndices();
+  const pos = visible.indexOf(current);
+  if(pos > 0){ setActive(visible[pos-1]); }
+}
+function enterReviewMode(){
+  const wl = wrongIndices();
+  if(wl.length === 0) return;
+  reviewList = wl;
+  wl.forEach(i => { answered[i] = null; });
+  filterMode = 'review';
+  current = wl[0];
+  render();
+  scrollToActive();
+}
+function exitReviewMode(){
+  filterMode = 'all';
+  render();
+  if(layoutMode === 'list') smoothTop();
+}
+function updateChrome(){
+  const ids = scopeIdx();
+  const ex = examMode && ids.some(i => !examGraded[i]);      // an exam is in progress in this view
+  const answeredNum = ids.filter(i => shownAns(i) !== null && shownAns(i) !== -1).length;
+  const correctNum = ids.filter(i => answered[i] === QUESTIONS[i].correct).length;
+  document.getElementById('totalCount').textContent = ids.length;
+  answeredCountEl.textContent = answeredNum;
+  correctCountEl.textContent = ex ? '–' : correctNum;
+
+  const res = examMode && ids.length && ids.every(i => examGraded[i]) ? { c: ids.filter(i => examRes[i] === 'c').length, u: ids.filter(i => examRes[i] === 'u').length, n: ids.length } : null;
+  const er = document.getElementById('examResult');
+  er.classList.toggle('show', !!res);
+  if(res){
+    const pct = res.n ? Math.round(res.c / res.n * 100) : 0;
+    er.innerHTML = `<div class="er-inner"><div class="er-label">Exam Score</div><div class="er-score">${res.c}<small>/ ${res.n}</small></div><div class="er-pct" style="color:${pct >= 90 ? '#0d4a18' : pct >= 80 ? '#1b6b25' : pct >= 70 ? '#388e3c' : pct >= 40 ? '#d9730d' : '#b3261e'}">${pct}%</div><div class="er-detail">${res.n - res.c - res.u} incorrect · ${res.u} unanswered (counted as incorrect)</div><button class="btn" id="retakeBtn" type="button">Retake Exam</button></div>`;
+    document.getElementById('retakeBtn').addEventListener('click', () => { resetChapter(); smoothTop(); });
+  }
+  const eb = document.getElementById('examBar');
+  eb.classList.toggle('show', ex);
+  if(ex){
+    const left = ids.length - answeredNum;
+    document.getElementById('examInfo').textContent = `${answeredNum} of ${ids.length} answered` + (left ? ` · ${left} unanswered will be marked incorrect` : '');
+  }
+
+  const wl = wrongIndices();
+  const currentWrongInReview = filterMode === 'review' ? reviewList.filter(i => answered[i] !== null && answered[i] !== QUESTIONS[i].correct) : [];
+
+  wrongCountEl.textContent = wl.length;
+  copyMissedBtn.disabled = ex || !ids.some(i => missed.has(i));
+  reviewBtn.disabled = ex || wl.length === 0 || filterMode === 'review';
+  reviewBtn.textContent = filterMode === 'review' ? 'Reviewing…' : `Review Incorrect (${wl.length})`;
+
+  allViewBtn.classList.toggle('active-mode', filterMode === 'all');
+  const fc = scopeIdx().filter(i => flagged.has(i)).length;
+  flagBtn.textContent = `Marked for Review (${fc})`;
+  flagBtn.disabled = fc === 0 && filterMode !== 'flagged';
+  flagBtn.classList.toggle('active-mode', filterMode === 'flagged');
+  modeLabel.textContent = ex ? '' : (filterMode === 'review' ? `Review mode — ${reviewList.length} previously incorrect question(s)` : filterMode === 'flagged' ? `Marked for review — ${flagList.length} question(s)` : '');
+
+  const reviewAnsweredCount = reviewList.filter(i => answered[i] !== null).length;
+  const reviewDone = filterMode === 'review' && reviewAnsweredCount === reviewList.length && reviewList.length > 0;
+
+  if(reviewDone){
+    reviewBanner.classList.add('show');
+    if(currentWrongInReview.length === 0){
+      reviewBannerText.textContent = `Review complete — all ${reviewList.length} question(s) answered correctly.`;
+      reviewBannerActions.innerHTML = '';
+      const backBtn = document.createElement('button');
+      backBtn.className = 'btn primary';
+      backBtn.textContent = 'Back to All Questions';
+      backBtn.addEventListener('click', exitReviewMode);
+      reviewBannerActions.appendChild(backBtn);
+    } else {
+      reviewBannerText.textContent = `Review complete — ${currentWrongInReview.length} of ${reviewList.length} still incorrect.`;
+      reviewBannerActions.innerHTML = '';
+      const retryBtn = document.createElement('button');
+      retryBtn.className = 'btn primary';
+      retryBtn.textContent = 'Retry Remaining';
+      retryBtn.addEventListener('click', () => {
+        reviewList = currentWrongInReview;
+        currentWrongInReview.forEach(i => { answered[i] = null; });
+        current = reviewList[0];
+        reviewBanner.classList.remove('show');
+        render();
+        scrollToActive();
+      });
+      const backBtn = document.createElement('button');
+      backBtn.className = 'btn';
+      backBtn.textContent = 'Back to All Questions';
+      backBtn.addEventListener('click', exitReviewMode);
+      reviewBannerActions.appendChild(retryBtn);
+      reviewBannerActions.appendChild(backBtn);
+    }
+  } else {
+    reviewBanner.classList.remove('show');
+  }
+}
+
+document.addEventListener('keydown', (e) => {
+  if(e.target && e.target.closest && e.target.closest('textarea, input, [contenteditable]')) return;   // typing in the memo must not trigger quiz keys
+  if(lightbox.classList.contains('show')){            // enlarged view: Esc / Enter / Space close it, nothing else acts
+    if(e.key === 'Escape' || e.key === 'Enter' || e.key === ' '){ e.preventDefault(); closeLightbox(); }
+    return;
+  }
+  const visible = visibleIndices();
+  if(visible.length === 0) return;
+  if(e.key >= '1' && e.key <= '4'){
+    const oi = parseInt(e.key, 10) - 1;
+    if(QUESTIONS[current] && oi < QUESTIONS[current].options.length){
+      e.preventDefault();
+      selectAnswer(current, oi);
+    }
+  } else if(e.key === 'Enter' || e.key === ' '){
+    if(e.target.closest && e.target.closest('summary')) return;   // let "How to use" toggle normally
+    e.preventDefault();
+    goNext();
+  } else if(e.key === 'Tab' && !e.ctrlKey && !e.altKey && !e.metaKey && (e.target === document.body || e.target === document.documentElement)){   // Tab / Shift+Tab: next / previous question (when no button has focus)
+    e.preventDefault();
+    if(e.shiftKey) goPrev(); else goNext();
+  } else if(e.key === 'ArrowDown' || e.key === 'ArrowUp'){
+    if(e.altKey || e.ctrlKey || e.metaKey) return;
+    e.preventDefault();
+    if(e.key === 'ArrowDown') goNext(); else goPrev();
+  }
+});
+
+reviewBtn.addEventListener('click', enterReviewMode);
+const flagBtn = document.getElementById('flagBtn');
+flagBtn.addEventListener('click', () => {                  // show only the questions ticked "Review"
+  flagList = scopeIdx().filter(i => flagged.has(i));
+  if(!flagList.length) return;
+  filterMode = 'flagged'; reviewList = [];
+  reviewBanner.classList.remove('show');
+  if(!flagList.includes(current)) current = flagList[0];
+  render(); smoothTop();
+});
+allViewBtn.addEventListener('click', exitReviewMode);
+layoutToggleBtn.addEventListener('click', () => {
+  layoutMode = layoutMode === 'list' ? 'single' : 'list';
+  setOn(layoutToggleBtn, layoutMode === 'single');
+  render();
+});
+
+keywordsToggleBtn.addEventListener('click', () => {
+  const showing = document.body.classList.toggle('show-keywords');
+  setOn(keywordsToggleBtn, showing);
+});
+
+const darkSw = document.getElementById('darkSw');
+function setDark(d){ document.documentElement.classList.toggle('dark', d); setOn(darkSw, d); }
+darkSw.addEventListener('click', () => setDark(!document.documentElement.classList.contains('dark')));
+
+const examModeBtn = document.getElementById('examModeBtn');
+const menuBtn = document.getElementById('menuBtn'), settingsEl = document.getElementById('settings');
+// ---- question-number search: practise only the typed numbers (numbers are those shown on the question circles) ----
+const qSearch = document.getElementById('qSearch'), qWarn = document.getElementById('qWarn'), qForm = document.getElementById('qSearchForm');
+function qBad(msg){ qWarn.textContent = msg; qWarn.classList.toggle('show', !!msg); qSearch.classList.toggle('bad', !!msg); }
+function parseNums(txt){                              // "1,2,3,15" / "1 2 3" / "1, 3-5": spaces are optional
+  const t = txt.replace(/[，、;；]/g, ',').replace(/[–—~～]/g, '-').replace(/\s*-\s*/g, '-').trim();
+  if(!t) return { empty: true };
+  const out = new Set();
+  for(const tok of t.split(/[\s,]+/).filter(Boolean)){
+    let m;
+    if(/^\d+$/.test(tok)) out.add(+tok);
+    else if((m = tok.match(/^(\d+)-(\d+)$/)) && +m[1] <= +m[2] && +m[2] - +m[1] < 1000){ for(let k = +m[1]; k <= +m[2]; k++) out.add(k); }
+    else return { err: `Not recognised: "${tok}" — type numbers like 1, 2, 3, 15` };
+  }
+  return { set: out };
+}
+function clearPick(silent){
+  pickNums = null; qSearch.value = ''; qBad(''); document.getElementById('qSearchForm').classList.remove('active');
+  if(!silent){ filterMode = 'all'; reviewList = []; reviewBanner.classList.remove('show'); current = scopeIdx()[0]; render(); smoothTop(); }
+}
+qForm.addEventListener('submit', e => {
+  e.preventDefault();
+  const r = parseNums(qSearch.value);
+  if(r.empty){ clearPick(false); return; }
+  if(r.err){ qBad(r.err); return; }
+  const have = new Set(baseIdx().map(i => QUESTIONS[i].n));
+  const miss = [...r.set].filter(n => !have.has(n)).sort((a, b) => a - b);
+  if(miss.length){ qBad(`No question ${miss.slice(0, 6).join(', ')}${miss.length > 6 ? '…' : ''} here (${viewAll ? 'all chapters' : 'this chapter'} has 1–${Math.max(...have)})`); return; }
+  qBad(''); pickNums = r.set; qForm.classList.add('active');
+  qSearch.value = [...r.set].sort((a, b) => a - b).join(', ');
+  filterMode = 'all'; reviewList = []; reviewBanner.classList.remove('show');
+  current = scopeIdx()[0]; render(); smoothTop();
+});
+qSearch.addEventListener('input', () => qBad(''));
+document.getElementById('qClear').addEventListener('click', () => clearPick(false));
+document.addEventListener('click', e => { if(settingsEl.classList.contains('open') && !e.target.closest('#settings, #menuBtn')){ settingsEl.classList.remove('open'); menuBtn.setAttribute('aria-expanded', 'false'); } });
+menuBtn.addEventListener('click', () => { const on = settingsEl.classList.toggle('open'); menuBtn.setAttribute('aria-expanded', String(on)); });
+function gradeExam(){
+  const ids = scopeIdx().filter(i => !examGraded[i]);        // everything in view that is not graded yet
+  ids.forEach(i => {
+    missed.delete(i);
+    const p = examPick[i];
+    examGraded[i] = true;
+    if(p === null){ examRes[i] = 'u'; answered[i] = -1; missed.add(i); }          // unanswered = incorrect
+    else { answered[i] = p; if(p === QUESTIONS[i].correct) examRes[i] = 'c'; else { examRes[i] = 'w'; missed.add(i); } }
+  });
+  filterMode = 'all'; reviewList = [];
+  current = scopeIdx()[0];
+  render();
+  smoothTop();
+}
+document.getElementById('gradeBtn').addEventListener('click', gradeExam);
+examModeBtn.addEventListener('click', () => {
+  examMode = !examMode;
+  setOn(examModeBtn, examMode);
+  if(examMode && scopeIdx().some(i => !examGraded[i])){ filterMode = 'all'; reviewList = []; reviewBanner.classList.remove('show'); }
+  render();
+});
+const allChBtn = document.getElementById('allChBtn');
+if(CHAPTERS.length < 2) allChBtn.remove();
+function setViewAll(on){
+  viewAll = on;
+  clearPick(true);
+  setOn(allChBtn, on);
+  filterMode = 'all'; reviewList = [];
+  reviewBanner.classList.remove('show');
+  if(!scopeIdx().includes(current)) current = scopeIdx()[0];
+  renderToc();
+}
+allChBtn.addEventListener('click', () => { setViewAll(!viewAll); render(); smoothTop(); });
+document.getElementById('printBtn').addEventListener('click', () => { document.body.classList.remove('print-solution'); window.print(); });
+document.getElementById('printSolBtn').addEventListener('click', () => { document.body.classList.add('print-solution'); window.print(); });
+
+function sheetHtml(title, idx){                    // one chapter: questions, then its answer key (numbers are per chapter)
+  const L = i => String.fromCharCode(97 + i);
+  let html = `<h1>${esc(title)}</h1><h2>Multiple Choice</h2>`;
+  idx.forEach(qi => {
+    const q = QUESTIONS[qi];
+    html += `<div class="p-q"><p>${QUESTIONS[qi].n}. ${fm(q.text)}</p>` + (q.code ? codeHTML(q.code) : '') + (q.fig ? `<div class="p-fig">${figHTML(q.fig)}</div>` : '') +
+      q.options.map((o, oi) => `<p class="p-opt">${L(oi)}. ${fm(o)}</p>`).join('') + `</div>`;
+  });
+  html += `<div class="p-key"><h1>${esc(title)} — Answers</h1><div class="p-grid">` +
+    idx.map(qi => `<div>${QUESTIONS[qi].n}. ${L(QUESTIONS[qi].correct)}</div>`).join('') +
+    `</div><div class="p-sol">` +
+    idx.map(qi => `<div class="p-s"><p><b>${QUESTIONS[qi].n}. ${L(QUESTIONS[qi].correct)}</b></p><p>${fm(QUESTIONS[qi].explain)}</p></div>`).join('') +
+    `</div></div>`;
+  return html;
+}
+function buildPrintSheet(indices){
+  const sel = indices || scopeIdx();
+  document.getElementById('printSheet').innerHTML = viewAll && CHAPTERS.length > 1
+    ? CHAPTERS.map((c, ci) => ({ c, ix: sel.filter(i => QUESTIONS[i].ch === ci) })).filter(o => o.ix.length)
+        .map(o => `<section class="p-ch">${sheetHtml(o.c.title, o.ix)}</section>`).join('')
+    : sheetHtml(printTitle(), sel);
+}
+buildPrintSheet();
+// In the review (wrong-answer) page, print only those questions.
+window.addEventListener('beforeprint', () => buildPrintSheet(visibleIndices()));   // exactly what is on screen: chapter / all chapters / Review / search
+window.addEventListener('afterprint', () => { document.body.classList.remove('print-solution'); });
+
+function copyText(t){
+  if(navigator.clipboard && window.isSecureContext) return navigator.clipboard.writeText(t);
+  return new Promise((ok, fail) => {
+    const ta = document.createElement('textarea');
+    ta.value = t; ta.style.cssText = 'position:fixed;opacity:0';
+    document.body.appendChild(ta); ta.select();
+    let done = false;
+    try{ done = document.execCommand('copy'); }catch(e){}
+    ta.remove(); done ? ok() : fail();
+  });
+}
+copyMissedBtn.addEventListener('click', () => {
+  const chs = viewAll ? CHAPTERS.map((c, ci) => ci) : [activeCh];
+  const lines = chs.map(ci => {
+    const nums = [...missed].filter(i => QUESTIONS[i].ch === ci).map(i => QUESTIONS[i].n).sort((a, b) => a - b);
+    return nums.length ? `${CHAPTERS.length > 1 ? CHAPTERS[ci].title : QUIZ_TITLE} incorrect: ${nums.join(', ')}` : '';
+  }).filter(Boolean);
+  if(!lines.length) return;
+  copyText(lines.join('\n')).then(
+    () => showTip(copyMissedBtn, 'Copied'),
+    () => showTip(copyMissedBtn, 'Copy failed')
+  );
+});
+const liveTips = [];
+function placeTip(t){
+  const r = t.anchor.getBoundingClientRect(), h = t.el.offsetHeight;
+  let top = r.top - 8 - h;                       // above the button
+  if(top < 4) top = r.bottom + 8;                // no room above (button stuck at the very top) -> below
+  t.el.style.left = (r.left + r.width / 2) + 'px';
+  t.el.style.top = top + 'px';
+}
+function showTip(anchor, msg, ms = 700){
+  const el = document.createElement('div');
+  el.className = 'tip';
+  el.textContent = msg;
+  document.body.appendChild(el);
+  const t = { el, anchor };
+  liveTips.push(t);
+  placeTip(t);
+  requestAnimationFrame(() => el.classList.add('show'));
+  t.hide = () => {
+    clearTimeout(t.timer);
+    el.classList.remove('show');
+    setTimeout(() => { el.remove(); const i = liveTips.indexOf(t); if(i > -1) liveTips.splice(i, 1); }, 130);
+  };
+  t.timer = setTimeout(t.hide, ms);
+  return t;
+}
+window.addEventListener('scroll', () => liveTips.forEach(placeTip), { passive: true });
+window.addEventListener('resize', () => liveTips.forEach(placeTip));
+
+// Back-to-top: shows at bottom centre as soon as the USER scrolls UP (TOP_REVEAL px) while far from the top.
+// Scroll changes caused by the page itself (re-rendering after an answer, smooth jumps) are ignored.
+const TOP_REVEAL = 30;                                    // px of upward scroll before it appears (small = near-instant; filters jitter)
+const topThreshold = () => Math.max(900, window.innerHeight * 1.5);
+let lastY = window.scrollY, upAcc = 0, topHideTimer = null, lastUserScroll = 0, pointerOnScrollbar = false, ignoreScrollUntil = 0;
+const hideTop = () => { toTopBtn.classList.remove('show'); upAcc = 0; };
+const markUser = () => { lastUserScroll = performance.now(); };
+window.addEventListener('wheel', markUser, { passive: true });
+window.addEventListener('touchmove', markUser, { passive: true });
+window.addEventListener('keydown', e => { if(e.defaultPrevented) return; if(['ArrowUp','ArrowDown','PageUp','PageDown','Home','End'].includes(e.key)) markUser(); });
+window.addEventListener('pointerdown', e => { if(e.target === document.documentElement) pointerOnScrollbar = true; });
+window.addEventListener('pointerup', () => { pointerOnScrollbar = false; });
+window.addEventListener('scroll', () => {
+  const y = window.scrollY, d = y - lastY;
+  lastY = y;
+  const byUser = pointerOnScrollbar || performance.now() - lastUserScroll < 700;
+  if(!byUser || performance.now() < ignoreScrollUntil) return;
+  if(d > 0 || y <= topThreshold()){ clearTimeout(topHideTimer); hideTop(); return; }
+  upAcc -= d;                                              // d < 0 : scrolling up
+  if(upAcc >= TOP_REVEAL){
+    toTopBtn.classList.add('show');
+    clearTimeout(topHideTimer);
+    topHideTimer = setTimeout(hideTop, 2200);
+  }
+}, { passive: true });
+toTopBtn.addEventListener('mouseenter', () => clearTimeout(topHideTimer));
+toTopBtn.addEventListener('mouseleave', () => { topHideTimer = setTimeout(hideTop, 1200); });
+toTopBtn.addEventListener('click', () => window.scrollTo({ top: 0, behavior: 'smooth' }));
+
+let resetArmed = false, resetArmTimer = null, resetTip = null;
+resetBtn.addEventListener('click', () => {
+  if(!resetArmed){
+    resetArmed = true;
+    resetBtn.classList.add('danger');                 // colour only; the label stays "Restart"
+    resetTip = showTip(resetBtn, 'Restart?', 4000);   // click again within 4s to run
+    clearTimeout(resetArmTimer);
+    resetArmTimer = setTimeout(disarmReset, 4000);
+    return;
+  }
+  clearTimeout(resetArmTimer);
+  disarmReset();
+  resetChapter();
+  smoothTop();
+});
+function resetChapter(){                      // this chapter only (answers, exam picks, exam score)
+  scopeIdx().forEach(i => { answered[i] = null; examPick[i] = null; examGraded[i] = false; examRes[i] = null; missed.delete(i); });
+  current = scopeIdx()[0];
+  filterMode = 'all';
+  reviewList = [];
+  reviewBanner.classList.remove('show');
+  render();
+}
+function disarmReset(){
+  resetArmed = false;
+  resetBtn.classList.remove('danger');
+  if(resetTip){ resetTip.hide(); resetTip = null; }
+}
+
+// ---- memo (one notepad for all chapters; stored together with Save) ----
+const memoEl = document.getElementById('memoText'), memoTab = document.getElementById('memoTab');
+function setMemoOpen(on){ document.body.classList.toggle('memo-open', on); memoTab.setAttribute('aria-expanded', String(on)); }
+function memoHtml(){                                  // keep only bold, line breaks and text
+  const out = n => [...n.childNodes].map(c => c.nodeType === 3 ? esc(c.nodeValue.replace(/\u200B/g, '')) : c.nodeName === 'BR' ? '<br>' :
+    ['B', 'STRONG'].includes(c.nodeName) ? `<b>${out(c)}</b>` : c.nodeName === 'SUP' ? `<sup>${out(c)}</sup>` : c.nodeName === 'SUB' ? `<sub>${out(c)}</sub>` : (c.nodeName === 'DIV' || c.nodeName === 'P') ? '<div>' + out(c) + '</div>' : out(c)).join('');
+  return out(memoEl);
+}
+function setMemo(s, isHtml){
+  if(!isHtml){ memoEl.textContent = s; return; }
+  memoEl.innerHTML = s;
+  memoEl.innerHTML = memoHtml();                       // sanitise whatever was stored
+}
+memoEl.addEventListener('paste', e => { e.preventDefault(); document.execCommand('insertText', false, (e.clipboardData || window.clipboardData).getData('text')); });
+const memoBoldBtn = document.getElementById('memoBold');
+memoBoldBtn.addEventListener('mousedown', e => e.preventDefault());   // keep the selection in the memo
+memoBoldBtn.addEventListener('click', () => { memoEl.focus(); document.execCommand('bold'); });
+['memoSup', 'memoSub'].forEach(id => {
+  const b = document.getElementById(id);
+  b.addEventListener('mousedown', e => e.preventDefault());
+  b.addEventListener('click', () => { memoEl.focus(); document.execCommand(id === 'memoSup' ? 'superscript' : 'subscript'); });
+});
+memoEl.addEventListener('keydown', e => {            // Ctrl+. superscript, Ctrl+, subscript
+  if(e.ctrlKey && !e.altKey && (e.key === '.' || e.key === ',')){ e.preventDefault(); document.execCommand(e.key === '.' ? 'superscript' : 'subscript'); }
+});
+// Typing x^2 + space, P_{t-1}, \pi + space turns into x², P(t-1), π as you type (same markup as the questions).
+memoEl.addEventListener('input', e => {
+  if(e.inputType !== 'insertText' || !e.data) return;
+  const sel = getSelection();
+  if(!sel.rangeCount || !sel.isCollapsed) return;
+  const node = sel.anchorNode, off = sel.anchorOffset;
+  if(node.nodeType !== 3 || node.parentNode.closest('sup, sub')) return;
+  const text = node.data.slice(0, off);
+  let m, endM;
+  if(e.data === '}'){ m = text.match(/[\^_]\{[^}]*\}$/); endM = off; }
+  else if(/^[\s.,;:)=+*\/]$/.test(e.data)){ m = text.slice(0, -1).match(/(?:\^-?[0-9A-Za-z]|_[0-9A-Za-z]|\\[A-Za-z]+)$/); endM = off - 1; }
+  if(!m) return;
+  const s = m[0], start = endM - s.length;
+  let repl;
+  if(s[0] === '\\'){ if(!MATH[s.slice(1)]) return; repl = document.createTextNode(MATH[s.slice(1)]); }
+  else { repl = document.createElement(s[0] === '^' ? 'sup' : 'sub'); repl.textContent = s.slice(1).replace(/^\{|\}$/g, ''); }
+  const tail = node.data.slice(endM), after = document.createTextNode(tail || '\u200B');   // ZWSP keeps the caret outside <sub>/<sup>
+  node.data = node.data.slice(0, start);
+  node.after(repl); repl.after(after);
+  const r = document.createRange(); r.setStart(after, tail ? off - endM : 1); r.collapse(true);
+  sel.removeAllRanges(); sel.addRange(r);
+});
+function toggleMemo(){ const on = !document.body.classList.contains('memo-open'); setMemoOpen(on); if(on) memoEl.focus(); else memoEl.blur(); }
+memoTab.addEventListener('click', toggleMemo);
+document.addEventListener('mousedown', e => { if(document.body.classList.contains('memo-open') && !e.target.closest('#memo, #memoTab')) setMemoOpen(false); });   // click anywhere outside the memo closes it
+window.addEventListener('keydown', e => { if(e.ctrlKey && !e.altKey && !e.shiftKey && e.key.toLowerCase() === 'q'){ e.preventDefault(); toggleMemo(); } });
+document.getElementById('memoClose').addEventListener('click', () => setMemoOpen(false));
+
+// ---- Save / restore progress (all chapters) in this browser's localStorage ----
+const saveBtn = document.getElementById('saveBtn');
+const hashStr = t => { let h = 5381; for(let i = 0; i < t.length; i++) h = ((h << 5) + h + t.charCodeAt(i)) | 0; return String(h); };
+const SAVE_KEY = 'quizProgress:' + QUIZ_TITLE;
+const SAVE_SIG = hashStr(QUESTIONS.map(q => q.text + '|' + q.options.join('|') + '|' + q.correct).join('\n'));
+function setSaveTitle(t){ saveBtn.title = t ? 'Last saved ' + new Date(t).toLocaleString() : 'Save progress in this browser'; }
+function saveProgress(){
+  try{
+    const t = Date.now();
+    localStorage.setItem(SAVE_KEY, JSON.stringify({ sig: SAVE_SIG, t, answered, missed: [...missed], flagged: [...flagged], activeCh, current, filterMode, reviewList, examMode, examPick, examGraded, examRes, memo: memoHtml(), memoFmt: 'html', memoOpen: document.body.classList.contains('memo-open') }));
+    setSaveTitle(t);
+    showTip(saveBtn, 'Saved');
+  }catch(e){ showTip(saveBtn, 'Save failed'); }
+}
+function loadProgress(){                       // returns true if progress was restored
+  let d;
+  try{ d = JSON.parse(localStorage.getItem(SAVE_KEY) || 'null'); }catch(e){ return false; }
+  if(!d) return false;
+  setSaveTitle(d.t);
+  if(typeof d.memo === 'string') setMemo(d.memo, d.memoFmt === 'html');      // the memo does not depend on the questions: restore it even if they changed
+  if(d.memoOpen) setMemoOpen(true);
+  if(d.sig !== SAVE_SIG || !Array.isArray(d.answered) || d.answered.length !== QUESTIONS.length) return 'mismatch';
+  answered = d.answered;
+  if(Array.isArray(d.examPick) && d.examPick.length === QUESTIONS.length) examPick = d.examPick;
+  if(Array.isArray(d.examGraded) && d.examGraded.length === QUESTIONS.length){ examGraded = d.examGraded; examRes = Array.isArray(d.examRes) && d.examRes.length === QUESTIONS.length ? d.examRes : examRes; }
+  examMode = !!d.examMode;
+  setOn(examModeBtn, examMode);
+  d.missed.forEach(i => missed.add(i));
+  (d.flagged || []).forEach(i => { if(i >= 0 && i < QUESTIONS.length) flagged.add(i); });
+  activeCh = CHAPTERS[d.activeCh] ? d.activeCh : 0;
+  const ids = CHAPTERS[activeCh].idx;
+  reviewList = (d.reviewList || []).filter(i => ids.includes(i));
+  filterMode = d.filterMode === 'review' && reviewList.length ? 'review' : 'all';
+  if(filterMode === 'all') reviewList = [];
+  current = visibleIndices().includes(d.current) ? d.current : visibleIndices()[0];
+  return true;
+}
+saveBtn.addEventListener('click', saveProgress);
+setSaveTitle(0);
+const restored = loadProgress();
+
+const tocEl = document.getElementById('toc');
+function renderToc(){
+  tocEl.classList.toggle('on', CHAPTERS.length > 1);          // single chapter: no contents list
+  if(CHAPTERS.length < 2) return;
+  tocEl.innerHTML = '<div class="toc-inner"></div>';
+  const inner = tocEl.firstChild;
+  CHAPTERS.forEach((c, ci) => {
+    const b = document.createElement('button');
+    b.type = 'button';
+    b.textContent = chLabel(ci);
+    b.title = c.title;
+    if(ci === activeCh && !viewAll) b.className = 'active';
+    b.addEventListener('click', () => switchChapter(ci));
+    inner.appendChild(b);
+  });
+}
+function switchChapter(ci){
+  if(ci === activeCh && !viewAll) return;
+  clearPick(true);
+  if(viewAll) setViewAll(false);
+  activeCh = ci;
+  filterMode = 'all';
+  reviewList = [];
+  reviewBanner.classList.remove('show');
+  current = CHAPTERS[ci].idx[0];
+  renderToc();
+  render();
+  smoothTop();
+}
+
+if(CHAPTERS.length > 1 && filterMode === 'all' && /midterm|final/i.test(QUIZ_TITLE)) setViewAll(true);   // title contains "midterm" / "final": All chapters is the default view
+renderToc();
+render();
+if(restored === true) showTip(saveBtn, 'Progress restored');
+else if(restored === 'mismatch') showTip(saveBtn, 'Saved data is from another version');
+</script>
+</body>
+</html>
