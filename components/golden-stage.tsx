@@ -12,6 +12,8 @@ const SIDE = "clamp(0.75rem, 5vw, 4rem)"
 const PHOTO_H = `min(calc(100svh - 11.5rem), calc((100vw - 2 * ${SIDE} - 2 * ${GAP}) / 3 * 4 / 3))`
 // 좁은 화면(1400px 미만): 한 장씩 보이고 좌우로 넘긴다(터치 스와이프 / 마우스 클릭 후 드래그) — 아래에 점·알약 표시.
 const PHOTO_H_MOBILE = `min(calc(100svh - 13.5rem), calc((100vw - 2 * ${SIDE}) * 4 / 3))`
+// 넘기는 창은 사진 한 장 너비로만 — 배경(검정 여백)은 끌리지도, 옆 사진이 비치지도 않는다.
+const PHOTO_W_MOBILE = `calc(${PHOTO_H_MOBILE} * 3 / 4)`
 
 export function GoldenStage({ title, date, photos }: { title: string; date: string; photos: Photo[] }) {
   const scroller = useRef<HTMLDivElement>(null)
@@ -69,12 +71,12 @@ export function GoldenStage({ title, date, photos }: { title: string; date: stri
   return (
     <div className="relative bg-black text-white">
       <div className="flex h-svh items-start justify-center overflow-hidden pt-5" style={{ paddingInline: SIDE }}>
-        <div className="flex w-full flex-col min-[1400px]:w-auto" style={{ gap: "0.75rem" }}>
+        <div className="flex w-full flex-col max-[1399px]:items-center min-[1400px]:w-auto" style={{ gap: "0.75rem" }}>
           <Link href="/" className="self-start font-mono text-xs uppercase tracking-[0.25em] text-white/80 transition-colors hover:text-white">
             ← Back to board
           </Link>
 
-          <div className="flex flex-wrap items-baseline gap-x-4">
+          <div className="flex flex-wrap items-baseline gap-x-4 max-[1399px]:justify-center">
             <h1 className="font-sans font-extrabold leading-none tracking-tight" style={{ fontSize: "clamp(2rem, 5vw, 4.25rem)" }}>
               {title}
             </h1>
@@ -87,10 +89,10 @@ export function GoldenStage({ title, date, photos }: { title: string; date: stri
             onPointerMove={onPointerMove}
             onPointerUp={endDrag}
             onPointerCancel={endDrag}
-            className={`mt-2 flex w-full overflow-x-auto [scrollbar-width:none] min-[1400px]:w-auto min-[1400px]:cursor-auto min-[1400px]:snap-none min-[1400px]:items-center min-[1400px]:justify-center min-[1400px]:gap-[var(--gap)] min-[1400px]:overflow-visible [&::-webkit-scrollbar]:hidden ${
+            className={`mt-2 flex w-[var(--pw-m)] overflow-x-auto [scrollbar-width:none] min-[1400px]:w-auto min-[1400px]:cursor-auto min-[1400px]:snap-none min-[1400px]:items-center min-[1400px]:justify-center min-[1400px]:gap-[var(--gap)] min-[1400px]:overflow-visible [&::-webkit-scrollbar]:hidden ${
               dragging ? "cursor-grabbing select-none" : "cursor-grab snap-x snap-mandatory"
             }`}
-            style={{ "--gap": GAP } as React.CSSProperties}
+            style={{ "--gap": GAP, "--pw-m": PHOTO_W_MOBILE } as React.CSSProperties}
           >
             {photos.map((p, i) => (
               <div key={p.src} className="flex w-full shrink-0 snap-start justify-start min-[1400px]:w-auto min-[1400px]:justify-center">
@@ -129,7 +131,7 @@ export function GoldenStage({ title, date, photos }: { title: string; date: stri
             ))}
           </div>
 
-          <div className="flex items-center justify-start gap-2 min-[1400px]:hidden" role="tablist" aria-label="사진 선택">
+          <div className="flex items-center justify-center gap-2 min-[1400px]:hidden" role="tablist" aria-label="사진 선택">
             {photos.map((p, i) => (
               <button
                 key={p.src}
