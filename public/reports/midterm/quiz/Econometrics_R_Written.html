@@ -533,7 +533,7 @@ This is a **linear probability model**; A coefficient measures the change in the
     #printSheet .p-q{break-inside:avoid; page-break-inside:avoid; margin:0 0 4mm;}
     #printSheet .p-q p{margin:0;}
     #printSheet .p-fig{margin:1.5mm 0 2mm; max-width:110mm;}
-    #printSheet .p-lines{height:calc(var(--n, 8) * 8mm); background-image:linear-gradient(to bottom, transparent calc(8mm - 0.2mm), #ccc calc(8mm - 0.2mm)); background-size:100% 8mm; -webkit-print-color-adjust:exact; print-color-adjust:exact; margin-top:1mm;}
+    #printSheet .p-lines{height:calc(var(--n, 8) * 1.5em); background-image:linear-gradient(to bottom, transparent calc(1.5em - 0.2mm), #ccc calc(1.5em - 0.2mm)); background-size:100% 1.5em; -webkit-print-color-adjust:exact; print-color-adjust:exact; margin-top:1mm;}
     #printSheet .p-ex{break-inside:avoid; page-break-inside:avoid; border-top:0.3mm solid #000; border-bottom:0.3mm solid #000; padding:3mm 0 1mm; margin:2mm 0 6mm;}
     #printSheet .p-ex h2{font-size:12.5pt; font-weight:400; margin:0;}
     #printSheet .p-ex .uses{font-size:9pt; margin:0 0 3mm; font-style:italic;}
@@ -919,7 +919,7 @@ function buildPrintSheet(){
     const q = QUESTIONS[qi];
     if(q.use && q.use !== last) html += `<div class="p-ex">${exhibitHTML(q.use, idx)}</div>`;
     last = q.use;
-    const lines = 3;                                               // print: about two handwritten sentences
+    const lines = 2;                                               // print: two lines at the question text size (1.5em)
     html += `<div class="p-q"><p>${q.n}. ${q.use ? `[Exhibit ${esc(q.use)}] ` : ''}${fm(q.text)}</p>` + (q.code ? `<pre class="p-code">${rHL(q.code.join('\n'))}</pre>` : '') + (q.fig ? `<div class="p-fig">${tblHTML(q.fig)}</div>` : '') + `<div class="p-lines" style="--n:${lines}"></div></div>`;
   });
   html += `<section class="p-key"><h1>${esc(QUIZ_TITLE)} — Model answers</h1>` + idx.map(qi => { const q = QUESTIONS[qi]; return `<div class="p-s"><p><b>${q.n}.</b> ${fm(q.tag)}</p>${fmtExpl(q.model)}${q.kws.length ? `<p class="p-kw">Key results: ${q.kws.map(k => fm(k[0])).join(' · ')}</p>` : ''}</div>`; }).join('') + '</section>';
