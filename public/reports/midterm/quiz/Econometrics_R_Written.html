@@ -13,7 +13,7 @@
               1000 px the side note moves under the answer. One serif font everywhere, hairline rules only, no boxes or buttons.
 
   DATA FORMAT (blocks separated by a line that is only ===)
-    meta        title: / sub: / subject: / textbook:   then ===      (title: = "Business Finance Midterm"; sub: = "Written Calculations · Chapters 2-7 · 15 questions")
+    meta        title: / sub: / subject: / textbook:   then ===      (sub: = scope and number of questions only)
     exhibit     @case ID  /  title line  /  @tbl Caption :: H1|H2|H3;;row;;!Section;;=Total|1|2   (one or more @tbl lines)
                 Questions that use the same exhibit must be consecutive.
     question    lines, then ===:
@@ -54,314 +54,200 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <!--DATA-START-->
 <script type="text/plain" id="quizData">
-title: Econometrics R
-sub: R code functions and output interpretation · W1, W2, W5, W6 · 52 questions
-subject: Econometrics / R Programming
-textbook: Lab scripts and lecture notes
-===
-W1 · Variable assignment
-Which symbols assign a value to a variable in R, and what does an assignment do?
-assign / assignment / 할당|right-hand side / right side / value on the right / 우변|stored / stores / saves / saved / 저장|left-hand side / left side / variable on the left / 좌변
-`<-` and `=` are the **assignment** operators in R; The **right-hand side** (a value or the result of a calculation) is evaluated; The result is **stored** in the variable on the left-hand side
-@code x <- 5;;y = x + 2
-===
-W1 · Vector creation
-Which function combines several values into one vector in R, and how does it work?
-c() / c function / concatenate / combine|one vector / single vector / a vector / 하나의 벡터|joins / combines / links / puts together / 연결 / 결합
-The function **`c()`** (concatenate) combines several values into **one vector**; `c(9, 8, 7, 6)` joins the four numbers into a single vector
-@code try1 <- c(9, 8, 7, 6)
-===
-W1 · Vector arithmetic
-What happens when a single number is added to a vector (try1 + 5), and what happens when two vectors of the same length are added?
-each element / every element / element-wise / 각 요소|element by element / one by one / individually / separately / position by position / 개별 / 각각
-`try1 + 5` adds 5 to **each element** of the vector and gives 14 13 12 11; Two vectors of the same length are added **element by element**, position by position, so `try1 + try2` gives 14 12 10 8
-@code try1 <- c(9, 8, 7, 6);;try2 <- c(5, 4, 3, 2);;try1 + 5;;try1 + try2
-===
-W1 · Structure of a data frame
-In an R data frame, what do the rows and the columns represent?
-observation / observations / subject / subjects / case / cases / 관측대상 / 피험자|variable / variables / 변수
-Each **row** is one **observation** (a subject or a case); Each **column** is one **variable**; `dim(df)` returns the number of rows and the number of columns
-@code View(df);;dim(df)
-===
-W1 · The summary() function
-What statistics does summary() report when it is applied to a numeric vector or to a data frame?
-minimum / maximum / min / max / 최소 / 최대|mean / median / 평균 / 중앙값|quartile / quartiles / 1st Qu / 3rd Qu / 사분위
-`summary()` reports the **minimum** and the **maximum**; It reports the **mean** and the **median**; It reports the first and third **quartiles**; For a data frame it does this for every column
-@code summary(x)
-===
-W1 · Mean versus median with outliers
-When a data set contains extreme outliers, which measure of the center is more appropriate, the mean or the median, and why?
-median / 중앙값|sensitive / affected / influenced / pulled / 민감 / 영향
-The **median** is more appropriate; The mean is **sensitive** to outliers because every value enters the calculation, so one extreme value pulls it away from the center; The median depends only on the middle position of the sorted data, so it is hardly affected
-@code mean(x);;median(x)
-===
-W1 · Reading a histogram
-Name two statistical features of a data set that you can read from a histogram created with hist().
-distribution / shape / skewness / skewed / 분포 / 모양|frequency / frequencies / count / counts / 빈도|center / centre / central / location / mode / 중심
-A histogram shows the **shape of the distribution**, for example skewness; It shows the **frequency** (count) of observations in each bin; It shows where the **center** of the data lies; `breaks` controls the number of bins
-@code hist(x, breaks = 15)
+title: Econometrics Midterm
+sub: R Functions · W1, W2, W5, W6 · 31 questions
+subject: Econometrics
+textbook: R lab scripts (Lab2.R, Lab4.R, regression.R, simple regression demonstration.R) and W6 lecture (Wooldridge Ch.7)
 ===
 W1 · Finding the mode with table() and sort()
-How can table() and sort() be combined in R to find the mode of a numeric variable?
-table() / frequency table / 빈도표|sort() / decreasing / descending / 내림차순|highest frequency / largest count / most frequent / 가장 높은 빈도 / 최빈값
-`table(x)` builds a **frequency table** of each value; `sort(table(x), decreasing = TRUE)` orders it in **descending** order; The value with the **highest frequency**, the first entry, is the mode
-@code table(x);;sort(table(x), decreasing = TRUE)
+Read the code. What does table(x) return, and what does sort(..., decreasing = TRUE) do with it?
+frequency / frequencies / count / counts / 빈도|decreasing / descending / largest first / 내림차순|mode / most frequent / 최빈값
+table(): counts how many times each distinct value occurs and returns a **frequency** table (here 2 twice, 3 three times, 5 once); sort(): with decreasing = TRUE orders those counts from largest to smallest (**descending**); The first entry is the value with the highest count, the **mode** (here 3)
+@code x <- c(2, 3, 3, 5, 3, 2);;table(x);;sort(table(x), decreasing = TRUE)
 ===
-W2 · Reading Description File and Extracting Names
-In name.R, what does read\_file("WAGE2\_description.txt") combined with string splitting functions accomplish regarding variable names?
-extract variable names / parses description file / 변수명 추출 / 설명 파일 파싱|string split / string subset / 문자열 분할 / 공백 및 줄바꿈 기준 분할
-The code reads the dataset description file and performs **string split** and **subsetting** operations to automatically **extract variable names** from WAGE2\_description.txt
+W2 · read.csv() and its arguments
+Read the code from Lab2.R. What does read.csv() do, and what do the arguments header = TRUE and na.strings = "." do?
+data frame / dataframe / 데이터프레임|first row / column names / variable names / 첫 행|NA / missing / 결측
+read.csv(): reads a comma-separated text file and returns a **data frame**; header: TRUE means the **first row** holds the column (variable) names, not data; na.strings: every cell that contains "." is read as **NA** (missing), so it does not enter calculations as a value; Several codes can be given at once, for example c(".", "-")
+@code practice <- read.csv("Lab2_Practice.csv", header=TRUE, na.strings=".")
 ===
-W2 · Interpreting Log Wage in W2
-In the W2 dataset description, lwage is defined as the natural log of wage. What is the primary econometric purpose of using lwage instead of raw wage?
-natural log / 자연로그|percentage change / elasticity / 백분율 변화 / 탄력성 해석
-Using **lwage** (the **natural log** of wage) linearizes multiplicative relationships and allows coefficients to be interpreted approximately as a **percentage change**
+W2 · attach() and detach()
+Read the code from Lab2.R. What do attach(practice) and detach(practice) do?
+search path / 검색 경로|by name / directly / without / $ 없이 / 직접|removes / remove / 제거 / 해제
+attach(): adds the data frame to R's **search path**, so its columns can be used **by name** (COMPETENCE instead of practice$COMPETENCE); detach(): **removes** the data frame from the search path again; Risk: a column can mask, or be masked by, another object with the same name
+@code attach(practice);;mean(COMPETENCE);;detach(practice)
 ===
-W2 · Binary Dummy Variables in W2
-In the W2 dataset, variables like married, black, south, and urban are coded as binary indicators (e.g., =1 if married). How are these interpreted in regression?
-binary dummy variables / indicator variables / 이진 가변수 / 지시 변수|difference in intercept / base group comparison / 절편의 차이 / 기준 집단 대비 차이
-Variables such as married and urban function as **binary dummy variables**, representing group membership whose coefficients measure the **difference in intercept** relative to the base category
+W2 · quantile() and IQR()
+For breaks, the first line returns 0, 1, 2, 4.5 and 12 and the second returns 3.5. What does each function compute?
+quartile / quartiles / percentile / 사분위|minimum / maximum / median / 최소 / 최대 / 중앙값|third quartile minus / Q3 - Q1 / 4.5 - 1 / 3.5 / middle 50
+quantile(): by default returns the 0%, 25%, 50%, 75% and 100% points, that is the **minimum**, the first **quartile**, the median, the third quartile and the maximum (0, 1, 2, 4.5, 12); IQR(): the interquartile range, the **third quartile minus** the first quartile (4.5 - 1 = 3.5), the spread of the middle 50% of the data
+@code quantile(breaks);;IQR(breaks)
 ===
-W2 · Handling Missing Values with na.strings
-In Lab 2\_2, what is the precise statistical function of setting na.strings="." when importing data via read.csv()?
-replaces missing values / replaces dot with NA / 결측치 처리 / NA로 치환|prevents calculation errors / accurate statistical evaluation / 연산 오류 방지 / 정확한 통계 계산
-Setting **na.strings="."** automatically **replaces missing values** (represented by dots) with **NA**, which **prevents calculation errors** when computing summary statistics
+W2 · boxplot() and abline(h = )
+Read the code from Lab2.R. What does boxplot(grade) draw, and what does abline(h = median(grade), col = "red") add to it?
+box / hinges / quartile / 상자|median / 중앙값|whiskers / outliers / 1.5 / 수염 / 이상치|horizontal / 수평
+boxplot(): draws a **box** from the lower to the upper hinge (about Q1 to Q3) with a bold line at the **median**; The **whiskers** reach the most extreme points within 1.5 times the IQR of the box, and points beyond them are drawn as outliers; abline(): with h set to a value it draws a **horizontal** line at that y-value, so here a red line through the median
+@code boxplot(grade);;abline(h=median(grade), col="red")
 ===
-W2 · Attaching and Detaching Data Frames
-What are the functional role and the potential risk of using attach(practice) and detach(practice) in R?
-direct variable access / shortcut without dollar sign / $ 없이 변수 직접 접근|name conflict / masking variables / 변수명 충돌 / 이름 가림 현상
-`attach()` allows **direct variable access** without typing the dataset prefix, but introduces the risk of a **name conflict** if identical variable names exist
+W2 · vioplot() and its package
+Read the code from Lab2.R. What does vioplot() draw, and why must install.packages("vioplot") and library("vioplot") be run first?
+density / 밀도|box plot / boxplot / 상자|package / not in base / 패키지|load / loads / every session / 불러
+vioplot(): draws a violin plot for each variable, a smoothed **density** mirrored on both sides with a small **box plot** inside; install.packages(): downloads the **package** once, because vioplot is not part of base R; library(): **loads** the package in every new session so that vioplot() can be found
+@code install.packages("vioplot");;library("vioplot");;vioplot(competence, breaks, grade)
 ===
-W2 · Sum of Mean Deviations Identity
-When computing sum(competence - mean(competence)), why does the resulting value theoretically equal zero?
-cancel out / offset / 완전히 상쇄|positive and negative deviations / 양의 편차와 음의 편차
-The sum of deviations from the mean is always zero because **positive and negative deviations** around the mean perfectly **cancel out**
+W2 · par(mfrow = )
+Read the code from Lab2.R. What does par(mfrow = c(1, 2)) do to the plots that follow it?
+graphics parameter / par / 그래픽|1 row and 2 columns / one row / two columns / 1행 / 2열|side by side / next to each other / 나란히|until / reset / stays / 유지
+par(): sets **graphics parameters**; mfrow: c(1, 2) splits the plotting window into **1 row and 2 columns**, and the following plots fill the panels row by row; Here boxplot(grade) and vioplot(grade) appear **side by side**; The layout stays in effect **until** it is reset, for example with par(mfrow = c(1, 1))
+@code par(mfrow = c(1, 2));;boxplot(grade);;vioplot(grade)
 ===
-W2 · Variance vs Standard Deviation Units
-Why do we take the square root of variance to compute standard deviation instead of using variance directly?
-squared units / 제곱 단위|original unit of measurement / 원래 측정 단위 / 해석 용이성
-Variance results in **squared units** that inflate error interpretation, whereas taking the square root reverts the metric back to the **original unit of measurement**
+W2 · source() with echo = TRUE
+What does source() do, and what does the argument echo = TRUE add?
+runs / executes / run / 실행|prints / shows / displays / 출력
+source(): **runs** every command saved in the script file, from top to bottom; echo: TRUE also **prints** each command in the console before its output, as if it had been typed there
+@code source("~/R_w2.R", echo = TRUE)
 ===
-W2 · IQR Robustness under Skewness
-When data is positively skewed with outliers, why is the Interquartile Range (IQR) preferred over standard deviation?
-robust to outliers / resist extreme values / 이상치에 강함 / 덜 민감함|middle 50 percent / 중간 50% 범위
-The **IQR** measures the spread of the **middle 50 percent** of the data, making it **robust to outliers** that distort the mean and standard deviation
+W2 · Sample variance written out
+Read the code from Lab2.R (competence has 27 values). What does the first line compute, step by step, and which built-in function gives the same value?
+sample variance / variance / 분산|n - 1 / 26 / length / 자유도|var
+(competence - mean(competence))\^2: squares every deviation from the mean, and sum() adds them up (about 124.07); length(): returns n = 27, so the sum is divided by **n - 1** = 26; The result, about 4.77, is the **sample variance**, the same value that var(competence) returns
+@code sum((competence-mean(competence))^2)/(length(competence)-1);;var(competence)
 ===
-W2 · Mosaic Formula Interface Advantages
-In Lab 3\_2, what is the key benefit of using formula notation (e.g., mean(mpg ~ am, data = mtcars)) from the mosaic package?
-formula notation / tilde interface / ~ 공식 표기법|group-by calculation / eliminates manual indexing / 그룹별 계산 / 수동 인덱싱 생략
-The **mosaic package** utilizes **formula notation** (`~`), enabling clean **group-by calculation** without requiring repetitive manual subsetting or indexing
+W2 · Logical indexing with [ ]
+In mtcars, am = 0 marks cars with an automatic transmission. What does mpg[am == 0] select, and what does the whole line compute?
+logical / TRUE / FALSE / 논리|only / keeps / selects / subset / 선택|automatic / 자동|average / mean / 평균
+am == 0 compares every element with 0 and returns a **logical** vector of TRUE and FALSE; mpg[...]: keeps **only** the mpg values at the positions where the condition is TRUE; mean(): averages those values, so the line gives the **average** mpg of **automatic** cars; attach(mtcars) is what lets mpg and am be used by name
+@code attach(mtcars);;mean(mpg[am==0])
 ===
-W2 · Package Namespace Resolution Operator
-Why would an analyst use the explicit package syntax base::mean(mpg ~ am, data = mtcars)?
-namespace resolution / double colon operator / 네임스페이스 명시 / 콜론 연산자|override mask / function conflict / 함수 이름 충돌 방지
-The double-colon operator performs **namespace resolution** to explicitly invoke a function, allowing you to **override mask** issues when package function names conflict
+W2 · A user-defined function: to12()
+Read the function from Lab4.R. What does to12() do with its input, and what do as.integer() and paste() contribute to it?
+24-hour / 24 hour / 12-hour / 12 hour / convert / 변환|number / integer / numeric / 숫자 / 정수|joins / paste / combines / space / 붙|10 PM
+to12(): converts an hour on the **24-hour** clock, given as text, into a 12-hour label; as.integer(): turns the text "22" into the **number** 22 so it can be compared with 12 and reduced; paste(): **joins** its arguments with a space, so to12("22") returns "10 PM"; Flaw: hour > 12 sends 12 to the else branch, so noon is returned as "12 AM"
+@code to12 <- function(str){;;  hour=as.integer(str);;  if (hour>12) {;;    return(paste(hour-12, "PM"));;  } else {;;    return(paste(hour, "AM"));;  };;};;to12("22")
 ===
-W2 · Vectorized Function Application using sapply
-In Lab 4\_2, what is the functional advantage of using sapply(data$openingHour, to12) over a standard loop?
-vectorized application / apply function across elements / 벡터화 적용 / 개별 원소 적용|avoids explicit loops / efficient code / 반복문 생략 / 코드 간소화
-Using **`sapply()`** achieves **vectorized application** of custom functions across vector elements, which **avoids explicit loops** and improves execution efficiency
+W2 · Why as.integer() is needed
+In Lab4.R, hour = "13" is stored as text. Why does paste(hour - 12, "PM") stop with an error, and how does to12() avoid the problem?
+character / text / string / 문자|error / non-numeric / 오류|as.integer / convert / converts / 변환
+hour: "13" is a **character** string, and arithmetic is not defined for text; So hour - 12 stops with an **error** (non-numeric argument to binary operator), even though the comparison as.integer(hour) > 12 works; to12() first **converts** the input with as.integer(), so hour - 12 is computed on the number 13
+@code hour="13";;if(as.integer(hour)>12) {;;  print(paste(hour-12, "PM"));;}
 ===
-W2 · String Pattern Detection Logic
-What does the stringr function str\_detect(str, fixed(",")) return, and how is it used in data pipelines?
-boolean TRUE FALSE / 논리값 반환 / 참 거짓|pattern matching / detects substring / 문자열 패턴 탐색 / 쉼표 유무 확인
-`str_detect()` executes **pattern matching** to evaluate whether a substring exists, returning a **boolean TRUE FALSE** value utilized in conditional logic
+W2 · str\_detect() with fixed()
+Read the code from Lab4.R. What does str\_detect(str, fixed(",")) return, what does fixed() do, and what do the two calls return?
+TRUE / FALSE / logical / 논리|contains / pattern / detects / 포함 / 패턴|literal / exact / not a regular expression / 문자 그대로
+str\_detect(): returns **TRUE** or FALSE for each string, depending on whether it **contains** the pattern; fixed(): makes the pattern a **literal** string, matched character by character, not a regular expression; So hasMultipleLoc("Seoul, Suwon") is TRUE and hasMultipleLoc("Seoul") is FALSE
+@code library(stringr);;hasMultipleLoc <- function(str){;;  str_detect(str, fixed(","));;};;hasMultipleLoc("Seoul, Suwon");;hasMultipleLoc("Seoul")
 ===
-W5 · Scatterplot formula
-Read the code. In the formula perform ~ eye, which variable is the dependent variable and which is the independent variable, and how does plot() use them?
-perform / dependent / outcome / 종속변수 / y축 / 결과변수|eye / independent / predictor / 독립변수 / x축 / 설명변수
-In **`perform ~ eye`** the variable on the left, **perform**, is the dependent (outcome) variable and goes on the y-axis; the variable on the right, **eye**, is the independent (predictor) variable and goes on the x-axis; That is why the outcome must be written first
-@code plot(perform ~ eye)
+W2 · sapply()
+Read the code from Lab4.R. What does sapply() do here, and why is it used instead of calling to12(data$openingHour) directly?
+each element / every element / element by element / 각 요소|vector / simplifies / 벡터|if / single value / one value / not vectorized / 하나
+sapply(): calls to12() on **each element** of data$openingHour and simplifies the results into a **vector**; It is needed because to12() uses **if**, which takes a single TRUE or FALSE, so calling to12() on the whole column at once fails
+@code (openingHour <- sapply(data$openingHour, to12))
 ===
-W5 · OLS line and the two means
-The code draws a scatterplot of perform on eye, the OLS line (blue), a horizontal line at the mean of perform (red) and a vertical line at the mean of eye (green). Where does the blue line pass, and what does this show about OLS?
-passes through / intersection / crosses / 지나 / 통과 / 교점 / 교차|mean of x / mean(x) / mean of eye / x의 평균 / eye의 평균|mean of y / mean(y) / mean of perform / y의 평균 / perform의 평균
-The blue OLS line always **passes through** the point where the vertical line at the **mean of x** (eye) meets the horizontal line at the **mean of y** (perform), so the fitted line is anchored at the point of means
-@code plot(perform ~ eye);;eye_regr = lm(perform ~ eye);;abline(eye_regr, col="blue");;abline(h=mean(perform), col="red");;abline(v=mean(eye), col="green")
+W2 · ifelse()
+Read the code from Lab4.R. What does ifelse() do in this line, and what ends up in the new column?
+condition / test / 조건|each element / element by element / vectorized / 각 요소|Yes / No
+ifelse(): checks a **condition** for **each element** and returns the second argument where it is TRUE and the third where it is FALSE; Here the TRUE or FALSE from hasMultipleLoc() becomes "Yes" or "No", one per café, and is stored in the new column hasMultipleLoc
+@code (locationText <- ifelse(sapply(data$location, hasMultipleLoc), "Yes", "No"));;data$hasMultipleLoc = locationText
 ===
-W5 · R-squared equals squared correlation
-For the simple regression perform ~ skill, the code compares the model R-squared (about 0.046) with the squared correlation. Why does the script round the difference to 16 digits instead of testing with ==, and what equality is being checked?
-r-squared equals correlation squared / correlation squared / r^2 = R^2 / 상관계수의 제곱 / 결정계수는 상관계수의 제곱|small differences / floating point / rounding error / 부동소수점 / 반올림 오차 / 미세한 차이 / 계산상의 차이
-It checks that in a simple linear regression **R-squared equals the correlation squared**; The two numbers are computed by different formulas, so they can differ by **tiny floating-point (rounding) differences**; rounding the difference to 16 digits lets the check ignore that noise
-@code skill_summary = summary(lm(perform ~ skill));;(skill_coef = cor(perform, skill)^2);;round(skill_summary$r.squared - skill_coef, 16)
+W2 · read\_excel(), as.data.frame() and colnames()
+Read the code from Lab4.R. What does each of the three functions do?
+Excel / xlsx / 엑셀|tibble / data frame / 데이터프레임|rename / renames / column names / 이름
+read\_excel(): from the readxl package, reads the **Excel** file Café.xlsx into a **tibble**; as.data.frame(): converts the tibble into an ordinary base R data frame; colnames(data) = c(...): **renames** the four columns to type, location, openingHour and closingHour
+@code library(readxl);;data = read_excel("Café.xlsx");;data <- as.data.frame(data);;colnames(data) = c("type", "location", "openingHour", "closingHour")
 ===
-W5 · Null and alternative of the F-test
-The code fits perform on skill and ravens, and the last line of the summary reports F(2, 82) = 3.3 with p = 0.04184. State the null and alternative hypotheses of this F-test.
-all coefficients are 0 / all coefficients are zero / 계수가 모두 0 / 계수는 모두 0 / both coefficients are 0 / \beta_1 = \beta_2 = 0|at least one / 적어도 하나 / not 0 / not zero / 0이 아니
-The null hypothesis is that **all coefficients are 0** (the skill and ravens slopes are both 0, \beta_1 = \beta_2 = 0); The alternative is that **at least one** of them is not 0
-@code mult_lm = lm(formula = perform ~ skill + ravens);;(mult_summary = summary(mult_lm))
+W5 · lm() and abline() with a model
+Read the code from regression.R. What does lm() return here, and what does abline() draw when it is given that result?
+linear model / OLS / least squares / 선형 / 최소제곱|regression line / fitted line / intercept and slope / 회귀선|stores / stored / object / 저장
+lm(): fits a **linear model** by OLS, perform on eye, and returns a model object that holds the coefficients; abline(): given that object, draws the **fitted regression line** (its intercept and slope) on the scatterplot, in blue; The model is **stored** in eye\_regr so that later calls such as summary() and confint() can use it
+@code plot(perform ~ eye);;eye_regr = lm(perform ~ eye);;abline(eye_regr, col = "blue")
 ===
-W5 · Degrees of freedom in the F-statistic
-In the output F(2, 82) = 3.3 for the model perform ~ skill + ravens, what do the numerator degrees of freedom (2) and the denominator degrees of freedom (82) represent?
-number of predictors / number of slope coefficients / 예측변수의 수 / 독립변수의 수 / 설명변수의 수|residual degrees of freedom / residual df / 잔차 자유도 / n - k - 1 / n - 3 / n-3
-The numerator df, 2, is the **number of predictors** tested (skill and ravens); The denominator df, 82, is the **residual degrees of freedom**, n - k - 1 = n - 3, which implies n = 85 observations
-@code mult_summary = summary(lm(perform ~ skill + ravens));;mult_summary$fstatistic
+W5 · summary() of an lm model
+Read the code from regression.R. What does summary() report for an lm model, and what does $r.squared extract?
+coefficient table / Estimate / Std. Error / 계수|t value / p-value / 유의확률|R-squared / r.squared / 결정계수|F-statistic / F
+summary(): for an lm object reports the **coefficient table**, with Estimate, Std. Error, t value and p-value for each term; It also gives the residual standard error, the **R-squared** and adjusted R-squared, and the overall **F-statistic** with its p-value; The $r.squared part extracts only the R-squared from that summary
+@code eye_summary = summary(eye_regr);;eye_summary;;eye_summary$r.squared
 ===
-W5 · Conclusion of the F-test
-The F-test of the model perform ~ skill + ravens gives F(2, 82) = 3.3 and p = 0.04184. At the 5% significance level, what should we conclude about the model as a whole?
-reject the null hypothesis / 귀무가설 기각 / 귀무가설을 기각|at least one / 적어도 하나 / not 0 / 0이 아니|better than / no predictors / intercept-only / significant / 유의 / 예측변수가 없는 모형 / 설명력
-Because the p-value 0.04184 is less than 0.05, we **reject the null hypothesis**; At least one of the coefficients is not 0, so the model explains perform **significantly better than a model with no predictors**
-@code # F(2,82) = 3.3, p = 0.04184 (alpha = 0.05)
+W5 · confint() and its level argument
+Read the code from regression.R. What does confint() return, and what changes when level = 0.99 is added?
+confidence interval / confidence intervals / 신뢰구간|coefficient / coefficients / 계수|95% / default / 0.95 / 기본|wider / 99% / 넓
+confint(): returns a **confidence interval** for each **coefficient** of the model, one row per term with a lower and an upper bound; By **default** the level is 95% (columns 2.5 % and 97.5 %); level: 0.99 gives 99% intervals (columns 0.5 % and 99.5 %), which are **wider**
+@code confint(eye_regr);;confint(eye_regr, level = 0.99)
 ===
-W5 · Reading the coefficients
-The fitted equation of perform on skill and ravens is y = -4.355e-16 + 0.1712 * skill + 0.1746 * ravens, and all variables are standardized (mean 0, standard deviation 1). Interpret the coefficient 0.1712 and explain why the intercept is essentially 0.
-holding ravens constant / controlling for ravens / ceteris paribus / ravens를 통제 / ravens를 고정 / 다른 변수를 고정|standard deviation / 표준편차 / 1 SD / one SD|standardized / mean 0 / mean of 0 / 평균이 0 / 표준화 / passes through the means / 평균점
-**Holding ravens constant**, a one **standard deviation** increase in skill is associated with a 0.1712 standard deviation increase in predicted perform; Because all variables are **standardized** (mean 0), the regression plane passes through the point of means, so the intercept is about 0
-@code mult_summary$coefficients
+W5 · cor() and round()
+Read the code from regression.R. What does cor() compute, why is it squared, and what is round(..., 16) for?
+correlation / Pearson / 상관|R-squared / r squared / 결정계수|floating / rounding / tiny / 반올림 / 오차
+cor(): computes the Pearson **correlation** between perform and skill, and \^2 squares it; In a simple regression the squared correlation equals the **R-squared**, which is what the script checks; round(): rounds the difference to 16 decimal places so that tiny **floating**-point differences between the two calculations are not mistaken for a real gap
+@code (skill_coef = cor(perform, skill)^2);;round(skill_summary$r.squared - skill_coef, 16)
 ===
-W5 · Meaning of predict()
-Read the code. It returns 0.3475 for a group whose skill is 0.5 and whose ravens score is 1.5. What does this number represent and how is it obtained from the model?
-predicted value / point estimate / 예측값 / 점추정치 / 종속변수의 예측|substitut / plug / regression equation / estimated equation / 대입 / 회귀식 / 추정된 식
-The value is the **predicted value (point estimate)** of perform for skill = 0.5 and ravens = 1.5; It is obtained by **substituting** these values into the estimated **regression equation**: -4.355e-16 + 0.1712 * 0.5 + 0.1746 * 1.5, which is about 0.3475
-@code predict(mult_lm, data.frame(skill=0.5, ravens=1.5))
+W5 · predict() with interval = "confidence"
+Read the code from regression.R. What does predict() do with the data frame it is given, and what do the arguments interval and level change?
+predicted / prediction / fit / 예측|new data / data frame / newdata / 새 데이터|lwr / upr / lower / upper / 하한 / 상한|0.3475
+predict(): plugs the **new data**, a data frame with the same variable names as the model, into the fitted equation and returns the **predicted** values (about 0.3475 and 0.3441); interval: "confidence" adds the **lower and upper** bounds, so the result is a matrix with the columns fit, lwr and upr; level: 0.95 sets the confidence level of those bounds
+@code predict(mult_lm, data.frame(skill=c(0.5,1.5), ravens=c(1.5,0.5)), interval="confidence", level=0.95)
 ===
-W5 · Columns returned with interval = "confidence"
-Read the code. It supplies two new cases, (skill 0.5, ravens 1.5) and (skill 1.5, ravens 0.5), and asks for a 95% confidence interval. What does the output contain for each case, and what population quantity does the interval describe?
-fit / predicted value / 예측값 / 점추정치|lwr / upr / lower and upper / lower bound / upper bound / 하한 / 상한|population average / population mean / mean of the dependent variable / 모집단 평균 / 모평균
-For each case (one row per pair) the output gives **fit**, the predicted value (about 0.3475 and 0.3441), plus the **lower and upper** bounds (lwr, upr) of a 95% confidence interval; The interval expresses how accurate our estimate of the **population average** of perform is at those predictor values
-@code predict(mult_lm, data.frame(skill=c(0.5,1.5), ravens=c(1.5,0.5)), interval = "confidence", level = 0.95)
+W5 · seq(), polygon() and lines()
+Read the code from regression.R. What does each of seq(), polygon() and lines() do in drawing the confidence band?
+evenly spaced / equally spaced / grid / 등간격|fills / shaded / band / 채우 / 음영|dashed / boundaries / boundary / 점선 / 경계
+seq(): creates 10,000 **evenly spaced** x-values from min(eye) - 3 to max(eye) + 3; polygon(): joins the upper bounds (reversed) and the lower bounds into one closed shape and **fills** it in transparent grey, the **shaded** confidence band; lines(): draws the upper and lower bounds as green **dashed** lines
+@code points <- seq(min(eye)-3, max(eye)+3, length.out=10000);;pred <- predict(eye_regr, data.frame(eye=points), interval="confidence");;polygon(c(rev(points), points), c(rev(pred[ ,3]), pred[ ,2]), col=rgb(0,0,0,0.1), border=NA);;lines(points, pred[ ,3], lty='dashed', col='green')
 ===
-W5 · Confidence band code
-The code predicts over 10,000 x-values and shades the region between two columns of pred. What do pred[ ,2] and pred[ ,3] contain, and what does the shaded polygon show?
-lower bound / lwr / 하한 / 하한선|upper bound / upr / 상한 / 상한선|confidence band / confidence interval / shaded / 신뢰구간 / 신뢰대 / 음영 / 색칠
-The columns of pred are fit, lwr and upr, so pred[ ,2] holds the **lower bounds** and pred[ ,3] holds the **upper bounds** of the 95% confidence interval at every x-value; The polygon fills the area between them, drawing a shaded **confidence band** around the regression line
-@code pred <- predict(eye_regr, data.frame(eye=points), interval = "confidence", level = 0.95);;polygon(c(rev(points), points), c(rev(pred[ ,3]), pred[ ,2]), col = rgb(0, 0, 0, 0.1), border = NA)
+W5 · set.seed() and rnorm()
+Read the code from the simulation script. What do set.seed() and rnorm() do?
+reproducible / same random numbers / same results / 재현|normal / 정규|mean 10 / mean / 평균|standard deviation / sd / 표준편차
+set.seed(): fixes the starting point of the random number generator, so the same random numbers, and the same results, are **reproducible** on every run; rnorm(): draws sampleSize values from a **normal** distribution, here with **mean** 10 and **standard deviation** 2 for fertilizer; The second rnorm(sampleSize, 0, 1) adds random errors with mean 0 and standard deviation 1
+@code set.seed(4201);;fertilizer = rnorm(sampleSize, 10, 2);;yield = intercept + slope*fertilizer + rnorm(sampleSize, 0, 1)
 ===
-W5 · Confidence interval versus prediction interval
-Suppose the call shown is changed from interval = "confidence" to interval = "prediction". How does the meaning and the width of the interval change?
-individual / single observation / new observation / 개별 관측값 / 새로운 관측값 / 개별 값|wider / 더 넓 / larger|population average / mean response / average / 모집단 평균 / 평균 반응
-The confidence interval covers the **population average** of the dependent variable, whereas the prediction interval covers an **individual new observation** at those predictor values; Because an individual value also includes its own random error, the prediction interval is **wider**
-@code predict(mult_lm, data.frame(skill=0.5, ravens=1.5), interval = "confidence")
+W5 · The for loop and the coefficient matrix
+Read the simulation loop (sampleCnt = 10,000). What does the for loop do, and what do coef[2,1], coef[2,3] and coef[2,4] contain?
+repeats / loop / 10,000 / 10000 / 반복|estimate / slope / 추정 / 기울기|t value / t-statistic / t값|p-value / p값
+for: **repeats** the body 10,000 times, once per rowIdx, each time drawing a new sample and fitting lm(); summary(...)$coefficients: is the coefficient matrix, and row 2 is fertilizer; coef[2,1]: the slope **estimate**, coef[2,3] its **t value** and coef[2,4] its **p-value**, each stored at position rowIdx of its vector
+@code for(rowIdx in 1:sampleCnt) {;;  fertilizer=rnorm(sampleSize,10,2);;  yield=intercept+slope*fertilizer+rnorm(sampleSize,0,1);;  coef=summary(lm(yield~fertilizer))$coefficients;;  estimator[rowIdx]=coef[2,1];;  t[rowIdx]=coef[2,3];;  pValue[rowIdx]=coef[2,4];;}
 ===
-W5 · Monte Carlo loop
-Read the simulation. Each iteration draws a new sample and stores one number in estimator[rowIdx]. What is the number that is stored, and what does hist(estimator) display after 10,000 iterations (true intercept 3, true slope 0.2, sample size 10)?
-slope estimate / slope coefficient / estimated slope / 기울기 추정값 / 기울기 추정치 / 기울기 계수|sampling distribution / 표집 분포 / 표집분포 / 표본분포|new random sample / new sample / repeated samples / repeated / 새로운 표본 / 반복 / 매번
-Every iteration draws a **new random sample**, regresses yield on fertilizer and stores the **slope estimate** (coef[2, 1], the Estimate of fertilizer); The histogram of these 10,000 slopes shows the **sampling distribution** of the OLS slope estimator, centred near the true slope 0.2
-@code for(rowIdx in 1:sampleCnt) {;;  fertilizer = rnorm(sampleSize, 10, 2);;  yield = intercept + slope * fertilizer + rnorm(sampleSize, 0, 1);;  coef = summary(lm(yield ~ fertilizer))$coefficients;;  estimator[rowIdx] = coef[2, 1];;};;hist(estimator)
+W5 · ifelse(), table() and barplot()
+Read the code from the simulation script. What does each line do, and what does the share of "Reject" estimate here (the true slope is 0.2)?
+labels / Reject / Fail to Reject|counts / count / frequency / 빈도|bar / bars / 막대|power / 검정력
+pValue <= alpha gives TRUE where the p-value is at most 0.05; ifelse(): turns TRUE and FALSE into the **labels** "Reject" and "Fail to Reject"; table(): **counts** how many of the 10,000 samples fall under each label; barplot(): draws one **bar** per label with its count; Because the true slope is 0.2, not 0, the share of Reject estimates the test's **power**
+@code rejection = pValue <= alpha;;rejection = ifelse(rejection, "Reject", "Fail to Reject");;(result = table(rejection));;barplot(result, main = "Null Hypothesis Rejection")
 ===
-W5 · Columns of the coefficient table
-In the simulation, t[rowIdx] = coef[2,3] and pValue[rowIdx] = coef[2,4] are stored. What do coef[2,3] and coef[2,4] contain?
-t-statistic / t statistic / t value / t통계량 / t값|p-value / p value / p값|slope / fertilizer / second row / 기울기 / 두 번째 행
-In the coefficient table the columns are Estimate, Std. Error, t value and `Pr(>|t|)`, and row 2 is the **slope** of fertilizer; So coef[2,3] is the **t-statistic** and coef[2,4] is the **p-value** of the slope test
-@code coef = summary(lm(yield ~ fertilizer))$coefficients;;t[rowIdx] = coef[2, 3];;pValue[rowIdx] = coef[2, 4]
+W5 · Filling a results data frame
+Read the confidence-interval loop. What do data.frame(), results[rowIdx, "slope"], interval["fertilizer", "2.5 %"] and && do?
+data frame / 데이터프레임|cell / row and column / column name / 행 / 열|lower / lower bound / 2.5 / 하한|both / 둘 다 / 모두
+data.frame(): with index = 1:sampleCnt creates a **data frame** with 20 rows; results[rowIdx, "slope"] = ... writes into one **cell**, chosen by row number and column name, and creates the column the first time it is used; interval["fertilizer", "2.5 %"] picks the **lower** bound of the fertilizer interval from the confint() matrix, and "97.5 %" the upper bound; && is TRUE only if **both** conditions hold, so inside is TRUE when the true slope lies within the interval
+@code results = data.frame(index=1:sampleCnt);;results[rowIdx,"slope"] = fer_regr$coefficients[2];;interval = confint(fer_regr);;lowerBound = interval["fertilizer","2.5 %"];;upperBound = interval["fertilizer","97.5 %"];;inside = lowerBound<=slope && slope<=upperBound
 ===
-W5 · Rejection rule and what the table estimates
-Read the code. The true slope is 0.2, but the null hypothesis says the slope is 0. When is the null rejected, and what does the share of "Reject" in table(rejection) estimate? What would it estimate if the true slope were 0?
-p-value less than alpha / p-value less than or equal to alpha / p-value <= alpha / p-value is less than / at most alpha / p값이 유의수준보다 작 / p값이 알파 이하 / 유의수준 이하|power / 검정력|type I error / type 1 error / 제1종 오류 / 1종 오류 / 유의수준
-The null is rejected when the **p-value is less than or equal to alpha** (0.05); With a true slope of 0.2 the null is false, so the share of Reject estimates the test's **power**; If the true slope were 0 (a true null), that share would estimate the **Type I error rate**, about alpha
-@code alpha = 0.05;;rejection = pValue <= alpha;;rejection = ifelse(rejection, "Reject", "Fail to Reject");;table(rejection)
+W5 · ggplot() layers
+Read the plotting code from the simulation script. What does each layer add to the chart of the 20 confidence intervals?
+point / points / 점|error bar / error bars / interval / 오차 막대 / 구간|vertical line / true slope / 수직선
+ggplot(): sets the data (results) and the mapping of slope to the x-axis and index to the y-axis; geom\_point(): draws each estimated slope as a **point**, one row per sample; geom\_errorbarh(): draws a horizontal **error bar** from lower\_bound to upper\_bound, the confidence interval; geom\_vline(): adds a green **vertical line** at the true slope 2, so the intervals that miss it are easy to see
+@code ggplot(results, aes(x=slope, y=index)) + geom_point(size=3.5) +;;  geom_errorbarh(aes(xmin = lower_bound, xmax = upper_bound)) +;;  geom_vline(xintercept = 2, color = "green")
 ===
-W5 · Coverage of confidence intervals
-Read the code. For 20 samples (true slope 2, sample size 12) it records inside. When is inside TRUE, and about how many of the 20 95% intervals do you expect to contain the true slope? Why might the count differ from that?
-true slope inside / true slope lies within / contains the true slope / 진정한 기울기가 포함 / 참값이 포함 / 모수가 포함|95% / 95 percent / 19 / 95퍼센트 / 약 19|chance / random / sampling variability / 우연 / 무작위 / 표본마다
-inside is TRUE when the **true slope lies within** that sample's interval [lowerBound, upperBound]; Across repeated samples about **95%**, roughly 19 of 20, of the intervals should contain it, but the count of any one run of 20 varies by **chance** (random sampling)
-@code interval = confint(fer_regr);;lowerBound = interval["fertilizer", "2.5 %"];;upperBound = interval["fertilizer", "97.5 %"];;inside = lowerBound <= slope && slope <= upperBound
-===
-W5 · Confidence level and interval width
-Read the code. How does changing the confidence level from the default 0.95 to 0.99 affect the width of the confidence intervals for the coefficients, and why?
-wider / wide / larger / 넓어 / 더 넓은|more confident / higher confidence / more certain / capture the true / 더 높은 신뢰 / 모수를 포함할 / 더 확신
-The 99% intervals are **wider**; To be **more confident** that the interval captures the true parameter, the interval must be larger, which means a less precise estimate
-@code confint(mult_lm);;confint(mult_lm, level = 0.99)
-===
-W5 · Comparing R-squared values
-The R-squared of perform ~ skill + ravens is about 0.0745, while the single-predictor squared correlations are about 0.0459 (skill) and 0.0469 (ravens). The check round(mult\_summary$r.squared - skill\_coef, 2) == 0 returns FALSE. What does this say about adding ravens, and is R-squared the sum of the two single values?
-larger / increases / higher / 증가 / 커진 / 더 높|not the sum / not additive / overlap / shared / correlated / 합이 아니 / 중복 / 공유
-Adding ravens makes R-squared **larger** than either single-predictor value (the difference rounds to 0.03, so the check is FALSE); But 0.0745 is smaller than 0.0459 + 0.0469, so R-squared is **not the sum**: the predictors **overlap** and share some of the explained variance
-@code mult_summary$r.squared;;round(mult_summary$r.squared - skill_coef, 2) == 0;;round(mult_summary$r.squared - ravens_coef, 2) == 0
-===
-W5 · Deviations from the mean (Lab2.R)
-Read the code from Lab2.R. Why is the first result always 0 apart from rounding error, why are the deviations squared in the second line, and why does the third line divide by n - 1?
-always 0 / always zero / cancel / 항상 0 / 상쇄 / 합이 0|squar / 제곱 / negative and positive|n - 1 / n-1 / sample variance / 표본분산 / 자유도 / degrees of freedom
-Deviations from the mean always sum to **zero** because positive and negative deviations **cancel**; Squaring removes the signs so the deviations can be summed, and dividing by **n - 1** gives the **sample variance** (`var(competence)`); its square root is `sd()`
-@code sum(competence - mean(competence));;sum((competence - mean(competence))^2);;sum((competence - mean(competence))^2) / (length(competence) - 1)
-===
-W5 · IQR and boxplot (Lab2.R)
-For the variable grade, quantile(grade) gives a first quartile of 72 and a third quartile of 84. What does IQR(grade) compute, what do the box and whiskers of boxplot(grade) show, and why use the IQR when a distribution is skewed or has outliers?
-third quartile minus first quartile / Q3 - Q1 / Q3-Q1 / 84 - 72 / 12 / 제3사분위수 - 제1사분위수 / 사분위 범위|1.5 / 1.5 times / 1.5배|outlier / 이상치 / 극단값
-`IQR(grade)` is the **third quartile minus the first quartile** (84 - 72 = 12), the range of the middle 50% of the data, drawn as the box; Whiskers extend to the most extreme points within **1.5 times** the IQR, and points beyond are plotted as **outliers**; The IQR is robust, unlike the mean and standard deviation, when data are skewed or have outliers
-@code quantile(grade);;IQR(grade);;boxplot(grade);;abline(h=median(grade), col="red")
-===
-W5 · Reading the scatterplots (Lab2.R)
-For the practice data, the correlation of grade with competence is about 0.83 and with breaks about -0.85. Describe the general pattern each scatterplot shows.
-positive / 양의 / 양의 상관 / 정의 상관|negative / 음의 / 음의 상관 / 부의 상관
-Grade rises as **competence** rises, a **positive** relationship (r about 0.83); Grade falls as the number of **breaks** rises, a **negative** relationship (r about -0.85)
-@code plot(grade ~ competence);;plot(grade ~ breaks)
-===
-W5 · Function logic (Lab4.R)
-Read the function to12 from Lab4.R. What does to12("22") return and how? What happens for to12("12"), and why is that a flaw?
-10 PM / 10 pm / 10시 PM|subtract 12 / subtracts 12 / minus 12 / hour - 12 / 12를 뺀 / 12를 빼|12 AM / noon / mislabel / 정오 / AM으로 / 잘못
-`to12("22")` returns **"10 PM"** because 22 is greater than 12, so the function **subtracts 12** and pastes "PM"; `to12("12")` returns **"12 AM"**: 12 is not greater than 12, so it falls in the else branch and **noon is mislabeled as AM**
-@code to12 <- function(str){;;  hour = as.integer(str);;  if (hour > 12) {;;    return(paste(hour - 12, "PM"));;  } else {;;    return(paste(hour, "AM"));;  };;}
-===
-W5 · Why sapply (Lab4.R)
-Read the code from Lab4.R. Why is sapply() used to convert the whole column, instead of calling to12(data$openingHour) directly?
-each element / every element / element by element / one at a time / 각 원소 / 원소마다 / 하나씩|if / not vectorized / single value / one value / 벡터화되지 않 / 하나의 값 / 조건문
-to12 uses **if**, which is not vectorized and handles only a **single value** at a time; `sapply()` applies the function to **each element** of the column and returns the results as a vector
-@code (openingHour <- sapply(data$openingHour, to12));;(closingHour <- sapply(data$closingHour, to12))
-===
-W6 · lm function syntax
-Explain the role of the lm() function in R and how the formula y ~ x1 + x2 specifies the dependent variable and the independent variables.
-linear model / linear regression / OLS / 선형 모델 / 선형모형 / 회귀모형 / 선형회귀|dependent variable / left of the tilde / left side / 종속변수 / 왼쪽|independent variables / explanatory variables / right of the tilde / right side / 독립변수 / 설명변수 / 오른쪽|formula / tilde / 포뮬러 / 모형식 / 공식 / 틸데
-The **`lm()`** function fits a **linear model** (an OLS regression); In the **formula** `y ~ x1 + x2`, the tilde separates the **dependent variable** y on the left from the **independent variables** x1 and x2 on the right, which are joined by plus signs
-@code model <- lm(y ~ x1 + x2, data = df);;summary(model)
-===
-W6 · Factor conversion and dummy variables
-Why is the as.factor() function used on a categorical variable such as session before running a regression in R?
-categorical variable / categorical / 범주형 변수 / 범주형|dummy variables / dummy / indicator / 가변수 / 더미 변수 / 더미|automatically / 자동|base category / reference category / reference level / 기준 범주 / 기준 수준
-Using **`as.factor()`** tells R to treat the variable as a **categorical variable** rather than a number; `lm()` then **automatically** creates **dummy variables** for the categories and leaves one out as the **base (reference) category**
+W6 · as.factor() inside lm()
+What does as.factor(session) do in this regression, and what does lm() then create from it?
+factor / categorical / 범주|dummy / dummies / indicator / 더미 / 가변수|base / reference / left out / omitted / 기준
+as.factor(): turns session into a **factor**, a categorical variable, instead of a number; lm(): then creates a **dummy** variable for every category except one, the **base** (reference) category, which is absorbed in the intercept; Each dummy coefficient is the difference from the base category, holding x constant
 @code model <- lm(y ~ x + as.factor(session), data = df)
 ===
-W6 · Interaction terms in R formulas
-Explain the difference between using "+", ":" and "*" between two variables x1 and x2 in an R model formula.
-main effects / main effect / 주 효과 / 주효과|interaction / 상호작용 / 교차항|both / x1 + x2 + x1:x2 / shorthand / 모두 포함 / 함께 포함 / 약식
-"+" includes only the **main effects** of x1 and x2; ":" includes only their **interaction** term (the product x1 * x2); "*" is shorthand for x1 + x2 + `x1:x2`, so it includes **both** the main effects and the interaction
-@code lm(y ~ x1 + x2);;lm(y ~ x1:x2);;lm(y ~ x1*x2)
+W6 · The : and * operators in a formula
+What terms does each of the three formulas put into the model?
+interaction / product / 상호작용|main effects / main effect / 주효과|both / shorthand / x1 + x2 + x1:x2 / 모두
+x1:x2 adds only the **interaction** term, the product of x1 and x2; x1*x2: is shorthand for x1 + x2 + x1:x2, so it adds **both** the **main effects** and the interaction; x1 + x2: has the main effects only
+@code lm(y ~ x1:x2);;lm(y ~ x1*x2);;lm(y ~ x1 + x2)
 ===
-W6 · F-statistic interpretation
-What does a significant F-statistic of the overall regression, shown in the last line of summary(model), indicate about the relationship between the dependent variable and the independent variables?
-overall significance / model significance / jointly significant / 전체 유의성 / 모델 유의성 / 모형 전체|at least one / 적어도 하나|not zero / different from zero / not 0 / 0이 아니 / 0과 다르
-A significant F-statistic indicates the **overall significance** of the model; The null hypothesis that all slope coefficients are 0 is rejected, so **at least one** coefficient of the independent variables is **different from zero**
-@code summary(model)
-===
-W6 · Coefficients and economic significance
-How do you interpret the estimated coefficient of a continuous independent variable in a linear regression model?
-holding constant / holding other variables constant / other variables in the model constant / all other variables constant / ceteris paribus / 다른 변수를 고정 / 다른 조건이 일정 / 통제|unit change / one unit / one-unit / 1단위 / 단위 증가 / 단위 변화|marginal effect / expected change / average change / 한계 효과 / 기대 변화 / 변화량 / 평균적으로
-The coefficient measures the expected **marginal effect** on the dependent variable of a **one-unit change** in that independent variable, **holding** all other variables in the model **constant**
-@code summary(model)$coefficients
-===
-W6 · Linear hypothesis testing
-What is the purpose of the linearHypothesis() function from the car package in R?
-restrictions / linear restrictions / 제약 / 선형 제약|test / hypothesis test / 가설 검정 / 검정|coefficients / 계수|F-test / F test / F검정 / F통계량
-The **`linearHypothesis()`** function **tests** linear hypotheses, that is, linear **restrictions** on the **coefficients** of a fitted regression model, such as several coefficients being 0 at the same time or two coefficients being equal; For an lm object it reports an **F-test**
+W6 · linearHypothesis()
+What does linearHypothesis() from the car package do with the model in this call?
+restrictions / restriction / hypotheses / 제약 / 가설|jointly / together / at the same time / both / 동시에|F-test / F
+linearHypothesis(): from the car package, tests linear **restrictions** on the coefficients of a fitted model; Here it tests "x1 = 0" and "x2 = 0" **jointly**, not one at a time; For an lm model it reports an **F-test**, with the residual sums of squares of the restricted and unrestricted models, F and its p-value
 @code library(car);;linearHypothesis(model, c("x1 = 0", "x2 = 0"))
 ===
-W6 · Coefficient of a dummy variable
-In the regression lm(wage ~ female + educ), female is a dummy variable equal to 1 for women and 0 for men. How is the coefficient of female interpreted?
-difference / 차이|base group / reference group / baseline / men / male / 기준 집단 / 기준 그룹 / 남성|holding educ constant / holding education constant / educ를 고정 / educ를 통제 / 다른 조건이 같
-The coefficient of female is the **difference** in the expected wage between women and the **base group** (men), **holding educ constant**
-@code lm(wage ~ female + educ, data = df)
-===
-W6 · Interaction with a dummy variable
-In the regression lm(wage ~ educ*female), what does the coefficient of the interaction term educ:female measure, and what does the coefficient of female alone measure?
-difference in slopes / different slope / slope differs / 기울기 차이 / 기울기가 다르|return to education / effect of educ / effect of education / 교육 수익률 / 교육의 효과|intercept / 절편
-The coefficient of `educ:female` is the **difference in slopes**: how much the effect of educ on wage (the **return to education**) for women differs from that for men; The coefficient of female alone shifts the **intercept**, the wage difference at educ = 0
-@code lm(wage ~ educ*female, data = df)
-===
-W6 · Testing differences across groups (Chow test)
-The code compares a restricted model, with one regression for both groups, and an unrestricted model with a full set of interactions with the dummy female. What hypothesis does anova(restricted, unrestricted) test, and what assumption does this test make?
-same regression / no difference between the groups / all group coefficients are 0 / dummy and interaction coefficients are 0 / 같은 회귀식 / 그룹 간 차이가 없|F-test / F test / SSR / F검정 / F통계량 / Chow|constant error variance / same error variance / equal variance / homoskedastic / 오차분산이 같 / 등분산
-The null hypothesis is that the **same regression** holds for both groups, that is, the coefficient of female and all its interaction coefficients are 0; The **F-test** compares the SSR of the restricted and unrestricted models (the Chow test), and it assumes a **constant error variance** across the groups
+W6 · anova() with two nested models
+What does anova(restricted, unrestricted) do, and what test is it here?
+compares / nested / 비교|F-test / F|RSS / residual sum of squares / SSR / 잔차제곱합|Chow / both groups / 그룹
+anova(): given two **nested** models, **compares** them with an **F-test**; It uses the residual sum of squares (**RSS**) of each model and the number of extra parameters, and reports F and its p-value; Here the unrestricted model interacts every term with female, so the test is the **Chow** test of whether one regression fits both groups
 @code restricted <- lm(wage ~ educ + exper, data = df);;unrestricted <- lm(wage ~ (educ + exper)*female, data = df);;anova(restricted, unrestricted)
-===
-W6 · Binary dependent variable
-In the code, the dependent variable inlf is binary (1 = in the labor force, 0 = not). What do the coefficients of this lm() regression measure, and what is a known drawback?
-probability / 확률|linear probability model / LPM / 선형확률모형|outside 0 and 1 / below 0 / above 1 / negative probability / 0과 1 / 범위 밖 / 음의 확률
-This is a **linear probability model**; A coefficient measures the change in the **probability** that inlf = 1 for a one-unit change in the regressor; A drawback is that the fitted values can fall **outside 0 and 1**, for example a negative predicted probability
-@code lpm <- lm(inlf ~ educ + age, data = df)
 ===
 </script>
 <!--DATA-END-->
-<title>Quiz</title>
+<title>Econometrics Midterm: R Functions</title>
 <link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Source+Serif+4:ital,opsz,wght@0,8..60,400;0,8..60,600;1,8..60,400&family=Noto+Serif+KR:wght@400;600&display=swap" rel="stylesheet">
 <style>
