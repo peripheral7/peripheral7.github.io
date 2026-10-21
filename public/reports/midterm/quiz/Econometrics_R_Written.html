@@ -453,9 +453,10 @@ educ: one more year of education raises the probability of being in the labor fo
     .qside{grid-column:2; margin:-10px 0 0; max-width:none; padding:0 var(--pad) 22px;} .qside:empty{display:none;}
   }
   /* tablets (touch) and narrow windows: the code sticks to the top, under the score bar, and scrolls on its own */
-  /* tablets (touch, wider than a phone): the sheet fills the screen edge to edge, side notes go under the answer */
-  @media (pointer:coarse) and (min-width:821px){
+  /* tablets (touch, 600 px and wider): the sheet fills the screen edge to edge, side notes go under the answer */
+  @media (pointer:coarse) and (min-width:600px){
     :root{--paper-w:100vw; --pad:40px;}
+    html{font-size:clamp(17px, calc(14px + 0.5vw), 21px);}   /* wider sheet, larger type: about 18px at 820, 20px at 1180, 21px at 1366 */
     .sheet::before{box-shadow:none;}
     .scorebar, .data-errors{width:100%; max-width:none; margin-left:0; margin-right:0;}
     .qside{grid-column:2; margin:-10px 0 0; max-width:none; padding:0 var(--pad) 22px;} .qside:empty{display:none;}
