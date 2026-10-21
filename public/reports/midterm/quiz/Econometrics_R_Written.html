@@ -57,176 +57,151 @@
 <!--DATA-START-->
 <script type="text/plain" id="quizData">
 title: Econometrics Midterm
-sub: R functions and output interpretation · 5 code exhibits · W2, W5, W6 · 23 questions
+sub: R code and output · 기술통계 · 회귀분석 · 회귀선 · 수식과 더미변수 · 가설검정 · 시뮬레이션 · 19 questions
 subject: Econometrics
-textbook: R lab scripts (Lab2.R, Lab4.R, regression.R, simple regression demonstration.R; Exhibits C and D condensed), W6 lecture and Wooldridge Ch.2–7; outputs computed in R 4.3 from Lab2_Practice.csv, social.csv and the Wooldridge data sets wage1 and mroz
+textbook: Lab2.R, regression.R and simple regression demonstration.R (condensed), W6 lecture code and Wooldridge Ch.2–7; every output below the code was computed in R 4.3 (Lab2_Practice.csv, social.csv, Wooldridge wage1 and mroz)
 ===
 @case A
 Lab2.R — descriptive statistics (W2)
-@code practice <- read.csv("Lab2_Practice.csv", header=TRUE, na.strings=".");;competence <- practice$COMPETENCE;;breaks <- practice$BREAKS;;grade <- practice$GRADE;;hist(competence, breaks=15);;summary(breaks);;sum((competence-mean(competence))^2)/(length(competence)-1);;var(competence);;quantile(breaks);;IQR(breaks);;boxplot(grade);;abline(h=median(grade), col="red");;par(mfrow = c(1, 2));;boxplot(grade);;vioplot(grade)
+@code practice <- read.csv("Lab2_Practice.csv", header=TRUE, na.strings=".");;competence <- practice$COMPETENCE;;breaks <- practice$BREAKS;;grade <- practice$GRADE;;summary(breaks)   # also competence, grade;;sum(competence - mean(competence));;sum((competence - mean(competence))^2);;sum((competence - mean(competence))^2)/(length(competence) - 1);;var(competence); sd(competence);;quantile(breaks); IQR(breaks);;boxplot(grade)
+@tbl summary() · n = 27 :: Variable|Min|Q1|Median|Mean|Q3|Max;;competence|1|4|5|5.185|6.5|10;;breaks|0|1|2|3.185|4.5|12;;grade|36|72|80|77.26|84|97
+@tbl Lines 6–10 · output :: Line|Output|Value;;6|sum of deviations|1.78e-15;;7|sum of squares|124.0741;;8|÷ (27 − 1)|4.7721;;9|var() · sd()|4.7721 · 2.1845;;10|IQR(breaks) · IQR(grade)|3.5 · 12
 ===
-W2 · quantile()
-Line 9. What does quantile() do?
-quartile / quartiles / percentile / 분위 / 사분위|0% / 25% / 75% / 100% / five / 다섯|minimum / maximum / median / 최소 / 최대 / 중앙값
-quantile(): returns sample quantiles, the values below which given shares of the data fall; By default it gives five numbers, the 0%, 25%, 50%, 75% and 100% points: the **minimum**, the first **quartile**, the median, the third quartile and the **maximum**; Other points can be asked for with probs, for example quantile(breaks, probs = 0.9)
+기술통계 · W2 · mean vs median
+Line 5 and the summary() table. Compare the mean and the median of breaks and of grade. What does each comparison say about the shape of the distribution, and which centre and spread measures suit a skewed variable?
+right-skewed / right skewed / skewed to the right / positively skewed / 오른쪽 / 우측|left-skewed / left skewed / skewed to the left / negatively skewed / 왼쪽 / 좌측|median / 중앙값|IQR / interquartile / 사분위
+breaks: mean 3.185 > median 2, a few large values pull the mean up, so the distribution is **right-skewed**; grade: mean 77.26 < median 80, the low score 36 pulls the mean down, so it is **left-skewed**; Skewed data: the mean and the SD are pulled by extreme values, so report the **median** and the **IQR** (Q3 − Q1), which use only the order of the data
 @use A
 ===
-W2 · par(mfrow = )
-Line 13. What does par(mfrow = c(1, 2)) do?
-graphics parameter / graphics parameters / 그래픽|1 row and 2 columns / one row / two columns / 1행 / 2열|side by side / next to each other / 나란히
-par(): sets **graphics parameters** for the plots that follow; mfrow = c(1, 2) splits the plotting window into **1 row and 2 columns**, filled row by row; So the next two plots (lines 14–15) appear **side by side**, until the layout is reset with par(mfrow = c(1, 1))
+기술통계 · Ch.2 · variance by hand
+Lines 6–9. Explain each output: why line 6 is (almost) 0, why line 7 squares the deviations, and how lines 8–9 turn 124.0741 into the variance and the standard deviation. Why divide by n − 1?
+0 / zero / 1.78e-15 / 영|124.07 / 124.0741|26|4.772 / 4.7721|2.18 / 2.185 / 2.1845|unbiased / degree of freedom / degrees of freedom / 불편 / 자유도
+Line 6: deviations from the mean always sum to **0**, and 1.78e-15 is only floating-point rounding, so raw deviations cannot measure spread; Line 7: squaring makes every deviation positive, SS = Σ(x_i − x̄)^2 = **124.0741**; Line 8: s^2 = 124.0741 ÷ (27 − 1) = 124.0741 ÷ **26** = **4.772**, the same as var(); Line 9: s = √4.772 = **2.185**, the same unit as competence; Why n − 1: x̄ uses up one **degree of freedom**, and dividing by n − 1 makes s^2 an **unbiased** estimator of σ^2
 @use A
 ===
-W2 · Ch.2 sample variance
-Lines 7–8. Both lines print 4.772. Why do they agree, and why does the formula divide by n − 1 and not by n?
-4.772 / 4.77|var() / same formula / 같은 공식|n - 1 / n-1 / degrees of freedom / degree of freedom / 자유도|unbiased / 불편
-Line 7: computes the sample variance by hand, s^2 = Σ(x_i − x̄)^2 ÷ (n − 1) = 4.772 for competence (n = 27); var(): uses exactly the same formula, so both lines print **4.772**; Why n − 1: x̄ is estimated from the same data and uses up one **degree of freedom**, and dividing by n − 1 makes s^2 an **unbiased** estimator of σ^2; Same idea in Ch.3: σ̂^2 = SSR ÷ (n − k − 1)
+기술통계 · W2 · IQR and boxplot outliers
+Lines 10–11. Using the 1.5 × IQR rule, compute the fences for grade and for breaks and name the points that boxplot() draws as outliers.
+54|36|9.75|12
+Rule: a point is an outlier if it lies below Q1 − 1.5 × IQR or above Q3 + 1.5 × IQR; grade: IQR = 84 − 72 = 12, lower fence = 72 − 1.5 × 12 = **54** and upper fence = 84 + 18 = 102, so **36** is an outlier; breaks: IQR = 4.5 − 1 = 3.5, upper fence = 4.5 + 1.5 × 3.5 = **9.75**, so **12** is an outlier; Box: the box spans Q1 to Q3, the bold line is the median, the whiskers stop at the last point inside the fences
 @use A
-===
-W2 · Ch.2 output: summary() and IQR()
-Lines 9–10 (with line 6). The output for breaks is below. What do the mean and the median say about the shape of the distribution? Is the maximum an outlier by the 1.5 × IQR rule? Write the fence.
-right-skewed / right skewed / skewed to the right / positively skewed / 오른쪽 / 우측|9.75|outlier / 이상치
-Mean vs median: mean 3.185 > median 2, so a few large values pull the mean up and the distribution is **right-skewed**; IQR = Q3 − Q1 = 4.5 − 1 = 3.5; Upper fence = Q3 + 1.5 × IQR = 4.5 + 1.5 × 3.5 = **9.75**; Max 12 > 9.75, so 12 is an **outlier** and boxplot() draws it as a separate point; Robustness: the median and the IQR are not moved by it, the mean and the variance are
-@use A
-@tbl summary(breaks) and IQR(breaks) · n = 27 :: Min.|1st Qu.|Median|Mean|3rd Qu.|Max.|IQR;;0|1|2|3.185|4.5|12|3.5
 ===
 @case B
-Lab4.R — functions and strings (W2)
-@code library(readxl);;library(stringr);;to12 <- function(str){;;  hour=as.integer(str);;  if (hour>12) {;;    return(paste(hour-12, "PM"));;  } else {;;    return(paste(hour, "AM"));;  };;};;hasMultipleLoc <- function(str){;;  str_detect(str, fixed(","));;};;data=read_excel("Café.xlsx");;data <- as.data.frame(data);;colnames(data)=c("type","location","openingHour","closingHour");;(openingHour <- sapply(data$openingHour, to12));;data$openingHour=openingHour;;(locationText <- ifelse(sapply(data$location, hasMultipleLoc), "Yes", "No"));;data$hasMultipleLoc=locationText
+regression.R (condensed, line 18 added) — OLS, regression line, inference and prediction (W5)
+@code social <- read.csv("social.csv", header=T);;perform=social$cryp_scoreFINAL; eye=social$RMET_mean;;skill=social$Smean_mean; ravens=social$ravens_mean;;plot(perform ~ eye);;eye_regr=lm(perform ~ eye);;abline(eye_regr, col="blue");;abline(h=mean(perform), col="red");;abline(v=mean(eye), col="green");;skill_regr=lm(perform ~ skill);;summary(skill_regr);;confint(skill_regr); confint(skill_regr, level=0.99);;cor(perform, skill)^2;;mult_lm=lm(perform ~ skill + ravens);;summary(mult_lm);;cor(skill, ravens);;new=data.frame(skill=c(0.5,1.5), ravens=c(1.5,0.5));;predict(mult_lm, new, interval="confidence", level=0.95);;predict(mult_lm, new, interval="prediction", level=0.95);;points <- seq(min(eye)-3, max(eye)+3, length.out=10000);;pred <- predict(eye_regr, data.frame(eye=points), interval="confidence");;polygon(c(rev(points), points), c(rev(pred[ ,3]), pred[ ,2]), col=rgb(0,0,0,0.1), border=NA)
+@tbl summary(lm()) · slopes · n = 85 :: Model|Term|β̂|SE|t|p;;~ eye|eye|0.1919|0.1077|1.781|0.0785;;~ skill|skill|0.2141|0.1072|1.997|0.0491;;~ skill + ravens|skill|0.1712|0.1096|1.562|0.122;;|ravens|0.1746|0.1096|1.593|0.115
+@tbl Fit · all intercepts ≈ 0 :: Model|R²|adj. R²|F|df|p;;~ eye|0.0368|0.0252|3.172|1, 83|0.0785;;~ skill|0.0459|0.0344|3.989|1, 83|0.0491;;~ skill + ravens|0.0745|0.0519|3.300|2, 82|0.0418
+@tbl Other output :: Line|Output|Value;;7–8|mean(perform), mean(eye)|0.000, 0.000;;11|95% CI of skill|[0.0009, 0.4274];;11|99% CI of skill|[−0.0685, 0.4968];;12|cor(perform, skill)^2|0.04585;;15|cor(skill, ravens)|0.2458
+@tbl predict() · lines 17–18 :: skill, ravens|fit|95% confidence|95% prediction;;0.5, 1.5|0.3475|[−0.034, 0.729]|[−1.627, 2.322];;1.5, 0.5|0.3441|[−0.037, 0.726]|[−1.630, 2.318]
 ===
-W2 · str\_detect()
-Line 12. What does str\_detect() do, and what is fixed() for?
-TRUE / FALSE / logical / 논리|contains / detects / pattern / 포함 / 패턴|literal / exact / not a regular expression / 문자 그대로
-str\_detect(): checks whether each string **contains** a pattern and returns **TRUE** or FALSE for each one; fixed(): makes the pattern a **literal** string, not a regular expression; So hasMultipleLoc("Seoul, Suwon") is TRUE and hasMultipleLoc("Seoul") is FALSE
+회귀선 · W5 · plot() and abline()
+Lines 4–8. What does each line draw? Where do the red and the green lines cross, and why does the blue OLS line always pass through that point?
+outcome first / y ~ x / dependent / 종속변수 / 결과변수|mean / means / 평균|always / passes through / 지나|intercept / 절편 / 0
+Line 4: plot(perform ~ eye) is a scatterplot with the **outcome first**, perform on the y-axis and eye on the x-axis; Line 5–6: lm() fits the OLS line and abline() draws it in blue; Lines 7–8: a horizontal line at ȳ and a vertical line at x̄, which cross at the point of **means** (x̄, ȳ) = (0, 0); Why: the first-order condition gives β̂_0 = ȳ − β̂_1 x̄, so ȳ = β̂_0 + β̂_1 x̄ and the OLS line **always passes through** (x̄, ȳ); Here all variables are standardized, so the means are 0 and the **intercept** is ≈ 0
 @use B
 ===
-W2 · sapply()
-Line 17. What does sapply() do?
-each element / every element / element by element / 각 요소|applies / apply / function / 함수 / 적용|vector / simplifies / 벡터
-sapply(): **applies** a function to **each element** of a vector or list; It then simplifies the results into a **vector** (or a matrix) when it can; Here it runs to12() on every opening hour, which to12() cannot do by itself because its if() takes one value at a time
+회귀분석 · Ch.2 · summary(lm())
+Lines 9–12. From the tables, interpret the skill slope (all variables are standardized), show how t is computed, and interpret R². Check two identities that hold in simple regression: R² = cor² and F = t².
+0.214 / 0.2141|1.997|0.0459 / 0.04585 / 4.6%|cor / correlation / 상관|3.989
+Slope: one standard deviation more social skill goes with **0.214** SD higher team performance on average; t = β̂ ÷ SE = 0.2141 ÷ 0.1072 = **1.997**, with df = 85 − 2 = 83; R^2 = **0.0459**: skill explains about 4.6% of the variation in performance; Identity 1: in simple regression R^2 = **cor**(perform, skill)^2 = 0.04585, which line 12 prints; Identity 2: the overall F equals t^2 = 1.997^2 = **3.989**, with the same p = 0.0491; Low R^2: does not make the slope useless, it can still be a precise ceteris paribus estimate (Ch.3)
+@use B
+===
+가설검정 · Ch.4 · t-test and confidence interval
+Line 11. The 95% CI of the skill slope is [0.0009, 0.4274] and the 99% CI is [−0.0685, 0.4968], with p = 0.0491. At which levels is H_0: β_{skill} = 0 rejected, how do the two intervals show it, and what does "95%" mean?
+5% / 0.05|1% / 0.01 / 99%|excludes 0 / does not contain 0 / 0 is outside / 0을 포함하지 / 0 포함 안|repeated samples / repeated sampling / 반복
+5% level: p = 0.049 < **0.05**, so H_0 is rejected, and the 95% CI **excludes 0**; 1% level: p > **0.01**, so H_0 is not rejected, and the 99% CI contains 0; Rule: a two-sided test at level α rejects exactly when the 100(1 − α)% CI excludes the null value; 95%: in **repeated samples** 95% of intervals built this way cover the true β, any single interval either contains it or not
+@use B
+===
+가설검정 · Ch.4 · separate t-tests vs the F-test
+Lines 13–14. Interpret the skill coefficient in the multiple regression. Then explain how neither slope is significant at 5% on its own (p = 0.122 and 0.115) while F = 3.30 has p = 0.0418.
+holding ravens fixed / holding ravens constant / ceteris paribus / same ravens / 고정|0.122 / 0.115|0.0418 / 0.042|jointly / joint / both zero / 결합 / 동시
+Skill: holding ravens fixed (**ceteris paribus**), one SD more social skill goes with 0.171 SD higher performance; t-tests: p = **0.122** and 0.115 test one slope at a time, given that the other variable is already in the model; F-test: H_0: β_{skill} = β_{ravens} = 0 against at least one ≠ 0, F(2, 82) = 3.30 with p = **0.042** < 0.05, so they are **jointly** significant; Why both can hold: skill and ravens share explanatory power (correlation 0.246), so each adds little once the other is in, while together they clearly explain performance; Adjusted R^2: rises from 0.0344 to 0.0519, as expected because ravens has |t| = 1.59 > 1 (Ch.6)
+@use B
+===
+회귀분석 · Ch.3 · omitted variable bias
+Lines 9, 13 and 15. The skill slope is 0.2141 alone and 0.1712 with ravens, and the slope from regressing ravens on skill equals cor(skill, ravens) = 0.2458 here. Show how the numbers fit together and explain the drop.
+0.2141|0.1746|0.2458 / 0.246|omitted variable / omitted-variable / 누락변수 / 생략변수|upward / 상향 / 과대
+Formula: simple slope = β̂_1 + β̂_2 × δ̃_1 (Ch.3); Numbers: 0.1712 + **0.1746** × **0.2458** = 0.1712 + 0.0429 = **0.2141**; Why: ravens raises performance (β̂_2 > 0) and moves with skill (δ̃_1 > 0), so without ravens the skill slope picks up part of the ravens effect; Result: the simple slope is biased **upward** by 0.043, the **omitted variable** bias; Note: δ̃_1 equals the correlation here only because both variables are standardized
+@use B
+===
+회귀선 · Ch.6 · predict() and the confidence band
+Lines 16–21. Interpret the first prediction and its two intervals, explain why the prediction interval is so much wider, and say what lines 19–21 draw around the regression line.
+0.3475 / 0.347|average / mean / expected / 평균|one team / individual / single / one new / 개별|wider / 넓|band / 띠 / narrowest / 가장 좁
+Fit: ŷ = **0.3475** for skill = 0.5 and ravens = 1.5; Confidence interval: [−0.034, 0.729] covers the **average** performance E(y | x) of all teams with these scores and reflects only the uncertainty of the estimated coefficients; Prediction interval: [−1.627, 2.322] covers **one team**, so it adds that team's own error, se(ŷ)^2 + σ̂^2 with σ̂ = 0.974, and is always **wider**; Lines 19–21: predict() gives the confidence limits at 10,000 eye values and polygon() shades the confidence **band**, which is narrowest at the mean of eye and widens away from it
 @use B
 ===
 @case C
-regression.R (condensed) — OLS, inference and prediction (W5)
-@code social <- read.csv("social.csv", header=T);;perform=social$cryp_scoreFINAL;;eye=social$RMET_mean;;skill=social$Smean_mean;;ravens=social$ravens_mean;;plot(perform ~ eye);;eye_regr=lm(perform ~ eye);;abline(eye_regr, col="blue");;abline(h=mean(perform), col="red");;abline(v=mean(eye), col="green");;skill_regr=lm(perform ~ skill);;skill_summary=summary(skill_regr);;confint(skill_regr, level=0.99);;(skill_coef=cor(perform,skill)^2);;round(skill_summary$r.squared-skill_coef,16);;mult_lm=lm(perform ~ skill + ravens);;(mult_summary=summary(mult_lm));;predict(mult_lm, data.frame(skill=c(0.5,1.5), ravens=c(1.5,0.5)), interval="confidence", level=0.95);;points <- seq(min(eye)-3, max(eye)+3, length.out=10000);;pred <- predict(eye_regr, data.frame(eye=points), interval="confidence", level=0.95);;polygon(c(rev(points), points), c(rev(pred[ ,3]), pred[ ,2]), col=rgb(0,0,0,0.1), border=NA)
+W6 — formulas, dummy variables and joint tests (df = wage1 n = 526, mroz n = 753)
+@code m1 <- lm(wage ~ female + educ, data = df);;m2 <- lm(wage ~ educ*female, data = df);;m3 <- lm(wage ~ educ + as.factor(region), data = df);;library(car);;linearHypothesis(m2, c("female = 0", "educ:female = 0"));;restricted <- lm(wage ~ educ + exper, data = df);;unrestricted <- lm(wage ~ (educ + exper)*female, data = df);;anova(restricted, unrestricted);;lpm <- lm(inlf ~ nwifeinc + educ + exper + I(exper^2) + age + kidslt6 + kidsge6, data = mroz)
+@tbl m1 and m2 · estimate (SE) :: Term|m1|m2;;(Intercept)|0.623 (0.673)|0.2005 (0.844);;female|−2.273 (0.279)|−1.199 (1.325);;educ|0.506 (0.050)|0.539 (0.064);;educ:female||−0.086 (0.104)
+@tbl m3 · region from northcen, south, west · base = east :: Term|Estimate|SE|p;;educ|0.535|0.053|<0.001;;northcen|−0.664|0.426|0.120;;south|−0.598|0.397|0.133;;west|0.342|0.473|0.469
+@tbl Lines 5 and 8 · F-tests :: Line|Model|Res.Df|RSS|Df|F;;5|restricted|524|5980.7||;;5|m2|522|5300.2|2|33.51;;8|restricted|523|5548.2||;;8|unrestricted|520|4737.8|3|29.65
+@tbl lpm · fitted values −0.345 to 1.127 :: Term|Estimate|SE|t;;educ|0.0380|0.0074|5.15;;kidslt6|−0.2618|0.0335|−7.81;;age|−0.0161|0.0025|−6.48
 ===
-W5 · confint()
-Line 13. What does confint() do, and what does level = 0.99 change?
-confidence interval / confidence intervals / 신뢰구간|coefficient / coefficients / 계수|wider / 99% / 넓
-confint(): returns a **confidence interval** for each **coefficient** of a fitted model, a lower and an upper bound per term; By default the level is 95%; level = 0.99 gives 99% intervals, which are **wider**
+수식과 더미변수 · W6 · formula operators
+Lines 2, 7 and 9. Write out the terms that `educ*female` and `(educ + exper)*female` put into the model. What does `:` mean, and why is `I(exper^2)` needed instead of `exper^2`?
+educ + female + educ:female / main effects / main effect / 주효과|interaction / 상호작용|six / 6|I()|crossing / not a square / not squared / 교차 / 제곱이 아니
+Line 2: educ*female = educ + female + **educ:female**, both main effects plus their **interaction**; `:` alone adds only the product term educ × female; Line 7: (educ + exper)*female = educ + exper + female + educ:female + exper:female, so with the intercept the model has **6** coefficients; Line 9: inside a formula `^` means **crossing** (`exper^2` would just be exper), so **I()** makes R compute the arithmetic square and add exper squared as a regressor
 @use C
 ===
-W5 · predict()
-Line 18. What does predict() do, and what does interval = "confidence" add?
-predicted / prediction / fitted / 예측|new data / data frame / 새 데이터|lower / upper / lwr / upr / 하한 / 상한
-predict(): plugs **new data**, a data frame with the model's variable names, into the fitted equation and returns the **predicted** values, here about 0.3475 and 0.3441; interval = "confidence" adds the **lower and upper** bounds, so the result has the columns fit, lwr and upr
-@use C
-===
-W5 · Ch.4 output: t-test, CI and R²
-Lines 11–13. Read the output of `summary(skill_regr)` and `confint()` below (all variables are standardized). Interpret the slope, say whether it is significant at 5% and at 1% and how the two intervals show this, and say what share of the variation in perform skill explains.
-0.214 / 0.2141|1.997 / 2.0|0.0491 / 0.049|99% / 1% / 0.01|4.6% / 0.0459 / 0.04585
-Slope: one standard deviation more social skill goes with **0.214** SD higher team performance; t = 0.2141 ÷ 0.1072 = **1.997** with df = 85 − 2 = 83; p = **0.049** < 0.05, so H_0: β_1 = 0 is rejected at 5% but not at 1% (p > 0.01); Intervals: the 95% CI [0.0009, 0.4274] excludes 0 and the **99%** CI [−0.0685, 0.4968] includes 0, because a two-sided test at level α rejects exactly when the 100(1 − α)% CI excludes the null value; R^2 = 0.04585: skill explains about **4.6%** of the variation, and in simple regression R^2 = cor(perform, skill)^2, which is why lines 14–15 print a difference of 0; Low R^2: does not make the slope useless, it can still be a precise ceteris paribus estimate (Ch.3)
-@use C
-@tbl summary(skill\_regr) and confint() · n = 85 :: Term|Estimate|Std. Error|t value|p-value|95% CI|99% CI;;(Intercept)|0.0000|0.1066|0.000|1.0000|[−0.212, 0.212]|[−0.281, 0.281];;skill|0.2141|0.1072|1.997|0.0491|[0.0009, 0.4274]|[−0.0685, 0.4968];;!Multiple R-squared 0.04585 · Adjusted R-squared 0.03436 · F 3.989 on 1 and 83 DF, p = 0.0491
-===
-W5 · Ch.4 output: separate t-tests vs the F-test
-Lines 16–17. Read the output of `summary(mult_lm)` below. Interpret the skill coefficient. Then explain how neither slope is significant at 5% on its own while the regression as a whole is.
-holding ravens fixed / holding ravens constant / ceteris paribus / same ravens / 고정|0.122 / 0.115|0.0418 / 0.04184 / 0.042|jointly / joint / both zero / 결합 / 동시
-Skill: holding ravens fixed (**ceteris paribus**), one SD more social skill goes with 0.171 SD higher performance; t-tests: p = **0.122** (skill) and 0.115 (ravens), so neither is significant at 5% on its own; F-test: H_0: β_1 = β_2 = 0 against H_1: at least one ≠ 0 gives F(2, 82) = 3.30 with p = **0.042** < 0.05, so the two are **jointly** significant; Why both can hold: each t-test asks whether one variable adds anything once the other is already in, and skill and ravens share explanatory power (correlation 0.246), so each looks weak alone while together they clearly explain performance; Adjusted R^2 = 0.0519 > 0.0344 (skill alone): adding ravens is worth the lost degree of freedom, as expected because its |t| = 1.59 > 1 (Ch.6)
-@use C
-@tbl summary(mult\_lm) · n = 85 :: Term|Estimate|Std. Error|t value|p-value;;(Intercept)|0.0000|0.1056|0.000|1.000;;skill|0.1712|0.1096|1.562|0.122;;ravens|0.1746|0.1096|1.593|0.115;;!Multiple R-squared 0.07449 · Adjusted R-squared 0.05192 · F 3.30 on 2 and 82 DF, p = 0.04184
-===
-W5 · Ch.3 omitted variable bias
-Lines 11 and 16. The skill slope is 0.2141 in the simple regression (line 11) and 0.1712 once ravens is added (line 16). The slope from regressing ravens on skill is 0.2458. Show how these numbers fit together and explain the drop.
-0.2141|0.1746|0.2458 / 0.246|omitted variable / omitted-variable / 누락변수 / 생략변수|upward / positive / 상향 / 과대
-Formula: simple slope = β̂_1 + β̂_2 × δ̃_1 (Ch.3); Numbers: 0.1712 + 0.1746 × 0.2458 = 0.1712 + 0.0429 = **0.2141**; Why: ravens raises performance (β̂_2 = **0.1746** > 0) and is positively correlated with skill (δ̃_1 = **0.2458** > 0), so without ravens the skill slope picks up part of the ravens effect; Result: the simple slope is biased **upward** by 0.043, the **omitted variable** bias; Note: δ̃_1 equals the correlation here because both variables are standardized
-@use C
-===
-W5 · Ch.6 output: confidence vs prediction interval
-Line 18. The output below also shows `interval = "prediction"` for the same two new teams. Interpret the first confidence interval, and explain why the prediction interval is so much wider.
-0.3475 / 0.347|average / mean / expected / 평균|individual / single / one team / one new / 개별|error / σ / 오차|wider / 넓
-Fit: ŷ = 0.3475 for skill = 0.5 and ravens = 1.5; Confidence interval: [−0.034, 0.729] is a 95% range for the **average** performance E(y | x) of all teams with these scores, and it reflects only the uncertainty in the estimated coefficients; Prediction interval: [−1.627, 2.322] is a 95% range for **one** new team, and it adds the variance of that team's own **error** u, se(ŷ)^2 + σ̂^2 with σ̂ = 0.974; Why wider: σ̂^2 dominates and does not shrink as n grows, so the prediction interval is always **wider** (Ch.6)
-@use C
-@tbl predict() · 95% :: New team|fit|conf. lwr|conf. upr|pred. lwr|pred. upr;;skill 0.5, ravens 1.5|0.3475|−0.0339|0.7289|−1.6267|2.3217;;skill 1.5, ravens 0.5|0.3441|−0.0373|0.7255|−1.6301|2.3183
-===
-@case D
-simple regression demonstration.R (condensed) — simulation of tests and intervals (W5)
-@code set.seed(4201);;slope=0.2; intercept=3; sampleSize=10; sampleCnt=10000;;estimator=c(); t=c(); pValue=c();;for(rowIdx in 1:sampleCnt) {;;  fertilizer=rnorm(sampleSize,10,2);;  yield=intercept+slope*fertilizer+rnorm(sampleSize,0,1);;  coef=summary(lm(yield~fertilizer))$coefficients;;  estimator[rowIdx]=coef[2,1];;  t[rowIdx]=coef[2,3];;  pValue[rowIdx]=coef[2,4];;};;hist(estimator);;alpha=0.05;;rejection=ifelse(pValue<=alpha, "Reject", "Fail to Reject");;(result=table(rejection));;barplot(result, main="Null Hypothesis Rejection");;sampleSize=12; slope=2; sampleCnt=20;;results=data.frame(index=1:sampleCnt);;for(rowIdx in 1:sampleCnt) {;;  fertilizer=rnorm(sampleSize,10,2);;  yield=intercept+slope*fertilizer+rnorm(sampleSize,0,1);;  fer_regr=lm(yield ~ fertilizer);;  results[rowIdx,"slope"]=fer_regr$coefficients[2];;  interval=confint(fer_regr);;  lowerBound=interval["fertilizer","2.5 %"];;  upperBound=interval["fertilizer","97.5 %"];;  results[rowIdx,"inside"]=lowerBound<=slope && slope<=upperBound;;}
-===
-W5 · set.seed()
-Line 1. What does set.seed() do?
-reproducible / same results / 재현|random number generator / seed / starting point / 난수|same random numbers / same draws / same numbers / 같은
-set.seed(): sets the starting point (seed) of the **random number generator**; Every run with the same seed draws the **same random numbers**, so the simulation is **reproducible**; Without it, rnorm() would give different samples on each run
-@use D
-===
-W5 · ifelse()
-Line 14. What does ifelse() do?
-condition / test / 조건|each element / element by element / vectorized / 각 요소|second / third / Reject / Fail to Reject
-ifelse(): checks a **condition** for **each element** of a vector; Where it is TRUE it returns the **second** argument, and where it is FALSE the third; Here every p-value becomes "Reject" (p-value at most 0.05) or "Fail to Reject"
-@use D
-===
-W5 · Ch.3 unbiasedness in the simulation
-Lines 4–12. Over the 10,000 samples, mean(estimator) = 0.2027 and sd(estimator) = 0.190, while the true slope is 0.2. What property of OLS does this show, and what does the histogram on line 12 picture?
-unbiased / unbiasedness / 불편|0.2027 / 0.203|sampling distribution / 표본분포
-Mean: 0.2027 ≈ 0.2, so across repeated samples OLS is right on average, E(β̂_1) = β_1: **unbiasedness** (MLR.1–MLR.4); hist(estimator): pictures the **sampling distribution** of β̂_1, centred at 0.2 and roughly normal because the errors are normal (MLR.6); Spread: sd 0.190 is the sampling standard deviation, and it shrinks with a larger n or more variation in fertilizer, since Var(β̂_1) = σ^2 ÷ SST_x
-@use D
-===
-W5 · Ch.4 output: rejection rate = power
-Line 15. The table prints Fail to Reject 8092 and Reject 1908, and the true slope is 0.2, not 0. What does the 19.1% rejection rate measure, what is the other 80.9%, and what would the rate be if the true slope were 0?
-power / 검정력|19.1% / 0.191 / 1908|type II / type 2 / 제2종|5% / 0.05 / type I / 제1종
-Power: H_0 (β_1 = 0) is false here, so every rejection is correct and 1908 ÷ 10,000 = **19.1%** estimates the **power** of the 5% t-test; Type II: the other 80.9% fail to reject a false H_0, a **Type II** error; Why low: the effect is small relative to the noise and n is only 10, so a larger slope or a larger n raises power; True slope 0: H_0 is then true and the rejection rate is about α = **5%**, the Type I error rate (a rerun with slope = 0 gave 5.2%)
-@use D
-@tbl table(rejection) · 10,000 samples :: Fail to Reject|Reject;;8092|1908
-===
-W5 · Ch.4 output: what "95% confident" means
-Lines 17–28. In this run all 20 intervals contain the true slope 2 (inside = TRUE 20 times). How many would you expect, and what does the 95% level actually promise?
-19|repeated samples / repeated sampling / 95% of samples / 반복|true slope / true value / parameter / 참값 / 모수|random / 확률
-Expected: 0.95 × 20 = **19** intervals contain the true slope, and 20 of 20 is well within normal sampling variation; Meaning: 95% is a property of the method, in **repeated samples** 95% of the intervals built this way cover the **true slope**; Single interval: once computed it either contains 2 or it does not, so "a 95% probability that β_1 lies in this interval" is the wrong reading; Key point: the bounds are **random**, β_1 is fixed (Ch.4)
-@use D
-===
-@case E
-W6 — dummy variables and interactions (lecture examples, Wooldridge Ch.7)
-@code m1 <- lm(wage ~ female + educ, data = df);;m2 <- lm(wage ~ educ*female, data = df);;m3 <- lm(wage ~ educ + as.factor(region), data = df);;library(car);;linearHypothesis(m2, c("female = 0", "educ:female = 0"));;restricted <- lm(wage ~ educ + exper, data = df);;unrestricted <- lm(wage ~ (educ + exper)*female, data = df);;anova(restricted, unrestricted);;lpm <- lm(inlf ~ educ + age, data = df)
-===
-W6 · as.factor()
-Line 3. What does as.factor() do, and what does lm() then create from it?
-categorical / factor / 범주|dummy / dummies / 더미 / 가변수|base / reference / omitted / 기준
-as.factor(): converts a variable into a **factor**, a **categorical** variable with levels, instead of a number; lm(): then creates one **dummy** for each level except the **base** (reference) level; Each dummy coefficient is the difference from the base level
-@use E
-===
-W6 · anova()
-Line 8. What does anova() do when it is given two models?
-nested / compares / 비교|F-test / F|RSS / residual sum of squares / 잔차제곱합|Chow
-anova(): **compares** two **nested** models with an **F-test**; It uses the residual sum of squares (**RSS**) of each model and the number of extra parameters, and reports F and its p-value; Here the models differ by female and its interactions, so it is the **Chow** test
-@use E
-===
-W6 · Ch.7 output: dummy coefficient
-Line 1, estimated with df = wage1 (Wooldridge, n = 526), gives predicted wage = 0.623 − 2.273 female + 0.506 educ, with a standard error of 0.279 on female. Interpret the female coefficient. Which group is the base, and why can't a male dummy be added as well?
+수식과 더미변수 · Ch.7 · dummy coefficient
+Line 1 (m1). Interpret the female coefficient −2.273 (SE 0.279). Which group is the base, and why can't a male dummy be added as well?
 2.27 / 2.273|same education / same educ / holding educ / educ fixed / 교육 고정 / 같은 교육|base / reference / men / male / 남성 / 기준|dummy variable trap / perfect collinearity / 완전공선 / 더미변수 함정
 female: among people with the **same education**, women earn about **$2.27** per hour less than men on average (t = −2.273 ÷ 0.279 = −8.15, p < 0.001); Base group: men (female = 0), the intercept 0.623 belongs to the men's line and −2.273 shifts it down for women; Male dummy: female + male = 1 for everyone, an exact linear relation with the intercept, the **dummy variable trap** (perfect collinearity, MLR.3); Caution: this is not proof of discrimination, since female may be correlated with omitted productivity factors such as experience (Ch.7)
-@use E
+@use C
 ===
-W6 · Ch.7 output: interaction and joint test
-Lines 2 and 5. The output of m2 (wage1) is below. What is the estimated return to education for men and for women, and is the gap significant? Line 5 tests female = 0 and educ:female = 0 together and gives F = 33.51, p < 0.001. Why can it reject when neither t-test does?
-0.539 / 0.5395|0.453 / 0.4535|0.407 / not significant / insignificant / 유의하지 않|33.5 / 33.51|jointly / joint / 결합 / 동시
-Men: return to education = **0.539** dollars per hour for each year (female = 0); Women: 0.5395 − 0.0860 = **0.4535**; Gap: educ:female = −0.086 with p = **0.407**, so no evidence that the return differs; Joint test: F = **33.51** with p < 0.001 rejects H_0 that men and women have the same wage line; Why: female and educ:female are almost collinear (correlation 0.96), so their separate t-tests are weak while **jointly** they clearly matter; Reading: women earn less, the data just cannot say whether it is the intercept or the slope (at the mean educ 12.56 the gap is −1.1985 − 0.086 × 12.56 ≈ −2.28)
-@use E
-@tbl summary(m2) · wage1, n = 526 :: Term|Estimate|Std. Error|t value|p-value;;(Intercept)|0.2005|0.8436|0.238|0.812;;educ|0.5395|0.0642|8.400|<0.001;;female|−1.1985|1.3250|−0.905|0.366;;educ:female|−0.0860|0.1036|−0.830|0.407
+수식과 더미변수 · Ch.7 · as.factor() with several categories
+Line 3 (m3). region has four categories. How many dummies does lm() create from as.factor(region), which one is the base, and how is the south coefficient −0.598 (p = 0.133) read?
+three / 3 / k - 1 / k−1|base / reference / east / 기준|same education / holding educ / educ fixed / 교육 고정 / 같은 교육|not significant / insignificant / 유의하지 않
+Dummies: as.factor() makes region categorical, and lm() creates k − 1 = **3** dummies (northcen, south, west); Base: the first level in alphabetical order, **east**, is left out to avoid the dummy variable trap; south: with the **same education**, workers in the south earn on average $0.60 per hour less than in the east; Significance: p = 0.133 > 0.05, so the difference is **not significant** at 5%, and every region coefficient is a difference from east, not from the overall mean
+@use C
 ===
-W6 · Ch.7 output: Chow test by hand
-Line 8. The anova() table (wage1) is below. Compute F from the RSS values and state the conclusion. What does the test assume about the error variance?
-29.6 / 29.65 / 29.648|3|520|reject / 기각|same variance / constant variance / equal variance / same error variance / 등분산
-Formula: F = [(SSR_r − SSR_{ur}) ÷ q] ÷ [SSR_{ur} ÷ (n − k − 1)]; Numbers: [(5548.2 − 4737.8) ÷ **3**] ÷ (4737.8 ÷ **520**) = 270.1 ÷ 9.111 = **29.65**; Restrictions: q = 3, the female intercept shift and its two slope interactions, and df = 526 − 6 = 520; Conclusion: p < 2.2e-16, so **reject** H_0 that men and women share one wage equation; Assumption: the Chow test needs the **same error variance** in both groups (Ch.7)
-@use E
-@tbl anova(restricted, unrestricted) · wage1 :: Model|Res.Df|RSS|Df|Sum of Sq|F|p-value;;restricted|523|5548.2||||;;unrestricted|520|4737.8|3|810.38|29.648|<2.2e-16
+수식과 더미변수 · Ch.7 · interaction and joint test
+Lines 2 and 5 (m2). What is the return to education for men and for women, and is the gap significant? Line 5 tests female = 0 and educ:female = 0 together and gives F = 33.51. Why can it reject when neither t-test does?
+0.539|0.453 / 0.4535|0.407 / not significant / insignificant / 유의하지 않|33.5 / 33.51|jointly / joint / 결합 / 동시
+Men: return to education = **0.539** dollars per hour per year (female = 0); Women: 0.539 − 0.086 = **0.453**; Gap: educ:female = −0.086 with p = **0.407**, so no evidence that the return differs; Joint test: F = **33.51** with 2 and 522 df, p < 0.001, rejects that men and women have the same wage line; Why: female and educ:female are almost collinear (correlation 0.96), so their separate t-tests are weak while **jointly** they clearly matter
+@use C
 ===
-W6 · Ch.7 output: linear probability model
-Line 9 is a linear probability model (inlf = 1 if a woman is in the labor force). The textbook version (Example 7.12, mroz, n = 753) is below. Interpret the educ and kidslt6 coefficients, and name two weaknesses of the LPM that this fit shows.
+가설검정 · Ch.7 · Chow test by hand
+Line 8. Compute F from the RSS values in the table and state the conclusion. What does the test assume about the error variance?
+29.6 / 29.65|3|520|reject / 기각|same variance / constant variance / equal variance / same error variance / 등분산
+Formula: F = [(SSR_r − SSR_{ur}) ÷ q] ÷ [SSR_{ur} ÷ (n − k − 1)]; Numbers: [(5548.2 − 4737.8) ÷ **3**] ÷ (4737.8 ÷ **520**) = 270.1 ÷ 9.111 = **29.65**; Restrictions: q = 3, the female intercept shift and its two slope interactions, and df = 526 − 6 = 520; Conclusion: p < 0.001, so **reject** H_0 that men and women share one wage equation; Assumption: the Chow test needs the **same error variance** in both groups (Ch.7)
+@use C
+===
+수식과 더미변수 · Ch.7 · linear probability model
+Line 9. inlf = 1 if a woman is in the labor force. Interpret the educ and kidslt6 coefficients, and name two weaknesses of the LPM that this fit shows.
 percentage points / percentage point / %p / 퍼센트포인트|3.8 / 0.038|26.2 / 0.262|below 0 / above 1 / outside / 0과 1 / 벗어|heteroskedastic / heteroskedasticity / robust / 이분산
-educ: one more year of education raises the probability of being in the labor force by 0.038, that is **3.8 percentage points**, ceteris paribus; kidslt6: each child under 6 lowers it by **26.2** percentage points; Weakness 1: fitted values run from −0.345 to 1.127, and 33 of 753 (16 below 0, 17 above 1) fall **outside** [0, 1]; Weakness 2: Var(u | x) = p(x)[1 − p(x)] depends on x, so the LPM is necessarily **heteroskedastic** and needs robust standard errors; Also: a constant effect cannot hold everywhere, since going from 0 to 4 young children would lower the probability by 4 × 0.262 = 1.05
-@use E
-@code lpm <- lm(inlf ~ nwifeinc + educ + exper + I(exper^2) + age + kidslt6 + kidsge6, data = mroz)
-@tbl Selected coefficients · fitted values from −0.345 to 1.127 :: Term|Estimate|Std. Error|t value;;educ|0.0380|0.0074|5.15;;kidslt6|−0.2618|0.0335|−7.81;;age|−0.0161|0.0025|−6.48;;nwifeinc|−0.0034|0.0014|−2.35
+educ: one more year of education raises the probability of being in the labor force by 0.038, that is **3.8 percentage points**, ceteris paribus; kidslt6: each child under 6 lowers it by **26.2** percentage points; Weakness 1: fitted values run from −0.345 to 1.127, and 33 of 753 fall **outside** [0, 1]; Weakness 2: Var(u | x) = p(x)[1 − p(x)] depends on x, so the LPM is necessarily **heteroskedastic** and needs robust standard errors
+@use C
+===
+@case D
+simple regression demonstration.R (condensed) — simulation of estimates, tests and intervals (W5)
+@code set.seed(4201);;slope=0.2; intercept=3; sampleSize=10;;fertilizer=rnorm(sampleSize,10,2);;yield=intercept+slope*fertilizer+rnorm(sampleSize,0,1);;fer_regr=lm(yield ~ fertilizer);;summary(fer_regr)$coefficients; confint(fer_regr);;sampleCnt=10000; estimator=c(); t=c(); pValue=c();;for(rowIdx in 1:sampleCnt) {;;  fertilizer=rnorm(sampleSize,10,2);;  yield=intercept+slope*fertilizer+rnorm(sampleSize,0,1);;  coef=summary(lm(yield~fertilizer))$coefficients;;  estimator[rowIdx]=coef[2,1]; t[rowIdx]=coef[2,3]; pValue[rowIdx]=coef[2,4];;};;hist(estimator); mean(estimator); sd(estimator);;rejection=ifelse(pValue<=0.05, "Reject", "Fail to Reject");;(result=table(rejection));;sampleSize=12; slope=2; sampleCnt=20;;results=data.frame(index=1:sampleCnt);;for(rowIdx in 1:sampleCnt) {;;  fertilizer=rnorm(sampleSize,10,2);;  yield=intercept+slope*fertilizer+rnorm(sampleSize,0,1);;  interval=confint(lm(yield ~ fertilizer));;  results[rowIdx,"inside"]=interval["fertilizer","2.5 %"]<=slope && slope<=interval["fertilizer","97.5 %"];;};;table(results$inside)
+@tbl Line 6 · first sample, n = 10 :: Term|Estimate|SE|t|p|95% CI;;(Intercept)|4.983|1.509|3.302|0.011|[1.503, 8.463];;fertilizer|0.0616|0.139|0.443|0.669|[−0.259, 0.382]
+@tbl Lines 14–25 · simulation output :: Line|Output|Value;;14|mean · sd of estimator|0.2027 · 0.190;;16|table(rejection)|Fail 8092 · Reject 1908;;25|table(results$inside)|TRUE 19 · FALSE 1;;25|missed interval (no. 16)|[1.422, 1.979]
+===
+시뮬레이션 · W5 · the data-generating process
+Lines 1–6. What population model do lines 2–4 create, and what does set.seed() guarantee? In the first sample the slope estimate is 0.0616 with p = 0.669 although the true slope is 0.2. Is that a mistake, and what do you conclude from this sample?
+reproducible / same random numbers / 재현|0.2 / true slope / population / 모집단 / 참값|fail to reject / not reject / 기각하지 못 / 기각 못|sampling variation / random / chance / 표본 변동 / 우연
+Model: yield = 3 + **0.2** × fertilizer + u, with fertilizer ~ N(10, 2^2) and u ~ N(0, 1), so the true slope is known; set.seed(4201): fixes the random number generator, so every run draws the same samples and the results are **reproducible**; First sample: with n = 10, β̂_1 = 0.0616 is far from 0.2 only by **sampling variation**, not by a mistake; Test: p = 0.669 > 0.05, so we **fail to reject** H_0: β_1 = 0 even though it is false, a Type II error, and the 95% CI [−0.259, 0.382] contains both 0 and 0.2
+@use D
+===
+시뮬레이션 · Ch.3 · unbiasedness and the sampling distribution
+Lines 7–14. What do coef[2,1], coef[2,3] and coef[2,4] pick out? Over 10,000 samples the slope estimates have mean 0.2027 and sd 0.190. What property of OLS does this show, and what does hist(estimator) picture?
+slope estimate / estimate / 기울기 추정|t / t value / t-statistic / t 통계량|p-value / p / p값|unbiased / unbiasedness / 불편|sampling distribution / 표본분포
+coef matrix: row 2 is the slope, and columns 1, 3 and 4 are the **slope estimate**, its **t value** and its **p-value** (column 2 is the SE); Mean: 0.2027 ≈ 0.2, so across repeated samples OLS is right on average, E(β̂_1) = β_1: **unbiasedness** (MLR.1–MLR.4); hist(estimator): pictures the **sampling distribution** of β̂_1, centred at 0.2 and roughly normal because the errors are normal (MLR.6); Spread: sd 0.190 shrinks with a larger n or more variation in fertilizer, since Var(β̂_1) = σ^2 ÷ SST_x
+@use D
+===
+시뮬레이션 · Ch.4 · rejection rate = power
+Lines 15–16. The table prints Fail to Reject 8092 and Reject 1908, and the true slope is 0.2, not 0. What does the 19.1% rejection rate measure, what is the other 80.9%, how could the rate be raised, and what would it be if the true slope were 0?
+power / 검정력|19.1% / 0.191 / 1908|type II / type 2 / 제2종|larger n / sample size / larger slope / 표본 크기|5% / 0.05 / type I / 제1종
+Power: H_0 (β_1 = 0) is false here, so every rejection is correct and 1908 ÷ 10,000 = **19.1%** estimates the **power** of the 5% t-test; Type II: the other 80.9% fail to reject a false H_0, a **Type II** error; Raising power: a **larger sample size** or a larger true slope (the script suggests slope 9 or n = 100) makes the effect easier to detect; True slope 0: H_0 is then true and the rejection rate is about α = **5%**, the Type I error rate
+@use D
+===
+시뮬레이션 · Ch.4 · confidence-interval coverage
+Lines 17–25. Twenty samples of n = 12 with true slope 2 give 19 intervals that contain 2 and one (no. 16, [1.422, 1.979]) that does not. Is 19 of 20 what you expect, and what does the 95% level actually promise?
+19|repeated samples / repeated sampling / 95% of samples / 반복|true slope / true value / parameter / 참값 / 모수|random / 확률
+Expected: 0.95 × 20 = **19** intervals, exactly what this run gives, and interval 16 is the expected one-in-twenty miss; Meaning: 95% is a property of the method, in **repeated samples** 95% of the intervals built this way cover the **true slope**; Single interval: once computed it either contains 2 or it does not, so "a 95% probability that β_1 lies in [1.422, 1.979]" is the wrong reading; Key point: the bounds are **random**, β_1 is fixed (Ch.4)
+@use D
 ===
 </script>
 <!--DATA-END-->
@@ -340,7 +315,7 @@ educ: one more year of education raises the probability of being in the labor fo
   .case-ex:hover{scrollbar-color:var(--rule) transparent;}
   .case-ex::-webkit-scrollbar{width:5px; height:5px;} .case-ex::-webkit-scrollbar-thumb{background:transparent; border-radius:3px;} .case-ex:hover::-webkit-scrollbar-thumb{background:var(--rule);}
   .case-ex .tables{display:flex; flex-direction:column; gap:14px;}
-  .case-ex .exbox{background:var(--paper); padding:22px 16px; box-shadow:0 0 0 1px rgba(0,0,0,0.05);}
+  .case-ex .exbox{background:var(--paper); padding:22px 16px; box-shadow:0 0 0 1px rgba(0,0,0,0.05); overflow-x:auto;}
   .case-ex .exbox table.t{margin-bottom:0; line-height:1.38;}
   .case-ex h2{font-size:1.2rem; font-weight:400; margin:0;}
   .case-ex .uses{font-size:0.76rem; color:var(--faint); margin:2px 0 14px;}
@@ -407,8 +382,8 @@ educ: one more year of education raises the probability of being in the labor fo
     #printSheet .p-ex{break-inside:avoid; page-break-inside:avoid; border-top:0.3mm solid #000; border-bottom:0.3mm solid #000; padding:3mm 0 1mm; margin:2mm 0 6mm;}
     #printSheet .p-ex h2{font-size:12.5pt; font-weight:400; margin:0;}
     #printSheet .p-ex .uses{font-size:9pt; margin:0 0 3mm; font-style:italic;}
-    #printSheet .p-ex .tables{display:flex; gap:8mm; align-items:flex-start;}
-    #printSheet .p-ex .tables > table{flex:1 1 0;}
+    #printSheet .p-ex .tables{display:flex; flex-wrap:wrap; gap:4mm 8mm; align-items:flex-start;}
+    #printSheet .p-ex .tables > table{flex:0 1 auto; width:auto;}
     #printSheet table.t{font-size:9.3pt; color:#000;}
     #printSheet table.t caption{color:#000; font-size:10.5pt; padding-bottom:1.5mm;}
     #printSheet table.t thead th{border-top:0.35mm solid #000;}
@@ -463,9 +438,10 @@ educ: one more year of education raises the probability of being in the labor fo
   }
   @media (pointer:coarse), (max-width:999.98px){
     .case-ex{grid-column:2; grid-row:auto; position:sticky; top:var(--bar-h); z-index:6; justify-self:stretch; width:auto; margin:0; background:var(--paper);
-      max-height:max(calc(var(--vvh, 100dvh) * 0.4), calc(var(--vvh, 100dvh) - var(--bar-h) - 330px)); top:calc(var(--bar-h) + var(--vvt, 0px)); overflow-y:auto; overflow-x:hidden; padding:12px var(--pad) 10px; border-bottom:1px solid var(--rule); box-shadow:0 8px 14px -12px rgba(0,0,0,0.3);}
+      max-height:max(calc(var(--vvh, 100dvh) * 0.4), calc(var(--vvh, 100dvh) - var(--bar-h) - 330px)); top:calc(var(--bar-h) + var(--vvt, 0px)); overflow-y:auto; overflow-x:auto; padding:12px var(--pad) 10px; border-bottom:1px solid var(--rule); box-shadow:0 8px 14px -12px rgba(0,0,0,0.3);}
     .case-ex .tables{flex-direction:column; flex-wrap:nowrap; gap:0;} .case-ex .exbox{display:block; background:none; box-shadow:none; padding:0;}
     .case-ex h2{font-size:1rem;} .case-ex .uses{margin:0 0 6px;}
+    .case-ex .excode{margin-bottom:18px;} .case-ex table.t{margin-bottom:18px;}
   }
   /* touch devices: the score bar follows the visible area when the on-screen keyboard pans the page */
   @media (pointer:coarse){ .scorebar{top:var(--vvt, 0px);} }
@@ -475,7 +451,7 @@ educ: one more year of education raises the probability of being in the labor fo
     .case.pg{grid-template-columns:minmax(0,3fr) minmax(0,2fr);}
     .case.pg > .qmain, .case.pg > .qside{grid-column:2;}
     .case-ex{grid-column:1; grid-row:1 / span 99; align-self:start; justify-self:stretch; position:sticky; top:calc(var(--bar-h) + var(--vvt, 0px)); z-index:2;
-      width:auto; height:calc(var(--vvh, 100dvh) - var(--bar-h)); max-height:none; margin:0; overflow-y:auto; overflow-x:hidden;
+      width:auto; height:calc(var(--vvh, 100dvh) - var(--bar-h)); max-height:none; margin:0; overflow-y:auto; overflow-x:auto;
       padding:16px 24px 24px; background:var(--bg); border-right:1px solid var(--rule); border-bottom:none; box-shadow:none;}
     .case-ex .excode{font-size:0.78rem;}
     .qhead{flex-wrap:wrap; row-gap:2px;} .exref, .qtools{white-space:nowrap;}
@@ -778,6 +754,7 @@ function fitExhibits(){   /* an exhibit that cannot fit in the margin without wr
     const cs = getComputedStyle(ex); if(cs.position !== 'sticky') return;
     const inner = ex.clientWidth - parseFloat(cs.paddingLeft) - parseFloat(cs.paddingRight);
     const tooWide = [...ex.querySelectorAll('table')].some(t => { const p = t.parentElement, ps = getComputedStyle(p); return t.scrollWidth > p.clientWidth - parseFloat(ps.paddingLeft) - parseFloat(ps.paddingRight) + 1; });
+    if(ex.querySelector('.excode')) return;   /* a code exhibit stays sticky: its output tables scroll sideways inside their card */
     if(tooWide || ex.scrollWidth > ex.clientWidth + 1) sec.classList.add('stacked');
   });
 }
