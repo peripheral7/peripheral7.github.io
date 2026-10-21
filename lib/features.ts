@@ -20,8 +20,3 @@ export const STUDY_MATERIALS: Feature[] = [
   { label: "실무 퀴즈", href: "/reports/appraisal-practice-quiz.html" },
   { label: "감정평가사 학습트리", href: "/appraiser" },
 ]
-
-// 사진 왼쪽(xl)에 보이는 "대본": 발표 대본 PDF. 좁은 화면에서는 오른쪽 열 아래(md) / 맨 아래(폰)에 쌓인다.
-export const SCRIPTS: Feature[] = [
-  { label: "AI 세션 2 대본 (PDF)", href: "/reports/ai-session2-script.pdf" },
-]
