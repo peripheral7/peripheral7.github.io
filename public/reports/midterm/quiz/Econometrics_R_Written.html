@@ -28,6 +28,7 @@
                   and a short leading label before " = " or ":" (e.g. "OCF = ...", "BA II Plus: ...") is set in semibold.
                   Always give the formula with the substituted numbers AND the calculator solution.
                 5+ optional:  @use ID   (shown as a small light "Exhibit A" next to the tag)    @tbl Caption :: H1|H2;;a|b   (table under the question)
+    SHOW ALL    "Show all answers" in the score bar shows every model answer in the side notes (not checked, not counted); click again to hide.
     @code       optional extra line:  @code line1;;line2  (R code under the question: monospace, no box, R colours; ;; = new line). Inline `code` in text and answers = monospace.
     CONDITIONS  every question must stand alone: restate the numbers it needs, or point to its exhibit with @use.
 
@@ -480,6 +481,7 @@ anova(): given two **nested** models, **compares** them with an **F-test**; It u
       <button class="link on" id="allViewBtn" type="button">All</button>
       <button class="link" id="reviewBtn" type="button" disabled>Review not passed (0)</button>
       <button class="link" id="flagBtn" type="button" disabled>Marked (0)</button>
+      <button class="link" id="showAllBtn" type="button" title="Show the model answer of every question (not graded)">Show all answers</button>
       <button class="link" id="copyMissedBtn" type="button" disabled>Copy not passed #</button>
       <button class="link" id="saveBtn" type="button">Save</button>
       <button class="link" id="resetBtn" type="button">Restart</button>
@@ -578,6 +580,7 @@ $('quizFooter').textContent = `${META.subject || ''} — ${META.textbook || ''}`
 
 /* checking: key results found in the written answer */
 const PASS = 0.5;
+let showAll = false;   // "Show all answers": model answers in the side notes without checking
 let drafts = new Array(N).fill(''), snap = new Array(N).fill(null), filterMode = 'all', reviewList = [], flagList = [], pickNums = null, current = 0;
 const missed = new Set(), flagged = new Set();
 const norm = s => s.toLowerCase().replace(/[^a-z0-9가-힣]/g, '');
@@ -711,7 +714,7 @@ function questionNodes(qi, first, retry){
       `<div class="sn-head"><span class="${g.n / g.t >= PASS ? 'ok' : g.n ? 'part' : 'no'}">${g.n / g.t >= PASS ? 'Passed' : g.n ? 'Partly' : 'Not yet'}</span> · ${g.n} of ${g.t} key results</div>`;
     side.innerHTML = head2 + fmtExpl(q.model);
     if(!g.self) markIn(side, q.kws.filter((_, i) => !g.hits[i]), 'no');
-  }
+  } else if(showAll){ side.innerHTML = '<div class="sn-head">Answer</div>' + fmtExpl(q.model); }
   return [main, side];
 }
 function check(qi, ed, keep){ drafts[qi] = richHtml(ed); snap[qi] = drafts[qi]; current = qi; render(); if(keep) focusAnswer(qi, true); }
@@ -778,6 +781,7 @@ function updateChrome(){
 }
 $('reviewBtn').addEventListener('click', () => { const wl = scopeIdx().filter(i => !QUESTIONS[i].self && snap[i] !== null && resultOf(i) < 2); if(!wl.length) return; reviewList = wl; wl.forEach(i => { missed.add(i); snap[i] = null; }); filterMode = 'review'; render(); window.scrollTo({ top: 0, behavior: 'smooth' }); });
 $('allViewBtn').addEventListener('click', () => { filterMode = 'all'; render(); });
+$('showAllBtn').addEventListener('click', () => { showAll = !showAll; $('showAllBtn').textContent = showAll ? 'Hide all answers' : 'Show all answers'; $('showAllBtn').classList.toggle('on', showAll); render(); });
 $('flagBtn').addEventListener('click', () => { flagList = scopeIdx().filter(i => flagged.has(i)); if(!flagList.length) return; filterMode = 'flagged'; render(); window.scrollTo({ top: 0, behavior: 'smooth' }); });
 $('darkSw').addEventListener('click', () => $('darkSw').classList.toggle('on', document.documentElement.classList.toggle('dark')));
 
