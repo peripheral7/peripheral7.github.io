@@ -300,7 +300,8 @@ educ: one more year of education raises the probability of being in the labor fo
   .qflag.on::before{content:"●"; display:inline-block; font-size:0.62em; margin-right:5px; vertical-align:0.18em; color:#B9822A;}
   @keyframes flagpop{0%{opacity:.25; letter-spacing:0.08em;} 100%{opacity:1; letter-spacing:0;}}
   .qtext{font-size:1.06rem; margin:0 0 14px;}
-  .qfig{margin:0 0 14px; max-width:420px;}
+  .qfig{margin:0 0 14px; max-width:100%; overflow-x:auto;}   /* wide output tables scroll inside their box, never the page */
+  .qfig table.t{width:auto; min-width:min(420px, 100%);}
 
   /* ruled writing space */
   .answer{display:block; width:100%; min-height:calc(var(--lh) * 2); outline:none; font-size:0.92rem; line-height:var(--lh); color:var(--ink); overflow-wrap:anywhere; white-space:pre-wrap;
@@ -452,6 +453,13 @@ educ: one more year of education raises the probability of being in the labor fo
     .qside{grid-column:2; margin:-10px 0 0; max-width:none; padding:0 var(--pad) 22px;} .qside:empty{display:none;}
   }
   /* tablets (touch) and narrow windows: the code sticks to the top, under the score bar, and scrolls on its own */
+  /* tablets (touch, wider than a phone): the sheet fills the screen edge to edge, side notes go under the answer */
+  @media (pointer:coarse) and (min-width:821px){
+    :root{--paper-w:100vw; --pad:40px;}
+    .sheet::before{box-shadow:none;}
+    .scorebar, .data-errors{width:100%; max-width:none; margin-left:0; margin-right:0;}
+    .qside{grid-column:2; margin:-10px 0 0; max-width:none; padding:0 var(--pad) 22px;} .qside:empty{display:none;}
+  }
   @media (pointer:coarse), (max-width:999.98px){
     .case-ex{grid-column:2; grid-row:auto; position:sticky; top:var(--bar-h); z-index:6; justify-self:stretch; width:auto; margin:0; background:var(--paper);
       max-height:max(40vh, calc(100dvh - var(--bar-h) - 330px)); overflow-y:auto; overflow-x:hidden; padding:12px var(--pad) 10px; border-bottom:1px solid var(--rule); box-shadow:0 8px 14px -12px rgba(0,0,0,0.3);}
