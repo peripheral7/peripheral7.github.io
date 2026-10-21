@@ -53,7 +53,7 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, interactive-widget=resizes-content">
 <!--DATA-START-->
 <script type="text/plain" id="quizData">
 title: Econometrics Midterm
@@ -463,9 +463,22 @@ educ: one more year of education raises the probability of being in the labor fo
   }
   @media (pointer:coarse), (max-width:999.98px){
     .case-ex{grid-column:2; grid-row:auto; position:sticky; top:var(--bar-h); z-index:6; justify-self:stretch; width:auto; margin:0; background:var(--paper);
-      max-height:max(40vh, calc(100dvh - var(--bar-h) - 330px)); overflow-y:auto; overflow-x:hidden; padding:12px var(--pad) 10px; border-bottom:1px solid var(--rule); box-shadow:0 8px 14px -12px rgba(0,0,0,0.3);}
+      max-height:max(calc(var(--vvh, 100dvh) * 0.4), calc(var(--vvh, 100dvh) - var(--bar-h) - 330px)); top:calc(var(--bar-h) + var(--vvt, 0px)); overflow-y:auto; overflow-x:hidden; padding:12px var(--pad) 10px; border-bottom:1px solid var(--rule); box-shadow:0 8px 14px -12px rgba(0,0,0,0.3);}
     .case-ex .tables{flex-direction:column; flex-wrap:nowrap; gap:0;} .case-ex .exbox{display:block; background:none; box-shadow:none; padding:0;}
     .case-ex h2{font-size:1rem;} .case-ex .uses{margin:0 0 6px;}
+  }
+  /* touch devices: the score bar follows the visible area when the on-screen keyboard pans the page */
+  @media (pointer:coarse){ .scorebar{top:var(--vvt, 0px);} }
+  /* tablets 1000 px and wider (landscape; width, not orientation, so an Android keyboard does not flip the layout): the code stays fixed in the left 3/5, questions, answers and notes scroll in the right 2/5 */
+  @media (pointer:coarse) and (min-width:1000px){
+    :root{--pad:28px;}
+    .case.pg{grid-template-columns:minmax(0,3fr) minmax(0,2fr);}
+    .case.pg > .qmain, .case.pg > .qside{grid-column:2;}
+    .case-ex{grid-column:1; grid-row:1 / span 99; align-self:start; justify-self:stretch; position:sticky; top:calc(var(--bar-h) + var(--vvt, 0px)); z-index:2;
+      width:auto; height:calc(var(--vvh, 100dvh) - var(--bar-h)); max-height:none; margin:0; overflow-y:auto; overflow-x:hidden;
+      padding:16px 24px 24px; background:var(--bg); border-right:1px solid var(--rule); border-bottom:none; box-shadow:none;}
+    .case-ex .excode{font-size:0.78rem;}
+    .qhead{flex-wrap:wrap; row-gap:2px;} .exref, .qtools{white-space:nowrap;}
   }
 </style>
 </head>
@@ -902,6 +915,33 @@ try{
   }
 }catch(e){}
 render();
+/* touch devices: --vvh / --vvt follow the visible area (on-screen keyboard), and the line being typed stays in view */
+(function(){
+  const vv = window.visualViewport, root = document.documentElement;
+  if(!vv || !matchMedia('(pointer:coarse)').matches) return;
+  let raf = 0;
+  function keepCaret(){
+    const a = document.activeElement;
+    if(!a || !a.classList || !a.classList.contains('answer')) return;
+    const s = window.getSelection();
+    let r = s && s.rangeCount ? s.getRangeAt(0).getClientRects()[0] : null;
+    if(!r || (!r.width && !r.height && !r.top)){ const b = a.getBoundingClientRect(); r = { top: Math.max(b.top, b.bottom - 40), bottom: b.bottom }; }   /* empty line: use the end of the answer */
+    const top = vv.offsetTop + (parseFloat(getComputedStyle(root).getPropertyValue('--bar-h')) || 52) + 8, bottom = vv.offsetTop + vv.height - 16;
+    if(r.bottom > bottom) window.scrollBy(0, r.bottom - bottom + 24);
+    else if(r.top < top) window.scrollBy(0, r.top - top - 24);
+  }
+  function sync(){
+    raf = 0;
+    root.style.setProperty('--vvh', vv.height + 'px');
+    root.style.setProperty('--vvt', Math.max(0, vv.offsetTop) + 'px');
+    keepCaret();
+  }
+  const queue = () => { if(!raf) raf = requestAnimationFrame(sync); };
+  vv.addEventListener('resize', queue); vv.addEventListener('scroll', queue);
+  document.addEventListener('input', e => { if(e.target.classList && e.target.classList.contains('answer')) queue(); });
+  document.addEventListener('selectionchange', queue);
+  sync();
+})();
 const menuBtn = document.getElementById('menuBtn'), settingsEl = document.getElementById('settings');
 menuBtn.addEventListener('click', e => { e.stopPropagation(); const on = settingsEl.classList.toggle('open'); menuBtn.setAttribute('aria-expanded', String(on)); menuBtn.classList.toggle('on', on); });
 document.addEventListener('click', e => { if(settingsEl.classList.contains('open') && !e.target.closest('.setwrap')){ settingsEl.classList.remove('open'); menuBtn.classList.remove('on'); menuBtn.setAttribute('aria-expanded', 'false'); } });
