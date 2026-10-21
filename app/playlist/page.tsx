@@ -37,14 +37,16 @@ export default function SpotifyPlaylistPage() {
           title={post.title}
           tags={post.tags}
         />
-        <div className="relative mx-auto mt-8 max-w-4xl overflow-hidden rounded-lg border border-border bg-white shadow-scrap">
+        {/* 사진과 플레이어를 같은 격자 칸에 겹쳐 놓는다. 칸 높이 = max(사진 높이, 플레이어 352px + 여백) 이라
+            폰처럼 사진이 낮아지는 화면에서도 플레이어가 잘리지 않고, 사진은 object-cover 로 늘어나 배경을 채운다. */}
+        <div className="mx-auto mt-8 grid max-w-4xl overflow-hidden rounded-lg border border-border bg-white shadow-scrap">
           {/* eslint-disable-next-line @next/next/no-img-element */}
           <img
             src={post.image ?? "/placeholder.svg"}
             alt={post.imageAlt ?? post.title}
-            className="block w-full h-auto"
+            className="col-start-1 row-start-1 block h-full w-full object-cover"
           />
-          <div className="absolute inset-0 flex items-center justify-center p-6">
+          <div className="col-start-1 row-start-1 flex items-center justify-center p-4 sm:p-6">
             <PlaylistEmbed className="shadow-2xl" />
           </div>
         </div>
