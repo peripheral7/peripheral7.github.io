@@ -149,7 +149,7 @@ Compound: FV = 5,000 × (1.06)^4 = 6,312.38; Simple: FV = 5,000 × (1 + 0.06 × 
 Only the ratio matters
 $3,000 grows to $7,500 at 9% a year. Which statement is correct?
 It takes 2.5 times as long as $1,000 growing to $2,500.|*It takes 10.63 years, exactly as long as $1,000 growing to $2,500 at 9%.|It takes 16.67 years, because 150% ÷ 9% = 16.67.|The time cannot be found without the annuity formula.
-Formula: t = ln(FV / PV) / ln(1 + r); Step 1: FV / PV = 7,500 / 3,000 = 2.5; Step 2: t = ln 2.5 / ln 1.09 = 10.63 years; Insight: only the ratio FV / PV matters, so $1,000 → $2,500 takes the same time.
+Setup: 7,500 = 3,000 × (1.09)^t, so (1.09)^t = 7,500 / 3,000 = 2.5; Step 1: BA II Plus: 9 I/Y, −3000 PV, 0 PMT, 7500 FV, CPT N = 10.63 years; Check: (1.09)^{10} = 2.37 and (1.09)^{11} = 2.58, so t lies between 10 and 11; Insight: only the ratio FV / PV matters, so $1,000 → $2,500 (also a ratio of 2.5) takes the same 10.63 years.
 ===
 Solving for the rate
 An investment of $6,000 grows to $15,000 in 12 years. What annual rate did it earn?
@@ -171,7 +171,7 @@ Step 1: EAR(A) = (1 + 0.084/12)^{12} − 1 = 8.73%; Step 2: EAR(B) = (1 + 0.085/
 ★ Months versus years
 You save $400 at the end of every month in an account paying 6% compounded monthly. How many years until the balance reaches $30,000?
 63.85 years|6.25 years|*5.32 years
-Step 1: 30,000 = 400 × [(1.005)^t − 1] / 0.005; Step 2: (1.005)^t = 1.375; Step 3: t = ln 1.375 / ln 1.005 = 63.85 months; Step 4: Years = 63.85 / 12 = 5.32; BA II Plus: 0.5 I/Y, −400 PMT, 0 PV, 30000 FV, CPT N = 63.85 (months).
+Setup: 30,000 = 400 × [(1.005)^t − 1] / 0.005, with t in months; Step 1: BA II Plus: 0.5 I/Y, −400 PMT, 0 PV, 30000 FV, CPT N = 63.85; Step 2: CPT N counts payments, so 63.85 is in months; Step 3: Years = 63.85 / 12 = 5.32; Watch for: reporting 63.85 as years is the common error.
 ===
 ★ Deferred annuity
 You will receive $5,000 a year for 10 years, but the first payment arrives 4 years from today. The discount rate is 8%. What is the stream worth today?
@@ -709,7 +709,7 @@ function parseQuizData(raw){
       else if(l.startsWith('@')) errs.push(`${who}: unknown line "${l.slice(0, 12)}…" (use @use, @tbl or @img)`);
     });
     chapters[ch].idx.push(questions.length);
-    questions.push({ tag, text: L[1], options, correct, explain: L[3], fig, use, ch, n: chapters[ch].idx.length });
+    questions.push({ tag, text: L[1], options, correct, explain: L[3], fig, use, ch, n: questions.length + 1 });
   });
   questions.forEach(q => { if(q.use && !cases[q.use]) errs.push(`question ${q.n}: @use ${q.use} but no "@case ${q.use}" block exists`); });
   chapters.filter(c => !c.idx.length).forEach(c => errs.push(`chapter "${c.title}" has no questions`));
