@@ -29,7 +29,7 @@
                   Always give the formula with the substituted numbers AND the calculator solution.
                 5+ optional:  @use ID   (shown as a small light "Exhibit A" next to the tag)    @tbl Caption :: H1|H2;;a|b   (table under the question)
     SHOW ALL    "Show all answers" in the score bar shows every model answer in the side notes (not checked, not counted); click again to hide.
-    EXHIBIT CODE  an @case block may hold @code line1;;line2 instead of (or with) @tbl: the R code is shown with line numbers, sticky in the left margin.
+    STICKY CODE   desktop: the code exhibit stays in the left margin (the sheet shifts right below 1420 px); tablets and narrow windows: it sticks to the top.\n                  Selecting a question gives the code lines named in its text ("Line 5", "Lines 7-8") a soft grey background.\n    EXHIBIT CODE  an @case block may hold @code line1;;line2 instead of (or with) @tbl: the R code is shown with line numbers, sticky in the left margin.
     @code       optional extra line:  @code line1;;line2  (R code under the question: monospace, no box, R colours; ;; = new line). Inline `code` in text and answers = monospace.
     CONDITIONS  every question must stand alone: restate the numbers it needs, or point to its exhibit with @use.
 
@@ -57,7 +57,7 @@
 <!--DATA-START-->
 <script type="text/plain" id="quizData">
 title: Econometrics Midterm
-sub: R Functions · 5 code exhibits · W2, W5, W6 · 33 questions
+sub: R Functions · 5 code exhibits · W2, W5, W6 · 10 questions
 subject: Econometrics
 textbook: R lab scripts (Lab2.R, Lab4.R, regression.R, simple regression demonstration.R; Exhibits C and D condensed) and W6 lecture (Wooldridge Ch.7)
 ===
@@ -65,218 +65,80 @@ textbook: R lab scripts (Lab2.R, Lab4.R, regression.R, simple regression demonst
 Lab2.R — descriptive statistics (W2)
 @code practice <- read.csv("Lab2_Practice.csv", header=TRUE, na.strings=".");;competence <- practice$COMPETENCE;;breaks <- practice$BREAKS;;grade <- practice$GRADE;;hist(competence, breaks=15);;summary(breaks);;sum((competence-mean(competence))^2)/(length(competence)-1);;var(competence);;quantile(breaks);;IQR(breaks);;boxplot(grade);;abline(h=median(grade), col="red");;par(mfrow = c(1, 2));;boxplot(grade);;vioplot(grade)
 ===
-W2 · read.csv() and its arguments
-Line 1. What does read.csv() return, and what do the arguments header = TRUE and na.strings = "." do?
-data frame / dataframe / 데이터프레임|first row / column names / 첫 행|NA / missing / 결측
-read.csv(): reads a comma-separated file and returns a **data frame**; header: TRUE means the **first row** holds the column names, not data; na.strings: every "." in the file is read as **NA** (missing), so it does not enter calculations as a value
+W2 · quantile()
+Line 9. What does quantile() do?
+quartile / quartiles / percentile / 분위 / 사분위|0% / 25% / 75% / 100% / five / 다섯|minimum / maximum / median / 최소 / 최대 / 중앙값
+quantile(): returns sample quantiles, the values below which given shares of the data fall; By default it gives five numbers, the 0%, 25%, 50%, 75% and 100% points: the **minimum**, the first **quartile**, the median, the third quartile and the **maximum**; Other points can be asked for with probs, for example quantile(breaks, probs = 0.9)
 @use A
 ===
-W2 · The breaks argument of hist()
-Line 5. Is breaks in hist(competence, breaks=15) the variable breaks created on line 3? What does it do?
-argument / 인자|number of bins / bins / bars / cells / 구간|suggestion / approximately / about / pretty / 대략
-No: breaks= here is an **argument** of hist(), matched by its name, not the variable breaks; It sets the **number of bins** (bars) of the histogram, here about 15; A single number is only a **suggestion**: R chooses nearby "pretty" break points, so the exact count can differ
-@use A
-===
-W2 · Reading summary()
-Line 6. summary(breaks) returns Min. 0, 1st Qu. 1, Median 2, Mean 3.185, 3rd Qu. 4.5 and Max. 12. What does summary() report, and what does Mean > Median tell you?
-quartile / quartiles / minimum / maximum / 사분위|right / positively / positive skew / 오른쪽 / 양의 왜도|large values / outliers / pulled / 큰 값 / 이상치
-summary(): for a numeric vector reports the minimum, the first **quartile**, the median, the mean, the third quartile and the maximum; Here the mean (3.185) is above the median (2): a few **large values**, up to 12, pull the mean up; The distribution is **positively (right) skewed**
-@use A
-===
-W2 · Sample variance written out
-Lines 7–8 (competence has 27 values; the sum of squared deviations is about 124.07). What does line 7 compute step by step, and why does line 8 give the same number?
-sample variance / variance / 분산|n - 1 / 26 / 자유도|4.77|var
-(competence - mean(competence))\^2 squares each deviation from the mean, and sum() adds them (about 124.07); length(): gives n = 27, and dividing by **n - 1** = 26 gives about **4.77**; var(): computes the same **sample variance**, with the same n - 1 denominator, so line 8 returns the same value
-@use A
-===
-W2 · quantile() and IQR()
-Lines 9–10. quantile(breaks) returns 0, 1, 2, 4.5 and 12. What do these numbers represent, and what does IQR(breaks) return?
-quartile / quartiles / percentile / 사분위|minimum / maximum / median / 최소 / 최대 / 중앙값|3.5 / 4.5 - 1 / third quartile minus
-quantile(): by default returns the 0%, 25%, 50%, 75% and 100% points: the **minimum**, the first **quartile**, the median, the third quartile and the maximum; IQR(): the **third quartile minus** the first, 4.5 - 1 = **3.5**, the spread of the middle 50% of the students; Unlike the standard deviation, it is not pulled by the large values in the right tail
-@use A
-===
-W2 · boxplot() and abline(h = )
-Lines 11–12. What does boxplot(grade) draw, and why does the red line from abline(h = median(grade)) fall exactly on the bold line in the box?
-box / hinges / 상자|whiskers / outliers / 1.5 / 수염 / 이상치|median / 중앙값|horizontal / 수평
-boxplot(): draws a **box** from the lower to the upper hinge (about Q1 to Q3) with a bold line at the median; The **whiskers** reach the most extreme points within 1.5 times the IQR, and points beyond them are drawn as outliers; abline(): with h set to a value draws a **horizontal** line there; The bold line is the **median**, so the red line at median(grade) falls on it
-@use A
-===
-W2 · par(mfrow = ) and vioplot()
-Lines 13–15. What does par(mfrow = c(1, 2)) do, and what appears on screen after lines 14 and 15? (vioplot() comes from the vioplot package.)
-1 row and 2 columns / one row / two columns / 1행 / 2열|side by side / next to each other / 나란히|density / violin / 밀도|until / reset / stays / 유지
-par(): sets graphics parameters, and mfrow = c(1, 2) splits the window into **1 row and 2 columns**; So the boxplot (line 14) and the violin plot (line 15) of grade appear **side by side**; vioplot(): draws a smoothed **density** mirrored on both sides, with a small box plot inside; The layout stays in effect **until** it is reset, for example with par(mfrow = c(1, 1))
+W2 · par(mfrow = )
+Line 13. What does par(mfrow = c(1, 2)) do?
+graphics parameter / graphics parameters / 그래픽|1 row and 2 columns / one row / two columns / 1행 / 2열|side by side / next to each other / 나란히
+par(): sets **graphics parameters** for the plots that follow; mfrow = c(1, 2) splits the plotting window into **1 row and 2 columns**, filled row by row; So the next two plots (lines 14–15) appear **side by side**, until the layout is reset with par(mfrow = c(1, 1))
 @use A
 ===
 @case B
 Lab4.R — functions and strings (W2)
 @code library(readxl);;library(stringr);;to12 <- function(str){;;  hour=as.integer(str);;  if (hour>12) {;;    return(paste(hour-12, "PM"));;  } else {;;    return(paste(hour, "AM"));;  };;};;hasMultipleLoc <- function(str){;;  str_detect(str, fixed(","));;};;data=read_excel("Café.xlsx");;data <- as.data.frame(data);;colnames(data)=c("type","location","openingHour","closingHour");;(openingHour <- sapply(data$openingHour, to12));;data$openingHour=openingHour;;(locationText <- ifelse(sapply(data$location, hasMultipleLoc), "Yes", "No"));;data$hasMultipleLoc=locationText
 ===
-W2 · What to12() does
-Lines 3–10. What does to12() do, what are the roles of as.integer() and paste(), and what does to12("22") return?
-24-hour / 24 hour / 12-hour / 12 hour / convert / 변환|number / integer / 숫자 / 정수|joins / paste / space / 붙|10 PM
-to12(): converts an hour on the **24-hour** clock, given as text, into a 12-hour label; as.integer(): turns the text into a **number**, so it can be compared with 12 and reduced by 12; paste(): **joins** its arguments with a space; to12("22"): 22 > 12, so it returns paste(10, "PM"), that is **"10 PM"**
-@use B
-===
-W2 · Testing to12() at the edges
-Lines 3–10. What do to12("1") and to12("12") return, and which of the two shows a flaw in the function?
-1 AM|12 AM|noon / 12 PM / 정오|> 12 / greater than / 조건
-to12("1"): 1 is not greater than 12, so it returns **"1 AM"**, which is correct; to12("12"): 12 is not **greater than** 12 either, so it returns **"12 AM"**; That is the flaw: 12 o'clock in 24-hour time is **noon**, 12 PM; The condition hour > 12 treats 12 as morning, so 12 needs its own case (and 0, midnight, would give "0 AM")
-@use B
-===
-W2 · str\_detect() and fixed()
-Lines 11–13. What does hasMultipleLoc() return for "Seoul, Suwon" and for "Seoul", and what does fixed() do?
+W2 · str\_detect()
+Line 12. What does str\_detect() do, and what is fixed() for?
 TRUE / FALSE / logical / 논리|contains / detects / pattern / 포함 / 패턴|literal / exact / not a regular expression / 문자 그대로
-str\_detect(): returns **TRUE** or FALSE depending on whether the string **contains** the pattern; So hasMultipleLoc("Seoul, Suwon") is TRUE and hasMultipleLoc("Seoul") is FALSE; fixed(): makes "," a **literal** string matched character by character, not a regular expression
+str\_detect(): checks whether each string **contains** a pattern and returns **TRUE** or FALSE for each one; fixed(): makes the pattern a **literal** string, not a regular expression; So hasMultipleLoc("Seoul, Suwon") is TRUE and hasMultipleLoc("Seoul") is FALSE
 @use B
 ===
-W2 · A function without return()
-Lines 11–13. hasMultipleLoc() has no return() statement. What does it return, and why?
-last / last expression / last value / 마지막|automatically / implicitly / 자동|TRUE / FALSE / str\_detect
-An R function returns the value of the **last** expression it evaluates, even without return(); The last (and only) expression is str\_detect(...), so its TRUE or FALSE is returned **automatically**; return() is needed mainly to leave a function early, as in the two branches of to12()
-@use B
-===
-W2 · read\_excel(), as.data.frame() and colnames()
-Lines 14–16. What does each of the three lines do?
-Excel / xlsx / 엑셀|tibble / data frame / 데이터프레임|rename / renames / column names / 이름
-read\_excel(): from readxl (line 1), reads the **Excel** file Café.xlsx into a **tibble**; as.data.frame(): converts the tibble into an ordinary base R data frame; colnames(data) = c(...) **renames** the four columns to type, location, openingHour and closingHour
-@use B
-===
-W2 · Why sapply()
-Line 17. What does sapply() do here, and why not simply call to12(data$openingHour)?
-each element / every element / element by element / 각 요소|vector / simplifies / 벡터|if / single / one value / 하나
-sapply(): calls to12() on **each element** of the column and simplifies the results into a character **vector**; to12() uses **if**, which needs a single TRUE or FALSE; Given the whole column at once, the condition has many values and if() stops with an error (in current versions of R)
-@use B
-===
-W2 · ifelse() and the new columns
-Lines 18–20. What does ifelse() do on line 19, and what do lines 18 and 20 change in data?
-condition / test / 조건|each element / element by element / vectorized / 각 요소|Yes / No|overwrites / replaces / new column / 덮어 / 새 열
-ifelse(): checks a **condition** for **each element** and returns "Yes" where it is TRUE and "No" where it is FALSE; Line 18 **overwrites** the openingHour column with the 12-hour labels made on line 17; Line 20 adds a **new column**, hasMultipleLoc, with the Yes or No for each café
+W2 · sapply()
+Line 17. What does sapply() do?
+each element / every element / element by element / 각 요소|applies / apply / function / 함수 / 적용|vector / simplifies / 벡터
+sapply(): **applies** a function to **each element** of a vector or list; It then simplifies the results into a **vector** (or a matrix) when it can; Here it runs to12() on every opening hour, which to12() cannot do by itself because its if() takes one value at a time
 @use B
 ===
 @case C
 regression.R (condensed) — OLS, inference and prediction (W5)
 @code social <- read.csv("social.csv", header=T);;perform=social$cryp_scoreFINAL;;eye=social$RMET_mean;;skill=social$Smean_mean;;ravens=social$ravens_mean;;plot(perform ~ eye);;eye_regr=lm(perform ~ eye);;abline(eye_regr, col="blue");;abline(h=mean(perform), col="red");;abline(v=mean(eye), col="green");;skill_regr=lm(perform ~ skill);;skill_summary=summary(skill_regr);;confint(skill_regr, level=0.99);;(skill_coef=cor(perform,skill)^2);;round(skill_summary$r.squared-skill_coef,16);;mult_lm=lm(perform ~ skill + ravens);;(mult_summary=summary(mult_lm));;predict(mult_lm, data.frame(skill=c(0.5,1.5), ravens=c(1.5,0.5)), interval="confidence", level=0.95);;points <- seq(min(eye)-3, max(eye)+3, length.out=10000);;pred <- predict(eye_regr, data.frame(eye=points), interval="confidence", level=0.95);;polygon(c(rev(points), points), c(rev(pred[ ,3]), pred[ ,2]), col=rgb(0,0,0,0.1), border=NA)
 ===
-W5 · plot(), lm() and abline(model)
-Lines 6–8. Why is perform written first in perform ~ eye, what does lm() return, and what does abline() draw when it is given that result?
-dependent / outcome / y-axis / 종속|linear model / OLS / least squares / 선형|regression line / fitted line / intercept and slope / 회귀선
-perform ~ eye: the variable left of ~ is the **dependent** (outcome) variable, so plot() puts perform on the y-axis and eye on the x-axis; lm(): fits a **linear model** by OLS and returns a model object holding the intercept and the slope; abline(): given that object, draws the fitted **regression line** in blue
+W5 · confint()
+Line 13. What does confint() do, and what does level = 0.99 change?
+confidence interval / confidence intervals / 신뢰구간|coefficient / coefficients / 계수|wider / 99% / 넓
+confint(): returns a **confidence interval** for each **coefficient** of a fitted model, a lower and an upper bound per term; By default the level is 95%; level = 0.99 gives 99% intervals, which are **wider**
 @use C
 ===
-W5 · Lines at the means
-Lines 9–10. What do abline(h = ...) and abline(v = ...) add, and what do they show about the blue OLS line?
-horizontal / 수평|vertical / 수직|mean of perform / mean of eye / 평균|passes through / point of means / 지나
-abline(): with h draws a **horizontal** line at the **mean of perform**, and with v a **vertical** line at the mean of eye; The two lines cross at the point of means; The OLS line always **passes through** that point, because the OLS intercept equals mean(perform) - slope × mean(eye)
-@use C
-===
-W5 · summary() and confint(level = 0.99)
-Lines 12–13. What does summary() report for an lm model, and what does confint(skill\_regr, level = 0.99) return compared with the default?
-coefficient table / Estimate / Std. Error / 계수|R-squared / F-statistic / 결정계수|confidence interval / 신뢰구간|wider / 99% / 넓
-summary(): reports the **coefficient table** (Estimate, Std. Error, t value and p-value of each term), the residual standard error, the **R-squared** and adjusted R-squared, and the F-statistic; confint(): returns a **confidence interval** for each coefficient, by default at the 95% level; level: 0.99 gives 99% intervals (columns 0.5 % and 99.5 %), which are **wider**
-@use C
-===
-W5 · cor() squared and round(..., 16)
-Lines 14–15. The R-squared of perform ~ skill is about 0.0459. What does line 14 compute, how is it related to that R-squared, and what is round(..., 16) for?
-correlation / Pearson / 상관|equals / same / 같|floating / rounding / tiny / 반올림 / 오차
-cor(): computes the Pearson **correlation** of perform and skill, and \^2 squares it; In a simple regression the squared correlation **equals** the R-squared, so line 14 also gives about 0.0459; round(): rounds the difference to 16 decimals so that tiny **floating**-point differences between the two calculations are not read as a real gap
-@use C
-===
-W5 · The multiple regression and its F-test
-Lines 16–17. The summary reports coefficients 0.1712 (skill) and 0.1746 (ravens), R-squared 0.0745 and F(2, 82) = 3.3 with p = 0.04184. What does the F-test test, where do 2 and 82 come from, and what is the conclusion at 5%?
-both / jointly / all slopes / 모두 / 동시에|restrictions / predictors / 제약|n - k - 1 / 85 - 2 - 1 / residual degrees of freedom / 잔차 자유도|reject / 기각
-F-test: H_0 says the skill and ravens slopes are **both** 0, H_1 that at least one is not 0; 2: the number of **restrictions**, one per predictor tested; 82: the residual degrees of freedom, **n - k - 1** = 85 - 2 - 1; Since p = 0.04184 < 0.05 we **reject** H_0: the model explains perform better than a model with no predictors
-@use C
-===
-W5 · predict() with interval = "confidence"
-Line 18. What does predict() do with the data frame, and what does the result look like with interval = "confidence"?
-predicted / prediction / fit / 예측|new data / data frame / 새 데이터|lwr / upr / lower / upper / 하한 / 상한|0.3475
-predict(): plugs the **new data**, two cases with the same variable names as the model, into the fitted equation and returns the **predicted** values (about 0.3475 and 0.3441); interval: "confidence" adds the **lower and upper** bounds, so the result is a matrix with the columns fit, lwr and upr, one row per case; The interval is for the average perform at those predictor values, not for one new group
-@use C
-===
-W5 · Drawing the confidence band
-Lines 19–21. What do seq(), predict() and polygon() do together?
-evenly spaced / equally spaced / grid / 등간격|lower and upper / bounds / 하한 / 상한|fills / shaded / band / 음영 / 채우
-seq(): creates 10,000 **evenly spaced** values of eye from min(eye) - 3 to max(eye) + 3; predict(): gives the fitted value and the 95% **lower and upper** bounds at each of those points (columns 2 and 3 of pred); polygon(): joins the upper bounds (reversed) and the lower bounds into one closed shape and **fills** it in transparent grey, the **shaded** confidence band around the line
+W5 · predict()
+Line 18. What does predict() do, and what does interval = "confidence" add?
+predicted / prediction / fitted / 예측|new data / data frame / 새 데이터|lower / upper / lwr / upr / 하한 / 상한
+predict(): plugs **new data**, a data frame with the model's variable names, into the fitted equation and returns the **predicted** values, here about 0.3475 and 0.3441; interval = "confidence" adds the **lower and upper** bounds, so the result has the columns fit, lwr and upr
 @use C
 ===
 @case D
 simple regression demonstration.R (condensed) — simulation of tests and intervals (W5)
 @code set.seed(4201);;slope=0.2; intercept=3; sampleSize=10; sampleCnt=10000;;estimator=c(); t=c(); pValue=c();;for(rowIdx in 1:sampleCnt) {;;  fertilizer=rnorm(sampleSize,10,2);;  yield=intercept+slope*fertilizer+rnorm(sampleSize,0,1);;  coef=summary(lm(yield~fertilizer))$coefficients;;  estimator[rowIdx]=coef[2,1];;  t[rowIdx]=coef[2,3];;  pValue[rowIdx]=coef[2,4];;};;hist(estimator);;alpha=0.05;;rejection=ifelse(pValue<=alpha, "Reject", "Fail to Reject");;(result=table(rejection));;barplot(result, main="Null Hypothesis Rejection");;sampleSize=12; slope=2; sampleCnt=20;;results=data.frame(index=1:sampleCnt);;for(rowIdx in 1:sampleCnt) {;;  fertilizer=rnorm(sampleSize,10,2);;  yield=intercept+slope*fertilizer+rnorm(sampleSize,0,1);;  fer_regr=lm(yield ~ fertilizer);;  results[rowIdx,"slope"]=fer_regr$coefficients[2];;  interval=confint(fer_regr);;  lowerBound=interval["fertilizer","2.5 %"];;  upperBound=interval["fertilizer","97.5 %"];;  results[rowIdx,"inside"]=lowerBound<=slope && slope<=upperBound;;}
 ===
-W5 · set.seed() and rnorm()
-Lines 1–6. What do set.seed() and the two rnorm() calls do, and what is the true model that generates yield?
-reproducible / same random numbers / 재현|normal / 정규|3 + 0.2 / true model / slope 0.2 / 참
-set.seed(): fixes the start of the random number generator, so every run gives the same, **reproducible** draws; rnorm(sampleSize, 10, 2) draws 10 fertilizer values from a **normal** distribution with mean 10 and standard deviation 2; rnorm(sampleSize, 0, 1) draws the error term u with mean 0 and standard deviation 1; So the true model is yield = **3 + 0.2** × fertilizer + u
+W5 · set.seed()
+Line 1. What does set.seed() do?
+reproducible / same results / 재현|random number generator / seed / starting point / 난수|same random numbers / same draws / same numbers / 같은
+set.seed(): sets the starting point (seed) of the **random number generator**; Every run with the same seed draws the **same random numbers**, so the simulation is **reproducible**; Without it, rnorm() would give different samples on each run
 @use D
 ===
-W5 · The coefficient matrix
-Lines 7–10. What is coef, and what do coef[2,1], coef[2,3] and coef[2,4] contain?
-matrix / table / 행렬|estimate / slope / 기울기 / 추정|t value / t-statistic / t값|p-value / p값
-summary(...)$coefficients: is the coefficient **matrix**, one row per term ((Intercept) and fertilizer) with the columns Estimate, Std. Error, t value and p-value; coef[2,1] is the slope **estimate** of fertilizer, coef[2,3] its **t value** and coef[2,4] its **p-value** for the test of slope = 0; Each is stored at position rowIdx, so after the loop each vector holds 10,000 values
-@use D
-===
-W5 · hist(estimator)
-Line 12. What does the histogram of estimator show, and where should it be centred?
-sampling distribution / 표본분포|0.2 / true slope / 참 기울기|unbiased / unbiasedness / 불편
-hist(): of the 10,000 stored slopes shows the **sampling distribution** of the OLS slope estimator; It should be centred near the **true slope** 0.2, because OLS is **unbiased** under these assumptions; Its spread is the sampling variability that the standard error measures
-@use D
-===
-W5 · Counting rejections
-Lines 13–16. What do ifelse(), table() and barplot() do, and what does the share of "Reject" estimate here?
-labels / label / Reject|counts / count / frequency / 빈도|bar / bars / 막대|power / 검정력
-ifelse(): gives "Reject" where pValue <= 0.05 and "Fail to Reject" otherwise, one **label** per sample; table(): **counts** how many samples carry each label; barplot(): draws one **bar** per label; The true slope is 0.2, not 0, so the null is false and the share of Reject estimates the test's **power**
-@use D
-===
-W5 · If the true slope were 0
-If line 2 set slope=0 and the simulation were run again, what would the share of "Reject" estimate, and about what value should it be?
-Type I / type 1 / false rejection / 1종 오류|0.05 / 5% / alpha|null is true / hypothesis is true / true null / 귀무가설이 참
-With slope=0 the null hypothesis is **true**, so every rejection is a wrong one; The share of Reject then estimates the **Type I** error rate; It should be close to alpha, about **0.05** (5%), apart from simulation noise
-@use D
-===
-W5 · Filling results and checking coverage
-Lines 17–28. What do results[rowIdx, "slope"] and interval["fertilizer", "2.5 %"] select, when is inside TRUE, and about how many of the 20 rows should be TRUE?
-cell / row and column / column name / 행 / 열|lower / lower bound / 하한|both / 둘 다|19 / 95% / 95
-results[rowIdx, "slope"] = ... writes one **cell**, chosen by row number and column name, and creates the column the first time; interval["fertilizer", "2.5 %"] picks the **lower** bound in the fertilizer row of the confint() matrix ("97.5 %" is the upper bound); && is TRUE only if **both** comparisons hold, so inside is TRUE when the true slope 2 lies within the interval; About **95%** of such intervals cover the true slope, roughly 19 of 20, though one run can differ by chance
+W5 · ifelse()
+Line 14. What does ifelse() do?
+condition / test / 조건|each element / element by element / vectorized / 각 요소|second / third / Reject / Fail to Reject
+ifelse(): checks a **condition** for **each element** of a vector; Where it is TRUE it returns the **second** argument, and where it is FALSE the third; Here every p-value becomes "Reject" (p-value at most 0.05) or "Fail to Reject"
 @use D
 ===
 @case E
 W6 — dummy variables and interactions (lecture examples, Wooldridge Ch.7)
 @code m1 <- lm(wage ~ female + educ, data = df);;m2 <- lm(wage ~ educ*female, data = df);;m3 <- lm(wage ~ educ + as.factor(region), data = df);;library(car);;linearHypothesis(m2, c("female = 0", "educ:female = 0"));;restricted <- lm(wage ~ educ + exper, data = df);;unrestricted <- lm(wage ~ (educ + exper)*female, data = df);;anova(restricted, unrestricted);;lpm <- lm(inlf ~ educ + age, data = df)
 ===
-W6 · A dummy variable in lm()
-Line 1. female = 1 for women and 0 for men. How is the coefficient of female interpreted?
-difference / 차이|base group / men / reference / 기준|holding educ / same education / educ constant / 고정 / 통제|intercept / 절편
-The coefficient of female is the **difference** in expected wage between women and the **base group**, men; It is measured **holding educ** constant, that is, for a man and a woman with the same education; Graphically it shifts the **intercept**: both groups have the same slope on educ
+W6 · as.factor()
+Line 3. What does as.factor() do, and what does lm() then create from it?
+categorical / factor / 범주|dummy / dummies / 더미 / 가변수|base / reference / omitted / 기준
+as.factor(): converts a variable into a **factor**, a **categorical** variable with levels, instead of a number; lm(): then creates one **dummy** for each level except the **base** (reference) level; Each dummy coefficient is the difference from the base level
 @use E
 ===
-W6 · The * operator and the interaction term
-Line 2. Which terms does educ*female put into the model, and what do the coefficients of educ:female and of female measure?
-main effects / main effect / 주효과|interaction / 상호작용|slope / 기울기|intercept / educ = 0 / 절편
-educ*female: expands to educ + female + educ:female, the two **main effects** plus their **interaction**; The educ:female coefficient is the difference in the **slope** of educ between women and men (the difference in the return to education); female: the difference in the **intercept**, the wage gap at educ = 0
-@use E
-===
-W6 · as.factor() with several categories
-Line 3. region has several categories coded as numbers. What does as.factor() change, and what does lm() then create?
-categorical / factor / 범주|dummy / dummies / indicator / 더미 / 가변수|base / reference / omitted / left out / 기준|dummy variable trap / perfect collinearity / 다중공선
-as.factor(): treats region as a **categorical** variable, not as one number with a single slope; lm(): creates one **dummy** for each region except one, the **base** (reference) category; Leaving one out avoids the dummy variable trap (perfect collinearity with the intercept); Each dummy coefficient is the wage difference from the base region, holding educ constant
-@use E
-===
-W6 · linearHypothesis() on m2
-Lines 4–5. What does linearHypothesis() test here, which kind of test does it report, and what would rejecting the null mean?
-jointly / both / together / 동시에|F-test / F|car / package / 패키지|same intercept / same line / no difference / 차이가 없 / 같은
-linearHypothesis(): from the **car** package, tests the restrictions female = 0 and educ:female = 0 **jointly**; For an lm model it reports an **F-test**, here with 2 restrictions; The null says women and men have the **same intercept** and the same slope, one line for both; Rejecting it means the wage–education relationship differs by gender
-@use E
-===
-W6 · anova() and the Chow test
-Lines 6–8. What does anova(restricted, unrestricted) compute, how many restrictions are tested, and what does the test assume?
-F-test / F|nested / compares / 비교|3 / three / 세 개|Chow / same regression / 그룹|same error variance / equal variance / constant error variance / homoskedastic / 등분산
-anova(): with two **nested** models **compares** their residual sums of squares with an **F-test**; The unrestricted model adds female, educ:female and exper:female, so **3** restrictions are tested; This is the **Chow** test of whether one regression fits both women and men; It assumes the **same error variance** in both groups
-@use E
-===
-W6 · lm() with a binary dependent variable
-Line 9. inlf is 1 if a woman is in the labor force and 0 otherwise. What model does lm() estimate here, what does a coefficient measure, and what are two drawbacks?
-linear probability model / LPM / 선형확률|probability / 확률|outside 0 and 1 / below 0 / above 1 / 0과 1|heteroskedastic / heteroskedasticity / 이분산
-lm(): with a 0/1 dependent variable estimates a **linear probability model**; A coefficient is the change in the **probability** that inlf = 1 for a one-unit increase in the regressor, holding the others fixed; Drawback 1: fitted values can fall **outside 0 and 1**; Drawback 2: the error variance depends on x, so the model is **heteroskedastic** and the usual standard errors need care
+W6 · anova()
+Line 8. What does anova() do when it is given two models?
+nested / compares / 비교|F-test / F|RSS / residual sum of squares / 잔차제곱합|Chow
+anova(): **compares** two **nested** models with an **F-test**; It uses the residual sum of squares (**RSS**) of each model and the number of extra parameters, and reports F and its p-value; Here the models differ by female and its interactions, so it is the **Chow** test
 @use E
 ===
 </script>
@@ -488,6 +350,27 @@ lm(): with a 0/1 dependent variable estimates a **linear probability model**; A 
   .hl-com{color:var(--c-com); font-style:italic;} .hl-str{color:var(--c-str);} .hl-num{color:var(--c-num);} .hl-kw{color:var(--c-kw); font-weight:600;}
   .hl-fn{color:var(--c-fn);} .hl-arg{color:var(--c-arg);} .hl-op{color:var(--c-op);}
   @media print{ #printSheet .p-code{font-family:Consolas,Menlo,"Courier New",monospace; font-size:9.5pt; line-height:1.35; white-space:pre-wrap; margin:1.5mm 0 2mm; break-inside:avoid;} #printSheet code.ic{font-size:0.92em;} }
+  /* code lines of the selected question: soft neutral highlight */
+  .excode .cl{transition:background-color .25s; border-radius:3px;}
+  .excode .cl.hl{background:rgba(0,0,0,0.06);}
+  html.dark .excode .cl.hl{background:rgba(255,255,255,0.09);}
+  /* desktop (mouse) 1000-1419 px: shift the sheet right so the code stays sticky in a left column; side notes go under the answer */
+  @media (min-width:1000px) and (max-width:1419.98px) and (hover:hover) and (pointer:fine){
+    :root{--exw:clamp(360px, calc(100vw - 784px), 460px); --paper-w:min(760px, calc(100vw - var(--exw) - 24px));}
+    .pg{grid-template-columns:var(--exw) var(--paper-w) minmax(0,1fr);}
+    .sheet::before{left:calc(var(--exw) + var(--paper-w) / 2);}
+    .scorebar, .data-errors{margin-left:var(--exw); margin-right:0;}
+    .case-ex{grid-column:1; grid-row:1 / span var(--n, 1); position:sticky; top:calc(var(--bar-h) + 12px); align-self:start; justify-self:end; width:calc(100% - 20px); max-height:calc(100vh - var(--bar-h) - 24px); overflow:auto; margin:20px 14px 0 0; padding:1px 1px 12px;}
+    .case-ex .tables{flex-direction:column; flex-wrap:nowrap;} .case-ex .exbox{display:block;}
+    .qside{grid-column:2; margin:-10px 0 0; max-width:none; padding:0 var(--pad) 22px;} .qside:empty{display:none;}
+  }
+  /* tablets (touch) and narrow windows: the code sticks to the top, under the score bar, and scrolls on its own */
+  @media (pointer:coarse), (max-width:999.98px){
+    .case-ex{grid-column:2; grid-row:auto; position:sticky; top:var(--bar-h); z-index:6; justify-self:stretch; width:auto; margin:0; background:var(--paper);
+      max-height:min(40vh, 380px); overflow-y:auto; overflow-x:hidden; padding:12px var(--pad) 10px; border-bottom:1px solid var(--rule); box-shadow:0 8px 14px -12px rgba(0,0,0,0.3);}
+    .case-ex .tables{flex-direction:column; flex-wrap:nowrap; gap:0;} .case-ex .exbox{display:block; background:none; box-shadow:none; padding:0;}
+    .case-ex h2{font-size:1rem;} .case-ex .uses{margin:0 0 6px;}
+  }
 </style>
 </head>
 <body>
@@ -609,6 +492,7 @@ function parseQuizData(raw){
   return { meta, questions, cases, errs };
 }
 const PARSED = parseQuizData(document.getElementById('quizData').textContent);
+PARSED.questions.forEach(q => { const m = q.text.match(/\blines?\s+(\d+)(?:\s*[–-]\s*(\d+))?/i); q.hl = m ? [+m[1], +(m[2] || m[1])] : null; });   // code lines a question refers to
 const META = PARSED.meta, QUIZ_TITLE = META.title || 'Quiz', QUESTIONS = PARSED.questions, CASES = PARSED.cases, N = QUESTIONS.length;
 const $ = id => document.getElementById(id);
 if(PARSED.errs.length){ const b = document.createElement('div'); b.className = 'data-errors'; b.innerHTML = '<b>Quiz data needs fixing</b><ul>' + PARSED.errs.map(e => `<li>${esc(e)}</li>`).join('') + '</ul>'; document.body.insertBefore(b, document.body.firstChild); }
@@ -700,6 +584,7 @@ const rHLn = src => rHL(src).split('\n').map((l, i) => `<span class="cl"><span c
 function questionNodes(qi, first, retry){
   const q = QUESTIONS[qi];
   const main = document.createElement('div'); main.className = 'qmain inpage' + (first ? ' first' : ''); main.dataset.index = qi;
+  main.addEventListener('click', () => { if(current !== qi){ current = qi; markCurrent(); } });   /* selecting a question highlights its code lines */
   const head = document.createElement('div'); head.className = 'qhead';
   head.innerHTML = `<span class="qnum">${q.n}</span><span class="qtag">${fm(q.tag)}</span>` + (q.use ? `<span class="exref">· Exhibit ${esc(q.use)}</span>` : '') + (retry ? '<span class="retry">· retry</span>' : '');
   const tools = document.createElement('span'); tools.className = 'qtools';
@@ -759,7 +644,20 @@ function questionNodes(qi, first, retry){
   return [main, side];
 }
 function check(qi, ed, keep){ drafts[qi] = richHtml(ed); snap[qi] = drafts[qi]; current = qi; render(); if(keep) focusAnswer(qi, true); }
-function markCurrent(){ document.querySelectorAll('#quiz .qmain').forEach(m => m.classList.toggle('cur', +m.dataset.index === current)); }
+function markCurrent(){ document.querySelectorAll('#quiz .qmain').forEach(m => m.classList.toggle('cur', +m.dataset.index === current)); hlCode(); }
+/* the code lines named in the question text ("Line 5", "Lines 7-8") get a soft grey background in the exhibit */
+function hlCode(){
+  document.querySelectorAll('.excode .cl.hl').forEach(e => e.classList.remove('hl'));
+  const q = QUESTIONS[current]; if(!q || !q.use || !q.hl) return;
+  const m = $('quiz').querySelector(`.qmain[data-index="${current}"]`), sec = m && m.closest('.case'); if(!sec) return;
+  const lines = sec.querySelectorAll('.case-ex .excode .cl'); let first = null, last = null;
+  for(let k = q.hl[0]; k <= q.hl[1]; k++){ const el = lines[k - 1]; if(el){ el.classList.add('hl'); first = first || el; last = el; } }
+  const box = sec.querySelector('.case-ex');
+  if(first && box && box.scrollHeight > box.clientHeight + 2){   /* exhibit scrolls on its own: bring the lines into view */
+    const c = box.getBoundingClientRect(), r = first.getBoundingClientRect(), rl = last.getBoundingClientRect();
+    if(r.top < c.top + 8 || rl.bottom > c.bottom - 8) box.scrollBy({ top: r.top - c.top - 56, behavior: 'smooth' });
+  }
+}
 function caretEnd(ed){ const r = document.createRange(); r.selectNodeContents(ed); r.collapse(false); const s = window.getSelection(); s.removeAllRanges(); s.addRange(r); }
 function focusAnswer(qi, end){ current = qi; markCurrent(); const ed = $('quiz').querySelector(`.qmain[data-index="${qi}"] .answer`); if(ed){ ed.focus({ preventScroll: true }); if(end) caretEnd(ed); ed.closest('.qmain').scrollIntoView({ behavior: 'smooth', block: 'center' }); } }
 
