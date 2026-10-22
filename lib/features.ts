@@ -10,6 +10,7 @@ export const FEATURES: Feature[] = [
   { label: "시계", href: "/clock/" },
   { label: "슬라이드", href: "/slides/" },
   { label: "Midterm", href: "/reports/midterm/" },
+  { label: "계량 서브노트", href: "/reports/econometrics-subnotes/" },
 ]
 
 // 기능모음 아래에 나란히 보이는 "평가사 학습자료"(예전 게시판 맨 위 감정평가 카드 4장을 옮겨 온 것).
