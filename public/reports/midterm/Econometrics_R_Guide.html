@@ -1,0 +1,453 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>R Code and Output, Explained</title>
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Source+Serif+4:ital,opsz,wght@0,8..60,400;0,8..60,600;1,8..60,400&family=Noto+Serif+KR:wght@400;600&display=swap" rel="stylesheet">
+<!--
+  학습용 해설 페이지. 섹션마다 왼쪽 = R 코드와 실제 출력, 오른쪽 = 중요한 해석부터 순서대로.
+  해설 문장을 누르면 그 문장이 말하는 코드 토큰과 출력값이 연한 노란색으로 표시된다(다시 누르면 해제).
+  데이터: 아래 SECTIONS. 코드·출력 안의 ⟦id|텍스트⟧ 가 연결 대상, 해설의 refs 가 그 id 목록.
+  모든 출력은 R 4.3에서 실제로 실행한 값(Lab2_Practice.csv, social.csv, Wooldridge wage1·mroz, set.seed(4201)).
+-->
+<style>
+  :root{
+    --serif:"Source Serif 4","Noto Serif KR",Georgia,serif;
+    --mono:ui-monospace,SFMono-Regular,Consolas,"D2Coding",Menlo,monospace;
+    --bg:#F6F5F3; --paper:#FFFFFF; --panel:#FBFAF8; --ink:#1D1D1F; --soft:#6E6E73; --faint:#A1A1A6; --rule:#E6E5E1;
+    --hl:rgba(255,214,64,0.38); --hl-line:rgba(214,160,0,0.9); --note-on:rgba(255,214,64,0.18);
+    --c-com:#6a737d; --c-str:#22863a; --c-num:#b45309; --c-kw:#8250df; --c-fn:#0550ae; --c-arg:#0f766e; --c-op:#c2185b;
+    --gut:16px;
+  }
+  @media (prefers-color-scheme: dark){ :root:not([data-theme="light"]){
+    --bg:#1A1A1C; --paper:#232325; --panel:#1F1F21; --ink:#ECECEE; --soft:#A1A1A6; --faint:#6E6E73; --rule:#38383B;
+    --hl:rgba(255,210,80,0.26); --hl-line:rgba(255,210,80,0.8); --note-on:rgba(255,210,80,0.12);
+    --c-com:#8b949e; --c-str:#7ee787; --c-num:#ffa657; --c-kw:#d2a8ff; --c-fn:#79c0ff; --c-arg:#56d4c4; --c-op:#ff7b9c; } }
+  :root[data-theme="dark"]{
+    --bg:#1A1A1C; --paper:#232325; --panel:#1F1F21; --ink:#ECECEE; --soft:#A1A1A6; --faint:#6E6E73; --rule:#38383B;
+    --hl:rgba(255,210,80,0.26); --hl-line:rgba(255,210,80,0.8); --note-on:rgba(255,210,80,0.12);
+    --c-com:#8b949e; --c-str:#7ee787; --c-num:#ffa657; --c-kw:#d2a8ff; --c-fn:#79c0ff; --c-arg:#56d4c4; --c-op:#ff7b9c; }
+  *{box-sizing:border-box;}
+  html{-webkit-font-smoothing:antialiased;}
+  body{margin:0; background:var(--bg); color:var(--ink); font-family:var(--serif); line-height:1.65; font-size:16px;}
+
+  header{max-width:1320px; margin:0 auto; padding:56px 32px 18px;}
+  header h1{font-weight:400; font-size:2.6rem; line-height:1.1; margin:0 0 10px; letter-spacing:-0.01em;}
+  header p{margin:0; color:var(--soft); font-size:0.95rem; max-width:760px;}
+  nav{position:sticky; top:0; z-index:20; background:var(--bg); border-bottom:1px solid var(--rule);}
+  nav .in{max-width:1320px; margin:0 auto; padding:10px 32px; display:flex; flex-wrap:wrap; gap:4px 18px; font-size:0.86rem; align-items:baseline;}
+  nav a{color:var(--soft); text-decoration:none;} nav a:hover{color:var(--ink);}
+  nav .sp{flex:1;}
+  nav button{background:none; border:none; padding:0; font:inherit; font-size:0.86rem; color:var(--soft); cursor:pointer;}
+  nav button:hover{color:var(--ink);}
+
+  section{max-width:1320px; margin:0 auto; padding:34px 32px 10px;}
+  .sec-head{display:flex; align-items:baseline; gap:12px; margin:0 0 14px;}
+  .sec-head .no{font-size:0.9rem; color:var(--soft);}
+  .sec-head h2{font-weight:400; font-size:1.55rem; margin:0;}
+  .sec-head .src{margin-left:auto; font-size:0.8rem; color:var(--faint); text-align:right;}
+  .grid{display:grid; grid-template-columns:minmax(0,58fr) minmax(0,42fr); gap:28px; align-items:start;}
+
+  /* left: code and output, sticky while the notes scroll */
+  .left{position:sticky; top:calc(var(--nav-h, 44px) + 8px); max-height:calc(100vh - var(--nav-h, 44px) - 20px); overflow:auto; background:var(--paper); box-shadow:0 0 0 1px rgba(0,0,0,0.05); padding:18px 18px 22px;
+    scrollbar-width:thin;}
+  .lbl{font-size:0.74rem; letter-spacing:0.06em; text-transform:uppercase; color:var(--faint); margin:0 0 6px;}
+  pre{margin:0; font-family:var(--mono); font-size:0.8rem; line-height:1.55; white-space:pre; color:var(--ink);}
+  .code .cl{display:block; padding-left:2.6em; text-indent:-2.6em; white-space:pre-wrap; overflow-wrap:anywhere;}
+  .code .ln{display:inline-block; width:1.8em; margin-right:0.8em; text-indent:0; text-align:right; color:var(--faint); user-select:none;}
+  .out{margin-top:16px; border-top:1px solid var(--rule); padding-top:10px;}
+  .out .cmd{font-family:var(--mono); font-size:0.76rem; color:var(--soft); margin:0 0 3px;}
+  .out .cmd .at{color:var(--faint); margin-left:8px; font-family:var(--serif);}
+  .out pre{overflow-x:auto; padding-bottom:2px;}
+  .hl-com{color:var(--c-com); font-style:italic;} .hl-str{color:var(--c-str);} .hl-num{color:var(--c-num);} .hl-kw{color:var(--c-kw); font-weight:600;}
+  .hl-fn{color:var(--c-fn);} .hl-arg{color:var(--c-arg);} .hl-op{color:var(--c-op);}
+
+  /* linked token: invisible until its note is selected */
+  .k{border-radius:3px; transition:background-color .2s, box-shadow .2s;}
+  .k.on{background:var(--hl); box-shadow:inset 0 -1.5px 0 var(--hl-line);}
+
+  /* right: notes in order of importance */
+  .notes{list-style:none; margin:0; padding:0; counter-reset:n;}
+  .note{counter-increment:n; position:relative; padding:12px 14px 12px 44px; margin:0 0 6px; cursor:pointer; border-radius:6px; transition:background-color .2s;}
+  .note::before{content:counter(n); position:absolute; left:12px; top:12px; width:22px; text-align:right; font-size:0.9rem; color:var(--faint);}
+  .note:hover{background:rgba(0,0,0,0.03);}
+  .note.on{background:var(--note-on);}
+  .note.on::before{color:var(--ink);}
+  .note .t{font-weight:600; display:block; font-size:0.98rem; margin-bottom:2px;}
+  .note .b{font-size:0.95rem;}
+  .note:focus-visible{outline:2px solid var(--hl-line); outline-offset:2px;}
+  .note .num{font-variant-numeric:tabular-nums;}
+  .rank{font-size:0.74rem; color:var(--faint); letter-spacing:0.05em; margin:0 0 8px 14px;}
+  footer{max-width:1320px; margin:0 auto; padding:30px 32px 60px; color:var(--faint); font-size:0.8rem;}
+
+  @media (max-width:899.98px){
+    header{padding:36px var(--gut) 12px;} header h1{font-size:2rem;}
+    nav .in{padding:8px var(--gut); flex-wrap:nowrap; overflow-x:auto; white-space:nowrap; scrollbar-width:none;} nav .sp{flex:0 0 8px;}
+    section{padding:26px var(--gut) 6px;}
+    .sec-head{flex-wrap:wrap;} .sec-head .src{margin-left:0; text-align:left; flex:0 0 100%;}
+    .grid{grid-template-columns:minmax(0,1fr); gap:14px;}
+    .left{top:var(--nav-h, 44px); max-height:46vh; z-index:5; box-shadow:0 8px 14px -12px rgba(0,0,0,0.35), 0 0 0 1px rgba(0,0,0,0.05);}
+    .note{padding-left:38px;} .note::before{left:6px;}
+  }
+  @media print{
+    nav{display:none;} .left{position:static; max-height:none; overflow:visible; box-shadow:none;} .grid{grid-template-columns:1fr 1fr;}
+    section{break-inside:avoid-page;}
+  }
+</style>
+</head>
+<body>
+<header>
+  <h1 id="pgTitle"></h1>
+  <p id="pgIntro"></p>
+</header>
+<nav><div class="in" id="nav"><span class="sp"></span><button type="button" id="langBtn"></button><button type="button" id="clearBtn"></button><button type="button" id="themeBtn"></button></div></nav>
+<main id="main"></main>
+<footer id="pgFoot"></footer>
+
+<script>
+/* ⟦id|text⟧ marks a linked token; several ids: ⟦a,b|text⟧. Output text is R's printout, unchanged apart from the marks. */
+const SECTIONS = [
+{
+  id:'desc', no:'1', title:'기술통계', src:'Lab2.R · Lab2_Practice.csv (n = 27)',
+  code:[
+    'practice <- read.csv("Lab2_Practice.csv", header=TRUE, ⟦na|na.strings="."⟧)',
+    'competence <- practice$COMPETENCE',
+    'breaks <- practice$BREAKS',
+    'grade <- practice$GRADE',
+    '⟦sumb|summary(breaks)⟧',
+    '⟦sumg|summary(grade)⟧',
+    '⟦dev|sum(competence - mean(competence))⟧',
+    '⟦ss|sum((competence - mean(competence))^2)⟧',
+    '⟦ss2|sum((competence - mean(competence))^2)⟧/(⟦n1|length(competence) - 1⟧)',
+    '⟦var|var(competence)⟧; ⟦sd|sd(competence)⟧',
+    '⟦q|quantile(grade)⟧; ⟦iqr|IQR(grade)⟧',
+    '⟦box|boxplot(grade)⟧',
+    '⟦out|boxplot.stats(grade)$out⟧            # points drawn as outliers'
+  ],
+  outputs:[
+    {cmd:'summary(breaks)', at:'line 5', text:
+'   Min. 1st Qu.  Median    Mean 3rd Qu.    Max. \n  0.000   ⟦b_q1|1.000⟧   ⟦b_med|2.000⟧   ⟦b_mean|3.185⟧   ⟦b_q3|4.500⟧  ⟦b_max|12.000⟧ '},
+    {cmd:'summary(grade)', at:'line 6', text:
+'   Min. 1st Qu.  Median    Mean 3rd Qu.    Max. \n  ⟦g_min|36.00⟧   ⟦g_q1|72.00⟧   ⟦g_med|80.00⟧   ⟦g_mean|77.26⟧   ⟦g_q3|84.00⟧   97.00 '},
+    {cmd:'sum(competence - mean(competence))', at:'line 7', text:'[1] ⟦o_dev|1.776357e-15⟧'},
+    {cmd:'sum((competence - mean(competence))^2)', at:'line 8', text:'[1] ⟦o_ss|124.0741⟧'},
+    {cmd:'sum((competence - mean(competence))^2)/(length(competence) - 1)', at:'line 9', text:'[1] ⟦o_var1|4.77208⟧'},
+    {cmd:'var(competence); sd(competence)', at:'line 10', text:'[1] ⟦o_var|4.77208⟧\n[1] ⟦o_sd|2.184509⟧'},
+    {cmd:'quantile(grade); IQR(grade)', at:'line 11', text:'  0%  25%  50%  75% 100% \n  36   ⟦q_72|72⟧   80   ⟦q_84|84⟧   97 \n[1] ⟦o_iqr|12⟧'},
+    {cmd:'boxplot.stats(grade)$out', at:'line 13', text:'[1] ⟦o_out|36⟧'}
+  ],
+  notes:[
+    {t:'분포 모양: breaks는 오른쪽으로 치우쳤다', b:'breaks의 평균 3.185가 중앙값 2보다 크다. 최댓값 12 같은 큰 값 몇 개가 평균을 끌어올린 것이므로 오른쪽 꼬리가 긴(right-skewed) 분포다.', refs:['sumb','b_mean','b_med','b_max']},
+    {t:'grade는 반대로 왼쪽으로 치우쳤다', b:'grade의 평균 77.26이 중앙값 80보다 작다. 낮은 점수 36이 평균을 끌어내린 왼쪽 꼬리(left-skewed) 분포다.', refs:['sumg','g_mean','g_med','g_min']},
+    {t:'치우친 변수는 중앙값과 IQR로 요약한다', b:'평균·표준편차는 극단값에 끌려가므로, 순서만 쓰는 중앙값과 IQR = Q3 − Q1이 대표값·퍼짐으로 적절하다. grade의 IQR = 84 − 72 = 12.', refs:['q','q_72','q_84','iqr','o_iqr']},
+    {t:'표본분산 = 편차제곱합 ÷ (n − 1)', b:'편차제곱합 124.0741을 n − 1 = 26으로 나눈 4.772가 표본분산이고, var()의 값과 정확히 같다.', refs:['ss','o_ss','ss2','n1','o_var1','var','o_var']},
+    {t:'n − 1로 나누는 이유', b:'평균 x̄를 같은 데이터로 추정하면서 자유도 1을 썼기 때문이다. n − 1로 나눠야 s²가 모분산 σ²의 불편추정량이 된다(회귀의 σ̂² = SSR ÷ (n − k − 1)도 같은 원리).', refs:['n1']},
+    {t:'표준편차는 분산의 제곱근', b:'s = √4.772 = 2.185. 분산은 단위가 제곱이라 원래 단위로 되돌린 표준편차로 퍼짐을 읽는다.', refs:['sd','o_sd','o_var']},
+    {t:'편차의 합은 항상 0', b:'평균으로부터의 편차는 더하면 언제나 0이 된다. 1.776357e-15는 부동소수점 반올림 오차일 뿐이다. 그래서 퍼짐을 재려면 편차를 제곱해서 더한다.', refs:['dev','o_dev','ss']},
+    {t:'상자그림 이상치: 1.5 × IQR 규칙', b:'grade의 아래 경계 = Q1 − 1.5 × IQR = 72 − 18 = 54. 36은 54보다 작으므로 boxplot()이 점으로 따로 그리고, boxplot.stats()$out도 36을 돌려준다.', refs:['box','out','o_out','q_72','o_iqr','g_min']},
+    {t:'na.strings = "."', b:'파일 안의 "."를 결측값(NA)으로 읽게 한다. 결측이 섞이면 mean() 등은 NA를 돌려주므로 na.rm = TRUE가 필요하다(이 파일은 결측 0개).', refs:['na']}
+  ]
+},
+{
+  id:'simple', no:'2', title:'단순회귀와 회귀선', src:'regression.R · social.csv (n = 85, 모든 변수 표준화)',
+  code:[
+    'social <- read.csv("social.csv", header=T)',
+    '⟦y|perform⟧=social$cryp_scoreFINAL; ⟦xe|eye⟧=social$RMET_mean',
+    '⟦xs|skill⟧=social$Smean_mean; ravens=social$ravens_mean',
+    '⟦plot|plot(perform ~ eye)⟧',
+    'eye_regr=lm(perform ~ eye)',
+    '⟦abl|abline(eye_regr, col="blue")⟧',
+    '⟦hm|abline(h=mean(perform), col="red")⟧',
+    '⟦vm|abline(v=mean(eye), col="green")⟧',
+    '⟦means|c(mean(perform), mean(eye))⟧',
+    '⟦lm|skill_regr=lm(perform ~ skill)⟧',
+    '⟦summ|summary(skill_regr)⟧',
+    '⟦ci95|confint(skill_regr)⟧',
+    '⟦ci99|confint(skill_regr, level=0.99)⟧',
+    '⟦cor2|cor(perform, skill)^2⟧'
+  ],
+  outputs:[
+    {cmd:'c(mean(perform), mean(eye))', at:'line 9', text:'[1]  ⟦o_my|9.411765e-11⟧ ⟦o_mx|-2.941177e-10⟧'},
+    {cmd:'summary(skill_regr)', at:'line 11', text:
+'Coefficients:\n             Estimate Std. Error t value Pr(>|t|)  \n(Intercept) ⟦b0|8.656e-11⟧  1.066e-01   0.000   1.0000  \nskill       ⟦b1|2.141e-01⟧  ⟦se1|1.072e-01⟧   ⟦t1|1.997⟧   ⟦p1|0.0491⟧ ⟦star|*⟧\n---\nSignif. codes:  0 \'***\' 0.001 \'**\' 0.01 \'*\' 0.05 \'.\' 0.1 \' \' 1\n\nResidual standard error: ⟦rse|0.9827⟧ on ⟦df|83⟧ degrees of freedom\nMultiple R-squared:  ⟦r2|0.04585⟧,  Adjusted R-squared:  ⟦ar2|0.03436⟧ \nF-statistic: ⟦F|3.989⟧ on 1 and 83 DF,  p-value: ⟦Fp|0.04908⟧'},
+    {cmd:'confint(skill_regr)', at:'line 12', text:'                    2.5 %    97.5 %\n(Intercept) -0.2119943958 0.2119944\nskill        ⟦c95l|0.0008846993⟧ ⟦c95u|0.4273898⟧'},
+    {cmd:'confint(skill_regr, level=0.99)', at:'line 13', text:'                  0.5 %    99.5 %\n(Intercept) -0.28099885 0.2809988\nskill       ⟦c99l|-0.06852928⟧ ⟦c99u|0.4968037⟧'},
+    {cmd:'cor(perform, skill)^2', at:'line 14', text:'[1] ⟦o_cor2|0.04585475⟧'}
+  ],
+  notes:[
+    {t:'기울기 해석', b:'skill의 계수 0.2141: 사회적 기술이 1 표준편차 높은 팀은 암호 과제 성과가 평균 0.214 표준편차 높다. 변수가 모두 표준화돼 있어 단위가 표준편차다.', refs:['lm','xs','y','b1']},
+    {t:'t값과 p값: 5%에서 유의', b:'t = 추정치 ÷ 표준오차 = 0.2141 ÷ 0.1072 = 1.997. 자유도 83에서 p = 0.0491 < 0.05이므로 H₀: β_skill = 0을 5% 수준에서 기각한다. 별 하나(*)가 0.01 < p ≤ 0.05라는 표시다.', refs:['b1','se1','t1','p1','star','df']},
+    {t:'신뢰구간과 검정은 같은 결론을 준다', b:'95% 구간 [0.0009, 0.4274]는 0을 포함하지 않아 5%에서 기각, 99% 구간 [−0.0685, 0.4968]은 0을 포함해 1%에서는 기각하지 못한다. p = 0.049가 0.01과 0.05 사이인 것과 정확히 맞는다.', refs:['ci95','c95l','c95u','ci99','c99l','c99u','p1']},
+    {t:'R²: 설명력은 4.6%', b:'R² = 0.04585로 성과 변동의 약 4.6%만 설명한다. 단순회귀에서는 R²가 상관계수의 제곱과 같아 cor()² = 0.04585475와 일치한다. R²가 낮아도 기울기 추정 자체는 쓸모 있다.', refs:['r2','cor2','o_cor2']},
+    {t:'단순회귀에서는 F = t²', b:'설명변수가 하나뿐이면 전체 F검정은 기울기 t검정과 같은 검정이다. F = 1.997² = 3.989, p-value 0.04908도 t검정의 p와 같다.', refs:['F','Fp','t1','p1']},
+    {t:'회귀선은 항상 평균점을 지난다', b:'빨강(ȳ)과 초록(x̄) 선의 교점은 (x̄, ȳ)이다. OLS는 β̂₀ = ȳ − β̂₁x̄이므로 파란 회귀선이 언제나 이 점을 지난다. 여기서는 표준화로 두 평균이 0(9.4e-11, −2.9e-10)이라 절편도 ≈ 0이다.', refs:['abl','hm','vm','means','o_my','o_mx','b0']},
+    {t:'잔차표준오차와 자유도', b:'Residual standard error 0.9827은 오차 표준편차의 추정치 σ̂이다. 자유도 = n − k − 1 = 85 − 1 − 1 = 83.', refs:['rse','df']},
+    {t:'plot(y ~ x): 결과변수를 먼저', b:'공식에서 ~ 왼쪽이 y축(종속변수 perform), 오른쪽이 x축(설명변수 eye)이다. lm()의 공식과 같은 순서다.', refs:['plot','y','xe']}
+  ]
+},
+{
+  id:'multi', no:'3', title:'다중회귀와 예측', src:'regression.R 이어서 · 2절의 변수 그대로 사용',
+  code:[
+    '⟦mlm|mult_lm=lm(perform ~ skill + ravens)⟧',
+    '⟦msum|summary(mult_lm)⟧',
+    '⟦corsr|cor(skill, ravens)⟧',
+    '⟦new|new=data.frame(skill=c(0.5,1.5), ravens=c(1.5,0.5))⟧',
+    '⟦pc|predict(mult_lm, new, interval="confidence")⟧',
+    '⟦pp|predict(mult_lm, new, interval="prediction")⟧'
+  ],
+  outputs:[
+    {cmd:'summary(mult_lm)', at:'line 2', text:
+'Coefficients:\n             Estimate Std. Error t value Pr(>|t|)\n(Intercept) 9.424e-11  1.056e-01   0.000    1.000\nskill       ⟦mb1|1.712e-01⟧  ⟦mse1|1.096e-01⟧   ⟦mt1|1.562⟧    ⟦mp1|0.122⟧\nravens      ⟦mb2|1.746e-01⟧  1.096e-01   ⟦mt2|1.593⟧    ⟦mp2|0.115⟧\n\nResidual standard error: ⟦mrse|0.9737⟧ on 82 degrees of freedom\nMultiple R-squared:  ⟦mr2|0.07449⟧,  Adjusted R-squared:  ⟦mar2|0.05192⟧ \nF-statistic:   ⟦mF|3.3⟧ on ⟦mFdf|2 and 82⟧ DF,  p-value: ⟦mFp|0.04184⟧'},
+    {cmd:'cor(skill, ravens)', at:'line 3', text:'[1] ⟦o_corsr|0.2457995⟧'},
+    {cmd:'predict(mult_lm, new, interval="confidence")', at:'line 5', text:'        fit         lwr       upr\n1 ⟦fit1|0.3474736⟧ ⟦cl1|-0.03391639⟧ ⟦cu1|0.7288635⟧\n2 0.3441274 -0.03726250 0.7255174'},
+    {cmd:'predict(mult_lm, new, interval="prediction")', at:'line 6', text:'        fit       lwr      upr\n1 ⟦fit1b|0.3474736⟧ ⟦pl1|-1.626709⟧ ⟦pu1|2.321656⟧\n2 0.3441274 -1.630055 2.318310'}
+  ],
+  notes:[
+    {t:'F검정: 두 변수는 함께 유의하다', b:'F(2, 82) = 3.3, p = 0.04184 < 0.05. H₀: β_skill = β_ravens = 0을 기각하므로 두 변수가 함께(jointly) 성과를 설명한다. 절편만 있는 모형보다 낫다는 뜻이다.', refs:['mlm','mF','mFdf','mFp']},
+    {t:'그런데 각각은 5%에서 유의하지 않다', b:'skill p = 0.122, ravens p = 0.115. t검정은 “다른 변수가 이미 들어 있을 때 이 변수가 더 보태는가”를 묻는다. 두 변수가 설명력을 나눠 가지므로(상관 0.246) 각자는 약해 보이고, 함께 묶은 F검정에서는 유의하다.', refs:['mp1','mp2','mt1','mt2','corsr','o_corsr']},
+    {t:'다른 조건이 같을 때(ceteris paribus)의 효과', b:'skill 0.1712: ravens(IQ)가 같은 팀끼리 비교하면 사회적 기술 1 SD 차이가 성과 0.171 SD 차이와 연결된다. ravens 0.1746도 같은 방식으로 읽는다.', refs:['mb1','mb2','mlm']},
+    {t:'누락변수 편의: 0.2141 → 0.1712', b:'단순회귀 기울기 = 다중회귀 기울기 + ravens 계수 × (ravens를 skill에 회귀한 기울기) = 0.1712 + 0.1746 × 0.2458 = 0.2141. ravens가 성과를 높이고(+) skill과 양의 상관(+)이라, ravens를 빼면 skill 기울기가 위로 편의된다.', refs:['mb1','mb2','o_corsr','b1']},
+    {t:'조정 R²: ravens 추가는 가치가 있다', b:'R²는 0.04585 → 0.07449, 조정 R²는 0.03436 → 0.05192로 올랐다. 조정 R²는 새 변수의 |t| > 1일 때만 오르는데 ravens의 t = 1.593이다.', refs:['mr2','mar2','mt2','r2','ar2']},
+    {t:'예측값과 신뢰구간: 평균 성과의 범위', b:'skill 0.5, ravens 1.5인 팀의 예측값 ŷ = 0.3475. 신뢰구간 [−0.034, 0.729]는 이런 팀들의 평균 성과 E(y | x)가 있을 범위로, 계수 추정의 불확실성만 반영한다.', refs:['new','pc','fit1','cl1','cu1']},
+    {t:'예측구간은 팀 하나의 범위라 훨씬 넓다', b:'예측구간 [−1.627, 2.322]는 새 팀 하나의 성과 범위다. 그 팀의 오차까지 더하므로(σ̂ = 0.9737) 신뢰구간보다 훨씬 넓고, n이 커져도 σ̂ 부분은 줄지 않는다.', refs:['pp','fit1b','pl1','pu1','mrse']}
+  ]
+},
+{
+  id:'dummy', no:'4', title:'수식·더미변수·가설검정', src:'W6 강의 코드 · Wooldridge wage1 (n = 526), mroz (n = 753)',
+  code:[
+    'm1 <- lm(wage ~ ⟦dum|female⟧ + educ, data = df)',
+    'summary(m1)$coefficients',
+    'm2 <- lm(wage ~ ⟦star2|educ*female⟧, data = df)',
+    'summary(m2)',
+    '⟦lh|anova(lm(wage ~ educ, data = df), m2)⟧   # same F as linearHypothesis(m2, c("female = 0", "educ:female = 0"))',
+    '⟦rest|restricted <- lm(wage ~ educ + exper, data = df)⟧',
+    'unrestricted <- lm(wage ~ ⟦f7|(educ + exper)*female⟧, data = df)',
+    '⟦chow|anova(restricted, unrestricted)⟧',
+    'm3 <- lm(wage ~ educ + ⟦asf|as.factor(region)⟧, data = df)',
+    'summary(m3)$coefficients',
+    '⟦lpm|lpm <- lm(inlf ~ nwifeinc + educ + exper + I(exper^2) + age + kidslt6 + kidsge6, data = mroz)⟧',
+    'summary(lpm)$coefficients; ⟦rng|range(fitted(lpm))⟧'
+  ],
+  outputs:[
+    {cmd:'summary(m1)$coefficients', at:'line 2', text:
+'              Estimate Std. Error    t value     Pr(>|t|)\n(Intercept)  ⟦m1i|0.6228168⟧ 0.67253341  0.9260756 3.548338e-01\nfemale      ⟦m1f|-2.2733619⟧ ⟦m1fse|0.27904439⟧ ⟦m1ft|-8.1469542⟧ ⟦m1fp|2.764151e-15⟧\neduc         ⟦m1e|0.5064521⟧ 0.05039064 10.0505201 7.564342e-22'},
+    {cmd:'summary(m2)', at:'line 4', text:
+'Coefficients:\n            Estimate Std. Error t value Pr(>|t|)    \n(Intercept)  0.20050    0.84356   0.238    0.812    \neduc         ⟦m2e|0.53948⟧    0.06422   8.400 4.24e-16 ***\nfemale      ⟦m2f|-1.19852⟧    1.32504  -0.905    ⟦m2fp|0.366⟧    \neduc:female ⟦m2i|-0.08600⟧    0.10364  -0.830    ⟦m2ip|0.407⟧    \n\nResidual standard error: 3.186 on 522 degrees of freedom\nMultiple R-squared:  0.2598,  Adjusted R-squared:  0.2555 '},
+    {cmd:'anova(lm(wage ~ educ, data = df), m2)', at:'line 5', text:
+'  Res.Df    RSS Df Sum of Sq      F    Pr(>F)    \n1    524 5980.7                                  \n2    ⟦lhdf2|522⟧ 5300.2  ⟦lhdf|2⟧    680.51 ⟦lhF|33.511⟧ ⟦lhp|2.031e-14⟧ ***'},
+    {cmd:'anova(restricted, unrestricted)', at:'line 8', text:
+'  Res.Df    RSS Df Sum of Sq      F    Pr(>F)    \n1    523 ⟦rssr|5548.2⟧                                  \n2    ⟦dfu|520⟧ ⟦rssu|4737.8⟧  ⟦qn|3⟧    810.38 ⟦chF|29.648⟧ ⟦chp|< 2.2e-16⟧ ***'},
+    {cmd:'summary(m3)$coefficients', at:'line 10', text:
+'                            Estimate Std. Error    t value     Pr(>|t|)\n(Intercept)               -0.5025587 0.75296544 -0.6674393 5.047871e-01\neduc                       0.5349155 0.05341832 10.0137084 1.049641e-21\n⟦m3n|as.factor(region)northcen⟧ -0.6638931 0.42632054 -1.5572627 1.200153e-01\n⟦m3sn|as.factor(region)south⟧    ⟦m3s|-0.5981814⟧ 0.39748407 -1.5049191 ⟦m3sp|1.329509e-01⟧\n⟦m3w|as.factor(region)west⟧      0.3423364 0.47253900  0.7244616 4.691076e-01'},
+    {cmd:'summary(lpm)$coefficients; range(fitted(lpm))', at:'line 12', text:
+'                 Estimate   Std. Error    t value     Pr(>|t|)\n(Intercept)  0.5855192249 0.1541780020  3.7976833 1.579484e-04\nnwifeinc    -0.0034051689 0.0014484900 -2.3508405 1.899080e-02\neduc         ⟦lpe|0.0379953030⟧ 0.0073760181  5.1511944 3.317007e-07\nexper        0.0394923895 0.0056726733  6.9618657 7.376106e-12\nI(exper^2)  -0.0005963119 0.0001847907 -3.2269586 1.305858e-03\nage         -0.0160908061 0.0024846775 -6.4760139 1.709288e-10\nkidslt6     ⟦lpk|-0.2618104667⟧ 0.0335057850 -7.8138885 1.888877e-14\nkidsge6      0.0130122346 0.0131959595  0.9860772 3.244154e-01\n[1] ⟦rlo|-0.3451103⟧  ⟦rhi|1.1271505⟧'}
+  ],
+  notes:[
+    {t:'더미 계수: 같은 교육이면 여성이 $2.27 낮다', b:'female = −2.273: 교육 연수가 같은 사람끼리 비교하면 여성의 시간당 임금이 남성보다 평균 $2.27 낮다. t = −8.15, p ≈ 3e-15로 매우 유의하다. 단, 경력 같은 생산성 요인이 빠져 있어 차별의 증거라고 단정할 수는 없다.', refs:['dum','m1f','m1fse','m1ft','m1fp']},
+    {t:'기준집단과 더미변수 함정', b:'기준집단은 female = 0인 남성이고, 절편 0.623이 남성 직선의 절편이다. male 더미를 함께 넣으면 female + male = 1이 절편과 완전공선이 되므로(MLR.3 위반) 한 범주는 반드시 뺀다.', refs:['dum','m1i','m1f']},
+    {t:'교호작용 수식: educ*female', b:'educ*female은 educ + female + educ:female로 펼쳐진다. educ:female 계수는 여성의 교육 수익률이 남성과 얼마나 다른지, 즉 기울기 차이다.', refs:['star2','m2i']},
+    {t:'교육 수익률: 남성 0.539, 여성 0.453', b:'남성(female = 0)의 교육 1년당 임금 증가는 0.539달러, 여성은 0.539 − 0.086 = 0.453달러다. 차이의 p = 0.407이라 수익률이 다르다는 증거는 없다.', refs:['m2e','m2i','m2ip']},
+    {t:'결합검정: 함께 묶으면 강하게 기각', b:'female = 0과 educ:female = 0을 동시에 검정하면 F = 33.51 (2, 522), p ≈ 2e-14로 강하게 기각한다. 각각의 p(0.366, 0.407)가 큰 것은 두 변수가 거의 공선(상관 0.96)이어서 개별 추정이 부정확하기 때문이다.', refs:['lh','lhdf','lhdf2','lhF','lhp','m2fp','m2ip']},
+    {t:'Chow 검정: 남녀는 같은 임금식을 따르지 않는다', b:'F = [(SSR_r − SSR_ur) ÷ q] ÷ [SSR_ur ÷ df] = [(5548.2 − 4737.8) ÷ 3] ÷ (4737.8 ÷ 520) = 29.65, p < 2.2e-16 → 기각. q = 3은 female과 교호항 2개, 520 = 526 − 6이다. 두 집단의 오차분산이 같다고 가정한다.', refs:['chow','rest','f7','rssr','rssu','qn','dfu','chF','chp']},
+    {t:'as.factor(): 범주 k개 → 더미 k − 1개', b:'region은 범주가 4개라 lm()이 더미 3개(northcen, south, west)를 만들고, 알파벳 순 첫 범주 east를 기준으로 뺀다. south −0.598: 교육이 같으면 남부가 동부보다 평균 $0.60 낮지만 p = 0.133으로 유의하지 않다.', refs:['asf','m3n','m3sn','m3w','m3s','m3sp']},
+    {t:'선형확률모형(LPM): 계수는 확률의 %p 변화', b:'종속변수 inlf가 0/1이므로 계수는 확률 변화다. educ 0.038 → 교육 1년마다 경제활동 확률 3.8%p 증가, kidslt6 −0.262 → 6세 미만 자녀 1명마다 26.2%p 감소(다른 조건이 같을 때).', refs:['lpm','lpe','lpk']},
+    {t:'LPM의 약점', b:'적합값이 −0.345에서 1.127까지 나와 확률 범위 [0, 1]을 벗어난다. 또 Var(u | x) = p(x)[1 − p(x)]가 x에 따라 달라 이분산이 필연적이므로 강건(robust) 표준오차를 써야 한다.', refs:['rng','rlo','rhi']}
+  ]
+},
+{
+  id:'sim', no:'5', title:'시뮬레이션: 불편성·검정력·신뢰구간', src:'simple regression demonstration.R (요약) · set.seed(4201)',
+  code:[
+    '⟦seed|set.seed(4201)⟧',
+    '⟦truth|slope=0.2⟧; intercept=3; ⟦n10|sampleSize=10⟧',
+    'fertilizer=rnorm(sampleSize,10,2)',
+    '⟦dgp|yield=intercept+slope*fertilizer+rnorm(sampleSize,0,1)⟧',
+    'fer_regr=lm(yield ~ fertilizer)',
+    '⟦first|summary(fer_regr)$coefficients; confint(fer_regr)⟧',
+    'sampleCnt=10000; estimator=c(); t=c(); pValue=c()',
+    '⟦loop|for(rowIdx in 1:sampleCnt) {⟧',
+    '  fertilizer=rnorm(sampleSize,10,2)',
+    '  yield=intercept+slope*fertilizer+rnorm(sampleSize,0,1)',
+    '  coef=summary(lm(yield~fertilizer))$coefficients',
+    '  estimator[rowIdx]=⟦c21|coef[2,1]⟧; t[rowIdx]=⟦c23|coef[2,3]⟧; pValue[rowIdx]=⟦c24|coef[2,4]⟧',
+    '}',
+    '⟦meanest|mean(estimator)⟧; ⟦sdest|sd(estimator)⟧',
+    '⟦rej|rejection=ifelse(pValue<=0.05, "Reject", "Fail to Reject")⟧',
+    '⟦tab|table(rejection)⟧',
+    '⟦cis|sampleSize=12; slope=2; sampleCnt=20⟧',
+    'results=data.frame(index=1:sampleCnt)',
+    'for(rowIdx in 1:sampleCnt) {',
+    '  fertilizer=rnorm(sampleSize,10,2)',
+    '  yield=intercept+slope*fertilizer+rnorm(sampleSize,0,1)',
+    '  ⟦ci|interval=confint(lm(yield ~ fertilizer))⟧',
+    '  ⟦inside|results[rowIdx,"inside"]=interval["fertilizer","2.5 %"]<=slope && slope<=interval["fertilizer","97.5 %"]⟧',
+    '}',
+    '⟦tabin|table(results$inside)⟧'
+  ],
+  outputs:[
+    {cmd:'summary(fer_regr)$coefficients; confint(fer_regr)', at:'line 6', text:
+'              Estimate Std. Error   t value   Pr(>|t|)\n(Intercept) 4.98299489  1.5091662 3.3018199 0.01082943\nfertilizer  ⟦s1b|0.06163301⟧  0.1390278 0.4433143 ⟦s1p|0.66928224⟧\n                 2.5 %    97.5 %\n(Intercept)  1.5028514 8.4631383\nfertilizer  ⟦s1l|-0.2589656⟧ ⟦s1u|0.3822317⟧'},
+    {cmd:'mean(estimator); sd(estimator)', at:'line 14', text:'[1] ⟦o_mean|0.2026973⟧\n[1] ⟦o_sdest|0.1898274⟧'},
+    {cmd:'table(rejection)', at:'line 16', text:'rejection\nFail to Reject         Reject \n          ⟦o_fail|8092⟧           ⟦o_rej|1908⟧ '},
+    {cmd:'table(results$inside)', at:'line 25', text:'\nFALSE  TRUE \n    ⟦o_false|1⟧    ⟦o_true|19⟧ '}
+  ],
+  notes:[
+    {t:'기각률 19.1% = 검정력', b:'참 기울기가 0.2(≠ 0)라서 H₀: β₁ = 0은 거짓이다. 따라서 기각은 모두 옳은 판단이고, 1908 ÷ 10,000 = 19.1%가 이 5% t검정의 검정력(power)이다. 나머지 80.9%는 거짓 H₀를 기각하지 못한 제2종 오류다.', refs:['truth','c24','rej','tab','o_rej','o_fail']},
+    {t:'검정력이 낮은 이유와 높이는 법', b:'효과 0.2가 오차 표준편차 1에 비해 작고 n = 10이라 검정력이 낮다. 표본을 키우거나 효과가 크면 오른다(스크립트의 “slope 9 또는 n = 100”). 참 기울기가 0이면 기각률은 약 α = 5%, 즉 제1종 오류율이 된다.', refs:['truth','n10','dgp','rej']},
+    {t:'불편성: 추정치 평균 0.2027 ≈ 0.2', b:'10,000개 표본의 기울기 추정치 평균이 0.2027로 참값 0.2와 거의 같다. 반복표본에서 평균적으로 맞힌다는 E(β̂₁) = β₁, 즉 OLS의 불편성(MLR.1–4)이다.', refs:['loop','c21','meanest','o_mean']},
+    {t:'표본분포의 퍼짐: sd 0.190', b:'추정치의 표준편차 0.190은 β̂₁의 표본분포가 얼마나 퍼지는지 보여 준다. Var(β̂₁) = σ² ÷ SST_x이므로 n이나 fertilizer의 변동이 커지면 줄어든다.', refs:['sdest','o_sdest','n10']},
+    {t:'신뢰구간 커버리지: 20개 중 19개', b:'n = 12, 참 기울기 2로 만든 95% 구간 20개 중 19개가 2를 포함했다. 0.95 × 20 = 19와 일치한다. “95%”는 반복표본에서 이 방법이 참값을 덮는 비율이지, 계산된 한 구간에 참값이 있을 확률이 아니다.', refs:['cis','ci','inside','tabin','o_true','o_false']},
+    {t:'첫 표본 하나로는 결론이 불안정하다', b:'첫 표본은 β̂₁ = 0.0616, p = 0.669로 H₀를 기각하지 못하고, 구간 [−0.259, 0.382]는 0과 0.2를 모두 포함한다. n = 10에서는 표본변동이 커서 실제 효과가 있어도 놓치기 쉽다.', refs:['first','s1b','s1p','s1l','s1u']},
+    {t:'coef[2, 1:4]의 뜻', b:'summary(lm())$coefficients의 2행은 기울기다. 열 1은 추정치, 열 2는 표준오차, 열 3은 t값, 열 4는 p값이라 coef[2,1], coef[2,3], coef[2,4]가 각각 추정치·t·p를 꺼낸다.', refs:['c21','c23','c24']},
+    {t:'set.seed와 모집단 모형', b:'set.seed(4201)로 난수의 시작점을 고정해 실행할 때마다 같은 표본이 나온다(재현성). 모집단 모형은 yield = 3 + 0.2 × fertilizer + u, u ~ N(0, 1)로, 참값을 알고 있으니 추정·검정의 성질을 직접 확인할 수 있다.', refs:['seed','truth','dgp']}
+  ]
+}
+];
+
+/* English text: same order as SECTIONS and their notes. English is the default language; ?lang=ko or the button switches. */
+const EN = {
+  desc:{ title:'Descriptive statistics', src:'Lab2.R · Lab2_Practice.csv (n = 27)', notes:[
+    ['Shape: breaks is right-skewed','The mean of breaks, 3.185, is larger than its median, 2. A few large values such as the maximum 12 pull the mean up, so the distribution has a long right tail (right-skewed).'],
+    ['grade is skewed the other way','The mean of grade, 77.26, is below its median, 80. The low score 36 pulls the mean down: a long left tail (left-skewed).'],
+    ['Summarise skewed variables with the median and the IQR','The mean and the SD are pulled by extreme values, so the median and the IQR = Q3 − Q1, which use only the order of the data, are better measures of centre and spread. For grade, IQR = 84 − 72 = 12.'],
+    ['Sample variance = sum of squares ÷ (n − 1)','The sum of squared deviations, 124.0741, divided by n − 1 = 26 gives 4.772, exactly the value of var().'],
+    ['Why divide by n − 1','The mean x̄ is estimated from the same data, which uses up one degree of freedom. Dividing by n − 1 makes s² an unbiased estimator of σ² (the same idea as σ̂² = SSR ÷ (n − k − 1) in regression).'],
+    ['The SD is the square root of the variance','s = √4.772 = 2.185. The variance is in squared units, so read the spread from the SD, which is back in the original units.'],
+    ['Deviations always sum to 0','Deviations from the mean always add up to 0. 1.776357e-15 is only floating-point rounding. That is why spread is measured by squaring the deviations first.'],
+    ['Boxplot outliers: the 1.5 × IQR rule','Lower fence for grade = Q1 − 1.5 × IQR = 72 − 18 = 54. 36 lies below 54, so boxplot() draws it as a separate point and boxplot.stats()$out returns 36.'],
+    ['na.strings = "."','Reads every "." in the file as a missing value (NA). With missing values, mean() and similar functions return NA unless na.rm = TRUE (this file has no missing values).']
+  ]},
+  simple:{ title:'Simple regression and the regression line', src:'regression.R · social.csv (n = 85, all variables standardized)', notes:[
+    ['Interpreting the slope','skill coefficient 0.2141: teams with one standard deviation more social skill score on average 0.214 standard deviations higher on the cryptography task. All variables are standardized, so the units are standard deviations.'],
+    ['t and p: significant at 5%','t = estimate ÷ standard error = 0.2141 ÷ 0.1072 = 1.997. With 83 degrees of freedom p = 0.0491 < 0.05, so H₀: β_skill = 0 is rejected at the 5% level. The single star (*) marks 0.01 < p ≤ 0.05.'],
+    ['Confidence intervals and tests agree','The 95% interval [0.0009, 0.4274] excludes 0, so H₀ is rejected at 5%; the 99% interval [−0.0685, 0.4968] includes 0, so it is not rejected at 1%. This matches p = 0.049 lying between 0.01 and 0.05.'],
+    ['R²: 4.6% explained','R² = 0.04585: skill explains about 4.6% of the variation in performance. In simple regression R² equals the squared correlation, and cor()² = 0.04585475 agrees. A low R² does not make the slope estimate useless.'],
+    ['In simple regression F = t²','With one regressor the overall F-test is the same test as the slope t-test: F = 1.997² = 3.989, and its p-value 0.04908 equals the t-test\'s p.'],
+    ['The regression line always passes through the means','The red (ȳ) and green (x̄) lines cross at (x̄, ȳ). OLS sets β̂₀ = ȳ − β̂₁x̄, so the blue line always passes through that point. Here standardization makes both means 0 (9.4e-11 and −2.9e-10), so the intercept is ≈ 0 too.'],
+    ['Residual standard error and degrees of freedom','Residual standard error 0.9827 is σ̂, the estimate of the error standard deviation. Degrees of freedom = n − k − 1 = 85 − 1 − 1 = 83.'],
+    ['plot(y ~ x): outcome first','In a formula, the left of ~ is the y-axis (dependent variable perform) and the right is the x-axis (explanatory variable eye), in the same order as in lm().']
+  ]},
+  multi:{ title:'Multiple regression and prediction', src:'regression.R continued · uses the variables of section 2', notes:[
+    ['F-test: the two variables are jointly significant','F(2, 82) = 3.3, p = 0.04184 < 0.05. H₀: β_skill = β_ravens = 0 is rejected, so the two variables together explain performance: the model beats an intercept-only model.'],
+    ['Yet neither is significant at 5% on its own','skill p = 0.122, ravens p = 0.115. Each t-test asks whether a variable adds anything once the other is already in. The two share explanatory power (correlation 0.246), so each looks weak alone while the joint F-test is significant.'],
+    ['The ceteris paribus effect','skill 0.1712: comparing teams with the same ravens (IQ) score, one SD more social skill goes with 0.171 SD higher performance. Read ravens 0.1746 the same way.'],
+    ['Omitted variable bias: 0.2141 → 0.1712','Simple slope = multiple slope + ravens coefficient × (slope of ravens on skill) = 0.1712 + 0.1746 × 0.2458 = 0.2141. ravens raises performance (+) and is positively correlated with skill (+), so leaving it out biases the skill slope upward.'],
+    ['Adjusted R²: adding ravens pays off','R² rises from 0.04585 to 0.07449 and adjusted R² from 0.03436 to 0.05192. Adjusted R² rises only when the new variable has |t| > 1, and ravens has t = 1.593.'],
+    ['Prediction and confidence interval: the average outcome','For a team with skill 0.5 and ravens 1.5, ŷ = 0.3475. The confidence interval [−0.034, 0.729] is the range for the average performance E(y | x) of such teams and reflects only the uncertainty of the coefficients.'],
+    ['The prediction interval is for one team, so it is much wider','The prediction interval [−1.627, 2.322] covers the performance of one new team. It adds that team\'s own error (σ̂ = 0.9737), so it is much wider than the confidence interval, and the σ̂ part does not shrink as n grows.']
+  ]},
+  dummy:{ title:'Formulas, dummy variables and hypothesis tests', src:'W6 lecture code · Wooldridge wage1 (n = 526), mroz (n = 753)', notes:[
+    ['Dummy coefficient: women earn $2.27 less at the same education','female = −2.273: comparing people with the same years of education, women earn on average $2.27 less per hour than men. t = −8.15, p ≈ 3e-15, so it is highly significant. Experience and other productivity factors are omitted, so this alone does not prove discrimination.'],
+    ['Base group and the dummy variable trap','The base group is men (female = 0), and the intercept 0.623 belongs to the men\'s line. Adding a male dummy as well would make female + male = 1 perfectly collinear with the intercept (violating MLR.3), so one category must be left out.'],
+    ['Interaction formula: educ*female','educ*female expands to educ + female + educ:female. The educ:female coefficient is how much women\'s return to education differs from men\'s: a difference in slopes.'],
+    ['Return to education: men 0.539, women 0.453','For men (female = 0) one more year of education adds $0.539 per hour, for women 0.539 − 0.086 = $0.453. The difference has p = 0.407, so there is no evidence that the returns differ.'],
+    ['Joint test: a strong rejection when tested together','Testing female = 0 and educ:female = 0 together gives F = 33.51 (2, 522), p ≈ 2e-14. The individual p-values (0.366, 0.407) are large only because the two variables are almost collinear (correlation 0.96), which makes each estimate imprecise.'],
+    ['Chow test: men and women do not share one wage equation','F = [(SSR_r − SSR_ur) ÷ q] ÷ [SSR_ur ÷ df] = [(5548.2 − 4737.8) ÷ 3] ÷ (4737.8 ÷ 520) = 29.65, p < 2.2e-16 → reject. q = 3 is female plus its two interactions, and 520 = 526 − 6. The test assumes the same error variance in both groups.'],
+    ['as.factor(): k categories → k − 1 dummies','region has 4 categories, so lm() creates 3 dummies (northcen, south, west) and leaves out east, the first level alphabetically, as the base. south −0.598: with the same education, the south earns on average $0.60 less than the east, but p = 0.133 is not significant.'],
+    ['Linear probability model: coefficients are changes in probability','inlf is 0/1, so each coefficient is a change in probability. educ 0.038 → each year of education raises the probability of being in the labor force by 3.8 percentage points; kidslt6 −0.262 → each child under 6 lowers it by 26.2 points (other things equal).'],
+    ['Weaknesses of the LPM','Fitted values run from −0.345 to 1.127, outside the probability range [0, 1]. Var(u | x) = p(x)[1 − p(x)] changes with x, so heteroskedasticity is unavoidable and robust standard errors are needed.']
+  ]},
+  sim:{ title:'Simulation: unbiasedness, power and confidence intervals', src:'simple regression demonstration.R (condensed) · set.seed(4201)', notes:[
+    ['Rejection rate 19.1% = power','The true slope is 0.2 (≠ 0), so H₀: β₁ = 0 is false and every rejection is a correct decision. 1908 ÷ 10,000 = 19.1% is the power of this 5% t-test; the other 80.9% are Type II errors (failing to reject a false H₀).'],
+    ['Why power is low and how to raise it','The effect 0.2 is small next to the error SD of 1 and n is only 10, so power is low. A larger sample or a larger effect raises it (the script suggests slope 9 or n = 100). If the true slope were 0, the rejection rate would be about α = 5%, the Type I error rate.'],
+    ['Unbiasedness: mean estimate 0.2027 ≈ 0.2','Across 10,000 samples the slope estimates average 0.2027, almost the true 0.2. OLS is right on average in repeated samples, E(β̂₁) = β₁: unbiasedness (MLR.1–4).'],
+    ['Spread of the sampling distribution: sd 0.190','The standard deviation 0.190 of the estimates shows how widely the sampling distribution of β̂₁ spreads. Since Var(β̂₁) = σ² ÷ SST_x, it shrinks as n or the variation in fertilizer grows.'],
+    ['Confidence-interval coverage: 19 of 20','Of 20 intervals (95%, n = 12, true slope 2), 19 contain 2, matching 0.95 × 20 = 19. “95%” is the share of intervals the method covers in repeated samples, not the probability that one computed interval contains the true value.'],
+    ['One sample alone is unreliable','The first sample gives β̂₁ = 0.0616 with p = 0.669, so H₀ is not rejected, and the interval [−0.259, 0.382] contains both 0 and 0.2. With n = 10, sampling variation is large and a real effect is easily missed.'],
+    ['What coef[2, 1:4] means','Row 2 of summary(lm())$coefficients is the slope. Column 1 is the estimate, 2 the standard error, 3 the t value and 4 the p-value, so coef[2,1], coef[2,3] and coef[2,4] pick the estimate, t and p.'],
+    ['set.seed and the population model','set.seed(4201) fixes the starting point of the random numbers, so every run draws the same samples (reproducibility). The population model is yield = 3 + 0.2 × fertilizer + u, u ~ N(0, 1); because the true values are known, the properties of the estimates and tests can be checked directly.']
+  ]}
+};
+const UI = {
+  en:{ title:'R Code and Output, Explained', intro:'The statistically important parts of the econometrics R labs: the R code and its actual output on the left, the interpretation on the right, most important first. Click a sentence to highlight, in light yellow, the code and the output values it refers to. Click it again to clear.',
+       rank:'Most important first · click a sentence to highlight its code and values', clear:'Clear highlights', night:'Night mode', day:'Day mode', lang:'한국어',
+       footer:'Every output was produced by running the code in R 4.3. Data: Lab2_Practice.csv, social.csv (Weidmann & Deming 2021), Wooldridge wage1 and mroz, simple regression demonstration.R (set.seed(4201)). The joint test in section 4 uses an anova() comparison that gives the same F as linearHypothesis() from the car package.' },
+  ko:{ title:'R 코드·출력 해설', intro:'계량경제학 수업 R 코드 중 통계적으로 중요한 부분만 골라, 왼쪽에 코드와 실제 출력, 오른쪽에 해석을 중요한 순서대로 정리했습니다. 해석 문장을 누르면 그 문장이 가리키는 코드와 출력값이 연한 노란색으로 표시됩니다. 다시 누르면 꺼집니다.',
+       rank:'중요한 해석부터 · 문장을 누르면 관련 코드와 값 표시', clear:'표시 지우기', night:'야간 모드', day:'주간 모드', lang:'English',
+       footer:'출력은 모두 R 4.3에서 실제로 실행한 결과입니다. 데이터: Lab2_Practice.csv, social.csv (Weidmann & Deming 2021), Wooldridge wage1·mroz, simple regression demonstration.R (set.seed(4201)). 섹션 4의 결합검정은 car 패키지의 linearHypothesis()와 같은 F를 주는 anova() 비교로 계산했습니다.' }
+};
+
+const NAV = { en:['Descriptive statistics','Simple regression','Multiple regression','Dummies and tests','Simulation'], ko:['기술통계','단순회귀','다중회귀','더미·검정','시뮬레이션'] };
+/* ---------- rendering ---------- */
+const esc = s => String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+function rHL(src){   /* light R colouring for plain code fragments */
+  const RX = /(#.*$)|("(?:[^"\\]|\\.)*"|'(?:[^'\\]|\\.)*')|(\b\d+\.?\d*(?:[eE][-+]?\d+)?\b)|(\b(?:function|if|else|for|while|in|return|TRUE|FALSE|NULL|NA|T)\b)|([A-Za-z_.][\w.]*)(?=\s*\()|(?<=[(,]\s*)([A-Za-z_.][\w.]*)(?=\s*=(?!=))|(<-|%[^%\s]*%|[~$:*])/gm;
+  let o = '', last = 0, m;
+  while((m = RX.exec(src))){
+    o += esc(src.slice(last, m.index));
+    const c = m[1] ? 'com' : m[2] ? 'str' : m[3] ? 'num' : m[4] ? 'kw' : m[5] ? 'fn' : m[6] ? 'arg' : 'op';
+    o += `<span class="hl-${c}">${esc(m[0])}</span>`; last = m.index + m[0].length;
+  }
+  return o + esc(src.slice(last));
+}
+const MARK = /⟦([^|⟧]+)\|([^⟧]*)⟧/g;
+function marked(s, colour){   /* ⟦ids|text⟧ -> <span class="k" data-k="ids"> */
+  let o = '', last = 0, m; MARK.lastIndex = 0;
+  while((m = MARK.exec(s))){
+    o += colour ? rHL(s.slice(last, m.index)) : esc(s.slice(last, m.index));
+    o += `<span class="k" data-k="${esc(m[1])}">${colour ? rHL(m[2]) : esc(m[2])}</span>`; last = m.index + m[0].length;
+  }
+  return o + (colour ? rHL(s.slice(last)) : esc(s.slice(last)));
+}
+const main = document.getElementById('main'), nav = document.getElementById('nav');
+let LANG = 'en';
+try{ const q = new URLSearchParams(location.search).get('lang'), sv = localStorage.getItem('rguide-lang'); LANG = (q || sv) === 'ko' ? 'ko' : 'en'; }catch(e){}
+function render(){
+  const U = UI[LANG];
+  document.documentElement.lang = LANG; document.title = U.title;
+  document.getElementById('pgTitle').textContent = U.title; document.getElementById('pgIntro').textContent = U.intro; document.getElementById('pgFoot').textContent = U.footer;
+  document.getElementById('langBtn').textContent = U.lang; document.getElementById('clearBtn').textContent = U.clear;
+  main.innerHTML = ''; nav.querySelectorAll('a').forEach(a => a.remove());
+  SECTIONS.forEach(S => {
+    const E = LANG === 'en' ? EN[S.id] : null;
+    const title = E ? E.title : S.title, src = E ? E.src : S.src;
+    const sec = document.createElement('section'); sec.id = S.id;
+    const code = S.code.map((l, i) => `<span class="cl"><span class="ln">${i + 1}</span>${marked(l, true)}</span>`).join('');
+    const outs = S.outputs.map(o => `<div class="out"><p class="cmd">&gt; ${esc(o.cmd)}<span class="at">${esc(o.at)}</span></p><pre>${marked(o.text, false)}</pre></div>`).join('');
+    const notes = S.notes.map((n, i) => { const tt = E ? E.notes[i][0] : n.t, bb = E ? E.notes[i][1] : n.b;
+      return `<li class="note" tabindex="0" role="button" aria-pressed="false" data-refs="${n.refs.join(' ')}"><span class="t">${esc(tt)}</span><span class="b">${esc(bb)}</span></li>`; }).join('');
+    sec.innerHTML = `<div class="sec-head"><span class="no">${S.no}</span><h2>${esc(title)}</h2><span class="src">${esc(src)}</span></div>
+      <div class="grid"><div class="left"><p class="lbl">R code</p><pre class="code">${code}</pre>${outs}</div>
+      <div class="right"><p class="rank">${esc(U.rank)}</p><ol class="notes">${notes}</ol></div></div>`;
+    main.appendChild(sec);
+    const a = document.createElement('a'); a.href = '#' + S.id; a.textContent = S.no + ' ' + NAV[LANG][SECTIONS.indexOf(S)]; nav.insertBefore(a, nav.querySelector('.sp'));
+  });
+}
+render();
+document.getElementById('langBtn').addEventListener('click', () => { LANG = LANG === 'en' ? 'ko' : 'en'; try{ localStorage.setItem('rguide-lang', LANG); }catch(e){} render(); syncTheme(); setNavH(); });
+
+/* ---------- click a note: light up its tokens ---------- */
+function clearAll(){ document.querySelectorAll('.k.on').forEach(e => e.classList.remove('on')); document.querySelectorAll('.note.on').forEach(e => { e.classList.remove('on'); e.setAttribute('aria-pressed','false'); }); }
+function select(note){
+  const was = note.classList.contains('on'); clearAll(); if(was) return;
+  note.classList.add('on'); note.setAttribute('aria-pressed','true');
+  const ids = note.dataset.refs.split(' ');
+  const hits = [...document.querySelectorAll('.k')].filter(e => e.dataset.k.split(',').some(k => ids.includes(k)));
+  hits.forEach(e => e.classList.add('on'));
+  /* scroll this section's code panel: show every lit token if they fit, otherwise the first lit output value */
+  const left = note.closest('section').querySelector('.left'), mine = hits.filter(e => left.contains(e));
+  if(mine.length){
+    const c = left.getBoundingClientRect(), rs = mine.map(e => e.getBoundingClientRect());
+    const top = Math.min(...rs.map(r => r.top)), bottom = Math.max(...rs.map(r => r.bottom));
+    let dy;
+    if(bottom - top < c.height - 48) dy = (top + bottom) / 2 - (c.top + c.height / 2);
+    else { const o = mine.find(e => e.closest('.out')) || mine[0]; dy = o.getBoundingClientRect().top - c.top - 48; }
+    if(top < c.top + 8 || bottom > c.bottom - 8 || bottom - top >= c.height - 48) left.scrollBy({ top: dy, behavior:'smooth' });
+  }
+}
+document.addEventListener('click', e => { const n = e.target.closest('.note'); if(n) select(n); });
+document.addEventListener('keydown', e => { const n = e.target.closest && e.target.closest('.note'); if(n && (e.key === 'Enter' || e.key === ' ')){ e.preventDefault(); select(n); } if(e.key === 'Escape') clearAll(); });
+document.getElementById('clearBtn').addEventListener('click', clearAll);
+const themeBtn = document.getElementById('themeBtn');
+function isDark(){ const t = document.documentElement.dataset.theme; return t ? t === 'dark' : matchMedia('(prefers-color-scheme: dark)').matches; }
+function syncTheme(){ themeBtn.textContent = isDark() ? UI[LANG].day : UI[LANG].night; }
+themeBtn.addEventListener('click', () => { document.documentElement.dataset.theme = isDark() ? 'light' : 'dark'; try{ localStorage.setItem('rguide-theme', document.documentElement.dataset.theme); }catch(e){} syncTheme(); });
+try{ const t = localStorage.getItem('rguide-theme'); if(t) document.documentElement.dataset.theme = t; }catch(e){}
+syncTheme();
+/* the sticky code panel sits right under the navigation bar */
+var setNavH = () => document.documentElement.style.setProperty('--nav-h', document.querySelector('nav').offsetHeight + 'px');
+setNavH(); addEventListener('resize', setNavH);
+</script>
+</body>
+</html>
