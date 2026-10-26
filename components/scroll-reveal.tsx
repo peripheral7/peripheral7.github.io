@@ -7,7 +7,7 @@ const useIsoLayoutEffect = typeof window !== "undefined" ? useLayoutEffect : use
 /**
  * 스크롤 위치에 따라 스크롤하면서 서서히 나타나는 래퍼.
  * 사진을 가로 띠 STEPS 개로 나눠, 스크롤할수록 아래 띠부터 한 칸씩 끊어서 나타난다.
- * 각 띠는 짧게 페이드되고 다음 구간까지는 그대로 멈춰 있다.
+ * 시간 애니메이션 없이 스크롤 위치에 바로 묶여 있어, 스크롤한 만큼 지금 띠가 차오른다.
  */
 const STEPS = 6
 const EDGE = 2 // 띠 경계의 흐림 폭(%) — 작을수록 또렷하게 끊긴다
@@ -20,7 +20,6 @@ export function ScrollReveal({ children }: { children: React.ReactNode }) {
     if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) return
 
     let raf = 0
-    let current = -1 // 화면에 그려진 진행도(부드럽게 따라가는 값)
     let target = 0
 
     const paint = (p: number) => {
@@ -48,19 +47,12 @@ export function ScrollReveal({ children }: { children: React.ReactNode }) {
       const byPos = (vh * 0.85 - rect.top) / span
       // 처음 화면(스크롤 0)에서는 아무것도 보이지 않고, 조금 내려가야 나타난다
       const byScroll = window.scrollY / (vh * 0.35)
-      const raw = Math.min(1, Math.max(0, Math.min(byPos, byScroll)))
-      // 구간별로 끊기: 진행도를 STEPS 칸으로 내림
-      target = Math.floor(raw * STEPS + 0.001) / STEPS
+      target = Math.min(1, Math.max(0, Math.min(byPos, byScroll)))
     }
     const tick = () => {
       raf = 0
       measure()
-      if (current < 0) current = target
-      // 한 칸은 천천히(약 0.7초) 페이드로 채우고, 다음 구간까지 멈춘다
-      const step = 1 / STEPS / 42
-      current += Math.sign(target - current) * Math.min(Math.abs(target - current), step)
-      paint(current)
-      if (current !== target) raf = requestAnimationFrame(tick)
+      paint(target)
     }
     const onScroll = () => {
       if (!raf) raf = requestAnimationFrame(tick)
