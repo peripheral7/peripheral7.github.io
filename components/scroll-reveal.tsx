@@ -6,11 +6,8 @@ const useIsoLayoutEffect = typeof window !== "undefined" ? useLayoutEffect : use
 
 /**
  * 스크롤 위치에 따라 스크롤하면서 서서히 나타나는 래퍼.
- * 사진을 가로 띠 STEPS 개로 나눠, 스크롤할수록 아래 띠부터 한 칸씩 끊어서 나타난다.
- * 시간 애니메이션 없이 스크롤 위치에 바로 묶여 있어, 스크롤한 만큼 지금 띠가 차오른다.
+ * 처음엔 사진 윗부분이 그라데이션으로 흐려져 있다가, 스크롤할수록 위쪽까지 천천히 또렷해진다.
  */
-const STEPS = 6
-const EDGE = 2 // 띠 경계의 흐림 폭(%) — 작을수록 또렷하게 끊긴다
 export function ScrollReveal({ children }: { children: React.ReactNode }) {
   const ref = useRef<HTMLDivElement>(null)
 
@@ -20,6 +17,7 @@ export function ScrollReveal({ children }: { children: React.ReactNode }) {
     if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) return
 
     let raf = 0
+    let current = -1 // 화면에 그려진 진행도(부드럽게 따라가는 값)
     let target = 0
 
     const paint = (p: number) => {
@@ -29,15 +27,11 @@ export function ScrollReveal({ children }: { children: React.ReactNode }) {
         el.style.opacity = "1"
         return
       }
-      // 다 찬 띠는 또렷하게, 지금 차오르는 띠 하나는 통째로 페이드
-      const done = Math.floor(p * STEPS + 1e-6)
-      const f = p * STEPS - done
-      const a = (done / STEPS) * 100
-      const b = ((done + 1) / STEPS) * 100
-      const mask = `linear-gradient(to top, #000 ${a}%, rgba(0,0,0,${f.toFixed(3)}) ${a + EDGE / 2}%, rgba(0,0,0,${f.toFixed(3)}) ${b - EDGE / 2}%, transparent ${b + EDGE / 2}%)`
+      const stop = p * 140 - 40
+      const mask = `linear-gradient(to top, #000 ${stop}%, transparent ${stop + 40}%)`
       el.style.maskImage = el.style.webkitMaskImage = mask
       el.style.transform = "none"
-      el.style.opacity = "1"
+      el.style.opacity = String(Math.min(1, p * 3))
     }
     const measure = () => {
       const vh = window.innerHeight
@@ -52,7 +46,11 @@ export function ScrollReveal({ children }: { children: React.ReactNode }) {
     const tick = () => {
       raf = 0
       measure()
-      paint(target)
+      if (current < 0) current = target
+      current += (target - current) * 0.055
+      if (Math.abs(target - current) < 0.002) current = target
+      paint(current)
+      if (current !== target) raf = requestAnimationFrame(tick)
     }
     const onScroll = () => {
       if (!raf) raf = requestAnimationFrame(tick)
