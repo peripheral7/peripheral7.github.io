@@ -4,7 +4,7 @@ import Image from "next/image"
 import { useBoardFilter, type Filter } from "@/components/board-filter-context"
 import { SiteFeatures } from "@/components/site-features"
 import { WheretoPoster } from "@/components/whereto-poster"
-import { FEATURES, STUDY_MATERIALS } from "@/lib/features"
+import { FEATURES } from "@/lib/features"
 
 const nav: { label: string; value: Filter }[] = [
   { label: "Research", value: "RESEARCH" },
@@ -45,7 +45,7 @@ export function SiteHero() {
         </span>
       </div>
 
-      {/* 사진 + 오른쪽 열(여기살까? 포스터 위 · 기능모음 · 평가사 학습자료 아래, 항상 한 칸 15rem).
+      {/* 사진 + 오른쪽 열(여기살까? 포스터 위 · 기능모음 아래, 항상 한 칸 15rem).
           - 휴대폰: 모두 가운데 정렬로 위→아래로 쌓인다.
           - md~lg(웹 반쪽 화면): 사진이 왼쪽, 오른쪽 열이 붙는다. 사진 폭은 남는 가로 공간을 최대 30rem 까지 다 쓴다(나무가 가늘어지지 않게).
           - xl: 사진(30rem)은 화면 가운데, 오른쪽 열은 그 오른쪽.
@@ -85,7 +85,6 @@ export function SiteHero() {
             <WheretoPoster className="mx-auto w-60 md:mx-0 md:w-full md:self-start" />
             <div className="flex flex-col gap-4 text-center md:self-end md:text-left">
               <SiteFeatures title="기능모음" items={FEATURES} />
-              <SiteFeatures title="평가사 학습자료" items={STUDY_MATERIALS} />
             </div>
           </aside>
         </div>

@@ -10,7 +10,7 @@ Next.js 정적 사이트(`output: "export"`). `main` 에 푸시하면 `.github/w
 
 | 등급 | 맡기는 곳 | 이런 작업 |
 |---|---|---|
-| 쉬움 | `site-worker` (haiku) | 파일 1~2개, 바꿀 내용이 지시서에 값까지 적힌 일: 문구·링크·목록 추가(`lib/features.ts`), midterm 페이지 행 추가·쪽수 수정, 퀴즈 HTML 복사 + `scripts/quiz-to-pdf.mjs` 로 PDF 생성, 합본(`pdfunite`)·ZIP 재생성, Tailwind 클래스 값 교체 |
+| 쉬움 | `site-worker` (haiku) | 파일 1~2개, 바꿀 내용이 지시서에 값까지 적힌 일: 문구·링크·목록 추가(`lib/features.ts`), 정적 HTML 복사 + `scripts/quiz-to-pdf.mjs` 로 PDF 생성, Tailwind 클래스 값 교체 |
 | 보통 | `site-builder` (sonnet) | 여러 파일에 걸치지만 목표·완료 기준이 분명한 UI 수정: 반응형 배치 고치기, 컴포넌트 하나 새로 만들기, 스크린샷으로 확인이 필요한 일 |
 | 어려움 | 메인 세션이 직접 | 요구가 모호하거나 디자인 판단이 필요한 일, 원인 모를 버그, 빌드·배포 설정(`next.config.mjs`, `.github/`), 파일 삭제·대량 변경, 사용자 원본 파일 수정 여부 판단 |
 
@@ -28,12 +28,3 @@ Next.js 정적 사이트(`output: "export"`). `main` 에 푸시하면 `.github/w
 - 빌드가 건드리는 `next-env.d.ts` 와 작업과 무관한 기존 변경(`.claude/launch.json`, `tsconfig.tsbuildinfo` 등)은 커밋에 넣지 않는다.
 - 커밋 메시지는 한국어로 `영역: 무엇을 왜` (예: `플레이리스트: 모바일에서 플레이어가 사진 높이에 잘리지 않게`). 커밋에 `Co-Authored-By` 줄을 넣지 않는다.
 - 사용자가 올린 원본 HTML(퀴즈 등)은 내용을 고치지 않는다. 꼭 필요하면(예: 저장 키 충돌) 한 줄만 고치고 커밋 메시지와 보고에 적는다.
-
-## Midterm 자료 (`public/reports/midterm/`)
-
-- `index.html` — 과목별 목록. 행마다 [풀기](`quiz/*.html`) · [인쇄] · [PDF], 과목 맨 위에 합본.
-- 새 퀴즈 추가 순서(쉬움 → `site-worker`):
-  1. 원본을 `quiz/<과목>_<종류>.html` 로 복사. 같은 템플릿·같은 `title:` 인 퀴즈가 이미 있으면 저장 키 충돌 → 메인 세션에 보고.
-  2. `node scripts/quiz-to-pdf.mjs quiz/<파일>.html <이름>_with_answers.pdf` — 출력의 `n` 과 `q` 가 같아야 한다.
-  3. 과목 합본: `pdfunite <그 과목 PDF들> All_<과목>.pdf`, ZIP: `zip -X Midterm_All.zip *_with_answers.pdf`.
-  4. `index.html` 에 행 추가, 문항 수·쪽수(`pdfinfo`)·합본 쪽수·ZIP 크기 문구 갱신.
