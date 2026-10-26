@@ -14,6 +14,9 @@ export function SiteTopbar({ posts }: { posts: Post[] }) {
   const current = normalizePath(pathname ?? "/")
   const currentPost = posts.find((p) => p.href && normalizePath(p.href) === current)
 
+  // AQUI 보드는 검은 배경 페이지라 상단바도 검게 맞춘다.
+  const dark = current.startsWith("/board/aqui")
+
   const [open, setOpen] = useState(false)
   const rootRef = useRef<HTMLElement>(null)
 
@@ -46,12 +49,14 @@ export function SiteTopbar({ posts }: { posts: Post[] }) {
   return (
     <header
       ref={rootRef}
-      className="fixed inset-x-0 top-0 z-40 border-b border-border/60 bg-background/95 shadow-sm backdrop-blur-sm nav:hidden"
+      className={`fixed inset-x-0 top-0 z-40 border-b backdrop-blur-sm nav:hidden ${
+        dark ? "border-white/15 bg-black text-white" : "border-border/60 bg-background/95 shadow-sm"
+      }`}
     >
       <div className="flex h-12 items-center justify-between gap-3 px-4 md:px-8">
         <Link
           href="/"
-          className="font-mono text-xs font-semibold uppercase tracking-[0.25em] text-foreground transition-colors hover:text-accent"
+          className={`font-mono text-xs font-semibold uppercase tracking-[0.25em] transition-colors ${dark ? "text-white" : "text-foreground"} hover:text-accent`}
         >
           ← THE FIELD FILE
         </Link>
@@ -62,7 +67,7 @@ export function SiteTopbar({ posts }: { posts: Post[] }) {
           aria-expanded={open}
           aria-controls="site-index-panel"
           className={`flex items-center gap-1.5 py-2 pl-2 font-mono text-xs uppercase tracking-[0.2em] transition-colors hover:text-accent focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent ${
-            open ? "text-accent" : "text-muted-foreground"
+            open ? "text-accent" : dark ? "text-white/70" : "text-muted-foreground"
           }`}
         >
           Index
@@ -85,7 +90,9 @@ export function SiteTopbar({ posts }: { posts: Post[] }) {
         <nav
           id="site-index-panel"
           aria-label="글 목록"
-          className="absolute right-3 top-full mt-1 max-h-[calc(100dvh-4.25rem)] w-[min(22rem,calc(100vw-1.5rem))] overflow-y-auto rounded-2xl border border-border/60 bg-background px-5 py-5 shadow-xl md:right-6"
+          className={`absolute right-3 top-full mt-1 max-h-[calc(100dvh-4.25rem)] w-[min(22rem,calc(100vw-1.5rem))] overflow-y-auto rounded-2xl border px-5 py-5 shadow-xl md:right-6 ${
+            dark ? "border-white/15 bg-black" : "border-border/60 bg-background"
+          }`}
         >
           <div className="flex flex-col gap-5">
             {CATEGORY_ORDER.map((category) => {
@@ -96,7 +103,7 @@ export function SiteTopbar({ posts }: { posts: Post[] }) {
                 <div key={category}>
                   <p
                     className={`font-mono text-[0.7rem] uppercase tracking-[0.2em] ${
-                      category === currentPost?.category ? "text-accent" : "text-muted-foreground"
+                      category === currentPost?.category ? "text-accent" : dark ? "text-white/50" : "text-muted-foreground"
                     }`}
                   >
                     {CATEGORY_LABELS[category]}
@@ -110,7 +117,7 @@ export function SiteTopbar({ posts }: { posts: Post[] }) {
                             href={post.href ?? "/"}
                             aria-current={isCurrent ? "page" : undefined}
                             className={`block py-1 text-sm leading-snug transition-colors ${
-                              isCurrent ? "font-semibold text-accent" : "text-foreground/80 hover:text-accent"
+                              isCurrent ? "font-semibold text-accent" : dark ? "text-white/80 hover:text-accent" : "text-foreground/80 hover:text-accent"
                             }`}
                           >
                             {post.title}
