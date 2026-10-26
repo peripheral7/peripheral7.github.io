@@ -1,4 +1,5 @@
 import Image from "next/image"
+import { ScrollReveal } from "@/components/scroll-reveal"
 
 
 export type PinStyle = "pin" | "tape" | "clip" | "none"
@@ -107,7 +108,7 @@ function PhotoCell({ item }: { item: BoardPhoto }) {
   )
 }
 
-function BoardSectionBlock({ section }: { section: BoardSection }) {
+function BoardSectionBlock({ section, reveal, dark }: { section: BoardSection; reveal?: boolean; dark?: boolean }) {
   const columns = section.columns ?? 24
   const rows = section.rows ?? 160
   const paddingBottomPercent = (rows / columns) * 100
@@ -115,8 +116,8 @@ function BoardSectionBlock({ section }: { section: BoardSection }) {
   return (
     <section id={section.id} className="mb-12">
       {section.title && (
-        <header className="mb-10 border-b border-border pb-4">
-          <h2 className="font-sans text-2xl font-extrabold uppercase tracking-tight text-foreground md:text-3xl">{section.title}</h2>
+        <header className={`mb-10 border-b pb-4 ${dark ? "border-white/20" : "border-border"}`}>
+          <h2 className={`font-sans text-2xl font-extrabold uppercase tracking-tight md:text-3xl ${dark ? "text-white" : "text-foreground"}`}>{section.title}</h2>
           {section.note && <p className="mt-2 max-w-2xl font-[family-name:var(--font-kr)] text-sm leading-relaxed text-muted-foreground">{section.note}</p>}
         </header>
       )}
@@ -132,7 +133,13 @@ function BoardSectionBlock({ section }: { section: BoardSection }) {
 
           return (
             <div key={photoItem.id} className="absolute" style={{ left: `${lPercent}%`, top: `${tPercent}%`, width: `${wPercent}%`, zIndex: photoItem.z ?? 1 }}>
-              <PhotoCell item={photoItem} />
+              {reveal ? (
+                <ScrollReveal>
+                  <PhotoCell item={photoItem} />
+                </ScrollReveal>
+              ) : (
+                <PhotoCell item={photoItem} />
+              )}
             </div>
           )
         })}
@@ -146,17 +153,23 @@ export function PostBoard({
   eyebrow,
   intro,
   sections,
+  reveal,
+  dark,
 }: {
   title: string
   sidebarTitle?: string
   eyebrow?: string
   intro?: string
   sections: BoardSection[]
+  /** 스크롤에 따라 사진이 아래에서 서서히 올라오는 효과 */
+  reveal?: boolean
+  /** 본문 배경까지 검은색으로 */
+  dark?: boolean
 }) {
   return (
     <div className="relative min-h-screen bg-black text-foreground overflow-x-hidden">
-      <main className="mx-auto w-full max-w-5xl min-h-screen bg-background px-4 pt-24 pb-16 md:px-12 lg:px-16 shadow-2xl transition-all duration-300">
-        <header className="mb-10 border-b border-border pb-8">
+      <main className={`mx-auto w-full max-w-5xl min-h-screen px-4 pt-24 pb-16 md:px-12 lg:px-16 transition-all duration-300 ${dark ? "bg-black text-white" : "bg-background shadow-2xl"}`}>
+        <header className={`mb-10 border-b pb-8 ${dark ? "border-white/20" : "border-border"}`}>
           {eyebrow && (
             <span className="font-mono text-xs uppercase tracking-[0.3em] text-accent">
               {eyebrow}
@@ -166,14 +179,14 @@ export function PostBoard({
             {title}
           </h1>
           {intro && (
-            <p className="mt-4 max-w-2xl font-[family-name:var(--font-kr)] text-sm leading-relaxed text-muted-foreground md:text-base">
+            <p className={`mt-4 max-w-2xl font-[family-name:var(--font-kr)] text-sm leading-relaxed md:text-base ${dark ? "text-white/60" : "text-muted-foreground"}`}>
               {intro}
             </p>
           )}
         </header>
 
         {sections.map((section) => (
-          <BoardSectionBlock key={section.id} section={section} />
+          <BoardSectionBlock key={section.id} section={section} reveal={reveal} dark={dark} />
         ))}
       </main>
     </div>

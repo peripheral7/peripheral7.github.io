@@ -7,10 +7,12 @@ export const metadata = {
 
 export default function AquiBoardPage() {
   return (
-    <main className="min-h-screen bg-background text-foreground">
+    <main className="min-h-screen bg-black text-white">
       <PostBoard
         {...aquiMeta}
         sections={aquiBoard}
+        reveal
+        dark
       />
     </main>
   )
