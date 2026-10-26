@@ -14,8 +14,8 @@ export function SiteTopbar({ posts }: { posts: Post[] }) {
   const current = normalizePath(pathname ?? "/")
   const currentPost = posts.find((p) => p.href && normalizePath(p.href) === current)
 
-  // AQUI 보드는 검은 배경 페이지라 상단바도 검게 맞춘다.
-  const dark = current.startsWith("/board/aqui")
+  // AQUI·CBR650F 보드는 검은 배경 페이지라 상단바도 검게 맞춘다.
+  const dark = (current.startsWith("/board/aqui") || current.startsWith("/board/cbr650f"))
 
   const [open, setOpen] = useState(false)
   const rootRef = useRef<HTMLElement>(null)

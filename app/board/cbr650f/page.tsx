@@ -7,10 +7,12 @@ export const metadata = {
 
 export default function Cbr650fBoardPage() {
   return (
-    <main className="min-h-screen bg-background text-foreground">
+    <main className="min-h-screen bg-black text-white">
       <PostBoard
         {...cbr650fMeta}
         sections={cbr650fBoard}
+        reveal
+        dark
       />
     </main>
   )

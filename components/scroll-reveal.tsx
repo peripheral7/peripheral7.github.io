@@ -5,8 +5,8 @@ import { useEffect, useLayoutEffect, useRef } from "react"
 const useIsoLayoutEffect = typeof window !== "undefined" ? useLayoutEffect : useEffect
 
 /**
- * 스크롤 위치에 따라 아래에서 올라오듯 서서히 나타나는 래퍼.
- * 화면에 들어온 만큼만 위쪽부터 보이고, 아직 안 나온 아래쪽은 그라데이션으로 흐려진다.
+ * 스크롤 위치에 따라 스크롤하면서 서서히 나타나는 래퍼.
+ * 처음엔 사진 윗부분이 그라데이션으로 흐려져 있다가, 스크롤할수록 위쪽까지 천천히 또렷해진다.
  */
 export function ScrollReveal({ children }: { children: React.ReactNode }) {
   const ref = useRef<HTMLDivElement>(null)
@@ -28,16 +28,16 @@ export function ScrollReveal({ children }: { children: React.ReactNode }) {
         return
       }
       const stop = p * 140 - 40
-      const mask = `linear-gradient(to bottom, #000 ${stop}%, transparent ${stop + 40}%)`
+      const mask = `linear-gradient(to top, #000 ${stop}%, transparent ${stop + 40}%)`
       el.style.maskImage = el.style.webkitMaskImage = mask
-      el.style.transform = `translateY(${(1 - p) * 64}px)`
+      el.style.transform = "none"
       el.style.opacity = String(Math.min(1, p * 3))
     }
     const measure = () => {
       const vh = window.innerHeight
       const rect = el.getBoundingClientRect()
-      // 사진 윗변이 화면 아래에서 15% 위로 올라온 뒤부터 시작(아래 여백), 화면 높이의 70%(또는 사진 높이)만큼 올라오면 1
-      const span = Math.max(1, Math.min(rect.height, vh * 0.7))
+      // 사진 윗변이 화면 아래에서 15% 위로 올라온 뒤부터 시작(아래 여백), 화면 높이의 90%(또는 사진 높이)만큼 올라오면 1
+      const span = Math.max(1, Math.min(rect.height, vh * 0.9))
       const byPos = (vh * 0.85 - rect.top) / span
       // 처음 화면(스크롤 0)에서는 아무것도 보이지 않고, 조금 내려가야 나타난다
       const byScroll = window.scrollY / (vh * 0.35)
@@ -47,7 +47,7 @@ export function ScrollReveal({ children }: { children: React.ReactNode }) {
       raf = 0
       measure()
       if (current < 0) current = target
-      current += (target - current) * 0.1
+      current += (target - current) * 0.055
       if (Math.abs(target - current) < 0.002) current = target
       paint(current)
       if (current !== target) raf = requestAnimationFrame(tick)
