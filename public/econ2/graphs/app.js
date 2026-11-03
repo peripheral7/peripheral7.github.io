@@ -355,9 +355,9 @@
         const li = document.createElement('li'), btn = document.createElement('button');
         li.setAttribute('data-i', k);
         btn.type = 'button';
-        // 글은 ' — ' 에서 줄을 바꾸고, ' → ' 로 나뉜 조각 안에서는 줄이 바뀌지 않게(의미 단위로만 줄바꿈)
+        // 글은 ' — ' 에서 줄을 바꾸고, ' → ' 로 나뉜 조각(.u, inline-block)은 통째로 다음 줄로 — 조각이 칸보다 길 때만 그 안에서 줄바꿈. b.s 는 작은 숫자 줄
         const unit = (x) => x.split(' → ').map((u) => '<span class="u">' + arrows(u) + '</span>').join(' → ');
-        btn.innerHTML = '<span class="dot"></span><span class="k">[' + arrows(b.k || '') + ']</span><span class="tx">' + String(b.t || '').split(' — ').map(unit).join('<br>') + '</span>';
+        btn.innerHTML = '<span class="dot"></span><span class="k">[' + arrows(b.k || '') + ']</span><span class="tx">' + String(b.t || '').split(' — ').map(unit).join('<br>') + '</span>' + (b.s ? '<span class="sm">' + arrows(b.s) + '</span>' : '');
         btn.addEventListener('click', () => { playing = false; go(k, true); });
         li.appendChild(btn); rows.appendChild(li);
       });
@@ -561,34 +561,27 @@
       $$('#bank [data-k]').forEach((e) => e.classList.toggle('hi', (hi || []).indexOf(e.getAttribute('data-k')) >= 0));
     }
     // 걸음: [글자, 값, 강조할 칸]
-    const R2 = { R: 0.2 }, R5 = { R: 0.05 };
+    // 걸음: [꼬리표, 식(크게), 숫자(작게), 보여 줄 값, 강조할 칸]. 세 마디: 상황 → 승수 또는 지준 → 통화량 = 지준 × 1/R
     const EV = [
       { t: '지급준비율 인상 10% → 20%', q: 'SA 10', dir: 'l', steps: [
-        ['R 10% → 20% : 승수 1/R 10 → 5', R2, ['R']],
-        ['필요지준 20% × $1,000 = $200 > 지준 $100 → 부족', R2, ['res']],
-        ['대출 ↓ $900 → $400 → 예금 $1,000 → $500', { R: 0.2, L: 400, D: 500 }, ['L', 'D']],
-        ['M $1,000 → $500 ↓ (= $100 × 5)', { R: 0.2, L: 400, D: 500 }, ['M']]] },
+        ['상황', 'R 10% → 20%', '', { R: 0.2 }, ['R']],
+        ['승수', '1/R = 10 → 5', '', { R: 0.2 }, ['R']],
+        ['통화량', 'M = 지준 × 1/R ↓', '$100 × 5 = $500 (대출 $400 · 예금 $500)', { R: 0.2, L: 400, D: 500 }, ['M', 'L', 'D']]] },
       { t: '지급준비율 인하 10% → 5%', dir: 'r', steps: [
-        ['R 10% → 5% : 승수 1/R 10 → 20', R5, ['R']],
-        ['필요지준 5% × $1,000 = $50 < 지준 $100 → 초과지준 $50', R5, ['res']],
-        ['초과지준 대출 ↑ $900 → $1,900 → 예금 $1,000 → $2,000', { R: 0.05, L: 1900, D: 2000 }, ['L', 'D']],
-        ['M $1,000 → $2,000 ↑ (= $100 × 20)', { R: 0.05, L: 1900, D: 2000 }, ['M']]] },
+        ['상황', 'R 10% → 5%', '', { R: 0.05 }, ['R']],
+        ['승수', '1/R = 10 → 20', '', { R: 0.05 }, ['R']],
+        ['통화량', 'M = 지준 × 1/R ↑', '$100 × 20 = $2,000 (대출 $1,900 · 예금 $2,000)', { R: 0.05, L: 1900, D: 2000 }, ['M', 'L', 'D']]] },
       { t: 'Fed 채권 매입 $100 (공개시장 매입)', q: 'SA 11', dir: 'r', steps: [
-        ['Fed 채권 매입 $100 → 지준 $100 → $200', { res: 200 }, ['res']],
-        ['필요지준 10% × $1,000 = $100 → 초과지준 $100', { res: 200 }, ['res']],
-        ['초과지준 대출 · 재예금 반복 → 대출 $900 → $1,800 · 예금 $1,000 → $2,000', { res: 200, L: 1800, D: 2000 }, ['L', 'D']],
-        ['M +$1,000 ↑ (= 새 지준 $100 × 10)', { res: 200, L: 1800, D: 2000 }, ['M']]] },
+        ['상황', 'Fed 채권 매입 $100', '', {}, []],
+        ['지준', '본원통화 ↑ → 지준 +$100', '지준 $100 → $200', { res: 200 }, ['res']],
+        ['통화량', 'M = 지준 × 1/R ↑', '$200 × 10 = $2,000 (대출 $1,800 · 예금 $2,000)', { res: 200, L: 1800, D: 2000 }, ['M', 'L', 'D']]] },
       { t: 'Fed 채권 매각 $50 (공개시장 매각)', dir: 'l', steps: [
-        ['Fed 채권 매각 $50 → 지준 $100 → $50', { res: 50 }, ['res']],
-        ['필요지준 10% × $1,000 = $100 > 지준 $50 → 부족', { res: 50 }, ['res']],
-        ['대출 ↓ $900 → $450 → 예금 $1,000 → $500', { res: 50, L: 450, D: 500 }, ['L', 'D']],
-        ['M −$500 ↓ (= −$50 × 10)', { res: 50, L: 450, D: 500 }, ['M']]] }
+        ['상황', 'Fed 채권 매각 $50', '', {}, []],
+        ['지준', '본원통화 ↓ → 지준 −$50', '지준 $100 → $50', { res: 50 }, ['res']],
+        ['통화량', 'M = 지준 × 1/R ↓', '$50 × 10 = $500 (대출 $450 · 예금 $500)', { res: 50, L: 450, D: 500 }, ['M', 'L', 'D']]] }
     ];
-    const KS = ['상황', '비교', '조정', '통화량'];
     function beats(ev) {
-      const out = [];
-      ev.steps.forEach(([t, v, hi], i) => { const s = Object.assign({}, B, v); out.push({ g: ev.t, k: KS[i], t, run: () => show(s, hi), wait: 1.3 }); });
-      return out;
+      return ev.steps.map(([k, t, sm, v, hi]) => { const st = Object.assign({}, B, v); return { g: ev.t, k, t, s: sm, run: () => show(st, hi), wait: 1.3 }; });
     }
     list($('#o29'), EV, (i) => { if (i < 0) { player.clear(); show(B, []); } else player.load(beats(EV[i])); });
     show(B, []);

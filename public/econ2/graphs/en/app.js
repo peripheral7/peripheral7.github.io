@@ -355,9 +355,9 @@
         const li = document.createElement('li'), btn = document.createElement('button');
         li.setAttribute('data-i', k);
         btn.type = 'button';
-        // 글은 ' — ' 에서 줄을 바꾸고, ' → ' 로 나뉜 조각 안에서는 줄이 바뀌지 않게(의미 단위로만 줄바꿈)
+        // 글은 ' — ' 에서 줄을 바꾸고, ' → ' 로 나뉜 조각(.u, inline-block)은 통째로 다음 줄로 — 조각이 칸보다 길 때만 그 안에서 줄바꿈. b.s 는 작은 숫자 줄
         const unit = (x) => x.split(' → ').map((u) => '<span class="u">' + arrows(u) + '</span>').join(' → ');
-        btn.innerHTML = '<span class="dot"></span><span class="k">[' + arrows(b.k || '') + ']</span><span class="tx">' + String(b.t || '').split(' — ').map(unit).join('<br>') + '</span>';
+        btn.innerHTML = '<span class="dot"></span><span class="k">[' + arrows(b.k || '') + ']</span><span class="tx">' + String(b.t || '').split(' — ').map(unit).join('<br>') + '</span>' + (b.s ? '<span class="sm">' + arrows(b.s) + '</span>' : '');
         btn.addEventListener('click', () => { playing = false; go(k, true); });
         li.appendChild(btn); rows.appendChild(li);
       });
@@ -561,34 +561,27 @@
       $$('#bank [data-k]').forEach((e) => e.classList.toggle('hi', (hi || []).indexOf(e.getAttribute('data-k')) >= 0));
     }
     // 걸음: [글자, 값, 강조할 칸]
-    const R2 = { R: 0.2 }, R5 = { R: 0.05 };
+    // 걸음: [꼬리표, 식(크게), 숫자(작게), 보여 줄 값, 강조할 칸]. 세 마디: Situation → Multiplier 또는 Reserves → Money = reserves × 1/R
     const EV = [
       { t: 'Reserve ratio raised 10% → 20%', q: 'SA 10', dir: 'l', steps: [
-        ['R 10% → 20% : multiplier 1/R 10 → 5', R2, ['R']],
-        ['Required 20% × $1,000 = $200 > reserves $100 → shortfall', R2, ['res']],
-        ['Loans ↓ $900 → $400 → deposits $1,000 → $500', { R: 0.2, L: 400, D: 500 }, ['L', 'D']],
-        ['M $1,000 → $500 ↓ (= $100 × 5)', { R: 0.2, L: 400, D: 500 }, ['M']]] },
+        ['Situation', 'R 10% → 20%', '', { R: 0.2 }, ['R']],
+        ['Multiplier', '1/R = 10 → 5', '', { R: 0.2 }, ['R']],
+        ['Money', 'M = Reserves × 1/R ↓', '$100 × 5 = $500 (loans $400 · deposits $500)', { R: 0.2, L: 400, D: 500 }, ['M', 'L', 'D']]] },
       { t: 'Reserve ratio cut 10% → 5%', dir: 'r', steps: [
-        ['R 10% → 5% : multiplier 1/R 10 → 20', R5, ['R']],
-        ['Required 5% × $1,000 = $50 < reserves $100 → excess $50', R5, ['res']],
-        ['Excess lent: loans ↑ $900 → $1,900 → deposits $1,000 → $2,000', { R: 0.05, L: 1900, D: 2000 }, ['L', 'D']],
-        ['M $1,000 → $2,000 ↑ (= $100 × 20)', { R: 0.05, L: 1900, D: 2000 }, ['M']]] },
+        ['Situation', 'R 10% → 5%', '', { R: 0.05 }, ['R']],
+        ['Multiplier', '1/R = 10 → 20', '', { R: 0.05 }, ['R']],
+        ['Money', 'M = Reserves × 1/R ↑', '$100 × 20 = $2,000 (loans $1,900 · deposits $2,000)', { R: 0.05, L: 1900, D: 2000 }, ['M', 'L', 'D']]] },
       { t: 'Fed buys $100 of bonds (open-market purchase)', q: 'SA 11', dir: 'r', steps: [
-        ['Fed buys $100 of bonds → reserves $100 → $200', { res: 200 }, ['res']],
-        ['Required 10% × $1,000 = $100 → excess $100', { res: 200 }, ['res']],
-        ['Excess lent and redeposited repeatedly → loans $900 → $1,800 · deposits $1,000 → $2,000', { res: 200, L: 1800, D: 2000 }, ['L', 'D']],
-        ['M +$1,000 ↑ (= new reserves $100 × 10)', { res: 200, L: 1800, D: 2000 }, ['M']]] },
+        ['Situation', 'Fed buys $100 of bonds', '', {}, []],
+        ['Reserves', 'Monetary base ↑ → reserves +$100', 'Reserves $100 → $200', { res: 200 }, ['res']],
+        ['Money', 'M = Reserves × 1/R ↑', '$200 × 10 = $2,000 (loans $1,800 · deposits $2,000)', { res: 200, L: 1800, D: 2000 }, ['M', 'L', 'D']]] },
       { t: 'Fed sells $50 of bonds (open-market sale)', dir: 'l', steps: [
-        ['Fed sells $50 of bonds → reserves $100 → $50', { res: 50 }, ['res']],
-        ['Required 10% × $1,000 = $100 > reserves $50 → shortfall', { res: 50 }, ['res']],
-        ['Loans ↓ $900 → $450 → deposits $1,000 → $500', { res: 50, L: 450, D: 500 }, ['L', 'D']],
-        ['M −$500 ↓ (= −$50 × 10)', { res: 50, L: 450, D: 500 }, ['M']]] }
+        ['Situation', 'Fed sells $50 of bonds', '', {}, []],
+        ['Reserves', 'Monetary base ↓ → reserves −$50', 'Reserves $100 → $50', { res: 50 }, ['res']],
+        ['Money', 'M = Reserves × 1/R ↓', '$50 × 10 = $500 (loans $450 · deposits $500)', { res: 50, L: 450, D: 500 }, ['M', 'L', 'D']]] }
     ];
-    const KS = ['Situation', 'Compare', 'Adjust', 'Money'];
     function beats(ev) {
-      const out = [];
-      ev.steps.forEach(([t, v, hi], i) => { const s = Object.assign({}, B, v); out.push({ g: ev.t, k: KS[i], t, run: () => show(s, hi), wait: 1.3 }); });
-      return out;
+      return ev.steps.map(([k, t, sm, v, hi]) => { const st = Object.assign({}, B, v); return { g: ev.t, k, t, s: sm, run: () => show(st, hi), wait: 1.3 }; });
     }
     list($('#o29'), EV, (i) => { if (i < 0) { player.clear(); show(B, []); } else player.load(beats(EV[i])); });
     show(B, []);
