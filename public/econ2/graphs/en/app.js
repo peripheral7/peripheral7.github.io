@@ -347,7 +347,7 @@
         if (b.g !== g) {
           g = b.g;
           const st = document.createElement('li'), h = document.createElement('div'), nm = document.createElement('span');
-          st.className = b.alts ? 'stg alts' : 'stg'; h.className = 'gh'; nm.textContent = b.g; h.appendChild(nm);   // 갈래(ⓐ ⓑ)가 있으면 이름 · 칩을 선 위 한 줄로
+          st.className = b.alts ? 'stg alts' : 'stg'; h.className = 'gh'; nm.textContent = b.g; h.appendChild(nm);   // 갈래가 있으면 단계 이름 아래에 글자 버튼(unchanged · Policy)
           if (b.alts) b.alts.forEach((a) => { const x = document.createElement('button'); x.type = 'button'; x.className = a.on ? 'alt on' : 'alt'; x.textContent = a.t; x.addEventListener('click', a.pick); h.appendChild(x); });
           rows = document.createElement('ol'); rows.className = 'rows';
           st.appendChild(h); st.appendChild(rows); ol.appendChild(st);
@@ -478,7 +478,7 @@
       num++;
       const isAlt = alts.length && id !== 0;
       const stp = st.step || '', g = /Long run/.test(stp) ? 'Long run' : /Short run/.test(stp) ? 'Short run' : isAlt ? 'Long run' : num + ' stage';
-      const altList = isAlt ? alts.map((a, k) => ({ t: 'ⓐⓑⓒ'[k] + ' ' + sc.stages[a].name, on: a === id, pick: () => rebuild(a) })) : null;
+      const altList = isAlt ? alts.map((a, k) => ({ t: sc.stages[a].short || sc.stages[a].name, on: a === id, pick: () => rebuild(a) })) : null;
       const cause = ps.slice(0, at), after = ps.slice(at + 1).join(' → ');
       const sit = id === 0 ? sc.t : cause.shift() || st.name;
       out.push({ g, alts: altList, k: 'Situation', t: sit, run: snap(prevS, false), wait: 1 });
@@ -644,7 +644,7 @@
     { id: 'SRAS', kind: 'line', x: 5, y: 5, m: 0.85, span: 3.8, lab: 'SRAS' },
     { id: 'AD', kind: 'line', x: 5, y: 5, m: -0.85, span: 3.8, lab: 'AD' }
   ];
-  // 교점이 LRAS 위에 오도록 SRAS 를 옮기거나(Long run 자동 Adjust) AD 를 옮긴다(정책 수용)
+  // 교점이 LRAS 위에 오도록 SRAS 를 옮기거나(Long run 자동 Adjust) AD 를 옮긴다(Policy 수용)
   const lrSRAS = (off) => { const L = 5 + (off.LRAS || 0), yA = 5 - 0.85 * (L - 5 - (off.AD || 0)); return { SRAS: L - 5 - (yA - 5) / 0.85 }; };
   const lrAD = (off) => { const L = 5 + (off.LRAS || 0), yS = 5 + 0.85 * (L - 5 - (off.SRAS || 0)); return { AD: L - 5 + (yS - 5) / 0.85 }; };
   const eqX = (off) => 5 + ((off.AD || 0) + (off.SRAS || 0)) / 2;   // AD · SRAS 교점의 Y (기울기가 ±0.85 로 같아서)
@@ -692,8 +692,8 @@
     };
     const srEv = (t, why, q) => ({ t, q, dir: 'l', stages: [
       { name: 'SRAS ←', step: 'Stage 1 · Short run', ch: { add: { SRAS: -R } }, why },
-      { name: 'Do nothing: SRAS returns', ch: { abs: { SRAS: 0 } }, letter: 'A', at: 2, why: 'Y < Y* → wages · Pe ↓ → SRAS → → Y* and P restored (slow)' },
-      { name: 'Accommodate: AD →', from: 0, ch: { abs: lrAD }, chain: ['M ↑ · G ↑', 'AD →', 'Y* restored, P higher still'], at: 1 }] });
+      { name: 'Do nothing: SRAS returns', short: 'unchanged', ch: { abs: { SRAS: 0 } }, letter: 'A', at: 2, why: 'Y < Y* → wages · Pe ↓ → SRAS → → Y* and P restored (slow)' },
+      { name: 'Accommodate: AD →', short: 'Policy', from: 0, ch: { abs: lrAD }, chain: ['M ↑ · G ↑', 'AD →', 'Y* restored, P higher still'], at: 1 }] });
     const lrEv = (t, dir, why, q) => ({ t, q, dir, stages: [
       { name: 'LRAS · SRAS ' + (dir === 'r' ? '→' : '←'), step: 'Stage 1', ch: { add: { LRAS: dir === 'r' ? 1 : -1, SRAS: dir === 'r' ? 1 : -1 } }, why },
       { name: 'SRAS adjusts → new Y*', step: 'Stage 2 · Long run', ch: { abs: lrSRAS }, chain: dir === 'r' ? ['P < Pe → Pe ↓', 'SRAS →', 'new Y*, P ↓'] : ['P > Pe → Pe ↑', 'SRAS ←', 'new Y*, P ↑'], at: 1 }] });

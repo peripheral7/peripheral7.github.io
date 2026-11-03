@@ -38,6 +38,8 @@ const T = {
   "'단계'": "' stage'",
   '처음': 'Start',
   '상황': 'Situation',
+  '그대로': 'Wait',
+  '정책': 'Policy',
   '단기': 'Short run',
   '장기': 'Long run',
   '통화량': 'Money',

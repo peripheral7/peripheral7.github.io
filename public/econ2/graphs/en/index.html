@@ -58,13 +58,17 @@
   .steps{display:flex;flex-direction:column;gap:14px;margin:4px 0 0;padding:0;list-style:none}
   .steps li.hint{padding:12px 0;font-size:14.5px;color:var(--soft)}
   .stg{display:grid;grid-template-columns:76px minmax(0,1fr);gap:0 12px;align-items:start}
-  .solo .stg,.stg.alts{grid-template-columns:minmax(0,1fr)}
-  .stg.alts .gh{padding:0 0 8px;gap:6px 10px}
+  .stg.alts .gh{flex-direction:column;align-items:flex-start;gap:6px}
+  .stg.alts .gh>span{margin-bottom:2px}
   .solo .gh{display:none}
   .gh{display:flex;flex-wrap:wrap;align-items:center;gap:4px 8px;padding-top:22px;font-size:15px;font-weight:800;color:var(--soft)}
   .stg.cur .gh{color:var(--ink)}
-  .alt{padding:1px 8px;border:1.5px solid var(--line);border-radius:999px;background:#fff;font-size:12.5px;font-weight:700;cursor:pointer}
-  .alt.on{border-color:var(--blue);color:var(--blue)}
+  /* 갈래 고르기(unchanged · Policy): 글자 버튼. 고른 것은 ▸ 와 파랑 굵은 글자, 나머지는 흐리게 */
+  .alt{padding:0 0 0 14px;border:0;background:none;position:relative;font-size:14px;font-weight:600;color:#9aa0aa;cursor:pointer;text-align:left}
+  .alt::before{content:"·";position:absolute;left:3px}
+  .alt:hover{color:var(--ink)}
+  .alt.on{color:var(--blue);font-weight:800}
+  .alt.on::before{content:"▸";left:0}
   .rows{position:relative;display:flex;margin:0;padding:0;list-style:none}
   .rows::before{content:"";position:absolute;left:11px;right:11px;top:11px;height:3px;background:var(--ink);border-radius:2px}
   .rows li{flex:1 1 0;min-width:0}
@@ -202,6 +206,7 @@
     .rate .nm{grid-column:1 / -1}
     .stg{grid-template-columns:minmax(0,1fr);gap:4px}
     .gh{padding:0 0 2px 36px;font-size:14px}
+    .stg.alts .gh{flex-direction:row;align-items:center;gap:4px 12px}
     .rows{flex-direction:column;gap:12px;padding-left:36px}
     .rows::before{left:9px;right:auto;top:6px;bottom:6px;width:3px;height:auto}
     .rows li button{padding:0}

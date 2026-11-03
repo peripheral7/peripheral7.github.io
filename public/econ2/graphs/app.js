@@ -347,7 +347,7 @@
         if (b.g !== g) {
           g = b.g;
           const st = document.createElement('li'), h = document.createElement('div'), nm = document.createElement('span');
-          st.className = b.alts ? 'stg alts' : 'stg'; h.className = 'gh'; nm.textContent = b.g; h.appendChild(nm);   // 갈래(ⓐ ⓑ)가 있으면 이름 · 칩을 선 위 한 줄로
+          st.className = b.alts ? 'stg alts' : 'stg'; h.className = 'gh'; nm.textContent = b.g; h.appendChild(nm);   // 갈래가 있으면 단계 이름 아래에 글자 버튼(그대로 · 정책)
           if (b.alts) b.alts.forEach((a) => { const x = document.createElement('button'); x.type = 'button'; x.className = a.on ? 'alt on' : 'alt'; x.textContent = a.t; x.addEventListener('click', a.pick); h.appendChild(x); });
           rows = document.createElement('ol'); rows.className = 'rows';
           st.appendChild(h); st.appendChild(rows); ol.appendChild(st);
@@ -478,7 +478,7 @@
       num++;
       const isAlt = alts.length && id !== 0;
       const stp = st.step || '', g = /장기/.test(stp) ? '장기' : /단기/.test(stp) ? '단기' : isAlt ? '장기' : num + '단계';
-      const altList = isAlt ? alts.map((a, k) => ({ t: 'ⓐⓑⓒ'[k] + ' ' + sc.stages[a].name, on: a === id, pick: () => rebuild(a) })) : null;
+      const altList = isAlt ? alts.map((a, k) => ({ t: sc.stages[a].short || sc.stages[a].name, on: a === id, pick: () => rebuild(a) })) : null;
       const cause = ps.slice(0, at), after = ps.slice(at + 1).join(' → ');
       const sit = id === 0 ? sc.t : cause.shift() || st.name;
       out.push({ g, alts: altList, k: '상황', t: sit, run: snap(prevS, false), wait: 1 });
@@ -692,8 +692,8 @@
     };
     const srEv = (t, why, q) => ({ t, q, dir: 'l', stages: [
       { name: 'SRAS ←', step: '1단계 단기', ch: { add: { SRAS: -R } }, why },
-      { name: '그대로 두면 SRAS 복귀', ch: { abs: { SRAS: 0 } }, letter: 'A', at: 2, why: 'Y < Y* → 임금 · Pe ↓ → SRAS → → Y* 회복, P 회복 (오래 걸림)' },
-      { name: '정책으로 수용 AD →', from: 0, ch: { abs: lrAD }, chain: ['M ↑ · G ↑', 'AD →', 'Y* 회복, P 더 ↑'], at: 1 }] });
+      { name: '그대로 두면 SRAS 복귀', short: '그대로', ch: { abs: { SRAS: 0 } }, letter: 'A', at: 2, why: 'Y < Y* → 임금 · Pe ↓ → SRAS → → Y* 회복, P 회복 (오래 걸림)' },
+      { name: '정책으로 수용 AD →', short: '정책', from: 0, ch: { abs: lrAD }, chain: ['M ↑ · G ↑', 'AD →', 'Y* 회복, P 더 ↑'], at: 1 }] });
     const lrEv = (t, dir, why, q) => ({ t, q, dir, stages: [
       { name: 'LRAS · SRAS ' + (dir === 'r' ? '→' : '←'), step: '1단계', ch: { add: { LRAS: dir === 'r' ? 1 : -1, SRAS: dir === 'r' ? 1 : -1 } }, why },
       { name: 'SRAS 조정 → 새 Y*', step: '2단계 장기', ch: { abs: lrSRAS }, chain: dir === 'r' ? ['P < Pe → Pe ↓', 'SRAS →', '새 Y*, P ↓'] : ['P > Pe → Pe ↑', 'SRAS ←', '새 Y*, P ↑'], at: 1 }] });
