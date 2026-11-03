@@ -75,9 +75,22 @@
   const bNext = btn('bNext', 'Next', 'Next (→)', next);
   const bOpen = btn('bOpen', 'Open', 'Open the embedded page in a new tab', openEmbed);
   const bOver = btn('bOver', 'Overview', 'Slide overview (O)', openOverview);
-  const bTheme = btn('bTheme', 'Black / white', 'Black / white (D)', toggleTheme);
-  const bFont = btn('bFont', 'Font: Sans', 'Font: Sans = Pretendard, Serif = Baskerville (T)', toggleFont);
   const bFull = btn('bFull', 'Full screen', 'Full screen (F)', toggleFull);
+  // … 단추: 흑/백 · 글꼴은 아래로 펼치는 메뉴 안에(고르면 닫힘, 바깥을 누르거나 Esc 로도 닫힘)
+  const more = el('div', { id: 'more' });
+  const bMore = btn('bMore', '…', 'More', () => (menuOpen() ? closeMenu() : openMenu()));
+  bMore.setAttribute('aria-haspopup', 'true'); bMore.setAttribute('aria-expanded', 'false');
+  const menu = el('div', { id: 'menu', hidden: '' });
+  const bTheme = btn('bTheme', 'Black / white', 'Black / white (D)', () => { toggleTheme(); closeMenu(); });
+  const bFont = btn('bFont', 'Font: Sans', 'Font: Sans = Pretendard, Serif = Baskerville (T)', () => { toggleFont(); closeMenu(); });
+  more.appendChild(bMore); menu.appendChild(bTheme); menu.appendChild(bFont); more.appendChild(menu); ui.appendChild(more);
+  function menuOpen() { return !menu.hidden; }
+  function openMenu() {
+    menu.classList.toggle('left', more.getBoundingClientRect().left < 170);   // 좁은 화면에서 … 이 왼쪽으로 줄바꿈되면 메뉴를 오른쪽으로 펼친다
+    menu.hidden = false; bMore.setAttribute('aria-expanded', 'true'); showUi();
+  }
+  function closeMenu() { menu.hidden = true; bMore.setAttribute('aria-expanded', 'false'); }
+  document.addEventListener('pointerdown', (e) => { if (menuOpen() && !more.contains(e.target)) closeMenu(); });
   const bar = el('div', { id: 'bar' });
   const sr = el('div', { id: 'sr', role: 'status', 'aria-live': 'polite' });
   const overview = el('div', { id: 'overview', hidden: '' });
@@ -91,7 +104,7 @@
     uiTimer = setTimeout(hideUi, 3000);
   }
   function hideUi() {
-    if (sticky) return;
+    if (sticky || menuOpen()) return;                                  // 메뉴가 열려 있는 동안은 도구줄을 숨기지 않는다
     body.classList.remove('ui');
     if (!overviewOpen()) body.classList.add('idle');
   }
@@ -224,6 +237,7 @@
     each(overview.querySelectorAll('.thumb'), (t) => { t.firstChild.style.webkitTransform = t.firstChild.style.transform = 'scale(' + (t.clientWidth / W) + ')'; });
   }
   function openOverview() {
+    closeMenu();
     overview.textContent = '';
     slides.forEach((s, i) => {
       const t = el('button', { type: 'button', class: 'thumb' + (i === cur ? ' cur' : ''), title: (i + 1) + (slideTitle(s) ? ' · ' + slideTitle(s) : '') });
@@ -279,6 +293,7 @@
     if (isEditable(t)) return;
     if ((k === ' ' || k === 'Enter') && t && (t.tagName === 'BUTTON' || t.tagName === 'A')) return;   // 단추·링크에서는 그 동작을 그대로
     showUi();
+    if (menuOpen() && k === 'Escape') { closeMenu(); e.preventDefault(); return; }
     if (overviewOpen()) {
       if (k === 'Escape' || k === 'o' || k === 'O') { closeOverview(); e.preventDefault(); }
       else if (k.indexOf('Arrow') === 0) { moveThumb(k); e.preventDefault(); }
