@@ -1,4 +1,4 @@
-// 메인 화면 오른쪽 위의 "여기살까?" 작은 포스터.
+// 메인 화면 오른쪽 위의 "둥지학개론"(옛 이름 여기살까?) 작은 포스터.
 // 앞에는 물까치 로고(whereto 저장소 public/logo-magpie.svg 를 그대로 복사한 /images/whereto/logo-magpie.svg),
 // 뒤에는 앱 화면을 줄여 그린 것 — 지도 위 후보지 위치 마커(핀)·대중교통 경로와, 후보지 상세카드(종합평점, 고리 안 3D 집) 하나가 열린 모습.
 // 숫자·지명은 앱 소개 그림(og.jpg)의 예시값이다. 폭은 부르는 쪽이 정하고(기능모음 열과 같은 폭), 정사각형으로 늘어난다.
@@ -24,7 +24,7 @@ export function WheretoPoster({ className = "" }: { className?: string }) {
       target="_blank"
       rel="noopener noreferrer"
       className={`group block focus-visible:outline-none ${className}`}
-      aria-label="여기살까? — 후보지 입지 비교 앱 열기"
+      aria-label="둥지학개론 — 후보지 입지 비교 앱 열기"
     >
       <svg
         viewBox="0 0 240 240"
@@ -183,7 +183,7 @@ export function WheretoPoster({ className = "" }: { className?: string }) {
 
       <span className="mt-2 flex items-baseline justify-between gap-3">
         <span className="font-sans text-sm font-extrabold tracking-[0.04em] text-foreground underline-offset-4 group-hover:text-accent group-hover:underline">
-          여기살까?
+          둥지학개론
         </span>
         <span className="font-mono text-[0.6rem] uppercase tracking-[0.2em] text-muted-foreground">Fig. 02 — App</span>
       </span>

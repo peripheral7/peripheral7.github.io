@@ -9,4 +9,5 @@ export const FEATURES: Feature[] = [
   { label: "공원 촬영 앱", href: "/field-cam" },
   { label: "시계", href: "/clock/" },
   { label: "슬라이드", href: "/slides/" },
+  { label: "Econ2 Exam2 TA Session", href: "/econ2/" },
 ]

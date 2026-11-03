@@ -45,7 +45,7 @@ export function SiteHero() {
         </span>
       </div>
 
-      {/* 사진 + 오른쪽 열(여기살까? 포스터 위 · 기능모음 아래, 항상 한 칸 15rem).
+      {/* 사진 + 오른쪽 열(둥지학개론 포스터 위 · 기능모음 아래, 항상 한 칸 15rem).
           - 휴대폰: 모두 가운데 정렬로 위→아래로 쌓인다.
           - md~lg(웹 반쪽 화면): 사진이 왼쪽, 오른쪽 열이 붙는다. 사진 폭은 남는 가로 공간을 최대 30rem 까지 다 쓴다(나무가 가늘어지지 않게).
           - xl: 사진(30rem)은 화면 가운데, 오른쪽 열은 그 오른쪽.
@@ -71,8 +71,8 @@ export function SiteHero() {
               <span>Fig. 01 — Field Study</span>
             </p>
 
-            {/* title, right at the bottom of the photograph */}
-            <h1 className="mt-1 text-center font-sans text-[13vw] font-bold leading-[1] tracking-tight text-foreground sm:text-6xl md:text-7xl">
+            {/* 제목 "Moon" 은 화면에서 숨김(읽기 프로그램용 제목으로만 남김) */}
+            <h1 className="sr-only">
               Moon
             </h1>
 
