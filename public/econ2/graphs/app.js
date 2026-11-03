@@ -186,7 +186,8 @@
         if (!usedX.some((v) => Math.abs(v - X(pt.x)) < 28) && usedT.indexOf('x' + xl) < 0) {
           usedX.push(X(pt.x)); usedT.push('x' + xl);
           label(g, X(pt.x), box[1] + box[3] + 24, xl, { anchor: 'middle', size: 17, color: col, weight: wt(dx) });
-          tri(g, X(pt.x) + textW(xl, 17) / 2 + 4, box[1] + box[3] + 23, dx);
+          if (dx > 0) tri(g, X(pt.x) + textW(xl, 17) / 2 + 4, box[1] + box[3] + 23, dx);
+          else tri(g, X(pt.x) - textW(xl, 17) / 2 - 4, box[1] + box[3] + 23, dx, 'end');
         }
       });
 
@@ -249,12 +250,14 @@
       if (hl) {
         let lp = null;
         for (let i = P.length - 1; i >= 0; i--) if (P[i][0]) { lp = P[i][0]; break; }
-        if (hl.axis && lp) {
+        if (hl.axis && lp) {   // 'x' · 'y' · 'xy'(둘 한 번에)
           const px = X(lp.x), py = Y(lp.y), bot = box[1] + box[3];
-          el('path', { d: hl.axis === 'x' ? 'M' + px + ' ' + py + 'V' + bot : 'M' + box[0] + ' ' + py + 'H' + px, fill: 'none', stroke: C.blue, 'stroke-width': 3, 'stroke-dasharray': '6 5' }, g);
-          const r = el('rect', hl.axis === 'x' ? { x: px - 30, y: bot + 6, width: 60, height: 26 } : { x: box[0] - 64, y: py - 14, width: 58, height: 26 }, g);
-          r.setAttribute('rx', 6); r.setAttribute('fill', 'rgba(31,111,209,.14)');
-          g.insertBefore(r, g.firstChild);
+          for (const ax of hl.axis) {
+            el('path', { d: ax === 'x' ? 'M' + px + ' ' + py + 'V' + bot : 'M' + box[0] + ' ' + py + 'H' + px, fill: 'none', stroke: C.blue, 'stroke-width': 3, 'stroke-dasharray': '6 5' }, g);
+            const r = el('rect', ax === 'x' ? { x: px - 30, y: bot + 6, width: 60, height: 26 } : { x: box[0] - 64, y: py - 14, width: 58, height: 26 }, g);
+            r.setAttribute('rx', 6); r.setAttribute('fill', 'rgba(31,111,209,.14)');
+            g.insertBefore(r, g.firstChild);
+          }
         }
         if (hl.curve && byId[hl.curve] && cur.vis[hl.curve]) {
           const pts = path(byId[hl.curve], offOf(byId[hl.curve], disp));
@@ -448,7 +451,7 @@
   function apply(st, ch, letter) {
     const off = Object.assign({}, st.off);
     if (ch.add) for (const k in ch.add) off[k] = (off[k] || 0) + ch.add[k];
-    if (ch.abs) Object.assign(off, typeof ch.abs === 'function' ? ch.abs(st.off) : ch.abs);
+    if (ch.abs) Object.assign(off, typeof ch.abs === 'function' ? ch.abs(off) : ch.abs);   // add 를 적용한 뒤의 off 로
     return { off, vis: Object.assign({}, st.vis, ch.vis || {}), letter };
   }
   // 'A → B → C' 를 걸음으로. 'SRAS → → Y' 처럼 화살표가 겹치면 앞 조각에 붙인다
@@ -483,7 +486,7 @@
       const altList = isAlt ? alts.map((a, k) => ({ t: sc.stages[a].short || sc.stages[a].name, on: a === id, pick: () => rebuild(a) })) : null;
       const cause = ps.slice(0, at), after = ps.slice(at + 1).join(' → ');
       const sit = id === 0 ? sc.t : cause.shift() || st.name;
-      out.push({ g, alts: altList, k: '상황', t: sit, run: snap(prevS, false), wait: 1 });
+      out.push({ g, alts: altList, k: '상황', t: sit, run: snap(prevS, false), wait: 0.4 });   // 상황은 이미 아는 내용 — 빨리 지나간다
       out.push({ g, alts: altList, k: ps[at], t: cause.join(' → '), run: snap(withNew, true), wait: 1.25 });
       out.push({ g, alts: altList, k: '새 균형', t: after || o.result(prevS[prevS.length - 1], next, letter),
         run: (anim) => { snap(withNew, false)(anim); if (o.after) o.after(prevS[prevS.length - 1], next); }, wait: 1.8 });
@@ -581,7 +584,7 @@
         ['통화량', 'M = 지준 × 1/R ↓', '$50 × 10 = $500 (대출 $450 · 예금 $500)', { res: 50, L: 450, D: 500 }, ['M', 'L', 'D']]] }
     ];
     function beats(ev) {
-      return ev.steps.map(([k, t, sm, v, hi]) => { const st = Object.assign({}, B, v); return { g: ev.t, k, t, s: sm, run: () => show(st, hi), wait: 1.3 }; });
+      return ev.steps.map(([k, t, sm, v, hi]) => { const st = Object.assign({}, B, v); return { g: ev.t, k, t, s: sm, run: () => show(st, hi), wait: k === '상황' ? 0.4 : 1.3 }; });
     }
     list($('#o29'), EV, (i) => { if (i < 0) { player.clear(); show(B, []); } else player.load(beats(EV[i])); });
     show(B, []);
@@ -609,12 +612,12 @@
       start: 'A : MS = MD',
       result: (a, b) => { const x = idx(a), y = idx(b); return '화폐가치 1/P ' + dirW(x.v, y.v, 0.02) + ' → 물가 P ' + dirW(x.P, y.P, 0.5); },
       quiet: () => plot.hilite(null),
-      // 새 균형에서: 움직인 곡선 → 화폐량(x 축) → 화폐가치(y 축) 순서로 짚는다. 안 바뀐 것은 건너뜀
+      // 새 균형에서: 움직인 곡선 → 화폐량 · 화폐가치(x · y 축 한 번에). 안 바뀐 것은 건너뜀
       after: (a, b) => {
         const x = idx(a), y = idx(b), mv = ['MS', 'MD'].find((id) => !same(plot.offOf(plot.byId[id], a.off), plot.offOf(plot.byId[id], b.off))), items = [];
         if (mv) items.push({ curve: mv });
-        if (dirOf(x.M, y.M, 0.5)) items.push({ axis: 'x' });
-        if (dirOf(x.v, y.v, 0.02)) items.push({ axis: 'y' });
+        const ax = (dirOf(x.M, y.M, 0.5) ? 'x' : '') + (dirOf(x.v, y.v, 0.02) ? 'y' : '');
+        if (ax) items.push({ axis: ax });
         plot.seq(items);
       }
     });
@@ -662,14 +665,14 @@
       start: 'A : Y = Y*',
       result: (a, b) => { const x = plot.pointsOf(a.off, a.vis)[0], y = plot.pointsOf(b.off, b.vis)[0]; if (!x || !y) return ''; let s = 'Y ' + dirW(x.x, y.x, 0.03) + ' · P ' + dirW(x.y, y.y, 0.03) + ' — ' + gap(b.off, y); if (y.x < x.x - 0.03 && y.y > x.y + 0.03 && Math.abs(x.x - 5 - (a.off.LRAS || 0)) < 0.03) s += ' (스태그플레이션)'; return s; },
       quiet: () => plot.hilite(null),
-      // 새 균형에서: 움직인 곡선 → Y(x 축) → P(y 축) 순서로 짚는다
+      // 새 균형에서: 움직인 곡선 → Y · P(x · y 축 한 번에)
       after: (a, b) => {
         const x = plot.pointsOf(a.off, a.vis)[0], y = plot.pointsOf(b.off, b.vis)[0];
         if (!x || !y) return;
         const mv = movedId(plot, a, b), items = [];
         if (mv) items.push({ curve: mv });
-        if (dirOf(x.x, y.x, 0.03)) items.push({ axis: 'x' });
-        if (dirOf(x.y, y.y, 0.03)) items.push({ axis: 'y' });
+        const ax = (dirOf(x.x, y.x, 0.03) ? 'x' : '') + (dirOf(x.y, y.y, 0.03) ? 'y' : '');   // Y · P 변화는 한 번에
+        if (ax) items.push({ axis: ax });
         plot.seq(items);
       }
     });
@@ -689,9 +692,9 @@
       { name: 'SRAS ←', step: '1단계 단기', ch: { add: { SRAS: -R } }, why },
       { name: '그대로 두면 SRAS 복귀', short: '그대로', ch: { abs: { SRAS: 0 } }, letter: 'A', at: 2, why: 'Y < Y* → 임금 · Pe ↓ → SRAS → → Y* 회복, P 회복 (오래 걸림)' },
       { name: '정책으로 수용 AD →', short: '정책', from: 0, ch: { abs: lrAD }, chain: ['M ↑ · G ↑', 'AD →', 'Y* 회복, P 더 ↑'], at: 1 }] });
+    // LRAS 가 움직이면 SRAS 도 같이 움직여 새 균형은 새 Y* 위(장기균형). AD 그대로면 P 는 반대로
     const lrEv = (t, dir, why, q) => ({ t, q, dir, stages: [
-      { name: 'LRAS · SRAS ' + (dir === 'r' ? '→' : '←'), step: '1단계', ch: { add: { LRAS: dir === 'r' ? 1 : -1, SRAS: dir === 'r' ? 1 : -1 } }, why },
-      { name: 'SRAS 조정 → 새 Y*', step: '2단계 장기', ch: { abs: lrSRAS }, chain: dir === 'r' ? ['P < Pe → Pe ↓', 'SRAS →', '새 Y*, P ↓'] : ['P > Pe → Pe ↑', 'SRAS ←', '새 Y*, P ↑'], at: 1 }] });
+      { name: 'LRAS · SRAS ' + (dir === 'r' ? '→' : '←'), ch: { add: { LRAS: dir === 'r' ? 1 : -1 }, abs: lrSRAS }, why }] });
     const AS = {
       SR: [srEv('기대물가 상승', 'Pe ↑ → 임금 · 가격 ↑ → SRAS ←', 'MC 11'), srEv('유가 급등 (원자재 비용 ↑)', '유가 ↑ → 생산 비용 ↑ → SRAS ←'), srEv('명목임금 상승', '명목임금 ↑ → 비용 ↑ → SRAS ←')],
       LR: [lrEv('기술 진보', 'r', '기술 ↑ → 생산성 ↑ → Y* ↑ → LRAS · SRAS →', 'SA 4c'), lrEv('자본 · 인적자본 증가', 'r', '자본 K · 인적자본 H ↑ → Y* ↑ → LRAS · SRAS →', 'SA 5c'), lrEv('이민 → 노동 증가', 'r', '노동 L ↑ → Y* ↑ → LRAS · SRAS →', 'SA 1'), lrEv('자연재해 · 자원 감소', 'l', '자원 N · 자본 ↓ → Y* ↓ → LRAS · SRAS ←', 'SA 1')]
@@ -759,8 +762,8 @@
       start: 'A : W = W_E, L = L_E',
       result: (a, b) => (b.vis.W ? (b.off.W || 0) + 7 > eqW(b.off) + 0.05 ? 'W > W_E → 실업 = L_S − L_D' : 'W < W_E → 효과 없음' : 'W ↓ · L ↓, 실업 없음'),
       quiet: () => plot.hilite(null),
-      // 새 균형에서: 임금(W 선 또는 y 축) → 고용(x 축) 순서로 짚는다
-      after: (a, b) => plot.seq(b.vis.W ? [{ curve: 'W' }] : [{ axis: 'y' }, { axis: 'x' }])
+      // 새 균형에서: W 선, 또는 W · L(x · y 축 한 번에)
+      after: (a, b) => plot.seq(b.vis.W ? [{ curve: 'W' }] : [{ axis: 'xy' }])
     });
     function eqW(off) { const m = meet(plot.byId.S, off.S || 0, plot.byId.D, off.D || 0, plot.dom); return m ? m.y : 5; }
     const w = (t, q, dir, W, why) => ({ t, q, dir, stages: [{ name: t, at: 0, ch: { vis: { W: true }, abs: { W } }, why }] });
@@ -821,7 +824,7 @@
       const dLF = (m.E || 0) + (m.U || 0), dPop = dLF + (m.N || 0);
       const moved = Object.keys(m).map((k) => NM[k] + ' ' + (m[k] > 0 ? '↑' : '↓')).join(' · ');
       return [
-        { g: s.t, k: '상황', t: moved, run: () => { stopR(); rates(m, 1); }, wait: 1.1 },
+        { g: s.t, k: '상황', t: moved, run: () => { stopR(); rates(m, 1); }, wait: 0.5 },
         { g: s.t, k: '실업률', t: '실업자 ' + arrow(m.U || 0) + ' · 경제활동인구 ' + arrow(dLF) + ' → 실업률 ' + arrow(dirOf(ur(B), ur(v), 1e-9)), run: stage(m, [2, 3, 4], 'UR'), wait: 2.2 },
         { g: s.t, k: '참가율', t: '경제활동인구 ' + arrow(dLF) + ' · 성인 인구 ' + arrow(dPop) + ' → 참가율 ' + arrow(dirOf(lf(B), lf(v), 1e-9)), run: stage(m, [5, 6, 7], 'LF'), wait: 2.2 }
       ];

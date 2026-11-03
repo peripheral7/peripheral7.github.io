@@ -195,6 +195,7 @@ const T = {
   'SRAS 만 이동': 'SRAS only',
   'LRAS 와 SRAS 함께 이동': 'LRAS and SRAS together',
   'Y = Y* 장기균형': 'Y = Y* long-run equilibrium',
+  '새 Y* 장기균형': 'new Y* long-run equilibrium',
   'Y > Y* 단기 경기 과열': 'Y > Y* short-run boom',
   'Y < Y* 단기 경기 침체': 'Y < Y* short-run recession',
   'SRAS 조정 → 새 Y*': 'SRAS adjusts → new Y*',
