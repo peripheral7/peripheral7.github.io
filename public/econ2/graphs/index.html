@@ -1,0 +1,238 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="robots" content="noindex">
+<title>Econ2 핵심 그래프</title>
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Cpath d='M4 4v24h24' fill='none' stroke='%23000' stroke-width='3'/%3E%3Cpath d='M8 8l18 18M8 24L26 8' stroke='%231f6fd1' stroke-width='2.5'/%3E%3C/svg%3E">
+<!--
+  Econ2 Exam2 핵심 그래프 — 챕터마다 한 화면(Ch29 통화승수 · Ch30 화폐시장 · Ch33 AD/AS 탭 · Ch28 노동시장).
+  사건 단추를 누르면 곡선이 움직이고(앞 상태는 흐리게 남음) 아래에 "무엇이 → 왜 → 결과"가 나온다. 곡선은 손으로 끌 수도 있다.
+  그래프·사건 내용은 app.js 한 곳(CH29 · CH30 · CH33_AD · CH33_AS · CH28). 슬라이드 덱(/slides/econ2/)과는 따로 움직인다.
+  주소 #ch29 · #ch30 · #ch33 · #ch33-as · #ch28 로 바로 열 수 있다.
+-->
+<style>
+  @font-face{font-family:"Pretendard Variable";font-weight:45 920;font-style:normal;font-display:swap;src:local("Pretendard Variable"),url("/fonts/PretendardVariable.woff2") format("woff2-variations")}
+  :root{--ink:#1f2537;--blue:#1f6fd1;--red:#c8352e;--soft:#5b6170;--line:#d8dbe0;--tint:#f3f6fb;--top:56px}
+  *{box-sizing:border-box}
+  html,body{margin:0;background:#fff;color:var(--ink);font-family:"Pretendard Variable",Pretendard,-apple-system,BlinkMacSystemFont,"Segoe UI","Apple SD Gothic Neo","Malgun Gothic",sans-serif;word-break:keep-all;-webkit-font-smoothing:antialiased}
+  button{font:inherit;color:inherit}
+  .top{position:sticky;top:0;z-index:10;display:flex;align-items:center;gap:18px;height:var(--top);padding:0 24px;border-bottom:1px solid var(--line);background:#fff}
+  .top h1{margin:0;font-size:17px;font-weight:800;white-space:nowrap}
+  .top h1 a{color:inherit;text-decoration:none}
+  .tabs{display:flex;gap:4px;overflow-x:auto;scrollbar-width:none}
+  .tabs::-webkit-scrollbar{display:none}
+  .tabs button{flex:none;padding:8px 14px;border:0;border-bottom:3px solid transparent;background:none;font-size:15px;font-weight:600;color:var(--soft);cursor:pointer;white-space:nowrap}
+  .tabs button[aria-selected="true"]{color:var(--ink);border-bottom-color:var(--blue)}
+  .tabs button:hover{color:var(--ink)}
+  .top .links{margin-left:auto;display:flex;gap:14px;font-size:13px;white-space:nowrap}
+  .top .links a{color:var(--soft)}
+
+  /* 챕터 한 화면: 왼쪽 그래프(크게), 오른쪽 개념·사건 */
+  .ch{display:none;height:calc(100svh - var(--top));padding:18px 28px 18px;gap:28px;grid-template-columns:minmax(0,1.45fr) minmax(330px,1fr)}
+  .ch.on{display:grid}
+  .fig{display:flex;flex-direction:column;min-height:0;min-width:0}
+  .fig .stage{position:relative;flex:1;min-height:0}
+  .fig svg.plot{position:absolute;inset:0;width:100%;height:100%}
+  .sub{display:flex;gap:6px;margin:0 0 6px}
+  .sub button{padding:7px 16px;border:2px solid var(--ink);background:#fff;font-size:15px;font-weight:700;cursor:pointer}
+  .sub button[aria-selected="true"]{background:var(--ink);color:#fff}
+  .read{flex:none;min-height:86px;margin-top:8px;padding:12px 16px;background:var(--tint);border-left:4px solid var(--blue);font-size:16px;line-height:1.55}
+  .read .chg{font-weight:800;color:var(--blue)}
+  .read .chg .dn{color:var(--red)}
+  .read .why{color:var(--ink)}
+  .read .hint{color:var(--soft)}
+  .side{min-height:0;overflow:auto;padding-right:4px}
+  .side h2{margin:0 0 4px;font-size:24px;line-height:1.25}
+  .side h2 small{display:block;font-size:14px;font-weight:600;color:var(--soft);letter-spacing:.02em}
+  .side p.lead{margin:8px 0 14px;font-size:15px;line-height:1.6;color:var(--ink)}
+  .box{margin:0 0 14px;padding:10px 14px;border:1px solid var(--line);font-size:14.5px;line-height:1.6}
+  .box b{color:var(--blue)}
+  .box ul{margin:4px 0 0;padding-left:18px}
+  .grp{margin:0 0 12px}
+  .grp h3{margin:0 0 6px;font-size:13px;font-weight:800;letter-spacing:.06em;color:var(--soft)}
+  .ev{display:flex;flex-wrap:wrap;gap:6px}
+  .ev button{padding:7px 11px;border:1.5px solid var(--line);background:#fff;font-size:14px;line-height:1.3;text-align:left;cursor:pointer}
+  .ev button:hover{border-color:var(--ink)}
+  .ev button.r::after{content:" →";color:var(--blue);font-weight:800}
+  .ev button.l::after{content:" ←";color:var(--red);font-weight:800}
+  .ev button.lr::after{content:" ⇢ 장기";color:var(--soft);font-weight:700}
+  .ev button.on{border-color:var(--blue);background:var(--tint)}
+  .ev button .q{font-size:12px;color:var(--soft);margin-left:4px}
+  .ctl{display:flex;gap:8px;margin:2px 0 14px}
+  .ctl button{padding:7px 14px;border:2px solid var(--ink);background:#fff;font-size:14px;font-weight:700;cursor:pointer}
+  .ctl button:hover{background:var(--ink);color:#fff}
+  .slider{display:grid;grid-template-columns:auto 1fr auto;align-items:center;gap:10px;margin:6px 0 12px;font-size:14.5px}
+  .slider input{width:100%;accent-color:var(--blue)}
+  .slider output{min-width:54px;text-align:right;font-weight:800}
+
+  /* Ch29 통화승수: 은행 전체 대차대조표 막대 */
+  .stage.bankst{overflow:auto}
+  .bank{display:flex;flex-direction:column;justify-content:center;gap:16px;min-height:100%;padding:8px 4px}
+  .bar{height:52px}
+  .legend{display:flex;flex-wrap:wrap;gap:4px 14px;margin:-6px 0 0 130px;font-size:13px;color:var(--soft);align-items:center}
+  .legend i{display:inline-block;width:12px;height:12px;margin-right:5px;vertical-align:-1px}
+  .legend i.res{background:#1f2537}.legend i.ex{background:#8d93a0}.legend i.loan{background:#1f6fd1}.legend i.dep{background:#7fa9e6}.legend i.cash{background:#c9a227}
+  .flow{padding:12px 14px;border:1px solid var(--line)}
+  .flow .fh{font-size:15px;line-height:1.5}
+  .flow .fh b{color:var(--blue)}
+  .flow .fb{display:flex;align-items:flex-end;gap:5px;height:110px;margin-top:10px;border-bottom:2px solid var(--ink)}
+  .flow .fb span{flex:1;background:#7fa9e6;transition:height .6s}
+  .flow .fb span:first-child{background:#1f6fd1}
+  .flow .fb span.dn{background:#e7a09c}.flow .fb span.dn:first-child{background:#c8352e}
+  .row{display:grid;grid-template-columns:118px 1fr;align-items:center;gap:12px}
+  .row .k{font-size:15px;font-weight:700;text-align:right}
+  .row .k small{display:block;font-size:12px;font-weight:600;color:var(--soft)}
+  .bar{display:flex;background:#f1f2f4}
+  .seg{display:flex;align-items:center;justify-content:center;overflow:hidden;white-space:nowrap;font-size:14px;font-weight:700;color:#fff;transition:width .7s cubic-bezier(.4,0,.2,1)}
+  .seg.res{background:#1f2537}.seg.loan{background:#1f6fd1}.seg.dep{background:#7fa9e6;color:#13213a}.seg.cash{background:#c9a227;color:#2a2205}.seg.ex{background:#8d93a0}
+  .nums{display:grid;grid-template-columns:repeat(3,1fr);gap:8px 14px;margin-top:6px}
+  .num{padding:8px 10px;border:1px solid var(--line)}
+  .num .k{font-size:12.5px;color:var(--soft);font-weight:700}
+  .num .v{font-size:21px;font-weight:800}
+  .num .d{font-size:13px;font-weight:700;color:var(--blue)}
+  .num .d.dn{color:var(--red)}
+  .num.big{border-color:var(--blue)}
+  .amt{display:flex;align-items:center;gap:6px;flex-wrap:wrap}
+  .amt input{width:76px;padding:6px 8px;border:1.5px solid var(--line);font:inherit;font-size:14px}
+
+  /* Ch28 노동통계 계산 */
+  .stat{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px 14px;margin:6px 0 10px}
+  .stat label{display:flex;flex-direction:column;font-size:12.5px;font-weight:700;color:var(--soft);gap:3px}
+  .stat input{width:100%;min-width:0;padding:6px 8px;border:1.5px solid var(--line);font:inherit;font-size:15px;color:var(--ink)}
+  .stat .out{padding:6px 8px;background:var(--tint);font-size:15px;font-weight:800;color:var(--ink)}
+  .stat .out em{font-style:normal;font-size:12.5px;font-weight:700;color:var(--blue);margin-left:6px}
+  .stat .out em.dn{color:var(--red)}
+
+  @media (max-width:900px){
+    :root{--top:auto}
+    .top{flex-wrap:wrap;height:auto;padding:10px 14px 0;gap:6px 14px}
+    .top .links{margin-left:auto}
+    .tabs{order:3;width:100%}
+    .tabs button{padding:8px 9px;font-size:14px}
+    .ch{height:auto;grid-template-columns:minmax(0,1fr);padding:14px 16px 28px;gap:16px}
+    .fig .stage{flex:none;aspect-ratio:640/520}
+    .fig .stage.bankst{aspect-ratio:auto}
+    .side{overflow:visible}
+    .nums{grid-template-columns:repeat(2,1fr)}
+    .row{grid-template-columns:84px 1fr}
+    .legend{margin-left:0}
+    .bar{height:44px}
+  }
+  @media (prefers-reduced-motion:reduce){.seg{transition:none}}
+</style>
+</head>
+<body>
+<header class="top">
+  <h1><a href="/econ2/">Econ2 핵심 그래프</a></h1>
+  <nav class="tabs" role="tablist" aria-label="챕터">
+    <button role="tab" data-ch="ch29">Ch29 통화승수</button>
+    <button role="tab" data-ch="ch30">Ch30 화폐·물가</button>
+    <button role="tab" data-ch="ch33">Ch33 AD–AS</button>
+    <button role="tab" data-ch="ch28">Ch28 실업</button>
+  </nav>
+  <div class="links"><a href="/slides/econ2/">슬라이드</a><a href="/econ2/">PDF · PPT</a></div>
+</header>
+
+<main>
+  <!-- Ch29 -->
+  <section class="ch" id="c29" aria-label="Ch29 통화승수">
+    <div class="fig">
+      <div class="stage bankst"><div class="bank" id="bank"></div></div>
+      <div class="read" id="read29"></div>
+    </div>
+    <div class="side">
+      <h2><small>Ch29 The Monetary System</small>통화승수 = 1 / R</h2>
+      <p class="lead">은행은 예금의 R 만큼만 지준으로 두고 나머지를 대출한다. 대출금이 다시 예금되며 예금이 지준의 <b>1/R 배</b>까지 불어난다.</p>
+      <div class="box"><b>승수 1/R 의 조건</b><ul><li>사람들이 현금을 더 들고 있지 않음(새 돈은 모두 예금)</li><li>은행이 초과지준 없이 남는 돈은 모두 대출</li></ul>조건이 깨지면(초과지준 · 현금 보유) 실제 불어나는 양이 줄어든다.</div>
+      <div class="slider"><span>지급준비율 R</span><input type="range" id="rr" min="5" max="50" step="5" value="10" aria-label="지급준비율"><output id="rrv">10%</output></div>
+      <div class="grp"><h3>문제 상황 불러오기</h3><div class="ev" id="pre29"></div></div>
+      <div class="grp"><h3>사건</h3><div class="ev" id="ev29"></div></div>
+      <div class="grp"><h3>Fed 공개시장조작</h3>
+        <div class="ev amt"><span>금액 $</span><input type="number" id="omo" value="8" min="1" step="1" aria-label="공개시장조작 금액"><button type="button" id="buy">채권 매입</button><button type="button" id="sell">채권 매각</button></div>
+      </div>
+      <div class="ctl"><button type="button" id="reset29">처음으로</button></div>
+    </div>
+  </section>
+
+  <!-- Ch30 -->
+  <section class="ch" id="c30" aria-label="Ch30 화폐와 물가">
+    <div class="fig">
+      <div class="stage" id="plot30"></div>
+      <div class="read" id="read30"></div>
+    </div>
+    <div class="side">
+      <h2><small>Ch30 Money Growth and Inflation</small>화폐시장: 화폐가치 1/P</h2>
+      <p class="lead">세로축은 <b>화폐 한 단위의 가치 1/P</b>(위로 갈수록 물가 P 는 낮음). MS 는 Fed 가 정해 수직, MD 는 1/P 가 낮을수록(물가가 높을수록) 사람들이 돈을 더 들고 있어야 해서 우하향.</p>
+      <div class="box"><b>수량방정식 M × V = P × Y</b><br>V 와 Y 가 그대로면 M 이 늘어난 만큼 P 가 오른다(화폐 수량설). 돈은 장기에 실질 변수(Y)를 바꾸지 못한다 — <b>고전적 이분법 · 화폐 중립성</b>.</div>
+      <div class="grp"><h3>통화 공급(MS)</h3><div class="ev" id="ev30s"></div></div>
+      <div class="grp"><h3>화폐 수요(MD)</h3><div class="ev" id="ev30d"></div></div>
+      <div class="ctl"><button type="button" data-reset="30">처음으로</button></div>
+    </div>
+  </section>
+
+  <!-- Ch33 -->
+  <section class="ch" id="c33" aria-label="Ch33 AD–AS">
+    <div class="fig">
+      <div class="sub" role="tablist" aria-label="AD · AS"><button role="tab" data-sub="ad">AD 총수요</button><button role="tab" data-sub="as">AS 총공급</button></div>
+      <div class="stage" id="plot33ad"></div>
+      <div class="stage" id="plot33as" hidden></div>
+      <div class="read" id="read33"></div>
+    </div>
+    <div class="side">
+      <div id="side33ad">
+        <h2><small>Ch33 Aggregate Demand</small>AD 를 움직이는 것</h2>
+        <p class="lead"><b>주어진 물가에서</b> C · I · G · NX 가 바뀌면 AD 가 이동한다. 물가 P 가 바뀌어 생기는 변화는 곡선 <b>위의 이동</b>이다.</p>
+        <div class="box"><b>AD 가 우하향하는 이유</b>(P 가 내리면)<ul><li>부(富) 효과: 실질 부 ↑ → C ↑</li><li>이자율 효과: MD ↓ → r ↓ → I ↑</li><li>환율 효과: r ↓ → 원화 ↓ → NX ↑</li></ul>
+          <div class="slider" style="margin:8px 0 0"><span>P 만 바꿔 보기</span><input type="range" id="pmove" min="-100" max="100" value="0" aria-label="물가 수준"><output id="pmovev">—</output></div></div>
+        <div class="grp"><h3>C 소비</h3><div class="ev" data-ev="C"></div></div>
+        <div class="grp"><h3>I 투자</h3><div class="ev" data-ev="I"></div></div>
+        <div class="grp"><h3>G 정부 구매</h3><div class="ev" data-ev="G"></div></div>
+        <div class="grp"><h3>NX 순수출</h3><div class="ev" data-ev="NX"></div></div>
+        <div class="grp"><h3>그다음</h3><div class="ev" data-ev="LRad"></div></div>
+      </div>
+      <div id="side33as" hidden>
+        <h2><small>Ch33 Aggregate Supply</small>AS 를 움직이는 것</h2>
+        <p class="lead">단기 생산 <b>Y = Y* + α(P − Pe)</b>. 기대물가 Pe · 명목임금 · 원가가 오르면 같은 P 에서 덜 생산 → SRAS ←. LRAS 는 Y*(노동 L · 자본 K · 인적자본 H · 자원 N · 기술)로만 정해진다.</p>
+        <div class="box"><b>SRAS 가 우상향하는 이유</b>(P 가 Pe 보다 높으면)<ul><li>경직적 임금: 명목임금 고정 → 실질임금 ↓ → 고용 ↑</li><li>경직적 가격: 가격을 못 올린 기업 판매 ↑</li><li>착각: 상대가격이 오른 줄 알고 생산 ↑</li></ul></div>
+        <div class="grp"><h3>SRAS 만</h3><div class="ev" data-ev="SR"></div></div>
+        <div class="grp"><h3>LRAS(와 SRAS 함께)</h3><div class="ev" data-ev="LR"></div></div>
+        <div class="grp"><h3>LRAS 를 바꾸지 않는 것</h3><div class="ev" data-ev="NO"></div></div>
+        <div class="grp"><h3>그다음</h3><div class="ev" data-ev="LRas"></div></div>
+      </div>
+      <div class="ctl"><button type="button" data-reset="33">처음으로</button></div>
+    </div>
+  </section>
+
+  <!-- Ch28 -->
+  <section class="ch" id="c28" aria-label="Ch28 실업">
+    <div class="fig">
+      <div class="stage" id="plot28"></div>
+      <div class="read" id="read28"></div>
+    </div>
+    <div class="side">
+      <h2><small>Ch28 Unemployment</small>균형보다 높은 임금 → 실업</h2>
+      <p class="lead">임금이 균형 W<sub>E</sub> 보다 높게 묶이면 일하려는 사람(L<sub>S</sub>)이 기업이 원하는 사람(L<sub>D</sub>)보다 많아진다. 그 차이가 <b>구조적 실업</b>. W 선은 위아래로 끌 수 있다.</p>
+      <div class="grp"><h3>임금이 균형보다 높아지는 세 가지</h3><div class="ev" id="ev28w"></div></div>
+      <div class="grp"><h3>노동 수요 · 공급 변화</h3><div class="ev" id="ev28s"></div></div>
+      <div class="ctl"><button type="button" data-reset="28">처음으로</button></div>
+      <div class="box"><b>노동 통계</b> (Short Answer 1 · MC 1 · MC 5)
+        <div class="stat">
+          <label>취업자 E<input type="number" id="sE" value="140196000" step="1000"></label>
+          <label>실업자 U<input type="number" id="sU" value="14729000" step="1000"></label>
+          <label>비경제활동 NILF<input type="number" id="sN" value="80729000" step="1000"></label>
+          <label>성인 인구<span class="out" id="oPop"></span></label>
+          <label>경제활동인구 E + U<span class="out" id="oLF"></span></label>
+          <label>참가율 LF ÷ 인구<span class="out" id="oLFPR"></span></label>
+          <label>실업률 U ÷ LF<span class="out" id="oUR"></span></label>
+        </div>
+        <div class="ev" id="ev28stat"></div>
+      </div>
+    </div>
+  </section>
+</main>
+
+<script src="/econ2/graphs/app.js"></script>
+</body>
+</html>
