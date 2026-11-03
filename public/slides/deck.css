@@ -105,7 +105,8 @@ html.dark #bar{background:#fff}
 #sr{position:absolute;width:1px;height:1px;margin:-1px;padding:0;overflow:hidden;clip:rect(0 0 0 0);border:0}
 
 /* ───────── 목록(O 키): 슬라이드 축소판 ───────── */
-#overview{position:fixed;left:0;top:0;right:0;bottom:0;z-index:30;overflow:auto;padding:28px 28px 84px;background:#fff;color:#000;display:grid;grid-template-columns:repeat(auto-fill,minmax(300px,1fr));gap:26px;align-content:start}
+#overview{position:fixed;left:0;top:0;right:0;bottom:0;z-index:30;overflow:auto;padding:28px 28px 84px;background:#fff;color:#000;display:grid;grid-template-columns:repeat(auto-fill,minmax(300px,1fr));grid-auto-rows:max-content;gap:26px;align-content:start}
+/* grid-auto-rows:max-content — 축소판은 overflow:hidden 이라 최소 높이가 0 으로 잡혀, 장이 많으면(줄 × 축소판 높이 > 화면) 줄이 화면 높이에 맞춰 눌려 서로 겹쳤다 */
 html.dark #overview{background:#000;color:#fff}
 #overview .thumb{position:relative;display:block;width:100%;aspect-ratio:16/9;padding:0;border:3px solid currentColor;background:transparent;color:inherit;cursor:pointer;overflow:hidden;opacity:.8;-webkit-appearance:none;appearance:none}
 #overview .thumb:hover,#overview .thumb.cur{opacity:1}
