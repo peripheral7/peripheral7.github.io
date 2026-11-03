@@ -18,6 +18,13 @@
   PDF 가 바뀌면: 그림을 다시 뽑고(PyMuPDF 로 2배, JPG 82) 그래프 자리·단계를 새 장 번호에 맞춘다.
 -->
 <style>
+  /* 마지막 장: 덱 주소 QR(qr.svg 는 segno 로 만든 정적 파일 — 주소가 바뀌면 다시 만든다) */
+  .slide.qr{flex-direction:row;align-items:center;justify-content:center;gap:80px;padding:60px;background:#fff;color:#1f2537}
+  .slide.qr>img{width:640px;height:640px;max-width:none;max-height:none;image-rendering:pixelated}
+  .qr-t p{margin:0}
+  .slide .qr-h{font-size:48px;font-weight:800;line-height:1.25;margin-bottom:28px}
+  .slide .qr-u{font-size:34px;font-weight:700;color:#1f6fd1;margin-bottom:40px}
+  .slide .qr-s{font-size:26px;color:#5b6170;line-height:1.5}
   .slide.pg{padding:0}
   .slide.pg>img{position:absolute;left:0;top:0;width:1600px;height:900px;max-width:none;max-height:none}
   .g{position:absolute;touch-action:none;-webkit-user-select:none;user-select:none}
@@ -250,6 +257,14 @@
   </section>
   <section class="slide pg" data-title="Answers 2 / 2 · Ch33 · Ch28">
     <img src="p33.jpg" alt="Answers 2 / 2 · Ch33 · Ch28" decoding="async">
+  </section>
+  <section class="slide qr" data-title="QR · 이 슬라이드 열기">
+    <img src="qr.svg" alt="QR: https://peripheral7.github.io/slides/econ2/">
+    <div class="qr-t">
+      <p class="qr-h"><span data-l="ko">휴대폰으로 이 슬라이드 열기</span><span data-l="en" hidden>Open these slides on your phone</span></p>
+      <p class="qr-u">peripheral7.github.io/slides/econ2/</p>
+      <p class="qr-s"><span data-l="ko">그래프를 직접 움직여 보기:</span><span data-l="en" hidden>Try the graphs yourself:</span> peripheral7.github.io/econ2/graphs/</p>
+    </div>
   </section>
 </main>
 

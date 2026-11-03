@@ -41,9 +41,10 @@
       panels: [{
         dom: [0, 9000, 0, 1.25], xName: 'M', yName: '1/P', xTitle: 'M', yTitle: '1/P',
         yTicks: [0.125, 0.25, 0.375, 0.5, 0.625, 0.75, 0.875, 1, 1.125],
+        rightP: { ticks: [[1, '1'], [1 / 1.143, '1.14'], [0.75, '1.33'], [0.5, '2'], [0.25, '4'], [0.125, '8']], num: true },
         curves: [
           { id: 'MS', kind: 'vert', x: 5000, y0: 0, y1: 1.18, lab: 'MS', drag: 'x', range: [-2500, 2500] },
-          { id: 'MD', kind: 'hyper', k: 2500, ylim: 1.2, xmax: 8600, lab: 'MD', subs: [2, 1], drag: 'x', range: [-1500, 3500] }
+          { id: 'MD', kind: 'hyper', k: 2500, ylim: 1.2, xmax: 6600, lab: 'MD', subs: [2, 1], drag: 'x', range: [-1500, 3500] }
         ]
       }],
       states: [
@@ -57,15 +58,15 @@
         const q = ctx.prev[0];
         return [l1, q && !ctx.free ? tr(['물가상승률 = ', 'Inflation = ']) + fmt(q.y, 3) + ' / ' + fmt(p.y, 3) + ' − 1 = ' + fmt((q.y / p.y - 1) * 100, 0) + '%' : ctx.say];
       },
-      pad: { l: 66, r: 70 }
+      pad: { l: 66, r: 112 }
     },
     // 15 — 신용카드 확대 → MD ← → 1/P ↓(P ↑). 물가를 지키려면 Fed 가 MS ←
     p15: {
       panels: [{
-        dom: [0, 10, 0, 10], xName: 'M', yName: '1/P', xTitle: 'M', yTitle: 'Value of Money  1/P', invY: true, ptD: [12, -12],
+        dom: [0, 10, 0, 10], xName: 'M', yName: '1/P', xTitle: 'M', yTitle: 'Value of Money  1/P', invY: true, ptD: [12, -12], rightP: {},
         curves: [
           { id: 'MS', kind: 'vert', x: 6, y0: 0.6, y1: 9.4, lab: 'MS', drag: 'x' },
-          { id: 'MD', kind: 'hyper', k: 30, ylim: 9.2, xmax: 9.6, lab: 'MD', drag: 'x', range: [-3, 2] }
+          { id: 'MD', kind: 'hyper', k: 30, ylim: 9.2, xmax: 8.0, lab: 'MD', drag: 'x', range: [-3, 2] }
         ]
       }],
       states: [
@@ -73,7 +74,7 @@
         { off: { MD: -1.6 }, pts: [['MS', 'MD']], say: ['카드 확대 → MD ← : 1/P ↓, P ↑', 'More credit cards → MD ← : 1/P ↓, P ↑'] },
         { off: { MD: -1.6, MS: -1.6 }, pts: [['MS', 'MD']], say: ['Fed 가 MS ← : 1/P 회복, P 안정', 'Fed cuts MS ← : 1/P restored, P stable'] }
       ],
-      pad: { l: 70 }
+      pad: { l: 70, r: 112 }
     },
     p17: adas({ star: true, states: [{ off: {}, pts: EQ }, { off: { AD: 1.6 }, pts: EQ, say: 'C · I · G · NX ↑ → AD →' }] }),
     p18: adas({
@@ -399,8 +400,23 @@
       const g = svg('g', {}, s), b = pn.box, X = (x) => this.X(pn, x), Y = (y) => this.Y(pn, y);
       if (pn.title) label(g, b[0] + b[2] / 2, b[1] - 52, pn.title, { anchor: 'middle', size: 18, color: C.soft, weight: 600 });
       // 축
-      svg('path', { d: 'M' + b[0] + ' ' + (b[1] - 14) + 'V' + (b[1] + b[3]) + 'H' + (b[0] + b[2] + 14), fill: 'none', stroke: C.ink, 'stroke-width': 2 }, g);
-      arrowHead(g, b[0], b[1] - 20, -Math.PI / 2, C.ink, 9); arrowHead(g, b[0] + b[2] + 20, b[1] + b[3], 0, C.ink, 9);
+      const rp = pn.rightP, xR = b[0] + b[2];
+      svg('path', { d: 'M' + b[0] + ' ' + (b[1] - 14) + 'V' + (b[1] + b[3]) + 'H' + (rp ? xR : b[0] + b[2] + 14), fill: 'none', stroke: C.ink, 'stroke-width': 2 }, g);
+      arrowHead(g, b[0], b[1] - 20, -Math.PI / 2, C.ink, 9);
+      if (!rp) arrowHead(g, b[0] + b[2] + 20, b[1] + b[3], 0, C.ink, 9);
+      if (rp) {
+        // 오른쪽 P 축(교재 그림처럼 거꾸로: 위가 낮은 물가, 아래가 높은 물가). P = 1 / (1/P)
+        svg('path', { d: 'M' + xR + ' ' + (b[1] + b[3]) + 'V' + (b[1] - 14), fill: 'none', stroke: C.ink, 'stroke-width': 2 }, g);
+        label(g, xR + 8, b[1] - 26, tr(['물가 P', 'Price level P']), { size: 18, color: C.soft });
+        (rp.ticks || []).forEach(([y, t]) => {
+          svg('line', { x1: xR, x2: xR + 5, y1: Y(y), y2: Y(y), stroke: C.ink, 'stroke-width': 1.5 }, g);
+          label(g, xR + 9, Y(y) + 5, t, { size: 14, color: C.soft });
+        });
+        if (!rp.ticks) {
+          label(g, xR + 9, b[1] + 6, tr(['낮음', 'Low']), { size: 14, color: C.soft });
+          label(g, xR + 9, b[1] + b[3] - 4, tr(['높음', 'High']), { size: 14, color: C.soft });
+        }
+      }
       label(g, b[0] + (pn.yTitle.length > 3 ? -8 : -12), b[1] - 26, pn.yTitle, { anchor: pn.yTitle.length > 3 ? 'start' : 'end', size: 18, color: C.soft });
       label(g, b[0] + b[2] + 18, b[1] + b[3] + 48, pn.xTitle, { anchor: 'end', size: 18, color: C.soft });
       (pn.yTicks || []).forEach((v) => {
@@ -427,13 +443,19 @@
           : pn.star && lr && Math.abs(lr.x - p.x) < sx * 2 ? pn.xName + '*' : name(xs, p.x, sx, pn.xName, pn.star ? 2 : 1));
         const col = si === now ? C.guide : C.ghost;
         svg('path', { d: 'M' + b[0] + ' ' + Y(p.y) + 'H' + X(p.x) + 'V' + (b[1] + b[3]), fill: 'none', stroke: col, 'stroke-width': 1.4, 'stroke-dasharray': '5 5' }, g);
+        if (rp) svg('path', { d: 'M' + X(p.x) + ' ' + Y(p.y) + 'H' + xR, fill: 'none', stroke: col, 'stroke-width': 1.4, 'stroke-dasharray': '2 5' }, g);
       }));
-      const usedY = [], usedX = [];                                    // 겹치는 이름은 지금 것을 먼저
+      const usedY = [], usedX = [], usedR = [];                        // 겹치는 이름은 지금 것을 먼저
       [now].concat(P.map((_, i) => i).filter((i) => i !== now)).forEach((si) => (P[si] || []).forEach((p) => {
         if (p.o.guide === false) return;
         const col = si === now ? C.ink : C.soft;
         if (p._yl.trim() && !usedY.some((v) => Math.abs(v - Y(p.y)) < 15)) { usedY.push(Y(p.y)); label(g, b[0] - 8, Y(p.y) + 6, p._yl, { anchor: 'end', size: 18, color: col }); }
         if (!usedX.some((v) => Math.abs(v - X(p.x)) < 26)) { usedX.push(X(p.x)); label(g, X(p.x), b[1] + b[3] + 24, p._xl, { anchor: 'middle', size: 18, color: col }); }
+        if (rp && !usedR.some((v) => Math.abs(v - Y(p.y)) < 15)) {
+          usedR.push(Y(p.y));
+          if (rp.num) label(g, xR + 44, Y(p.y) + 6, 'P = ' + fmt(1 / p.y, 2), { size: 15, color: si === now ? C.blue : C.soft, weight: 700 });
+          else label(g, xR + 9, Y(p.y) + 6, String(p._yl).replace('1/P', 'P'), { size: 18, color: col });
+        }
       }));
 
       // 곡선: 앞 상태 위치는 흐리게, 지금 위치는 진하게(처음 자리에서 옮겨졌으면 파랑). 이름은 서로 겹치지 않는 자리에
