@@ -4,9 +4,13 @@ import { useEffect, useLayoutEffect, useRef } from "react"
 
 const useIsoLayoutEffect = typeof window !== "undefined" ? useLayoutEffect : useEffect
 
+/** 진행도를 몇 단계로 끊어 보여 줄지 */
+const STEPS = 4
+
 /**
- * 스크롤 위치에 따라 스크롤하면서 서서히 나타나는 래퍼.
- * 처음엔 사진 윗부분이 그라데이션으로 흐려져 있다가, 스크롤할수록 위쪽까지 천천히 또렷해진다.
+ * 스크롤 위치에 따라 단계별로 나타나는 래퍼.
+ * 사진 위쪽부터 또렷하고 아래쪽이 그라데이션으로 흐려져 있다가, 스크롤할 때마다 한 칸씩 아래까지 드러난다.
+ * 진행도는 스크롤 위치로만 정해지므로 스크롤을 멈추면 그 단계에서 멈춘다.
  */
 export function ScrollReveal({ children }: { children: React.ReactNode }) {
   const ref = useRef<HTMLDivElement>(null)
@@ -14,23 +18,24 @@ export function ScrollReveal({ children }: { children: React.ReactNode }) {
   useIsoLayoutEffect(() => {
     const el = ref.current
     if (!el) return
-    if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) return
+    if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) {
+      el.style.opacity = "1"
+      return
+    }
 
     let raf = 0
-    let current = -1 // 화면에 그려진 진행도(부드럽게 따라가는 값)
-    let target = 0
+    let shown = -1 // 화면에 그려진 단계
 
-    const paint = (p: number) => {
-      if (p >= 0.999) {
+    const paint = (step: number) => {
+      if (step >= STEPS) {
         el.style.maskImage = el.style.webkitMaskImage = "none"
-        el.style.transform = "none"
         el.style.opacity = "1"
         return
       }
+      const p = step / STEPS
       const stop = p * 140 - 40
-      const mask = `linear-gradient(to top, #000 ${stop}%, transparent ${stop + 40}%)`
+      const mask = `linear-gradient(to bottom, #000 ${stop}%, transparent ${stop + 40}%)`
       el.style.maskImage = el.style.webkitMaskImage = mask
-      el.style.transform = "none"
       el.style.opacity = String(Math.min(1, p * 3))
     }
     const measure = () => {
@@ -41,16 +46,16 @@ export function ScrollReveal({ children }: { children: React.ReactNode }) {
       const byPos = (vh * 0.85 - rect.top) / span
       // 처음 화면(스크롤 0)에서는 아무것도 보이지 않고, 조금 내려가야 나타난다
       const byScroll = window.scrollY / (vh * 0.35)
-      target = Math.min(1, Math.max(0, Math.min(byPos, byScroll)))
+      const p = Math.min(1, Math.max(0, Math.min(byPos, byScroll)))
+      return Math.floor(p * STEPS + 0.001)
     }
     const tick = () => {
       raf = 0
-      measure()
-      if (current < 0) current = target
-      current += (target - current) * 0.055
-      if (Math.abs(target - current) < 0.002) current = target
-      paint(current)
-      if (current !== target) raf = requestAnimationFrame(tick)
+      const step = measure()
+      if (step !== shown) {
+        shown = step
+        paint(step)
+      }
     }
     const onScroll = () => {
       if (!raf) raf = requestAnimationFrame(tick)
@@ -70,7 +75,7 @@ export function ScrollReveal({ children }: { children: React.ReactNode }) {
   }, [])
 
   return (
-    <div ref={ref} style={{ willChange: "transform, opacity", opacity: 0 }}>
+    <div ref={ref} style={{ willChange: "opacity", opacity: 0 }}>
       {children}
     </div>
   )
