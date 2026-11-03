@@ -79,11 +79,13 @@ function PhotoCell({ item }: { item: BoardPhoto }) {
   const paddingBottom = frameHeightPercent(item.aspectRatio ?? "4 / 5")
 
   const frame = (
-    <div className="relative w-full overflow-hidden bg-muted ring-1 ring-black/5 shadow-md" style={{ paddingBottom: `${paddingBottom}%` }}>
+    <div className="relative w-full select-none overflow-hidden bg-muted ring-1 ring-black/5 shadow-md [-webkit-touch-callout:none]" style={{ paddingBottom: `${paddingBottom}%` }}>
       {pin === "tape" && <Tape />}
       {pin === "pin" && <Pin />}
       {pin === "clip" && <Clip />}
-      <Image src={item.src} alt={item.alt} fill quality={55} sizes="(max-width: 1024px) 100vw, 1024px" className="object-cover" />
+      <Image src={item.src} alt={item.alt} fill quality={55} sizes="(max-width: 1024px) 100vw, 1024px" draggable={false} className="pointer-events-none object-cover" />
+      {/* 사진 위 투명 덮개: 오른쪽 클릭·길게 누르기·끌기로 사진을 저장하지 못하게 */}
+      <span aria-hidden className="absolute inset-0" />
 
       {isOverlay && item.caption && (
         <div
