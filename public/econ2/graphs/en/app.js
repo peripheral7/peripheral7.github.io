@@ -333,7 +333,7 @@
         if (b.g !== g) {
           g = b.g;
           const st = document.createElement('li'), h = document.createElement('div'), nm = document.createElement('span');
-          st.className = b.alts ? 'stg alts' : 'stg'; h.className = 'gh'; nm.textContent = b.g; h.appendChild(nm);   // 갈래가 있으면 단계 이름 아래에 글자 버튼(unchanged · Policy)
+          st.className = b.alts ? 'stg alts' : 'stg'; h.className = 'gh'; nm.textContent = b.g; h.appendChild(nm);   // 갈래가 있으면 단계 이름 아래에 글자 버튼(unchanged · 정책)
           if (b.alts) b.alts.forEach((a) => { const x = document.createElement('button'); x.type = 'button'; x.className = a.on ? 'alt on' : 'alt'; x.textContent = a.t; x.addEventListener('click', a.pick); h.appendChild(x); });
           rows = document.createElement('ol'); rows.className = 'rows';
           st.appendChild(h); st.appendChild(rows); ol.appendChild(st);
@@ -468,7 +468,7 @@
       const stp = st.step || '', g = /Long run/.test(stp) ? 'Long run' : /Short run/.test(stp) ? 'Short run' : isAlt ? 'Long run' : num + ' stage';
       const altList = isAlt ? alts.map((a, k) => ({ t: sc.stages[a].short || sc.stages[a].name, on: a === id, pick: () => rebuild(a) })) : null;
       const cause = ps.slice(0, at), after = ps.slice(at + 1).join(' → ');
-      const sit = id === 0 ? sc.t : cause.shift() || st.name;
+      const sit = id === 0 ? sc.sit || sc.t : cause.shift() || st.name;   // sc.sit: Situation 마디 글(' — ' 마다 줄바꿈)
       out.push({ g, alts: altList, k: 'Situation', t: sit, run: snap(prevS, false), wait: 0.4 });   // Situation은 이미 아는 내용 — 빨리 지나간다
       out.push({ g, alts: altList, k: ps[at], t: cause.join(' → '), run: snap(withNew, true), wait: 1.25 });
       out.push({ g, alts: altList, k: 'New equilibrium', t: after || o.result(prevS[prevS.length - 1], next, letter),
@@ -627,7 +627,7 @@
     { id: 'SRAS', kind: 'line', x: 5, y: 5, m: 0.85, span: 3.8, lab: 'SRAS' },
     { id: 'AD', kind: 'line', x: 5, y: 5, m: -0.85, span: 3.8, lab: 'AD' }
   ];
-  // 교점이 LRAS 위에 오도록 SRAS 를 옮기거나(Long run 자동 Adjust) AD 를 옮긴다(Policy 수용)
+  // 교점이 LRAS 위에 오도록 SRAS 를 옮기거나(Long run 자동 Adjust) AD 를 옮긴다(정책 수용)
   const lrSRAS = (off) => { const L = 5 + (off.LRAS || 0), yA = 5 - 0.85 * (L - 5 - (off.AD || 0)); return { SRAS: L - 5 - (yA - 5) / 0.85 }; };
   const lrAD = (off) => { const L = 5 + (off.LRAS || 0), yS = 5 + 0.85 * (L - 5 - (off.SRAS || 0)); return { AD: L - 5 + (yS - 5) / 0.85 }; };
   const eqX = (off) => 5 + ((off.AD || 0) + (off.SRAS || 0)) / 2;   // AD · SRAS 교점의 Y (기울기가 ±0.85 로 같아서)
@@ -673,7 +673,7 @@
     };
     const srEv = (t, why, q) => ({ t, q, dir: 'l', stages: [
       { name: 'SRAS ←', step: 'Stage 1 · Short run', ch: { add: { SRAS: -R } }, why },
-      { name: 'Do nothing: SRAS returns', short: 'unchanged', ch: { abs: { SRAS: 0 } }, letter: 'A', at: 2, why: 'Y < Y* → wages · Pe ↓ → SRAS → → Y* and P restored (slow)' },
+      { name: 'Do nothing: SRAS returns', short: 'Wait', ch: { abs: { SRAS: 0 } }, letter: 'A', at: 2, why: 'Y < Y* → wages · Pe ↓ → SRAS → → Y* and P restored (slow)' },
       { name: 'Accommodate: AD →', short: 'Policy', from: 0, ch: { abs: lrAD }, chain: ['M ↑ · G ↑', 'AD →', 'Y* restored, P higher still'], at: 1 }] });
     // LRAS 가 움직이면 SRAS 도 같이 움직여 New equilibrium은 새 Y* 위(Long runEquilibrium). AD unchanged면 P 는 반대로
     const lrEv = (t, dir, why, q) => ({ t, q, dir, stages: [
@@ -749,11 +749,10 @@
       after: (a, b) => plot.seq(b.vis.W ? [] : [{ axis: 'xy' }])
     });
     function eqW(off) { const m = meet(plot.byId.S, off.S || 0, plot.byId.D, off.D || 0, plot.dom); return m ? m.y : 5; }
-    const w = (t, q, dir, W, why) => ({ t, q, dir, stages: [{ name: t, at: 0, ch: { vis: { W: true }, abs: { W } }, why }] });
     const EV = [
-      w('Minimum wage (above equilibrium)', 'MC 14', 'r', 0, 'By law W > W_E → L_S ↑ · L_D ↓ → unemployment'),
-      w('Labor union', 'MC 10', 'r', 0.5, 'Collective bargaining W > W_E → L_D ↓ → unemployment'),
-      w('Efficiency wages', 'MC 14', 'r', -0.4, 'Firms choose W > W_E → effort ↑ · turnover ↓ → unemployment'),
+      { t: 'Wage above equilibrium (minimum wage · union · efficiency wage)', q: 'MC 10 · 14', dir: 'r',
+        sit: 'Minimum wage : set by law — Union : collective bargaining — Efficiency wage : firms choose it (effort ↑ · turnover ↓)',
+        stages: [{ name: 'W > W_E', at: 0, ch: { vis: { W: true }, abs: { W: 0 } }, chain: ['W > W_E', 'L_S ↑ · L_D ↓ → unemployment'] }] },
       { t: 'Labor demand falls (imports ↑ → domestic industry declines)', q: 'SA 4', dir: 'l', stages: [
         { name: 'Demand D ←, wage unchanged', step: 'Stage 1 · Short run', at: 2, ch: { add: { D: -1.4 }, vis: { W: true }, abs: { W: -2 } }, why: 'Imports ↑ → domestic industry declines → D ← → W stuck at W_E → unemployment' },
         { name: 'Wage ↓ → new equilibrium', step: 'Stage 2 · Long run', at: 0, ch: { vis: { W: false } }, why: 'W ↓ → L ↓, no unemployment (workers move to other industries)' }] }
@@ -787,18 +786,20 @@
       const d = (k) => (lv >= 1 ? m[k] || 0 : 0), dLF = d('E') + d('U'), dPop = dLF + d('N');
       const dUR = dirOf(ur(B), ur(v), 1e-9), dLFr = dirOf(lf(B), lf(v), 1e-9);
       rk.set({ UR: lv >= 4 ? { d: dUR } : { txt: '· · ·' }, LF: lv >= 7 ? { d: dLFr } : { txt: '· · ·' } });
+      // lv: 0 Start · 1 무리 옮김 · 3 Unemployment rate 분자 · 분모(한 번에) · 4 Result · 6 Participation 분자 · 분모(한 번에) · 7 Result
       const hi = (n) => (lv === n ? ' hi' : '');
       const chip = (k) => '<span class="grp">' + NM[k] + tri(d(k)) + '</span>';
-      const part = (ks, dd, sum, on) => ks.map((k) => NM[k] + (ks.length > 1 ? tri(d(k)) : '')).join(' + ') + (sum ? '<span class="sum">= ' + sum + '</span>' : '') + (on ? ' ' + wordOf(dd) : '');   // 여러 항이면 바뀐 무리마다 ▲▼
+      const part = (ks, dd, on) => ks.map((k) => NM[k] + (ks.length > 1 ? tri(d(k)) : '')).join(' + ') + (on ? ' ' + wordOf(dd) : '');   // 여러 항이면 바뀐 무리마다 ▲▼
+      const one = (name, dd, on) => name + (on ? ' ' + wordOf(dd) : '');
       const res = (dd, on) => (on ? wordOf(dd, ['up', 'down']) : '<span class="q">?</span>');
       $('#rates').innerHTML =
         '<div class="who' + hi(1) + '"><span class="lb">Population</span>' + chip('E') + chip('U') + chip('N') + '</div>' +
-        '<div class="rate"><span class="nm">Unemployment rate</span><span class="frac"><span class="' + hi(2) + '">' + part(['U'], d('U'), '', lv >= 2) + '</span><span class="' + hi(3) + '">' + part(['E', 'U'], dLF, 'Labor force', lv >= 3) + '</span></span><span class="eqs">=</span><span class="res' + hi(4) + '">' + res(dUR, lv >= 4) + '</span></div>' +
-        '<div class="rate"><span class="nm">Participation rate</span><span class="frac"><span class="' + hi(5) + '">' + part(['E', 'U'], dLF, 'Labor force', lv >= 5) + '</span><span class="' + hi(6) + '">' + part(['E', 'U', 'N'], dPop, 'Adult population', lv >= 6) + '</span></span><span class="eqs">=</span><span class="res' + hi(7) + '">' + res(dLFr, lv >= 7) + '</span></div>';
+        '<div class="rate"><span class="nm">Unemployment rate</span><span class="frac"><span class="' + hi(3) + '">' + part(['U'], d('U'), lv >= 3) + '</span><span class="' + hi(3) + '">' + part(['E', 'U'], dLF, lv >= 3) + '</span></span><span class="eqs">=</span><span class="res' + hi(4) + '">' + res(dUR, lv >= 4) + '</span></div>' +
+        '<div class="rate"><span class="nm">Participation rate</span><span class="frac"><span class="' + hi(6) + '">' + part(['E', 'U'], dLF, lv >= 6) + '</span><span class="' + hi(6) + '">' + one('Adult population', dPop, lv >= 6) + '</span></span><span class="eqs">=</span><span class="res' + hi(7) + '">' + res(dLFr, lv >= 7) + '</span></div>';
     }
     let rt = [];
     const stopR = () => { rt.forEach(clearTimeout); rt = []; rk.stop(); };
-    // 한 걸음 안에서 lvs 를 차례로(분자 → 분모 → Result). 마지막 Result에서 지표 상자를 짚는다
+    // 한 걸음 안에서 lvs 를 차례로(분자 · 분모 함께 → Result). 마지막 Result에서 Result 항을 짚는다
     const stage = (m, lvs, key) => (anim) => {
       stopR();
       if (!anim || reduce) { rates(m, lvs[lvs.length - 1]); rk.seq([key]); return; }
@@ -811,8 +812,8 @@
       const moved = Object.keys(m).map((k) => NM[k] + ' ' + (m[k] > 0 ? '↑' : '↓')).join(' · ');
       return [
         { g: s.t, k: 'Situation', t: moved, run: () => { stopR(); rates(m, 1); }, wait: 0.5 },
-        { g: s.t, k: 'Unemployment rate', t: 'Unemployed ' + arrow(m.U || 0) + ' · Labor force ' + arrow(dLF) + ' → unemployment rate ' + arrow(dirOf(ur(B), ur(v), 1e-9)), run: stage(m, [2, 3, 4], 'UR'), wait: 2.2 },
-        { g: s.t, k: 'Participation', t: 'Labor force ' + arrow(dLF) + ' · Adult population ' + arrow(dPop) + ' → participation rate ' + arrow(dirOf(lf(B), lf(v), 1e-9)), run: stage(m, [5, 6, 7], 'LF'), wait: 2.2 }
+        { g: s.t, k: 'Unemployment rate', t: 'Unemployed ' + arrow(m.U || 0) + ' · Labor force ' + arrow(dLF) + ' → unemployment rate ' + arrow(dirOf(ur(B), ur(v), 1e-9)), run: stage(m, [3, 4], 'UR'), wait: 2.2 },
+        { g: s.t, k: 'Participation', t: 'Labor force ' + arrow(dLF) + ' · Adult population ' + arrow(dPop) + ' → participation rate ' + arrow(dirOf(lf(B), lf(v), 1e-9)), run: stage(m, [6, 7], 'LF'), wait: 2.2 }
       ];
     }
     list($('#o28s'), SIT, (i) => { if (i < 0) { pl2.clear(); stopR(); rates({}, 0); } else pl2.load(beats(SIT[i])); });

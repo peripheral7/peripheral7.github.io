@@ -468,7 +468,7 @@
       const stp = st.step || '', g = /장기/.test(stp) ? '장기' : /단기/.test(stp) ? '단기' : isAlt ? '장기' : num + '단계';
       const altList = isAlt ? alts.map((a, k) => ({ t: sc.stages[a].short || sc.stages[a].name, on: a === id, pick: () => rebuild(a) })) : null;
       const cause = ps.slice(0, at), after = ps.slice(at + 1).join(' → ');
-      const sit = id === 0 ? sc.t : cause.shift() || st.name;
+      const sit = id === 0 ? sc.sit || sc.t : cause.shift() || st.name;   // sc.sit: 상황 마디 글(' — ' 마다 줄바꿈)
       out.push({ g, alts: altList, k: '상황', t: sit, run: snap(prevS, false), wait: 0.4 });   // 상황은 이미 아는 내용 — 빨리 지나간다
       out.push({ g, alts: altList, k: ps[at], t: cause.join(' → '), run: snap(withNew, true), wait: 1.25 });
       out.push({ g, alts: altList, k: '새 균형', t: after || o.result(prevS[prevS.length - 1], next, letter),
@@ -749,11 +749,10 @@
       after: (a, b) => plot.seq(b.vis.W ? [] : [{ axis: 'xy' }])
     });
     function eqW(off) { const m = meet(plot.byId.S, off.S || 0, plot.byId.D, off.D || 0, plot.dom); return m ? m.y : 5; }
-    const w = (t, q, dir, W, why) => ({ t, q, dir, stages: [{ name: t, at: 0, ch: { vis: { W: true }, abs: { W } }, why }] });
     const EV = [
-      w('최저임금 (균형보다 높게)', 'MC 14', 'r', 0, '법으로 W > W_E → L_S ↑ · L_D ↓ → 실업'),
-      w('노동조합', 'MC 10', 'r', 0.5, '단체교섭으로 W > W_E → L_D ↓ → 실업'),
-      w('효율임금', 'MC 14', 'r', -0.4, '기업이 스스로 W > W_E → 노력 ↑ · 이직 ↓ → 실업'),
+      { t: '임금이 균형보다 높게 (최저임금 · 노동조합 · 효율임금)', q: 'MC 10 · 14', dir: 'r',
+        sit: '최저임금 : 법으로 정함 — 노동조합 : 단체교섭 — 효율임금 : 기업이 스스로 (노력 ↑ · 이직 ↓)',
+        stages: [{ name: 'W > W_E', at: 0, ch: { vis: { W: true }, abs: { W: 0 } }, chain: ['W > W_E', 'L_S ↑ · L_D ↓ → 실업'] }] },
       { t: '노동 수요 감소 (수입 ↑ → 국내 산업 쇠퇴)', q: 'SA 4', dir: 'l', stages: [
         { name: '수요 D ←, 임금 그대로', step: '1단계 단기', at: 2, ch: { add: { D: -1.4 }, vis: { W: true }, abs: { W: -2 } }, why: '수입 ↑ → 국내 산업 쇠퇴 → D ← → W 는 W_E 에 묶임 → 실업' },
         { name: '임금 ↓ → 새 균형', step: '2단계 장기', at: 0, ch: { vis: { W: false } }, why: 'W ↓ → L ↓, 실업 없음 (다른 산업으로 이동)' }] }
@@ -787,18 +786,20 @@
       const d = (k) => (lv >= 1 ? m[k] || 0 : 0), dLF = d('E') + d('U'), dPop = dLF + d('N');
       const dUR = dirOf(ur(B), ur(v), 1e-9), dLFr = dirOf(lf(B), lf(v), 1e-9);
       rk.set({ UR: lv >= 4 ? { d: dUR } : { txt: '· · ·' }, LF: lv >= 7 ? { d: dLFr } : { txt: '· · ·' } });
+      // lv: 0 처음 · 1 무리 옮김 · 3 실업률 분자 · 분모(한 번에) · 4 결과 · 6 참가율 분자 · 분모(한 번에) · 7 결과
       const hi = (n) => (lv === n ? ' hi' : '');
       const chip = (k) => '<span class="grp">' + NM[k] + tri(d(k)) + '</span>';
-      const part = (ks, dd, sum, on) => ks.map((k) => NM[k] + (ks.length > 1 ? tri(d(k)) : '')).join(' + ') + (sum ? '<span class="sum">= ' + sum + '</span>' : '') + (on ? ' ' + wordOf(dd) : '');   // 여러 항이면 바뀐 무리마다 ▲▼
+      const part = (ks, dd, on) => ks.map((k) => NM[k] + (ks.length > 1 ? tri(d(k)) : '')).join(' + ') + (on ? ' ' + wordOf(dd) : '');   // 여러 항이면 바뀐 무리마다 ▲▼
+      const one = (name, dd, on) => name + (on ? ' ' + wordOf(dd) : '');
       const res = (dd, on) => (on ? wordOf(dd, ['상승', '하락']) : '<span class="q">?</span>');
       $('#rates').innerHTML =
         '<div class="who' + hi(1) + '"><span class="lb">인구</span>' + chip('E') + chip('U') + chip('N') + '</div>' +
-        '<div class="rate"><span class="nm">실업률</span><span class="frac"><span class="' + hi(2) + '">' + part(['U'], d('U'), '', lv >= 2) + '</span><span class="' + hi(3) + '">' + part(['E', 'U'], dLF, '경제활동인구', lv >= 3) + '</span></span><span class="eqs">=</span><span class="res' + hi(4) + '">' + res(dUR, lv >= 4) + '</span></div>' +
-        '<div class="rate"><span class="nm">경제활동참가율</span><span class="frac"><span class="' + hi(5) + '">' + part(['E', 'U'], dLF, '경제활동인구', lv >= 5) + '</span><span class="' + hi(6) + '">' + part(['E', 'U', 'N'], dPop, '성인 인구', lv >= 6) + '</span></span><span class="eqs">=</span><span class="res' + hi(7) + '">' + res(dLFr, lv >= 7) + '</span></div>';
+        '<div class="rate"><span class="nm">실업률</span><span class="frac"><span class="' + hi(3) + '">' + part(['U'], d('U'), lv >= 3) + '</span><span class="' + hi(3) + '">' + part(['E', 'U'], dLF, lv >= 3) + '</span></span><span class="eqs">=</span><span class="res' + hi(4) + '">' + res(dUR, lv >= 4) + '</span></div>' +
+        '<div class="rate"><span class="nm">경제활동참가율</span><span class="frac"><span class="' + hi(6) + '">' + part(['E', 'U'], dLF, lv >= 6) + '</span><span class="' + hi(6) + '">' + one('성인 인구', dPop, lv >= 6) + '</span></span><span class="eqs">=</span><span class="res' + hi(7) + '">' + res(dLFr, lv >= 7) + '</span></div>';
     }
     let rt = [];
     const stopR = () => { rt.forEach(clearTimeout); rt = []; rk.stop(); };
-    // 한 걸음 안에서 lvs 를 차례로(분자 → 분모 → 결과). 마지막 결과에서 지표 상자를 짚는다
+    // 한 걸음 안에서 lvs 를 차례로(분자 · 분모 함께 → 결과). 마지막 결과에서 결과 항을 짚는다
     const stage = (m, lvs, key) => (anim) => {
       stopR();
       if (!anim || reduce) { rates(m, lvs[lvs.length - 1]); rk.seq([key]); return; }
@@ -811,8 +812,8 @@
       const moved = Object.keys(m).map((k) => NM[k] + ' ' + (m[k] > 0 ? '↑' : '↓')).join(' · ');
       return [
         { g: s.t, k: '상황', t: moved, run: () => { stopR(); rates(m, 1); }, wait: 0.5 },
-        { g: s.t, k: '실업률', t: '실업자 ' + arrow(m.U || 0) + ' · 경제활동인구 ' + arrow(dLF) + ' → 실업률 ' + arrow(dirOf(ur(B), ur(v), 1e-9)), run: stage(m, [2, 3, 4], 'UR'), wait: 2.2 },
-        { g: s.t, k: '참가율', t: '경제활동인구 ' + arrow(dLF) + ' · 성인 인구 ' + arrow(dPop) + ' → 참가율 ' + arrow(dirOf(lf(B), lf(v), 1e-9)), run: stage(m, [5, 6, 7], 'LF'), wait: 2.2 }
+        { g: s.t, k: '실업률', t: '실업자 ' + arrow(m.U || 0) + ' · 경제활동인구 ' + arrow(dLF) + ' → 실업률 ' + arrow(dirOf(ur(B), ur(v), 1e-9)), run: stage(m, [3, 4], 'UR'), wait: 2.2 },
+        { g: s.t, k: '참가율', t: '경제활동인구 ' + arrow(dLF) + ' · 성인 인구 ' + arrow(dPop) + ' → 참가율 ' + arrow(dirOf(lf(B), lf(v), 1e-9)), run: stage(m, [6, 7], 'LF'), wait: 2.2 }
       ];
     }
     list($('#o28s'), SIT, (i) => { if (i < 0) { pl2.clear(); stopR(); rates({}, 0); } else pl2.load(beats(SIT[i])); });
