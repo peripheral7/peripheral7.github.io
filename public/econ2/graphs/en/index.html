@@ -61,10 +61,10 @@
   .stg.alts .gh{flex-direction:column;align-items:flex-start;gap:6px}
   .stg.alts .gh>span{margin-bottom:2px}
   .solo .gh{display:none}
-  .gh{display:flex;flex-wrap:wrap;align-items:center;gap:4px 8px;padding-top:22px;font-size:15px;font-weight:800;color:var(--soft)}
+  .gh{display:flex;flex-wrap:wrap;align-items:center;gap:4px 8px;padding-top:36px;font-size:17px;font-weight:800;line-height:1.3;color:var(--soft)}
   .stg.cur .gh{color:var(--ink)}
   /* 갈래 고르기(unchanged · Policy): 글자 버튼. 고른 것은 ▸ 와 파랑 굵은 글자, 나머지는 흐리게 */
-  .alt{padding:0 0 0 14px;border:0;background:none;position:relative;font-size:14px;font-weight:600;color:#9aa0aa;cursor:pointer;text-align:left}
+  .alt{padding:0 0 0 14px;border:0;background:none;position:relative;font-size:15px;font-weight:600;color:#9aa0aa;cursor:pointer;text-align:left}
   .alt::before{content:"·";position:absolute;left:3px}
   .alt:hover{color:var(--ink)}
   .alt.on{color:var(--blue);font-weight:800}
@@ -74,8 +74,9 @@
   .rows li{flex:1 1 0;min-width:0}
   .rows li button{position:relative;display:block;width:100%;padding:0 10px 0 0;border:0;background:none;text-align:left;cursor:pointer;color:#9aa0aa}
   .rows .dot{display:block;width:24px;height:24px;border:3px solid var(--ink);border-radius:50%;background:#fff;box-sizing:border-box;margin-bottom:12px}
-  .rows .k{display:block;font-size:16px;font-weight:800;line-height:1.3}
-  .rows .tx{display:block;margin-top:2px;font-size:15.5px;font-weight:600;line-height:1.4}
+  .rows .k{display:block;font-size:18px;font-weight:800;line-height:1.3}
+  .rows .tx{display:block;margin-top:3px;font-size:17px;font-weight:600;line-height:1.45}
+  .rows .u{white-space:nowrap}
   .rows .tx:empty{display:none}
   .rows .tx sub{font-size:.7em}
   .rows li.todo .up,.rows li.todo .dn{color:inherit}
@@ -83,7 +84,7 @@
   .rows li.done button{color:var(--ink)}
   .rows li.cur button{color:var(--ink)}
   .rows li.cur .dot{background:var(--blue);border-color:var(--blue)}
-  .rows li.cur .k{color:var(--blue);font-size:17px}
+  .rows li.cur .k{color:var(--blue);font-size:19px}
   .pbar{display:flex;flex-wrap:wrap;align-items:center;justify-content:flex-end;gap:8px;margin:8px 0 0}
   .pbar .cnt{margin-right:auto;font-size:14px;font-weight:800;color:var(--ink);font-variant-numeric:tabular-nums}
   .seg{display:inline-flex;border:1.5px solid var(--ink);border-radius:8px;overflow:hidden}
@@ -205,14 +206,16 @@
     .rate{grid-template-columns:auto auto minmax(0,1fr);font-size:15px}
     .rate .nm{grid-column:1 / -1}
     .stg{grid-template-columns:minmax(0,1fr);gap:4px}
-    .gh{padding:0 0 2px 36px;font-size:14px}
+    .steps{gap:26px}
+    .gh{padding:0 0 12px 36px;font-size:16px}
     .stg.alts .gh{flex-direction:row;align-items:center;gap:4px 12px}
-    .rows{flex-direction:column;gap:12px;padding-left:36px}
+    .rows{flex-direction:column;gap:14px;padding-left:36px}
     .rows::before{left:9px;right:auto;top:6px;bottom:6px;width:3px;height:auto}
     .rows li button{padding:0}
     .rows .dot{position:absolute;left:-36px;top:0;width:22px;height:22px;margin:0}
-    .rows .k{font-size:15.5px}
-    .rows .tx{font-size:14.5px}
+    .rows .k{font-size:16.5px}
+    .rows .tx{font-size:15.5px}
+    .rows li.cur .k{font-size:17.5px}
     .seg button{padding:7px 11px;font-size:13.5px}
 
     .fig .stage{max-height:none}

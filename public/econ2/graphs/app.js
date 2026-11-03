@@ -355,7 +355,9 @@
         const li = document.createElement('li'), btn = document.createElement('button');
         li.setAttribute('data-i', k);
         btn.type = 'button';
-        btn.innerHTML = '<span class="dot"></span><span class="k">[' + arrows(b.k || '') + ']</span><span class="tx">' + arrows(b.t || '') + '</span>';
+        // 글은 ' — ' 에서 줄을 바꾸고, ' → ' 로 나뉜 조각 안에서는 줄이 바뀌지 않게(의미 단위로만 줄바꿈)
+        const unit = (x) => x.split(' → ').map((u) => '<span class="u">' + arrows(u) + '</span>').join(' → ');
+        btn.innerHTML = '<span class="dot"></span><span class="k">[' + arrows(b.k || '') + ']</span><span class="tx">' + String(b.t || '').split(' — ').map(unit).join('<br>') + '</span>';
         btn.addEventListener('click', () => { playing = false; go(k, true); });
         li.appendChild(btn); rows.appendChild(li);
       });
