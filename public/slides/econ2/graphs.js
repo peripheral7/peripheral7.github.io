@@ -86,7 +86,15 @@
     p19: adas({ star: true, states: [{ off: {}, pts: EQ }, { off: { SRAS: -1.6 }, pts: EQ, say: 'Pe ↑ → SRAS ← (LRAS 그대로)' }] }),
     p22: adas({ xTitle: 'Real GDP', yTitle: 'Price level', states: sticky(1) }),
     p24: adas({ xTitle: 'Real GDP', yTitle: 'Price level', states: sticky(2), start: 1 }),
-    p25: adas({ xTitle: 'Real GDP', yTitle: 'Price level', states: sticky(2), start: 2 }),
+    // 25 — 경직적 임금: A → B(명목임금 W 그대로, P ↑ → 실질임금 ↓) → C(W 가 P 만큼 올라 실질임금 원래대로). 아래 표가 A · B · C 의 W · P · W/P
+    p25: Object.assign(adas({
+      xTitle: 'Real GDP', yTitle: 'Price level',
+      states: [
+        { off: {}, pts: EQ, say: '장기균형 A: W = P = 100 (지수) → 실질임금 100' },
+        { off: { AD: 1.6 }, pts: EQ, say: '명목임금 W 고정 · P ↑ → 실질임금 ↓ → 고용 · Y ↑' },
+        { off: { AD: 1.6, SRAS: -1.6 }, pts: EQ, say: '명목임금이 P 만큼 오름 → 실질임금 A 수준 · Y = Y*' }
+      ]
+    }), { extra: wageTable, pad: { l: 60, r: 92, b: 196 } }),
     // 26 — 투자 붐: AD → (B) → 임금·물가 기대 조정으로 SRAS ← (C) → 자본이 늘면 LRAS·SRAS → (D)
     p26: adas({
       xTitle: 'Real GDP', yTitle: 'Price level', dragLRAS: true,
@@ -142,6 +150,35 @@
       pad: { r: 150 }
     }
   };
+
+  // 경직적 임금 표(25쪽): 명목임금 W 는 기대물가 Pe 에 맞춰 정해진다고 보고 = SRAS 가 Y*(LRAS) 에서 갖는 높이,
+  // 물가 P = 균형점 높이. 둘 다 A 를 100 으로 한 지수, 실질임금 = W / P × 100. 지금 행(파랑)은 애니메이션·끌기에 따라 값이 움직인다
+  function wageTable(g, pn, st, ctx, shown, P) {
+    const S = pn.curves.find((c) => c.id === 'SRAS'), base = S.y;
+    const rows = [];
+    shown.forEach((s, i) => {
+      const p = (P[i] || [])[0];
+      if (!p) return;
+      const W = 100 * fy(S, offOf(S, s.off), 5) / base, Pi = 100 * p.y / base;
+      rows.push({ lab: p.lab, W, P: Pi, R: W / Pi * 100, now: i === shown.length - 1 });
+    });
+    const top = this.H - 128, x0 = 14, cx = [x0, 116, 206, 300], barX = 352, barW = this.W - barX - 18;
+    svg('line', { x1: x0, x2: this.W - 14, y1: top - 8, y2: top - 8, stroke: C.ghost, 'stroke-width': 1 }, g);
+    [['', 'start'], ['명목임금 W', 'end'], ['물가 P', 'end'], ['실질임금 W/P', 'end']].forEach((h, i) =>
+      label(g, i ? cx[i] + 38 : cx[i], top + 12, h[0], { anchor: h[1], size: 14, color: C.soft, weight: 600 }));
+    const arrowOf = (a, b) => (Math.abs(b - a) < 0.5 ? ' =' : b > a ? ' ↑' : ' ↓');
+    rows.forEach((r, i) => {
+      const y = top + 40 + i * 27, col = r.now ? C.blue : C.ink, prev = rows[i - 1];
+      label(g, cx[0], y, r.lab, { size: 17, weight: 700, color: col });
+      [r.W, r.P, r.R].forEach((v, j) => {
+        const key = ['W', 'P', 'R'][j];
+        label(g, cx[j + 1] + 38, y, fmt(v, 0) + (prev ? arrowOf(prev[key], v) : '  '), { anchor: 'end', size: 17, color: col, weight: j === 2 ? 700 : 500 });
+      });
+      svg('rect', { x: barX, y: y - 14, width: Math.max(0, barW * Math.min(r.R, 130) / 130), height: 16, fill: r.now ? C.blue : C.ghost }, g);
+      svg('line', { x1: barX + barW * 100 / 130, x2: barX + barW * 100 / 130, y1: y - 18, y2: y + 6, stroke: C.ink, 'stroke-width': 1.2, 'stroke-dasharray': '3 2' }, g);
+    });
+    label(g, barX + barW * 100 / 130, top + 12, '100', { anchor: 'middle', size: 13, color: C.soft });
+  }
 
   // 노동시장: W 가 균형보다 높으면 L_D · L_S 와 실업(공급 − 수요) 화살표, 낮으면 "효과 없음"
   function laborExtra(g, pn, st, ctx) {
@@ -448,7 +485,7 @@
         const d = p.o.d || pn.ptD || (lr && p.x < lr.x - 0.05 ? [-30, 7] : [16, 7]);
         if (p.lab) label(g, px + d[0], py + d[1], p.lab, { size: p.lab.length > 2 ? 16 : 20, weight: 700, color: isNow ? C.blue : C.ink });
       }));
-      if (sc.extra) sc.extra.call(this, g, pn, shown[now], ctx);
+      if (sc.extra) sc.extra.call(this, g, pn, shown[now], ctx, shown, P);
     });
 
     // 설명 두 줄(위 띠): 기본은 "앞 → 지금 : Y ↑ · P ↑" 와 상태 설명
