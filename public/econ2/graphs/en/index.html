@@ -224,6 +224,39 @@
 
     .fig .stage{max-height:none}
   }
+
+  /* 데스크톱(901px 이상): 한 화면에 다 들어가게 — 머리줄 아래를 창 높이로 잡고 그래프가 남는 높이를 채운다. 가로도 전체 폭.
+     오른쪽 설명 · Events 목록이 길면 그 칸만 안에서 스크롤. 시간선 · 조작 줄은 아래에 고정 높이 */
+  @media (min-width:901px){
+    html,body{height:100%}
+    body{display:flex;flex-direction:column}
+    .top .in{max-width:none;padding:0 20px}
+    main{flex:1;min-height:0;display:flex;flex-direction:column;max-width:none;width:100%;padding:10px 20px 12px}
+    .ch.on{flex:1;min-height:0;grid-template-rows:minmax(0,1fr) auto}
+    .ch.tabbed.on{grid-template-rows:auto minmax(0,1fr) auto}
+    .fig{display:flex;flex-direction:column;min-height:0;height:100%}
+    .fig .stage{flex:1;min-height:0;max-height:none;aspect-ratio:auto}
+    .bankfig{flex:1;justify-content:center}
+    .side{min-height:0;height:100%;overflow:auto;padding-right:4px}
+    .player{padding-top:4px}
+  }
+  /* 낮은 화면(노트북)에서는 시간선을 한 단계 작게 해 그래프에 높이를 더 준다 */
+  @media (min-width:901px) and (max-height:820px){
+    .steps{gap:8px}
+    .gh{padding-top:28px;font-size:15px}
+    .rows .dot{width:20px;height:20px;border-width:2.5px;margin-bottom:8px}
+    .rows::before{left:9px;right:9px;top:9px}
+    .rows .k{font-size:16px}
+    .rows li.cur .k{font-size:17px}
+    .rows .tx{font-size:15px;margin-top:2px}
+    .rows .sm{font-size:13px}
+    .pbar{margin-top:4px}
+    .pbar button,.seg button{padding:5px 12px;font-size:13px}
+    .sub button{padding:6px 14px;font-size:15px}
+  }
+  @media (max-width:900px){
+    .fig .stage{max-height:none;aspect-ratio:640/520}
+  }
 </style>
 </head>
 <body>
