@@ -337,15 +337,17 @@
       draw(); schedule();
       if (self.onGo) self.onGo(i);
     }
-    // 단계(묶음)마다 li.stg = 한 열: 제목 줄(.gh, 갈래 ⓐ ⓑ 포함) + 걸음 목록(ol.rows)
+    // 단계(묶음)마다 li.stg = 한 줄: 단계 이름(.gh, 갈래 ⓐ ⓑ 포함) + 마디 목록(ol.rows: 선 위의 점 · [제목] · 글)
     function build() {
       ol.innerHTML = '';
+      const ng = new Set(beats.map((b) => b.g)).size;
+      ol.classList.toggle('solo', ng < 2 && !beats.some((b) => b.alts));   // 단계가 하나면 단계 이름 줄을 숨긴다
       let g = null, rows = null;
       beats.forEach((b, k) => {
         if (b.g !== g) {
           g = b.g;
           const st = document.createElement('li'), h = document.createElement('div'), nm = document.createElement('span');
-          st.className = 'stg'; h.className = 'gh'; nm.textContent = b.g; h.appendChild(nm);
+          st.className = b.alts ? 'stg alts' : 'stg'; h.className = 'gh'; nm.textContent = b.g; h.appendChild(nm);   // 갈래(ⓐ ⓑ)가 있으면 이름 · 칩을 선 위 한 줄로
           if (b.alts) b.alts.forEach((a) => { const x = document.createElement('button'); x.type = 'button'; x.className = a.on ? 'alt on' : 'alt'; x.textContent = a.t; x.addEventListener('click', a.pick); h.appendChild(x); });
           rows = document.createElement('ol'); rows.className = 'rows';
           st.appendChild(h); st.appendChild(rows); ol.appendChild(st);
@@ -353,7 +355,7 @@
         const li = document.createElement('li'), btn = document.createElement('button');
         li.setAttribute('data-i', k);
         btn.type = 'button';
-        btn.innerHTML = '<span class="n">' + (k + 1) + '</span>' + (b.k ? '<span class="k">' + esc(b.k) + '</span>' : '') + '<span class="tx' + (b.k ? '' : ' wide') + '">' + arrows(b.t) + '</span>';
+        btn.innerHTML = '<span class="dot"></span><span class="k">[' + arrows(b.k || '') + ']</span><span class="tx">' + arrows(b.t || '') + '</span>';
         btn.addEventListener('click', () => { playing = false; go(k, true); });
         li.appendChild(btn); rows.appendChild(li);
       });
@@ -467,7 +469,6 @@
     const out = [];
     let S = [plot.base()];
     const snap = (states, hide) => (anim) => { if (o.quiet) o.quiet(); plot.show(states, { hide, dur: dur(), instant: !anim }); };
-    out.push({ g: 'Start', k: 'Start', t: o.start, run: snap(S, false), wait: 0.8 });
     let num = 0;
     ids.forEach((id) => {
       const st = sc.stages[id], prevS = S, next = apply(S[S.length - 1], st.ch, st.letter);
@@ -476,12 +477,13 @@
       const withNew = S.concat([next]), letter = next.letter || LET[withNew.length - 1];
       num++;
       const isAlt = alts.length && id !== 0;
-      const g = (st.step || (isAlt ? 'Stage 2' : num + ' stage')) + ' · ' + st.name;
+      const stp = st.step || '', g = /Long run/.test(stp) ? 'Long run' : /Short run/.test(stp) ? 'Short run' : isAlt ? 'Long run' : num + ' stage';
       const altList = isAlt ? alts.map((a, k) => ({ t: 'ⓐⓑⓒ'[k] + ' ' + sc.stages[a].name, on: a === id, pick: () => rebuild(a) })) : null;
-      const gg = isAlt ? 'Stage 2' : g, cause = ps.slice(0, at).join(' → '), after = ps.slice(at + 1).join(' → ');
-      if (cause) out.push({ g: gg, alts: altList, k: 'Cause', t: cause, run: snap(prevS, false), wait: 1.1 });
-      out.push({ g: gg, alts: altList, k: 'Shift', t: ps[at], run: snap(withNew, true), wait: 1.25 });
-      out.push({ g: gg, alts: altList, k: 'Equilibrium', t: letter + ' : ' + (after || o.result(prevS[prevS.length - 1], next, letter)),
+      const cause = ps.slice(0, at), after = ps.slice(at + 1).join(' → ');
+      const sit = id === 0 ? sc.t : cause.shift() || st.name;
+      out.push({ g, alts: altList, k: 'Situation', t: sit, run: snap(prevS, false), wait: 1 });
+      out.push({ g, alts: altList, k: ps[at], t: cause.join(' → '), run: snap(withNew, true), wait: 1.25 });
+      out.push({ g, alts: altList, k: 'New equilibrium', t: after || o.result(prevS[prevS.length - 1], next, letter),
         run: (anim) => { snap(withNew, false)(anim); if (o.after) o.after(prevS[prevS.length - 1], next); }, wait: 1.8 });
       S = withNew;
     });
@@ -530,7 +532,7 @@
   }
 
   /* ───────── Ch29 은행 T계정 ───────── */
-  // Start: Reserves $100, R 10% → 예금 $1,000 · 대출 $900 · 통화량 $1,000(현금 보유 없음). 사건마다 걸음별 값(R · Reserves · 대출 · 예금)을 차례로 보여 준다
+  // Start: Reserves $100, R 10% → 예금 $1,000 · 대출 $900 · Money $1,000(현금 보유 없음). 사건마다 걸음별 값(R · Reserves · 대출 · 예금)을 차례로 보여 준다
   function ch29() {
     const B = { R: 0.1, res: 100, L: 900, D: 1000 };
     const player = Player($('#pl29'), 'Pick an event from the list: all steps appear here and the T-account changes one step at a time.');
@@ -560,29 +562,29 @@
     const R2 = { R: 0.2 }, R5 = { R: 0.05 };
     const EV = [
       { t: 'Reserve ratio raised 10% → 20%', q: 'SA 10', dir: 'l', steps: [
-        ['Reserve ratio R 10% → 20% : multiplier 1/R = 10 → 5', R2, ['R']],
-        ['Required = 20% × deposits $1,000 = $200 > reserves held $100 → shortfall', R2, ['res']],
-        ['Banks call in loans → loans $900 → $400, so deposits $1,000 → $500', { R: 0.2, L: 400, D: 500 }, ['L', 'D']],
-        ['Money M $1,000 → $500 ↓ (= reserves $100 × multiplier 5; reserves unchanged)', { R: 0.2, L: 400, D: 500 }, ['M']]] },
+        ['R 10% → 20% : multiplier 1/R 10 → 5', R2, ['R']],
+        ['Required 20% × $1,000 = $200 > reserves $100 → shortfall', R2, ['res']],
+        ['Loans ↓ $900 → $400 → deposits $1,000 → $500', { R: 0.2, L: 400, D: 500 }, ['L', 'D']],
+        ['M $1,000 → $500 ↓ (= $100 × 5)', { R: 0.2, L: 400, D: 500 }, ['M']]] },
       { t: 'Reserve ratio cut 10% → 5%', dir: 'r', steps: [
-        ['Reserve ratio R 10% → 5% : multiplier 1/R = 10 → 20', R5, ['R']],
-        ['Required = 5% × deposits $1,000 = $50 < reserves held $100 → excess reserves $50', R5, ['res']],
-        ['Excess reserves are lent → loans $900 → $1,900, redeposited → deposits $1,000 → $2,000', { R: 0.05, L: 1900, D: 2000 }, ['L', 'D']],
-        ['Money M $1,000 → $2,000 ↑ (= reserves $100 × multiplier 20)', { R: 0.05, L: 1900, D: 2000 }, ['M']]] },
+        ['R 10% → 5% : multiplier 1/R 10 → 20', R5, ['R']],
+        ['Required 5% × $1,000 = $50 < reserves $100 → excess $50', R5, ['res']],
+        ['Excess lent: loans ↑ $900 → $1,900 → deposits $1,000 → $2,000', { R: 0.05, L: 1900, D: 2000 }, ['L', 'D']],
+        ['M $1,000 → $2,000 ↑ (= $100 × 20)', { R: 0.05, L: 1900, D: 2000 }, ['M']]] },
       { t: 'Fed buys $100 of bonds (open-market purchase)', q: 'SA 11', dir: 'r', steps: [
-        ['Fed buys $100 of bonds from banks and pays in reserves → reserves $100 → $200', { res: 200 }, ['res']],
-        ['Required is 10% × $1,000 = $100 → excess reserves $100', { res: 200 }, ['res']],
-        ['Banks lend the excess → loans are redeposited again and again → loans $900 → $1,800, deposits $1,000 → $2,000', { res: 200, L: 1800, D: 2000 }, ['L', 'D']],
-        ['Money M +$1,000 ↑ = new reserves $100 × multiplier 10', { res: 200, L: 1800, D: 2000 }, ['M']]] },
+        ['Fed buys $100 of bonds → reserves $100 → $200', { res: 200 }, ['res']],
+        ['Required 10% × $1,000 = $100 → excess $100', { res: 200 }, ['res']],
+        ['Excess lent and redeposited repeatedly → loans $900 → $1,800 · deposits $1,000 → $2,000', { res: 200, L: 1800, D: 2000 }, ['L', 'D']],
+        ['M +$1,000 ↑ (= new reserves $100 × 10)', { res: 200, L: 1800, D: 2000 }, ['M']]] },
       { t: 'Fed sells $50 of bonds (open-market sale)', dir: 'l', steps: [
-        ['Fed sells $50 of bonds to banks and takes payment from reserves → reserves $100 → $50', { res: 50 }, ['res']],
-        ['Required is 10% × $1,000 = $100 > reserves held $50 → shortfall', { res: 50 }, ['res']],
-        ['Banks call in loans → loans $900 → $450, deposits $1,000 → $500', { res: 50, L: 450, D: 500 }, ['L', 'D']],
-        ['Money M −$500 ↓ = reserves −$50 × multiplier 10', { res: 50, L: 450, D: 500 }, ['M']]] }
+        ['Fed sells $50 of bonds → reserves $100 → $50', { res: 50 }, ['res']],
+        ['Required 10% × $1,000 = $100 > reserves $50 → shortfall', { res: 50 }, ['res']],
+        ['Loans ↓ $900 → $450 → deposits $1,000 → $500', { res: 50, L: 450, D: 500 }, ['L', 'D']],
+        ['M −$500 ↓ (= −$50 × 10)', { res: 50, L: 450, D: 500 }, ['M']]] }
     ];
-    const KS = ['Cause', 'Compare', 'Adjust', 'Result'];
+    const KS = ['Situation', 'Compare', 'Adjust', 'Money'];
     function beats(ev) {
-      const out = [{ g: 'Start', k: 'Start', t: 'Reserves $100 × 1/R 10 = M $1,000', run: () => show(B, []), wait: 0.8 }];
+      const out = [];
       ev.steps.forEach(([t, v, hi], i) => { const s = Object.assign({}, B, v); out.push({ g: ev.t, k: KS[i], t, run: () => show(s, hi), wait: 1.3 }); });
       return out;
     }
@@ -623,14 +625,14 @@
     });
     const keep = (why) => ({ name: 'Fed shifts MS to hold P', ch: { abs: (o) => ({ MS: 5 * (1 + mdScale(o)) - 5 }) }, why });
     const EV = [
-      { t: 'Fed doubles the money supply', dir: 'r', stages: [{ name: 'MS →', at: 0, ch: { add: { MS: 5 } }, why: 'M doubles (MS →) → 1/P halves → P doubles (V · Y unchanged)' }] },
-      { t: 'Fed cuts the money supply', dir: 'l', stages: [{ name: 'MS ←', at: 0, ch: { add: { MS: -1.5 } }, why: 'M ↓ (MS ←) → 1/P ↑ → P ↓' }] },
+      { t: 'Fed doubles the money supply', dir: 'r', stages: [{ name: 'MS →', at: 0, ch: { add: { MS: 5 } }, why: 'MS → → 1/P halves → P doubles' }] },
+      { t: 'Fed cuts the money supply', dir: 'l', stages: [{ name: 'MS ←', at: 0, ch: { add: { MS: -1.5 } }, why: 'MS ← → 1/P ↑ → P ↓' }] },
       { t: 'Credit cards spread → less money held', q: 'SA 2', dir: 'l', stages: [
-        { name: 'Money demand falls', ch: { add: { Vg: 0.5 } }, why: 'Pay by card → money held ↓ → MD ← → 1/P ↓ → P ↑ (if the Fed does nothing)' },
-        keep('Fed cuts M by the fall in MD (MS ←) → 1/P back to start → P unchanged')] },
+        { name: 'Money demand falls', ch: { add: { Vg: 0.5 } }, why: 'Pay by card → money held ↓ → MD ← → 1/P ↓ → P ↑' },
+        keep('Fed cuts M → MS ← → 1/P restored → P unchanged')] },
       { t: 'Real GDP rises → more money for transactions', dir: 'r', stages: [
-        { name: 'Money demand rises', ch: { add: { Yg: 0.3 } }, why: 'Y ↑ → money for transactions ↑ → MD → → 1/P ↑ → P ↓' },
-        keep('Fed raises M (MS →) → 1/P back to start → P unchanged')] }
+        { name: 'Money demand rises', ch: { add: { Yg: 0.3 } }, why: 'Y ↑ → money demand ↑ → MD → → 1/P ↑ → P ↓' },
+        keep('Fed raises M → MS → → 1/P restored → P unchanged')] }
     ];
     list($('#o30'), EV, (i) => r.pick(i < 0 ? null : EV[i]));
     return plot;
@@ -642,15 +644,15 @@
     { id: 'SRAS', kind: 'line', x: 5, y: 5, m: 0.85, span: 3.8, lab: 'SRAS' },
     { id: 'AD', kind: 'line', x: 5, y: 5, m: -0.85, span: 3.8, lab: 'AD' }
   ];
-  // 교점이 LRAS 위에 오도록 SRAS 를 옮기거나(장기 자동 Adjust) AD 를 옮긴다(정책 수용)
+  // 교점이 LRAS 위에 오도록 SRAS 를 옮기거나(Long run 자동 Adjust) AD 를 옮긴다(정책 수용)
   const lrSRAS = (off) => { const L = 5 + (off.LRAS || 0), yA = 5 - 0.85 * (L - 5 - (off.AD || 0)); return { SRAS: L - 5 - (yA - 5) / 0.85 }; };
   const lrAD = (off) => { const L = 5 + (off.LRAS || 0), yS = 5 + 0.85 * (L - 5 - (off.SRAS || 0)); return { AD: L - 5 + (yS - 5) / 0.85 }; };
   const eqX = (off) => 5 + ((off.AD || 0) + (off.SRAS || 0)) / 2;   // AD · SRAS 교점의 Y (기울기가 ±0.85 로 같아서)
   function longRun(S) {                        // Stage 2 설명: Stage 1 끝 상태가 Y* 보다 큰지 작은지
     const b = S[S.length - 1].off, L = 5 + (b.LRAS || 0);
     return eqX(b) > L + 0.03
-      ? 'Y > Y* : wages · Pe ↑ → SRAS ← → Y = Y*, P higher still'
-      : 'Y < Y* : unemployment ↑ → wages · Pe ↓ → SRAS → → Y = Y*, P ↓';
+      ? 'Y > Y* → wages · Pe ↑ → SRAS ← → Y* restored, P ↑'
+      : 'Y < Y* → wages · Pe ↓ → SRAS → → Y* restored, P ↓';
   }
   function gap(off, pt) {
     const L = 5 + (off.LRAS || 0);
@@ -683,21 +685,21 @@
       { name: 'AD ' + (dir === 'r' ? '→' : '←'), step: 'Stage 1 · Short run', ch: { add: { AD: dir === 'r' ? R : -R } }, why },
       { name: 'SRAS adjusts → Y*', step: 'Stage 2 · Long run', ch: { abs: lrSRAS }, why: longRun }] });
     const AD = {
-      C: [adEv('Stock boom → wealth ↑', 'r', 'Stocks ↑ → wealth ↑ → consumption C ↑ → AD →'), adEv('Stock market crash', 'l', 'Stocks ↓ → wealth ↓ → consumption C ↓ → AD ←', 'SA 4a'), adEv('Income tax cut', 'r', 'Income tax ↓ → disposable income ↑ → C ↑ → AD →')],
+      C: [adEv('Stock boom', 'r', 'Stocks ↑ → wealth ↑ → C ↑ → AD →'), adEv('Stock market crash', 'l', 'Stocks ↓ → wealth ↓ → C ↓ → AD ←', 'SA 4a'), adEv('Income tax cut', 'r', 'Income tax ↓ → disposable income ↑ → C ↑ → AD →')],
       I: [adEv('Money supply up (M ↑ → r ↓)', 'r', 'M ↑ → r ↓ → I ↑ (exchange rate ↓ → NX ↑) → AD →'), adEv('Business optimism · investment boom', 'r', 'Expected profits ↑ → new plant & equipment I ↑ → AD →', 'SA 5'), adEv('Investment tax credit', 'r', 'Tax break on investment → I ↑ → AD →')],
       G: [adEv('Government purchases rise', 'r', 'Government purchases G ↑ → AD →', 'SA 4b')],
       NX: [adEv('Recession abroad', 'l', 'Foreign income ↓ → our exports ↓ → NX ↓ → AD ←', 'SA 4d'), adEv('Turmoil abroad → currency appreciates', 'l', 'Currency ↑ → exports ↓ · imports ↑ → NX ↓ → AD ←', 'MC 7')]
     };
     const srEv = (t, why, q) => ({ t, q, dir: 'l', stages: [
       { name: 'SRAS ←', step: 'Stage 1 · Short run', ch: { add: { SRAS: -R } }, why },
-      { name: 'Do nothing: SRAS returns', ch: { abs: { SRAS: 0 } }, letter: 'A', at: 2, why: 'Y < Y* : unemployment ↑ → wages · Pe ↓ → SRAS back to start → Y = Y*, P = P_1 (slow)' },
-      { name: 'Accommodate: AD →', from: 0, ch: { abs: lrAD }, chain: ['M ↑ · G ↑', 'AD →', 'Y = Y* at once, but P higher still (accommodating the supply shock)'], at: 1 }] });
+      { name: 'Do nothing: SRAS returns', ch: { abs: { SRAS: 0 } }, letter: 'A', at: 2, why: 'Y < Y* → wages · Pe ↓ → SRAS → → Y* and P restored (slow)' },
+      { name: 'Accommodate: AD →', from: 0, ch: { abs: lrAD }, chain: ['M ↑ · G ↑', 'AD →', 'Y* restored, P higher still'], at: 1 }] });
     const lrEv = (t, dir, why, q) => ({ t, q, dir, stages: [
       { name: 'LRAS · SRAS ' + (dir === 'r' ? '→' : '←'), step: 'Stage 1', ch: { add: { LRAS: dir === 'r' ? 1 : -1, SRAS: dir === 'r' ? 1 : -1 } }, why },
-      { name: 'SRAS adjusts → new Y*', step: 'Stage 2 · Long run', ch: { abs: lrSRAS }, chain: dir === 'r' ? ['P < Pe → Pe ↓', 'SRAS further →', 'Y = new Y*, P ↓'] : ['P > Pe → Pe ↑', 'SRAS further ←', 'Y = new Y*, P ↑'], at: 1 }] });
+      { name: 'SRAS adjusts → new Y*', step: 'Stage 2 · Long run', ch: { abs: lrSRAS }, chain: dir === 'r' ? ['P < Pe → Pe ↓', 'SRAS →', 'new Y*, P ↓'] : ['P > Pe → Pe ↑', 'SRAS ←', 'new Y*, P ↑'], at: 1 }] });
     const AS = {
-      SR: [srEv('Expected price level rises', 'Pe ↑ → nominal wages · prices set higher → SRAS ← (LRAS unchanged)', 'MC 11'), srEv('Oil price spike (input costs ↑)', 'Oil ↑ → production costs ↑ → SRAS ←'), srEv('Nominal wages rise', 'Nominal wages ↑ → costs ↑ → SRAS ←')],
-      LR: [lrEv('Technological progress', 'r', 'More output from the same labor · capital → Y* ↑ → LRAS · SRAS →', 'SA 4c'), lrEv('Capital · human capital rise', 'r', 'Capital K · human capital H ↑ → Y* ↑ → LRAS · SRAS →', 'SA 5c'), lrEv('Immigration → labor rises', 'r', 'Labor L ↑ → Y* ↑ → LRAS · SRAS →', 'SA 1'), lrEv('Natural disaster · resources fall', 'l', 'Resources N · capital ↓ → Y* ↓ → LRAS · SRAS ←', 'SA 1')]
+      SR: [srEv('Expected price level rises', 'Pe ↑ → wages · prices ↑ → SRAS ←', 'MC 11'), srEv('Oil price spike (input costs ↑)', 'Oil ↑ → production costs ↑ → SRAS ←'), srEv('Nominal wages rise', 'Nominal wages ↑ → costs ↑ → SRAS ←')],
+      LR: [lrEv('Technological progress', 'r', 'Technology ↑ → productivity ↑ → Y* ↑ → LRAS · SRAS →', 'SA 4c'), lrEv('Capital · human capital rise', 'r', 'Capital K · human capital H ↑ → Y* ↑ → LRAS · SRAS →', 'SA 5c'), lrEv('Immigration → labor rises', 'r', 'Labor L ↑ → Y* ↑ → LRAS · SRAS →', 'SA 1'), lrEv('Natural disaster · resources fall', 'l', 'Resources N · capital ↓ → Y* ↓ → LRAS · SRAS ←', 'SA 1')]
     };
     // 어느 목록에서 골라도 그 탭의 줄 표시를 모두 지우고 새 사건을 Start 상태 A 에서 시작한다(앞 사건의 LRAS Shift 등은 풀린다). 같은 줄을 다시 누르면 풀림
     $$('#side33ad [data-o]').forEach((h) => { const L = AD[h.getAttribute('data-o')]; list(h, L, (i) => rad.pick(i < 0 ? null : L[i]), $('#side33ad')); });
@@ -768,11 +770,11 @@
     function eqW(off) { const m = meet(plot.byId.S, off.S || 0, plot.byId.D, off.D || 0, plot.dom); return m ? m.y : 5; }
     const w = (t, q, dir, W, why) => ({ t, q, dir, stages: [{ name: t, at: 0, ch: { vis: { W: true }, abs: { W } }, why }] });
     const EV = [
-      w('Minimum wage (above equilibrium)', 'MC 14', 'r', 0, 'By law W > W_E → L_S ↑ · L_D ↓ → unemployment (teens · unskilled)'),
-      w('Labor union', 'MC 10', 'r', 0.5, 'Collective bargaining W > W_E → L_D ↓ in that sector → unemployment · move to non-union sector'),
-      w('Efficiency wages', 'MC 14', 'r', -0.4, 'Firms choose W > W_E → health · effort ↑ · turnover ↓ → still unemployment'),
+      w('Minimum wage (above equilibrium)', 'MC 14', 'r', 0, 'By law W > W_E → L_S ↑ · L_D ↓ → unemployment'),
+      w('Labor union', 'MC 10', 'r', 0.5, 'Collective bargaining W > W_E → L_D ↓ → unemployment'),
+      w('Efficiency wages', 'MC 14', 'r', -0.4, 'Firms choose W > W_E → effort ↑ · turnover ↓ → unemployment'),
       { t: 'Labor demand falls (imports ↑ → domestic industry declines)', q: 'SA 4', dir: 'l', stages: [
-        { name: 'Demand D ←, wage unchanged', step: 'Stage 1 · Short run', at: 2, ch: { add: { D: -1.4 }, vis: { W: true }, abs: { W: -2 } }, why: 'Imports ↑ → domestic industry declines → D ← → W stuck at W_E → L_S > L_D → unemployment' },
+        { name: 'Demand D ←, wage unchanged', step: 'Stage 1 · Short run', at: 2, ch: { add: { D: -1.4 }, vis: { W: true }, abs: { W: -2 } }, why: 'Imports ↑ → domestic industry declines → D ← → W stuck at W_E → unemployment' },
         { name: 'Wage ↓ → new equilibrium', step: 'Stage 2 · Long run', at: 0, ch: { vis: { W: false } }, why: 'W ↓ → L ↓, no unemployment (workers move to other industries)' }] }
     ];
     list($('#o28'), EV, (i) => r.pick(i < 0 ? null : EV[i]));
@@ -824,10 +826,9 @@
       const dLF = (m.E || 0) + (m.U || 0), dPop = dLF + (m.N || 0);
       const moved = Object.keys(m).map((k) => NM[k] + ' ' + (m[k] > 0 ? '↑' : '↓')).join(' · ');
       return [
-        { g: 'Start', k: 'Start', t: 'Before', run: () => { stopR(); rates({}, 0); }, wait: 0.8 },
-        { g: s.t, k: 'Shift', t: moved, run: () => { stopR(); rates(m, 1); }, wait: 1.1 },
-        { g: s.t, k: 'Unemployment rate', t: 'Numerator Unemployed ' + arrow(m.U || 0) + ' · denominator Labor force ' + arrow(dLF) + ' → unemployment rate ' + arrow(dirOf(ur(B), ur(v), 1e-9)), run: stage(m, [2, 3, 4], 'UR'), wait: 2.2 },
-        { g: s.t, k: 'Participation', t: 'Numerator Labor force ' + arrow(dLF) + ' · denominator Adult population ' + arrow(dPop) + ' → participation rate ' + arrow(dirOf(lf(B), lf(v), 1e-9)), run: stage(m, [5, 6, 7], 'LF'), wait: 2.2 }
+        { g: s.t, k: 'Situation', t: moved, run: () => { stopR(); rates(m, 1); }, wait: 1.1 },
+        { g: s.t, k: 'Unemployment rate', t: 'Unemployed ' + arrow(m.U || 0) + ' · Labor force ' + arrow(dLF) + ' → unemployment rate ' + arrow(dirOf(ur(B), ur(v), 1e-9)), run: stage(m, [2, 3, 4], 'UR'), wait: 2.2 },
+        { g: s.t, k: 'Participation', t: 'Labor force ' + arrow(dLF) + ' · Adult population ' + arrow(dPop) + ' → participation rate ' + arrow(dirOf(lf(B), lf(v), 1e-9)), run: stage(m, [5, 6, 7], 'LF'), wait: 2.2 }
       ];
     }
     list($('#o28s'), SIT, (i) => { if (i < 0) { pl2.clear(); stopR(); rates({}, 0); } else pl2.load(beats(SIT[i])); });
