@@ -1,7 +1,7 @@
 /* Econ2 핵심 그래프 페이지 — index.html 과 짝. 슬라이드 덱(/slides/econ2/graphs.js)과는 따로 쓴 작은 그래프 엔진 + 챕터별 사건.
    · 사건은 늘 처음 상태 A 에서 시작한다. 고른 줄을 한 번 더 누르면 풀리고 A 로 돌아간다.
    · 사건을 고르면 변화가 한 걸음씩(beat) 차례로 나온다: 원인 → 곡선 이동 → 새 균형점 → (2단계 장기 조정 …).
-     Player 가 걸음 목록 · 재생/멈춤 · 이전/다음/처음 · 빠르기(느리게 · 보통 · 빠르게)를 맡는다. 모든 챕터가 같은 Player 를 쓴다.
+     Player 가 단계 목차(번호 점) · 걸음 카드(◀ ▶ · 밀어 넘기기) · 재생/멈춤 · 처음 · 빠르기(느리게 · 보통 · 빠르게)를 맡는다. 모든 챕터가 같은 Player 를 쓴다.
    · 그래프 사건의 걸음은 stage.why 를 ' → ' 로 잘라 만든다. 곡선이 움직이는 걸음은 곡선 이름 + 화살표(AD → 등)로 찾고,
      못 찾으면 stage.at 으로 정한다. 각 단계 끝에는 "새 균형" 걸음을 붙인다. stage.from 을 주면 그 단계에서 갈라진다(2단계 ⓐ / ⓑ).
    · 교재의 기본 곡선만 쓴다: AD · SRAS 직선, LRAS · MS 수직선, MD 는 1/P = k / M(직각쌍곡선), 노동 수요 · 공급 직선.
@@ -251,22 +251,25 @@
     return self;
   }
 
-  /* ───────── 재생기: 걸음 목록 · 재생/멈춤 · 이전/다음/처음 · 빠르기 ───────── */
+  /* ───────── 재생기: 목차(단계 이름 + 번호 점) · 걸음 카드(◀ ▶ · 밀어 넘기기) · 재생/멈춤 · 처음 · 빠르기 ───────── */
   // beat = { g: 묶음 이름(1단계 단기 …), alts: [{ t, on, pick }](갈라지는 단계일 때), t: 글자, run(anim), wait: 머무는 시간 배율 }
   const SPEEDS = [['느리게', 0.5], ['보통', 1], ['빠르게', 2]];
   let SPEED = 1;
   const players = [];
   function Player(host) {
     host.innerHTML =
-      '<div class="pctl"><button type="button" data-a="first">처음</button><button type="button" data-a="prev">◀ 이전</button>' +
-      '<button type="button" data-a="play" class="pp"></button><button type="button" data-a="next">다음 ▶</button>' +
+      '<div class="pctl"><button type="button" data-a="first">처음</button><button type="button" data-a="play" class="pp"></button>' +
       '<span class="spd">빠르기 ' + SPEEDS.map((s) => '<button type="button" data-s="' + s[1] + '">' + s[0] + '</button>').join('') + '</span><span class="cnt"></span></div>' +
-      '<ol class="beats"></ol><div class="pstat"></div>';
-    const ol = $('.beats', host), pp = $('.pp', host), cnt = $('.cnt', host), stat = $('.pstat', host);
-    let beats = [], i = -1, playing = false, timer = 0;
+      '<ol class="toc" aria-label="단계 목차"></ol>' +
+      '<div class="card"><button type="button" class="cv" data-a="prev" aria-label="이전 걸음">‹</button>' +
+      '<div class="cbody" aria-live="polite"><div class="cg"></div><div class="ct"></div></div>' +
+      '<button type="button" class="cv" data-a="next" aria-label="다음 걸음">›</button></div><div class="pstat"></div>';
+    const toc = $('.toc', host), card = $('.card', host), body = $('.cbody', host), pp = $('.pp', host), cnt = $('.cnt', host), stat = $('.pstat', host);
+    let beats = [], pos = [], i = -1, playing = false, timer = 0;
     const self = { onGo: null };
     function draw() {
-      $$('li[data-i]', ol).forEach((li) => { const k = +li.getAttribute('data-i'); li.className = k === i ? 'cur' : k < i ? 'done' : 'todo'; });
+      $$('.dot', toc).forEach((d) => { const k = +d.getAttribute('data-i'); d.className = 'dot' + (k === i ? ' cur' : k < i ? ' done' : ''); });
+      $$('li', toc).forEach((li, gi) => li.classList.toggle('cur', !!pos[i] && pos[i].gi === gi));
       const end = i >= beats.length - 1;
       pp.textContent = playing ? '❚❚ 멈춤' : end ? '↻ 다시 보기' : '▶ 재생';
       pp.classList.toggle('on', playing);
@@ -281,49 +284,75 @@
       timer = setTimeout(() => go(i + 1, true), 1500 * (beats[i].wait || 1) / SPEED);
     }
     function go(k, anim) {
+      const was = i;
       i = Math.max(0, Math.min(beats.length - 1, k));
       beats[i].run(anim !== false);
+      const p = pos[i];
+      $('.cg', body).textContent = p.n > 1 ? p.g + ' · ' + (p.si + 1) + ' / ' + p.n : p.g;
+      $('.ct', body).innerHTML = arrows(beats[i].t);
+      body.classList.remove('in-r', 'in-l');
+      if (anim !== false && was !== i && !reduce) { void body.offsetWidth; body.classList.add(i > was ? 'in-r' : 'in-l'); }   // 넘기는 방향으로 카드가 들어온다
       draw(); schedule();
-      const li = $('li[data-i="' + i + '"]', ol);
-      if (li && (li.offsetTop < ol.scrollTop || li.offsetTop + li.offsetHeight > ol.scrollTop + ol.clientHeight)) ol.scrollTop = li.offsetTop - 40;   // 목록 안에서만 굴린다(scrollIntoView 는 페이지까지 굴림)
       if (self.onGo) self.onGo(i);
     }
+    // 목차: 단계(묶음)마다 한 줄 — 이름(누르면 그 단계 첫 걸음) + 걸음 번호 점(누르면 그 걸음, 지금 파랑 · 지난 것 진하게)
     function build() {
-      ol.innerHTML = '';
-      let g = null;
+      toc.innerHTML = ''; pos = [];
+      const groups = [];
       beats.forEach((b, k) => {
-        if (b.g !== g) {
-          g = b.g;
-          const h = document.createElement('li');
-          h.className = 'grp';
-          if (b.alts) {
-            h.innerHTML = esc(b.g) + ' ';
-            b.alts.forEach((a) => { const x = document.createElement('button'); x.type = 'button'; x.className = a.on ? 'alt on' : 'alt'; x.textContent = a.t; x.addEventListener('click', a.pick); h.appendChild(x); });
-          } else h.textContent = b.g;
-          ol.appendChild(h);
-        }
-        const li = document.createElement('li'), btn = document.createElement('button');
-        li.setAttribute('data-i', k);
-        btn.type = 'button'; btn.innerHTML = arrows(b.t);
-        btn.addEventListener('click', () => { playing = false; go(k, true); });
-        li.appendChild(btn); ol.appendChild(li);
+        if (!groups.length || groups[groups.length - 1].g !== b.g) groups.push({ g: b.g, alts: b.alts, ks: [] });
+        const G = groups[groups.length - 1];
+        pos[k] = { gi: groups.length - 1, si: G.ks.length, g: b.g };
+        G.ks.push(k);
+      });
+      pos.forEach((p) => { p.n = groups[p.gi].ks.length; });
+      groups.forEach((G) => {
+        const li = document.createElement('li'), nm = document.createElement('button');
+        nm.type = 'button'; nm.className = 'gn'; nm.textContent = G.g;
+        nm.addEventListener('click', () => { playing = false; go(G.ks[0], true); });
+        li.appendChild(nm);
+        if (G.alts) G.alts.forEach((a) => { const x = document.createElement('button'); x.type = 'button'; x.className = a.on ? 'alt on' : 'alt'; x.textContent = a.t; x.addEventListener('click', a.pick); li.appendChild(x); });
+        const dots = document.createElement('span');
+        dots.className = 'dots';
+        G.ks.forEach((k, j) => {
+          const d = document.createElement('button');
+          d.type = 'button'; d.className = 'dot'; d.setAttribute('data-i', k); d.textContent = j + 1;
+          d.title = beats[k].t; d.setAttribute('aria-label', G.g + ' ' + (j + 1) + '번째 걸음: ' + beats[k].t);
+          d.addEventListener('click', () => { playing = false; go(k, true); });
+          dots.appendChild(d);
+        });
+        li.appendChild(dots); toc.appendChild(li);
       });
     }
     self.load = (list, o) => {
       o = o || {};
       clearTimeout(timer);
-      beats = list; host.hidden = !list.length;
+      beats = list; host.hidden = !list.length; i = -1;
       build();
       playing = o.play !== false && !reduce;
-      if (list.length) go(o.at || 0, o.anim !== false); else { i = -1; draw(); }
+      if (list.length) go(o.at || 0, o.anim !== false); else draw();
     };
-    self.clear = () => { clearTimeout(timer); playing = false; beats = []; i = -1; host.hidden = true; ol.innerHTML = ''; stat.innerHTML = ''; };
+    self.clear = () => { clearTimeout(timer); playing = false; beats = []; pos = []; i = -1; host.hidden = true; toc.innerHTML = ''; stat.innerHTML = ''; };
     self.status = (html) => { stat.innerHTML = html || ''; };
     self.index = () => i;
     self.redrawSpeed = () => { draw(); if (playing) schedule(); };
+    const step = (dk) => { playing = false; go(i + dk, true); };
     $('[data-a="first"]', host).addEventListener('click', () => { playing = false; go(0, true); });
-    $('[data-a="prev"]', host).addEventListener('click', () => { playing = false; go(i - 1, true); });
-    $('[data-a="next"]', host).addEventListener('click', () => { playing = false; go(i + 1, true); });
+    $('[data-a="prev"]', host).addEventListener('click', () => step(-1));
+    $('[data-a="next"]', host).addEventListener('click', () => step(1));
+    // 휴대폰: 카드를 옆으로 밀어 넘긴다. 키보드: 재생기 안에서 ← →
+    let tx = null, ty = 0;
+    card.addEventListener('touchstart', (e) => { tx = e.touches[0].clientX; ty = e.touches[0].clientY; }, { passive: true });
+    card.addEventListener('touchend', (e) => {
+      if (tx == null || !beats.length) return;
+      const dx = e.changedTouches[0].clientX - tx, dy = e.changedTouches[0].clientY - ty;
+      tx = null;
+      if (Math.abs(dx) > 40 && Math.abs(dx) > Math.abs(dy) * 1.5) step(dx < 0 ? 1 : -1);
+    });
+    host.addEventListener('keydown', (e) => {
+      if (!beats.length || (e.key !== 'ArrowLeft' && e.key !== 'ArrowRight')) return;
+      e.preventDefault(); step(e.key === 'ArrowRight' ? 1 : -1);
+    });
     pp.addEventListener('click', () => {
       if (playing) { playing = false; clearTimeout(timer); draw(); return; }
       playing = true;
