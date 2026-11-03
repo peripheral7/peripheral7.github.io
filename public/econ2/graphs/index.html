@@ -15,7 +15,7 @@
 -->
 <style>
   @font-face{font-family:"Pretendard Variable";font-weight:45 920;font-style:normal;font-display:swap;src:local("Pretendard Variable"),url("/fonts/PretendardVariable.woff2") format("woff2-variations")}
-  :root{--ink:#1f2537;--blue:#1f6fd1;--red:#c8352e;--soft:#5b6170;--line:#d8dbe0;--tint:#f3f6fb;--max:1180px;--up:#d6322b;--down:#1f6fd1}
+  :root{--ink:#1f2537;--blue:#1f6fd1;--red:#c8352e;--soft:#5b6170;--line:#d8dbe0;--tint:#f3f6fb;--max:1240px;--up:#d6322b;--down:#1f6fd1}
   /* 방향: 상승 ▲ 빨강 · 하락 ▼ 파랑 · 그대로 회색 (한국 주식 표기) */
   .up{color:var(--up)} .dn{color:var(--down)} .same{color:var(--soft)}
   *{box-sizing:border-box}
@@ -61,12 +61,12 @@
      지금 마디는 파란 점 · 파란 제목, 지난 마디는 검정, 남은 마디는 흐리게. 휴대폰은 세로(선이 왼쪽, 마디가 아래로). 사건을 고르기 전엔 안내 한 줄만 */
   .steps{display:flex;flex-direction:column;gap:14px;margin:4px 0 0;padding:0;list-style:none}
   .steps li.hint{padding:12px 0;font-size:14.5px;color:var(--soft)}
-  .stg{display:grid;grid-template-columns:76px minmax(0,1fr);gap:0 12px;align-items:start}
+  .stg{display:grid;grid-template-columns:84px minmax(0,1fr);gap:0 12px;align-items:start}
   .stg.alts .gh{flex-direction:column;align-items:flex-start;gap:6px}
   .stg.alts .gh>span{margin-bottom:2px}
   .solo .stg{grid-template-columns:minmax(0,1fr)}   /* 단계가 하나면 이름 칸 없이 전체 폭 */
   .solo .gh{display:none}
-  .gh{display:flex;flex-wrap:wrap;align-items:center;gap:4px 8px;padding-top:36px;font-size:17px;font-weight:800;line-height:1.3;color:var(--soft)}
+  .gh{display:flex;flex-wrap:wrap;align-items:center;gap:4px 8px;padding-top:38px;font-size:19px;font-weight:800;line-height:1.3;color:var(--soft)}
   .stg.cur .gh{color:var(--ink)}
   /* 갈래 고르기(그대로 · 정책): 글자 버튼. 고른 것은 ▸ 와 파랑 굵은 글자, 나머지는 흐리게 */
   .alt{padding:0 0 0 14px;border:0;background:none;position:relative;font-size:15px;font-weight:600;color:#9aa0aa;cursor:pointer;text-align:left}
@@ -79,10 +79,10 @@
   .rows li{flex:1 1 0;min-width:0}
   .rows li button{position:relative;display:block;width:100%;padding:0 22px 0 0;border:0;background:none;text-align:left;cursor:pointer;color:#9aa0aa;overflow-wrap:anywhere}
   .rows .dot{display:block;width:24px;height:24px;border:3px solid var(--ink);border-radius:50%;background:#fff;box-sizing:border-box;margin-bottom:12px}
-  .rows .k{display:block;font-size:18px;font-weight:800;line-height:1.3}
-  .rows .tx{display:block;margin-top:3px;font-size:17px;font-weight:600;line-height:1.45}
+  .rows .k{display:block;font-size:20px;font-weight:800;line-height:1.3}
+  .rows .tx{display:block;margin-top:4px;font-size:19px;font-weight:600;line-height:1.45}
   .rows .u{display:inline-block;max-width:100%}
-  .rows .sm{display:block;margin-top:3px;font-size:14px;font-weight:600;color:var(--soft);line-height:1.4}
+  .rows .sm{display:block;margin-top:4px;font-size:15.5px;font-weight:600;color:var(--soft);line-height:1.4}
   .rows li.todo .sm{color:inherit}
   .rows .tx:empty{display:none}
   .rows .tx sub{font-size:.7em}
@@ -91,7 +91,7 @@
   .rows li.done button{color:var(--ink)}
   .rows li.cur button{color:var(--ink)}
   .rows li.cur .dot{background:var(--blue);border-color:var(--blue)}
-  .rows li.cur .k{color:var(--blue);font-size:19px}
+  .rows li.cur .k{color:var(--blue);font-size:21px}
   .pbar{display:flex;flex-wrap:wrap;align-items:center;justify-content:center;gap:8px 12px;margin:10px 0 0}
   .pbar .cnt{font-size:14px;font-weight:800;color:var(--ink);font-variant-numeric:tabular-nums;min-width:40px}
   .seg{display:inline-flex;border:1.5px solid var(--ink);border-radius:8px;overflow:hidden}
@@ -106,23 +106,23 @@
   .player.idle .pbar{display:none}
 
   .side{min-width:0}
-  .side h2{margin:0 0 6px;font-size:20px;line-height:1.25}
-  .side h2 small{display:block;font-size:13px;font-weight:600;color:var(--soft);letter-spacing:.02em}
-  .eq{margin:0 0 12px;padding:8px 12px;border-radius:10px;background:var(--tint);font-size:14.5px;line-height:1.55}
-  .eq .f{display:block;font-size:17px;font-weight:800;letter-spacing:.01em;margin:0 0 2px}
+  .side h2{margin:0 0 8px;font-size:23px;line-height:1.25}
+  .side h2 small{display:block;font-size:14px;font-weight:600;color:var(--soft);letter-spacing:.02em}
+  .eq{margin:0 0 14px;padding:10px 14px;border-radius:10px;background:var(--tint);font-size:15.5px;line-height:1.6}
+  .eq .f{display:block;font-size:19px;font-weight:800;letter-spacing:.01em;margin:0 0 2px}
   .eq .f + .f{margin-top:4px}
   .eq small{display:block;color:var(--soft);font-size:13.5px;line-height:1.5}
 
   /* 고를 것(사건 목록): 블로그 목차처럼 — 왼쪽 세로선 아래 작은 제목과 글줄. 고른 줄은 세로선 · 글자가 파랑, 다시 누르면 풀림 */
   .opts{margin:0 0 10px}
-  .opts h3{margin:0 0 2px;font-size:12.5px;font-weight:800;letter-spacing:.06em;color:var(--soft)}
+  .opts h3{margin:0 0 3px;font-size:13.5px;font-weight:800;letter-spacing:.06em;color:var(--soft)}
   .opts h3 small{font-weight:600;letter-spacing:0}
   .opts ul{margin:0;padding:0;list-style:none}
   .opts li{border-left:2px solid var(--line)}
-  .opts li button{display:block;width:100%;margin-left:-2px;padding:3px 8px 3px 14px;border:0;border-left:2px solid transparent;background:none;text-align:left;font-size:15.5px;line-height:1.4;color:var(--ink);cursor:pointer}
+  .opts li button{display:block;width:100%;margin-left:-2px;padding:3px 8px 3px 14px;border:0;border-left:2px solid transparent;background:none;text-align:left;font-size:17px;line-height:1.45;color:var(--ink);cursor:pointer}
   .opts li button:hover{color:var(--blue)}
   .opts li button[aria-pressed="true"]{border-left-color:var(--blue);color:var(--blue);font-weight:800}
-  .opts li button .q{margin-left:6px;font-size:12px;font-weight:600;color:var(--soft)}
+  .opts li button .q{margin-left:6px;font-size:13px;font-weight:600;color:var(--soft)}
   .opts li button .dir{margin-left:5px;font-weight:800;color:var(--up)}
   .opts li button .dir.l{color:var(--down)}
 
@@ -136,26 +136,27 @@
   .flow .ar{text-align:center;font-size:13.5px;font-weight:700;color:var(--soft);line-height:1.2;padding:2px 4px;transition:background .3s}
   .flow .ar::after{content:"→";display:block;font-size:24px;color:var(--ink)}
   /* 위 수식: 지급준비금 × 통화승수 = 통화량 — 영문(작게, 위) · 한글 항 · 숫자(작게, 아래). T계정과 같은 폭 */
-  .eqrow{display:grid;grid-template-columns:1fr auto 1fr auto 1fr;align-items:start;gap:8px;width:100%;max-width:600px;margin:0 0 4px}
-  .eqrow .kop{padding-top:22px}
+  .eqrow{display:grid;grid-template-columns:1fr auto 1fr auto 1fr;align-items:start;gap:10px;width:100%;max-width:680px;margin:0 0 4px}
+  .eqrow.two{grid-template-columns:1fr 1fr;max-width:560px}
+  .eqrow .kop{padding-top:24px;font-size:28px}
   .term{text-align:center;padding:6px 4px 8px;border-radius:10px;transition:background .35s}
-  .term i{display:block;font-style:normal;font-size:12px;font-weight:700;letter-spacing:.03em;color:var(--soft)}
+  .term i{display:block;font-style:normal;font-size:13px;font-weight:700;letter-spacing:.03em;color:var(--soft)}
   .term i:empty{display:none}
-  .term span{display:block;font-size:20px;font-weight:800;line-height:1.3}
-  .term b{display:block;min-height:18px;margin-top:3px;font-size:14px;font-weight:700;color:var(--soft);white-space:nowrap}
+  .term span{display:block;font-size:26px;font-weight:800;line-height:1.3}
+  .term b{display:block;min-height:20px;margin-top:4px;font-size:16px;font-weight:700;color:var(--soft);white-space:nowrap}
   .term b.up{color:var(--up)}
   .term b.dn{color:var(--down)}
   .term.pulse{background:var(--tint)}
-  .tacct{width:100%;max-width:600px}
-  .tacct h3{margin:0 0 6px;font-size:16px;text-align:center}
-  .tt{display:grid;grid-template-columns:1fr 1fr;border-top:3px solid var(--ink);font-size:19px;line-height:1.6}
-  .tt>div{padding:6px 14px 4px}
+  .tacct{width:100%;max-width:680px}
+  .tacct h3{margin:0 0 8px;font-size:19px;text-align:center}
+  .tt{display:grid;grid-template-columns:1fr 1fr;border-top:3px solid var(--ink);font-size:25px;line-height:1.6}
+  .tt>div{padding:10px 18px 6px}
   .tt>div:first-child{border-right:3px solid var(--ink)}
-  .tt .h{display:block;font-size:12.5px;font-weight:800;letter-spacing:.08em;color:var(--soft)}
+  .tt .h{display:block;font-size:14px;font-weight:800;letter-spacing:.08em;color:var(--soft)}
   .tt .r{display:flex;align-items:baseline;gap:8px;padding:0 4px;transition:background .3s}
   .tt .r b{margin-left:auto;font-weight:800}
-  .tt .r i{font-style:normal;font-size:13px;font-weight:800;min-width:52px;text-align:right}
-  .tnote{margin:8px 0 0;font-size:14.5px;color:var(--soft);text-align:center}
+  .tt .r i{font-style:normal;font-size:15px;font-weight:800;min-width:66px;text-align:right}
+  .tnote{margin:10px 0 0;font-size:16px;color:var(--soft);text-align:center}
   .tnote b{color:var(--ink)}
   .bankfig .hi{background:#dbe8fb}
   .flow .bx.hi{border-color:var(--blue)}
@@ -181,7 +182,9 @@
   .kd{min-height:18px;margin-top:2px;font-size:12.5px;color:var(--soft)}
 
   /* Ch28 실업률 탭: 숫자 대신 단어 + 방향. 걸음마다 옮긴 무리 → 분자 → 분모 → 결과 순서로 옅은 파랑 강조 */
-  .rates{display:flex;flex-direction:column;gap:18px;padding:6px 0 0}
+  .rates{display:flex;flex-direction:column;gap:20px;padding:6px 0 0;max-width:620px}
+  #pl28s .pbar{display:none}   /* 실업률 탭: 걸음이 셋뿐이라 조작 바 없이 마디를 눌러 넘긴다 */
+  .ratefig .eqrow{margin-top:22px}
   .who{display:flex;flex-wrap:wrap;align-items:center;gap:6px 8px;padding:8px 10px;border-radius:8px;font-size:15px;transition:background .3s}
   .who .lb{font-size:13px;font-weight:800;color:var(--soft);margin-right:2px}
   .grp{padding:3px 10px;border:1.5px solid var(--line);border-radius:999px;background:#fff;font-weight:700}
@@ -195,6 +198,7 @@
   .frac .sum{display:inline-block;margin-left:6px;font-size:13.5px;font-weight:800;white-space:nowrap}
   .rate .res{justify-self:start;padding:2px 8px;border-radius:6px;font-size:19px;font-weight:800;transition:background .3s}
   .rate .res .q{color:#b3b8c2}
+  .rate .res{white-space:nowrap}
   .rates .hi{background:#dbe8fb}
   .t{font-weight:700}
   .t b{margin-left:2px}
@@ -243,24 +247,24 @@
     .fig .stage{max-height:none}
   }
 
-  /* 데스크톱(901px 이상): 한 화면에 다 들어가게 — 머리줄 아래를 창 높이로 잡고 그래프가 남는 높이를 채운다. 가로도 전체 폭.
-     오른쪽 설명 · 사건 목록이 길면 그 칸만 안에서 스크롤. 시간선 · 조작 줄은 아래에 고정 높이 */
+  /* 데스크톱(901px 이상): 가운데 최대 폭 1240px, 위아래 여백. 그래프는 사건과 상관없이 화면 높이의 절반으로 고정.
+     오른쪽 설명 · 사건 목록은 그래프 높이 안에서, 길면 그 칸만 스크롤 */
   @media (min-width:901px){
-    html,body{height:100%}
-    body{display:flex;flex-direction:column}
-    .top .in{max-width:none;padding:0 20px}
-    main{flex:1;min-height:0;display:flex;flex-direction:column;max-width:none;width:100%;padding:10px 20px 12px}
-    .ch.on{flex:1;min-height:0;grid-template-rows:minmax(0,1fr) auto}
-    .ch.tabbed.on{grid-template-rows:auto minmax(0,1fr) auto}
-    .ch.tabbed .side{grid-row:1 / 3}
-    .fig{display:flex;flex-direction:column;min-height:0;height:100%}
-    .fig .stage{flex:1;min-height:0;max-height:none;aspect-ratio:auto}
-    .bankfig{flex:1;justify-content:center}
-    .side{min-height:0;height:100%;overflow:auto;padding-right:4px}
-    .player{padding-top:4px}
+    main{padding:18px 24px 28px}
+    .fig .stage{height:44vh;max-height:none;aspect-ratio:auto}
+    .bankfig{padding-top:2px}
+    .ratefig{padding-top:6px}
+    .side{max-height:calc(44vh + 60px);overflow:auto;padding-right:6px}
+    .ch.tabbed .side{grid-row:1 / 3;max-height:calc(44vh + 120px)}
+    .player{padding-top:18px}
   }
-  /* 낮은 화면(노트북)에서는 시간선을 한 단계 작게 해 그래프에 높이를 더 준다 */
+  /* 낮은 화면(노트북): 그래프 · 여백 · 시간선을 한 단계 작게 해 한 화면에 */
   @media (min-width:901px) and (max-height:820px){
+    main{padding:10px 24px 14px}
+    .fig .stage{height:40vh}
+    .side{max-height:calc(40vh + 60px)}
+    .ch.tabbed .side{max-height:calc(40vh + 110px)}
+    .player{padding-top:8px}
     .steps{gap:8px}
     .gh{padding-top:28px;font-size:15px}
     .rows .dot{width:20px;height:20px;border-width:2.5px;margin-bottom:8px}
@@ -272,6 +276,12 @@
     .pbar{margin-top:4px}
     .pbar button,.seg button{padding:5px 12px;font-size:13px}
     .sub button{padding:6px 14px;font-size:15px}
+  }
+  @media (min-width:901px) and (max-height:720px){
+    .fig .stage{height:36vh}
+    .side{max-height:calc(36vh + 60px)}
+    .ch.tabbed .side{max-height:calc(36vh + 110px)}
+    .gh{padding-top:24px}
   }
   @media (max-width:900px){
     .fig .stage{max-height:none;aspect-ratio:640/520}
@@ -375,8 +385,8 @@
     </div>
     <div class="panel" id="p28u" hidden>
       <div class="fig">
-        <div class="rates" id="rates"></div>
-        <div class="keys k2" id="k28s"></div>
+        <div class="ratefig"><div class="rates" id="rates"></div>
+        <div class="eqrow two" id="k28s"><div class="term" data-k="UR"><i>Unemployment rate</i><span>실업률</span><b></b></div><div class="term" data-k="LF"><i>Labor-force participation rate</i><span>경제활동참가율</span><b></b></div></div></div>
       </div>
       <div class="side">
         <h2><small>Ch28 Unemployment · 실업 지표</small>실업률 · 경제활동참가율</h2>

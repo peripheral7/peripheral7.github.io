@@ -771,10 +771,13 @@
       { t: 'Starts looking for a first job (Not in labor force → Unemployed)', m: { N: -1, U: 1 } }
     ];
     const pl2 = Player($('#pl28s'), 'Pick a case from the list: all steps appear here, then numerator, denominator and result change in turn.');
-    const rk = Keys($('#k28s'), [
-      { k: 'UR', t: 'Unemployment rate', s: 'Unemployed ÷ Labor force', w: ['up', 'down'] },
-      { k: 'LF', t: 'Participation rate', s: 'Labor force ÷ Adult population', w: ['up', 'down'] }
-    ]);
+    // Result 항(Ch29 처럼 글자): 영문 · 한글 · 방향. set({UR: {d} 또는 {txt}}), seq([k]) 로 잠깐 강조
+    let rkt = [];
+    const rk = {
+      set(v) { ['UR', 'LF'].forEach((k) => { const e = $('#k28s [data-k="' + k + '"] b'), x = v[k] || {}; if (x.d == null) { e.className = ''; e.textContent = x.txt || ''; return; } e.className = x.d > 0 ? 'up' : x.d < 0 ? 'dn' : ''; e.textContent = x.d > 0 ? '▲ up' : x.d < 0 ? '▼ down' : 'unchanged'; }); },
+      seq(ks) { rk.stop(); ks.forEach((k) => { const e = $('#k28s [data-k="' + k + '"]'); e.classList.add('pulse'); rkt.push(setTimeout(() => e.classList.remove('pulse'), 1000)); }); },
+      stop() { rkt.forEach(clearTimeout); rkt = []; $$('#k28s .term').forEach((e) => e.classList.remove('pulse')); }
+    };
     const tri = (d) => (d > 0 ? '<b class="up">▲</b>' : d < 0 ? '<b class="dn">▼</b>' : '');
     const wordOf = (d, w) => { w = w || ['up', 'down']; return d > 0 ? '<span class="t up">▲ ' + w[0] + '</span>' : d < 0 ? '<span class="t dn">▼ ' + w[1] + '</span>' : '<span class="t same">unchanged</span>'; };
     const ur = (x) => x.U / (x.E + x.U), lf = (x) => (x.E + x.U) / (x.E + x.U + x.N);
@@ -786,7 +789,7 @@
       rk.set({ UR: lv >= 4 ? { d: dUR } : { txt: '· · ·' }, LF: lv >= 7 ? { d: dLFr } : { txt: '· · ·' } });
       const hi = (n) => (lv === n ? ' hi' : '');
       const chip = (k) => '<span class="grp">' + NM[k] + tri(d(k)) + '</span>';
-      const part = (ks, dd, sum, on) => ks.map((k) => NM[k]).join(' + ') + (sum ? '<span class="sum">= ' + sum + '</span>' : '') + (on ? ' ' + wordOf(dd) : '');
+      const part = (ks, dd, sum, on) => ks.map((k) => NM[k] + (ks.length > 1 ? tri(d(k)) : '')).join(' + ') + (sum ? '<span class="sum">= ' + sum + '</span>' : '') + (on ? ' ' + wordOf(dd) : '');   // 여러 항이면 바뀐 무리마다 ▲▼
       const res = (dd, on) => (on ? wordOf(dd, ['up', 'down']) : '<span class="q">?</span>');
       $('#rates').innerHTML =
         '<div class="who' + hi(1) + '"><span class="lb">Population</span>' + chip('E') + chip('U') + chip('N') + '</div>' +
@@ -860,5 +863,6 @@
     show(m ? m[1] : 'ch29', m && m[2]);
   }
   window.addEventListener('hashchange', fromHash);
+  $$('.links a').forEach((a) => { if (/\/econ2\/graphs\//.test(a.getAttribute('href'))) a.addEventListener('click', () => { a.href = a.getAttribute('href').split('#')[0] + location.hash; }); });
   fromHash();
 })();

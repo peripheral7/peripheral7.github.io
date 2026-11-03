@@ -771,10 +771,13 @@
       { t: '처음으로 구직 시작 (비경제활동인구 → 실업자)', m: { N: -1, U: 1 } }
     ];
     const pl2 = Player($('#pl28s'), '목록에서 상황을 고르면 전체 단계가 여기 나오고, 분자 · 분모 · 결과가 차례로 바뀝니다.');
-    const rk = Keys($('#k28s'), [
-      { k: 'UR', t: '실업률', s: '실업자 ÷ 경제활동인구', w: ['상승', '하락'] },
-      { k: 'LF', t: '경제활동참가율', s: '경제활동인구 ÷ 성인 인구', w: ['상승', '하락'] }
-    ]);
+    // 결과 항(Ch29 처럼 글자): 영문 · 한글 · 방향. set({UR: {d} 또는 {txt}}), seq([k]) 로 잠깐 강조
+    let rkt = [];
+    const rk = {
+      set(v) { ['UR', 'LF'].forEach((k) => { const e = $('#k28s [data-k="' + k + '"] b'), x = v[k] || {}; if (x.d == null) { e.className = ''; e.textContent = x.txt || ''; return; } e.className = x.d > 0 ? 'up' : x.d < 0 ? 'dn' : ''; e.textContent = x.d > 0 ? '▲ 상승' : x.d < 0 ? '▼ 하락' : '그대로'; }); },
+      seq(ks) { rk.stop(); ks.forEach((k) => { const e = $('#k28s [data-k="' + k + '"]'); e.classList.add('pulse'); rkt.push(setTimeout(() => e.classList.remove('pulse'), 1000)); }); },
+      stop() { rkt.forEach(clearTimeout); rkt = []; $$('#k28s .term').forEach((e) => e.classList.remove('pulse')); }
+    };
     const tri = (d) => (d > 0 ? '<b class="up">▲</b>' : d < 0 ? '<b class="dn">▼</b>' : '');
     const wordOf = (d, w) => { w = w || ['증가', '감소']; return d > 0 ? '<span class="t up">▲ ' + w[0] + '</span>' : d < 0 ? '<span class="t dn">▼ ' + w[1] + '</span>' : '<span class="t same">그대로</span>'; };
     const ur = (x) => x.U / (x.E + x.U), lf = (x) => (x.E + x.U) / (x.E + x.U + x.N);
@@ -786,7 +789,7 @@
       rk.set({ UR: lv >= 4 ? { d: dUR } : { txt: '· · ·' }, LF: lv >= 7 ? { d: dLFr } : { txt: '· · ·' } });
       const hi = (n) => (lv === n ? ' hi' : '');
       const chip = (k) => '<span class="grp">' + NM[k] + tri(d(k)) + '</span>';
-      const part = (ks, dd, sum, on) => ks.map((k) => NM[k]).join(' + ') + (sum ? '<span class="sum">= ' + sum + '</span>' : '') + (on ? ' ' + wordOf(dd) : '');
+      const part = (ks, dd, sum, on) => ks.map((k) => NM[k] + (ks.length > 1 ? tri(d(k)) : '')).join(' + ') + (sum ? '<span class="sum">= ' + sum + '</span>' : '') + (on ? ' ' + wordOf(dd) : '');   // 여러 항이면 바뀐 무리마다 ▲▼
       const res = (dd, on) => (on ? wordOf(dd, ['상승', '하락']) : '<span class="q">?</span>');
       $('#rates').innerHTML =
         '<div class="who' + hi(1) + '"><span class="lb">인구</span>' + chip('E') + chip('U') + chip('N') + '</div>' +
@@ -860,5 +863,6 @@
     show(m ? m[1] : 'ch29', m && m[2]);
   }
   window.addEventListener('hashchange', fromHash);
+  $$('.links a').forEach((a) => { if (/\/econ2\/graphs\//.test(a.getAttribute('href'))) a.addEventListener('click', () => { a.href = a.getAttribute('href').split('#')[0] + location.hash; }); });
   fromHash();
 })();
