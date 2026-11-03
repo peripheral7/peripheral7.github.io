@@ -12,6 +12,7 @@
   Econ2 Exam2 TA Session 덱 — 원본 PDF(/econ2/econ2-exam2-ta-session.pdf) 33장을 장마다 그림(p01~p33.jpg, 1920×1080)으로 넣었다.
   그래프가 있는 장(11 15 17 18 19 22 23 24 25 26 29)은 <div class="g" data-g="p번호"> 가 원본 그래프 자리를 움직이는 그래프로 덮는다(graphs.js).
     자리(left/top/width/height)는 무대 px = PDF pt × 5/3. 빈 <i class="step"> 개수 = 그 장에서 → 로 넘기는 그래프 단계 수(graphs.js 의 states 와 맞춘다).
+  2쪽 뒤의 「Ch29 Money Creation」 장은 PDF 에 없는 HTML 장(money.js) — 그래서 덱 번호는 3쪽부터 PDF 쪽 번호 + 1.
   PDF 가 바뀌면: 그림을 다시 뽑고(PyMuPDF 로 2배, JPG 82) 그래프 자리·단계를 새 장 번호에 맞춘다.
 -->
 <style>
@@ -26,6 +27,43 @@
   .gtools button:hover{background:#1f2537;color:#fff}
   .g.orig .gtools button:last-child{background:#1f2537;color:#fff}
   #overview .gtools{display:none}
+  /* Ch29 통화 창출 장(money.js): 그림이 아니라 HTML 로 그린 장. 흑/백 설정과 상관없이 원본 장들처럼 흰 바탕 */
+  .slide.mc{padding:52px 96px 40px;background:#fff;color:#1f2537;--blue:#1f6fd1;--soft:#5b6170;--line:#c9cdd4}
+  .mc .mc-head{margin:0 0 26px;font-size:27px;line-height:1.2;display:flex;gap:22px;align-items:baseline}
+  .mc .mc-head span{color:var(--soft)}
+  .mc .mc-head .mc-ko{color:var(--blue);font-weight:600;font-size:24px}
+  .mc-body{display:grid;grid-template-columns:600px 1fr;gap:64px;align-items:start}
+  .mc-t{border:0;padding:0}
+  .mc .mc-bank{font-size:22px;font-weight:700;margin:0 0 6px}
+  .mc-tt{display:grid;grid-template-columns:1fr 1fr;font-size:24px;line-height:1.45;border-top:2.5px solid currentColor}
+  .mc-tt>div{padding:6px 16px 4px}
+  .mc-tt>div:first-child{border-right:2.5px solid currentColor}
+  .mc-tt .h{font-size:17px;font-weight:700;letter-spacing:.06em;color:var(--soft);text-transform:uppercase}
+  .mc-tt b{float:right;font-weight:700}
+  .mc-tt .lo b{color:var(--blue)}
+  .mc .mc-arrow{margin:10px 0 12px 20px;font-size:21px;color:var(--blue);font-weight:600}
+  .mc-r{display:flex;align-items:center;gap:10px;font-size:22px;font-weight:700;margin:0 0 18px}
+  .mc-r button{font:inherit;font-size:20px;padding:6px 16px;border:2px solid #1f2537;border-radius:0;background:#fff;color:#1f2537;cursor:pointer;-webkit-appearance:none;appearance:none}
+  .mc-r button[aria-pressed="true"]{background:#1f2537;color:#fff}
+  .mc-chart{display:block;width:660px;height:320px;overflow:visible}
+  .mc-bar{fill:#b3b8c2;transform:scaleY(0);transform-box:fill-box;transform-origin:50% 100%;transition:transform .45s ease-out}
+  .mc-bar.first{fill:var(--blue)}
+  .mc-seg{transform:scaleX(0);transform-box:fill-box;transform-origin:0 50%;transition:transform .35s ease-out}
+  .mc-seg.a{fill:#1f6fd1}.mc-seg.b{fill:#7fa9e6}
+  .mc-frame{fill:none;stroke:#1f2537;stroke-width:1.5}
+  .mc-axis{stroke:#1f2537;stroke-width:2}
+  .mc-bl{font-size:17px;font-weight:700;fill:#1f6fd1}
+  .mc-ax{font-size:17px;fill:#5b6170}
+  .mc-tot{font-size:19px;font-weight:700;fill:#1f2537}
+  .mc-graph.shown .mc-bar,.mc-graph.shown .mc-seg{transform:none}
+  .slide.instant .mc-bar,.slide.instant .mc-seg{transition:none}
+  #overview .mc-bar,#overview .mc-seg{transform:none}
+  .mc-f{margin:18px 0 0;font-size:25px;line-height:1.55}
+  .mc-f b{color:var(--blue)}
+  .mc-f small{display:block;font-size:19px;color:var(--soft);line-height:1.4}
+  .mc-cond{position:absolute;left:96px;right:96px;bottom:34px;display:flex;gap:34px;align-items:baseline;padding:14px 22px;border:2px solid var(--line);font-size:21px;line-height:1.35}
+  .mc-cond b{color:var(--blue);white-space:nowrap}
+  @media print{.mc-bar,.mc-seg{transform:none}}
   @media print{.gtools{display:none}}
 </style>
 </head>
@@ -38,6 +76,46 @@
   </section>
   <section class="slide pg" data-title="Ch29 The Monetary System">
     <img src="p02.jpg" alt="Ch29 The Monetary System" decoding="async">
+  </section>
+  <section class="slide mc" data-title="Ch29 Money Creation · Money Multiplier">
+    <p class="mc-head"><b>Ch29</b><span>Concept</span><b>Money Creation · Money Multiplier</b><span class="mc-ko">통화 창출(신용팽창)</span></p>
+    <div class="mc-body">
+      <div>
+        <div class="mc-t">
+        <p class="mc-bank">First National Bank — 현금 $100 예금</p>
+        <div class="mc-tt">
+          <div><span class="h">Assets</span><br>Reserves <b data-v="r1"></b><br><span class="lo">Loans <b data-v="l1"></b></span></div>
+          <div><span class="h">Liabilities</span><br>Deposits <b data-v="d1"></b></div>
+        </div>
+        </div>
+        <div class="mc-t step">
+          <p class="mc-arrow">↓ 대출 <span data-v="l1"></span> 이 다른 은행에 예금됨</p>
+        <p class="mc-bank">Second National Bank</p>
+        <div class="mc-tt">
+          <div><span class="h">Assets</span><br>Reserves <b data-v="r2"></b><br><span class="lo">Loans <b data-v="l2"></b></span></div>
+          <div><span class="h">Liabilities</span><br>Deposits <b data-v="d2"></b></div>
+        </div>
+        </div>
+        <div class="mc-t step">
+          <p class="mc-arrow">↓ 대출 <span data-v="l2"></span> 이 또 예금됨 …</p>
+        <p class="mc-bank">Third National Bank</p>
+        <div class="mc-tt">
+          <div><span class="h">Assets</span><br>Reserves <b data-v="r3"></b><br><span class="lo">Loans <b data-v="l3"></b></span></div>
+          <div><span class="h">Liabilities</span><br>Deposits <b data-v="d3"></b></div>
+        </div>
+        </div>
+      </div>
+      <div>
+        <div class="mc-r">지급준비율 R <button type="button" data-r="0.05" aria-pressed="false">5%</button><button type="button" data-r="0.1" aria-pressed="true">10%</button><button type="button" data-r="0.2" aria-pressed="false">20%</button></div>
+        <div class="mc-graph step"><svg class="mc-chart" viewBox="0 0 660 320" aria-hidden="true"></svg></div>
+        <div class="mc-f step">
+          통화승수 = 1 / R = 1 / <span data-v="R"></span> = <b data-v="m"></b><br>
+          예금 합계 = $100 + <span data-v="d2s"></span> + <span data-v="d3s"></span> + … = <b data-v="total"></b>
+          <small>현금 $100 이 예금으로 바뀐 경우 통화량 증가 = <span data-v="total"></span> − $100 = <span data-v="new"></span> (현금은 이미 통화)<br>Fed 공개시장 매입으로 새 지준 $100 이 생기면 통화량 + <span data-v="total"></span></small>
+        </div>
+      </div>
+    </div>
+    <div class="mc-cond"><b>가정</b><span>① 사람들이 현금을 들고 있지 않음(모두 예금)</span><span>② 은행은 초과지준 없이 R 만큼만 지준, 나머지는 모두 대출</span><span>③ 대출금은 다시 은행에 예금</span></div>
   </section>
   <section class="slide pg" data-title="Ch29 MC 14 · Excess Reserves">
     <img src="p03.jpg" alt="Ch29 MC 14 · Excess Reserves" decoding="async">
@@ -158,5 +236,6 @@
 
 <script src="/slides/deck.js"></script>
 <script src="/slides/econ2/graphs.js"></script>
+<script src="/slides/econ2/money.js"></script>
 </body>
 </html>
