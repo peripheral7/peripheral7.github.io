@@ -36,7 +36,7 @@
      단계 목록은 맨 아래 전체 폭. 휴대폰은 그래프 → 단계 → 설명. 탭 줄(.sub)은 app.js 가 그래프 y 축에 맞춰 왼쪽 여백을 준다 */
   main{max-width:var(--max);margin:0 auto;padding:14px 12px 40px}
   .ch{display:none;gap:12px 28px;grid-template-columns:minmax(0,1.3fr) minmax(300px,1fr);grid-template-areas:"fig side" "play play";align-items:start}
-  .ch.tabbed{grid-template-areas:"tabs tabs" "fig side" "play play"}
+  .ch.tabbed{grid-template-areas:"tabs side" "fig side" "play play"}   /* 오른쪽 설명은 탭 줄 높이부터 */
   .ch.on{display:grid}
   .ch>.sub{grid-area:tabs}
   .fig{grid-area:fig;min-width:0}
@@ -46,6 +46,10 @@
   .panel[hidden]{display:none}
   .fig .stage{position:relative;aspect-ratio:640/520;max-height:min(480px,56vh)}
   .fig svg.plot{position:absolute;inset:0;width:100%;height:100%}
+  /* 새 균형의 축 값: 한 번 커졌다 작아진다 */
+  svg.plot text.pop{animation:pop .85s ease-out;transform-box:fill-box;transform-origin:center}
+  @keyframes pop{0%{transform:scale(1)}35%{transform:scale(1.5)}100%{transform:scale(1)}}
+  @media (prefers-reduced-motion:reduce){svg.plot text.pop{animation:none}}
   /* 큰 탭(AD · AS, 균형임금 · 실업률): 고른 탭은 진한 바탕 흰 글자 */
   .sub{display:flex;gap:8px}
   .sub button{flex:none;min-width:150px;padding:9px 18px;border:2px solid var(--ink);border-radius:10px;background:#fff;font-size:16.5px;font-weight:800;color:var(--ink);cursor:pointer}
@@ -88,8 +92,8 @@
   .rows li.cur button{color:var(--ink)}
   .rows li.cur .dot{background:var(--blue);border-color:var(--blue)}
   .rows li.cur .k{color:var(--blue);font-size:19px}
-  .pbar{display:flex;flex-wrap:wrap;align-items:center;justify-content:flex-end;gap:8px;margin:8px 0 0}
-  .pbar .cnt{margin-right:auto;font-size:14px;font-weight:800;color:var(--ink);font-variant-numeric:tabular-nums}
+  .pbar{display:flex;flex-wrap:wrap;align-items:center;justify-content:center;gap:8px 12px;margin:10px 0 0}
+  .pbar .cnt{font-size:14px;font-weight:800;color:var(--ink);font-variant-numeric:tabular-nums;min-width:40px}
   .seg{display:inline-flex;border:1.5px solid var(--ink);border-radius:8px;overflow:hidden}
   .seg button{padding:7px 14px;border:0;border-left:1.5px solid var(--ink);background:#fff;font-size:14px;font-weight:700;cursor:pointer}
   .seg button:first-child{border-left:0}
@@ -123,7 +127,7 @@
   .opts li button .dir.l{color:var(--down)}
 
   /* Ch29: 도식(지준 → ×1/R → 예금 = 통화량) + 은행 전체 T계정(폭을 줄여 가운데) */
-  .bankfig{display:flex;flex-direction:column;align-items:center;gap:22px;padding:10px 0 4px}
+  .bankfig{display:flex;flex-direction:column;align-items:center;gap:18px;padding:10px 0 4px}
   .flow{display:grid;grid-template-columns:1fr auto 1fr auto 1fr;align-items:center;gap:8px;width:100%;max-width:600px}
   .flow .bx{padding:10px 8px;border:2px solid var(--ink);text-align:center;font-size:14.5px;line-height:1.35;transition:background .3s,border-color .3s}
   .flow .bx b{display:block;font-size:24px;font-weight:800;margin-top:2px}
@@ -131,7 +135,18 @@
   .flow .bx.m b{color:var(--blue)}
   .flow .ar{text-align:center;font-size:13.5px;font-weight:700;color:var(--soft);line-height:1.2;padding:2px 4px;transition:background .3s}
   .flow .ar::after{content:"→";display:block;font-size:24px;color:var(--ink)}
-  .tacct{width:100%;max-width:440px}
+  /* 위 수식: 지급준비금 × 통화승수 = 통화량 — 영문(작게, 위) · 한글 항 · 숫자(작게, 아래). T계정과 같은 폭 */
+  .eqrow{display:grid;grid-template-columns:1fr auto 1fr auto 1fr;align-items:start;gap:8px;width:100%;max-width:600px;margin:0 0 4px}
+  .eqrow .kop{padding-top:22px}
+  .term{text-align:center;padding:6px 4px 8px;border-radius:10px;transition:background .35s}
+  .term i{display:block;font-style:normal;font-size:12px;font-weight:700;letter-spacing:.03em;color:var(--soft)}
+  .term i:empty{display:none}
+  .term span{display:block;font-size:20px;font-weight:800;line-height:1.3}
+  .term b{display:block;min-height:18px;margin-top:3px;font-size:14px;font-weight:700;color:var(--soft);white-space:nowrap}
+  .term b.up{color:var(--up)}
+  .term b.dn{color:var(--down)}
+  .term.pulse{background:var(--tint)}
+  .tacct{width:100%;max-width:600px}
   .tacct h3{margin:0 0 6px;font-size:16px;text-align:center}
   .tt{display:grid;grid-template-columns:1fr 1fr;border-top:3px solid var(--ink);font-size:19px;line-height:1.6}
   .tt>div{padding:6px 14px 4px}
@@ -201,6 +216,9 @@
     .ka{font-size:19px}
     .kh i{display:none}
     .kop{font-size:18px}
+    .term span{font-size:17px}
+    .term b{font-size:12.5px;white-space:normal}
+    .eqrow .kop{padding-top:18px}
     .tt{grid-template-columns:minmax(0,1fr) minmax(0,1fr);font-size:16px;line-height:1.5}
     .tt>div{padding:6px 8px}
     .tt .r{flex-wrap:wrap;gap:0 6px}
@@ -234,6 +252,7 @@
     main{flex:1;min-height:0;display:flex;flex-direction:column;max-width:none;width:100%;padding:10px 20px 12px}
     .ch.on{flex:1;min-height:0;grid-template-rows:minmax(0,1fr) auto}
     .ch.tabbed.on{grid-template-rows:auto minmax(0,1fr) auto}
+    .ch.tabbed .side{grid-row:1 / 3}
     .fig{display:flex;flex-direction:column;min-height:0;height:100%}
     .fig .stage{flex:1;min-height:0;max-height:none;aspect-ratio:auto}
     .bankfig{flex:1;justify-content:center}

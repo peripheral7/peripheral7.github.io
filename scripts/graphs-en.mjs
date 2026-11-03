@@ -111,6 +111,11 @@ const T = {
   '균형보다': 'above',
   '높은 임금': 'equilibrium',
   // ── Ch29
+  '<i>Reserves</i>': '<i></i>',
+  '<i>Money multiplier 1/R</i>': '<i></i>',
+  '<i>Money supply</i>': '<i></i>',
+  '지급준비금': 'Reserves',
+  '통화량': 'Money supply',
   '통화승수': 'Money multiplier',
   '통화량 M = 지준 × 1/R': 'Money supply M = Reserves × 1/R',
   '필요지준 = R × 예금': 'Required reserves = R × Deposits',

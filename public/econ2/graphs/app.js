@@ -177,15 +177,16 @@
         if (pt.o.guide === false) return;
         const now = i === n - 1 && !hideNow, col = i === n - 1 ? C.ink : C.soft, yl = pt.o.yl || cfg.yName + '_' + (i + 1), xl = xName(pt, offs[i], i);
         const dx = now && prevPt ? dirOf(prevPt.x, pt.x, tolX) : 0, dy = now && prevPt ? dirOf(prevPt.y, pt.y, tolY) : 0;
-        const wt = (dd) => (now && dd ? 800 : 500);
+        const wt = (dd) => (now && dd ? 800 : 500), dc = (dd) => (now && dd ? (dd > 0 ? C.up : C.down) : col);
+        const pop = (t, ax, dd) => { if (t && now && dd && hl && hl.axis && hl.axis.indexOf(ax) >= 0) t.setAttribute('class', 'pop'); };
         if (!usedY.some((v) => Math.abs(v - Y(pt.y)) < 15) && usedT.indexOf('y' + yl) < 0) {
           usedY.push(Y(pt.y)); usedT.push('y' + yl);
-          label(g, box[0] - 8, Y(pt.y) + 6, yl, { anchor: 'end', size: 17, color: col, weight: wt(dy) });
+          pop(label(g, box[0] - 8, Y(pt.y) + 6, yl, { anchor: 'end', size: 17, color: dc(dy), weight: wt(dy) }), 'y', dy);
           tri(g, box[0] - 10 - textW(yl, 17), Y(pt.y) + 5, dy, 'end');
         }
         if (!usedX.some((v) => Math.abs(v - X(pt.x)) < 28) && usedT.indexOf('x' + xl) < 0) {
           usedX.push(X(pt.x)); usedT.push('x' + xl);
-          label(g, X(pt.x), box[1] + box[3] + 24, xl, { anchor: 'middle', size: 17, color: col, weight: wt(dx) });
+          pop(label(g, X(pt.x), box[1] + box[3] + 24, xl, { anchor: 'middle', size: 17, color: dc(dx), weight: wt(dx) }), 'x', dx);
           if (dx > 0) tri(g, X(pt.x) + textW(xl, 17) / 2 + 4, box[1] + box[3] + 23, dx);
           else tri(g, X(pt.x) - textW(xl, 17) / 2 - 4, box[1] + box[3] + 23, dx, 'end');
         }
@@ -246,24 +247,6 @@
         label(g, px + dd[0], py + dd[1], S[i].letter || LET[i], { size: 19, weight: 800, color: col });
       }));
 
-      // 강조: 지표 상자를 순서대로 짚을 때 같은 축(x · y, 지금 균형점의 안내선과 축 이름)이나 곡선(넓은 옅은 띠)을 함께
-      if (hl) {
-        let lp = null;
-        for (let i = P.length - 1; i >= 0; i--) if (P[i][0]) { lp = P[i][0]; break; }
-        if (hl.axis && lp) {   // 'x' · 'y' · 'xy'(둘 한 번에)
-          const px = X(lp.x), py = Y(lp.y), bot = box[1] + box[3];
-          for (const ax of hl.axis) {
-            el('path', { d: ax === 'x' ? 'M' + px + ' ' + py + 'V' + bot : 'M' + box[0] + ' ' + py + 'H' + px, fill: 'none', stroke: C.blue, 'stroke-width': 3, 'stroke-dasharray': '6 5' }, g);
-            const r = el('rect', ax === 'x' ? { x: px - 30, y: bot + 6, width: 60, height: 26 } : { x: box[0] - 64, y: py - 14, width: 58, height: 26 }, g);
-            r.setAttribute('rx', 6); r.setAttribute('fill', 'rgba(31,111,209,.14)');
-            g.insertBefore(r, g.firstChild);
-          }
-        }
-        if (hl.curve && byId[hl.curve] && cur.vis[hl.curve]) {
-          const pts = path(byId[hl.curve], offOf(byId[hl.curve], disp));
-          if (pts.length > 1) g.insertBefore(el('path', { d: dstr(pts), fill: 'none', stroke: 'rgba(31,111,209,.16)', 'stroke-width': 18, 'stroke-linecap': 'round' }), g.firstChild);
-        }
-      }
       const ctx = { g, S, P, off: disp, X, Y, box, dom: d, hide: hideNow };
       if (self.extra) self.extra(ctx);
       if (self.on) self.on(ctx);
@@ -271,12 +254,12 @@
     self.render = render;
     let hlT = [];
     self.hilite = (h) => { hlT.forEach(clearTimeout); hlT = []; hl = h; render(); };
-    // items 를 순서대로 하나씩 잠깐 강조(축 안내선 · 축 이름 바탕 · 곡선 띠)하고 끝나면 지운다
+    // items(축 'x' · 'y' · 'xy')를 곡선이 멈춘 뒤 차례로: 새 균형의 축 이름이 한 번 커졌다 작아진다(.pop). 색 · 굵기는 계속 남는다
     self.seq = (items) => {
       self.hilite(null);
-      const step = 700 / SPEED;
-      items.forEach((it, i) => hlT.push(setTimeout(() => { hl = it; render(); }, i * step)));
-      hlT.push(setTimeout(() => { hl = null; render(); }, items.length * step + 300));
+      const t0 = 780 / SPEED, step = 900;
+      items.forEach((it, i) => hlT.push(setTimeout(() => { hl = it; render(); }, t0 + i * step)));
+      hlT.push(setTimeout(() => { hl = null; render(); }, t0 + items.length * step));
     };
     // 상태 줄을 통째로 바꾸고 지금(마지막) 상태로 움직인다. o.hide: 새 균형점은 아직 숨김, o.dur: 애니메이션 길이(ms)
     self.show = (states, o) => {
@@ -542,21 +525,24 @@
     const B = { R: 0.1, res: 100, L: 900, D: 1000 };
     const player = Player($('#pl29'), '목록에서 사건을 고르면 전체 단계가 여기 나오고, T계정이 한 걸음씩 바뀝니다.');
     $('#bank').innerHTML =
-      '<div class="keys" id="k29"></div>' +
+      // 위 수식: 영문(작게) / 한글 항 / 숫자(작게). 상자 없이 글자만
+      '<div class="eqrow" id="k29">' +
+      '<div class="term" data-k="res"><i>Reserves</i><span>지급준비금</span><b></b></div><span class="kop">×</span>' +
+      '<div class="term" data-k="R"><i>Money multiplier 1/R</i><span>통화승수</span><b></b></div><span class="kop">=</span>' +
+      '<div class="term" data-k="M"><i>Money supply</i><span>통화량</span><b></b></div></div>' +
       '<div class="tacct"><h3>은행 전체 T계정</h3><div class="tt">' +
       '<div><span class="h">ASSETS 자산</span><div class="r" data-k="res">지준 <b id="tRes"></b><i id="dRes"></i></div><div class="r" data-k="L">대출 <b id="tLoan"></b><i id="dLoan"></i></div></div>' +
       '<div><span class="h">LIABILITIES 부채</span><div class="r" data-k="D">예금 <b id="tDep"></b><i id="dDep"></i></div></div></div>' +
       '<p class="tnote" id="tNote"></p></div>';
     const money = (v) => '$' + fmt(v);
-    const keys = Keys($('#k29'), [
-      { k: 'res', t: '지준', s: 'Reserves', f: money },
-      { k: 'R', t: '통화승수', s: '1/R', f: (v) => fmt(v) },
-      { k: 'M', t: '통화량 = 예금', s: 'M', f: money }
-    ], ['×', '=']);
+    // 항 아래 숫자: 바뀌었으면 '처음 → 지금 ▲', 아니면 지금 값. hi 순서대로 항을 잠깐 강조
+    let kt = [];
+    const term = (k, b, a, f, extra) => { const e = $('#k29 [data-k="' + k + '"] b'), d = dirOf(b, a, 1e-6); e.className = d > 0 ? 'up' : d < 0 ? 'dn' : ''; e.textContent = (d ? f(b) + ' → ' + f(a) + (d > 0 ? ' ▲' : ' ▼') : f(a)) + (extra || ''); };
+    const pulse = (ks) => { kt.forEach(clearTimeout); kt = []; const mark = (k) => $$('#k29 .term').forEach((e) => e.classList.toggle('pulse', e.getAttribute('data-k') === k)); mark(null); ks.forEach((k, i) => kt.push(setTimeout(() => mark(k), i * 700 / SPEED))); kt.push(setTimeout(() => mark(null), ks.length * 700 / SPEED + 300)); };
     const delta = (id, v) => { const e = $('#' + id); e.className = v < -0.5 ? 'dn' : v > 0.5 ? 'up' : ''; e.textContent = Math.abs(v) < 0.5 ? '' : (v > 0 ? '▲ +' : '▼ −') + money(Math.abs(v)); };
     function show(s, hi) {
-      keys.set({ res: { b: B.res, a: s.res }, R: { b: 1 / B.R, a: 1 / s.R, note: 'R = ' + Math.round(s.R * 100) + '%' }, M: { b: B.D, a: s.D } });
-      keys.seq((hi || []).filter((k) => k === 'res' || k === 'R' || k === 'M'));
+      term('res', B.res, s.res, money); term('R', 1 / B.R, 1 / s.R, fmt, ' (R ' + Math.round(s.R * 100) + '%)'); term('M', B.D, s.D, money);
+      pulse((hi || []).filter((k) => k === 'res' || k === 'R' || k === 'M'));
       $('#tRes').textContent = money(s.res); $('#tLoan').textContent = money(s.L); $('#tDep').textContent = money(s.D);
       delta('dRes', s.res - B.res); delta('dLoan', s.L - B.L); delta('dDep', s.D - B.D);
       const req = s.R * s.D, gap = s.res - req;
@@ -612,10 +598,9 @@
       start: 'A : MS = MD',
       result: (a, b) => { const x = idx(a), y = idx(b); return '화폐가치 1/P ' + dirW(x.v, y.v, 0.02) + ' → 물가 P ' + dirW(x.P, y.P, 0.5); },
       quiet: () => plot.hilite(null),
-      // 새 균형에서: 움직인 곡선 → 화폐량 · 화폐가치(x · y 축 한 번에). 안 바뀐 것은 건너뜀
+      // 새 균형에서: 바뀐 축 값(M · 1/P)을 한 번에 강조
       after: (a, b) => {
-        const x = idx(a), y = idx(b), mv = ['MS', 'MD'].find((id) => !same(plot.offOf(plot.byId[id], a.off), plot.offOf(plot.byId[id], b.off))), items = [];
-        if (mv) items.push({ curve: mv });
+        const x = idx(a), y = idx(b), items = [];
         const ax = (dirOf(x.M, y.M, 0.5) ? 'x' : '') + (dirOf(x.v, y.v, 0.02) ? 'y' : '');
         if (ax) items.push({ axis: ax });
         plot.seq(items);
@@ -660,17 +645,15 @@
     const mk = (host) => Plot(host, { aria: '총수요 총공급 그래프', dom: [0, 10, 0, 10], xName: 'Y', yName: 'P', xTitle: '실질 GDP Y', yTitle: '물가 P', star: true, curves: adasCurves(), eqs: [['AD', 'SRAS']] });
     const ad = mk($('#plot33ad')), as = mk($('#plot33as')), player = Player($('#pl33'));
     const CV = ['AD', 'SRAS', 'LRAS'];
-    const movedId = (plot, a, b) => CV.find((id) => b.vis[id] && a.vis[id] && !same(plot.offOf(plot.byId[id], a.off), plot.offOf(plot.byId[id], b.off)));
     const opt = (plot) => ({
       start: 'A : Y = Y*',
       result: (a, b) => { const x = plot.pointsOf(a.off, a.vis)[0], y = plot.pointsOf(b.off, b.vis)[0]; if (!x || !y) return ''; let s = 'Y ' + dirW(x.x, y.x, 0.03) + ' · P ' + dirW(x.y, y.y, 0.03) + ' — ' + gap(b.off, y); if (y.x < x.x - 0.03 && y.y > x.y + 0.03 && Math.abs(x.x - 5 - (a.off.LRAS || 0)) < 0.03) s += ' (스태그플레이션)'; return s; },
       quiet: () => plot.hilite(null),
-      // 새 균형에서: 움직인 곡선 → Y · P(x · y 축 한 번에)
+      // 새 균형에서: 바뀐 축 값(Y · P)을 한 번에 강조
       after: (a, b) => {
         const x = plot.pointsOf(a.off, a.vis)[0], y = plot.pointsOf(b.off, b.vis)[0];
         if (!x || !y) return;
-        const mv = movedId(plot, a, b), items = [];
-        if (mv) items.push({ curve: mv });
+        const items = [];
         const ax = (dirOf(x.x, y.x, 0.03) ? 'x' : '') + (dirOf(x.y, y.y, 0.03) ? 'y' : '');   // Y · P 변화는 한 번에
         if (ax) items.push({ axis: ax });
         plot.seq(items);
@@ -763,7 +746,7 @@
       result: (a, b) => (b.vis.W ? (b.off.W || 0) + 7 > eqW(b.off) + 0.05 ? 'W > W_E → 실업 = L_S − L_D' : 'W < W_E → 효과 없음' : 'W ↓ · L ↓, 실업 없음'),
       quiet: () => plot.hilite(null),
       // 새 균형에서: W 선, 또는 W · L(x · y 축 한 번에)
-      after: (a, b) => plot.seq(b.vis.W ? [{ curve: 'W' }] : [{ axis: 'xy' }])
+      after: (a, b) => plot.seq(b.vis.W ? [] : [{ axis: 'xy' }])
     });
     function eqW(off) { const m = meet(plot.byId.S, off.S || 0, plot.byId.D, off.D || 0, plot.dom); return m ? m.y : 5; }
     const w = (t, q, dir, W, why) => ({ t, q, dir, stages: [{ name: t, at: 0, ch: { vis: { W: true }, abs: { W } }, why }] });
