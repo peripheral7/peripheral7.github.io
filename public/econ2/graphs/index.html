@@ -7,67 +7,82 @@
 <title>Econ2 핵심 그래프</title>
 <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Cpath d='M4 4v24h24' fill='none' stroke='%23000' stroke-width='3'/%3E%3Cpath d='M8 8l18 18M8 24L26 8' stroke='%231f6fd1' stroke-width='2.5'/%3E%3C/svg%3E">
 <!--
-  Econ2 Exam2 핵심 그래프 — 챕터마다 한 화면(Ch29 은행 T계정 · Ch30 화폐시장 · Ch33 AD/AS 탭 · Ch28 노동시장 + 실업 지표).
-  교재의 기본 식 · 곡선만 쓴다. 고를 것은 글자 목록(.opts)이고, 고른 사건은 늘 처음 상태(A)에서 시작한다(앞 사건은 풀린다).
-  단기 → 장기로 이어지는 사건은 아래 단계 줄(1단계 · 2단계)로 지금 몇 단계인지 보이고, 단계를 눌러 넘어간다.
+  Econ2 Exam2 핵심 그래프 — 챕터마다 한 구역(Ch29 은행 T계정 · Ch30 화폐시장 · Ch33 AD/AS 탭 · Ch28 노동시장 + 실업 지표).
+  교재의 기본 식 · 곡선만 쓴다. 고를 것은 글자 목록(.opts): 고르면 처음 상태 A 에서 변화가 한 걸음씩 재생되고(.player),
+  같은 줄을 다시 누르면 풀린다. 재생기는 걸음 목록 · 재생/멈춤 · 이전/다음/처음 · 빠르기를 가진다.
   그래프 · 사건 내용은 app.js 한 곳. 주소 #ch29 · #ch30 · #ch33 · #ch33-as · #ch28 로 바로 열 수 있다(구역 id 는 c29 처럼 달리 둔다 — 같으면 브라우저가 그 구역으로 내려가 머리줄 밑에 가린다).
 -->
 <style>
   @font-face{font-family:"Pretendard Variable";font-weight:45 920;font-style:normal;font-display:swap;src:local("Pretendard Variable"),url("/fonts/PretendardVariable.woff2") format("woff2-variations")}
-  :root{--ink:#1f2537;--blue:#1f6fd1;--red:#c8352e;--soft:#5b6170;--line:#d8dbe0;--tint:#f3f6fb;--top:56px}
+  :root{--ink:#1f2537;--blue:#1f6fd1;--red:#c8352e;--soft:#5b6170;--line:#d8dbe0;--tint:#f3f6fb;--max:1180px}
   *{box-sizing:border-box}
   html,body{margin:0;background:#fff;color:var(--ink);font-family:"Pretendard Variable",Pretendard,-apple-system,BlinkMacSystemFont,"Segoe UI","Apple SD Gothic Neo","Malgun Gothic",sans-serif;word-break:keep-all;-webkit-font-smoothing:antialiased}
   button{font:inherit;color:inherit}
-  .top{position:sticky;top:0;z-index:10;display:flex;align-items:center;gap:18px;height:var(--top);padding:0 24px;border-bottom:1px solid var(--line);background:#fff}
-  .top h1{margin:0;font-size:17px;font-weight:800;white-space:nowrap}
+  .top{position:sticky;top:0;z-index:10;border-bottom:1px solid var(--line);background:#fff}
+  .top .in{display:flex;align-items:center;gap:16px;max-width:var(--max);height:52px;margin:0 auto;padding:0 12px}
+  .top h1{margin:0;font-size:16px;font-weight:800;white-space:nowrap}
   .top h1 a{color:inherit;text-decoration:none}
-  .tabs{display:flex;gap:4px;overflow-x:auto;scrollbar-width:none}
+  .tabs{display:flex;gap:2px;overflow-x:auto;scrollbar-width:none}
   .tabs::-webkit-scrollbar{display:none}
-  .tabs button{flex:none;padding:8px 14px;border:0;border-bottom:3px solid transparent;background:none;font-size:15px;font-weight:600;color:var(--soft);cursor:pointer;white-space:nowrap}
+  .tabs button{flex:none;padding:8px 11px;border:0;border-bottom:3px solid transparent;background:none;font-size:15px;font-weight:600;color:var(--soft);cursor:pointer;white-space:nowrap}
   .tabs button[aria-selected="true"]{color:var(--ink);border-bottom-color:var(--blue)}
-  .top .links{margin-left:auto;display:flex;gap:14px;font-size:13px;white-space:nowrap}
+  .top .links{margin-left:auto;display:flex;gap:12px;font-size:13px;white-space:nowrap}
   .top .links a{color:var(--soft)}
 
-  /* 챕터 한 화면: 왼쪽 그림(크게), 오른쪽 기본 식 + 고를 것 목록 */
-  .ch{display:none;height:calc(100svh - var(--top));padding:18px 28px;gap:32px;grid-template-columns:minmax(0,1.45fr) minmax(320px,1fr)}
+  /* 챕터 한 구역: 왼쪽 그림 + 재생기, 오른쪽 기본 식 + 고를 것 목록. 화면 높이에 맞추지 않고 내용만큼 */
+  main{max-width:var(--max);margin:0 auto;padding:12px 12px 40px}
+  .ch{display:none;gap:22px;grid-template-columns:minmax(0,1.35fr) minmax(300px,1fr);align-items:start}
   .ch.on{display:grid}
-  .fig{display:flex;flex-direction:column;min-height:0;min-width:0}
-  .fig .stage{position:relative;flex:1;min-height:0}
+  .fig{min-width:0}
+  .fig .stage{position:relative;aspect-ratio:640/520;max-height:560px}
   .fig svg.plot{position:absolute;inset:0;width:100%;height:100%}
   .sub{display:flex;gap:22px;margin:0 0 4px;border-bottom:1px solid var(--line)}
   .sub button{padding:6px 2px;border:0;border-bottom:3px solid transparent;background:none;font-size:16px;font-weight:700;color:var(--soft);cursor:pointer}
   .sub button[aria-selected="true"]{color:var(--ink);border-bottom-color:var(--ink)}
 
-  /* 단계 줄: 1단계 단기 → 2단계 장기. 지금 단계는 파랑 바탕 */
-  .stages{display:flex;flex-wrap:wrap;align-items:stretch;gap:6px;margin:8px 0 0;padding:0;list-style:none;min-height:0}
-  .stages:empty{display:none}
-  .stages li{display:flex}
-  .stages li.sep{align-items:center;color:var(--soft);font-weight:800}
-  .stages button{display:flex;flex-direction:column;align-items:flex-start;gap:1px;padding:7px 12px;border:1.5px solid var(--line);background:#fff;text-align:left;cursor:pointer;font-size:14px;line-height:1.35}
-  .stages button .n{font-size:12px;font-weight:800;color:var(--soft);letter-spacing:.04em}
-  .stages button:hover{border-color:var(--ink)}
-  .stages button.cur{border-color:var(--blue);background:var(--blue);color:#fff}
-  .stages button.cur .n{color:#d6e4fb}
-  .stages button.done{border-color:var(--ink)}
-  .read{flex:none;min-height:66px;margin-top:8px;padding:10px 16px;background:var(--tint);border-left:4px solid var(--blue);font-size:16px;line-height:1.55}
-  .read .chg{font-weight:800;color:var(--blue)}
-  .read .dn{color:var(--red)}
-  .read .hint{color:var(--soft)}
+  /* 재생기: 조작 줄 + 걸음 목록(지금 걸음 파랑 · 지난 걸음 진하게 · 남은 걸음 흐리게) + 지금 상태 한 줄 */
+  .player{margin-top:6px;border:1px solid var(--line)}
+  .player[hidden]{display:none}
+  .pctl{display:flex;flex-wrap:wrap;align-items:center;gap:6px;padding:7px 10px;border-bottom:1px solid var(--line);background:#fafbfc}
+  .pctl button{padding:4px 10px;border:1.5px solid var(--line);background:#fff;font-size:13.5px;font-weight:700;cursor:pointer}
+  .pctl button:hover:not(:disabled){border-color:var(--ink)}
+  .pctl button:disabled{opacity:.4;cursor:default}
+  .pctl .pp{min-width:94px;border-color:var(--ink)}
+  .pctl .pp.on{background:var(--ink);color:#fff}
+  .pctl .spd{display:flex;align-items:center;gap:4px;margin-left:8px;font-size:13px;font-weight:700;color:var(--soft)}
+  .pctl .spd button{padding:3px 8px;font-weight:600}
+  .pctl .spd button[aria-pressed="true"]{border-color:var(--blue);color:var(--blue);font-weight:800}
+  .pctl .cnt{margin-left:auto;font-size:13px;font-weight:700;color:var(--soft);font-variant-numeric:tabular-nums}
+  .beats{position:relative;margin:0;padding:6px 10px 8px;list-style:none;max-height:260px;overflow:auto;font-size:15px;line-height:1.45}
+  .beats li.grp{margin:6px 0 2px;font-size:12.5px;font-weight:800;letter-spacing:.04em;color:var(--soft)}
+  .beats li.grp:first-child{margin-top:0}
+  .beats li.grp .alt{margin-left:6px;padding:1px 6px;border:1px solid var(--line);background:#fff;font-size:12.5px;font-weight:700;letter-spacing:0;cursor:pointer}
+  .beats li.grp .alt.on{border-color:var(--blue);color:var(--blue)}
+  .beats li[data-i] button{display:block;width:100%;padding:3px 8px;border:0;border-left:3px solid transparent;background:none;text-align:left;cursor:pointer}
+  .beats li.todo button{color:#9aa0aa}
+  .beats li.done button{color:var(--ink)}
+  .beats li.cur button{border-left-color:var(--blue);background:var(--tint);color:var(--blue);font-weight:800}
+  .beats .dn{color:var(--red)}
+  .beats li.todo .dn{color:inherit}
+  .pstat{padding:6px 10px 8px;border-top:1px solid var(--line);font-size:14.5px;color:var(--ink)}
+  .pstat:empty{display:none}
+  .pstat b{color:var(--blue)}
+  .pstat .dn{color:var(--red)}
 
-  .side{min-height:0;overflow:auto;padding-right:4px}
-  .side h2,.pane h2{margin:0 0 10px;font-size:24px;line-height:1.25}
-  .side h2 small,.pane h2 small{display:block;font-size:14px;font-weight:600;color:var(--soft);letter-spacing:.02em}
-  .eq{margin:0 0 16px;padding:12px 16px;border:1px solid var(--line);font-size:15px;line-height:1.65}
-  .eq .f{display:block;font-size:19px;font-weight:800;letter-spacing:.01em;margin:0 0 2px}
-  .eq .f + .f{margin-top:6px}
+  .side{min-width:0}
+  .side h2,.pane h2{margin:0 0 8px;font-size:22px;line-height:1.25}
+  .side h2 small,.pane h2 small{display:block;font-size:13.5px;font-weight:600;color:var(--soft);letter-spacing:.02em}
+  .eq{margin:0 0 14px;padding:10px 14px;border:1px solid var(--line);font-size:15px;line-height:1.6}
+  .eq .f{display:block;font-size:18px;font-weight:800;letter-spacing:.01em;margin:0 0 2px}
+  .eq .f + .f{margin-top:4px}
   .eq small{display:block;color:var(--soft);font-size:13.5px;line-height:1.5}
 
-  /* 고를 것: 버튼이 아니라 글자 목록. 고른 줄은 ▸ 와 파랑 굵은 글자 */
-  .opts{margin:0 0 14px}
-  .opts h3{margin:0 0 4px;font-size:13px;font-weight:800;letter-spacing:.06em;color:var(--soft)}
+  /* 고를 것: 글자 목록. 고른 줄은 ▸ 와 파랑 굵은 글자, 다시 누르면 풀림 */
+  .opts{margin:0 0 12px}
+  .opts h3{margin:0 0 3px;font-size:13px;font-weight:800;letter-spacing:.06em;color:var(--soft)}
+  .opts h3 small{font-weight:600;letter-spacing:0}
   .opts ul{margin:0;padding:0;list-style:none}
-  .opts li{margin:0}
-  .opts li button{display:block;width:100%;padding:4px 0 4px 18px;border:0;background:none;text-align:left;font-size:15.5px;line-height:1.45;cursor:pointer;position:relative}
+  .opts li button{display:block;width:100%;padding:3px 0 3px 18px;border:0;background:none;text-align:left;font-size:15.5px;line-height:1.45;cursor:pointer;position:relative}
   .opts li button::before{content:"·";position:absolute;left:5px;color:var(--soft)}
   .opts li button:hover{text-decoration:underline;text-underline-offset:3px}
   .opts li button[aria-pressed="true"]{color:var(--blue);font-weight:800}
@@ -76,76 +91,98 @@
   .opts li button .dir{margin-left:4px;font-weight:800;color:var(--blue)}
   .opts li button .dir.l{color:var(--red)}
 
-  /* Ch29: 도식(Fed → 지준 → ×1/R → 예금 = 통화량) + 은행 전체 T계정 */
-  .bankfig{display:flex;flex-direction:column;justify-content:center;gap:34px;min-height:100%;padding:8px 6px}
-  .flow{display:grid;grid-template-columns:1fr auto 1fr auto 1fr;align-items:center;gap:10px}
-  .flow .bx{padding:12px 10px;border:2px solid var(--ink);text-align:center;font-size:15px;line-height:1.35}
-  .flow .bx b{display:block;font-size:26px;font-weight:800;margin-top:2px}
-  .flow .bx.m{border-color:var(--blue);background:var(--tint)}
+  /* Ch29: 도식(지준 → ×1/R → 예금 = 통화량) + 은행 전체 T계정(폭을 줄여 가운데) */
+  .bankfig{display:flex;flex-direction:column;align-items:center;gap:22px;padding:10px 0 4px}
+  .flow{display:grid;grid-template-columns:1fr auto 1fr auto 1fr;align-items:center;gap:8px;width:100%;max-width:600px}
+  .flow .bx{padding:10px 8px;border:2px solid var(--ink);text-align:center;font-size:14.5px;line-height:1.35;transition:background .3s,border-color .3s}
+  .flow .bx b{display:block;font-size:24px;font-weight:800;margin-top:2px}
+  .flow .bx.m{border-color:var(--blue)}
   .flow .bx.m b{color:var(--blue)}
-  .flow .ar{text-align:center;font-size:14px;font-weight:700;color:var(--soft);line-height:1.2}
-  .flow .ar::after{content:"→";display:block;font-size:26px;color:var(--ink)}
-  .tacct h3{margin:0 0 8px;font-size:18px}
-  .tt{display:grid;grid-template-columns:1fr 1fr;border-top:3px solid var(--ink);font-size:22px;line-height:1.6}
-  .tt>div{padding:8px 20px 6px}
+  .flow .ar{text-align:center;font-size:13.5px;font-weight:700;color:var(--soft);line-height:1.2;padding:2px 4px;transition:background .3s}
+  .flow .ar::after{content:"→";display:block;font-size:24px;color:var(--ink)}
+  .tacct{width:100%;max-width:440px}
+  .tacct h3{margin:0 0 6px;font-size:16px;text-align:center}
+  .tt{display:grid;grid-template-columns:1fr 1fr;border-top:3px solid var(--ink);font-size:19px;line-height:1.6}
+  .tt>div{padding:6px 14px 4px}
   .tt>div:first-child{border-right:3px solid var(--ink)}
-  .tt .h{display:block;font-size:14px;font-weight:800;letter-spacing:.08em;color:var(--soft)}
-  .tt .r{display:flex;justify-content:space-between;gap:12px}
-  .tt .r b{font-weight:800}
-  .tt .r i{font-style:normal;font-size:14px;font-weight:800;color:var(--blue);align-self:center;min-width:64px;text-align:right}
+  .tt .h{display:block;font-size:12.5px;font-weight:800;letter-spacing:.08em;color:var(--soft)}
+  .tt .r{display:flex;align-items:baseline;gap:8px;padding:0 4px;transition:background .3s}
+  .tt .r b{margin-left:auto;font-weight:800}
+  .tt .r i{font-style:normal;font-size:13px;font-weight:800;color:var(--blue);min-width:52px;text-align:right}
   .tt .r i.dn{color:var(--red)}
-  .tnote{margin:10px 0 0;font-size:16px;color:var(--soft)}
+  .tnote{margin:8px 0 0;font-size:14.5px;color:var(--soft);text-align:center}
   .tnote b{color:var(--ink)}
-  .flash{animation:fl .9s ease-out}
-  @keyframes fl{0%{background:rgba(31,111,209,.28)}100%{background:transparent}}
+  .bankfig .hi{background:#dbe8fb}
+  .flow .bx.hi{border-color:var(--blue)}
+
+  /* 지표 상자(참고: Econoland 보드의 key 카드): 이름 · 처음(작게, 회색) → 지금(크게) · 변화 알약. 바뀐 상자는 파란 테두리 */
+  .keys{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px;margin:8px 0 2px}
+  .keys.k2{grid-template-columns:repeat(2,minmax(0,1fr));margin:2px 0 12px}
+  .keys.ops{grid-template-columns:minmax(0,1fr) auto minmax(0,1fr) auto minmax(0,1fr);align-items:center;width:100%;max-width:600px}
+  .kop{font-size:26px;font-weight:800;color:var(--soft);text-align:center}
+  .key{border:1px solid var(--line);border-radius:6px;padding:8px 12px 9px;background:#fff;transition:border-color .4s,box-shadow .4s;min-width:0}
+  .key.chg{border-color:rgba(31,111,209,.55);box-shadow:0 0 0 3px rgba(31,111,209,.08)}
+  .kh{display:flex;justify-content:space-between;gap:6px;font-size:12.5px;font-weight:700;color:var(--soft)}
+  .kh i{font-style:normal;font-weight:500;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+  .kv{display:flex;align-items:baseline;gap:6px;margin-top:2px;white-space:nowrap}
+  .kb{font-size:15px;color:var(--soft)}
+  .karr{font-size:13px;color:var(--soft)}
+  .ka{font-size:25px;font-weight:800;line-height:1.15}
+  .key.chg .ka{color:var(--blue)}
+  .kd{display:flex;flex-wrap:wrap;gap:6px;align-items:center;min-height:18px;margin-top:3px;font-size:12px}
+  .pill{color:var(--blue);background:rgba(31,111,209,.09);padding:1px 7px;border-radius:4px;font-weight:700}
+  .pill.dn{color:var(--red);background:rgba(200,53,46,.08)}
+  .kn{color:var(--soft)}
+  .kn .dn{color:var(--red)}
 
   /* Ch28: 그래프 · 실업 지표 두 구역 */
-  #c28{grid-template-columns:minmax(0,1fr) minmax(0,1fr);grid-template-rows:minmax(0,1fr)}
-  .pane{display:flex;flex-direction:column;min-height:0;min-width:0;overflow:auto}
-  .pane>*{flex:none}
-  .pane .stage{position:relative;flex:1 0 auto;min-height:400px}
+  #c28{grid-template-columns:minmax(0,1fr) minmax(0,1fr)}
+  .pane{min-width:0}
+  .pane .stage{position:relative;aspect-ratio:640/520}
   .pane .opts{margin:10px 0 0}
-  .rates{display:flex;flex-direction:column;gap:20px;margin:4px 0 0}
-  .rate{display:grid;grid-template-columns:auto auto auto auto auto;align-items:center;justify-content:start;gap:10px 14px;font-size:18px}
-  .rate .nm{font-weight:800;min-width:118px}
-  .frac{display:inline-flex;flex-direction:column;align-items:center;font-size:18px;line-height:1.3}
-  .frac>span{padding:0 6px;white-space:nowrap}
+  .rates{display:flex;flex-direction:column;gap:16px;margin:4px 0 0}
+  .rate{display:grid;grid-template-columns:auto auto auto auto auto;align-items:center;justify-content:start;gap:8px 12px;font-size:17px}
+  .rate .nm{font-weight:800;min-width:108px}
+  .frac{display:inline-flex;flex-direction:column;align-items:center;font-size:17px;line-height:1.3}
+  .frac>span{padding:1px 6px;white-space:nowrap;transition:background .3s}
   .frac>span:first-child{border-bottom:2px solid var(--ink);padding-bottom:3px}
   .frac>span:last-child{padding-top:3px}
   .frac.sym{color:var(--soft);font-weight:700}
-  .rate .res{font-size:24px;font-weight:800}
+  .rate .res{font-size:22px;font-weight:800;padding:0 4px;transition:background .3s}
+  .rates .hi{background:#dbe8fb}
   .t{padding:0 2px}
   .t.up{color:var(--blue);font-weight:800}
   .t.dn{color:var(--red);font-weight:800}
-  .rate .res .up,.rate .res .dn{font-size:16px;margin-left:4px}
-  .pop{font-size:15px;color:var(--soft);line-height:1.6}
+  .rate .res .up,.rate .res .dn{font-size:15px;margin-left:4px}
+  .pop{padding:2px 4px;font-size:14.5px;color:var(--soft);line-height:1.6;transition:background .3s}
   .pop b{color:var(--ink)}
 
   @media (max-width:900px){
-    :root{--top:auto}
-    .top{flex-wrap:wrap;height:auto;padding:10px 14px 0;gap:6px 14px}
+    .top .in{flex-wrap:wrap;height:auto;padding:8px 10px 0;gap:4px 12px}
     .tabs{order:3;width:100%}
-    .tabs button{padding:8px 9px;font-size:14px}
-    .ch,#c28{height:auto;grid-template-columns:minmax(0,1fr);grid-template-rows:none;padding:14px 16px 28px;gap:18px}
-    .fig .stage,.pane .stage{flex:none;aspect-ratio:640/520;min-height:0}
-    .fig .stage.bk{aspect-ratio:auto}
-    .side{overflow:visible}
-    .flow{grid-template-columns:1fr;gap:4px}
-    .flow .ar::after{content:"↓"}
-    .tt{grid-template-columns:minmax(0,1fr) minmax(0,1fr);font-size:15px;line-height:1.5}
+    .tabs button{padding:8px 8px;font-size:14px}
+    main{padding:10px 10px 32px}
+    .ch,#c28{grid-template-columns:minmax(0,1fr);gap:16px}
+    .keys{gap:6px}
+    .key{padding:6px 8px}
+    .ka{font-size:19px}
+    .kb{font-size:13px}
+    .kh i{display:none}
+    .kop{font-size:18px}
+    .tt{grid-template-columns:minmax(0,1fr) minmax(0,1fr);font-size:16px;line-height:1.5}
     .tt>div{padding:6px 8px}
-    .tt .r{flex-wrap:wrap;gap:0 8px}
-    .tt .r i{min-width:0;width:100%;text-align:left}
-    .tnote{font-size:14px}
-    .rate{grid-template-columns:auto auto auto;font-size:16px}
+    .tt .r{flex-wrap:wrap;gap:0 6px}
+    .tt .r i{min-width:0;width:100%;text-align:right}
+    .tnote{font-size:13.5px}
+    .rate{grid-template-columns:auto auto auto;font-size:15px}
     .rate .nm{grid-column:1 / -1}
-    .frac{font-size:16px}
+    .frac{font-size:15px}
+    .pctl .spd{margin-left:0}
   }
-  @media (prefers-reduced-motion:reduce){.flash{animation:none}}
 </style>
 </head>
 <body>
-<header class="top">
+<header class="top"><div class="in">
   <h1><a href="/econ2/">Econ2 핵심 그래프</a></h1>
   <nav class="tabs" role="tablist" aria-label="챕터">
     <button role="tab" data-ch="ch29">Ch29 통화승수</button>
@@ -154,24 +191,23 @@
     <button role="tab" data-ch="ch28">Ch28 실업</button>
   </nav>
   <div class="links"><a href="/slides/econ2/">슬라이드</a><a href="/econ2/">PDF · PPT</a></div>
-</header>
+</div></header>
 
 <main>
   <!-- Ch29: 은행 전체 T계정 -->
   <section class="ch" id="c29" aria-label="Ch29 통화승수">
     <div class="fig">
-      <div class="stage bk"><div class="bankfig" id="bank"></div></div>
-      <div class="read" id="read29"></div>
+      <div class="bankfig" id="bank"></div>
+      <div class="player" id="pl29"></div>
     </div>
     <div class="side">
       <h2><small>Ch29 The Monetary System</small>통화승수</h2>
       <div class="eq">
         <span class="f">통화량 M = 지준 × 1/R</span>
-        <span class="f">지준 = R × 예금</span>
+        <span class="f">필요지준 = R × 예금</span>
         <small>R = 지급준비율. 사람들은 현금을 들고 있지 않고(모두 예금), 은행은 초과지준 없이 나머지를 모두 대출한다고 본다(SA 10 · 11 의 가정).</small>
       </div>
-      <div class="opts" id="o29r"><h3>지급준비율 R</h3><ul></ul></div>
-      <div class="opts" id="o29m"><h3>Fed 공개시장조작(통화 공급)</h3><ul></ul></div>
+      <div class="opts" id="o29"><h3>사건 <small>· 다시 누르면 풀림</small></h3><ul></ul></div>
     </div>
   </section>
 
@@ -179,8 +215,8 @@
   <section class="ch" id="c30" aria-label="Ch30 화폐와 물가">
     <div class="fig">
       <div class="stage" id="plot30"></div>
-      <ol class="stages" id="st30"></ol>
-      <div class="read" id="read30"></div>
+      <div class="keys" id="k30"></div>
+      <div class="player" id="pl30"></div>
     </div>
     <div class="side">
       <h2><small>Ch30 Money Growth and Inflation</small>화폐시장: 화폐가치 1/P</h2>
@@ -189,8 +225,7 @@
         <span class="f">화폐가치 = 1 / P</span>
         <small>MS 는 Fed 가 정해 수직. MD 는 화폐가치가 낮을수록(물가가 높을수록) 더 많은 돈이 필요해 우하향. V · Y 가 그대로면 M 이 늘어난 비율만큼 P 가 오른다(화폐 수량설, 화폐 중립성).</small>
       </div>
-      <div class="opts" id="o30s"><h3>통화 공급(MS)</h3><ul></ul></div>
-      <div class="opts" id="o30d"><h3>화폐 수요(MD)</h3><ul></ul></div>
+      <div class="opts" id="o30"><h3>사건 <small>· 다시 누르면 풀림</small></h3><ul></ul></div>
     </div>
   </section>
 
@@ -200,8 +235,8 @@
       <div class="sub" role="tablist" aria-label="AD · AS"><button role="tab" data-sub="ad">AD 총수요</button><button role="tab" data-sub="as">AS 총공급</button></div>
       <div class="stage" id="plot33ad"></div>
       <div class="stage" id="plot33as" hidden></div>
-      <ol class="stages" id="st33"></ol>
-      <div class="read" id="read33"></div>
+      <div class="keys" id="k33"></div>
+      <div class="player" id="pl33"></div>
     </div>
     <div class="side">
       <div id="side33ad">
@@ -233,15 +268,16 @@
     <div class="pane">
       <h2><small>Ch28 Unemployment · 노동시장</small>균형보다 높은 임금 → 실업</h2>
       <div class="stage" id="plot28"></div>
-      <ol class="stages" id="st28"></ol>
-      <div class="read" id="read28"></div>
-      <div class="opts" id="o28"><h3>임금 · 노동 수요</h3><ul></ul></div>
+      <div class="keys" id="k28"></div>
+      <div class="player" id="pl28"></div>
+      <div class="opts" id="o28"><h3>임금 · 노동 수요 <small>· 다시 누르면 풀림</small></h3><ul></ul></div>
     </div>
     <div class="pane">
       <h2><small>Ch28 Unemployment · 실업 지표</small>실업률 · 경제활동참가율</h2>
+      <div class="keys k2" id="k28s"></div>
       <div class="rates" id="rates"></div>
-      <div class="read" id="read28s"></div>
-      <div class="opts" id="o28s"><h3>상황(100만 명이 옮겨 간다고 보기)</h3><ul></ul></div>
+      <div class="player" id="pl28s"></div>
+      <div class="opts" id="o28s"><h3>상황 (100만 명이 옮겨 간다고 보기) <small>· 다시 누르면 풀림</small></h3><ul></ul></div>
     </div>
   </section>
 </main>
