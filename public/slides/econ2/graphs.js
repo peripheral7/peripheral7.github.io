@@ -31,8 +31,8 @@
     };
   }
   function sticky(n) {
-    const s = [{ off: {}, pts: EQ }, { off: { AD: 1.6 }, pts: EQ, say: '통화량 5% ↑ → AD → : 단기 Y ↑ · P ↑' }];
-    if (n > 1) s.push({ off: { AD: 1.6, SRAS: -1.6 }, pts: EQ, say: '명목임금 조정 → SRAS ← : Y 원래대로, P 만 ↑' });
+    const s = [{ off: {}, pts: EQ }, { off: { AD: 1.6 }, pts: EQ, say: ['통화량 5% ↑ → AD → : 단기 Y ↑ · P ↑', 'Money +5% → AD → : short-run Y ↑ · P ↑'] }];
+    if (n > 1) s.push({ off: { AD: 1.6, SRAS: -1.6 }, pts: EQ, say: ['명목임금 조정 → SRAS ← : Y 원래대로, P 만 ↑', 'Nominal wages adjust → SRAS ← : Y back, only P ↑'] });
     return s;
   }
   const SCN = {
@@ -55,7 +55,7 @@
         const P = 1 / p.y, V = P * 30000 / p.x;
         const l1 = '1/P = ' + fmt(p.y, 3) + ' → P = ' + fmt(P, 3) + ' · V = PY/M = ' + fmt(V, 1);
         const q = ctx.prev[0];
-        return [l1, q && !ctx.free ? '물가상승률 = ' + fmt(q.y, 3) + ' / ' + fmt(p.y, 3) + ' − 1 = ' + fmt((q.y / p.y - 1) * 100, 0) + '%' : ctx.say];
+        return [l1, q && !ctx.free ? tr(['물가상승률 = ', 'Inflation = ']) + fmt(q.y, 3) + ' / ' + fmt(p.y, 3) + ' − 1 = ' + fmt((q.y / p.y - 1) * 100, 0) + '%' : ctx.say];
       },
       pad: { l: 66, r: 70 }
     },
@@ -70,8 +70,8 @@
       }],
       states: [
         { off: {}, pts: [['MS', 'MD']] },
-        { off: { MD: -1.6 }, pts: [['MS', 'MD']], say: '카드 확대 → MD ← : 1/P ↓, P ↑' },
-        { off: { MD: -1.6, MS: -1.6 }, pts: [['MS', 'MD']], say: 'Fed 가 MS ← : 1/P 회복, P 안정' }
+        { off: { MD: -1.6 }, pts: [['MS', 'MD']], say: ['카드 확대 → MD ← : 1/P ↓, P ↑', 'More credit cards → MD ← : 1/P ↓, P ↑'] },
+        { off: { MD: -1.6, MS: -1.6 }, pts: [['MS', 'MD']], say: ['Fed 가 MS ← : 1/P 회복, P 안정', 'Fed cuts MS ← : 1/P restored, P stable'] }
       ],
       pad: { l: 70 }
     },
@@ -79,20 +79,20 @@
     p18: adas({
       star: true,
       states: [
-        { off: {}, pts: EQ, say: '장기: P = Pe, Y = Y* · 단기: Y = Y* + α(P − Pe)' },
-        { off: { SRAS: -1.6 }, pts: EQ, say: 'Pe · 임금 · 원가 ↑ → SRAS ← : 스태그플레이션' }
+        { off: {}, pts: EQ, say: ['장기: P = Pe, Y = Y* · 단기: Y = Y* + α(P − Pe)', 'Long run: P = Pe, Y = Y* · Short run: Y = Y* + α(P − Pe)'] },
+        { off: { SRAS: -1.6 }, pts: EQ, say: ['Pe · 임금 · 원가 ↑ → SRAS ← : 스태그플레이션', 'Pe · wages · costs ↑ → SRAS ← : stagflation'] }
       ]
     }),
-    p19: adas({ star: true, states: [{ off: {}, pts: EQ }, { off: { SRAS: -1.6 }, pts: EQ, say: 'Pe ↑ → SRAS ← (LRAS 그대로)' }] }),
+    p19: adas({ star: true, states: [{ off: {}, pts: EQ }, { off: { SRAS: -1.6 }, pts: EQ, say: ['Pe ↑ → SRAS ← (LRAS 그대로)', 'Pe ↑ → SRAS ← (LRAS unchanged)'] }] }),
     p22: adas({ xTitle: 'Real GDP', yTitle: 'Price level', states: sticky(1) }),
     p24: adas({ xTitle: 'Real GDP', yTitle: 'Price level', states: sticky(2), start: 1 }),
     // 25 — 경직적 임금: A → B(명목임금 W 그대로, P ↑ → 실질임금 ↓) → C(W 가 P 만큼 올라 실질임금 원래대로). 아래 표가 A · B · C 의 W · P · W/P
     p25: Object.assign(adas({
       xTitle: 'Real GDP', yTitle: 'Price level',
       states: [
-        { off: {}, pts: EQ, say: '장기균형 A: W = P = 100 (지수) → 실질임금 100' },
-        { off: { AD: 1.6 }, pts: EQ, say: '명목임금 W 고정 · P ↑ → 실질임금 ↓ → 고용 · Y ↑' },
-        { off: { AD: 1.6, SRAS: -1.6 }, pts: EQ, say: '명목임금이 P 만큼 오름 → 실질임금 A 수준 · Y = Y*' }
+        { off: {}, pts: EQ, say: ['장기균형 A: W = P = 100 (지수) → 실질임금 100', 'Long-run equilibrium A: W = P = 100 (index) → real wage 100'] },
+        { off: { AD: 1.6 }, pts: EQ, say: ['명목임금 W 고정 · P ↑ → 실질임금 ↓ → 고용 · Y ↑', 'W fixed · P ↑ → real wage ↓ → hiring · Y ↑'] },
+        { off: { AD: 1.6, SRAS: -1.6 }, pts: EQ, say: ['명목임금이 P 만큼 오름 → 실질임금 A 수준 · Y = Y*', 'W rises as much as P → real wage back to A · Y = Y*'] }
       ]
     }), { extra: wageTable, pad: { l: 60, r: 92, b: 196 } }),
     // 26 — 투자 붐: AD → (B) → 임금·물가 기대 조정으로 SRAS ← (C) → 자본이 늘면 LRAS·SRAS → (D)
@@ -100,9 +100,9 @@
       xTitle: 'Real GDP', yTitle: 'Price level', dragLRAS: true,
       states: [
         { off: {}, pts: EQ },
-        { off: { AD: 1.6 }, pts: EQ, say: '투자 ↑ → AD → : Y ↑ · P ↑' },
-        { off: { AD: 1.6, SRAS: -1.6 }, pts: EQ, say: '임금 · 물가 기대 조정 → SRAS ←' },
-        { off: { AD: 1.6, SRAS: -0.4, LRAS: 1 }, pts: EQ, say: '자본 ↑ → LRAS · SRAS → : 장기 Y ↑' }
+        { off: { AD: 1.6 }, pts: EQ, say: ['투자 ↑ → AD → : Y ↑ · P ↑', 'Investment ↑ → AD → : Y ↑ · P ↑'] },
+        { off: { AD: 1.6, SRAS: -1.6 }, pts: EQ, say: ['임금 · 물가 기대 조정 → SRAS ←', 'Wage and price expectations adjust → SRAS ←'] },
+        { off: { AD: 1.6, SRAS: -0.4, LRAS: 1 }, pts: EQ, say: ['자본 ↑ → LRAS · SRAS → : 장기 Y ↑', 'Capital ↑ → LRAS · SRAS → : long-run Y ↑'] }
       ]
     }),
     // 23 — 화폐시장(MS → r ↓ → I ↑)과 AD–AS(AD →)를 이어 둠: AD 이동 = MS 이동 × 0.9
@@ -126,7 +126,7 @@
           pts: EQ
         }
       ],
-      states: [{ off: {} }, { off: { MS: 1.8 }, say: 'MS ↑ → r ↓ → I ↑ → AD → : 단기 Y ↑ · P ↑' }],
+      states: [{ off: {} }, { off: { MS: 1.8 }, say: ['MS ↑ → r ↓ → I ↑ → AD → : 단기 Y ↑ · P ↑', 'MS ↑ → r ↓ → I ↑ → AD → : short-run Y ↑ · P ↑'] }],
       pad: { l: 56, r: 80, t: 132, gap: 40 }
     },
     // 29 — 균형보다 높은 임금(노조 · 효율임금 · 최저임금) → 노동 공급 > 수요 = 실업. 균형보다 낮은 최저임금은 효과 없음
@@ -142,8 +142,8 @@
       }],
       states: [
         { off: {} },
-        { off: { W: 0 }, say: '노조 · 효율임금 · 최저임금 → W > W_E → 실업' },
-        { off: { W: -3.4 }, say: '최저임금 < W_E → 구속력 없음(W_E · L_E 그대로)' }
+        { off: { W: 0 }, say: ['노조 · 효율임금 · 최저임금 → W > W_E → 실업', 'Unions · efficiency wages · minimum wage → W > W_E → unemployment'] },
+        { off: { W: -3.4 }, say: ['최저임금 < W_E → 구속력 없음(W_E · L_E 그대로)', 'Minimum wage < W_E → not binding (W_E · L_E unchanged)'] }
       ],
       read(ctx) { return [ctx.labor || '', ctx.free ? '' : ctx.say]; },
       extra: laborExtra,
@@ -166,9 +166,9 @@
     const top = this.H - 128, x0 = 14, lx = 150, colW = Math.min(110, (this.W - lx - 14) / Math.max(3, rows.length));
     const cx = (i) => lx + colW * (i + 0.5), yW = top + 40, yBar = top + 50, yP = top + 74, yR = top + 106;
     svg('line', { x1: x0, x2: this.W - 14, y1: top - 8, y2: top - 8, stroke: C.ghost, 'stroke-width': 1 }, g);
-    label(g, x0, yW, '명목임금 W', { size: 16, color: C.soft, weight: 600 });
-    label(g, x0, yP, '물가 P', { size: 16, color: C.soft, weight: 600 });
-    label(g, x0, yR, '= 실질임금 W/P', { size: 16, color: C.ink, weight: 700 });
+    label(g, x0, yW, tr(['명목임금 W', 'Nominal wage W']), { size: 16, color: C.soft, weight: 600 });
+    label(g, x0, yP, tr(['물가 P', 'Price level P']), { size: 16, color: C.soft, weight: 600 });
+    label(g, x0, yR, tr(['= 실질임금 W/P', '= Real wage W/P']), { size: 16, color: C.ink, weight: 700 });
     svg('line', { x1: x0, x2: lx - 18, y1: yBar, y2: yBar, stroke: C.soft, 'stroke-width': 1.5 }, g);
     const mark = (a, b) => (Math.abs(b - a) < 0.5 ? ['=', C.ghost] : b > a ? ['↑', C.blue] : ['↓', C.red]);
     rows.forEach((r, i) => {
@@ -198,8 +198,8 @@
     if (!e || w <= e.y + 0.05) {
       label(g, endX, Y(w) - 4, 'Below-', { size: 15, color: C.red });
       label(g, endX, Y(w) + 14, 'equilibrium wage', { size: 15, color: C.red });
-      label(g, endX, Y(w) + 32, '→ 효과 없음', { size: 15, color: C.red, weight: 700 });
-      ctx.labor = 'W < W_E : 시장 임금 W_E 그대로 → 실업 없음';
+      label(g, endX, Y(w) + 32, tr(['→ 효과 없음', '→ no effect']), { size: 15, color: C.red, weight: 700 });
+      ctx.labor = tr(['W < W_E : 시장 임금 W_E 그대로 → 실업 없음', 'W < W_E : market wage stays at W_E → no unemployment']);
       return;
     }
     const ld = meet(W, offOf(W, st.off), D, offOf(D, st.off), pn.dom), ls = meet(W, offOf(W, st.off), S, offOf(S, st.off), pn.dom);
@@ -216,7 +216,7 @@
     }
     label(g, endX, Y(w) - 4, 'Above-', { size: 15, color: C.red });
     label(g, endX, Y(w) + 14, 'equilibrium wage', { size: 15, color: C.red });
-    if (ld && ls) ctx.labor = '실업 = L_S − L_D = ' + fmt((ls.x - ld.x) * 10, 0) + ' (그래프 단위)';
+    if (ld && ls) ctx.labor = tr(['실업 = L_S − L_D = ', 'Unemployment = L_S − L_D = ']) + fmt((ls.x - ld.x) * 10, 0) + tr([' (그래프 단위)', ' (graph units)']);
   }
 
   /* ───────── 곡선 계산 ───────── */
@@ -279,6 +279,8 @@
     arrowHead(parent, x2, y2, ang, color);
     if (both) arrowHead(parent, x1, y1, ang + Math.PI, color);
   }
+  // 덱 언어(영어면 [한국어, 영어] 짝의 둘째). 덱이 'deck:lang' 을 보내면 모든 그래프를 다시 그린다
+  function tr(v) { return Array.isArray(v) ? v[window.Deck && Deck.lang && Deck.lang() === 'en' ? 1 : 0] : v; }
   function fmt(v, d) { return Number(v).toLocaleString('en-US', { minimumFractionDigits: d, maximumFractionDigits: d }); }
   function same(a, b) { return Math.abs(a - b) < 1e-6; }
   // 글자 폭 어림(18px 기준): 한글 1em, 그 밖 0.58em, 아래 첨자 0.42em
@@ -391,7 +393,7 @@
     if (free) shown.push({ j: k, off: this.disp, letter: LETTERS[k + 1], free: true });
     else shown[k] = Object.assign({}, shown[k], { off: this.disp });
     const now = shown.length - 1, labelOff = this.target();
-    const ctx = { cur: [], prev: [], free: !!free, k, say: (sc.states[k].say || '') };
+    const ctx = { cur: [], prev: [], free: !!free, k, say: tr(sc.states[k].say || '') };
 
     sc.panels.forEach((pn) => {
       const g = svg('g', {}, s), b = pn.box, X = (x) => this.X(pn, x), Y = (y) => this.Y(pn, y);
@@ -526,11 +528,16 @@
       bar.appendChild(b);
       return b;
     };
-    this.resetBtn = mk('↺', '되돌리기', () => { this.free = null; this.go(); });
-    mk('원본', 'PDF 원래 그림 보기', () => this.box.classList.toggle('orig'));
+    this.resetBtn = mk('↺', '', () => { this.free = null; this.go(); });
+    this.origBtn = mk('', '', () => this.box.classList.toggle('orig'));
+    this.toolText();
     this.box.appendChild(bar);
     // 덱의 쓸어 넘기기(touchend)가 곡선 끌기에 끼어들지 않게
     ['touchstart', 'touchend'].forEach((t) => this.box.addEventListener(t, (e) => e.stopPropagation(), { passive: true }));
+  };
+  Graph.prototype.toolText = function () {     // 단추 글자도 언어 따라
+    this.resetBtn.title = tr(['되돌리기', 'Reset']);
+    this.origBtn.textContent = tr(['원본', 'Original']); this.origBtn.title = tr(['PDF 원래 그림 보기', 'Show the original figure from the PDF']);
   };
   Graph.prototype.bindDrag = function () {
     const s = this.svg;
@@ -601,10 +608,13 @@
   };
 
   /* ───────── 시작 ───────── */
+  const all = [];
+  window.addEventListener('deck:lang', () => all.forEach((g) => { g.toolText(); g.render(); }));
   document.querySelectorAll('.g[data-g]').forEach((box) => {
     const sc = SCN[box.getAttribute('data-g')];
     if (!sc) return;
     const g = new Graph(box, sc);
+    all.push(g);
     let wasActive = g.slide.classList.contains('active');
     g.sync(true);
     new MutationObserver(() => {

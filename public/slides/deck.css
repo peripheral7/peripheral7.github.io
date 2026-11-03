@@ -95,6 +95,13 @@ body.ui #ui{opacity:1;pointer-events:auto}
 #menu button{text-align:left;white-space:nowrap}
 #menu.left{right:auto;left:0}
 html.dark #bMore[aria-expanded="true"]{background:#fff;color:#000}
+/* 영어 브라우저에 한 번 묻는 언어 상자(아래 가운데) */
+#langAsk{position:fixed;left:0;right:0;bottom:28px;z-index:40;margin:0 auto;width:max-content;display:flex;flex-wrap:wrap;align-items:center;gap:10px;max-width:calc(100% - 28px);padding:14px 18px;border:2px solid #000;background:#fff;color:#000;font-size:16px;line-height:1.35;box-shadow:0 6px 24px rgba(0,0,0,.18)}
+#langAsk p{margin:0 8px 0 0}
+#langAsk button{font:inherit;font-weight:600;color:#000;background:#fff;border:2px solid #000;border-radius:0;padding:6px 16px;cursor:pointer;-webkit-appearance:none;appearance:none}
+#langAsk button:first-of-type,#langAsk button:hover{background:#000;color:#fff}
+html.dark #langAsk,html.dark #langAsk button{background:#000;color:#fff;border-color:#fff}
+html.dark #langAsk button:first-of-type,html.dark #langAsk button:hover{background:#fff;color:#000}
 #ui button:focus-visible,#overview .thumb:focus-visible{outline:2px solid #888;outline-offset:2px}
 html.dark #counter,html.dark #ui button{background:#000;color:#fff;border-color:#fff}
 html.dark #ui button:hover{background:#fff;color:#000}

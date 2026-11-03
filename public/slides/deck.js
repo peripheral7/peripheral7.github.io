@@ -46,7 +46,8 @@
   let cur = -1, uiTimer = 0, sticky = false, digits = '', digitTimer = 0;
   const state = {
     dark: params.has('theme') ? /^(dark|black)$/.test(params.get('theme')) : LS.get('theme') === 'dark',
-    serif: (params.has('font') ? params.get('font') : LS.get('font')) === 'serif'     // 'serif' 가 아니면 모두 기본 고딕체(Pretendard)
+    serif: (params.has('font') ? params.get('font') : LS.get('font')) === 'serif',    // 'serif' 가 아니면 모두 기본 고딕체(Pretendard)
+    lang: ''
   };
 
   /* ───────── 슬라이드 준비 ───────── */
@@ -84,6 +85,11 @@
   const bTheme = btn('bTheme', 'Black / white', 'Black / white (D)', () => { toggleTheme(); closeMenu(); });
   const bFont = btn('bFont', 'Font: Sans', 'Font: Sans = Pretendard, Serif = Baskerville (T)', () => { toggleFont(); closeMenu(); });
   more.appendChild(bMore); menu.appendChild(bTheme); menu.appendChild(bFont); more.appendChild(menu); ui.appendChild(more);
+  // 언어: <html data-langs="ko,en"> 처럼 여러 언어를 가진 덱만. 첫 값이 기본 언어
+  const langs = (root.getAttribute('data-langs') || '').split(',').map((x) => x.trim()).filter(Boolean);
+  const LANG_NAME = { ko: '한국어', en: 'English' };
+  const bLang = langs.length > 1 ? btn('bLang', 'Language', 'Language', () => { setLang(langs[(langs.indexOf(state.lang) + 1) % langs.length], true); closeMenu(); }) : null;
+  if (bLang) menu.appendChild(bLang);
   function menuOpen() { return !menu.hidden; }
   function openMenu() {
     menu.classList.toggle('left', more.getBoundingClientRect().left < 170);   // 좁은 화면에서 … 이 왼쪽으로 줄바꿈되면 메뉴를 오른쪽으로 펼친다
@@ -278,6 +284,32 @@
   function toggleTheme() { state.dark = !state.dark; applyTheme(); if (state.dark) LS.set('theme', 'dark'); else LS.del('theme'); }
   function applyFont() { root.classList.toggle('font-serif', state.serif); bFont.textContent = 'Font: ' + (state.serif ? 'Serif' : 'Sans'); }
   function toggleFont() { state.serif = !state.serif; applyFont(); if (state.serif) LS.set('font', 'serif'); else LS.del('font'); if (overviewOpen()) fitThumbs(); }
+  /* 언어 바꾸기: img[data-<언어>] 의 그림 주소를 바꾸고, data-l="<언어>" 인 요소만 보이고, window 에 'deck:lang' 이벤트를 보낸다(덱 스크립트가 글자를 다시 그림) */
+  function setLang(l, save) {
+    if (langs.indexOf(l) < 0) l = langs[0];
+    state.lang = l;
+    root.setAttribute('lang', l);
+    each(document.querySelectorAll('img'), (img) => {
+      if (!langs.some((x) => img.hasAttribute('data-' + x))) return;
+      if (!img.hasAttribute('data-' + langs[0])) img.setAttribute('data-' + langs[0], img.getAttribute('src'));
+      img.setAttribute('src', img.getAttribute('data-' + l) || img.getAttribute('data-' + langs[0]));
+    });
+    each(document.querySelectorAll('[data-l]'), (e) => { e.hidden = e.getAttribute('data-l') !== l; });
+    if (bLang) bLang.textContent = 'Language: ' + (LANG_NAME[l] || l);
+    if (save) LS.set('lang', l);
+    window.dispatchEvent(new CustomEvent('deck:lang', { detail: { lang: l } }));
+  }
+  // 저장된 선택이 없고 브라우저가 영어면, 영어로 바꿀지 영어로 묻는다(답은 저장 — 다시 묻지 않음)
+  function askLang() {
+    const box = el('div', { id: 'langAsk', role: 'dialog', 'aria-label': 'Language' });
+    box.appendChild(el('p', null, 'This deck is also available in English. Switch to English?'));
+    const done = (l) => { setLang(l, true); box.remove(); };
+    const yes = el('button', { type: 'button' }, 'Yes'), no = el('button', { type: 'button' }, 'No');
+    yes.addEventListener('click', () => done('en')); no.addEventListener('click', () => done(langs[0]));
+    box.appendChild(yes); box.appendChild(no);
+    body.appendChild(box);
+    yes.focus();
+  }
   function toggleFull() {
     const d = document, e = root, f = d.fullscreenElement || d.webkitFullscreenElement;
     try {
@@ -330,6 +362,12 @@
     return m ? clamp(parseInt(m[1], 10) - 1) : 0;
   }
   applyTheme(); applyFont(); fit();
+  if (langs.length > 1) {
+    const want = params.get('lang') || LS.get('lang');
+    setLang(want || langs[0], false);
+    const nav = (navigator.languages && navigator.languages[0]) || navigator.language || '';
+    if (!want && langs[0] !== 'en' && langs.indexOf('en') >= 0 && /^en\b/i.test(nav)) askLang();
+  }
   show(startIndex());
   document.addEventListener('keydown', onKey);
   document.addEventListener('mousemove', () => showUi());
@@ -338,5 +376,5 @@
   window.addEventListener('orientationchange', fit);
   window.addEventListener('hashchange', () => { const m = /^#(\d+)$/.exec(location.hash); if (m) show(clamp(parseInt(m[1], 10) - 1)); SS.set(location.hash + '|' + cur); });
 
-  window.Deck = { next, prev, goto(n) { show(clamp(n - 1)); }, count: slides.length, index() { return cur + 1; } };
+  window.Deck = { next, prev, goto(n) { show(clamp(n - 1)); }, count: slides.length, index() { return cur + 1; }, lang() { return state.lang || langs[0] || ''; } };
 })();

@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="ko">
+<html lang="ko" data-langs="ko,en">
 <head>
 <meta name="pinterest" content="nopin">
 <meta charset="utf-8">
@@ -12,6 +12,8 @@
   Econ2 Exam2 TA Session 덱 — 원본 PDF(/econ2/econ2-exam2-ta-session.pdf) 33장을 장마다 그림(p01~p33.jpg, 1920×1080)으로 넣었다.
   그래프가 있는 장(11 15 17 18 19 22 23 24 25 26 29)은 <div class="g" data-g="p번호"> 가 원본 그래프 자리를 움직이는 그래프로 덮는다(graphs.js).
     자리(left/top/width/height)는 무대 px = PDF pt × 5/3. 빈 <i class="step"> 개수 = 그 장에서 → 로 넘기는 그래프 단계 수(graphs.js 의 states 와 맞춘다).
+  영어: <html data-langs="ko,en"> — … 메뉴의 Language 로 바꾼다. 한글이 있던 PDF 쪽(5 6 10 13 14 17 18 20 30 31)만 en/pNN.jpg 영문 그림(img data-en),
+    HTML 글자는 data-l="ko"/"en" 짝, graphs.js·money.js 는 'deck:lang' 이벤트를 받아 다시 그린다.
   2쪽 뒤의 「Ch29 Money Creation」 장은 PDF 에 없는 HTML 장(money.js) — 그래서 덱 번호는 3쪽부터 PDF 쪽 번호 + 1.
   PDF 가 바뀌면: 그림을 다시 뽑고(PyMuPDF 로 2배, JPG 82) 그래프 자리·단계를 새 장 번호에 맞춘다.
 -->
@@ -44,13 +46,12 @@
   .mc .mc-arrow{margin:10px 0 10px 4px;font-size:20px;color:var(--blue);font-weight:600}
   .mc .mc-arrow u{text-decoration-thickness:2px;text-underline-offset:4px}
   .mc-tt .h em{float:right;font-style:normal;color:#1f2537;letter-spacing:0;text-transform:none}
-  /* 앞 은행의 대출 = 이 은행 자산 전체: 둘 다 파란 테두리, 이 은행이 나타날 때 두 번 깜빡임 */
-  .mc-loan{display:inline-block;width:calc(100% + 16px);margin:2px -8px 0;padding:0 8px;outline:2.5px solid var(--blue);outline-offset:0}
-  .mc-tt>.mc-in{outline:3px solid var(--blue);outline-offset:-3px;background:rgba(31,111,209,.06)}
+  /* 앞 은행의 대출 = 이 은행 자산 전체: 이 은행이 나타날 때 두 칸의 바탕이 함께 한 번 깜빡인다(테두리 없음) */
+  .mc-loan{display:inline-block;width:calc(100% + 16px);margin:0 -8px;padding:0 8px}
   .mc-tt>.mc-in .h em{color:var(--blue)}
-  .mc-t.step.shown .mc-in,.mc-t:has(+ .mc-t.step.shown) .mc-loan{animation:mcPulse .7s ease-in-out .15s 2}
+  .mc-t.step.shown .mc-in,.mc-t:has(+ .mc-t.step.shown) .mc-loan{animation:mcPulse 1s ease-in-out .15s 1}
   .slide.instant .mc-in,.slide.instant .mc-loan{animation:none !important}
-  @keyframes mcPulse{50%{outline-color:rgba(31,111,209,.15);background-color:rgba(31,111,209,.22)}}
+  @keyframes mcPulse{40%{background-color:rgba(31,111,209,.24)}}
   @media (prefers-reduced-motion:reduce){.mc-in,.mc-loan{animation:none !important}}
   .mc .u{white-space:nowrap}
   .mc-r{display:flex;align-items:center;gap:10px;font-size:22px;font-weight:700;margin:0 0 18px}
@@ -90,46 +91,50 @@
     <img src="p02.jpg" alt="Ch29 The Monetary System" decoding="async">
   </section>
   <section class="slide mc" data-title="Ch29 Money Creation · Money Multiplier">
-    <p class="mc-head"><b>Ch29</b><span>Concept</span><b>Money Creation · Money Multiplier</b><span class="mc-ko">통화 창출(신용팽창)</span></p>
+    <p class="mc-head"><b>Ch29</b><span>Concept</span><b>Money Creation · Money Multiplier</b><span class="mc-ko"><span data-l="ko">통화 창출(신용팽창)</span><span data-l="en" hidden>How banks create money</span></span></p>
     <div class="mc-body">
       <div>
         <div class="mc-t">
-        <p class="mc-bank">1번 은행 — 현금 $100 예금</p>
+        <p class="mc-bank"><span data-l="ko">1번 은행 — 현금 $100 예금</span><span data-l="en" hidden>Bank 1 — $100 of cash deposited</span></p>
         <div class="mc-tt">
-          <div class="mc-as"><span class="h">Assets <em>합계 <span data-v="d1"></span></em></span><br>Reserves <b data-v="r1"></b><br><span class="lo mc-loan">Loans <b data-v="l1"></b></span></div>
+          <div class="mc-as"><span class="h">Assets <em><span data-l="ko">합계</span><span data-l="en" hidden>Total</span> <span data-v="d1"></span></em></span><br>Reserves <b data-v="r1"></b><br><span class="lo mc-loan">Loans <b data-v="l1"></b></span></div>
           <div><span class="h">Liabilities</span><br>Deposits <b data-v="d1"></b></div>
         </div>
         </div>
         <div class="mc-t step">
-          <p class="mc-arrow">↓ 1번 은행 대출 <span data-v="l1"></span> → 2번 은행 예금 → <u>2번 은행 자산 전체</u></p>
-        <p class="mc-bank">2번 은행</p>
+          <p class="mc-arrow"><span data-l="ko">↓ 1번 은행 대출 <span data-v="l1"></span> → 2번 은행 예금 → <u>2번 은행 자산 전체</u></span><span data-l="en" hidden>↓ Bank 1 loan <span data-v="l1"></span> → deposit at Bank 2 → <u>all of Bank 2’s assets</u></span></p>
+        <p class="mc-bank"><span data-l="ko">2번 은행</span><span data-l="en" hidden>Bank 2</span></p>
         <div class="mc-tt">
-          <div class="mc-as mc-in"><span class="h">Assets <em>합계 <span data-v="d2"></span></em></span><br>Reserves <b data-v="r2"></b><br><span class="lo mc-loan">Loans <b data-v="l2"></b></span></div>
+          <div class="mc-as mc-in"><span class="h">Assets <em><span data-l="ko">합계</span><span data-l="en" hidden>Total</span> <span data-v="d2"></span></em></span><br>Reserves <b data-v="r2"></b><br><span class="lo mc-loan">Loans <b data-v="l2"></b></span></div>
           <div><span class="h">Liabilities</span><br>Deposits <b data-v="d2"></b></div>
         </div>
         </div>
         <div class="mc-t step">
-          <p class="mc-arrow">↓ 2번 은행 대출 <span data-v="l2"></span> → 3번 은행 예금 → <u>3번 은행 자산 전체</u> …</p>
-        <p class="mc-bank">3번 은행</p>
+          <p class="mc-arrow"><span data-l="ko">↓ 2번 은행 대출 <span data-v="l2"></span> → 3번 은행 예금 → <u>3번 은행 자산 전체</u> …</span><span data-l="en" hidden>↓ Bank 2 loan <span data-v="l2"></span> → deposit at Bank 3 → <u>all of Bank 3’s assets</u></span></p>
+        <p class="mc-bank"><span data-l="ko">3번 은행</span><span data-l="en" hidden>Bank 3</span></p>
         <div class="mc-tt">
-          <div class="mc-as mc-in"><span class="h">Assets <em>합계 <span data-v="d3"></span></em></span><br>Reserves <b data-v="r3"></b><br><span class="lo mc-loan">Loans <b data-v="l3"></b></span></div>
+          <div class="mc-as mc-in"><span class="h">Assets <em><span data-l="ko">합계</span><span data-l="en" hidden>Total</span> <span data-v="d3"></span></em></span><br>Reserves <b data-v="r3"></b><br><span class="lo mc-loan">Loans <b data-v="l3"></b></span></div>
           <div><span class="h">Liabilities</span><br>Deposits <b data-v="d3"></b></div>
         </div>
         </div>
       </div>
       <div>
-        <div class="mc-r">지급준비율 R <button type="button" data-r="0.05" aria-pressed="false">5%</button><button type="button" data-r="0.1" aria-pressed="true">10%</button><button type="button" data-r="0.2" aria-pressed="false">20%</button></div>
+        <div class="mc-r"><span data-l="ko">지급준비율 R</span><span data-l="en" hidden>Reserve ratio R</span> <button type="button" data-r="0.05" aria-pressed="false">5%</button><button type="button" data-r="0.1" aria-pressed="true">10%</button><button type="button" data-r="0.2" aria-pressed="false">20%</button></div>
         <div class="mc-graph step"><svg class="mc-chart" viewBox="0 0 660 320" aria-hidden="true"></svg></div>
         <div class="mc-f step">
-          <span class="u">통화승수 = 1 / R = 1 / <span data-v="R"></span> = <b data-v="m"></b></span><br>
-          <span class="u">예금 합계 = $100 + <span data-v="d2s"></span> + <span data-v="d3s"></span> + … = <b data-v="total"></b></span>
-          <small><span class="u">현금 $100 을 예금한 경우 → 통화량 + <b data-v="new"></b></span><br>
+          <span class="u"><span data-l="ko">통화승수</span><span data-l="en" hidden>Money multiplier</span> = 1 / R = 1 / <span data-v="R"></span> = <b data-v="m"></b></span><br>
+          <span class="u"><span data-l="ko">예금 합계</span><span data-l="en" hidden>Total deposits</span> = $100 + <span data-v="d2s"></span> + <span data-v="d3s"></span> + … = <b data-v="total"></b></span>
+          <small data-l="ko"><span class="u">현금 $100 을 예금한 경우 → 통화량 + <b data-v="new"></b></span><br>
           <span class="u">(예금 <span data-v="total"></span> − 이미 통화였던 현금 $100)</span><br>
           <span class="u">Fed 공개시장 매입으로 새 지준 $100 → 통화량 + <b data-v="total"></b></span></small>
+          <small data-l="en" hidden><span class="u">$100 of cash deposited → money supply + <b data-v="new"></b></span><br>
+          <span class="u">(deposits <span data-v="total"></span> − the $100 of cash that was already money)</span><br>
+          <span class="u">Fed open-market purchase adds $100 of new reserves → money supply + <b data-v="total"></b></span></small>
         </div>
       </div>
     </div>
-    <div class="mc-cond"><b>가정</b><span>① 현금 보유 없음(모두 예금)</span><span>② 초과지준 없음: R 만큼만 지준, 나머지는 모두 대출</span><span>③ 대출금은 다시 은행에 예금</span></div>
+    <div class="mc-cond" data-l="ko"><b>가정</b><span>① 현금 보유 없음(모두 예금)</span><span>② 초과지준 없음: R 만큼만 지준, 나머지는 모두 대출</span><span>③ 대출금은 다시 은행에 예금</span></div>
+    <div class="mc-cond" data-l="en" hidden><b>Assumptions</b><span>① No cash held (all deposited)</span><span>② No excess reserves: hold R, lend the rest</span><span>③ Loans are deposited again</span></div>
   </section>
   <section class="slide pg" data-title="Ch29 MC 14 · Excess Reserves">
     <img src="p03.jpg" alt="Ch29 MC 14 · Excess Reserves" decoding="async">
@@ -138,10 +143,10 @@
     <img src="p04.jpg" alt="Ch29 SA 10 · Money Multiplier · Reserve Requirement" decoding="async">
   </section>
   <section class="slide pg" data-title="Ch29 SA 5 · Money Multiplier">
-    <img src="p05.jpg" alt="Ch29 SA 5 · Money Multiplier" decoding="async">
+    <img src="p05.jpg" data-en="en/p05.jpg" alt="Ch29 SA 5 · Money Multiplier" decoding="async">
   </section>
   <section class="slide pg" data-title="Ch29 SA 11 · Open-Market Operations">
-    <img src="p06.jpg" alt="Ch29 SA 11 · Open-Market Operations" decoding="async">
+    <img src="p06.jpg" data-en="en/p06.jpg" alt="Ch29 SA 11 · Open-Market Operations" decoding="async">
   </section>
   <section class="slide pg" data-title="Ch29 MC 15 · Bank Balance Sheet · Loans">
     <img src="p07.jpg" alt="Ch29 MC 15 · Bank Balance Sheet · Loans" decoding="async">
@@ -153,7 +158,7 @@
     <img src="p09.jpg" alt="Ch30 Money Growth and Inflation" decoding="async">
   </section>
   <section class="slide pg" data-title="Ch30 MC 10 · Classical Dichotomy / MC 21 · Unexpected Inflation">
-    <img src="p10.jpg" alt="Ch30 MC 10 · Classical Dichotomy / MC 21 · Unexpected Inflation" decoding="async">
+    <img src="p10.jpg" data-en="en/p10.jpg" alt="Ch30 MC 10 · Classical Dichotomy / MC 21 · Unexpected Inflation" decoding="async">
   </section>
   <section class="slide pg" data-title="Ch30 MC 8 · Velocity of Money / MC 9 · Value of Money">
     <img src="p11.jpg" alt="Ch30 MC 8 · Velocity of Money / MC 9 · Value of Money" decoding="async">
@@ -164,10 +169,10 @@
     <img src="p12.jpg" alt="Ch30 SA 5 · After-Tax Real Interest Rate" decoding="async">
   </section>
   <section class="slide pg" data-title="Ch30 MC 19 · Inflation · Capital Gains Tax">
-    <img src="p13.jpg" alt="Ch30 MC 19 · Inflation · Capital Gains Tax" decoding="async">
+    <img src="p13.jpg" data-en="en/p13.jpg" alt="Ch30 MC 19 · Inflation · Capital Gains Tax" decoding="async">
   </section>
   <section class="slide pg" data-title="Ch30 SA 1 · Quantity Theory · Money Supply Rule">
-    <img src="p14.jpg" alt="Ch30 SA 1 · Quantity Theory · Money Supply Rule" decoding="async">
+    <img src="p14.jpg" data-en="en/p14.jpg" alt="Ch30 SA 1 · Quantity Theory · Money Supply Rule" decoding="async">
   </section>
   <section class="slide pg" data-title="Ch30 SA 2 · Money Demand Shift · Price Level">
     <img src="p15.jpg" alt="Ch30 SA 2 · Money Demand Shift · Price Level" decoding="async">
@@ -178,12 +183,12 @@
     <img src="p16.jpg" alt="Ch33 Aggregate Demand and Aggregate Supply" decoding="async">
   </section>
   <section class="slide pg" data-title="Ch33 AD–AS Overview · AD Shifters">
-    <img src="p17.jpg" alt="Ch33 AD–AS Overview · AD Shifters" decoding="async">
+    <img src="p17.jpg" data-en="en/p17.jpg" alt="Ch33 AD–AS Overview · AD Shifters" decoding="async">
     <div class="g" data-g="p17" style="left:120px;top:272px;width:567px;height:557px"></div>
     <i class="step"></i>
   </section>
   <section class="slide pg" data-title="Ch33 AD–AS Overview · SRAS Shifters">
-    <img src="p18.jpg" alt="Ch33 AD–AS Overview · SRAS Shifters" decoding="async">
+    <img src="p18.jpg" data-en="en/p18.jpg" alt="Ch33 AD–AS Overview · SRAS Shifters" decoding="async">
     <div class="g" data-g="p18" style="left:120px;top:272px;width:567px;height:557px"></div>
     <i class="step"></i>
   </section>
@@ -193,7 +198,7 @@
     <i class="step"></i>
   </section>
   <section class="slide pg" data-title="Ch33 MC 7 · Capital Inflow · Exchange Rate">
-    <img src="p20.jpg" alt="Ch33 MC 7 · Capital Inflow · Exchange Rate" decoding="async">
+    <img src="p20.jpg" data-en="en/p20.jpg" alt="Ch33 MC 7 · Capital Inflow · Exchange Rate" decoding="async">
   </section>
   <section class="slide pg" data-title="Ch33 SA 1 · Long-Run Aggregate Supply Shifters">
     <img src="p21.jpg" alt="Ch33 SA 1 · Long-Run Aggregate Supply Shifters" decoding="async">
@@ -235,10 +240,10 @@
     <i class="step"></i><i class="step"></i>
   </section>
   <section class="slide pg" data-title="Ch28 SA 1 · Labor Force Statistics">
-    <img src="p30.jpg" alt="Ch28 SA 1 · Labor Force Statistics" decoding="async">
+    <img src="p30.jpg" data-en="en/p30.jpg" alt="Ch28 SA 1 · Labor Force Statistics" decoding="async">
   </section>
   <section class="slide pg" data-title="Ch28 SA 4 · Sectoral Shifts · Wage Adjustment">
-    <img src="p31.jpg" alt="Ch28 SA 4 · Sectoral Shifts · Wage Adjustment" decoding="async">
+    <img src="p31.jpg" data-en="en/p31.jpg" alt="Ch28 SA 4 · Sectoral Shifts · Wage Adjustment" decoding="async">
   </section>
   <section class="slide pg" data-title="Answers 1 / 2 · Ch29 · Ch30">
     <img src="p32.jpg" alt="Answers 1 / 2 · Ch29 · Ch30" decoding="async">
