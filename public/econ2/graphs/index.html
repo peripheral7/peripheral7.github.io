@@ -9,7 +9,8 @@
 <!--
   Econ2 Exam2 핵심 그래프 — 챕터마다 한 구역(Ch29 은행 T계정 · Ch30 화폐시장 · Ch33 AD/AS 탭 · Ch28 노동시장 + 실업 지표).
   교재의 기본 식 · 곡선만 쓴다. 고를 것은 글자 목록(.opts): 고르면 처음 상태 A 에서 변화가 한 걸음씩 재생되고(.player),
-  같은 줄을 다시 누르면 풀린다. 재생기(오른쪽 아래)는 전체 단계 목록(지금 걸음만 크게) + 조작 줄(‹ 이전 · 자동 · 다음 › · 속도). 지표 상자는 그래프 바로 아래, 방향(▲ ▼)만.
+  같은 줄을 다시 누르면 풀린다. 재생기는 전체 폭 단계 목록(안 A 열 · 안 B 타임라인 ?steps=b) + 조작 줄(‹ 이전 · 자동 · 다음 › · 속도).
+  방향(▲ ▼)은 그래프의 새 균형점 축 이름 옆에 붙는다. 지표 상자는 그래프가 없는 Ch29 · 실업률 탭에만.
   그래프 · 사건 내용은 app.js 한 곳. 주소 #ch29 · #ch30 · #ch33 · #ch33-as · #ch28 · #ch28-u 로 바로 열 수 있다(구역 id 는 c29 처럼 달리 둔다 — 같으면 브라우저가 그 구역으로 내려가 머리줄 밑에 가린다).
 -->
 <style>
@@ -31,11 +32,13 @@
   .top .links{margin-left:auto;display:flex;gap:12px;font-size:13px;white-space:nowrap}
   .top .links a{color:var(--soft)}
 
-  /* 챕터 한 구역: 왼쪽 그림(그래프 → 바로 아래 지표 상자), 오른쪽 위 기본 식 · 사건 목록, 오른쪽 아래 걸음 카드(재생기).
-     휴대폰(한 줄)에서는 그림 → 걸음 카드 → 설명 · 목록 순서. 탭이 있는 구역(.tabbed)은 맨 위에 큰 탭 */
+  /* 챕터 한 구역: 왼쪽 그래프, 오른쪽 기본 식 · 사건 목록, 전체 폭 단계 목록(재생기).
+     안 A(기본): 단계 목록이 맨 아래. 안 B(body.sb, 주소 ?steps=b): 탭 아래 · 그래프 위 타임라인. 휴대폰은 그래프 → 단계 → 설명 */
   main{max-width:var(--max);margin:0 auto;padding:14px 12px 40px}
-  .ch{display:none;gap:10px 28px;grid-template-columns:minmax(0,1.3fr) minmax(300px,1fr);grid-template-rows:auto 1fr;grid-template-areas:"fig side" "fig play";align-items:start}
-  .ch.tabbed{grid-template-rows:auto auto 1fr;grid-template-areas:"tabs tabs" "fig side" "fig play"}
+  .ch{display:none;gap:12px 28px;grid-template-columns:minmax(0,1.3fr) minmax(300px,1fr);grid-template-areas:"fig side" "play play";align-items:start}
+  .ch.tabbed{grid-template-areas:"tabs tabs" "fig side" "play play"}
+  .sb .ch{grid-template-areas:"play play" "fig side"}
+  .sb .ch.tabbed{grid-template-areas:"tabs tabs" "play play" "fig side"}
   .ch.on{display:grid}
   .ch>.sub{grid-area:tabs}
   .fig{grid-area:fig;min-width:0}
@@ -52,24 +55,28 @@
   .sub button:hover:not([aria-selected="true"]){background:var(--tint)}
   .sub button[aria-selected="true"]{background:var(--ink);color:#fff}
 
-  /* 재생기: 단계 목록(사건을 고르면 전체 걸음이 한눈에 — 묶음 제목 + 번호 · 꼬리표 · 글, 지금 걸음만 파랑 바탕에 크게)
-     + 조작 줄(하나로 이어진 사각 버튼: ‹ 이전 · 자동 · 다음 › / 속도). 사건을 고르기 전엔 안내 한 줄만(.idle) */
-  .steps{margin:0;padding:0;list-style:none;border:1.5px solid var(--line);border-radius:10px;overflow:hidden;background:#fff}
-  .steps li.hint{padding:16px 14px;font-size:14.5px;line-height:1.5;color:var(--soft)}
-  .steps li.grp{display:flex;flex-wrap:wrap;align-items:center;gap:4px 8px;padding:8px 12px 5px;border-top:1px solid var(--line);background:#fafbfc;font-size:12.5px;font-weight:800;letter-spacing:.04em;color:var(--soft)}
-  .steps li.grp:first-child{border-top:0}
-  .steps .alt{padding:1px 8px;border:1.5px solid var(--line);border-radius:999px;background:#fff;font-size:12.5px;font-weight:700;letter-spacing:0;cursor:pointer}
-  .steps .alt.on{border-color:var(--blue);color:var(--blue)}
-  .steps li[data-i] button{display:grid;grid-template-columns:20px auto minmax(0,1fr);align-items:baseline;gap:0 8px;width:100%;padding:6px 12px 6px 10px;border:0;border-left:3px solid transparent;background:none;text-align:left;font-size:15px;line-height:1.45;color:#9aa0aa;cursor:pointer;transition:background .2s}
-  .steps li.todo .up,.steps li.todo .dn{color:inherit}
-  .steps li.done button{color:var(--ink)}
-  .steps li.cur button{border-left-color:var(--blue);background:var(--tint);color:var(--ink);font-size:16.5px;font-weight:800;padding:9px 12px 9px 10px}
-  .steps .n{font-size:12.5px;font-weight:800;font-variant-numeric:tabular-nums;text-align:right}
-  .steps .k{padding:1px 6px;border-radius:4px;background:#eceef2;font-size:11.5px;font-weight:800;letter-spacing:.04em;color:var(--soft);white-space:nowrap}
-  .steps li.cur .k{background:var(--blue);color:#fff}
-  .steps .tx.wide{grid-column:2 / -1}
-  .steps .tx sub{font-size:.7em}
-  .pbar{display:flex;flex-wrap:wrap;align-items:center;gap:8px;margin:10px 0 0}
+  /* 재생기 — 안 A(기본): 단계(처음 · 1단계 · 2단계)마다 한 열(li.stg), 열 안에 걸음이 세로로. 지금 걸음만 파랑 바탕에 크게, 지금 단계 열은 진한 테두리.
+     조작 줄(이어진 사각 버튼 ‹ 이전 · 자동 · 다음 › / 속도)은 목록 아래 오른쪽. 사건을 고르기 전엔 안내 한 줄만(.idle) */
+  .steps{display:flex;gap:10px;margin:0;padding:0;list-style:none}
+  .steps li.hint{flex:1;padding:14px 16px;border:1.5px dashed var(--line);border-radius:10px;font-size:14.5px;line-height:1.5;color:var(--soft)}
+  .stg{flex:1 1 0;min-width:0;border:1.5px solid var(--line);border-radius:10px;overflow:hidden;background:#fff}
+  .stg:first-child{flex:0 1 230px}
+  .stg.cur{border-color:var(--ink)}
+  .gh{display:flex;flex-wrap:wrap;align-items:center;gap:4px 8px;padding:7px 12px;border-bottom:1px solid var(--line);background:#fafbfc;font-size:12.5px;font-weight:800;letter-spacing:.04em;color:var(--soft)}
+  .stg.cur .gh{color:var(--ink)}
+  .alt{padding:1px 8px;border:1.5px solid var(--line);border-radius:999px;background:#fff;font-size:12.5px;font-weight:700;letter-spacing:0;cursor:pointer}
+  .alt.on{border-color:var(--blue);color:var(--blue)}
+  .rows{margin:0;padding:0;list-style:none}
+  .rows li button{display:grid;grid-template-columns:20px auto minmax(0,1fr);align-items:baseline;gap:0 8px;width:100%;padding:7px 12px 7px 10px;border:0;border-left:3px solid transparent;background:none;text-align:left;font-size:15px;line-height:1.45;color:#9aa0aa;cursor:pointer;transition:background .2s}
+  .rows li.todo .up,.rows li.todo .dn{color:inherit}
+  .rows li.done button{color:var(--ink)}
+  .rows li.cur button{border-left-color:var(--blue);background:var(--tint);color:var(--ink);font-size:16.5px;font-weight:800}
+  .rows .n{font-size:12.5px;font-weight:800;font-variant-numeric:tabular-nums;text-align:right}
+  .rows .k{padding:1px 6px;border-radius:4px;background:#eceef2;font-size:11.5px;font-weight:800;letter-spacing:.04em;color:var(--soft);white-space:nowrap}
+  .rows li.cur .k{background:var(--blue);color:#fff}
+  .rows .tx.wide{grid-column:2 / -1}
+  .rows .tx sub{font-size:.7em}
+  .pbar{display:flex;flex-wrap:wrap;align-items:center;justify-content:flex-end;gap:8px;margin:8px 0 0}
   .pbar .cnt{margin-right:auto;font-size:14px;font-weight:800;color:var(--ink);font-variant-numeric:tabular-nums}
   .seg{display:inline-flex;border:1.5px solid var(--ink);border-radius:8px;overflow:hidden}
   .seg button{padding:7px 14px;border:0;border-left:1.5px solid var(--ink);background:#fff;font-size:14px;font-weight:700;cursor:pointer}
@@ -81,6 +88,22 @@
   .pbar .spdb{padding:7px 12px;border:1.5px solid var(--line);border-radius:8px;background:#fff;font-size:13.5px;font-weight:700;color:var(--soft);cursor:pointer}
   .pbar .spdb:hover{border-color:var(--ink);color:var(--ink)}
   .player.idle .pbar{display:none}
+
+  /* 재생기 — 안 B(body.sb): 한 줄 타임라인. 단계 이름은 작은 머리글, 걸음은 번호 · 꼬리표 칩, 지금 걸음만 글이 펼쳐진다. 조작 줄은 같은 줄 오른쪽 */
+  .sb .player{display:flex;align-items:flex-start;gap:12px}
+  .sb .steps{flex:1;flex-wrap:wrap;align-items:center;gap:6px 8px;min-width:0}
+  .sb .stg{display:contents}
+  .sb .gh{padding:0 2px 0 0;border:0;background:none;font-size:12px}
+  .sb .stg + .stg .gh::before{content:"›";margin-right:8px;font-size:15px;color:#b3b8c2}
+  .sb .rows{display:contents}
+  .sb .rows li button{display:inline-flex;align-items:center;gap:6px;width:auto;padding:6px 10px;border:1.5px solid var(--line);border-radius:8px;font-size:14px;line-height:1.35;color:#9aa0aa}
+  .sb .rows li.done button{border-color:var(--ink)}
+  .sb .rows li:not(.cur) .tx{display:none}
+  .sb .rows li.cur button{border-color:var(--blue);background:var(--tint);font-size:16px}
+  .sb .rows .n{text-align:left}
+  .sb .pbar{flex:none;margin:0}
+  .sb .pbar .cnt{margin-right:4px}
+  .sb .player.idle{display:block}
 
   .side{min-width:0}
   .side h2{margin:0 0 6px;font-size:20px;line-height:1.25}
@@ -170,8 +193,10 @@
     .tabs{order:3;width:100%}
     .tabs button{padding:8px 8px;font-size:14px}
     main{padding:10px 10px 32px}
-    .ch,.ch.tabbed{grid-template-columns:minmax(0,1fr);grid-template-rows:none;grid-template-areas:"fig" "play" "side";gap:14px}
+    .ch,.ch.tabbed{grid-template-columns:minmax(0,1fr);grid-template-areas:"fig" "play" "side";gap:14px}
     .ch.tabbed{grid-template-areas:"tabs" "fig" "play" "side"}
+    .sb .ch{grid-template-areas:"play" "fig" "side"}
+    .sb .ch.tabbed{grid-template-areas:"tabs" "play" "fig" "side"}
     .sub button{flex:1;min-width:0;padding:9px 6px;font-size:15.5px}
     .sub button small{display:block;margin:0}
     .kdir{font-size:17px}
@@ -188,9 +213,14 @@
     .tnote{font-size:13.5px}
     .rate{grid-template-columns:auto auto minmax(0,1fr);font-size:15px}
     .rate .nm{grid-column:1 / -1}
-    .steps li[data-i] button{font-size:14.5px}
-    .steps li.cur button{font-size:15.5px}
+    .steps{flex-direction:column;gap:8px}
+    .stg,.stg:first-child{flex:none}
+    .rows li button{font-size:14.5px}
+    .rows li.cur button{font-size:15.5px}
     .seg button{padding:7px 11px;font-size:13.5px}
+    .sb .player{display:block}
+    .sb .steps{flex-direction:row}
+    .sb .pbar{margin-top:8px}
     .fig .stage{max-height:none}
   }
 </style>
@@ -227,7 +257,6 @@
   <section class="ch" id="c30" aria-label="Ch30 화폐와 물가">
     <div class="fig">
       <div class="stage" id="plot30"></div>
-      <div class="keys" id="k30"></div>
     </div>
     <div class="side">
       <h2><small>Ch30 Money Growth and Inflation</small>화폐시장: 화폐가치 1/P</h2>
@@ -247,7 +276,6 @@
     <div class="fig">
       <div class="stage" id="plot33ad"></div>
       <div class="stage" id="plot33as" hidden></div>
-      <div class="keys" id="k33"></div>
     </div>
     <div class="side">
       <div id="side33ad">
@@ -281,7 +309,6 @@
     <div class="panel" id="p28w">
       <div class="fig">
         <div class="stage" id="plot28"></div>
-        <div class="keys" id="k28"></div>
       </div>
       <div class="side">
         <h2><small>Ch28 Unemployment · 노동시장</small>균형보다 높은 임금 → 실업</h2>
