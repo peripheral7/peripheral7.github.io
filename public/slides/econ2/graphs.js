@@ -152,7 +152,7 @@
   };
 
   // 경직적 임금 표(25쪽): 명목임금 W 는 기대물가 Pe 에 맞춰 정해진다고 보고 = SRAS 가 Y*(LRAS) 에서 갖는 높이,
-  // 물가 P = 균형점 높이. 둘 다 A 를 100 으로 한 지수, 실질임금 = W / P × 100. 지금 행(파랑)은 애니메이션·끌기에 따라 값이 움직인다
+  // 물가 P = 균형점 높이. 둘 다 A 를 100 으로 한 지수, 실질임금 = W / P × 100. 지금 열(글자 파랑)은 애니메이션·끌기에 따라 값이 움직인다
   function wageTable(g, pn, st, ctx, shown, P) {
     const S = pn.curves.find((c) => c.id === 'SRAS'), base = S.y;
     const rows = [];
@@ -162,22 +162,29 @@
       const W = 100 * fy(S, offOf(S, s.off), 5) / base, Pi = 100 * p.y / base;
       rows.push({ lab: p.lab, W, P: Pi, R: W / Pi * 100, now: i === shown.length - 1 });
     });
-    const top = this.H - 128, x0 = 14, cx = [x0, 116, 206, 300], barX = 352, barW = this.W - barX - 18;
+    // A · B · C 를 가로로 나란히, 각 열은 분수 W / P = 실질임금. 바로 앞 열보다 오르면 ↑(파랑), 내리면 ↓(빨강), 그대로면 =(회색)
+    const top = this.H - 128, x0 = 14, lx = 150, colW = Math.min(110, (this.W - lx - 14) / Math.max(3, rows.length));
+    const cx = (i) => lx + colW * (i + 0.5), yW = top + 40, yBar = top + 50, yP = top + 74, yR = top + 106;
     svg('line', { x1: x0, x2: this.W - 14, y1: top - 8, y2: top - 8, stroke: C.ghost, 'stroke-width': 1 }, g);
-    [['', 'start'], ['명목임금 W', 'end'], ['물가 P', 'end'], ['실질임금 W/P', 'end']].forEach((h, i) =>
-      label(g, i ? cx[i] + 38 : cx[i], top + 12, h[0], { anchor: h[1], size: 14, color: C.soft, weight: 600 }));
-    const arrowOf = (a, b) => (Math.abs(b - a) < 0.5 ? ' =' : b > a ? ' ↑' : ' ↓');
+    label(g, x0, yW, '명목임금 W', { size: 16, color: C.soft, weight: 600 });
+    label(g, x0, yP, '물가 P', { size: 16, color: C.soft, weight: 600 });
+    label(g, x0, yR, '= 실질임금 W/P', { size: 16, color: C.ink, weight: 700 });
+    svg('line', { x1: x0, x2: lx - 18, y1: yBar, y2: yBar, stroke: C.soft, 'stroke-width': 1.5 }, g);
+    const mark = (a, b) => (Math.abs(b - a) < 0.5 ? ['=', C.ghost] : b > a ? ['↑', C.blue] : ['↓', C.red]);
     rows.forEach((r, i) => {
-      const y = top + 40 + i * 27, col = r.now ? C.blue : C.ink, prev = rows[i - 1];
-      label(g, cx[0], y, r.lab, { size: 17, weight: 700, color: col });
-      [r.W, r.P, r.R].forEach((v, j) => {
-        const key = ['W', 'P', 'R'][j];
-        label(g, cx[j + 1] + 38, y, fmt(v, 0) + (prev ? arrowOf(prev[key], v) : '  '), { anchor: 'end', size: 17, color: col, weight: j === 2 ? 700 : 500 });
+      const x = cx(i), prev = rows[i - 1];
+      label(g, x, top + 12, r.lab, { anchor: 'middle', size: 19, weight: 700, color: r.now ? C.blue : C.ink });
+      svg('line', { x1: x - 30, x2: x + 30, y1: yBar, y2: yBar, stroke: C.ink, 'stroke-width': 1.8 }, g);
+      [['W', yW, 500], ['P', yP, 500], ['R', yR, 700]].forEach(([k, y, w]) => {
+        const t = svg('text', { x: x + 6, y, 'text-anchor': 'end', 'font-size': 18, 'font-weight': w, fill: C.ink }, g);
+        t.textContent = fmt(r[k], 0);
+        if (prev) {
+          const m = mark(prev[k], r[k]);
+          const u = svg('text', { x: x + 10, y, 'font-size': 18, 'font-weight': 700, fill: m[1] }, g);
+          u.textContent = m[0];
+        }
       });
-      svg('rect', { x: barX, y: y - 14, width: Math.max(0, barW * Math.min(r.R, 130) / 130), height: 16, fill: r.now ? C.blue : C.ghost }, g);
-      svg('line', { x1: barX + barW * 100 / 130, x2: barX + barW * 100 / 130, y1: y - 18, y2: y + 6, stroke: C.ink, 'stroke-width': 1.2, 'stroke-dasharray': '3 2' }, g);
     });
-    label(g, barX + barW * 100 / 130, top + 12, '100', { anchor: 'middle', size: 13, color: C.soft });
   }
 
   // 노동시장: W 가 균형보다 높으면 L_D · L_S 와 실업(공급 − 수요) 화살표, 낮으면 "효과 없음"
