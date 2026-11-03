@@ -1,0 +1,161 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta name="pinterest" content="nopin">
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="robots" content="noindex">
+<title>Econ2 Exam2 TA Session</title>
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Cpath d='M4 4v24h24' fill='none' stroke='%23000' stroke-width='3'/%3E%3Cpath d='M8 8l18 18M8 24L26 8' stroke='%231f6fd1' stroke-width='2.5'/%3E%3C/svg%3E">
+<link rel="stylesheet" href="/slides/deck.css">
+<!--
+  Econ2 Exam2 TA Session 덱 — 원본 PDF(/econ2/econ2-exam2-ta-session.pdf) 33장을 장마다 그림(p01~p33.jpg, 1920×1080)으로 넣었다.
+  그래프가 있는 장(11 15 17 18 19 22 23 24 25 26 29)은 <div class="g" data-g="p번호"> 가 원본 그래프 자리를 움직이는 그래프로 덮는다(graphs.js).
+    자리(left/top/width/height)는 무대 px = PDF pt × 5/3. 빈 <i class="step"> 개수 = 그 장에서 → 로 넘기는 그래프 단계 수(graphs.js 의 states 와 맞춘다).
+  PDF 가 바뀌면: 그림을 다시 뽑고(PyMuPDF 로 2배, JPG 82) 그래프 자리·단계를 새 장 번호에 맞춘다.
+-->
+<style>
+  .slide.pg{padding:0}
+  .slide.pg>img{position:absolute;left:0;top:0;width:1600px;height:900px;max-width:none;max-height:none}
+  .g{position:absolute;touch-action:none;-webkit-user-select:none;user-select:none}
+  .gsvg{display:block;width:100%;height:100%;font-family:inherit;overflow:visible}
+  .g.orig .gsvg{opacity:0;pointer-events:none}
+  .gtools{position:absolute;right:4px;top:4px;display:flex;gap:6px;opacity:.5;transition:opacity .2s}
+  .g:hover .gtools,.gtools:focus-within{opacity:1}
+  .gtools button{font-family:inherit;font-size:16px;font-weight:600;line-height:1;padding:6px 10px;border:1.5px solid #1f2537;border-radius:0;background:#fff;color:#1f2537;cursor:pointer;-webkit-appearance:none;appearance:none}
+  .gtools button:hover{background:#1f2537;color:#fff}
+  .g.orig .gtools button:last-child{background:#1f2537;color:#fff}
+  #overview .gtools{display:none}
+  @media print{.gtools{display:none}}
+</style>
+</head>
+<body>
+<noscript>JavaScript is required.</noscript>
+
+<main id="stage">
+  <section class="slide pg" data-title="Exam 2 Review">
+    <img src="p01.jpg" alt="Exam 2 Review" fetchpriority="high">
+  </section>
+  <section class="slide pg" data-title="Ch29 The Monetary System">
+    <img src="p02.jpg" alt="Ch29 The Monetary System" decoding="async">
+  </section>
+  <section class="slide pg" data-title="Ch29 MC 14 · Excess Reserves">
+    <img src="p03.jpg" alt="Ch29 MC 14 · Excess Reserves" decoding="async">
+  </section>
+  <section class="slide pg" data-title="Ch29 SA 10 · Money Multiplier · Reserve Requirement">
+    <img src="p04.jpg" alt="Ch29 SA 10 · Money Multiplier · Reserve Requirement" decoding="async">
+  </section>
+  <section class="slide pg" data-title="Ch29 SA 5 · Money Multiplier">
+    <img src="p05.jpg" alt="Ch29 SA 5 · Money Multiplier" decoding="async">
+  </section>
+  <section class="slide pg" data-title="Ch29 SA 11 · Open-Market Operations">
+    <img src="p06.jpg" alt="Ch29 SA 11 · Open-Market Operations" decoding="async">
+  </section>
+  <section class="slide pg" data-title="Ch29 MC 15 · Bank Balance Sheet · Loans">
+    <img src="p07.jpg" alt="Ch29 MC 15 · Bank Balance Sheet · Loans" decoding="async">
+  </section>
+  <section class="slide pg" data-title="Ch29 SA 6 · Leverage · Bank Capital">
+    <img src="p08.jpg" alt="Ch29 SA 6 · Leverage · Bank Capital" decoding="async">
+  </section>
+  <section class="slide pg" data-title="Ch30 Money Growth and Inflation">
+    <img src="p09.jpg" alt="Ch30 Money Growth and Inflation" decoding="async">
+  </section>
+  <section class="slide pg" data-title="Ch30 MC 10 · Classical Dichotomy / MC 21 · Unexpected Inflation">
+    <img src="p10.jpg" alt="Ch30 MC 10 · Classical Dichotomy / MC 21 · Unexpected Inflation" decoding="async">
+  </section>
+  <section class="slide pg" data-title="Ch30 MC 8 · Velocity of Money / MC 9 · Value of Money">
+    <img src="p11.jpg" alt="Ch30 MC 8 · Velocity of Money / MC 9 · Value of Money" decoding="async">
+    <div class="g" data-g="p11" style="left:1092px;top:142px;width:467px;height:408px"></div>
+    <i class="step"></i>
+  </section>
+  <section class="slide pg" data-title="Ch30 SA 5 · After-Tax Real Interest Rate">
+    <img src="p12.jpg" alt="Ch30 SA 5 · After-Tax Real Interest Rate" decoding="async">
+  </section>
+  <section class="slide pg" data-title="Ch30 MC 19 · Inflation · Capital Gains Tax">
+    <img src="p13.jpg" alt="Ch30 MC 19 · Inflation · Capital Gains Tax" decoding="async">
+  </section>
+  <section class="slide pg" data-title="Ch30 SA 1 · Quantity Theory · Money Supply Rule">
+    <img src="p14.jpg" alt="Ch30 SA 1 · Quantity Theory · Money Supply Rule" decoding="async">
+  </section>
+  <section class="slide pg" data-title="Ch30 SA 2 · Money Demand Shift · Price Level">
+    <img src="p15.jpg" alt="Ch30 SA 2 · Money Demand Shift · Price Level" decoding="async">
+    <div class="g" data-g="p15" style="left:1075px;top:180px;width:483px;height:483px"></div>
+    <i class="step"></i><i class="step"></i>
+  </section>
+  <section class="slide pg" data-title="Ch33 Aggregate Demand and Aggregate Supply">
+    <img src="p16.jpg" alt="Ch33 Aggregate Demand and Aggregate Supply" decoding="async">
+  </section>
+  <section class="slide pg" data-title="Ch33 AD–AS Overview · AD Shifters">
+    <img src="p17.jpg" alt="Ch33 AD–AS Overview · AD Shifters" decoding="async">
+    <div class="g" data-g="p17" style="left:120px;top:272px;width:567px;height:557px"></div>
+    <i class="step"></i>
+  </section>
+  <section class="slide pg" data-title="Ch33 AD–AS Overview · SRAS Shifters">
+    <img src="p18.jpg" alt="Ch33 AD–AS Overview · SRAS Shifters" decoding="async">
+    <div class="g" data-g="p18" style="left:120px;top:272px;width:567px;height:557px"></div>
+    <i class="step"></i>
+  </section>
+  <section class="slide pg" data-title="Ch33 MC 11 · Expected Price Level · SRAS">
+    <img src="p19.jpg" alt="Ch33 MC 11 · Expected Price Level · SRAS" decoding="async">
+    <div class="g" data-g="p19" style="left:1113px;top:393px;width:437px;height:440px"></div>
+    <i class="step"></i>
+  </section>
+  <section class="slide pg" data-title="Ch33 MC 7 · Capital Inflow · Exchange Rate">
+    <img src="p20.jpg" alt="Ch33 MC 7 · Capital Inflow · Exchange Rate" decoding="async">
+  </section>
+  <section class="slide pg" data-title="Ch33 SA 1 · Long-Run Aggregate Supply Shifters">
+    <img src="p21.jpg" alt="Ch33 SA 1 · Long-Run Aggregate Supply Shifters" decoding="async">
+  </section>
+  <section class="slide pg" data-title="Ch33 SA 2 · Money Neutrality · Sticky Wages (1/3)">
+    <img src="p22.jpg" alt="Ch33 SA 2 · Money Neutrality · Sticky Wages (1/3)" decoding="async">
+    <div class="g" data-g="p22" style="left:1060px;top:175px;width:448px;height:483px"></div>
+    <i class="step"></i>
+  </section>
+  <section class="slide pg" data-title="Ch33 Money Supply → Aggregate Demand">
+    <img src="p23.jpg" alt="Ch33 Money Supply → Aggregate Demand" decoding="async">
+    <div class="g" data-g="p23" style="left:133px;top:133px;width:1333px;height:617px"></div>
+    <i class="step"></i>
+  </section>
+  <section class="slide pg" data-title="Ch33 SA 2 · Money Neutrality · Sticky Wages (2/3)">
+    <img src="p24.jpg" alt="Ch33 SA 2 · Money Neutrality · Sticky Wages (2/3)" decoding="async">
+    <div class="g" data-g="p24" style="left:1060px;top:175px;width:448px;height:483px"></div>
+    <i class="step"></i>
+  </section>
+  <section class="slide pg" data-title="Ch33 SA 2 · Money Neutrality · Sticky Wages (3/3)">
+    <img src="p25.jpg" alt="Ch33 SA 2 · Money Neutrality · Sticky Wages (3/3)" decoding="async">
+    <div class="g" data-g="p25" style="left:1060px;top:175px;width:448px;height:483px"></div>
+  </section>
+  <section class="slide pg" data-title="Ch33 SA 5 · Investment Boom / SA 4 · Short-Run vs. Long-Run">
+    <img src="p26.jpg" alt="Ch33 SA 5 · Investment Boom / SA 4 · Short-Run vs. Long-Run" decoding="async">
+    <div class="g" data-g="p26" style="left:1067px;top:125px;width:483px;height:422px"></div>
+    <i class="step"></i><i class="step"></i><i class="step"></i>
+  </section>
+  <section class="slide pg" data-title="Ch28 Unemployment">
+    <img src="p27.jpg" alt="Ch28 Unemployment" decoding="async">
+  </section>
+  <section class="slide pg" data-title="Ch28 MC 1 · Labor-Force Participation / MC 5 · Unemployment Rate">
+    <img src="p28.jpg" alt="Ch28 MC 1 · Labor-Force Participation / MC 5 · Unemployment Rate" decoding="async">
+  </section>
+  <section class="slide pg" data-title="Ch28 MC 10 / MC 14 · Wage above Equilibrium">
+    <img src="p29.jpg" alt="Ch28 MC 10 / MC 14 · Wage above Equilibrium" decoding="async">
+    <div class="g" data-g="p29" style="left:913px;top:125px;width:628px;height:550px"></div>
+    <i class="step"></i><i class="step"></i>
+  </section>
+  <section class="slide pg" data-title="Ch28 SA 1 · Labor Force Statistics">
+    <img src="p30.jpg" alt="Ch28 SA 1 · Labor Force Statistics" decoding="async">
+  </section>
+  <section class="slide pg" data-title="Ch28 SA 4 · Sectoral Shifts · Wage Adjustment">
+    <img src="p31.jpg" alt="Ch28 SA 4 · Sectoral Shifts · Wage Adjustment" decoding="async">
+  </section>
+  <section class="slide pg" data-title="Answers 1 / 2 · Ch29 · Ch30">
+    <img src="p32.jpg" alt="Answers 1 / 2 · Ch29 · Ch30" decoding="async">
+  </section>
+  <section class="slide pg" data-title="Answers 2 / 2 · Ch33 · Ch28">
+    <img src="p33.jpg" alt="Answers 2 / 2 · Ch33 · Ch28" decoding="async">
+  </section>
+</main>
+
+<script src="/slides/deck.js"></script>
+<script src="/slides/econ2/graphs.js"></script>
+</body>
+</html>
