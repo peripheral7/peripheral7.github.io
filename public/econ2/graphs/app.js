@@ -1,7 +1,7 @@
 /* Econ2 핵심 그래프 페이지 — index.html 과 짝. 슬라이드 덱(/slides/econ2/graphs.js)과는 따로 쓴 작은 그래프 엔진 + 챕터별 사건.
    · 사건은 늘 처음 상태 A 에서 시작한다. 고른 줄을 한 번 더 누르면 풀리고 A 로 돌아간다.
    · 사건을 고르면 변화가 한 걸음씩(beat) 차례로 나온다: 원인 → 곡선 이동 → 새 균형점 → (2단계 장기 조정 …).
-     Player 가 단계 목차(번호 점) · 걸음 카드(◀ ▶ · 밀어 넘기기) · 재생/멈춤 · 처음 · 빠르기(느리게 · 보통 · 빠르게)를 맡는다. 모든 챕터가 같은 Player 를 쓴다.
+     Player 가 걸음 카드(‹ › · 밀어 넘기기) · 조작 줄(처음으로 · 자동 재생 · 속도) · 단계 목차(번호 점)를 맡는다. 모든 챕터가 같은 Player 를 쓴다.
    · 그래프 사건의 걸음은 stage.why 를 ' → ' 로 잘라 만든다. 곡선이 움직이는 걸음은 곡선 이름 + 화살표(AD → 등)로 찾고,
      못 찾으면 stage.at 으로 정한다. 각 단계 끝에는 "새 균형" 걸음을 붙인다. stage.from 을 주면 그 단계에서 갈라진다(2단계 ⓐ / ⓑ).
    · 교재의 기본 곡선만 쓴다: AD · SRAS 직선, LRAS · MS 수직선, MD 는 1/P = k / M(직각쌍곡선), 노동 수요 · 공급 직선.
@@ -251,31 +251,40 @@
     return self;
   }
 
-  /* ───────── 재생기: 목차(단계 이름 + 번호 점) · 걸음 카드(◀ ▶ · 밀어 넘기기) · 재생/멈춤 · 처음 · 빠르기 ───────── */
+  /* ───────── 재생기: 걸음 카드(그래프 바로 아래, ‹ › · 밀어 넘기기 · ← →) → 조작 줄(처음으로 · 자동 재생 · 속도) → 단계 목차(이름 + 번호 점) ───────── */
   // beat = { g: 묶음 이름(1단계 단기 …), alts: [{ t, on, pick }](갈라지는 단계일 때), t: 글자, run(anim), wait: 머무는 시간 배율 }
+  // 사건을 고르기 전에는 카드에 안내만 보이고 조작 줄 · 목차는 숨는다(.idle)
   const SPEEDS = [['느리게', 0.5], ['보통', 1], ['빠르게', 2]];
   let SPEED = 1;
   const players = [];
-  function Player(host) {
+  function Player(host, hint) {
+    hint = hint || '목록에서 사건을 고르면 그래프가 한 걸음씩 움직입니다. ‹ › 로 넘겨 보세요.';
     host.innerHTML =
-      '<div class="pctl"><button type="button" data-a="first">처음</button><button type="button" data-a="play" class="pp"></button>' +
-      '<span class="spd">빠르기 ' + SPEEDS.map((s) => '<button type="button" data-s="' + s[1] + '">' + s[0] + '</button>').join('') + '</span><span class="cnt"></span></div>' +
-      '<ol class="toc" aria-label="단계 목차"></ol>' +
       '<div class="card"><button type="button" class="cv" data-a="prev" aria-label="이전 걸음">‹</button>' +
-      '<div class="cbody" aria-live="polite"><div class="cg"></div><div class="ct"></div></div>' +
-      '<button type="button" class="cv" data-a="next" aria-label="다음 걸음">›</button></div><div class="pstat"></div>';
-    const toc = $('.toc', host), card = $('.card', host), body = $('.cbody', host), pp = $('.pp', host), cnt = $('.cnt', host), stat = $('.pstat', host);
+      '<div class="cbody" aria-live="polite"><div class="cg"></div><div class="ct"></div><div class="pstat"></div></div>' +
+      '<button type="button" class="cv" data-a="next" aria-label="다음 걸음">›</button></div>' +
+      '<div class="pbar"><span class="cnt"></span><button type="button" data-a="first">처음으로</button>' +
+      '<button type="button" data-a="play" class="pp"></button><button type="button" data-a="spd"></button></div>' +
+      '<ol class="toc" aria-label="단계 목차"></ol>';
+    const toc = $('.toc', host), card = $('.card', host), body = $('.cbody', host), pp = $('.pp', host), cnt = $('.cnt', host), stat = $('.pstat', host), spd = $('[data-a="spd"]', host);
     let beats = [], pos = [], i = -1, playing = false, timer = 0;
     const self = { onGo: null };
     function draw() {
+      host.classList.toggle('idle', !beats.length);
       $$('.dot', toc).forEach((d) => { const k = +d.getAttribute('data-i'); d.className = 'dot' + (k === i ? ' cur' : k < i ? ' done' : ''); });
       $$('li', toc).forEach((li, gi) => li.classList.toggle('cur', !!pos[i] && pos[i].gi === gi));
       const end = i >= beats.length - 1;
-      pp.textContent = playing ? '❚❚ 멈춤' : end ? '↻ 다시 보기' : '▶ 재생';
+      pp.textContent = playing ? '❚❚ 멈춤' : end ? '↻ 다시 보기' : '▶ 자동 재생';
       pp.classList.toggle('on', playing);
       cnt.textContent = beats.length ? (i + 1) + ' / ' + beats.length : '';
-      $$('[data-s]', host).forEach((b) => b.setAttribute('aria-pressed', String(+b.getAttribute('data-s') === SPEED)));
+      spd.textContent = '속도 ' + SPEEDS.find((s) => s[1] === SPEED)[0];
       $('[data-a="prev"]', host).disabled = i <= 0; $('[data-a="first"]', host).disabled = i <= 0; $('[data-a="next"]', host).disabled = end;
+    }
+    function idle() {
+      $('.cg', body).textContent = '사건을 고르세요';
+      $('.ct', body).textContent = hint;
+      body.classList.remove('in-r', 'in-l');
+      draw();
     }
     function schedule() {
       clearTimeout(timer);
@@ -327,16 +336,16 @@
     self.load = (list, o) => {
       o = o || {};
       clearTimeout(timer);
-      beats = list; host.hidden = !list.length; i = -1;
+      beats = list; i = -1;
       build();
       playing = o.play !== false && !reduce;
-      if (list.length) go(o.at || 0, o.anim !== false); else draw();
+      if (list.length) go(o.at || 0, o.anim !== false); else idle();
     };
-    self.clear = () => { clearTimeout(timer); playing = false; beats = []; pos = []; i = -1; host.hidden = true; toc.innerHTML = ''; stat.innerHTML = ''; };
+    self.clear = () => { clearTimeout(timer); playing = false; beats = []; pos = []; i = -1; toc.innerHTML = ''; stat.innerHTML = ''; idle(); };
     self.status = (html) => { stat.innerHTML = html || ''; };
     self.index = () => i;
     self.redrawSpeed = () => { draw(); if (playing) schedule(); };
-    const step = (dk) => { playing = false; go(i + dk, true); };
+    const step = (dk) => { if (!beats.length) return; playing = false; go(i + dk, true); };
     $('[data-a="first"]', host).addEventListener('click', () => { playing = false; go(0, true); });
     $('[data-a="prev"]', host).addEventListener('click', () => step(-1));
     $('[data-a="next"]', host).addEventListener('click', () => step(1));
@@ -344,7 +353,7 @@
     let tx = null, ty = 0;
     card.addEventListener('touchstart', (e) => { tx = e.touches[0].clientX; ty = e.touches[0].clientY; }, { passive: true });
     card.addEventListener('touchend', (e) => {
-      if (tx == null || !beats.length) return;
+      if (tx == null) return;
       const dx = e.changedTouches[0].clientX - tx, dy = e.changedTouches[0].clientY - ty;
       tx = null;
       if (Math.abs(dx) > 40 && Math.abs(dx) > Math.abs(dy) * 1.5) step(dx < 0 ? 1 : -1);
@@ -358,8 +367,12 @@
       playing = true;
       if (i >= beats.length - 1) go(0, true); else { draw(); schedule(); }
     });
-    $$('[data-s]', host).forEach((b) => b.addEventListener('click', () => { SPEED = +b.getAttribute('data-s'); players.forEach((p) => p.redrawSpeed()); }));
-    host.hidden = true;
+    spd.addEventListener('click', () => {   // 느리게 → 보통 → 빠르게 → 느리게 (모든 재생기 같이)
+      const k = SPEEDS.findIndex((s) => s[1] === SPEED);
+      SPEED = SPEEDS[(k + 1) % SPEEDS.length][1];
+      players.forEach((p) => p.redrawSpeed());
+    });
+    idle();
     players.push(self);
     return self;
   }
@@ -458,9 +471,18 @@
         if (was) { onPick(-1, b); return; }
         b.setAttribute('aria-pressed', 'true');
         onPick(i, b);
+        bringFig(b);
       });
       li.appendChild(b); ul.appendChild(li);
     });
+  }
+  // 휴대폰(한 줄 배치)에서는 목록이 그래프 아래에 있으므로, 사건을 고르면 그 그림 · 카드가 보이게 올린다
+  function bringFig(from) {
+    if (!window.matchMedia('(max-width:900px)').matches) return;
+    const pane = from.closest('.pane'), t = pane ? $('.stage, .keys', pane) : $('.fig', from.closest('.ch'));
+    if (!t) return;
+    const top = t.getBoundingClientRect().top - $('.top').offsetHeight - 8;
+    if (top < 0) window.scrollTo({ top: window.scrollY + top, behavior: reduce ? 'auto' : 'smooth' });
   }
   const unpress = (scope) => $$('.opts button[aria-pressed="true"]', scope).forEach((b) => b.setAttribute('aria-pressed', 'false'));
   // 그래프 하나 + 재생기 + 목록 묶음
@@ -482,7 +504,7 @@
   // 처음: 지준 $100, R 10% → 예금 $1,000 · 대출 $900 · 통화량 $1,000(현금 보유 없음). 사건마다 걸음별 값(R · 지준 · 대출 · 예금)을 차례로 보여 준다
   function ch29() {
     const B = { R: 0.1, res: 100, L: 900, D: 1000 };
-    const player = Player($('#pl29'));
+    const player = Player($('#pl29'), '목록에서 사건을 고르면 T계정이 한 걸음씩 바뀝니다. ‹ › 로 넘겨 보세요.');
     $('#bank').innerHTML =
       '<div class="keys" id="k29"></div>' +
       '<div class="tacct"><h3>은행 전체 T계정</h3><div class="tt">' +
@@ -755,7 +777,7 @@
       { t: '실업자가 취업 (실업자 → 취업자)', m: { U: -1, E: 1 } },
       { t: '처음으로 구직 시작 (비경제활동 → 실업자)', m: { N: -1, U: 1 } }
     ];
-    const pl2 = Player($('#pl28s')), one = (v) => fmt(v, 1);
+    const pl2 = Player($('#pl28s'), '목록에서 상황을 고르면 분자 · 분모가 한 걸음씩 바뀝니다. ‹ › 로 넘겨 보세요.'), one = (v) => fmt(v, 1);
     // lv: 0 처음 · 1 사람 수 바뀜 · 2 실업률 분자 · 3 분모 · 4 실업률 · 5 참가율 분자 · 6 분모 · 7 참가율
     const rk = Keys($('#k28s'), [
       { k: 'UR', t: '실업률', s: 'U ÷ (E + U)', f: (v) => fmt(v, 1) + '%', d: pp },

@@ -9,7 +9,7 @@
 <!--
   Econ2 Exam2 핵심 그래프 — 챕터마다 한 구역(Ch29 은행 T계정 · Ch30 화폐시장 · Ch33 AD/AS 탭 · Ch28 노동시장 + 실업 지표).
   교재의 기본 식 · 곡선만 쓴다. 고를 것은 글자 목록(.opts): 고르면 처음 상태 A 에서 변화가 한 걸음씩 재생되고(.player),
-  같은 줄을 다시 누르면 풀린다. 재생기는 단계 목차(번호 점) · 걸음 카드(‹ › · 밀어 넘기기) · 재생/멈춤 · 처음 · 빠르기를 가진다.
+  같은 줄을 다시 누르면 풀린다. 재생기는 그래프 바로 아래 걸음 카드(‹ › · 밀어 넘기기) · 조작 줄(처음으로 · 자동 재생 · 속도) · 단계 목차(번호 점) 순서.
   그래프 · 사건 내용은 app.js 한 곳. 주소 #ch29 · #ch30 · #ch33 · #ch33-as · #ch28 로 바로 열 수 있다(구역 id 는 c29 처럼 달리 둔다 — 같으면 브라우저가 그 구역으로 내려가 머리줄 밑에 가린다).
 -->
 <style>
@@ -29,79 +29,83 @@
   .top .links{margin-left:auto;display:flex;gap:12px;font-size:13px;white-space:nowrap}
   .top .links a{color:var(--soft)}
 
-  /* 챕터 한 구역: 왼쪽 그림 + 재생기, 오른쪽 기본 식 + 고를 것 목록. 화면 높이에 맞추지 않고 내용만큼 */
+  /* 챕터 한 구역: 왼쪽 그림 → 바로 아래 걸음 카드 → 조작 줄 · 단계 목차 → 지표 상자, 오른쪽 기본 식 + 사건 목록.
+     그래프 높이를 화면 높이에 맞춰 줄여(데스크톱) 사건을 고른 뒤 카드까지 한 화면에 보이게 한다 */
   main{max-width:var(--max);margin:0 auto;padding:12px 12px 40px}
-  .ch{display:none;gap:22px;grid-template-columns:minmax(0,1.35fr) minmax(300px,1fr);align-items:start}
+  .ch{display:none;gap:28px;grid-template-columns:minmax(0,1.3fr) minmax(300px,1fr);align-items:start}
   .ch.on{display:grid}
   .fig{min-width:0}
-  .fig .stage{position:relative;aspect-ratio:640/520;max-height:560px}
+  .fig .stage,.pane .stage{position:relative;aspect-ratio:640/520;max-height:min(460px,52vh)}
   .fig svg.plot{position:absolute;inset:0;width:100%;height:100%}
   .sub{display:flex;gap:22px;margin:0 0 4px;border-bottom:1px solid var(--line)}
   .sub button{padding:6px 2px;border:0;border-bottom:3px solid transparent;background:none;font-size:16px;font-weight:700;color:var(--soft);cursor:pointer}
   .sub button[aria-selected="true"]{color:var(--ink);border-bottom-color:var(--ink)}
 
-  /* 재생기: 조작 줄 + 단계 목차 + 걸음 카드 + 지금 상태 한 줄 */
-  .player{margin-top:6px;border:1px solid var(--line)}
-  .player[hidden]{display:none}
-  .pctl{display:flex;flex-wrap:wrap;align-items:center;gap:6px;padding:7px 10px;border-bottom:1px solid var(--line);background:#fafbfc}
-  .pctl button{padding:4px 10px;border:1.5px solid var(--line);background:#fff;font-size:13.5px;font-weight:700;cursor:pointer}
-  .pctl button:hover:not(:disabled){border-color:var(--ink)}
-  .pctl button:disabled{opacity:.4;cursor:default}
-  .pctl .pp{min-width:94px;border-color:var(--ink)}
-  .pctl .pp.on{background:var(--ink);color:#fff}
-  .pctl .spd{display:flex;align-items:center;gap:4px;margin-left:8px;font-size:13px;font-weight:700;color:var(--soft)}
-  .pctl .spd button{padding:3px 8px;font-weight:600}
-  .pctl .spd button[aria-pressed="true"]{border-color:var(--blue);color:var(--blue);font-weight:800}
-  .pctl .cnt{margin-left:auto;font-size:13px;font-weight:700;color:var(--soft);font-variant-numeric:tabular-nums}
-  /* 목차: 단계마다 한 줄(이름 + 걸음 번호 점). 지금 걸음 파랑 · 지난 걸음 진하게 · 남은 걸음 흐리게 */
-  .toc{display:flex;flex-direction:column;gap:5px;margin:0;padding:8px 10px 2px;list-style:none}
-  .toc li{display:flex;flex-wrap:wrap;align-items:center;gap:4px 8px}
-  .toc .gn{padding:0;border:0;background:none;font-size:13px;font-weight:800;color:#9aa0aa;text-align:left;cursor:pointer}
-  .toc li.cur .gn{color:var(--ink)}
-  .toc .alt{padding:1px 6px;border:1px solid var(--line);background:#fff;font-size:12.5px;font-weight:700;cursor:pointer}
-  .toc .alt.on{border-color:var(--blue);color:var(--blue)}
-  .toc .dots{display:flex;flex-wrap:wrap;gap:4px}
-  .toc .dot{width:22px;height:22px;padding:0;border:1.5px solid var(--line);border-radius:50%;background:#fff;font-size:11.5px;font-weight:800;line-height:1;color:#9aa0aa;font-variant-numeric:tabular-nums;cursor:pointer}
-  .toc .dot.done{border-color:var(--ink);color:var(--ink)}
-  .toc .dot.cur{border-color:var(--blue);background:var(--blue);color:#fff}
-  /* 걸음 카드: 지금 걸음 하나만 크게. 양옆 ‹ › 또는 옆으로 밀어 넘김 */
-  .card{display:grid;grid-template-columns:40px minmax(0,1fr) 40px;margin:6px 10px 10px;border:1.5px solid var(--ink);border-radius:8px;overflow:hidden;min-height:92px;touch-action:pan-y}
-  .card .cv{padding:0;border:0;background:#fafbfc;font-size:28px;font-weight:700;color:var(--ink);cursor:pointer}
-  .card .cv:first-child{border-right:1px solid var(--line)}
-  .card .cv:last-child{border-left:1px solid var(--line)}
-  .card .cv:hover:not(:disabled){background:var(--tint);color:var(--blue)}
-  .card .cv:disabled{color:#c9ccd2;cursor:default}
-  .cbody{display:flex;flex-direction:column;justify-content:center;min-width:0;padding:10px 14px}
-  .cg{font-size:12.5px;font-weight:800;letter-spacing:.02em;color:var(--soft)}
-  .ct{margin-top:3px;font-size:19px;font-weight:700;line-height:1.4}
+  /* 재생기 ① 걸음 카드: 지금 걸음 하나만 크게(단계 · 몇 번째 / 글 / 지금 상태). 양옆 ‹ ›, 옆으로 밀기, ← → */
+  .player{margin:8px 0 12px}
+  .card{display:grid;grid-template-columns:48px minmax(0,1fr) 48px;align-items:center;min-height:108px;border:2px solid var(--ink);border-radius:12px;background:#fff;touch-action:pan-y}
+  .card .cv{justify-self:center;width:36px;height:36px;padding:0 0 3px;border:1.5px solid var(--line);border-radius:50%;background:#fff;font-size:24px;font-weight:700;line-height:1;color:var(--ink);cursor:pointer}
+  .card .cv:hover:not(:disabled){border-color:var(--blue);color:var(--blue)}
+  .card .cv:disabled{border-color:#eceef1;color:#d3d6db;cursor:default}
+  .cbody{min-width:0;padding:12px 2px;overflow:hidden}
+  .cg{font-size:13px;font-weight:800;letter-spacing:.02em;color:var(--blue)}
+  .ct{margin-top:4px;font-size:20px;font-weight:800;line-height:1.38}
   .ct .dn{color:var(--red)}
+  .ct sub{font-size:.7em}
+  .pstat{margin-top:8px;padding-top:7px;border-top:1px dashed var(--line);font-size:14px;color:var(--soft)}
+  .pstat:empty{display:none}
+  .pstat b{color:var(--ink)}
+  .pstat .dn{color:var(--red)}
   .cbody.in-r{animation:cin-r .28s ease-out}
   .cbody.in-l{animation:cin-l .28s ease-out}
   @keyframes cin-r{from{opacity:0;transform:translateX(28px)}}
   @keyframes cin-l{from{opacity:0;transform:translateX(-28px)}}
-  .pstat{padding:6px 10px 8px;border-top:1px solid var(--line);font-size:14.5px;color:var(--ink)}
-  .pstat:empty{display:none}
-  .pstat b{color:var(--blue)}
-  .pstat .dn{color:var(--red)}
+  /* 사건을 고르기 전: 점선 카드에 안내만, 조작 줄 · 목차는 숨김 */
+  .player.idle .card{border:2px dashed var(--line);background:#fafbfc}
+  .player.idle .cg{color:var(--soft)}
+  .player.idle .ct{font-size:15.5px;font-weight:600;color:var(--soft)}
+  .player.idle .cv{visibility:hidden}
+  .player.idle .pbar,.player.idle .toc{display:none}
+
+  /* 재생기 ② 조작 줄: 몇 번째 / 전체 · 처음으로 · 자동 재생 · 속도(누를 때마다 느리게 → 보통 → 빠르게) */
+  .pbar{display:flex;flex-wrap:wrap;align-items:center;gap:6px;margin:10px 0 0}
+  .pbar .cnt{margin-right:auto;font-size:14px;font-weight:800;color:var(--ink);font-variant-numeric:tabular-nums}
+  .pbar button{padding:5px 12px;border:1.5px solid var(--line);border-radius:999px;background:#fff;font-size:13.5px;font-weight:700;cursor:pointer}
+  .pbar button:hover:not(:disabled){border-color:var(--ink)}
+  .pbar button:disabled{opacity:.4;cursor:default}
+  .pbar .pp{min-width:104px;border-color:var(--ink)}
+  .pbar .pp.on{background:var(--ink);color:#fff}
+
+  /* 재생기 ③ 단계 목차: 단계마다 한 줄(이름 + 걸음 번호 점). 지금 단계 줄은 옅은 파랑, 지금 걸음 파랑 · 지난 걸음 진하게 · 남은 걸음 흐리게 */
+  .toc{display:flex;flex-direction:column;gap:2px;margin:8px 0 0;padding:0;list-style:none}
+  .toc li{display:flex;flex-wrap:wrap;align-items:center;gap:4px 10px;padding:5px 8px;border-radius:8px}
+  .toc li.cur{background:var(--tint)}
+  .toc .gn{min-width:0;padding:0;border:0;background:none;font-size:13.5px;font-weight:800;color:#9aa0aa;text-align:left;cursor:pointer}
+  .toc li.cur .gn{color:var(--ink)}
+  .toc .alt{padding:2px 8px;border:1.5px solid var(--line);border-radius:999px;background:#fff;font-size:12.5px;font-weight:700;cursor:pointer}
+  .toc .alt.on{border-color:var(--blue);color:var(--blue)}
+  .toc .dots{display:flex;flex-wrap:wrap;gap:5px;margin-left:auto}
+  .toc .dot{width:24px;height:24px;padding:0;border:1.5px solid var(--line);border-radius:50%;background:#fff;font-size:12px;font-weight:800;line-height:1;color:#9aa0aa;font-variant-numeric:tabular-nums;cursor:pointer}
+  .toc .dot.done{border-color:var(--ink);color:var(--ink)}
+  .toc .dot.cur{border-color:var(--blue);background:var(--blue);color:#fff}
 
   .side{min-width:0}
   .side h2,.pane h2{margin:0 0 8px;font-size:22px;line-height:1.25}
   .side h2 small,.pane h2 small{display:block;font-size:13.5px;font-weight:600;color:var(--soft);letter-spacing:.02em}
-  .eq{margin:0 0 14px;padding:10px 14px;border:1px solid var(--line);font-size:15px;line-height:1.6}
+  .eq{margin:0 0 16px;padding:10px 14px;border-radius:10px;background:var(--tint);font-size:15px;line-height:1.6}
   .eq .f{display:block;font-size:18px;font-weight:800;letter-spacing:.01em;margin:0 0 2px}
   .eq .f + .f{margin-top:4px}
   .eq small{display:block;color:var(--soft);font-size:13.5px;line-height:1.5}
 
-  /* 고를 것: 글자 목록. 고른 줄은 ▸ 와 파랑 굵은 글자, 다시 누르면 풀림 */
-  .opts{margin:0 0 12px}
-  .opts h3{margin:0 0 3px;font-size:13px;font-weight:800;letter-spacing:.06em;color:var(--soft)}
+  /* 고를 것(사건 목록): 줄 전체가 버튼. 고른 줄은 옅은 파랑 바탕 + 왼쪽 파란 막대, 다시 누르면 풀림 */
+  .opts{margin:0 0 14px}
+  .opts h3{margin:0 0 4px;font-size:13px;font-weight:800;letter-spacing:.06em;color:var(--soft)}
   .opts h3 small{font-weight:600;letter-spacing:0}
-  .opts ul{margin:0;padding:0;list-style:none}
-  .opts li button{display:block;width:100%;padding:3px 0 3px 18px;border:0;background:none;text-align:left;font-size:15.5px;line-height:1.45;cursor:pointer;position:relative}
-  .opts li button::before{content:"·";position:absolute;left:5px;color:var(--soft)}
-  .opts li button:hover{text-decoration:underline;text-underline-offset:3px}
-  .opts li button[aria-pressed="true"]{color:var(--blue);font-weight:800}
-  .opts li button[aria-pressed="true"]::before{content:"▸";left:2px;color:var(--blue)}
+  .opts ul{margin:0;padding:0;list-style:none;border-top:1px solid var(--line)}
+  .opts li{border-bottom:1px solid var(--line)}
+  .opts li button{display:block;width:100%;padding:8px 10px 8px 12px;border:0;border-left:3px solid transparent;background:none;text-align:left;font-size:15.5px;line-height:1.4;cursor:pointer}
+  .opts li button:hover{background:#f6f7f9}
+  .opts li button[aria-pressed="true"]{border-left-color:var(--blue);background:var(--tint);color:var(--blue);font-weight:800}
   .opts li button .q{margin-left:6px;font-size:12.5px;font-weight:600;color:var(--soft)}
   .opts li button .dir{margin-left:4px;font-weight:800;color:var(--blue)}
   .opts li button .dir.l{color:var(--red)}
@@ -192,10 +196,11 @@
     .rate{grid-template-columns:auto auto auto;font-size:15px}
     .rate .nm{grid-column:1 / -1}
     .frac{font-size:15px}
-    .pctl .spd{margin-left:0}
-    .card{grid-template-columns:36px minmax(0,1fr) 36px}
-    .cbody{padding:9px 10px}
-    .ct{font-size:17px}
+    .card{grid-template-columns:42px minmax(0,1fr) 42px;min-height:100px}
+    .card .cv{width:32px;height:32px;font-size:22px}
+    .ct{font-size:17.5px}
+    .player.idle .ct{font-size:14.5px}
+    .fig .stage,.pane .stage{max-height:none}
   }
 </style>
 </head>
@@ -233,8 +238,8 @@
   <section class="ch" id="c30" aria-label="Ch30 화폐와 물가">
     <div class="fig">
       <div class="stage" id="plot30"></div>
-      <div class="keys" id="k30"></div>
       <div class="player" id="pl30"></div>
+      <div class="keys" id="k30"></div>
     </div>
     <div class="side">
       <h2><small>Ch30 Money Growth and Inflation</small>화폐시장: 화폐가치 1/P</h2>
@@ -253,8 +258,8 @@
       <div class="sub" role="tablist" aria-label="AD · AS"><button role="tab" data-sub="ad">AD 총수요</button><button role="tab" data-sub="as">AS 총공급</button></div>
       <div class="stage" id="plot33ad"></div>
       <div class="stage" id="plot33as" hidden></div>
-      <div class="keys" id="k33"></div>
       <div class="player" id="pl33"></div>
+      <div class="keys" id="k33"></div>
     </div>
     <div class="side">
       <div id="side33ad">
@@ -286,8 +291,8 @@
     <div class="pane">
       <h2><small>Ch28 Unemployment · 노동시장</small>균형보다 높은 임금 → 실업</h2>
       <div class="stage" id="plot28"></div>
-      <div class="keys" id="k28"></div>
       <div class="player" id="pl28"></div>
+      <div class="keys" id="k28"></div>
       <div class="opts" id="o28"><h3>임금 · 노동 수요 <small>· 다시 누르면 풀림</small></h3><ul></ul></div>
     </div>
     <div class="pane">
