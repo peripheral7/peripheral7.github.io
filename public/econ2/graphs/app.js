@@ -1,9 +1,10 @@
 /* Econ2 핵심 그래프 페이지 — index.html 과 짝. 슬라이드 덱(/slides/econ2/graphs.js)과는 따로 쓴 작은 그래프 엔진 + 챕터별 사건.
    · 사건은 늘 처음 상태 A 에서 시작한다. 고른 줄을 한 번 더 누르면 풀리고 A 로 돌아간다.
-   · 사건을 고르면 변화가 한 걸음씩(beat) 차례로 나온다: 원인 → 곡선 이동 → 새 균형점 → (2단계 장기 조정 …).
-     Player 가 걸음 카드(‹ › · 밀어 넘기기) · 조작 줄(처음으로 · 자동 재생 · 속도) · 단계 목차(번호 점)를 맡는다. 모든 챕터가 같은 Player 를 쓴다.
-   · 그래프 사건의 걸음은 stage.why 를 ' → ' 로 잘라 만든다. 곡선이 움직이는 걸음은 곡선 이름 + 화살표(AD → 등)로 찾고,
-     못 찾으면 stage.at 으로 정한다. 각 단계 끝에는 "새 균형" 걸음을 붙인다. stage.from 을 주면 그 단계에서 갈라진다(2단계 ⓐ / ⓑ).
+   · 사건을 고르면 전체 걸음(beat)이 목록으로 보이고 하나씩 활성화된다: 단계마다 원인 → 이동 → 새 균형 세 걸음.
+     Player 가 단계 목록 · 조작 줄(‹ 이전 · 자동 · 다음 › · 속도)을 맡는다. 모든 챕터가 같은 Player 를 쓴다.
+   · 그래프 사건의 걸음은 stage.why 를 ' → ' 로 잘라, 곡선이 움직이는 조각(곡선 이름 + 화살표, 못 찾으면 stage.at) 앞은 '원인' 한 걸음,
+     그 조각은 '이동', 뒤는 '새 균형' 한 걸음으로 합친다. stage.from 을 주면 그 단계에서 갈라진다(2단계 ⓐ / ⓑ).
+   · 지표 상자는 크기 · 비율 대신 방향(▲ 상승 빨강 · ▼ 하락 파랑)만. 새 균형 걸음에서 원인 → 결과 순서로 상자를 하나씩 짚으며 그래프의 같은 축 · 곡선을 함께 강조한다.
    · 교재의 기본 곡선만 쓴다: AD · SRAS 직선, LRAS · MS 수직선, MD 는 1/P = k / M(직각쌍곡선), 노동 수요 · 공급 직선.
    · 라벨의 '_' 뒤는 아래 첨자(P_1, AD_2, L_E). 좌표: 곡선은 데이터 단위(dom = [x0, x1, y0, y1]), 글자는 SVG 픽셀(640 × 520). */
 (function () {
@@ -51,7 +52,9 @@
   const same = (a, b) => Math.abs(a - b) < 1e-6;
   const sign = (a, b, tol) => (Math.abs(b - a) < tol ? '=' : b > a ? '↑' : '↓');
   const esc = (s) => String(s).replace(/[&<>]/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;' }[c]));
-  const arrows = (s) => esc(s).replace(/↓/g, '<span class="dn">↓</span>').replace(/_([A-Z])/g, '<sub>$1</sub>');
+  const arrows = (s) => esc(s).replace(/↑/g, '<span class="up">▲</span>').replace(/↓/g, '<span class="dn">▼</span>').replace(/_([A-Z])/g, '<sub>$1</sub>');
+  const dirOf = (a, b, tol) => (Math.abs(b - a) < (tol || 1e-6) ? 0 : b > a ? 1 : -1);
+  const dirW = (a, b, tol) => ['↓', '그대로', '↑'][dirOf(a, b, tol) + 1];
   function textW(s, size) {
     let w = 0, sub = false;
     for (const ch of String(s)) { if (ch === '_') { sub = true; continue; } if (ch === ' ') sub = false; w += sub ? 0.42 : /[ㄱ-힝]/.test(ch) ? 1 : 0.58; }
@@ -111,7 +114,7 @@
     cfg.curves.forEach((c) => { baseVis[c.id] = !c.hidden; });
     const offOf = (c, off) => (c.calc ? c.calc(off) : off[c.id] || 0);
     const base = () => ({ off: Object.assign({}, cfg.start || {}), vis: Object.assign({}, baseVis) });
-    let S = [base()], disp = Object.assign({}, S[0].off), anim = 0, hideNow = false;
+    let S = [base()], disp = Object.assign({}, S[0].off), anim = 0, hideNow = false, moving = false, hl = null;
     const self = { X, Y, box, dom: d, byId, offOf, base, on: null, extra: cfg.extra || null, states: () => S, hidden: () => hideNow };
 
     function pointsOf(off, vis) {
@@ -200,8 +203,8 @@
         drawLab(pts, lab(now), col);
       });
 
-      // 이동 화살표: 바로 앞 상태 → 지금
-      if (n > 1) cfg.curves.forEach((c) => {
+      // 이동 화살표: 바로 앞 상태 → 지금. 곡선이 다 움직인 뒤에 나온다
+      if (n > 1 && !moving) cfg.curves.forEach((c) => {
         const a = S[n - 2];
         if (!a.vis[c.id] || !cur.vis[c.id]) return;
         const oa = offOf(c, a.off), oz = offOf(c, tgt);
@@ -226,22 +229,41 @@
         label(g, px + dd[0], py + dd[1], S[i].letter || LET[i], { size: 19, weight: 800, color: col });
       }));
 
+      // 강조: 지표 상자를 순서대로 짚을 때 같은 축(x · y, 지금 균형점의 안내선과 축 이름)이나 곡선(넓은 옅은 띠)을 함께
+      if (hl) {
+        let lp = null;
+        for (let i = P.length - 1; i >= 0; i--) if (P[i][0]) { lp = P[i][0]; break; }
+        if (hl.axis && lp) {
+          const px = X(lp.x), py = Y(lp.y), bot = box[1] + box[3];
+          el('path', { d: hl.axis === 'x' ? 'M' + px + ' ' + py + 'V' + bot : 'M' + box[0] + ' ' + py + 'H' + px, fill: 'none', stroke: C.blue, 'stroke-width': 3, 'stroke-dasharray': '6 5' }, g);
+          const r = el('rect', hl.axis === 'x' ? { x: px - 30, y: bot + 6, width: 60, height: 26 } : { x: box[0] - 64, y: py - 14, width: 58, height: 26 }, g);
+          r.setAttribute('rx', 6); r.setAttribute('fill', 'rgba(31,111,209,.14)');
+          g.insertBefore(r, g.firstChild);
+        }
+        if (hl.curve && byId[hl.curve] && cur.vis[hl.curve]) {
+          const pts = path(byId[hl.curve], offOf(byId[hl.curve], disp));
+          if (pts.length > 1) g.insertBefore(el('path', { d: dstr(pts), fill: 'none', stroke: 'rgba(31,111,209,.16)', 'stroke-width': 18, 'stroke-linecap': 'round' }), g.firstChild);
+        }
+      }
       const ctx = { g, S, P, off: disp, X, Y, box, dom: d, hide: hideNow };
       if (self.extra) self.extra(ctx);
       if (self.on) self.on(ctx);
     }
     self.render = render;
+    self.hilite = (h) => { hl = h; render(); };
     // 상태 줄을 통째로 바꾸고 지금(마지막) 상태로 움직인다. o.hide: 새 균형점은 아직 숨김, o.dur: 애니메이션 길이(ms)
     self.show = (states, o) => {
       o = o || {};
       S = states; hideNow = !!o.hide;
       const to = Object.assign({}, S[S.length - 1].off), from = Object.assign({}, disp);
-      cancelAnimationFrame(anim);
+      cancelAnimationFrame(anim); moving = false;
       if (o.instant || reduce) { disp = to; render(); return; }
+      moving = true;
       const ids = Object.keys(Object.assign({}, from, to)), t0 = performance.now(), dur = o.dur || 750;
       const tick = (t1) => {
         const t = Math.min(1, (t1 - t0) / dur), e = EASE(t), m = {};
         ids.forEach((k) => { m[k] = (from[k] || 0) + ((to[k] || 0) - (from[k] || 0)) * e; });
+        if (t >= 1) moving = false;
         disp = m; render();
         if (t < 1) anim = requestAnimationFrame(tick);
       };
@@ -251,41 +273,33 @@
     return self;
   }
 
-  /* ───────── 재생기: 걸음 카드(그래프 바로 아래, ‹ › · 밀어 넘기기 · ← →) → 조작 줄(처음으로 · 자동 재생 · 속도) → 단계 목차(이름 + 번호 점) ───────── */
-  // beat = { g: 묶음 이름(1단계 단기 …), alts: [{ t, on, pick }](갈라지는 단계일 때), t: 글자, run(anim), wait: 머무는 시간 배율 }
-  // 사건을 고르기 전에는 카드에 안내만 보이고 조작 줄 · 목차는 숨는다(.idle)
+  /* ───────── 재생기: 단계 목록(전체 걸음이 한눈에, 지금 걸음만 크게) · 조작 줄(‹ 이전 · 자동 · 다음 › · 속도) ───────── */
+  // beat = { g: 묶음 이름(1단계 단기 …), alts: [{ t, on, pick }](갈라지는 단계일 때), k: 꼬리표(원인 · 이동 · 균형 …), t: 글자, run(anim), wait: 머무는 시간 배율 }
+  // 사건을 고르기 전에는 안내 한 줄만 보이고 조작 줄은 숨는다(.idle)
   const SPEEDS = [['느리게', 0.5], ['보통', 1], ['빠르게', 2]];
   let SPEED = 1;
   const players = [];
   function Player(host, hint) {
-    hint = hint || '목록에서 사건을 고르면 그래프가 한 걸음씩 움직입니다. ‹ › 로 넘겨 보세요.';
+    hint = hint || '목록에서 사건을 고르면 전체 단계가 여기 나오고, 그래프가 한 걸음씩 움직입니다.';
     host.innerHTML =
-      '<div class="card"><button type="button" class="cv" data-a="prev" aria-label="이전 걸음">‹</button>' +
-      '<div class="cbody" aria-live="polite"><div class="cg"></div><div class="ct"></div><div class="pstat"></div></div>' +
-      '<button type="button" class="cv" data-a="next" aria-label="다음 걸음">›</button></div>' +
-      '<div class="pbar"><span class="cnt"></span><button type="button" data-a="first">처음으로</button>' +
-      '<button type="button" data-a="play" class="pp"></button><button type="button" data-a="spd"></button></div>' +
-      '<ol class="toc" aria-label="단계 목차"></ol>';
-    const toc = $('.toc', host), card = $('.card', host), body = $('.cbody', host), pp = $('.pp', host), cnt = $('.cnt', host), stat = $('.pstat', host), spd = $('[data-a="spd"]', host);
-    let beats = [], pos = [], i = -1, playing = false, timer = 0;
+      '<ol class="steps" aria-live="polite"></ol>' +
+      '<div class="pbar"><span class="cnt"></span><span class="seg"><button type="button" data-a="prev">‹ 이전</button>' +
+      '<button type="button" data-a="play" class="pp"></button><button type="button" data-a="next">다음 ›</button></span>' +
+      '<button type="button" data-a="spd" class="spdb"></button></div>';
+    const ol = $('.steps', host), pp = $('.pp', host), cnt = $('.cnt', host), spd = $('[data-a="spd"]', host);
+    let beats = [], i = -1, playing = false, timer = 0;
     const self = { onGo: null };
     function draw() {
       host.classList.toggle('idle', !beats.length);
-      $$('.dot', toc).forEach((d) => { const k = +d.getAttribute('data-i'); d.className = 'dot' + (k === i ? ' cur' : k < i ? ' done' : ''); });
-      $$('li', toc).forEach((li, gi) => li.classList.toggle('cur', !!pos[i] && pos[i].gi === gi));
+      $$('li[data-i]', ol).forEach((li) => { const k = +li.getAttribute('data-i'); li.className = k === i ? 'cur' : k < i ? 'done' : 'todo'; });
       const end = i >= beats.length - 1;
-      pp.textContent = playing ? '❚❚ 멈춤' : end ? '↻ 다시 보기' : '▶ 자동 재생';
+      pp.textContent = playing ? '❚❚ 멈춤' : end ? '↻ 다시' : '▶ 자동';
       pp.classList.toggle('on', playing);
       cnt.textContent = beats.length ? (i + 1) + ' / ' + beats.length : '';
-      spd.textContent = '속도 ' + SPEEDS.find((s) => s[1] === SPEED)[0];
-      $('[data-a="prev"]', host).disabled = i <= 0; $('[data-a="first"]', host).disabled = i <= 0; $('[data-a="next"]', host).disabled = end;
+      spd.textContent = '속도 ' + SPEEDS.find((x) => x[1] === SPEED)[0];
+      $('[data-a="prev"]', host).disabled = i <= 0; $('[data-a="next"]', host).disabled = end;
     }
-    function idle() {
-      $('.cg', body).textContent = '사건을 고르세요';
-      $('.ct', body).textContent = hint;
-      body.classList.remove('in-r', 'in-l');
-      draw();
-    }
+    function idle() { ol.innerHTML = '<li class="hint">' + esc(hint) + '</li>'; draw(); }
     function schedule() {
       clearTimeout(timer);
       if (!playing) return;
@@ -293,44 +307,28 @@
       timer = setTimeout(() => go(i + 1, true), 1500 * (beats[i].wait || 1) / SPEED);
     }
     function go(k, anim) {
-      const was = i;
       i = Math.max(0, Math.min(beats.length - 1, k));
       beats[i].run(anim !== false);
-      const p = pos[i];
-      $('.cg', body).textContent = p.n > 1 ? p.g + ' · ' + (p.si + 1) + ' / ' + p.n : p.g;
-      $('.ct', body).innerHTML = arrows(beats[i].t);
-      body.classList.remove('in-r', 'in-l');
-      if (anim !== false && was !== i && !reduce) { void body.offsetWidth; body.classList.add(i > was ? 'in-r' : 'in-l'); }   // 넘기는 방향으로 카드가 들어온다
       draw(); schedule();
       if (self.onGo) self.onGo(i);
     }
-    // 목차: 단계(묶음)마다 한 줄 — 이름(누르면 그 단계 첫 걸음) + 걸음 번호 점(누르면 그 걸음, 지금 파랑 · 지난 것 진하게)
     function build() {
-      toc.innerHTML = ''; pos = [];
-      const groups = [];
+      ol.innerHTML = '';
+      let g = null;
       beats.forEach((b, k) => {
-        if (!groups.length || groups[groups.length - 1].g !== b.g) groups.push({ g: b.g, alts: b.alts, ks: [] });
-        const G = groups[groups.length - 1];
-        pos[k] = { gi: groups.length - 1, si: G.ks.length, g: b.g };
-        G.ks.push(k);
-      });
-      pos.forEach((p) => { p.n = groups[p.gi].ks.length; });
-      groups.forEach((G) => {
-        const li = document.createElement('li'), nm = document.createElement('button');
-        nm.type = 'button'; nm.className = 'gn'; nm.textContent = G.g;
-        nm.addEventListener('click', () => { playing = false; go(G.ks[0], true); });
-        li.appendChild(nm);
-        if (G.alts) G.alts.forEach((a) => { const x = document.createElement('button'); x.type = 'button'; x.className = a.on ? 'alt on' : 'alt'; x.textContent = a.t; x.addEventListener('click', a.pick); li.appendChild(x); });
-        const dots = document.createElement('span');
-        dots.className = 'dots';
-        G.ks.forEach((k, j) => {
-          const d = document.createElement('button');
-          d.type = 'button'; d.className = 'dot'; d.setAttribute('data-i', k); d.textContent = j + 1;
-          d.title = beats[k].t; d.setAttribute('aria-label', G.g + ' ' + (j + 1) + '번째 걸음: ' + beats[k].t);
-          d.addEventListener('click', () => { playing = false; go(k, true); });
-          dots.appendChild(d);
-        });
-        li.appendChild(dots); toc.appendChild(li);
+        if (b.g !== g) {
+          g = b.g;
+          const h = document.createElement('li'), nm = document.createElement('span');
+          h.className = 'grp'; nm.textContent = b.g; h.appendChild(nm);
+          if (b.alts) b.alts.forEach((a) => { const x = document.createElement('button'); x.type = 'button'; x.className = a.on ? 'alt on' : 'alt'; x.textContent = a.t; x.addEventListener('click', a.pick); h.appendChild(x); });
+          ol.appendChild(h);
+        }
+        const li = document.createElement('li'), btn = document.createElement('button');
+        li.setAttribute('data-i', k);
+        btn.type = 'button';
+        btn.innerHTML = '<span class="n">' + (k + 1) + '</span>' + (b.k ? '<span class="k">' + esc(b.k) + '</span>' : '') + '<span class="tx' + (b.k ? '' : ' wide') + '">' + arrows(b.t) + '</span>';
+        btn.addEventListener('click', () => { playing = false; go(k, true); });
+        li.appendChild(btn); ol.appendChild(li);
       });
     }
     self.load = (list, o) => {
@@ -341,18 +339,16 @@
       playing = o.play !== false && !reduce;
       if (list.length) go(o.at || 0, o.anim !== false); else idle();
     };
-    self.clear = () => { clearTimeout(timer); playing = false; beats = []; pos = []; i = -1; toc.innerHTML = ''; stat.innerHTML = ''; idle(); };
-    self.status = (html) => { stat.innerHTML = html || ''; };
+    self.clear = () => { clearTimeout(timer); playing = false; beats = []; i = -1; idle(); };
     self.index = () => i;
     self.redrawSpeed = () => { draw(); if (playing) schedule(); };
     const step = (dk) => { if (!beats.length) return; playing = false; go(i + dk, true); };
-    $('[data-a="first"]', host).addEventListener('click', () => { playing = false; go(0, true); });
     $('[data-a="prev"]', host).addEventListener('click', () => step(-1));
     $('[data-a="next"]', host).addEventListener('click', () => step(1));
-    // 휴대폰: 카드를 옆으로 밀어 넘긴다. 키보드: 재생기 안에서 ← →
+    // 휴대폰: 목록을 옆으로 밀어 넘긴다. 키보드: 재생기 안에서 ← →
     let tx = null, ty = 0;
-    card.addEventListener('touchstart', (e) => { tx = e.touches[0].clientX; ty = e.touches[0].clientY; }, { passive: true });
-    card.addEventListener('touchend', (e) => {
+    ol.addEventListener('touchstart', (e) => { tx = e.touches[0].clientX; ty = e.touches[0].clientY; }, { passive: true });
+    ol.addEventListener('touchend', (e) => {
       if (tx == null) return;
       const dx = e.changedTouches[0].clientX - tx, dy = e.changedTouches[0].clientY - ty;
       tx = null;
@@ -368,9 +364,9 @@
       if (i >= beats.length - 1) go(0, true); else { draw(); schedule(); }
     });
     spd.addEventListener('click', () => {   // 느리게 → 보통 → 빠르게 → 느리게 (모든 재생기 같이)
-      const k = SPEEDS.findIndex((s) => s[1] === SPEED);
+      const k = SPEEDS.findIndex((x) => x[1] === SPEED);
       SPEED = SPEEDS[(k + 1) % SPEEDS.length][1];
-      players.forEach((p) => p.redrawSpeed());
+      players.forEach((q) => q.redrawSpeed());
     });
     idle();
     players.push(self);
@@ -378,32 +374,41 @@
   }
   const dur = () => 750 / SPEED;
 
-  /* ───────── 지표 상자: 이름 · 처음 → 지금 · 변화 알약 (바뀐 상자는 파란 테두리) ───────── */
-  // defs = [{ k, t: 이름, s: 기호, f: 값 → 글자, d: (처음, 지금) → 알약 글자 }], ops: 상자 사이 기호(× = 등)
+  /* ───────── 지표 상자: 이름 · 방향(▲ 증가 빨강 / ▼ 감소 파랑 / 그대로). seq 로 순서대로 하나씩 잠깐 강조 ───────── */
+  // defs = [{ k, t: 이름, s: 기호, w: [증가 말, 감소 말], tol: 같다고 볼 차이, f: 값 → 글자(있으면 값도 보여 줌, Ch29) }], ops: 상자 사이 기호(× = 등)
+  const DIR = (d, w) => { w = w || ['증가', '감소']; return d > 0 ? '<span class="kdir up">▲ ' + w[0] + '</span>' : d < 0 ? '<span class="kdir dn">▼ ' + w[1] + '</span>' : '<span class="kdir same">— 그대로</span>'; };
   function Keys(host, defs, ops) {
     host.innerHTML = defs.map((d, i) => (i && ops ? '<span class="kop">' + ops[i - 1] + '</span>' : '') +
-      '<div class="key" data-k="' + d.k + '"><div class="kh"><span>' + esc(d.t) + '</span><i>' + esc(d.s || '') + '</i></div><div class="kv"><span class="kb"></span><span class="karr">→</span><span class="ka"></span></div><div class="kd"></div></div>').join('');
+      '<div class="key" data-k="' + d.k + '"><div class="kh"><span>' + esc(d.t) + '</span><i>' + esc(d.s || '') + '</i></div><div class="kv"></div><div class="kd"></div></div>').join('');
     if (ops) host.classList.add('ops');
-    return {
-      // vals[k] = { b: 처음 값, a: 지금 값 } 또는 { txt: 글자 값(곡선 이동 등), base: 처음 글자 }, note: 아래 작은 글
+    let timers = [];
+    const mark = (k) => $$('.key', host).forEach((b) => b.classList.toggle('pulse', b.getAttribute('data-k') === k));
+    const self = {
+      // vals[k] = { d: 방향(+1 · −1 · 0) } 또는 { b: 처음 값, a: 지금 값 }(방향은 비교로) 또는 { txt: 글자, on: 강조 }, note: 아래 작은 글
       set(vals) {
         defs.forEach((d) => {
-          const v = vals[d.k] || {}, box = $('[data-k="' + d.k + '"]', host);
-          const f = d.f || ((x) => String(x));
-          const txt = v.txt != null, ch = txt ? !!v.txt : v.a != null && v.b != null && Math.abs(v.a - v.b) > 1e-6;
-          box.classList.toggle('chg', ch);   // 'ch' 는 챕터 구역 이름이라 쓰지 않는다
-          $('.kb', box).textContent = ch && !txt ? f(v.b) : '';
-          $('.karr', box).style.display = ch && !txt ? '' : 'none';
-          $('.ka', box).textContent = txt ? v.txt || v.base || '—' : v.a != null ? f(v.a) : v.b != null ? f(v.b) : '—';
-          const pill = ch && !txt && d.d ? d.d(v.b, v.a) : '';
-          $('.kd', box).innerHTML = (pill ? '<span class="pill' + (v.a < v.b ? ' dn' : '') + '">' + esc(pill) + '</span>' : '') + (v.note ? '<span class="kn">' + arrows(v.note) + '</span>' : '');
+          const v = vals[d.k] || {}, bx = $('[data-k="' + d.k + '"]', host);
+          const dir = v.d != null ? v.d : v.a != null && v.b != null ? dirOf(v.b, v.a, d.tol) : 0;
+          let html;
+          if (v.txt != null) html = '<span class="kt' + (v.on ? ' on' : '') + '">' + esc(v.txt) + '</span>';
+          else if (d.f && v.a != null) html = '<span class="ka' + (dir > 0 ? ' up' : dir < 0 ? ' dn' : '') + '">' + esc(d.f(v.a)) + '</span>' + (dir ? '<span class="kdir ' + (dir > 0 ? 'up' : 'dn') + '">' + (dir > 0 ? '▲' : '▼') + '</span>' : '');
+          else html = DIR(dir, d.w);
+          $('.kv', bx).innerHTML = html;
+          bx.classList.toggle('chg', v.txt != null ? !!v.on : dir !== 0);
+          $('.kd', bx).innerHTML = v.note ? arrows(v.note) : '';
         });
-      }
+      },
+      // ks 순서대로 하나씩 .pulse, 매번 cb(k) → 끝나면 cb(null)
+      seq(ks, cb) {
+        self.stop();
+        const step = 700 / SPEED;
+        ks.forEach((k, i) => timers.push(setTimeout(() => { mark(k); if (cb) cb(k); }, i * step)));
+        timers.push(setTimeout(() => { mark(null); if (cb) cb(null); }, ks.length * step + 300));
+      },
+      stop() { timers.forEach(clearTimeout); timers = []; mark(null); }
     };
+    return self;
   }
-  const pct = (b, a) => (a >= b ? '+' : '−') + fmt(Math.abs(a / b - 1) * 100) + '%';
-  const pp = (b, a) => (a >= b ? '+' : '−') + fmt(Math.abs(a - b), 1) + '%p';
-  const idx0 = (v) => fmt(v);
   // 그래프에서 지금 보이는 마지막 균형점(곡선이 움직이는 걸음에서는 그 앞 점)
   const lastPt = (ctx) => { for (let i = ctx.P.length - 1; i >= 0; i--) if (ctx.P[i][0]) return { pt: ctx.P[i][0], i }; return null; };
   // 처음과 지금 사이에 움직인 곡선 이름(AD →, SRAS ← …)
@@ -440,8 +445,8 @@
     else ids = sc.stages.map((s, i) => i);
     const out = [];
     let S = [plot.base()];
-    const snap = (states, hide) => (anim) => plot.show(states, { hide, dur: dur(), instant: !anim });
-    out.push({ g: '처음', t: o.start, run: snap(S, false), wait: 0.8 });
+    const snap = (states, hide) => (anim) => { if (o.quiet) o.quiet(); plot.show(states, { hide, dur: dur(), instant: !anim }); };
+    out.push({ g: '처음', k: '처음', t: o.start, run: snap(S, false), wait: 0.8 });
     let num = 0;
     ids.forEach((id) => {
       const st = sc.stages[id], prevS = S, next = apply(S[S.length - 1], st.ch, st.letter);
@@ -452,8 +457,11 @@
       const isAlt = alts.length && id !== 0;
       const g = (st.step || (isAlt ? '2단계' : num + '단계')) + ' · ' + st.name;
       const altList = isAlt ? alts.map((a, k) => ({ t: 'ⓐⓑⓒ'[k] + ' ' + sc.stages[a].name, on: a === id, pick: () => rebuild(a) })) : null;
-      ps.forEach((t, k) => out.push({ g: isAlt ? '2단계' : g, alts: altList, t, run: snap(k < at ? prevS : withNew, k === at), wait: k === at ? 1.25 : 1 }));
-      out.push({ g: isAlt ? '2단계' : g, alts: altList, t: '새 균형 ' + letter + ' : ' + o.result(prevS[prevS.length - 1], next, letter), run: snap(withNew, false), wait: 1.4 });
+      const gg = isAlt ? '2단계' : g, cause = ps.slice(0, at).join(' → '), after = ps.slice(at + 1).join(' → ');
+      if (cause) out.push({ g: gg, alts: altList, k: '원인', t: cause, run: snap(prevS, false), wait: 1.1 });
+      out.push({ g: gg, alts: altList, k: '이동', t: ps[at], run: snap(withNew, true), wait: 1.25 });
+      out.push({ g: gg, alts: altList, k: '균형', t: '새 균형 ' + letter + ' : ' + (after || o.result(prevS[prevS.length - 1], next, letter)),
+        run: (anim) => { snap(withNew, false)(anim); if (o.after) o.after(prevS[prevS.length - 1], next); }, wait: 1.8 });
       S = withNew;
     });
     return out;
@@ -464,7 +472,7 @@
     items.forEach((it, i) => {
       const li = document.createElement('li'), b = document.createElement('button');
       b.type = 'button'; b.setAttribute('aria-pressed', 'false');
-      b.innerHTML = esc(it.t) + (it.dir ? '<span class="dir' + (it.dir === 'l' ? ' l' : '') + '">' + (it.dir === 'l' ? '←' : '→') + '</span>' : '') + (it.q ? '<span class="q">' + esc(it.q) + '</span>' : '');
+      b.innerHTML = arrows(it.t) + (it.dir ? '<span class="dir' + (it.dir === 'l' ? ' l' : '') + '">' + (it.dir === 'l' ? '←' : '→') + '</span>' : '') + (it.q ? '<span class="q">' + esc(it.q) + '</span>' : '');
       b.addEventListener('click', () => {
         const was = b.getAttribute('aria-pressed') === 'true';
         unpress(scope || host);
@@ -479,7 +487,7 @@
   // 휴대폰(한 줄 배치)에서는 목록이 그래프 아래에 있으므로, 사건을 고르면 그 그림 · 카드가 보이게 올린다
   function bringFig(from) {
     if (!window.matchMedia('(max-width:900px)').matches) return;
-    const pane = from.closest('.pane'), t = pane ? $('.stage, .keys', pane) : $('.fig', from.closest('.ch'));
+    const root = from.closest('.panel') || from.closest('.ch'), t = root && $('.fig', root);
     if (!t) return;
     const top = t.getBoundingClientRect().top - $('.top').offsetHeight - 8;
     if (top < 0) window.scrollTo({ top: window.scrollY + top, behavior: reduce ? 'auto' : 'smooth' });
@@ -494,7 +502,7 @@
       player.load(beats, { at: start || 0, play });
     }
     return {
-      pick(s) { if (!s) { sc = null; player.clear(); plot.show([plot.base()], { dur: dur() }); return; } sc = s; load(null, 0, true); },
+      pick(s) { if (o.quiet) o.quiet(); if (!s) { sc = null; player.clear(); plot.show([plot.base()], { dur: dur() }); return; } sc = s; load(null, 0, true); },
       resume() { if (sc) player.load(beats, { at, play: false, anim: false }); else { player.clear(); plot.show([plot.base()], { instant: true }); } },
       cur: () => sc
     };
@@ -504,7 +512,7 @@
   // 처음: 지준 $100, R 10% → 예금 $1,000 · 대출 $900 · 통화량 $1,000(현금 보유 없음). 사건마다 걸음별 값(R · 지준 · 대출 · 예금)을 차례로 보여 준다
   function ch29() {
     const B = { R: 0.1, res: 100, L: 900, D: 1000 };
-    const player = Player($('#pl29'), '목록에서 사건을 고르면 T계정이 한 걸음씩 바뀝니다. ‹ › 로 넘겨 보세요.');
+    const player = Player($('#pl29'), '목록에서 사건을 고르면 전체 단계가 여기 나오고, T계정이 한 걸음씩 바뀝니다.');
     $('#bank').innerHTML =
       '<div class="keys" id="k29"></div>' +
       '<div class="tacct"><h3>은행 전체 T계정</h3><div class="tt">' +
@@ -513,13 +521,14 @@
       '<p class="tnote" id="tNote"></p></div>';
     const money = (v) => '$' + fmt(v);
     const keys = Keys($('#k29'), [
-      { k: 'res', t: '지준', s: 'Reserves', f: money, d: (b, a) => (a >= b ? '+' : '−') + money(Math.abs(a - b)) },
-      { k: 'R', t: '통화승수', s: '1/R', f: (v) => fmt(v), d: (b, a) => (a >= b ? '+' : '−') + fmt(Math.abs(a - b)) },
-      { k: 'M', t: '통화량 = 예금', s: 'M', f: money, d: (b, a) => (a >= b ? '+' : '−') + money(Math.abs(a - b)) }
+      { k: 'res', t: '지준', s: 'Reserves', f: money },
+      { k: 'R', t: '통화승수', s: '1/R', f: (v) => fmt(v) },
+      { k: 'M', t: '통화량 = 예금', s: 'M', f: money }
     ], ['×', '=']);
-    const delta = (id, v) => { const e = $('#' + id); e.className = v < -0.5 ? 'dn' : ''; e.textContent = Math.abs(v) < 0.5 ? '' : (v > 0 ? '+' : '−') + money(Math.abs(v)); };
+    const delta = (id, v) => { const e = $('#' + id); e.className = v < -0.5 ? 'dn' : v > 0.5 ? 'up' : ''; e.textContent = Math.abs(v) < 0.5 ? '' : (v > 0 ? '▲ +' : '▼ −') + money(Math.abs(v)); };
     function show(s, hi) {
       keys.set({ res: { b: B.res, a: s.res }, R: { b: 1 / B.R, a: 1 / s.R, note: 'R = ' + Math.round(s.R * 100) + '%' }, M: { b: B.D, a: s.D } });
+      keys.seq((hi || []).filter((k) => k === 'res' || k === 'R' || k === 'M'));
       $('#tRes').textContent = money(s.res); $('#tLoan').textContent = money(s.L); $('#tDep').textContent = money(s.D);
       delta('dRes', s.res - B.res); delta('dLoan', s.L - B.L); delta('dDep', s.D - B.D);
       const req = s.R * s.D, gap = s.res - req;
@@ -550,9 +559,10 @@
         ['은행이 대출을 줄임 → 대출 $900 → $450, 예금 $1,000 → $500', { res: 50, L: 450, D: 500 }, ['L', 'D']],
         ['통화량 M −$500 ↓ = 지준 −$50 × 승수 10', { res: 50, L: 450, D: 500 }, ['M']]] }
     ];
+    const KS = ['원인', '비교', '조정', '결과'];
     function beats(ev) {
-      const out = [{ g: '처음', t: '처음: 지준 $100 × 승수 10 = 예금 · 통화량 $1,000', run: () => show(B, []), wait: 0.8 }];
-      ev.steps.forEach(([t, v, hi]) => { const s = Object.assign({}, B, v); out.push({ g: ev.t, t, run: () => show(s, hi), wait: 1.3 }); });
+      const out = [{ g: '처음', k: '처음', t: '처음: 지준 $100 × 승수 10 = 예금 · 통화량 $1,000', run: () => show(B, []), wait: 0.8 }];
+      ev.steps.forEach(([t, v, hi], i) => { const s = Object.assign({}, B, v); out.push({ g: ev.t, k: KS[i], t, run: () => show(s, hi), wait: 1.3 }); });
       return out;
     }
     list($('#o29'), EV, (i) => { if (i < 0) { player.clear(); show(B, []); } else player.load(beats(EV[i])); });
@@ -578,18 +588,25 @@
       return { M, P, Y, V: P * Y / M / 100, v: m ? m.y : NaN };
     };
     const r = runner(plot, player, {
-      start: 'A : 처음 균형 — M = 100, P = 100 (지수)',
-      result: (a, b) => { const x = idx(a), y = idx(b); return '1/P ' + sign(x.v, y.v, 0.02) + ' → 물가 P ' + fmt(x.P) + ' → ' + fmt(y.P) + ' (화폐량 M ' + fmt(x.M) + ' → ' + fmt(y.M) + ')'; }
+      start: 'A : 처음 균형',
+      result: (a, b) => { const x = idx(a), y = idx(b); return '화폐가치 1/P ' + dirW(x.v, y.v, 0.02) + ' → 물가 P ' + dirW(x.P, y.P, 0.5); },
+      quiet: () => { keys.stop(); plot.hilite(null); },
+      // 새 균형에서: 화폐량(x 축) → 화폐가치(y 축) → 물가 순서로 짚는다. 안 바뀐 것은 건너뜀
+      after: (a, b) => {
+        const x = idx(a), y = idx(b), ks = [];
+        if (dirOf(x.M, y.M, 0.5)) ks.push('M');
+        if (dirOf(x.v, y.v, 0.02)) ks.push('v', 'P');
+        keys.seq(ks, (k) => plot.hilite(k === 'M' ? { axis: 'x' } : k ? { axis: 'y' } : null));
+      }
     });
     const keys = Keys($('#k30'), [
-      { k: 'M', t: '화폐량', s: 'M (A = 100)', f: idx0, d: pct },
-      { k: 'v', t: '화폐가치', s: '1/P (A = 100)', f: idx0, d: pct },
-      { k: 'P', t: '물가', s: 'P (A = 100)', f: idx0, d: pct }
+      { k: 'M', t: '화폐량', s: 'M', w: ['증가', '감소'] },
+      { k: 'v', t: '화폐가치', s: '1/P', w: ['상승', '하락'] },
+      { k: 'P', t: '물가', s: 'P', w: ['상승', '하락'] }
     ]);
     plot.on = (ctx) => {
-      const S = ctx.S, n = idx({ off: ctx.off, vis: S[S.length - 1].vis }), a = idx(S[0]), lp = lastPt(ctx), z = lp ? idx(S[lp.i]) : a;
-      keys.set({ M: { b: a.M, a: z.M }, v: { b: 100, a: 100 * z.v / a.v }, P: { b: a.P, a: z.P } });
-      player.status(esc('M × V = P × Y : ' + fmt(n.M) + ' × ' + fmt(n.V, 2) + ' = ' + fmt(n.P) + ' × ' + fmt(n.Y / 100, 2)));
+      const S = ctx.S, a = idx(S[0]), lp = lastPt(ctx), z = lp ? idx(S[lp.i]) : a;
+      keys.set({ M: { d: dirOf(a.M, z.M, 0.5) }, v: { d: dirOf(a.v, z.v, 0.02) }, P: { d: dirOf(a.P, z.P, 0.5) } });
     };
     const keep = (why) => ({ name: 'Fed 가 MS 를 옮겨 물가 유지', ch: { abs: (o) => ({ MS: 5 * (1 + mdScale(o)) - 5 }) }, why });
     const EV = [
@@ -629,20 +646,28 @@
   function ch33() {
     const mk = (host) => Plot(host, { aria: '총수요 총공급 그래프', dom: [0, 10, 0, 10], xName: 'Y', yName: 'P', xTitle: '실질 GDP Y', yTitle: '물가 P', star: true, curves: adasCurves(), eqs: [['AD', 'SRAS']] });
     const ad = mk($('#plot33ad')), as = mk($('#plot33as')), player = Player($('#pl33'));
+    const CV = ['AD', 'SRAS', 'LRAS'];
+    const movedId = (plot, a, b) => CV.find((id) => b.vis[id] && a.vis[id] && !same(plot.offOf(plot.byId[id], a.off), plot.offOf(plot.byId[id], b.off)));
     const opt = (plot) => ({
       start: 'A : 처음 장기균형 (Y = Y*)',
-      result: (a, b) => { const x = plot.pointsOf(a.off, a.vis)[0], y = plot.pointsOf(b.off, b.vis)[0]; if (!x || !y) return ''; let s = 'Y ' + sign(x.x, y.x, 0.03) + ' · P ' + sign(x.y, y.y, 0.03) + ' — ' + gap(b.off, y); if (y.x < x.x - 0.03 && y.y > x.y + 0.03 && Math.abs(x.x - 5 - (a.off.LRAS || 0)) < 0.03) s += ' (스태그플레이션)'; return s; }
+      result: (a, b) => { const x = plot.pointsOf(a.off, a.vis)[0], y = plot.pointsOf(b.off, b.vis)[0]; if (!x || !y) return ''; let s = 'Y ' + dirW(x.x, y.x, 0.03) + ' · P ' + dirW(x.y, y.y, 0.03) + ' — ' + gap(b.off, y); if (y.x < x.x - 0.03 && y.y > x.y + 0.03 && Math.abs(x.x - 5 - (a.off.LRAS || 0)) < 0.03) s += ' (스태그플레이션)'; return s; },
+      quiet: () => { keys.stop(); plot.hilite(null); },
+      // 새 균형에서: 움직인 곡선 → Y(x 축) → P(y 축) 순서로 짚는다
+      after: (a, b) => {
+        const x = plot.pointsOf(a.off, a.vis)[0], y = plot.pointsOf(b.off, b.vis)[0];
+        if (!x || !y) return;
+        const mv = movedId(plot, a, b), ks = [];
+        if (mv) ks.push('mv');
+        if (dirOf(x.x, y.x, 0.03)) ks.push('Y');
+        if (dirOf(x.y, y.y, 0.03)) ks.push('P');
+        keys.seq(ks, (k) => plot.hilite(k === 'mv' ? { curve: mv } : k === 'Y' ? { axis: 'x' } : k === 'P' ? { axis: 'y' } : null));
+      }
     });
     const rad = runner(ad, player, opt(ad)), ras = runner(as, player, opt(as));
     let curName = 'ad';
-    const stat = (plot) => (ctx) => {
-      if ((curName === 'ad') !== (plot === ad) || ctx.hide) return;
-      const z = ctx.P[ctx.S.length - 1][0];
-      if (z) player.status('지금: <b>' + esc(gap(ctx.off, z)) + '</b>' + (Math.abs(z.x - 5 - (ctx.off.LRAS || 0)) < 0.03 ? '' : z.x > 5 + (ctx.off.LRAS || 0) ? ' — 실업률 &lt; 자연실업률' : ' — 실업률 &gt; 자연실업률'));
-    };
     const keys = Keys($('#k33'), [
-      { k: 'Y', t: '실질 GDP', s: 'Y (Y* = 100)', f: idx0, d: pct },
-      { k: 'P', t: '물가', s: 'P (A = 100)', f: idx0, d: pct },
+      { k: 'Y', t: '실질 GDP', s: 'Y', w: ['증가', '감소'], tol: 0.03 },
+      { k: 'P', t: '물가', s: 'P', w: ['상승', '하락'], tol: 0.03 },
       { k: 'mv', t: '곡선 이동', s: '처음 A 대비' }
     ]);
     const card = (plot) => (ctx) => {
@@ -650,8 +675,8 @@
       const a = plot.pointsOf(ctx.S[0].off, ctx.S[0].vis)[0], lp = lastPt(ctx);
       if (!a) return;
       const z = lp ? lp.pt : a, off = lp && lp.i < ctx.S.length - 1 ? ctx.S[lp.i].off : ctx.off;
-      keys.set({ Y: { b: 100, a: 100 * z.x / 5, note: gap(off, z) }, P: { b: 100, a: 100 * z.y / 5 }, mv: { txt: movedText(plot, ctx.S, ['AD', 'SRAS', 'LRAS']), base: '없음' } });
-      stat(plot)(ctx);
+      const mv = movedText(plot, ctx.S, CV);
+      keys.set({ Y: { b: 5, a: z.x, note: gap(off, z) }, P: { b: 5, a: z.y }, mv: { txt: mv || '없음', on: !!mv } });
     };
     ad.on = card(ad); as.on = card(as);
     const R = 1.4;
@@ -734,16 +759,18 @@
     const player = Player($('#pl28'));
     const r = runner(plot, player, {
       start: '처음: 균형 W_E 에서 L_E 만큼 고용, 실업 없음',
-      result: (a, b) => (b.vis.W ? (b.off.W || 0) + 7 > eqW(b.off) + 0.05 ? '임금이 W_E 보다 높게 묶임 → L_S − L_D 만큼 실업' : '임금 바닥이 균형보다 낮아 효과 없음' : '임금이 내려가 새 균형 — 고용 ↓ · 임금 ↓, 실업 없음')
+      result: (a, b) => (b.vis.W ? (b.off.W || 0) + 7 > eqW(b.off) + 0.05 ? '임금이 W_E 보다 높게 묶임 → L_S − L_D 만큼 실업' : '임금 바닥이 균형보다 낮아 효과 없음' : '임금이 내려가 새 균형 — 고용 ↓ · 임금 ↓, 실업 없음'),
+      quiet: () => { keys.stop(); plot.hilite(null); },
+      // 새 균형에서: 임금(W 선 또는 y 축) → 고용(x 축) → 실업 순서로 짚는다
+      after: (a, b) => keys.seq(['W', 'L', 'U'], (k) => plot.hilite(k === 'W' ? (b.vis.W ? { curve: 'W' } : { axis: 'y' }) : k === 'L' && !b.vis.W ? { axis: 'x' } : null))
     });
     function eqW(off) { const m = meet(plot.byId.S, off.S || 0, plot.byId.D, off.D || 0, plot.dom); return m ? m.y : 5; }
     const keys = Keys($('#k28'), [
-      { k: 'W', t: '임금', s: 'W (W_E = 100)', f: idx0, d: pct },
-      { k: 'L', t: '고용', s: 'L (L_E = 100)', f: idx0, d: pct },
-      { k: 'U', t: '실업', s: 'L_S − L_D', f: idx0, d: (b, a) => (a >= b ? '+' : '−') + fmt(Math.abs(a - b)) }
+      { k: 'W', t: '임금', s: 'W', w: ['상승', '하락'], tol: 0.03 },
+      { k: 'L', t: '고용', s: 'L', w: ['증가', '감소'], tol: 0.03 },
+      { k: 'U', t: '실업', s: 'L_S − L_D', w: ['발생', '감소'], tol: 0.03 }
     ]);
     plot.on = (ctx) => {
-      player.status(info ? arrows(info) : '');
       const cur = ctx.S[ctx.S.length - 1], off = ctx.off, Wc = plot.byId.W, Sc = plot.byId.S, Dc = plot.byId.D;
       const lp = lastPt(ctx), e = lp ? lp.pt : { x: 5, y: 5 };
       let w = e.y, L = e.x, U = 0;
@@ -754,83 +781,102 @@
           if (ld && ls) { w = wl; L = ld.x; U = (ls.x - ld.x) * 10; }
         }
       }
-      keys.set({ W: { b: 100, a: 100 * w / 5 }, L: { b: 100, a: 100 * L / 5 }, U: { b: 0, a: U } });
+      keys.set({ W: { b: 5, a: w }, L: { b: 5, a: L }, U: { b: 0, a: U } });
     };
     const w = (t, q, dir, W, why) => ({ t, q, dir, stages: [{ name: t, at: 0, ch: { vis: { W: true }, abs: { W } }, why }] });
     const EV = [
       w('최저임금 (균형보다 높게)', 'MC 14', 'r', 0, '법으로 최저임금 W > W_E → 일하려는 사람 ↑ · 기업이 원하는 사람 ↓ → 실업 (특히 10대 · 미숙련)'),
       w('노동조합', 'MC 10', 'r', 0.5, '단체교섭으로 조합원 임금 W > W_E → 그 부문 고용 ↓ → 밀려난 사람은 실업 · 노조 없는 부문으로'),
       w('효율임금', 'MC 14', 'r', -0.4, '기업이 스스로 W > W_E 를 줌 → 건강 · 이직 ↓ · 좋은 지원자 · 노력 ↑ → 그래도 W > W_E 라 실업'),
-      w('최저임금이 균형보다 낮다면', 'MC 10 +', 'l', -3.4, '최저임금 W < W_E → 구속력 없음 → 시장 임금 W_E 그대로, 남는 노동 없음'),
       { t: '노동 수요 감소 (수입 ↑ → 국내 산업 쇠퇴)', q: 'SA 4', dir: 'l', stages: [
         { name: '수요 D ←, 임금 그대로', step: '1단계 단기', at: 2, ch: { add: { D: -1.4 }, vis: { W: true }, abs: { W: -2 } }, why: '수입 ↑ → 국내 산업 쇠퇴 → 노동 수요 D ← → 임금은 처음 W_E 에 묶임 → 일하려는 사람 > 원하는 사람 → 실업' },
         { name: '임금 ↓ → 새 균형', step: '2단계 장기', at: 0, ch: { vis: { W: false } }, why: '시간이 지나 임금이 내려감 → 새 균형에서 고용 ↓ · 임금 ↓ → 실업은 사라짐(다른 산업으로 옮겨 가며 임금이 같아짐)' }] }
     ];
     list($('#o28'), EV, (i) => r.pick(i < 0 ? null : EV[i]));
 
-    // 실업 지표: 분수로 보여 주고, 걸음마다 바뀐 사람 수 → 실업률 분자 → 분모 → 결과 → 참가율 분자 → 분모 → 결과 순으로 강조
+    // 실업 지표: 숫자 대신 단어 + 방향. 걸음: 처음 → 옮긴 무리 → 실업률(분자 → 분모 → 결과) → 참가율(분자 → 분모 → 결과). 방향은 실제 수(2009년 6월, SA 1)로 계산
     const B = { E: 140.196, U: 14.729, N: 80.729 };
+    const NM = { E: '취업자', U: '실업자', N: '비경제활동인구' };
     const SIT = [
       { t: '실직 후 구직 중 (취업자 → 실업자)', m: { E: -1, U: 1 } },
-      { t: '실직 후 구직 포기 (취업자 → 비경제활동)', q: 'MC 1', m: { E: -1, N: 1 } },
-      { t: '구직 시늉만 하던 사람을 비경제활동으로 (실업자 → 비경제활동)', q: 'MC 5', m: { U: -1, N: 1 } },
+      { t: '실직 후 구직 포기 (취업자 → 비경제활동인구)', q: 'MC 1', m: { E: -1, N: 1 } },
+      { t: '구직 시늉만 하던 사람을 비경제활동인구로 (실업자 → 비경제활동인구)', q: 'MC 5', m: { U: -1, N: 1 } },
       { t: '실업자가 취업 (실업자 → 취업자)', m: { U: -1, E: 1 } },
-      { t: '처음으로 구직 시작 (비경제활동 → 실업자)', m: { N: -1, U: 1 } }
+      { t: '처음으로 구직 시작 (비경제활동인구 → 실업자)', m: { N: -1, U: 1 } }
     ];
-    const pl2 = Player($('#pl28s'), '목록에서 상황을 고르면 분자 · 분모가 한 걸음씩 바뀝니다. ‹ › 로 넘겨 보세요.'), one = (v) => fmt(v, 1);
-    // lv: 0 처음 · 1 사람 수 바뀜 · 2 실업률 분자 · 3 분모 · 4 실업률 · 5 참가율 분자 · 6 분모 · 7 참가율
+    const pl2 = Player($('#pl28s'), '목록에서 상황을 고르면 전체 단계가 여기 나오고, 분자 · 분모 · 결과가 차례로 바뀝니다.');
     const rk = Keys($('#k28s'), [
-      { k: 'UR', t: '실업률', s: 'U ÷ (E + U)', f: (v) => fmt(v, 1) + '%', d: pp },
-      { k: 'LF', t: '경제활동참가율', s: '(E + U) ÷ 인구', f: (v) => fmt(v, 1) + '%', d: pp }
+      { k: 'UR', t: '실업률', s: '실업자 ÷ 경제활동인구', w: ['상승', '하락'] },
+      { k: 'LF', t: '경제활동참가율', s: '경제활동인구 ÷ 성인 인구', w: ['상승', '하락'] }
     ]);
+    const tri = (d) => (d > 0 ? '<b class="up">▲</b>' : d < 0 ? '<b class="dn">▼</b>' : '');
+    const wordOf = (d, w) => { w = w || ['증가', '감소']; return d > 0 ? '<span class="t up">▲ ' + w[0] + '</span>' : d < 0 ? '<span class="t dn">▼ ' + w[1] + '</span>' : '<span class="t same">그대로</span>'; };
+    const ur = (x) => x.U / (x.E + x.U), lf = (x) => (x.E + x.U) / (x.E + x.U + x.N);
+    // lv: 0 처음 · 1 무리 옮김 · 2 실업률 분자 · 3 분모 · 4 결과 · 5 참가율 분자 · 6 분모 · 7 결과
     function rates(m, lv) {
-      const v = { E: B.E + (m.E || 0), U: B.U + (m.U || 0), N: B.N + (m.N || 0) }, u = lv >= 1 ? v : B;
-      const ur = (x) => x.U / (x.E + x.U) * 100, lf = (x) => (x.E + x.U) / (x.E + x.U + x.N) * 100;
-      rk.set({ UR: { b: ur(B), a: lv >= 4 ? ur(v) : ur(B) }, LF: { b: lf(B), a: lv >= 7 ? lf(v) : lf(B) } });
-      const t = (k) => { const dd = lv >= 1 ? m[k] || 0 : 0; return '<span class="t' + (dd > 0 ? ' up' : dd < 0 ? ' dn' : '') + '">' + one(u[k]) + (dd > 0 ? '↑' : dd < 0 ? '↓' : '') + '</span>'; };
-      const UR = (x) => x.U / (x.E + x.U) * 100, LF = (x) => (x.E + x.U) / (x.E + x.U + x.N) * 100;
-      const res = (f, show) => { const a = f(B), b = f(v); return fmt(show ? b : a, 1) + '%' + (show && Math.abs(b - a) > 0.005 ? (b > a ? '<span class="t up">↑</span>' : '<span class="t dn">↓</span>') : ''); };
-      const hi = (n) => (lv === n ? ' hi' : '');
-      $('#rates').innerHTML =
-        '<div class="rate"><span class="nm">실업률</span><span class="frac sym"><span>U</span><span>E + U</span></span><span>=</span><span class="frac"><span class="' + hi(2) + '">' + t('U') + '</span><span class="' + hi(3) + '">' + t('E') + ' + ' + t('U') + '</span></span><span class="res' + hi(4) + '">= ' + res(UR, lv >= 4) + '</span></div>' +
-        '<div class="rate"><span class="nm">경제활동참가율</span><span class="frac sym"><span>E + U</span><span>E + U + NILF</span></span><span>=</span><span class="frac"><span class="' + hi(5) + '">' + t('E') + ' + ' + t('U') + '</span><span class="' + hi(6) + '">' + t('E') + ' + ' + t('U') + ' + ' + t('N') + '</span></span><span class="res' + hi(7) + '">= ' + res(LF, lv >= 7) + '</span></div>' +
-        '<div class="pop' + hi(1) + '">E 취업자 · U 실업자 · NILF 비경제활동, 단위 백만 명 · 성인 인구 = <b>' + one(u.E + u.U + u.N) + '</b> · 경제활동인구 = <b>' + one(u.E + u.U) + '</b></div>';
-    }
-    const word = (dv) => (Math.abs(dv) < 1e-9 ? '그대로' : dv > 0 ? '↑' : '↓');
-    const nm = { E: '취업자 E', U: '실업자 U', N: '비경제활동 NILF' };
-    function beats(s) {
-      const m = s.m, dU = m.U || 0, dLF = (m.E || 0) + (m.U || 0), dPop = dLF + (m.N || 0);
       const v = { E: B.E + (m.E || 0), U: B.U + (m.U || 0), N: B.N + (m.N || 0) };
-      const UR0 = B.U / (B.E + B.U) * 100, UR1 = v.U / (v.E + v.U) * 100, LF0 = (B.E + B.U) / (B.E + B.U + B.N) * 100, LF1 = (v.E + v.U) / (v.E + v.U + v.N) * 100;
-      const moved = Object.keys(m).map((k) => nm[k] + ' ' + (m[k] > 0 ? '+1.0' : '−1.0')).join(' · ');
-      const steps = [
-        ['처음: 2009년 6월 (SA 1) — 실업률 9.5% · 참가율 65.7%', 0],
-        [moved, 1],
-        ['실업률 분자 U : ' + word(dU), 2], ['실업률 분모 E + U : ' + word(dLF), 3],
-        ['→ 실업률 ' + fmt(UR0, 1) + '% → ' + fmt(UR1, 1) + '% ' + word(UR1 - UR0 > 0.005 || UR1 - UR0 < -0.005 ? UR1 - UR0 : 0), 4],
-        ['참가율 분자 E + U : ' + word(dLF), 5], ['참가율 분모 E + U + NILF : ' + word(dPop), 6],
-        ['→ 참가율 ' + fmt(LF0, 1) + '% → ' + fmt(LF1, 1) + '% ' + word(Math.abs(LF1 - LF0) > 0.005 ? LF1 - LF0 : 0), 7]
-      ];
-      return steps.map(([t, lv]) => ({ g: lv ? s.t : '처음', t, run: () => rates(m, lv), wait: lv === 4 || lv === 7 ? 1.3 : 1 }));
+      const d = (k) => (lv >= 1 ? m[k] || 0 : 0), dLF = d('E') + d('U'), dPop = dLF + d('N');
+      const dUR = dirOf(ur(B), ur(v), 1e-9), dLFr = dirOf(lf(B), lf(v), 1e-9);
+      rk.set({ UR: lv >= 4 ? { d: dUR } : { txt: '· · ·' }, LF: lv >= 7 ? { d: dLFr } : { txt: '· · ·' } });
+      const hi = (n) => (lv === n ? ' hi' : '');
+      const chip = (k) => '<span class="grp">' + NM[k] + tri(d(k)) + '</span>';
+      const part = (ks, dd, sum, on) => ks.map((k) => NM[k]).join(' + ') + (sum ? '<span class="sum">= ' + sum + '</span>' : '') + (on ? ' ' + wordOf(dd) : '');
+      const res = (dd, on) => (on ? wordOf(dd, ['상승', '하락']) : '<span class="q">?</span>');
+      $('#rates').innerHTML =
+        '<div class="who' + hi(1) + '"><span class="lb">인구</span>' + chip('E') + chip('U') + chip('N') + '</div>' +
+        '<div class="rate"><span class="nm">실업률</span><span class="frac"><span class="' + hi(2) + '">' + part(['U'], d('U'), '', lv >= 2) + '</span><span class="' + hi(3) + '">' + part(['E', 'U'], dLF, '경제활동인구', lv >= 3) + '</span></span><span class="eqs">=</span><span class="res' + hi(4) + '">' + res(dUR, lv >= 4) + '</span></div>' +
+        '<div class="rate"><span class="nm">경제활동참가율</span><span class="frac"><span class="' + hi(5) + '">' + part(['E', 'U'], dLF, '경제활동인구', lv >= 5) + '</span><span class="' + hi(6) + '">' + part(['E', 'U', 'N'], dPop, '성인 인구', lv >= 6) + '</span></span><span class="eqs">=</span><span class="res' + hi(7) + '">' + res(dLFr, lv >= 7) + '</span></div>';
     }
-    list($('#o28s'), SIT, (i) => { if (i < 0) { pl2.clear(); rates({}, 0); } else pl2.load(beats(SIT[i])); });
+    let rt = [];
+    const stopR = () => { rt.forEach(clearTimeout); rt = []; rk.stop(); };
+    // 한 걸음 안에서 lvs 를 차례로(분자 → 분모 → 결과). 마지막 결과에서 지표 상자를 짚는다
+    const stage = (m, lvs, key) => (anim) => {
+      stopR();
+      if (!anim || reduce) { rates(m, lvs[lvs.length - 1]); rk.seq([key]); return; }
+      lvs.forEach((lv, i) => rt.push(setTimeout(() => { rates(m, lv); if (i === lvs.length - 1) rk.seq([key]); }, i * 700 / SPEED)));
+    };
+    const arrow = (dd) => (dd > 0 ? '↑' : dd < 0 ? '↓' : '그대로');
+    function beats(s) {
+      const m = s.m, v = { E: B.E + (m.E || 0), U: B.U + (m.U || 0), N: B.N + (m.N || 0) };
+      const dLF = (m.E || 0) + (m.U || 0), dPop = dLF + (m.N || 0);
+      const moved = Object.keys(m).map((k) => NM[k] + ' ' + (m[k] > 0 ? '↑' : '↓')).join(' · ');
+      return [
+        { g: '처음', k: '처음', t: '처음: 취업자 · 실업자 · 비경제활동인구 — 아직 변화 없음', run: () => { stopR(); rates({}, 0); }, wait: 0.8 },
+        { g: s.t, k: '이동', t: moved, run: () => { stopR(); rates(m, 1); }, wait: 1.1 },
+        { g: s.t, k: '실업률', t: '분자 실업자 ' + arrow(m.U || 0) + ' · 분모 경제활동인구 ' + arrow(dLF) + ' → 실업률 ' + arrow(dirOf(ur(B), ur(v), 1e-9)), run: stage(m, [2, 3, 4], 'UR'), wait: 2.2 },
+        { g: s.t, k: '참가율', t: '분자 경제활동인구 ' + arrow(dLF) + ' · 분모 성인 인구 ' + arrow(dPop) + ' → 경제활동참가율 ' + arrow(dirOf(lf(B), lf(v), 1e-9)), run: stage(m, [5, 6, 7], 'LF'), wait: 2.2 }
+      ];
+    }
+    list($('#o28s'), SIT, (i) => { if (i < 0) { pl2.clear(); stopR(); rates({}, 0); } else pl2.load(beats(SIT[i])); });
     rates({}, 0);
-    return plot;
+
+    // 균형임금 · 실업률 탭: 한 번에 하나만
+    let cur28 = 'w';
+    function showSub(which, push) {
+      cur28 = which;
+      $$('#c28 .sub button').forEach((b) => b.setAttribute('aria-selected', String(b.getAttribute('data-sub') === which)));
+      $('#p28w').hidden = which !== 'w'; $('#p28u').hidden = which !== 'u';
+      if (which === 'w') plot.render();
+      if (push) history.replaceState(null, '', which === 'u' ? '#ch28-u' : '#ch28');
+    }
+    $$('#c28 .sub button').forEach((b) => b.addEventListener('click', () => showSub(b.getAttribute('data-sub'), true)));
+    return { showSub, current: () => cur28 };
   }
 
   /* ───────── 챕터 탭 ───────── */
   ch29();
-  const p30 = ch30(), c33 = ch33(), p28 = ch28();
-  const plots = { ch30: [p30], ch28: [p28] };
+  const p30 = ch30(), c33 = ch33(), c28 = ch28();
+  const plots = { ch30: [p30] };
   function show(id, sub) {
     $$('.ch').forEach((s) => s.classList.toggle('on', s.id === id.replace('ch', 'c')));   // 구역 id(c29)를 주소(#ch29)와 다르게: 같으면 브라우저가 그 구역으로 내려가 고정 머리줄 밑에 가린다
     $$('.tabs button').forEach((b) => b.setAttribute('aria-selected', String(b.getAttribute('data-ch') === id)));
-    if (id === 'ch33') c33.showSub(sub || c33.current(), false);
+    if (id === 'ch33') c33.showSub(sub === 'as' || sub === 'ad' ? sub : c33.current(), false);
+    if (id === 'ch28') c28.showSub(sub === 'u' || sub === 'w' ? sub : c28.current(), false);
     (plots[id] || []).forEach((p) => p.render());
   }
   $$('.tabs button').forEach((b) => b.addEventListener('click', () => { show(b.getAttribute('data-ch')); history.replaceState(null, '', '#' + b.getAttribute('data-ch')); }));
   function fromHash() {
-    const m = /^(ch29|ch30|ch33|ch28)(?:-(as|ad))?$/.exec(location.hash.slice(1));
+    const m = /^(ch29|ch30|ch33|ch28)(?:-(as|ad|u|w))?$/.exec(location.hash.slice(1));
     show(m ? m[1] : 'ch29', m && m[2]);
   }
   window.addEventListener('hashchange', fromHash);
