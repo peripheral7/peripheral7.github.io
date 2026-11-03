@@ -54,7 +54,7 @@
   const same = (a, b) => Math.abs(a - b) < 1e-6;
   const sign = (a, b, tol) => (Math.abs(b - a) < tol ? '=' : b > a ? '↑' : '↓');
   const esc = (s) => String(s).replace(/[&<>]/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;' }[c]));
-  const arrows = (s) => esc(s).replace(/↑/g, '<span class="up">▲</span>').replace(/↓/g, '<span class="dn">▼</span>').replace(/_([A-Z])/g, '<sub>$1</sub>');
+  const arrows = (s) => esc(s).replace(/↑/g, '<span class="up">▲</span>').replace(/↓/g, '<span class="dn">▼</span>').replace(/_([A-Z0-9])/g, '<sub>$1</sub>');
   const dirOf = (a, b, tol) => (Math.abs(b - a) < (tol || 1e-6) ? 0 : b > a ? 1 : -1);
   const dirW = (a, b, tol) => ['↓', '그대로', '↑'][dirOf(a, b, tol) + 1];
   function textW(s, size) {
@@ -337,7 +337,7 @@
       draw(); schedule();
       if (self.onGo) self.onGo(i);
     }
-    // 단계(묶음)마다 li.stg = 제목 줄(.gh, 갈래 ⓐ ⓑ 포함) + 걸음 목록(ol.rows). 안 A 는 가로 열, 안 B 는 타임라인 칩 — CSS 만 다르다
+    // 단계(묶음)마다 li.stg = 한 열: 제목 줄(.gh, 갈래 ⓐ ⓑ 포함) + 걸음 목록(ol.rows)
     function build() {
       ol.innerHTML = '';
       let g = null, rows = null;
@@ -457,7 +457,7 @@
     });
     return out;
   }
-  const MOVE = /(AD|SRAS|LRAS|MS|MD)( 가 더)?\s*[←→]/;
+  const MOVE = /(AD|SRAS|LRAS|MS|MD)( 가 더| further)?\s*[←→]/;
   // 사건(sc)의 갈래(branch: 갈라지는 단계 번호)를 따라 걸음을 만든다. o.start: A 설명, o.result(앞 상태, 새 상태, 글자): 새 균형 설명
   function beatsFor(plot, sc, branch, o, rebuild) {
     const alts = sc.stages.map((s, i) => i).filter((i) => i > 0 && (sc.stages[i].from != null || sc.stages.some((x) => x.from != null)));
@@ -481,7 +481,7 @@
       const gg = isAlt ? '2단계' : g, cause = ps.slice(0, at).join(' → '), after = ps.slice(at + 1).join(' → ');
       if (cause) out.push({ g: gg, alts: altList, k: '원인', t: cause, run: snap(prevS, false), wait: 1.1 });
       out.push({ g: gg, alts: altList, k: '이동', t: ps[at], run: snap(withNew, true), wait: 1.25 });
-      out.push({ g: gg, alts: altList, k: '균형', t: '새 균형 ' + letter + ' : ' + (after || o.result(prevS[prevS.length - 1], next, letter)),
+      out.push({ g: gg, alts: altList, k: '균형', t: letter + ' : ' + (after || o.result(prevS[prevS.length - 1], next, letter)),
         run: (anim) => { snap(withNew, false)(anim); if (o.after) o.after(prevS[prevS.length - 1], next); }, wait: 1.8 });
       S = withNew;
     });
@@ -582,7 +582,7 @@
     ];
     const KS = ['원인', '비교', '조정', '결과'];
     function beats(ev) {
-      const out = [{ g: '처음', k: '처음', t: '처음: 지준 $100 × 승수 10 = 예금 · 통화량 $1,000', run: () => show(B, []), wait: 0.8 }];
+      const out = [{ g: '처음', k: '처음', t: '지준 $100 × 1/R 10 = M $1,000', run: () => show(B, []), wait: 0.8 }];
       ev.steps.forEach(([t, v, hi], i) => { const s = Object.assign({}, B, v); out.push({ g: ev.t, k: KS[i], t, run: () => show(s, hi), wait: 1.3 }); });
       return out;
     }
@@ -609,7 +609,7 @@
       return { M, P, Y, V: P * Y / M / 100, v: m ? m.y : NaN };
     };
     const r = runner(plot, player, {
-      start: 'A : 처음 균형',
+      start: 'A : MS = MD',
       result: (a, b) => { const x = idx(a), y = idx(b); return '화폐가치 1/P ' + dirW(x.v, y.v, 0.02) + ' → 물가 P ' + dirW(x.P, y.P, 0.5); },
       quiet: () => plot.hilite(null),
       // 새 균형에서: 움직인 곡선 → 화폐량(x 축) → 화폐가치(y 축) 순서로 짚는다. 안 바뀐 것은 건너뜀
@@ -623,14 +623,14 @@
     });
     const keep = (why) => ({ name: 'Fed 가 MS 를 옮겨 물가 유지', ch: { abs: (o) => ({ MS: 5 * (1 + mdScale(o)) - 5 }) }, why });
     const EV = [
-      { t: 'Fed 통화량 2배', dir: 'r', stages: [{ name: 'MS →', at: 0, ch: { add: { MS: 5 } }, why: 'Fed 가 통화량 M 을 2배로(MS →) → 화폐가 흔해져 화폐가치 1/P 절반 → 물가 P 2배 → V · Y 그대로라 통화 증가율 = 물가상승률' }] },
-      { t: 'Fed 통화량 감소', dir: 'l', stages: [{ name: 'MS ←', at: 0, ch: { add: { MS: -1.5 } }, why: 'Fed 가 통화량을 줄임(MS ←) → 화폐가치 1/P ↑ → 물가 P ↓' }] },
+      { t: 'Fed 통화량 2배', dir: 'r', stages: [{ name: 'MS →', at: 0, ch: { add: { MS: 5 } }, why: 'M 2배 (MS →) → 1/P 절반 → P 2배 (V · Y 그대로)' }] },
+      { t: 'Fed 통화량 감소', dir: 'l', stages: [{ name: 'MS ←', at: 0, ch: { add: { MS: -1.5 } }, why: 'M ↓ (MS ←) → 1/P ↑ → P ↓' }] },
       { t: '신용카드 보급 → 현금 덜 보유', q: 'SA 2', dir: 'l', stages: [
-        { name: '화폐 수요 감소', ch: { add: { Vg: 0.5 } }, why: '카드로 결제 → 같은 물가에서 들고 있을 돈 ↓ → MD ← → 화폐가치 1/P ↓ → 물가 P ↑ (Fed 가 가만히 있으면, SA 2b)' },
-        keep('Fed 가 통화량을 MD 감소만큼 줄임(MS ←) → 1/P 가 처음 높이로 → 물가 그대로 (SA 2c)')] },
+        { name: '화폐 수요 감소', ch: { add: { Vg: 0.5 } }, why: '카드 결제 → 들고 있을 돈 ↓ → MD ← → 1/P ↓ → P ↑ (Fed 가 가만히 있으면)' },
+        keep('Fed 가 M 을 MD 감소만큼 ↓ (MS ←) → 1/P 처음 높이 → P 그대로')] },
       { t: '실질 GDP 증가 → 거래용 돈 더 필요', dir: 'r', stages: [
-        { name: '화폐 수요 증가', ch: { add: { Yg: 0.3 } }, why: '생산 Y ↑ → 같은 물가에서 돈이 더 필요 → MD → → 화폐가치 1/P ↑ → 물가 P ↓' },
-        keep('Fed 가 통화량을 늘림(MS →) → 1/P 가 처음 높이로 → 물가 그대로')] }
+        { name: '화폐 수요 증가', ch: { add: { Yg: 0.3 } }, why: 'Y ↑ → 거래용 돈 ↑ → MD → → 1/P ↑ → P ↓' },
+        keep('Fed 가 M ↑ (MS →) → 1/P 처음 높이 → P 그대로')] }
     ];
     list($('#o30'), EV, (i) => r.pick(i < 0 ? null : EV[i]));
     return plot;
@@ -649,8 +649,8 @@
   function longRun(S) {                        // 2단계 설명: 1단계 끝 상태가 Y* 보다 큰지 작은지
     const b = S[S.length - 1].off, L = 5 + (b.LRAS || 0);
     return eqX(b) > L + 0.03
-      ? 'Y > Y* : 일손 부족 → 임금과 기대물가 ↑ → SRAS ← → Y 는 Y* 로 돌아오고 P 는 더 ↑'
-      : 'Y < Y* : 실업 ↑ → 임금과 기대물가 ↓ → SRAS → → Y 는 Y* 로 돌아오고 P ↓';
+      ? 'Y > Y* : 임금 · Pe ↑ → SRAS ← → Y = Y*, P 더 ↑'
+      : 'Y < Y* : 실업 ↑ → 임금 · Pe ↓ → SRAS → → Y = Y*, P ↓';
   }
   function gap(off, pt) {
     const L = 5 + (off.LRAS || 0);
@@ -662,7 +662,7 @@
     const CV = ['AD', 'SRAS', 'LRAS'];
     const movedId = (plot, a, b) => CV.find((id) => b.vis[id] && a.vis[id] && !same(plot.offOf(plot.byId[id], a.off), plot.offOf(plot.byId[id], b.off)));
     const opt = (plot) => ({
-      start: 'A : 처음 장기균형 (Y = Y*)',
+      start: 'A : Y = Y*',
       result: (a, b) => { const x = plot.pointsOf(a.off, a.vis)[0], y = plot.pointsOf(b.off, b.vis)[0]; if (!x || !y) return ''; let s = 'Y ' + dirW(x.x, y.x, 0.03) + ' · P ' + dirW(x.y, y.y, 0.03) + ' — ' + gap(b.off, y); if (y.x < x.x - 0.03 && y.y > x.y + 0.03 && Math.abs(x.x - 5 - (a.off.LRAS || 0)) < 0.03) s += ' (스태그플레이션)'; return s; },
       quiet: () => plot.hilite(null),
       // 새 균형에서: 움직인 곡선 → Y(x 축) → P(y 축) 순서로 짚는다
@@ -684,19 +684,19 @@
       { name: 'SRAS 조정 → Y*', step: '2단계 장기', ch: { abs: lrSRAS }, why: longRun }] });
     const AD = {
       C: [adEv('주가 급등 → 부 ↑', 'r', '주가 ↑ → 부 ↑ → 소비 C ↑ → AD →'), adEv('주가 폭락', 'l', '주가 ↓ → 부 ↓ → 소비 C ↓ → AD ←', 'SA 4a'), adEv('소득세 인하', 'r', '소득세 ↓ → 가처분소득 ↑ → C ↑ → AD →')],
-      I: [adEv('통화량 증가 (M ↑ → r ↓)', 'r', '통화량 M ↑ → 이자율 r ↓ → 투자 I ↑ (원화 ↓ → NX ↑ 도) → AD →'), adEv('기업 낙관 · 투자 붐', 'r', '미래 사업 전망 ↑ → 새 설비 투자 I ↑ → AD →', 'SA 5'), adEv('투자세액공제', 'r', '투자하면 세금 감면 → I ↑ → AD →')],
+      I: [adEv('통화량 증가 (M ↑ → r ↓)', 'r', 'M ↑ → r ↓ → I ↑ (환율 ↓ → NX ↑) → AD →'), adEv('기업 낙관 · 투자 붐', 'r', '미래 사업 전망 ↑ → 새 설비 투자 I ↑ → AD →', 'SA 5'), adEv('투자세액공제', 'r', '투자하면 세금 감면 → I ↑ → AD →')],
       G: [adEv('정부 구매 증가', 'r', '정부 구매 G ↑ → AD →', 'SA 4b')],
-      NX: [adEv('해외 경기 침체', 'l', '외국 소득 ↓ → 우리 수출 ↓ → NX ↓ → AD ←', 'SA 4d'), adEv('해외 정치 불안 → 원화 절상', 'l', '한국 자산 수요 ↑ → 원화 가치 ↑ → 수출 ↓ · 수입 ↑ → NX ↓ → AD ← (P 때문이 아닌 환율 변화라 이동)', 'MC 7')]
+      NX: [adEv('해외 경기 침체', 'l', '외국 소득 ↓ → 우리 수출 ↓ → NX ↓ → AD ←', 'SA 4d'), adEv('해외 정치 불안 → 원화 절상', 'l', '원화 ↑ → 수출 ↓ · 수입 ↑ → NX ↓ → AD ←', 'MC 7')]
     };
     const srEv = (t, why, q) => ({ t, q, dir: 'l', stages: [
       { name: 'SRAS ←', step: '1단계 단기', ch: { add: { SRAS: -R } }, why },
-      { name: '그대로 두면 SRAS 복귀', ch: { abs: { SRAS: 0 } }, letter: 'A', at: 2, why: 'Y < Y* : 실업 ↑ → 임금 · 기대물가 ↓ → SRAS 가 처음 자리로 → A 로 돌아옴 (시간이 오래 걸림)' },
-      { name: '정책으로 수용 AD →', from: 0, ch: { abs: lrAD }, chain: ['Fed · 정부가 통화량 ↑ · 정부 구매 ↑', 'AD →', 'Y 는 바로 Y* 로, 대신 P 는 더 ↑ (공급충격 수용)'], at: 1 }] });
+      { name: '그대로 두면 SRAS 복귀', ch: { abs: { SRAS: 0 } }, letter: 'A', at: 2, why: 'Y < Y* : 실업 ↑ → 임금 · Pe ↓ → SRAS 가 처음 자리로 → Y = Y*, P = P_1 (오래 걸림)' },
+      { name: '정책으로 수용 AD →', from: 0, ch: { abs: lrAD }, chain: ['M ↑ · G ↑', 'AD →', 'Y = Y* 바로, 대신 P 더 ↑ (공급충격 수용)'], at: 1 }] });
     const lrEv = (t, dir, why, q) => ({ t, q, dir, stages: [
       { name: 'LRAS · SRAS ' + (dir === 'r' ? '→' : '←'), step: '1단계', ch: { add: { LRAS: dir === 'r' ? 1 : -1, SRAS: dir === 'r' ? 1 : -1 } }, why },
-      { name: 'SRAS 조정 → 새 Y*', step: '2단계 장기', ch: { abs: lrSRAS }, chain: dir === 'r' ? ['P 가 Pe 보다 낮아짐 → 기대물가 ↓', 'SRAS 가 더 →', '새 Y* 에서 장기균형, P ↓'] : ['P 가 Pe 보다 높아짐 → 기대물가 ↑', 'SRAS 가 더 ←', '새 Y* 에서 장기균형, P ↑'], at: 1 }] });
+      { name: 'SRAS 조정 → 새 Y*', step: '2단계 장기', ch: { abs: lrSRAS }, chain: dir === 'r' ? ['P < Pe → Pe ↓', 'SRAS 가 더 →', 'Y = 새 Y*, P ↓'] : ['P > Pe → Pe ↑', 'SRAS 가 더 ←', 'Y = 새 Y*, P ↑'], at: 1 }] });
     const AS = {
-      SR: [srEv('기대물가 상승', '기대물가 Pe ↑ → 명목임금 계약 · 가격을 미리 ↑ → 같은 P 에서 생산 ↓ → SRAS ← (LRAS 그대로)', 'MC 11'), srEv('유가 급등 (원자재 비용 ↑)', '유가 ↑ → 생산 비용 ↑ → SRAS ←'), srEv('명목임금 상승', '명목임금 ↑ → 비용 ↑ → SRAS ←')],
+      SR: [srEv('기대물가 상승', 'Pe ↑ → 명목임금 · 가격 미리 ↑ → SRAS ← (LRAS 그대로)', 'MC 11'), srEv('유가 급등 (원자재 비용 ↑)', '유가 ↑ → 생산 비용 ↑ → SRAS ←'), srEv('명목임금 상승', '명목임금 ↑ → 비용 ↑ → SRAS ←')],
       LR: [lrEv('기술 진보', 'r', '같은 노동 · 자본으로 더 생산 → Y* ↑ → LRAS · SRAS →', 'SA 4c'), lrEv('자본 · 인적자본 증가', 'r', '자본 K · 인적자본 H ↑ → Y* ↑ → LRAS · SRAS →', 'SA 5c'), lrEv('이민 → 노동 증가', 'r', '노동 L ↑ → Y* ↑ → LRAS · SRAS →', 'SA 1'), lrEv('자연재해 · 자원 감소', 'l', '자원 N · 자본 ↓ → Y* ↓ → LRAS · SRAS ←', 'SA 1')]
     };
     // 어느 목록에서 골라도 그 탭의 줄 표시를 모두 지우고 새 사건을 처음 상태 A 에서 시작한다(앞 사건의 LRAS 이동 등은 풀린다). 같은 줄을 다시 누르면 풀림
@@ -759,8 +759,8 @@
     });
     const player = Player($('#pl28'));
     const r = runner(plot, player, {
-      start: '처음: 균형 W_E 에서 L_E 만큼 고용, 실업 없음',
-      result: (a, b) => (b.vis.W ? (b.off.W || 0) + 7 > eqW(b.off) + 0.05 ? '임금이 W_E 보다 높게 묶임 → L_S − L_D 만큼 실업' : '임금 바닥이 균형보다 낮아 효과 없음' : '임금이 내려가 새 균형 — 고용 ↓ · 임금 ↓, 실업 없음'),
+      start: 'A : W = W_E, L = L_E',
+      result: (a, b) => (b.vis.W ? (b.off.W || 0) + 7 > eqW(b.off) + 0.05 ? 'W > W_E → 실업 = L_S − L_D' : 'W < W_E → 효과 없음' : 'W ↓ · L ↓, 실업 없음'),
       quiet: () => plot.hilite(null),
       // 새 균형에서: 임금(W 선 또는 y 축) → 고용(x 축) 순서로 짚는다
       after: (a, b) => plot.seq(b.vis.W ? [{ curve: 'W' }] : [{ axis: 'y' }, { axis: 'x' }])
@@ -768,12 +768,12 @@
     function eqW(off) { const m = meet(plot.byId.S, off.S || 0, plot.byId.D, off.D || 0, plot.dom); return m ? m.y : 5; }
     const w = (t, q, dir, W, why) => ({ t, q, dir, stages: [{ name: t, at: 0, ch: { vis: { W: true }, abs: { W } }, why }] });
     const EV = [
-      w('최저임금 (균형보다 높게)', 'MC 14', 'r', 0, '법으로 최저임금 W > W_E → 일하려는 사람 ↑ · 기업이 원하는 사람 ↓ → 실업 (특히 10대 · 미숙련)'),
-      w('노동조합', 'MC 10', 'r', 0.5, '단체교섭으로 조합원 임금 W > W_E → 그 부문 고용 ↓ → 밀려난 사람은 실업 · 노조 없는 부문으로'),
-      w('효율임금', 'MC 14', 'r', -0.4, '기업이 스스로 W > W_E 를 줌 → 건강 · 이직 ↓ · 좋은 지원자 · 노력 ↑ → 그래도 W > W_E 라 실업'),
+      w('최저임금 (균형보다 높게)', 'MC 14', 'r', 0, '법으로 W > W_E → L_S ↑ · L_D ↓ → 실업 (10대 · 미숙련)'),
+      w('노동조합', 'MC 10', 'r', 0.5, '단체교섭으로 W > W_E → 그 부문 L_D ↓ → 실업 · 노조 없는 부문으로'),
+      w('효율임금', 'MC 14', 'r', -0.4, '기업이 스스로 W > W_E → 건강 · 노력 ↑ · 이직 ↓ → 그래도 실업'),
       { t: '노동 수요 감소 (수입 ↑ → 국내 산업 쇠퇴)', q: 'SA 4', dir: 'l', stages: [
-        { name: '수요 D ←, 임금 그대로', step: '1단계 단기', at: 2, ch: { add: { D: -1.4 }, vis: { W: true }, abs: { W: -2 } }, why: '수입 ↑ → 국내 산업 쇠퇴 → 노동 수요 D ← → 임금은 처음 W_E 에 묶임 → 일하려는 사람 > 원하는 사람 → 실업' },
-        { name: '임금 ↓ → 새 균형', step: '2단계 장기', at: 0, ch: { vis: { W: false } }, why: '시간이 지나 임금이 내려감 → 새 균형에서 고용 ↓ · 임금 ↓ → 실업은 사라짐(다른 산업으로 옮겨 가며 임금이 같아짐)' }] }
+        { name: '수요 D ←, 임금 그대로', step: '1단계 단기', at: 2, ch: { add: { D: -1.4 }, vis: { W: true }, abs: { W: -2 } }, why: '수입 ↑ → 국내 산업 쇠퇴 → D ← → W 는 W_E 에 묶임 → L_S > L_D → 실업' },
+        { name: '임금 ↓ → 새 균형', step: '2단계 장기', at: 0, ch: { vis: { W: false } }, why: 'W ↓ → L ↓, 실업 없음 (다른 산업으로 이동)' }] }
     ];
     list($('#o28'), EV, (i) => r.pick(i < 0 ? null : EV[i]));
 
@@ -824,7 +824,7 @@
       const dLF = (m.E || 0) + (m.U || 0), dPop = dLF + (m.N || 0);
       const moved = Object.keys(m).map((k) => NM[k] + ' ' + (m[k] > 0 ? '↑' : '↓')).join(' · ');
       return [
-        { g: '처음', k: '처음', t: '처음: 취업자 · 실업자 · 비경제활동인구 — 아직 변화 없음', run: () => { stopR(); rates({}, 0); }, wait: 0.8 },
+        { g: '처음', k: '처음', t: '변화 전', run: () => { stopR(); rates({}, 0); }, wait: 0.8 },
         { g: s.t, k: '이동', t: moved, run: () => { stopR(); rates(m, 1); }, wait: 1.1 },
         { g: s.t, k: '실업률', t: '분자 실업자 ' + arrow(m.U || 0) + ' · 분모 경제활동인구 ' + arrow(dLF) + ' → 실업률 ' + arrow(dirOf(ur(B), ur(v), 1e-9)), run: stage(m, [2, 3, 4], 'UR'), wait: 2.2 },
         { g: s.t, k: '참가율', t: '분자 경제활동인구 ' + arrow(dLF) + ' · 분모 성인 인구 ' + arrow(dPop) + ' → 경제활동참가율 ' + arrow(dirOf(lf(B), lf(v), 1e-9)), run: stage(m, [5, 6, 7], 'LF'), wait: 2.2 }
@@ -841,13 +841,24 @@
       $('#p28w').hidden = which !== 'w'; $('#p28u').hidden = which !== 'u';
       if (which === 'w') plot.render();
       if (push) history.replaceState(null, '', which === 'u' ? '#ch28-u' : '#ch28');
+      if (push) alignTabs();
     }
     $$('#c28 .sub button').forEach((b) => b.addEventListener('click', () => showSub(b.getAttribute('data-sub'), true)));
     return { showSub, current: () => cur28 };
   }
 
-  /* ───────── 단계 목록 안 고르기: 주소에 ?steps=b 면 안 B(타임라인), 아니면 안 A(열) ───────── */
-  if (/[?&]steps=b\b/.test(location.search)) document.body.classList.add('sb');
+  /* ───────── 탭 줄을 그래프 y 축에 맞춤: 그려진 SVG 폭(높이 제한이면 가운데 정렬) × 축 위치(74/640) ───────── */
+  function alignTabs() {
+    $$('.ch.on.tabbed').forEach((sec) => {
+      const svg = $$('.fig .stage:not([hidden]) svg.plot', sec)[0], sub = $('.sub', sec);
+      if (!svg || !sub) return;
+      const r = svg.getBoundingClientRect(), f = sec.getBoundingClientRect();
+      if (!r.width) return;
+      const dw = Math.min(r.width, r.height * 640 / 520), x = r.left + (r.width - dw) / 2 + dw * 74 / 640 - f.left;
+      sub.style.marginLeft = window.matchMedia('(max-width:900px)').matches ? '' : Math.max(0, Math.round(x) - 1) + 'px';
+    });
+  }
+  window.addEventListener('resize', alignTabs);
 
   /* ───────── 챕터 탭 ───────── */
   ch29();
@@ -858,6 +869,7 @@
     $$('.tabs button').forEach((b) => b.setAttribute('aria-selected', String(b.getAttribute('data-ch') === id)));
     if (id === 'ch33') c33.showSub(sub === 'as' || sub === 'ad' ? sub : c33.current(), false);
     if (id === 'ch28') c28.showSub(sub === 'u' || sub === 'w' ? sub : c28.current(), false);
+    alignTabs();
     (plots[id] || []).forEach((p) => p.render());
   }
   $$('.tabs button').forEach((b) => b.addEventListener('click', () => { show(b.getAttribute('data-ch')); history.replaceState(null, '', '#' + b.getAttribute('data-ch')); }));
