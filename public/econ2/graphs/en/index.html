@@ -31,12 +31,16 @@
   .tabs button[aria-selected="true"]{color:var(--ink);border-bottom-color:var(--blue)}
   .top .links{margin-left:auto;display:flex;gap:12px;font-size:13px;white-space:nowrap}
   .top .links a{color:var(--soft)}
+  #langAsk{position:fixed;left:0;right:0;bottom:28px;z-index:40;margin:0 auto;width:max-content;display:flex;flex-wrap:wrap;align-items:center;gap:10px;max-width:calc(100% - 28px);box-sizing:border-box;padding:14px 18px;border:2px solid var(--ink);border-radius:10px;background:#fff;color:var(--ink);font-size:16px;line-height:1.35;box-shadow:0 6px 24px rgba(0,0,0,.18)}
+  #langAsk p{margin:0 8px 0 0}
+  #langAsk button{font:inherit;font-weight:700;color:var(--ink);background:#fff;border:2px solid var(--ink);border-radius:8px;padding:6px 16px;cursor:pointer}
+  #langAsk button:first-of-type,#langAsk button:hover{background:var(--ink);color:#fff}
 
   /* Chapters 한 구역: 왼쪽 그래프, 오른쪽 기본 식 · Events 목록, 전체 폭 단계 목록(재생기).
      단계 목록은 맨 아래 전체 폭. 휴대폰은 그래프 → 단계 → 설명. 탭 줄(.sub)은 app.js 가 그래프 y 축에 맞춰 왼쪽 여백을 준다 */
   main{max-width:var(--max);margin:0 auto;padding:14px 12px 40px}
   .ch{display:none;gap:12px 28px;grid-template-columns:minmax(0,1.3fr) minmax(300px,1fr);grid-template-areas:"fig side" "play play";align-items:start}
-  .ch.tabbed{grid-template-areas:"tabs side" "fig side" "play play"}   /* 오른쪽 설명은 탭 줄 높이부터 */
+  .ch.tabbed{grid-template-areas:"tabs side" "fig side" "play play";grid-template-rows:auto 1fr auto}   /* 오른쪽 설명은 탭 줄 높이부터. 설명이 그래프보다 길 때 남는 높이는 그래프 줄(1fr)이 받는다 — auto 면 탭 줄에도 나뉘어 탭과 그래프 사이가 벌어졌다 */
   .ch.on{display:grid}
   .ch>.sub{grid-area:tabs}
   .fig{grid-area:fig;min-width:0;overflow-wrap:anywhere}
@@ -216,7 +220,7 @@
     .tabs{order:3;width:100%}
     .tabs button{padding:8px 8px;font-size:14px}
     main{padding:10px 10px 84px}
-    .ch,.ch.tabbed{grid-template-columns:minmax(0,1fr);grid-template-areas:"fig" "play" "side";gap:14px}
+    .ch,.ch.tabbed{grid-template-columns:minmax(0,1fr);grid-template-rows:none;grid-template-areas:"fig" "play" "side";gap:14px}
     .ch.tabbed{grid-template-areas:"tabs" "fig" "play" "side"}
 
     .sub button{flex:1;min-width:0;padding:9px 6px;font-size:15.5px}
@@ -305,7 +309,7 @@
     <button role="tab" data-ch="ch33">Ch33 AD–AS</button>
     <button role="tab" data-ch="ch28">Ch28 Unemployment</button>
   </nav>
-  <div class="links"><a href="/slides/econ2/">Slides</a><a href="/econ2/">PDF · PPT</a><a href="/econ2/graphs/">한국어</a></div>
+  <div class="links"><a href="/econ2/graphs/">한국어</a></div>
 </div></header>
 
 <main>
@@ -410,6 +414,33 @@
   </section>
 </main>
 
+<script>
+/* 언어: 고른 언어는 Slides 덱과 같은 키(localStorage 'slides.lang')에 둔다. EN · 한국어 링크를 누르면 그 언어로 저장.
+   한국어판에서: 저장값이 en 이면 영문판으로, 저장값이 없고 브라우저 첫 언어가 영어면 영문판으로 갈지 묻는다(덱의 askLang 과 같은 창). */
+(function () {
+  var KEY = 'slides.lang', EN = '/econ2/graphs/en/', KO = '/econ2/graphs/';
+  function get() { try { return localStorage.getItem(KEY); } catch (e) { return null; } }
+  function set(v) { try { localStorage.setItem(KEY, v); } catch (e) { /* no storage */ } }
+  var links = document.querySelectorAll('.top .links a');
+  for (var i = 0; i < links.length; i++) (function (a) {
+    var h = a.getAttribute('href');
+    if (h === EN) a.addEventListener('click', function () { set('en'); });
+    if (h === KO) a.addEventListener('click', function () { set('ko'); });
+  })(links[i]);
+  if (document.documentElement.lang !== 'ko') return;
+  var want = get();
+  if (want === 'en') { location.replace(EN + location.hash); return; }
+  var nav = (navigator.languages && navigator.languages[0]) || navigator.language || '';
+  if (want || !/^en\b/i.test(nav)) return;
+  var box = document.createElement('div');
+  box.id = 'langAsk'; box.setAttribute('role', 'dialog'); box.setAttribute('aria-label', 'Language');
+  box.innerHTML = '<p>This page is also available in English. Switch to English?</p><button type="button">Yes</button><button type="button">No</button>';
+  var b = box.querySelectorAll('button');
+  b[0].addEventListener('click', function () { set('en'); location.href = EN + location.hash; });
+  b[1].addEventListener('click', function () { set('ko'); box.parentNode.removeChild(box); });
+  document.body.appendChild(box);
+})();
+</script>
 <script src="/econ2/graphs/en/app.js"></script>
 </body>
 </html>
