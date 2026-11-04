@@ -288,6 +288,63 @@
     return self;
   }
 
+  /* ───────── 결과 문장: Situation 줄 아래 "…하면 Y ▲ … 한다." — 결과 마디에 닿을 때마다 빈칸(?)이 채워진다 ───────── */
+  // COND: 사건 이름 → 조건절. rs: 결과 마디의 'Y ↑ · P 그대로' 같은 글(이름 + 방향 + 덧말)
+  const COND = {
+    '지급준비율 인상 10% → 20%': 'Fed 가 지급준비율을 10% 에서 20% 로 올리면',
+    '지급준비율 인하 10% → 5%': 'Fed 가 지급준비율을 10% 에서 5% 로 내리면',
+    '은행이 초과지준을 더 보유': '은행이 초과지준을 더 쌓으면',
+    '예금 $100 증가': '사람들이 현금 $100 을 예금하면',
+    '예금 $50 인출': '사람들이 예금 $50 을 현금으로 찾으면',
+    'Fed 채권 매입 $100': 'Fed 가 채권 $100 을 사면',
+    'Fed 채권 매각 $50': 'Fed 가 채권 $50 을 팔면',
+    'Fed 가 은행에 $100 대출 (재할인율 인하)': 'Fed 가 재할인율을 내려 은행에 $100 을 빌려주면',
+    '대출 부실 → 은행 자본 감소': '은행 대출 $50 이 부실해지면',
+    'Fed 통화량 2배': 'Fed 가 통화량을 2배로 늘리면',
+    'Fed 통화량 감소': 'Fed 가 통화량을 줄이면',
+    '신용카드 보급 → 현금 덜 보유': '신용카드가 퍼져 사람들이 돈을 덜 들고 있으면',
+    '실질 GDP 증가 → 거래용 돈 더 필요': '실질 GDP 가 늘어 거래에 돈이 더 필요하면',
+    '주가 급등': '주가가 급등하면',
+    '주가 폭락': '주가가 폭락하면',
+    '소득세 인하': '소득세를 내리면',
+    '통화량 증가': '통화량이 늘면',
+    '기업 낙관 · 투자 붐': '기업이 낙관해 투자가 늘면',
+    '투자세액공제': '투자세액공제를 도입하면',
+    '정부 구매 증가': '정부 구매가 늘면',
+    '해외 경기 침체': '해외 경기가 침체하면',
+    '해외 정치 불안 → 원화 절상': '해외 정치 불안으로 원화가 절상되면',
+    '기대물가 상승': '기대물가가 오르면',
+    '유가 급등': '유가가 급등하면',
+    '명목임금 상승': '명목임금이 오르면',
+    '기술 진보': '기술이 진보하면',
+    '자본 · 인적자본 증가': '자본 · 인적자본이 늘면',
+    '이민 → 노동 증가': '이민으로 노동이 늘면',
+    '자연재해 · 자원 감소': '자연재해로 자원이 줄면',
+    '자연실업률 상승': '자연실업률이 오르면',
+    '임금이 균형보다 높게': '임금이 균형보다 높게 묶이면',
+    '노동 수요 감소': '노동 수요가 줄면'
+  };
+  const rsTok = (s) => String(s).split(' · ').map((x) => { const m = /^(.+?) (↑|↓|▲|▼|unchanged|그대로|back)(?: (.+))?$/.exec(x.trim()); return m ? { n: m[1], d: /[↑▲]/.test(m[2]) ? 1 : /[↓▼]/.test(m[2]) ? -1 : 0, back: m[2] === 'back', x: m[3] || '' } : { n: x.trim(), d: null }; });
+  // parts: [{ g: 단계 이름(여러 단계일 때만 앞에 '단기에는'), rs, on: 채워졌나, b: 마디 번호 }]
+  function rsHTML(cond, parts) {
+    const multi = new Set(parts.map((p) => p.g)).size > 1, when = { '단기': '단기에는 ', '장기': '장기에는 ' };
+    const toks = [];
+    parts.forEach((p, pi) => rsTok(p.rs).forEach((t, ti, all) => toks.push(Object.assign({ pre: ti ? '' : multi ? (when[p.g] || (pi ? '이어서 ' : '')) : '', on: p.on, b: p.b, partEnd: multi && ti === all.length - 1 }, t))));
+    // 받침이 있으면 '은', 없으면 '는'. 영문 기호는 읽는 소리로(L 엘 · M 엠 · N 엔 · R 알 → 은)
+    const josa = (n) => { const c = n.replace(/[\s*′']+$/, '').slice(-1), h = c.charCodeAt(0) - 0xac00; return h >= 0 && h < 11172 ? (h % 28 ? '은' : '는') : /[LMNR]/.test(c) ? '은' : '는'; };
+    const qty = (n) => /^(Y|L|실업|통화량|자산|자본|대출|예금)/.test(n);
+    const slot = (t, k) => {
+      const last = k === toks.length - 1, end = last ? '다.' : t.partEnd ? '며,' : '고';
+      if (!t.on) return '<b class="slot q" data-b="' + t.b + '">?</b>' + (last ? '.' : t.partEnd ? ',' : '');
+      if (t.d == null) return '<b class="slot same" data-b="' + t.b + '">' + esc(t.n) + '</b>' + (last ? '.' : '');
+      if (t.back) return '<b class="slot same" data-b="' + t.b + '">Y* 로 ' + (last ? '돌아온다.' : t.partEnd ? '돌아오며,' : '돌아오고') + '</b>';
+      const v = t.d ? (t.d > 0 ? (qty(t.n) ? '증가' : '상승') : (qty(t.n) ? '감소' : '하락')) + (last ? '한' : '하') : '그대로' + (last ? '이' : '이');
+      return '<b class="slot ' + (t.d > 0 ? 'up' : t.d < 0 ? 'dn' : 'same') + '" data-b="' + t.b + '">' + (t.d > 0 ? '▲ ' : t.d < 0 ? '▼ ' : '') + (t.x ? esc(t.x) + ' ' : '') + v + end + '</b>';
+    };
+    return esc(cond || '') + ' ' + toks.map((t, k) => (k ? ' ' : '') + t.pre + (t.d == null && t.on ? '' : arrows(t.n) + (/[가-힣]$/.test(t.n) ? '' : ' ') + josa(t.n) + ' ') + slot(t, k)).join('');
+  }
+  const YBACK = 'Y back';   // 둘째 단계 이후 Y = Y* 이면 결과 문장에서 Y 의 오르내림 대신 'Y* 로 돌아온다'
+  const sitHTML = (x) => (x ? '<span class="lb">상황</span><span class="st">' + String(x).split(' — ').map(arrows).join('<br>') + '</span>' : '');
   /* ───────── 재생기: 단계 목록(전체 걸음이 한눈에, 지금 걸음만 크게) · 조작 줄(‹ 이전 · 자동 · 다음 › · 속도) ───────── */
   // beat = { g: 묶음 이름(1단계 단기 …), alts: [{ t, on, pick }](갈라지는 단계일 때), k: 꼬리표(원인 · 이동 · 균형 …), t: 글자, run(anim), wait: 머무는 시간 배율 }
   // 사건을 고르기 전에는 안내 한 줄만 보이고 조작 줄은 숨는다(.idle)
@@ -307,6 +364,7 @@
       host.classList.toggle('idle', !beats.length);
       $$('li[data-i]', ol).forEach((li) => { const k = +li.getAttribute('data-i'); li.className = k === i ? 'cur' : k < i ? 'done' : 'todo'; });
       $$('.stg', ol).forEach((st) => st.classList.toggle('cur', !!$('li.cur', st)));
+      $$('.gl', ol).forEach((x) => x.classList.toggle('cur', !!beats[i] && beats[i].g === x.getAttribute('data-g')));
       host.classList.toggle('end', fin);   // 다 끝남: 마지막 걸음을 보여 준 뒤 색이 끝 원으로 옮겨 가 거기서 멈춘다
       const end = i >= beats.length - 1;
       pp.textContent = playing ? '❚❚ 멈춤' : end ? '↻ 다시' : '▶ 자동';
@@ -315,7 +373,7 @@
       spd.textContent = '속도 ' + SPEEDS.find((x) => x[1] === SPEED)[0];
       $('[data-a="prev"]', host).disabled = i <= 0; $('[data-a="next"]', host).disabled = end;
     }
-    function idle() { ol.innerHTML = ''; setSit(''); draw(); }
+    function idle() { ol.innerHTML = ''; setSit(''); sentence(); draw(); }
     function schedule() {
       clearTimeout(timer);
       const last = i >= beats.length - 1;
@@ -323,10 +381,20 @@
       timer = setTimeout(() => { if (last) { fin = true; playing = false; draw(); } else go(i + 1, true); }, 1500 * (beats[i].wait || 1) / SPEED);
     }
     const sitEl = () => { const r = host.closest('.panel') || host.closest('.ch'); return r && $('.sitline', r); };
-    const setSit = (x) => { const el = sitEl(); if (el) el.innerHTML = x ? '<span class="lb">상황</span><span class="st">' + String(x).split(' — ').map(arrows).join('<br>') + '</span>' : ''; };
+    const setSit = (x) => { const el = sitEl(); if (el) el.innerHTML = sitHTML(x); };
+    // 결과 문장: Situation 줄 바로 아래 p.rsent.auto. 결과 마디(rs)가 있는 사건만 — 지금 마디까지 채우고, 방금 채운 칸은 잠깐 형광펜
+    const rsEl = () => { const s = sitEl(), n = s && s.nextElementSibling; return n && n.classList.contains('auto') ? n : null; };
+    let rsT = 0;
+    function sentence(anim) {
+      const el = rsEl(); if (!el) return;
+      const parts = beats.map((b, k) => ({ g: b.g, rs: b.rs, on: k <= i, b: k })).filter((p) => p.rs);
+      el.innerHTML = parts.length && i >= 0 ? rsHTML(COND[beats[0].ev], parts) : '';
+      clearTimeout(rsT);
+      if (anim && beats[i] && beats[i].rs) { const hs = $$('[data-b="' + i + '"]', el); hs.forEach((h) => h.classList.add('pulse')); rsT = setTimeout(() => hs.forEach((h) => h.classList.remove('pulse')), 1000); }
+    }
     function go(k, anim) {
       i = Math.max(0, Math.min(beats.length - 1, k)); fin = false;
-      setSit(beats[i].sit);
+      setSit(beats[i].sit); sentence(anim !== false);
       beats[i].run(anim !== false);
       draw(); schedule();
       if (self.onGo) self.onGo(i);
@@ -334,20 +402,25 @@
     // 단계(묶음)마다 li.stg = 한 줄: 단계 이름(.gh, 갈래 ⓐ ⓑ 포함) + 마디 목록(ol.rows: 선 위의 점 · [제목] · 글)
     function build() {
       ol.innerHTML = '';
-      const ng = new Set(beats.map((b) => b.g)).size;
-      ol.classList.toggle('solo', ng < 2 && !beats.some((b) => b.alts));   // 단계가 하나면 단계 이름 줄을 숨긴다
-      let g = null, rows = null, gStart = 0;
+      // 단계가 여럿이어도(단기 · 장기, 1 · 2단계) 선은 하나. 단계가 바뀌는 마디 위에 단계 이름(.gl)을 달아 나눈다. 갈래가 있으면 이름 옆에 글자 버튼(그대로 · 정책)
+      const lab = new Set(beats.map((b) => b.g)).size > 1 || beats.some((b) => b.alts);
+      ol.classList.add('solo');
+      const st = document.createElement('li'), rows = document.createElement('ol');
+      st.className = 'stg'; rows.className = lab ? 'rows lab' : 'rows';
+      st.appendChild(rows); ol.appendChild(st);
+      let g = null, gStart = 0;
       beats.forEach((b, k) => {
-        if (b.g !== g) {
-          g = b.g; gStart = k;
-          const st = document.createElement('li'), h = document.createElement('div'), nm = document.createElement('span');
-          st.className = b.alts ? 'stg alts' : 'stg'; h.className = 'gh'; nm.textContent = b.g; h.appendChild(nm);   // 갈래가 있으면 단계 이름 아래에 글자 버튼(그대로 · 정책)
-          if (b.alts) b.alts.forEach((a) => { const x = document.createElement('button'); x.type = 'button'; x.className = a.on ? 'alt on' : 'alt'; x.textContent = a.t; x.addEventListener('click', a.pick); h.appendChild(x); });
-          rows = document.createElement('ol'); rows.className = 'rows';
-          st.appendChild(h); st.appendChild(rows); ol.appendChild(st);
-        }
         const li = document.createElement('li'), btn = document.createElement('button');
         li.setAttribute('data-i', k);
+        if (b.g !== g) {
+          g = b.g; gStart = k;
+          if (lab) {
+            const gl = document.createElement('div'), nm = document.createElement('span');
+            gl.className = k ? 'gl sep' : 'gl'; gl.setAttribute('data-g', b.g); nm.textContent = b.g; gl.appendChild(nm);
+            if (b.alts) b.alts.forEach((a) => { const x = document.createElement('button'); x.type = 'button'; x.className = a.on ? 'alt on' : 'alt'; x.textContent = a.t; x.addEventListener('click', a.pick); gl.appendChild(x); });
+            li.appendChild(gl);
+          }
+        }
         btn.type = 'button';
         // 글은 ' — ' 에서 줄을 바꾸고, ' → ' 로 나뉜 조각(.u, inline-block)은 통째로 다음 줄로 — 조각이 칸보다 길 때만 그 안에서 줄바꿈. b.s 는 작은 숫자 줄
         const unit = (x) => x.split(' → ').map((u, k) => '<span class="u">' + (k ? '→ ' : '') + arrows(u) + '</span>').join(' ');   // 화살표는 다음 조각 앞에 붙여 줄 끝에 홀로 남지 않게
@@ -481,8 +554,8 @@
       const sit = id === 0 ? sc.sit || sc.t : st.sit || (cause.length ? cause.shift() : st.name);
       // 결론 제목: result 의 ' — ' 앞(Y ↓ · P ↑ 등), 설명: 사슬의 뒤쪽 또는 result 의 ' — ' 뒤
       const res = o.result(prevS[prevS.length - 1], next, letter).split(' — '), pre = snap(prevS, false);
-      out.push({ g, alts: altList, sit, pre, k: ps[at], t: cause.join(' → '), run: snap(withNew, true), wait: 1.25 });
-      out.push({ g, alts: altList, sit, pre: snap(withNew, true), k: res[0], t: after || res.slice(1).join(' — '),
+      out.push({ g, ev: sc.t, alts: altList, sit, pre, k: ps[at], t: cause.join(' → '), run: snap(withNew, true), wait: 1.25 });
+      out.push({ g, ev: sc.t, rs: num > 1 && /Y = Y\*/.test(res[1] || '') ? res[0].replace(/^Y [↑↓]/, YBACK) : res[0], alts: altList, sit, pre: snap(withNew, true), k: res[0], t: after || res.slice(1).join(' — '),
         run: () => { snap(withNew, false)(false); if (o.after) o.after(prevS[prevS.length - 1], next); }, wait: 1.8 });
       S = withNew;
     });
@@ -536,7 +609,7 @@
     let sc = null, beats = [], at = 0;
     player.onGo = (i) => { at = i; };
     function load(branch, start, play) {
-      beats = beatsFor(plot, sc, branch, o, (b) => { const k = beats.findIndex((x) => x.g === '2단계'); load(b, k, true); });
+      beats = beatsFor(plot, sc, branch, o, (b) => { const k = beats.findIndex((x) => x.g !== beats[0].g); load(b, k, true); });
       player.load(beats, { at: start || 0, play });
     }
     return {
@@ -573,6 +646,10 @@
     // 식 숫자: 지준(변화분 또는 수준) × 승수(바뀌면 '10 → 5') = 통화량 변화분 ▲▼. ev 가 없으면 처음 수준 $100 × 10 = $1,000
     function formula(ev) {
       const nRes = $('#nRes'), nR = $('#nR'), nM = $('#nM');
+      // 식 사건도 Situation 줄 + 결과 문장(통화량 변화 = 세부 글의 굵은 정답)
+      const sl = $('#c29 .sitline'), rsx = sl && sl.nextElementSibling, ans = ev && /\*\*([+−-])(\$[\d,]+)\*\*/.exec(ev.d);
+      if (sl) sl.innerHTML = ev ? sitHTML(ev.t) : '';
+      if (rsx) rsx.innerHTML = ans ? rsHTML(COND[ev.t], [{ g: '', rs: '통화량 ' + (ans[1] === '+' ? '↑' : '↓') + ' ' + ans[2], on: true, b: -1 }]) : '';
       $('#mLab').textContent = ev && ev.dep ? '예금' : '통화량'; $('#mLabEn').textContent = ev && ev.dep ? 'Deposits' : 'Money supply';
       $('#k29d').innerHTML = ev ? ev.d.split(' ¶ ').map((p) => '<span class="dp">' + p.split(' — ').map((x) => '<span class="dl">' + x.split(' → ').map((u, k) => '<span class="u">' + (k ? '→ ' : '') + arrows(u).replace(/==(.+?)==/g, '<mark>$1</mark>').replace(/\*\*(.+?)\*\*/g, '<b>$1</b>') + '</span>').join(' ') + '</span>').join('') + '</span>').join('') : '';
       if (!ev) { nRes.className = nR.className = nM.className = 'num'; nRes.textContent = money(RES0); nR.textContent = fmt(1 / R0); nM.textContent = money(RES0 / R0); return; }
@@ -609,8 +686,8 @@
     ];
     const CAP = EV.find((e) => e.cap);
     const capBeats = () => [
-      { g: CAP.t, sit: '대출 부실', k: '대출 ↓ $50', t: '자산 감소율 = $50 ÷ $1,000 = 5%', run: () => tshow(Object.assign({}, CB, { L: 650 }), ['L']), wait: 1.4 },
-      { g: CAP.t, sit: '대출 부실', k: '자본 ▼ 100%', t: '자본 감소율 = 자산 감소율 × 레버리지 = 5% × 20', run: () => tshow(Object.assign({}, CB, { L: 650, K: 0 }), ['K']), wait: 1.4 }
+      { g: CAP.t, ev: CAP.t, rs: '자산 ↓ 5%', sit: '대출 부실', k: '대출 ↓ $50', t: '자산 감소율 = $50 ÷ $1,000 = 5%', run: () => tshow(Object.assign({}, CB, { L: 650 }), ['L']), wait: 1.4 },
+      { g: CAP.t, ev: CAP.t, rs: '자본 ↓ 100%', sit: '대출 부실', k: '자본 ▼ 100%', t: '자본 감소율 = 자산 감소율 × 레버리지 = 5% × 20', run: () => tshow(Object.assign({}, CB, { L: 650, K: 0 }), ['K']), wait: 1.4 }
     ];
     list($('#o29'), EV, (i) => {
       const ev = i < 0 ? null : EV[i];
