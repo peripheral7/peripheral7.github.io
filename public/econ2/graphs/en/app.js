@@ -671,8 +671,8 @@
   function longRun(S) {                        // Stage 2 설명: Stage 1 끝 상태가 Y* 보다 큰지 작은지
     const b = S[S.length - 1].off, L = 5 + (b.LRAS || 0);
     return eqX(b) > L + 0.03
-      ? 'Y > Y* → wages · Pe ↑ → SRAS ← → Y* restored, P ↑'
-      : 'Y < Y* → wages · Pe ↓ → SRAS → → Y* restored, P ↓';
+      ? 'Y > Y* → wages · Pe adjust ↑ → SRAS ← → Y* restored, P ↑'
+      : 'Y < Y* → wages · Pe adjust ↓ → SRAS → → Y* restored, P ↓';
   }
   function gap(off, pt) {
     const L = 5 + (off.LRAS || 0);
@@ -710,7 +710,7 @@
     };
     const srEv = (t, why, q) => ({ t, q, dir: 'l', stages: [
       { name: 'SRAS ←', step: 'Stage 1 · Short run', ch: { add: { SRAS: -R } }, why },
-      { name: 'Do nothing: SRAS returns', short: 'Wait', ch: { abs: { SRAS: 0 } }, letter: 'A', at: 2, why: 'Y < Y* → wages · Pe ↓ → SRAS → → Y* and P restored (slow)' },
+      { name: 'Do nothing: SRAS returns', short: 'Wait', ch: { abs: { SRAS: 0 } }, letter: 'A', at: 2, why: 'Y < Y* → wages · Pe adjust ↓ → SRAS → → Y* and P restored (slow)' },
       { name: 'Accommodate: AD →', short: 'Policy', sit: 'Y < Y* : accommodate with policy', from: 0, ch: { abs: lrAD }, chain: ['M ↑ · G ↑', 'AD →', 'Y* restored, P higher still'], at: 1 }] });
     // LRAS 가 움직이면 SRAS 도 같이 움직여 New equilibrium은 새 Y* 위(Long runEquilibrium). AD unchanged면 P 는 반대로
     const lrEv = (t, dir, why, q) => ({ t, q, dir, stages: [

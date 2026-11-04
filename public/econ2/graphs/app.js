@@ -671,8 +671,8 @@
   function longRun(S) {                        // 2단계 설명: 1단계 끝 상태가 Y* 보다 큰지 작은지
     const b = S[S.length - 1].off, L = 5 + (b.LRAS || 0);
     return eqX(b) > L + 0.03
-      ? 'Y > Y* → 임금 · Pe ↑ → SRAS ← → Y* 회복, P ↑'
-      : 'Y < Y* → 임금 · Pe ↓ → SRAS → → Y* 회복, P ↓';
+      ? 'Y > Y* → 임금 · Pe 조정 ↑ → SRAS ← → Y* 회복, P ↑'
+      : 'Y < Y* → 임금 · Pe 조정 ↓ → SRAS → → Y* 회복, P ↓';
   }
   function gap(off, pt) {
     const L = 5 + (off.LRAS || 0);
@@ -710,7 +710,7 @@
     };
     const srEv = (t, why, q) => ({ t, q, dir: 'l', stages: [
       { name: 'SRAS ←', step: '1단계 단기', ch: { add: { SRAS: -R } }, why },
-      { name: '그대로 두면 SRAS 복귀', short: '그대로', ch: { abs: { SRAS: 0 } }, letter: 'A', at: 2, why: 'Y < Y* → 임금 · Pe ↓ → SRAS → → Y* 회복, P 회복 (오래 걸림)' },
+      { name: '그대로 두면 SRAS 복귀', short: '그대로', ch: { abs: { SRAS: 0 } }, letter: 'A', at: 2, why: 'Y < Y* → 임금 · Pe 조정 ↓ → SRAS → → Y* 회복, P 회복 (오래 걸림)' },
       { name: '정책으로 수용 AD →', short: '정책', sit: 'Y < Y* : 정책으로 수용', from: 0, ch: { abs: lrAD }, chain: ['M ↑ · G ↑', 'AD →', 'Y* 회복, P 더 ↑'], at: 1 }] });
     // LRAS 가 움직이면 SRAS 도 같이 움직여 새 균형은 새 Y* 위(장기균형). AD 그대로면 P 는 반대로
     const lrEv = (t, dir, why, q) => ({ t, q, dir, stages: [
