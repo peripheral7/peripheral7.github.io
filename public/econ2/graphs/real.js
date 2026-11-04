@@ -1,7 +1,8 @@
 /* Econ2 Interactive — Real world 모드
    · 토글 [Basic | Real world] · localStorage 'econ2.mode' · <html class="rw">
    · 카드: 예측 질문 → 실제 데이터 그래프 → 이론 대조 → 뉴스·연구
-   · 데이터: real-data.json (FRED, scripts/econ2-real-data.mjs) */
+   · 데이터: real-data.json (FRED, scripts/econ2-real-data.mjs)
+   · 한국어판(<html lang="ko">): real-ko.js 가 먼저 window.RW_KO = { cases } 를 둔다(사례 구조 · 숫자는 영문과 같고 글만 한국어). 화면 글자는 UI */
 (function () {
   'use strict';
   const $ = (s, r) => (r || document).querySelector(s);
@@ -230,6 +231,17 @@
       ]
     }
   ] };
+  const KO = document.documentElement.lang === 'ko' && window.RW_KO;
+  const CS = KO ? KO.cases : CASES;
+  const UI = KO ? {
+    tag: '현실 연결', pick: '<b class="rwchip">현실</b> 표시가 붙은 사건을 고르면 모형을 미국 실제 데이터와 맞춰 볼 수 있다.',
+    predict: '먼저 예측:', skip: '바로 보기', right: '✓ 정답.', wrong: '✗ 오답.', theory: '이론과 현실',
+    source: '출처: FRED — ', got: ' · 받은 날 ', band: ' · 노란 칸: 사건 기간', nodata: '데이터를 불러오지 못했다.', mode: '모드', basic: '기본', rw: '현실 연결'
+  } : {
+    tag: 'Real world', pick: 'Pick an event marked <b class="rwchip">REAL</b> to test the model against U.S. data.',
+    predict: 'Predict first.', skip: 'Just show me', right: '✓ Right.', wrong: '✗ Not quite.', theory: 'Theory vs reality',
+    source: 'Source: FRED — ', got: ' · retrieved ', band: ' · shaded: event period', nodata: 'Data could not be loaded.', mode: 'Mode', basic: 'Basic', rw: 'Real world'
+  };
 
   /* ───────── 선그래프 ───────── */
   const W = 640, H = 290, L = 52, R = 18, T = 30, B = 30;
@@ -270,23 +282,23 @@
   const fmtT = (s) => esc(s).replace(/==(.+?)==/g, '<mark>$1</mark>');
   function render(card, c) {
     card.hidden = c === 'none';   // 이 사건엔 현실 사례가 없으면 카드를 띄우지 않는다(선택을 풀면 다시 안내)
-    if (!c) { card.innerHTML = '<p class="rwnote"><span class="rwtag">Real world</span>Pick an event marked <b class="rwchip">REAL</b> to test the model against U.S. data.</p>'; return; }
+    if (!c) { card.innerHTML = '<p class="rwnote"><span class="rwtag">' + UI.tag + '</span>' + UI.pick + '</p>'; return; }
     if (c === 'none') { card.innerHTML = ''; return; }
     card.innerHTML =
-      '<div class="rwhd"><span class="rwtag">Real world</span><span class="rwwhen">' + esc(c.when) + '</span></div>' +
+      '<div class="rwhd"><span class="rwtag">' + UI.tag + '</span><span class="rwwhen">' + esc(c.when) + '</span></div>' +
       '<h3>' + esc(c.title) + '</h3>' +
-      '<p class="rwq"><b>Predict first.</b> ' + esc(c.q) + '</p>' +
-      '<div class="rwopts">' + c.opts.map((o, i) => '<button type="button" data-i="' + i + '">' + esc(o) + '</button>').join('') + '<button type="button" class="rwskip" data-i="-1">Just show me</button></div>' +
+      '<p class="rwq"><b>' + UI.predict + '</b> ' + esc(c.q) + '</p>' +
+      '<div class="rwopts">' + c.opts.map((o, i) => '<button type="button" data-i="' + i + '">' + esc(o) + '</button>').join('') + '<button type="button" class="rwskip" data-i="-1">' + UI.skip + '</button></div>' +
       '<div class="rwans" hidden>' +
       '<p class="rwv"></p>' +
-      (c.chart ? '<figure class="rwfig">' + (data ? chart(c.chart, data) : '<p class="rwnote">Data could not be loaded.</p>') + '<figcaption>Source: FRED — ' + esc(c.chart.cap) + (data ? ' · retrieved ' + esc(data.fetched) : '') + (c.chart.band ? ' · shaded: event period' : '') + '</figcaption></figure>' : '') +   // chart 없으면 그림 생략(연구 사례)
-      '<p class="rwth"><span class="lb">Theory vs reality</span>' + fmtT(c.th) + '</p>' +
+      (c.chart ? '<figure class="rwfig">' + (data ? chart(c.chart, data) : '<p class="rwnote">' + UI.nodata + '</p>') + '<figcaption>' + UI.source + esc(c.chart.cap) + (data ? UI.got + esc(data.fetched) : '') + (c.chart.band ? UI.band : '') + '</figcaption></figure>' : '') +   // chart 없으면 그림 생략(연구 사례)
+      '<p class="rwth"><span class="lb">' + UI.theory + '</span>' + fmtT(c.th) + '</p>' +
       '<ul class="rwsrc">' + c.src.map((x) => '<li><span class="lb">' + x.k + '</span><div><a href="' + esc(x.u) + '" target="_blank" rel="noopener">' + esc(x.t) + '</a><small>' + esc(x.by) + ' · ' + esc(x.d) + '</small><p>' + esc(x.s) + '</p></div></li>').join('') + '</ul>' +
       '</div>';
     card.querySelectorAll('.rwopts button').forEach((b) => b.addEventListener('click', () => {
       const i = +b.getAttribute('data-i');
       card.querySelectorAll('.rwopts button').forEach((x) => { const k = +x.getAttribute('data-i'); x.disabled = true; x.classList.toggle('ok', k === c.ans); x.classList.toggle('no', k === i && i !== c.ans); });
-      $('.rwv', card).innerHTML = (i < 0 ? '' : i === c.ans ? '<b class="ok">✓ Right.</b> ' : '<b class="no">✗ Not quite.</b> ') + esc(c.v);
+      $('.rwv', card).innerHTML = (i < 0 ? '' : i === c.ans ? '<b class="ok">' + UI.right + '</b> ' : '<b class="no">' + UI.wrong + '</b> ') + esc(c.v);
       $('.rwans', card).hidden = false;
       card.dispatchEvent(new CustomEvent('rwanswer'));   // 시간선 숨김(attach)
     }));
@@ -323,13 +335,13 @@
     redo.push(() => { if (cur && cur !== 'none' && $('.rwans', card).hidden) render(card, cur); });
   }
   function init() {
-    Object.keys(CASES).forEach((k) => attach(k, CASES[k]));
-    fetch('/econ2/graphs/real-data.json?v=20261105g').then((r) => r.json()).then((d) => { data = d; redo.forEach((f) => f()); }).catch(() => {});
+    Object.keys(CS).forEach((k) => attach(k, CS[k]));
+    fetch('/econ2/graphs/real-data.json?v=20261105h').then((r) => r.json()).then((d) => { data = d; redo.forEach((f) => f()); }).catch(() => {});
 
     // 모드 토글
     const links = $('.top .links'), tg = document.createElement('div');
-    tg.className = 'rwtog'; tg.setAttribute('role', 'group'); tg.setAttribute('aria-label', 'Mode');
-    tg.innerHTML = '<button type="button" data-m="basic">Basic</button><button type="button" data-m="rw">Real world</button>';
+    tg.className = 'rwtog'; tg.setAttribute('role', 'group'); tg.setAttribute('aria-label', UI.mode);
+    tg.innerHTML = '<button type="button" data-m="basic">' + UI.basic + '</button><button type="button" data-m="rw">' + UI.rw + '</button>';
     links.parentNode.insertBefore(tg, links);
     const set = (m) => {
       document.documentElement.classList.toggle('rw', m === 'rw');

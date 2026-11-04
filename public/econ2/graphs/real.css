@@ -73,3 +73,5 @@
 }
 @media (prefers-reduced-motion:reduce){.rw .rwdock .player{transition:none}}
 .rw .rwdock .player.idle{display:none}   /* 걸음이 없는 사건(Ch29 식 사건)은 빈 띠를 두지 않는다 */
+html.rw[lang="ko"] .opts li.hasrw button::after{content:"현실";letter-spacing:0}   /* 한국어판 표시 */
+html[lang="ko"] .rwchip{letter-spacing:0}
