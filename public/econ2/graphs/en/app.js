@@ -531,89 +531,77 @@
     };
   }
 
-  /* ───────── Ch29 은행 T계정 ───────── */
+  /* ───────── Ch29 Bank T-account ───────── */
   // Start: Reserves $100, R 10% → 예금 $1,000 · 대출 $900 · Money supply $1,000(현금 보유 없음). 사건마다 걸음별 값(R · Reserves · 대출 · 예금)을 차례로 보여 준다
   function ch29() {
-    // 상태: res Reserves · L 대출 · S 증권 · D 예금 · Db 부채 · K Capital · R 지급준비율. null 이면 T계정에 '—'
-    const B = { R: 0.1, res: 100, L: 900, S: null, D: 1000, Db: null, K: null };
+    // Money multiplier 사건: T계정 · 시간선 없이 변화량 식 하나 — ΔReserves × Multiplier = ΔMoney supply (숫자는 up분 중심), 아래 작은 글에 세부(본원통화 등).
+    // Bad loans 사건만: 맨큐의 레버리지 예처럼 은행 한 곳의 T계정 + 두 마디 시간선
+    const EN = document.documentElement.lang === 'en';
+    const R0 = 0.1, RES0 = 100;
     const player = Player($('#pl29'));
     const row = (k, nm, id) => '<div class="r" data-k="' + k + '"><span>' + nm + '</span><b id="t' + id + '"></b><i id="d' + id + '"></i></div>';
     $('#bank').innerHTML =
-      // 위 수식: 1행 영문(작게) + 한글 항, 2행 숫자(한 줄). 상자 없이 글자만
       '<div class="eqrow" id="k29">' +
       '<div class="term" data-k="res"><i></i><span>Reserves</span></div><span class="kop">×</span>' +
       '<div class="term" data-k="R"><i></i><span>Money multiplier</span></div><span class="kop">=</span>' +
-      '<div class="term" data-k="M"><i></i><span>Money supply</span></div>' +
+      '<div class="term" data-k="M"><i id="mLabEn">Money supply</i><span id="mLab">Money supply</span></div>' +
       '<b class="num" data-k="res" id="nRes"></b><span class="kop2">×</span><b class="num" data-k="R" id="nR"></b><span class="kop2">=</span><b class="num" data-k="M" id="nM"></b></div>' +
-      '<div class="tacct"><h3>Banking system T-account</h3><div class="tt">' +
+      '<p class="eqdetail" id="k29d"></p>' +
+      '<div class="tacct" id="tacct" hidden><h3>Bank T-account</h3><div class="tt">' +
       '<div><span class="h">ASSETS</span>' + row('res', 'Reserves', 'Res') + row('L', 'Loans', 'Loan') + row('S', 'Securities', 'Sec') + '</div>' +
       '<div><span class="h">LIABILITIES & CAPITAL</span>' + row('D', 'Deposits', 'Dep') + row('Db', 'Debt', 'Debt') + row('K', 'Capital', 'Cap') + '</div></div>' +
-      '<p class="tnote" id="tNote"></p></div>';
+      '<p class="tnote" id="tNote">※ Leverage ratio = assets ÷ capital</p></div>';
     const money = (v) => (v == null ? '—' : '$' + fmt(v));
+    const sgn = (v) => (v > 0 ? '+' : '−') + '$' + fmt(Math.abs(v));
     let kt = [];
-    const num = (id, b, a, f) => { const e = $('#' + id); if (a == null) { e.className = 'num'; e.textContent = '—'; return; } const d = b == null ? 0 : dirOf(b, a, 1e-6); e.className = 'num' + (d > 0 ? ' up' : d < 0 ? ' dn' : ''); e.innerHTML = d ? '<span class="old">' + esc(f(b)) + ' →</span> ' + esc(f(a)) + (d > 0 ? ' ▲' : ' ▼') : esc(f(a)); };
-    const pulse = (ks) => { kt.forEach(clearTimeout); kt = []; const mark = (k) => $$('#k29 [data-k]').forEach((e) => e.classList.toggle('pulse', e.getAttribute('data-k') === k)); mark(null); ks.forEach((k, i) => kt.push(setTimeout(() => mark(k), i * 700 / SPEED))); kt.push(setTimeout(() => mark(null), ks.length * 700 / SPEED + 300)); };
+    const pulse = (ks) => { kt.forEach(clearTimeout); kt = []; const mark = (k) => $$('#k29 [data-k]').forEach((x) => x.classList.toggle('pulse', x.getAttribute('data-k') === k)); mark(null); ks.forEach((k, i) => kt.push(setTimeout(() => mark(k), i * 600 / SPEED))); kt.push(setTimeout(() => mark(null), ks.length * 600 / SPEED + 400)); };
+    // 식 숫자: Reserves(변화분 또는 수준) × Multiplier(바뀌면 '10 → 5') = Money supply 변화분 ▲▼. ev 가 없으면 Start 수준 $100 × 10 = $1,000
+    function formula(ev) {
+      const nRes = $('#nRes'), nR = $('#nR'), nM = $('#nM');
+      $('#mLab').textContent = ev && ev.dep ? 'Deposits' : 'Money supply'; $('#mLabEn').textContent = '';
+      $('#k29d').innerHTML = ev ? arrows(ev.d) : '';
+      if (!ev) { nRes.className = nR.className = nM.className = 'num'; nRes.textContent = money(RES0); nR.textContent = fmt(1 / R0); nM.textContent = money(RES0 / R0); return; }
+      const R1 = ev.R || R0, dRes = ev.dRes || 0, dM = (RES0 + dRes) / R1 - RES0 / R0;
+      nRes.className = 'num' + (dRes > 0 ? ' up' : dRes < 0 ? ' dn' : ''); nRes.textContent = dRes ? sgn(dRes) : money(RES0);
+      nR.className = 'num' + (R1 !== R0 ? (R1 < R0 ? ' up' : ' dn') : ''); nR.innerHTML = R1 !== R0 ? '<span class="old">' + fmt(1 / R0) + ' →</span> ' + fmt(1 / R1) : fmt(1 / R0);
+      nM.className = 'num' + (dM > 0 ? ' up' : ' dn'); nM.textContent = sgn(dM) + (dM > 0 ? ' ▲' : ' ▼');
+      pulse(R1 !== R0 ? ['R', 'M'] : ['res', 'M']);
+    }
+    // Bad loans(맨큐 레버리지 예): Reserves $200 · 대출 $700 · 증권 $100 | 예금 $800 · 부채 $150 · Capital $50
+    const CB = { res: 200, L: 700, S: 100, D: 800, Db: 150, K: 50 };
     const cell = (id, base, v) => {
       $('#t' + id).textContent = money(v);
-      const e = $('#d' + id), dv = v == null || base == null ? 0 : v - base;
-      e.className = dv < -0.5 ? 'dn' : dv > 0.5 ? 'up' : ''; e.textContent = Math.abs(dv) < 0.5 ? '' : (dv > 0 ? '▲ +' : '▼ −') + money(Math.abs(dv));
+      const x = $('#d' + id), dv = v - base;
+      x.className = dv < -0.5 ? 'dn' : dv > 0.5 ? 'up' : ''; x.textContent = Math.abs(dv) < 0.5 ? '' : (dv > 0 ? '▲ +' : '▼ −') + money(Math.abs(dv));
     };
-    function show(s, hi, base) {
-      base = base || B;
-      const mult = s.R ? 1 / s.R : null;
-      num('nRes', base.res, s.res, money); num('nR', base.R ? 1 / base.R : null, mult, fmt); num('nM', base.R ? base.D : null, s.R ? s.D : null, money);
-      pulse((hi || []).filter((k) => k === 'res' || k === 'R' || k === 'M'));
-      cell('Res', base.res, s.res); cell('Loan', base.L, s.L); cell('Sec', base.S, s.S); cell('Dep', base.D, s.D); cell('Debt', base.Db, s.Db); cell('Cap', base.K, s.K);
-      if (s.R) {
-        const req = s.R * s.D, gap = s.res - req;
-        $('#tNote').innerHTML = 'R = <b>' + Math.round(s.R * 100) + '%</b> · Required = R × Deposits = ' + money(req) + (Math.abs(gap) < 0.5 ? ' = reserves' : gap > 0 ? ' → excess reserves <b>' + money(gap) + '</b>' : ' → shortfall <b>' + money(-gap) + '</b>');
-      } else {
-        const A = (s.res || 0) + (s.L || 0) + (s.S || 0);
-        $('#tNote').innerHTML = '※ Leverage ratio = assets ÷ capital';   // 주석: 구하는 법만(숫자 없이)
-      }
-      $$('#bank .tt [data-k]').forEach((e) => e.classList.toggle('hi', (hi || []).indexOf(e.getAttribute('data-k')) >= 0));
+    function tshow(st, hi) {
+      cell('Res', CB.res, st.res); cell('Loan', CB.L, st.L); cell('Sec', CB.S, st.S); cell('Dep', CB.D, st.D); cell('Debt', CB.Db, st.Db); cell('Cap', CB.K, st.K);
+      $$('#bank .tt [data-k]').forEach((x) => x.classList.toggle('hi', (hi || []).indexOf(x.getAttribute('data-k')) >= 0));
     }
-    // 은행 Capital · 레버리지(맨큐 Ch29 예): Reserves $200 · 대출 $700 · 증권 $100 | 예금 $800 · 부채 $150 · Capital $50, 레버리지 20
-    const CB = { R: null, res: 200, L: 700, S: 100, D: 800, Db: 150, K: 50 };
-    // 걸음: [꼬리표, 식(크게), 숫자(작게), 보여 줄 값, 강조할 칸]. 세 마디: Situation → Multiplier · Reserves · Capital → Result
+    const mode = (cap) => { $('#k29').hidden = cap; $('#k29d').hidden = cap; $('#tacct').hidden = !cap; };
+    // d: 식 아래 작은 글(세부). dRes: Reserves 변화분, R: 새 지급준비율, dep: Result 항을 '예금'으로
     const EV = [
-      { t: 'Reserve ratio raised 10% → 20%', q: 'SA 10', dir: 'l', steps: [
-        ['Situation', 'R 10% → 20%', '', { R: 0.2 }, ['R']],
-        ['Multiplier', '1/R = 10 → 5', '', { R: 0.2 }, ['R']],
-        ['Money supply', 'M = Reserves × 1/R ↓', '$100 × 5 = $500 (loans $400 · deposits $500)', { R: 0.2, L: 400, D: 500 }, ['M', 'L', 'D']]] },
-      { t: 'Reserve ratio cut 10% → 5%', dir: 'r', steps: [
-        ['Situation', 'R 10% → 5%', '', { R: 0.05 }, ['R']],
-        ['Multiplier', '1/R = 10 → 20', '', { R: 0.05 }, ['R']],
-        ['Money supply', 'M = Reserves × 1/R ↑', '$100 × 20 = $2,000 (loans $1,900 · deposits $2,000)', { R: 0.05, L: 1900, D: 2000 }, ['M', 'L', 'D']]] },
-      { t: 'Deposits up $100', dir: 'r', steps: [
-        ['Situation', 'Deposits +$100 (new cash comes into banks)', '', {}, []],
-        ['Reserves', 'Bank reserves +$100', 'Reserves $100 → $200', { res: 200 }, ['res']],
-        ['Money supply', 'M = Reserves × 1/R ↑', '$200 × 10 = $2,000 (loans $1,800 · deposits $2,000)', { res: 200, L: 1800, D: 2000 }, ['M', 'L', 'D']]] },
-      { t: 'Withdrawal of $50', dir: 'l', steps: [
-        ['Situation', 'Deposits −$50 (withdrawn as cash)', '', {}, []],
-        ['Reserves', 'Bank reserves −$50', 'Reserves $100 → $50', { res: 50 }, ['res']],
-        ['Money supply', 'Deposits = Reserves × 1/R ↓', '$50 × 10 = $500 (loans $450) · the $50 withdrawn stays in the money supply as currency', { res: 50, L: 450, D: 500 }, ['M', 'L', 'D']]] },
-      { t: 'Fed buys $100 of bonds', q: 'SA 11', dir: 'r', steps: [
-        ['Situation', 'Fed buys $100 of bonds', '', {}, []],
-        ['Reserves', 'Monetary base ↑ → reserves +$100', 'Reserves $100 → $200', { res: 200 }, ['res']],
-        ['Money supply', 'M = Reserves × 1/R ↑', '$200 × 10 = $2,000 (loans $1,800 · deposits $2,000)', { res: 200, L: 1800, D: 2000 }, ['M', 'L', 'D']]] },
-      { t: 'Fed sells $50 of bonds', dir: 'l', steps: [
-        ['Situation', 'Fed sells $50 of bonds', '', {}, []],
-        ['Reserves', 'Monetary base ↓ → reserves −$50', 'Reserves $100 → $50', { res: 50 }, ['res']],
-        ['Money supply', 'M = Reserves × 1/R ↓', '$50 × 10 = $500 (loans $450 · deposits $500)', { res: 50, L: 450, D: 500 }, ['M', 'L', 'D']]] },
-      { t: 'Bad loans → bank capital falls', dir: 'l', base: CB, steps: [
-        ['Situation', 'Bad loans', '', {}, []],
-        ['Loans', 'Loans ↓ $50', 'Asset decline = $50 ÷ $1,000 = 5%', { L: 650 }, ['L']],
-        ['Capital', 'Capital ▼ 100%', 'Capital decline = asset decline × leverage = 5% × 20', { L: 650, K: 0 }, ['K']]] }
+      { t: 'Reserve ratio raised 10% → 20%', q: 'SA 10', dir: 'l', R: 0.2, d: 'R 10% → 20% → multiplier 1/R 10 → 5' },
+      { t: 'Reserve ratio cut 10% → 5%', dir: 'r', R: 0.05, d: 'R 10% → 5% → multiplier 1/R 10 → 20' },
+      { t: 'Deposits up $100', dir: 'r', dRes: 100, dep: true, d: '$100 of currency deposited → reserves +$100 · money supply = +$1,000 − $100 currency = +$900' },
+      { t: 'Withdrawal of $50', dir: 'l', dRes: -50, dep: true, d: '$50 withdrawn as currency → reserves −$50 · money supply = −$500 + $50 currency = −$450' },
+      { t: 'Fed buys $100 of bonds', q: 'SA 11', dir: 'r', dRes: 100, d: 'Fed buys bonds → monetary base ↑ → bank reserves +$100' },
+      { t: 'Fed sells $50 of bonds', dir: 'l', dRes: -50, d: 'Fed sells bonds → monetary base ↓ → bank reserves −$50' },
+      { t: 'Bad loans → bank capital falls', dir: 'l', cap: true }
     ];
-    function beats(ev) {
-      const base = ev.base || B;
-      const s0 = ev.steps[0], sit = s0[1] + (s0[2] ? ' — ' + s0[2] : '');   // 첫 걸음(Situation)은 그래프 아래 줄로
-      return ev.steps.slice(1).map(([k, t, sm, v, hi]) => { const st = Object.assign({}, base, v); return { g: ev.t, sit, k: t, t: sm, run: () => show(st, hi, base), wait: 1.4 }; });
-    }
-    list($('#o29'), EV, (i) => { if (i < 0) { player.clear(); show(B, []); } else player.load(beats(EV[i])); });
-    show(B, []);
+    const capBeats = () => [
+      { g: EV[6].t, sit: 'Bad loans', k: 'Loans ↓ $50', t: 'Asset decline = $50 ÷ $1,000 = 5%', run: () => tshow(Object.assign({}, CB, { L: 650 }), ['L']), wait: 1.4 },
+      { g: EV[6].t, sit: 'Bad loans', k: 'Capital ▼ 100%', t: 'Capital decline = asset decline × leverage = 5% × 20', run: () => tshow(Object.assign({}, CB, { L: 650, K: 0 }), ['K']), wait: 1.4 }
+    ];
+    list($('#o29'), EV, (i) => {
+      const ev = i < 0 ? null : EV[i];
+      if (ev && ev.cap) { mode(true); tshow(CB, []); player.load(capBeats()); }
+      else { mode(false); player.clear(); formula(ev); }
+      alignBank();
+    });
+    mode(false); formula(null);
   }
+
 
 
   /* ───────── Ch30 Money market: value of money 1/P ───────── */

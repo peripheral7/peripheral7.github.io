@@ -534,86 +534,74 @@
   /* ───────── Ch29 은행 T계정 ───────── */
   // 처음: 지준 $100, R 10% → 예금 $1,000 · 대출 $900 · 통화량 $1,000(현금 보유 없음). 사건마다 걸음별 값(R · 지준 · 대출 · 예금)을 차례로 보여 준다
   function ch29() {
-    // 상태: res 지급준비금 · L 대출 · S 증권 · D 예금 · Db 부채 · K 자본 · R 지급준비율. null 이면 T계정에 '—'
-    const B = { R: 0.1, res: 100, L: 900, S: null, D: 1000, Db: null, K: null };
+    // 통화승수 사건: T계정 · 시간선 없이 변화량 식 하나 — ΔReserves × 승수 = ΔMoney supply (숫자는 증가분 중심), 아래 작은 글에 세부(본원통화 등).
+    // 대출 부실 사건만: 맨큐의 레버리지 예처럼 은행 한 곳의 T계정 + 두 마디 시간선
+    const EN = document.documentElement.lang === 'en';
+    const R0 = 0.1, RES0 = 100;
     const player = Player($('#pl29'));
     const row = (k, nm, id) => '<div class="r" data-k="' + k + '"><span>' + nm + '</span><b id="t' + id + '"></b><i id="d' + id + '"></i></div>';
     $('#bank').innerHTML =
-      // 위 수식: 1행 영문(작게) + 한글 항, 2행 숫자(한 줄). 상자 없이 글자만
       '<div class="eqrow" id="k29">' +
       '<div class="term" data-k="res"><i>Reserves</i><span>지급준비금</span></div><span class="kop">×</span>' +
       '<div class="term" data-k="R"><i>Money multiplier</i><span>통화승수</span></div><span class="kop">=</span>' +
-      '<div class="term" data-k="M"><i>Money supply</i><span>통화량</span></div>' +
+      '<div class="term" data-k="M"><i id="mLabEn">Money supply</i><span id="mLab">통화량</span></div>' +
       '<b class="num" data-k="res" id="nRes"></b><span class="kop2">×</span><b class="num" data-k="R" id="nR"></b><span class="kop2">=</span><b class="num" data-k="M" id="nM"></b></div>' +
-      '<div class="tacct"><h3>은행 전체 T계정</h3><div class="tt">' +
+      '<p class="eqdetail" id="k29d"></p>' +
+      '<div class="tacct" id="tacct" hidden><h3>은행 T계정</h3><div class="tt">' +
       '<div><span class="h">ASSETS 자산</span>' + row('res', '지급준비금', 'Res') + row('L', '대출', 'Loan') + row('S', '증권', 'Sec') + '</div>' +
       '<div><span class="h">LIABILITIES · CAPITAL 부채 · 자본</span>' + row('D', '예금', 'Dep') + row('Db', '부채', 'Debt') + row('K', '자본', 'Cap') + '</div></div>' +
-      '<p class="tnote" id="tNote"></p></div>';
+      '<p class="tnote" id="tNote">※ 레버리지 비율 = 자산 ÷ 자본</p></div>';
     const money = (v) => (v == null ? '—' : '$' + fmt(v));
+    const sgn = (v) => (v > 0 ? '+' : '−') + '$' + fmt(Math.abs(v));
     let kt = [];
-    const num = (id, b, a, f) => { const e = $('#' + id); if (a == null) { e.className = 'num'; e.textContent = '—'; return; } const d = b == null ? 0 : dirOf(b, a, 1e-6); e.className = 'num' + (d > 0 ? ' up' : d < 0 ? ' dn' : ''); e.innerHTML = d ? '<span class="old">' + esc(f(b)) + ' →</span> ' + esc(f(a)) + (d > 0 ? ' ▲' : ' ▼') : esc(f(a)); };
-    const pulse = (ks) => { kt.forEach(clearTimeout); kt = []; const mark = (k) => $$('#k29 [data-k]').forEach((e) => e.classList.toggle('pulse', e.getAttribute('data-k') === k)); mark(null); ks.forEach((k, i) => kt.push(setTimeout(() => mark(k), i * 700 / SPEED))); kt.push(setTimeout(() => mark(null), ks.length * 700 / SPEED + 300)); };
+    const pulse = (ks) => { kt.forEach(clearTimeout); kt = []; const mark = (k) => $$('#k29 [data-k]').forEach((x) => x.classList.toggle('pulse', x.getAttribute('data-k') === k)); mark(null); ks.forEach((k, i) => kt.push(setTimeout(() => mark(k), i * 600 / SPEED))); kt.push(setTimeout(() => mark(null), ks.length * 600 / SPEED + 400)); };
+    // 식 숫자: 지준(변화분 또는 수준) × 승수(바뀌면 '10 → 5') = 통화량 변화분 ▲▼. ev 가 없으면 처음 수준 $100 × 10 = $1,000
+    function formula(ev) {
+      const nRes = $('#nRes'), nR = $('#nR'), nM = $('#nM');
+      $('#mLab').textContent = ev && ev.dep ? '예금' : '통화량'; $('#mLabEn').textContent = ev && ev.dep ? 'Deposits' : 'Money supply';
+      $('#k29d').innerHTML = ev ? arrows(ev.d) : '';
+      if (!ev) { nRes.className = nR.className = nM.className = 'num'; nRes.textContent = money(RES0); nR.textContent = fmt(1 / R0); nM.textContent = money(RES0 / R0); return; }
+      const R1 = ev.R || R0, dRes = ev.dRes || 0, dM = (RES0 + dRes) / R1 - RES0 / R0;
+      nRes.className = 'num' + (dRes > 0 ? ' up' : dRes < 0 ? ' dn' : ''); nRes.textContent = dRes ? sgn(dRes) : money(RES0);
+      nR.className = 'num' + (R1 !== R0 ? (R1 < R0 ? ' up' : ' dn') : ''); nR.innerHTML = R1 !== R0 ? '<span class="old">' + fmt(1 / R0) + ' →</span> ' + fmt(1 / R1) : fmt(1 / R0);
+      nM.className = 'num' + (dM > 0 ? ' up' : ' dn'); nM.textContent = sgn(dM) + (dM > 0 ? ' ▲' : ' ▼');
+      pulse(R1 !== R0 ? ['R', 'M'] : ['res', 'M']);
+    }
+    // 대출 부실(맨큐 레버리지 예): 지급준비금 $200 · 대출 $700 · 증권 $100 | 예금 $800 · 부채 $150 · 자본 $50
+    const CB = { res: 200, L: 700, S: 100, D: 800, Db: 150, K: 50 };
     const cell = (id, base, v) => {
       $('#t' + id).textContent = money(v);
-      const e = $('#d' + id), dv = v == null || base == null ? 0 : v - base;
-      e.className = dv < -0.5 ? 'dn' : dv > 0.5 ? 'up' : ''; e.textContent = Math.abs(dv) < 0.5 ? '' : (dv > 0 ? '▲ +' : '▼ −') + money(Math.abs(dv));
+      const x = $('#d' + id), dv = v - base;
+      x.className = dv < -0.5 ? 'dn' : dv > 0.5 ? 'up' : ''; x.textContent = Math.abs(dv) < 0.5 ? '' : (dv > 0 ? '▲ +' : '▼ −') + money(Math.abs(dv));
     };
-    function show(s, hi, base) {
-      base = base || B;
-      const mult = s.R ? 1 / s.R : null;
-      num('nRes', base.res, s.res, money); num('nR', base.R ? 1 / base.R : null, mult, fmt); num('nM', base.R ? base.D : null, s.R ? s.D : null, money);
-      pulse((hi || []).filter((k) => k === 'res' || k === 'R' || k === 'M'));
-      cell('Res', base.res, s.res); cell('Loan', base.L, s.L); cell('Sec', base.S, s.S); cell('Dep', base.D, s.D); cell('Debt', base.Db, s.Db); cell('Cap', base.K, s.K);
-      if (s.R) {
-        const req = s.R * s.D, gap = s.res - req;
-        $('#tNote').innerHTML = 'R = <b>' + Math.round(s.R * 100) + '%</b> · 필요지준 = R × 예금 = ' + money(req) + (Math.abs(gap) < 0.5 ? ' = 지준' : gap > 0 ? ' → 초과지준 <b>' + money(gap) + '</b>' : ' → 지준 부족 <b>' + money(-gap) + '</b>');
-      } else {
-        const A = (s.res || 0) + (s.L || 0) + (s.S || 0);
-        $('#tNote').innerHTML = '※ 레버리지 비율 = 자산 ÷ 자본';   // 주석: 구하는 법만(숫자 없이)
-      }
-      $$('#bank .tt [data-k]').forEach((e) => e.classList.toggle('hi', (hi || []).indexOf(e.getAttribute('data-k')) >= 0));
+    function tshow(st, hi) {
+      cell('Res', CB.res, st.res); cell('Loan', CB.L, st.L); cell('Sec', CB.S, st.S); cell('Dep', CB.D, st.D); cell('Debt', CB.Db, st.Db); cell('Cap', CB.K, st.K);
+      $$('#bank .tt [data-k]').forEach((x) => x.classList.toggle('hi', (hi || []).indexOf(x.getAttribute('data-k')) >= 0));
     }
-    // 은행 자본 · 레버리지(맨큐 Ch29 예): 지급준비금 $200 · 대출 $700 · 증권 $100 | 예금 $800 · 부채 $150 · 자본 $50, 레버리지 20
-    const CB = { R: null, res: 200, L: 700, S: 100, D: 800, Db: 150, K: 50 };
-    // 걸음: [꼬리표, 식(크게), 숫자(작게), 보여 줄 값, 강조할 칸]. 세 마디: 상황 → 승수 · 지준 · 자본 → 결과
+    const mode = (cap) => { $('#k29').hidden = cap; $('#k29d').hidden = cap; $('#tacct').hidden = !cap; };
+    // d: 식 아래 작은 글(세부). dRes: 지준 변화분, R: 새 지급준비율, dep: 결과 항을 '예금'으로
     const EV = [
-      { t: '지급준비율 인상 10% → 20%', q: 'SA 10', dir: 'l', steps: [
-        ['상황', 'R 10% → 20%', '', { R: 0.2 }, ['R']],
-        ['승수', '1/R = 10 → 5', '', { R: 0.2 }, ['R']],
-        ['통화량', 'M = 지준 × 1/R ↓', '$100 × 5 = $500 (대출 $400 · 예금 $500)', { R: 0.2, L: 400, D: 500 }, ['M', 'L', 'D']]] },
-      { t: '지급준비율 인하 10% → 5%', dir: 'r', steps: [
-        ['상황', 'R 10% → 5%', '', { R: 0.05 }, ['R']],
-        ['승수', '1/R = 10 → 20', '', { R: 0.05 }, ['R']],
-        ['통화량', 'M = 지준 × 1/R ↑', '$100 × 20 = $2,000 (대출 $1,900 · 예금 $2,000)', { R: 0.05, L: 1900, D: 2000 }, ['M', 'L', 'D']]] },
-      { t: '예금 $100 증가', dir: 'r', steps: [
-        ['상황', '예금 +$100 (새 현금이 은행에 들어옴)', '', {}, []],
-        ['지준', '은행 지준 +$100', '지준 $100 → $200', { res: 200 }, ['res']],
-        ['통화량', 'M = 지준 × 1/R ↑', '$200 × 10 = $2,000 (대출 $1,800 · 예금 $2,000)', { res: 200, L: 1800, D: 2000 }, ['M', 'L', 'D']]] },
-      { t: '예금 $50 인출', dir: 'l', steps: [
-        ['상황', '예금 −$50 (현금으로 빼 감)', '', {}, []],
-        ['지준', '은행 지준 −$50', '지준 $100 → $50', { res: 50 }, ['res']],
-        ['통화량', '예금 = 지준 × 1/R ↓', '$50 × 10 = $500 (대출 $450) · 빼 간 현금 $50 은 통화량에 남음', { res: 50, L: 450, D: 500 }, ['M', 'L', 'D']]] },
-      { t: 'Fed 채권 매입 $100', q: 'SA 11', dir: 'r', steps: [
-        ['상황', 'Fed 채권 매입 $100', '', {}, []],
-        ['지준', '본원통화 ↑ → 지준 +$100', '지준 $100 → $200', { res: 200 }, ['res']],
-        ['통화량', 'M = 지준 × 1/R ↑', '$200 × 10 = $2,000 (대출 $1,800 · 예금 $2,000)', { res: 200, L: 1800, D: 2000 }, ['M', 'L', 'D']]] },
-      { t: 'Fed 채권 매각 $50', dir: 'l', steps: [
-        ['상황', 'Fed 채권 매각 $50', '', {}, []],
-        ['지준', '본원통화 ↓ → 지준 −$50', '지준 $100 → $50', { res: 50 }, ['res']],
-        ['통화량', 'M = 지준 × 1/R ↓', '$50 × 10 = $500 (대출 $450 · 예금 $500)', { res: 50, L: 450, D: 500 }, ['M', 'L', 'D']]] },
-      { t: '대출 부실 → 은행 자본 감소', dir: 'l', base: CB, steps: [
-        ['상황', '대출 부실', '', {}, []],
-        ['대출', '대출 ↓ $50', '자산 감소율 = $50 ÷ $1,000 = 5%', { L: 650 }, ['L']],
-        ['자본', '자본 ▼ 100%', '자본 감소율 = 자산 감소율 × 레버리지 = 5% × 20', { L: 650, K: 0 }, ['K']]] }
+      { t: '지급준비율 인상 10% → 20%', q: 'SA 10', dir: 'l', R: 0.2, d: 'R 10% → 20% → 승수 1/R 10 → 5' },
+      { t: '지급준비율 인하 10% → 5%', dir: 'r', R: 0.05, d: 'R 10% → 5% → 승수 1/R 10 → 20' },
+      { t: '예금 $100 증가', dir: 'r', dRes: 100, dep: true, d: '현금 $100 을 예금 → 지준 +$100 · 통화량은 +$1,000 − 현금 $100 = +$900' },
+      { t: '예금 $50 인출', dir: 'l', dRes: -50, dep: true, d: '현금으로 $50 인출 → 지준 −$50 · 통화량은 −$500 + 현금 $50 = −$450' },
+      { t: 'Fed 채권 매입 $100', q: 'SA 11', dir: 'r', dRes: 100, d: 'Fed 채권 매입 → 본원통화(monetary base) ↑ → 은행 지준 +$100' },
+      { t: 'Fed 채권 매각 $50', dir: 'l', dRes: -50, d: 'Fed 채권 매각 → 본원통화(monetary base) ↓ → 은행 지준 −$50' },
+      { t: '대출 부실 → 은행 자본 감소', dir: 'l', cap: true }
     ];
-    function beats(ev) {
-      const base = ev.base || B;
-      const s0 = ev.steps[0], sit = s0[1] + (s0[2] ? ' — ' + s0[2] : '');   // 첫 걸음(상황)은 그래프 아래 줄로
-      return ev.steps.slice(1).map(([k, t, sm, v, hi]) => { const st = Object.assign({}, base, v); return { g: ev.t, sit, k: t, t: sm, run: () => show(st, hi, base), wait: 1.4 }; });
-    }
-    list($('#o29'), EV, (i) => { if (i < 0) { player.clear(); show(B, []); } else player.load(beats(EV[i])); });
-    show(B, []);
+    const capBeats = () => [
+      { g: EV[6].t, sit: '대출 부실', k: '대출 ↓ $50', t: '자산 감소율 = $50 ÷ $1,000 = 5%', run: () => tshow(Object.assign({}, CB, { L: 650 }), ['L']), wait: 1.4 },
+      { g: EV[6].t, sit: '대출 부실', k: '자본 ▼ 100%', t: '자본 감소율 = 자산 감소율 × 레버리지 = 5% × 20', run: () => tshow(Object.assign({}, CB, { L: 650, K: 0 }), ['K']), wait: 1.4 }
+    ];
+    list($('#o29'), EV, (i) => {
+      const ev = i < 0 ? null : EV[i];
+      if (ev && ev.cap) { mode(true); tshow(CB, []); player.load(capBeats()); }
+      else { mode(false); player.clear(); formula(ev); }
+      alignBank();
+    });
+    mode(false); formula(null);
   }
+
 
 
   /* ───────── Ch30 화폐시장: 화폐가치 1/P ───────── */
