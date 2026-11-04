@@ -372,6 +372,55 @@
   @media (max-width:900px){
     .fig .stage{max-height:none;aspect-ratio:640/520}
   }
+  /* Ch29 그림 칸(.bankfig) 폭 3구간: 화면 폭이 아니라 그림 칸 폭(cqi)에 맞춘다 — 데스크톱에서도 칸이 좁아질 수 있어서.
+     숫자는 줄바꿈하지 않고, 구간 안에서는 칸 폭에 비례해 글자를 줄인다(clamp). --tfmax 는 낮은 화면에서 T계정 상한 */
+  .bankfig{container-type:inline-size;--tfmax:24px}
+  @media (min-width:901px) and (max-height:820px){.bankfig{--tfmax:20px}}
+  .bankfig .tt .r{display:grid;grid-template-columns:minmax(0,1fr) auto auto;align-items:baseline;column-gap:8px}
+  .bankfig .tt .r span{overflow:hidden;text-overflow:ellipsis}
+  .bankfig .tt .r b,.bankfig .tt .r i{white-space:nowrap}
+  .bankfig .tt .r b{margin-left:0}
+  .bankfig .eqrow .num{white-space:nowrap}
+  /* 넓음(560px~): 칸 넓이 그대로, 증감 칸은 자리를 잡아 둔다 */
+  @container (min-width:560px){
+    .bankfig .tt{font-size:clamp(19px,3.6cqi,var(--tfmax));line-height:1.55}
+    .bankfig .tt>div{padding:8px 16px 6px}
+    .bankfig .tt .r i{min-width:64px;font-size:15px}
+    .bankfig .term span{font-size:clamp(20px,4.6cqi,34px)}
+    html[lang=en] .bankfig .term span{font-size:clamp(18px,3.6cqi,26px)}
+    .bankfig .eqrow .num{font-size:clamp(18px,3.4cqi,24px)}
+    .bankfig .eqrow .num.up,.bankfig .eqrow .num.dn{font-size:clamp(19px,3.6cqi,26px)}
+  }
+  /* 보통(380~559px): 여백 · 간격을 줄이고 증감은 작은 글로 바로 옆에 */
+  @container (min-width:380px) and (max-width:559.98px){
+    .bankfig .tt{font-size:clamp(14px,3.8cqi,19px);line-height:1.5}
+    .bankfig .tt>div{padding:6px 8px 4px}
+    .bankfig .tt .h{font-size:11.5px;letter-spacing:.04em}
+    .bankfig .tt .r{column-gap:6px;padding:0 2px}
+    .bankfig .tt .r i{min-width:0;font-size:12px}
+    .bankfig .term span,html[lang=en] .bankfig .term span{font-size:clamp(14px,3.8cqi,21px)}
+    .bankfig .term i{font-size:11px}
+    .bankfig .eqrow{gap:2px 6px}
+    .bankfig .eqrow .kop{font-size:22px;padding-bottom:2px}
+    .bankfig .eqrow .num,.bankfig .eqrow .num.up,.bankfig .eqrow .num.dn{font-size:clamp(14px,3.7cqi,20px);padding:2px}
+  }
+  /* 좁음(~379px): 증감은 숫자 아래 줄로 내린다 — 이름 · 숫자 · 증감이 한 줄에서 겹치지 않게 */
+  @container (max-width:379.98px){
+    .bankfig .tt{font-size:clamp(13px,4.4cqi,16px);line-height:1.45}
+    .bankfig .tt>div{padding:6px 6px 4px}
+    .bankfig .tt .h{font-size:10.5px;letter-spacing:.02em}
+    .bankfig .tt .r{grid-template-columns:minmax(0,1fr) auto;column-gap:4px;padding:0 2px}
+    .bankfig .tt .r i{grid-column:2;min-width:0;font-size:11px;line-height:1.3}
+    .bankfig .tt .r i:empty{display:none}
+    .bankfig .term span,html[lang=en] .bankfig .term span{font-size:clamp(12.5px,4.2cqi,15px)}
+    .bankfig .term i{font-size:10px}
+    .bankfig .eqrow{gap:2px 3px}
+    .bankfig .eqrow .kop{font-size:18px;padding-bottom:2px}
+    .bankfig .eqrow .kop2{font-size:12px}
+    .bankfig .eqrow .num,.bankfig .eqrow .num.up,.bankfig .eqrow .num.dn{font-size:clamp(12px,4cqi,15px);padding:2px 0}
+    .bankfig .eqdetail{font-size:13px}
+    .bankfig .tnote{font-size:12.5px}
+  }
 </style>
 </head>
 <body>
