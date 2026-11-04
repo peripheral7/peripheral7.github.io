@@ -54,7 +54,7 @@
   const same = (a, b) => Math.abs(a - b) < 1e-6;
   const sign = (a, b, tol) => (Math.abs(b - a) < tol ? '=' : b > a ? '↑' : '↓');
   const esc = (s) => String(s).replace(/[&<>]/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;' }[c]));
-  const arrows = (s) => esc(s).replace(/↑/g, '<span class="up">▲</span>').replace(/↓/g, '<span class="dn">▼</span>').replace(/_([A-Z0-9])/g, '<sub>$1</sub>');
+  const arrows = (s) => esc(s).replace(/↑/g, '<span class="up">▲</span>').replace(/↓/g, '<span class="dn">▼</span>').replace(/_([A-Z0-9])/g, '<sub>$1</sub>').replace(/\^([a-z])/g, '<sup>$1</sup>');
   const dirOf = (a, b, tol) => (Math.abs(b - a) < (tol || 1e-6) ? 0 : b > a ? 1 : -1);
   const dirW = (a, b, tol) => ['↓', '그대로', '↑'][dirOf(a, b, tol) + 1];
   function textW(s, size) {
@@ -559,7 +559,7 @@
     function formula(ev) {
       const nRes = $('#nRes'), nR = $('#nR'), nM = $('#nM');
       $('#mLab').textContent = ev && ev.dep ? '예금' : '통화량'; $('#mLabEn').textContent = ev && ev.dep ? 'Deposits' : 'Money supply';
-      $('#k29d').innerHTML = ev ? arrows(ev.d) : '';
+      $('#k29d').innerHTML = ev ? ev.d.split(' — ').map((x) => '<span class="dl">' + arrows(x).replace(/==(.+?)==/g, '<mark>$1</mark>').replace(/\*\*(.+?)\*\*/g, '<b>$1</b>') + '</span>').join('') : '';
       if (!ev) { nRes.className = nR.className = nM.className = 'num'; nRes.textContent = money(RES0); nR.textContent = fmt(1 / R0); nM.textContent = money(RES0 / R0); return; }
       const R1 = ev.R || R0, dRes = ev.dRes || 0, dM = (RES0 + dRes) / R1 - RES0 / R0;
       nRes.className = 'num' + (dRes > 0 ? ' up' : dRes < 0 ? ' dn' : ''); nRes.textContent = dRes ? sgn(dRes) : money(RES0);
@@ -580,18 +580,22 @@
     }
     const mode = (cap) => { $('#k29').hidden = cap; $('#k29d').hidden = cap; $('#tacct').hidden = !cap; };
     // d: 식 아래 작은 글(세부). dRes: 지준 변화분, R: 새 지급준비율, dep: 결과 항을 '예금'으로
+    // d 의 ' — ' 는 줄바꿈, ==…== 는 형광펜 강조, **…** 는 굵게(정답)
     const EV = [
-      { t: '지급준비율 인상 10% → 20%', q: 'SA 10', dir: 'l', R: 0.2, d: 'R 10% → 20% → 승수 1/R 10 → 5' },
-      { t: '지급준비율 인하 10% → 5%', dir: 'r', R: 0.05, d: 'R 10% → 5% → 승수 1/R 10 → 20' },
-      { t: '예금 $100 증가', dir: 'r', dRes: 100, dep: true, d: '현금 $100 을 예금 → 지준 +$100 · 통화량은 +$1,000 − 현금 $100 = +$900' },
-      { t: '예금 $50 인출', dir: 'l', dRes: -50, dep: true, d: '현금으로 $50 인출 → 지준 −$50 · 통화량은 −$500 + 현금 $50 = −$450' },
-      { t: 'Fed 채권 매입 $100', q: 'SA 11', dir: 'r', dRes: 100, d: 'Fed 채권 매입 → 본원통화(monetary base) ↑ → 은행 지준 +$100' },
-      { t: 'Fed 채권 매각 $50', dir: 'l', dRes: -50, d: 'Fed 채권 매각 → 본원통화(monetary base) ↓ → 은행 지준 −$50' },
+      { t: '지급준비율 인상 10% → 20%', q: 'SA 10', dir: 'l', R: 0.2, d: 'R 10% → 20% → 승수 1/R 10 → 5 — 통화량 = $100 × 5 = $500 → **−$500**' },
+      { t: '지급준비율 인하 10% → 5%', dir: 'r', R: 0.05, d: 'R 10% → 5% → 승수 1/R 10 → 20 — 통화량 = $100 × 20 = $2,000 → **+$1,000**' },
+      { t: '은행이 초과지준을 더 보유', dir: 'l', R: 0.2, d: '은행이 필요지준보다 더 쌓음 → 지급준비율 R 10% → 20% → 승수 10 → 5 — 통화량 → **−$500**' },
+      { t: '예금 $100 증가', dir: 'r', dRes: 100, dep: true, d: '이 $100 은 ==사람들이 이미 들고 있던 현금== = ==본원통화의 일부==로, 이미 통화량에 들어 있다 — 예금: 현금 −$100 → 지준 +$100 (본원통화 그대로) → 예금 +$1,000 — 통화량 = 예금 +$1,000 − 현금 $100 = **+$900**' },
+      { t: '예금 $50 인출', dir: 'l', dRes: -50, dep: true, d: '이 $50 은 ==본원통화 안에 그대로== — 지준에서 현금으로 자리만 옮긴다 — 인출: 지준 −$50 → 예금 −$500 — 통화량 = 예금 −$500 + 현금 $50 = **−$450**' },
+      { t: 'Fed 채권 매입 $100', q: 'SA 11', dir: 'r', dRes: 100, d: 'Fed 가 새 돈으로 지불 → ==본원통화 +$100== → 은행 지준 +$100 — 줄어든 현금이 없으므로 통화량 = **+$1,000**' },
+      { t: 'Fed 채권 매각 $50', dir: 'l', dRes: -50, d: 'Fed 가 돈을 거둬들임 → ==본원통화 −$50== → 은행 지준 −$50 — 통화량 = **−$500**' },
+      { t: 'Fed 가 은행에 $100 대출 (재할인율 인하)', dir: 'r', dRes: 100, d: '재할인율 ↓ → 은행이 Fed 에서 $100 차입 → ==본원통화 +$100== → 은행 지준 +$100 — 통화량 = **+$1,000**' },
       { t: '대출 부실 → 은행 자본 감소', dir: 'l', cap: true }
     ];
+    const CAP = EV.find((e) => e.cap);
     const capBeats = () => [
-      { g: EV[6].t, sit: '대출 부실', k: '대출 ↓ $50', t: '자산 감소율 = $50 ÷ $1,000 = 5%', run: () => tshow(Object.assign({}, CB, { L: 650 }), ['L']), wait: 1.4 },
-      { g: EV[6].t, sit: '대출 부실', k: '자본 ▼ 100%', t: '자본 감소율 = 자산 감소율 × 레버리지 = 5% × 20', run: () => tshow(Object.assign({}, CB, { L: 650, K: 0 }), ['K']), wait: 1.4 }
+      { g: CAP.t, sit: '대출 부실', k: '대출 ↓ $50', t: '자산 감소율 = $50 ÷ $1,000 = 5%', run: () => tshow(Object.assign({}, CB, { L: 650 }), ['L']), wait: 1.4 },
+      { g: CAP.t, sit: '대출 부실', k: '자본 ▼ 100%', t: '자본 감소율 = 자산 감소율 × 레버리지 = 5% × 20', run: () => tshow(Object.assign({}, CB, { L: 650, K: 0 }), ['K']), wait: 1.4 }
     ];
     list($('#o29'), EV, (i) => {
       const ev = i < 0 ? null : EV[i];
@@ -642,8 +646,7 @@
         { name: '화폐 수요 감소', ch: { add: { Vg: 0.5 } }, why: '카드 결제 → 돈 보유 ↓ → MD ← → 1/P ↓, P ↑' },
         keep('Fed 가 M ↓ → MS ← → 1/P 회복, P 그대로')] },
       { t: '실질 GDP 증가 → 거래용 돈 더 필요', dir: 'r', stages: [
-        { name: '화폐 수요 증가', ch: { add: { Yg: 0.3 } }, why: 'Y ↑ → 돈 수요 ↑ → MD → → 1/P ↑, P ↓' },
-        keep('Fed 가 M ↑ → MS → → 1/P 회복, P 그대로')] }
+        { name: '화폐 수요 증가', ch: { add: { Yg: 0.3 } }, why: 'Y ↑ → 돈 수요 ↑ → MD → → 1/P ↑, P ↓' }] }
     ];
     list($('#o30'), EV, (i) => r.pick(i < 0 ? null : EV[i]));
     return plot;
@@ -662,8 +665,8 @@
   function longRun(S) {                        // 2단계 설명: 1단계 끝 상태가 Y* 보다 큰지 작은지
     const b = S[S.length - 1].off, L = 5 + (b.LRAS || 0);
     return eqX(b) > L + 0.03
-      ? 'Y > Y* → 임금 · Pe 조정 ↑ → SRAS ← → Y* 회복, P ↑'
-      : 'Y < Y* → 임금 · Pe 조정 ↓ → SRAS → → Y* 회복, P ↓';
+      ? 'Y > Y* → 임금 · P^e 조정 ↑ → SRAS ← → Y* 회복, P ↑'
+      : 'Y < Y* → 임금 · P^e 조정 ↓ → SRAS → → Y* 회복, P ↓';
   }
   function gap(off, pt) {
     const L = 5 + (off.LRAS || 0);
@@ -695,20 +698,20 @@
       { name: 'SRAS 조정 → Y*', step: '2단계 장기', ch: { abs: lrSRAS }, why: longRun }] });
     const AD = {
       C: [adEv('주가 급등', 'r', '주가 ↑ → 부 ↑ → C ↑ → AD →'), adEv('주가 폭락', 'l', '주가 ↓ → 부 ↓ → C ↓ → AD ←', 'SA 4a'), adEv('소득세 인하', 'r', '소득세 ↓ → 가처분소득 ↑ → C ↑ → AD →')],
-      I: [adEv('통화량 증가', 'r', 'M ↑ → r ↓ → I ↑ (환율 ↓ → NX ↑) → AD →'), adEv('기업 낙관 · 투자 붐', 'r', '미래 사업 전망 ↑ → 새 설비 투자 I ↑ → AD →', 'SA 5'), adEv('투자세액공제', 'r', '투자하면 세금 감면 → I ↑ → AD →')],
+      I: [adEv('통화량 증가', 'r', 'M ↑ → r ↓ → I ↑ → AD →'), adEv('기업 낙관 · 투자 붐', 'r', '미래 사업 전망 ↑ → 새 설비 투자 I ↑ → AD →', 'SA 5'), adEv('투자세액공제', 'r', '투자하면 세금 감면 → I ↑ → AD →')],
       G: [adEv('정부 구매 증가', 'r', '정부 구매 G ↑ → AD →', 'SA 4b')],
       NX: [adEv('해외 경기 침체', 'l', '외국 소득 ↓ → 우리 수출 ↓ → NX ↓ → AD ←', 'SA 4d'), adEv('해외 정치 불안 → 원화 절상', 'l', '원화 ↑ → 수출 ↓ · 수입 ↑ → NX ↓ → AD ←', 'MC 7')]
     };
     const srEv = (t, why, q) => ({ t, q, dir: 'l', stages: [
       { name: 'SRAS ←', step: '1단계 단기', ch: { add: { SRAS: -R } }, why },
-      { name: '그대로 두면 SRAS 복귀', short: '그대로', ch: { abs: { SRAS: 0 } }, letter: 'A', at: 2, why: 'Y < Y* → 임금 · Pe 조정 ↓ → SRAS → → Y* 회복, P 회복 (오래 걸림)' },
+      { name: '그대로 두면 SRAS 복귀', short: '그대로', ch: { abs: { SRAS: 0 } }, letter: 'A', at: 2, why: 'Y < Y* → 임금 · P^e 조정 ↓ → SRAS → → Y* 회복, P 회복 (오래 걸림)' },
       { name: '정책으로 수용 AD →', short: '정책', sit: 'Y < Y* : 정책으로 수용', from: 0, ch: { abs: lrAD }, chain: ['M ↑ · G ↑', 'AD →', 'Y* 회복, P 더 ↑'], at: 1 }] });
     // LRAS 가 움직이면 SRAS 도 같이 움직여 새 균형은 새 Y* 위(장기균형). AD 그대로면 P 는 반대로
     const lrEv = (t, dir, why, q) => ({ t, q, dir, stages: [
       { name: 'LRAS · SRAS ' + (dir === 'r' ? '→' : '←'), ch: { add: { LRAS: dir === 'r' ? 1 : -1 }, abs: lrSRAS }, why }] });
     const AS = {
-      SR: [srEv('기대물가 상승', 'Pe ↑ → 임금 · 가격 ↑ → SRAS ←', 'MC 11'), srEv('유가 급등', '유가 ↑ → 생산 비용 ↑ → SRAS ←'), srEv('명목임금 상승', '명목임금 ↑ → 비용 ↑ → SRAS ←')],
-      LR: [lrEv('기술 진보', 'r', '기술 ↑ → 생산성 ↑ → Y* ↑ → LRAS · SRAS →', 'SA 4c'), lrEv('자본 · 인적자본 증가', 'r', '자본 K · 인적자본 H ↑ → Y* ↑ → LRAS · SRAS →', 'SA 5c'), lrEv('이민 → 노동 증가', 'r', '노동 L ↑ → Y* ↑ → LRAS · SRAS →', 'SA 1'), lrEv('자연재해 · 자원 감소', 'l', '자원 N · 자본 ↓ → Y* ↓ → LRAS · SRAS ←', 'SA 1')]
+      SR: [srEv('기대물가 상승', 'P^e ↑ → 임금 · 가격 ↑ → SRAS ←', 'MC 11'), srEv('유가 급등', '유가 ↑ → 생산 비용 ↑ → SRAS ←'), srEv('명목임금 상승', '명목임금 ↑ → 비용 ↑ → SRAS ←')],
+      LR: [lrEv('기술 진보', 'r', '기술 ↑ → 생산성 ↑ → Y* ↑ → LRAS · SRAS →', 'SA 4c'), lrEv('자본 · 인적자본 증가', 'r', '자본 K · 인적자본 H ↑ → Y* ↑ → LRAS · SRAS →', 'SA 5c'), lrEv('이민 → 노동 증가', 'r', '노동 L ↑ → Y* ↑ → LRAS · SRAS →', 'SA 1'), lrEv('자연재해 · 자원 감소', 'l', '자원 N · 자본 ↓ → Y* ↓ → LRAS · SRAS ←', 'SA 1'), lrEv('자연실업률 상승', 'l', '최저임금 ↑ → 자연실업률 ↑ → 취업자 L ↓ → Y* ↓ → LRAS · SRAS ←')]
     };
     // 어느 목록에서 골라도 그 탭의 줄 표시를 모두 지우고 새 사건을 처음 상태 A 에서 시작한다(앞 사건의 LRAS 이동 등은 풀린다). 같은 줄을 다시 누르면 풀림
     $$('#side33ad [data-o]').forEach((h) => { const L = AD[h.getAttribute('data-o')]; list(h, L, (i) => rad.pick(i < 0 ? null : L[i]), $('#side33ad')); });

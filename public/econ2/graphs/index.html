@@ -142,6 +142,23 @@
   .eq .f{display:block;font-size:19px;font-weight:800;letter-spacing:.01em;margin:0 0 2px}
   .eq .f + .f{margin-top:4px}
   .eq small{display:block;color:var(--soft);font-size:13.5px;line-height:1.5}
+  .eq small + .f{margin-top:10px}
+  .eq sup{font-size:.62em;line-height:0}
+  /* 파란 상자 안 펼침 글(SRAS 세 이론 · 마찰적 실업): 제목을 누르면 아래로 펼쳐진다 */
+  .eq .drop{margin:10px 0 2px;border-top:1px solid var(--line);padding-top:8px}
+  .eq .drop summary{display:flex;align-items:center;gap:6px;cursor:pointer;list-style:none;font-size:15px;font-weight:800;color:var(--blue)}
+  .eq .drop summary::-webkit-details-marker{display:none}
+  .eq .drop summary::after{content:"▾";font-size:14px;transition:transform .2s}
+  .eq .drop[open] summary::after{transform:rotate(180deg)}
+  .eq .drop summary:focus-visible{outline:2px solid var(--blue);outline-offset:2px;border-radius:4px}
+  .eq .drop p,.eq .drop ol{margin:6px 0 0;font-size:14px;line-height:1.55}
+  .eq .drop ol{padding-left:20px}
+  .eq .drop li + li{margin-top:4px}
+  .eqdetail .dl{display:block}
+  .eqdetail .dl + .dl{margin-top:4px}
+  .eqdetail mark{padding:0 3px;border-radius:4px;background:#fff3b0;color:var(--ink)}
+  .eqdetail b{color:var(--ink);font-weight:800}
+  .rows sup{font-size:.62em}
 
   /* 고를 것(사건 목록): 블로그 목차처럼 — 왼쪽 세로선 아래 작은 제목과 글줄. 고른 줄은 세로선 · 글자가 파랑, 다시 누르면 풀림 */
   .opts{margin:0 0 10px}
@@ -355,6 +372,55 @@
   @media (max-width:900px){
     .fig .stage{max-height:none;aspect-ratio:640/520}
   }
+  /* Ch29 그림 칸(.bankfig) 폭 3구간: 화면 폭이 아니라 그림 칸 폭(cqi)에 맞춘다 — 데스크톱에서도 칸이 좁아질 수 있어서.
+     숫자는 줄바꿈하지 않고, 구간 안에서는 칸 폭에 비례해 글자를 줄인다(clamp). --tfmax 는 낮은 화면에서 T계정 상한 */
+  .bankfig{container-type:inline-size;--tfmax:24px}
+  @media (min-width:901px) and (max-height:820px){.bankfig{--tfmax:20px}}
+  .bankfig .tt .r{display:grid;grid-template-columns:minmax(0,1fr) auto auto;align-items:baseline;column-gap:8px}
+  .bankfig .tt .r span{overflow:hidden;text-overflow:ellipsis}
+  .bankfig .tt .r b,.bankfig .tt .r i{white-space:nowrap}
+  .bankfig .tt .r b{margin-left:0}
+  .bankfig .eqrow .num{white-space:nowrap}
+  /* 넓음(560px~): 칸 넓이 그대로, 증감 칸은 자리를 잡아 둔다 */
+  @container (min-width:560px){
+    .bankfig .tt{font-size:clamp(19px,3.6cqi,var(--tfmax));line-height:1.55}
+    .bankfig .tt>div{padding:8px 16px 6px}
+    .bankfig .tt .r i{min-width:64px;font-size:15px}
+    .bankfig .term span{font-size:clamp(20px,4.6cqi,34px)}
+    html[lang=en] .bankfig .term span{font-size:clamp(18px,3.6cqi,26px)}
+    .bankfig .eqrow .num{font-size:clamp(18px,3.4cqi,24px)}
+    .bankfig .eqrow .num.up,.bankfig .eqrow .num.dn{font-size:clamp(19px,3.6cqi,26px)}
+  }
+  /* 보통(380~559px): 여백 · 간격을 줄이고 증감은 작은 글로 바로 옆에 */
+  @container (min-width:380px) and (max-width:559.98px){
+    .bankfig .tt{font-size:clamp(14px,3.8cqi,19px);line-height:1.5}
+    .bankfig .tt>div{padding:6px 8px 4px}
+    .bankfig .tt .h{font-size:11.5px;letter-spacing:.04em}
+    .bankfig .tt .r{column-gap:6px;padding:0 2px}
+    .bankfig .tt .r i{min-width:0;font-size:12px}
+    .bankfig .term span,html[lang=en] .bankfig .term span{font-size:clamp(14px,3.8cqi,21px)}
+    .bankfig .term i{font-size:11px}
+    .bankfig .eqrow{gap:2px 6px}
+    .bankfig .eqrow .kop{font-size:22px;padding-bottom:2px}
+    .bankfig .eqrow .num,.bankfig .eqrow .num.up,.bankfig .eqrow .num.dn{font-size:clamp(14px,3.7cqi,20px);padding:2px}
+  }
+  /* 좁음(~379px): 증감은 숫자 아래 줄로 내린다 — 이름 · 숫자 · 증감이 한 줄에서 겹치지 않게 */
+  @container (max-width:379.98px){
+    .bankfig .tt{font-size:clamp(13px,4.4cqi,16px);line-height:1.45}
+    .bankfig .tt>div{padding:6px 6px 4px}
+    .bankfig .tt .h{font-size:10.5px;letter-spacing:.02em}
+    .bankfig .tt .r{grid-template-columns:minmax(0,1fr) auto;column-gap:4px;padding:0 2px}
+    .bankfig .tt .r i{grid-column:2;min-width:0;font-size:11px;line-height:1.3}
+    .bankfig .tt .r i:empty{display:none}
+    .bankfig .term span,html[lang=en] .bankfig .term span{font-size:clamp(12.5px,4.2cqi,15px)}
+    .bankfig .term i{font-size:10px}
+    .bankfig .eqrow{gap:2px 3px}
+    .bankfig .eqrow .kop{font-size:18px;padding-bottom:2px}
+    .bankfig .eqrow .kop2{font-size:12px}
+    .bankfig .eqrow .num,.bankfig .eqrow .num.up,.bankfig .eqrow .num.dn{font-size:clamp(12px,4cqi,15px);padding:2px 0}
+    .bankfig .eqdetail{font-size:13px}
+    .bankfig .tnote{font-size:12.5px}
+  }
 </style>
 </head>
 <body>
@@ -378,7 +444,7 @@
       <div class="eq">
         <span class="f">통화량 M = 지준 × 1/R</span>
         <span class="f">필요지준 = R × 예금</span>
-        <small>R = 지급준비율. 사람들은 현금을 들고 있지 않고(모두 예금), 은행은 초과지준 없이 나머지를 모두 대출한다고 본다(SA 10 · 11 의 가정).</small>
+        <small>R = 지급준비율. 본원통화 = 현금 + 지준. 은행은 초과지준 없이 나머지를 모두 대출하고, 사람들은 돈을 예금으로 둔다고 본다(SA 10 · 11 의 가정).</small>
       </div>
       <div class="opts" id="o29"><h3>사건 <small>· 다시 누르면 풀림</small></h3><ul></ul></div>
     </div>
@@ -397,6 +463,8 @@
         <span class="f">M × V = P × Y</span>
         <span class="f">화폐가치 = 1 / P</span>
         <small>MS 는 Fed 가 정해 수직. MD 는 화폐가치가 낮을수록(물가가 높을수록) 더 많은 돈이 필요해 우하향. V · Y 가 그대로면 M 이 늘어난 비율만큼 P 가 오른다(화폐 수량설, 화폐 중립성).</small>
+        <span class="f">피셔 효과: i = r + π</span>
+        <small>명목이자율 i = 실질이자율 r + 인플레이션율 π. 장기에 통화 증가율이 높아져 π 가 오르면 i 도 같은 폭으로 오르고, r 은 그대로다.</small>
       </div>
       <div class="opts" id="o30"><h3>사건 <small>· 다시 누르면 풀림</small></h3><ul></ul></div>
     </div>
@@ -426,9 +494,19 @@
       <div id="side33as" hidden>
         <h2><small>Ch33 Aggregate Supply</small>AS 를 움직이는 것</h2>
         <div class="eq">
-          <span class="f">단기: Y = Y* + α(P − Pe)</span>
-          <span class="f">장기: Y* = f(L, K, H, N, 기술)</span>
-          <small>Pe · 명목임금 · 원가는 SRAS 만, 노동 · 자본 · 자원 · 기술은 LRAS(와 SRAS)를 옮긴다. 통화량은 LRAS 를 바꾸지 못한다.</small>
+          <span class="f">단기: Y = Y* + a(P − P<sup>e</sup>)</span>
+          <span class="f">장기: Y* = A · F(L, K, H, N)</span>
+          <small>Y* = 자연산출량, P<sup>e</sup> = 기대물가, A = 기술. P<sup>e</sup> · 명목임금 · 원가는 SRAS 만, 노동 · 자본 · 자원 · 기술은 LRAS(와 SRAS)를 옮긴다. 통화량은 LRAS 를 바꾸지 못한다.</small>
+          <details class="drop">
+            <summary><span>SRAS 가 우상향하는 이유 (Why SRAS slopes upward)</span></summary>
+            <p>세 이론 모두 P 가 P<sup>e</sup> 와 다르면 산출이 Y* 에서 벗어난다고 본다. P 가 P<sup>e</sup> 보다 낮아지면:</p>
+            <ol>
+              <li><b>임금 경직성 이론</b> — 명목임금은 P<sup>e</sup> 에 맞춰 정해져 있어 실질임금이 너무 높다 → 기업이 고용을 줄인다 → Y ↓.</li>
+              <li><b>가격 경직성 이론</b> — 메뉴 비용 때문에 일부 가격이 내려가지 않는다 → 그 기업들의 가격이 너무 높다 → 판매 ↓ → Y ↓.</li>
+              <li><b>착각 이론</b> — 공급자가 물가 하락을 자기 상품의 상대가격 하락으로 착각한다 → 생산을 줄인다 → Y ↓.</li>
+            </ol>
+            <p>장기에는 임금 · 가격 · 인식이 조정되어(P<sup>e</sup> 가 P 를 따라잡아) Y 가 Y* 로 돌아오므로 LRAS 는 수직이다.</p>
+          </details>
         </div>
         <div class="opts" data-o="SR"><h3>SRAS 만 이동</h3><ul></ul></div>
         <div class="opts" data-o="LR"><h3>LRAS 와 SRAS 함께 이동</h3><ul></ul></div>
@@ -450,6 +528,11 @@
         <div class="eq">
           <span class="f">실업 = 일하려는 사람 L<sub>S</sub> − 기업이 원하는 사람 L<sub>D</sub></span>
           <small>임금이 균형임금 W<sub>E</sub> 이면 일하려는 사람과 기업이 원하는 사람이 같아 이 그림에서는 실업이 없다. 최저임금 · 노동조합 · 효율임금은 임금을 W<sub>E</sub> 보다 높게 묶어 그 차이만큼 실업을 남긴다(구조적 실업).</small>
+          <details class="drop">
+            <summary><span>W<sub>E</sub> 에서도 남는 실업: 마찰적 실업</span></summary>
+            <p><b>마찰적 실업</b> — 임금이 W<sub>E</sub> 여도 노동자가 자기에게 맞는 일자리를 찾는 데 시간이 걸린다. 산업 간 수요 이동(sectoral shift)과 실업보험은 구직 기간을 늘린다.</p>
+            <p><b>자연실업률</b> = 마찰적 실업 + 구조적 실업, 경제가 평소에 갖는 실업률. <b>경기적 실업</b> = 경기 변동에 따라 자연실업률에서 벗어난 부분.</p>
+          </details>
         </div>
         <div class="opts" id="o28"><h3>임금 · 노동 수요 <small>· 다시 누르면 풀림</small></h3><ul></ul></div>
       </div>
