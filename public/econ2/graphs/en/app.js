@@ -574,7 +574,7 @@
     function formula(ev) {
       const nRes = $('#nRes'), nR = $('#nR'), nM = $('#nM');
       $('#mLab').textContent = ev && ev.dep ? 'Deposits' : 'Money supply'; $('#mLabEn').textContent = '';
-      $('#k29d').innerHTML = ev ? ev.d.split(' — ').map((x) => '<span class="dl">' + x.split(' → ').map((u, k) => '<span class="u">' + (k ? '→ ' : '') + arrows(u).replace(/==(.+?)==/g, '<mark>$1</mark>').replace(/\*\*(.+?)\*\*/g, '<b>$1</b>') + '</span>').join(' ') + '</span>').join('') : '';
+      $('#k29d').innerHTML = ev ? ev.d.split(' ¶ ').map((p) => '<span class="dp">' + p.split(' — ').map((x) => '<span class="dl">' + x.split(' → ').map((u, k) => '<span class="u">' + (k ? '→ ' : '') + arrows(u).replace(/==(.+?)==/g, '<mark>$1</mark>').replace(/\*\*(.+?)\*\*/g, '<b>$1</b>') + '</span>').join(' ') + '</span>').join('') + '</span>').join('') : '';
       if (!ev) { nRes.className = nR.className = nM.className = 'num'; nRes.textContent = money(RES0); nR.textContent = fmt(1 / R0); nM.textContent = money(RES0 / R0); return; }
       const R1 = ev.R || R0, dRes = ev.dRes || 0, dM = (RES0 + dRes) / R1 - RES0 / R0;
       nRes.className = 'num' + (dRes > 0 ? ' up' : dRes < 0 ? ' dn' : ''); nRes.textContent = dRes ? sgn(dRes) : money(RES0);
@@ -595,13 +595,13 @@
     }
     const mode = (cap) => { $('#k29').hidden = cap; $('#k29d').hidden = cap; $('#tacct').hidden = !cap; };
     // d: 식 아래 작은 글(세부). dRes: Reserves 변화분, R: 새 지급준비율, dep: Result 항을 '예금'으로
-    // d 의 ' — ' 는 내용 단위 줄바꿈(다음 줄이 '→ ' 로 시작하면 앞 줄에서 이어짐), ' → ' 조각은 통째로 넘어간다. ==…== 는 형광펜 강조, **…** 는 굵게(정답)
+    // d 의 ' ¶ ' 는 문단 나눔, ' — ' 는 내용 단위 줄바꿈(다음 줄이 '→ ' 로 시작하면 앞 줄에서 이어짐), ' → ' 조각은 통째로 넘어간다. ==…== 는 형광펜 강조, **…** 는 굵게(정답)
     const EV = [
       { t: 'Reserve ratio raised 10% → 20%', q: 'SA 10', dir: 'l', R: 0.2, d: 'R 10% → 20% → multiplier 1/R 10 → 5 — Money supply = $100 × 5 = $500 → **−$500**' },
       { t: 'Reserve ratio cut 10% → 5%', dir: 'r', R: 0.05, d: 'R 10% → 5% → multiplier 1/R 10 → 20 — Money supply = $100 × 20 = $2,000 → **+$1,000**' },
       { t: 'Banks hold more excess reserves', dir: 'l', R: 0.2, d: 'Banks keep reserves beyond the requirement — → reserve ratio R 10% → 20% → multiplier 10 → 5 — Money supply → **−$500**' },
-      { t: 'Deposits up $100', dir: 'r', dRes: 100, dep: true, d: 'The $100 is ==currency people already held== = ==part of the monetary base== — → already counted in the money supply — Deposited: currency −$100 → reserves +$100 (monetary base unchanged) — → deposits +$1,000 — Money supply = +$1,000 deposits − $100 currency = **+$900**' },
-      { t: 'Withdrawal of $50', dir: 'l', dRes: -50, dep: true, d: 'The $50 ==stays in the monetary base== — it only moves from reserves to currency — Withdrawn: reserves −$50 → deposits −$500 — Money supply = −$500 deposits + $50 currency = **−$450**' },
+      { t: 'Deposits up $100', dir: 'r', dRes: 100, dep: true, d: 'The $100 is ==currency people already held== = ==part of the monetary base== — → already counted in the money supply ¶ Deposited: currency −$100 → reserves +$100 (monetary base unchanged) — → deposits +$1,000 ¶ Money supply = +$1,000 deposits − $100 currency = **+$900**' },
+      { t: 'Withdrawal of $50', dir: 'l', dRes: -50, dep: true, d: 'The $50 ==stays in the monetary base== — it only moves from reserves to currency ¶ Withdrawn: reserves −$50 → deposits −$500 ¶ Money supply = −$500 deposits + $50 currency = **−$450**' },
       { t: 'Fed buys $100 of bonds', q: 'SA 11', dir: 'r', dRes: 100, d: 'Fed pays with new money → ==monetary base +$100== → bank reserves +$100 — No currency was taken out of circulation — → money supply = **+$1,000**' },
       { t: 'Fed sells $50 of bonds', dir: 'l', dRes: -50, d: 'Fed takes money out → ==monetary base −$50== → bank reserves −$50 — Money supply = **−$500**' },
       { t: 'Fed lends $100 to banks (discount rate cut)', dir: 'r', dRes: 100, d: 'Lower discount rate → banks borrow $100 from the Fed — → ==monetary base +$100== → bank reserves +$100 — Money supply = **+$1,000**' },
@@ -855,8 +855,8 @@
       const res = (dd, on) => (on ? wordOf(dd, ['up', 'down']) : '<span class="q">?</span>');
       $('#rates').innerHTML =
         '<div class="who' + hi(1) + '"><span class="lb">Population</span>' + chip('E') + chip('U') + chip('N') + '</div>' +
-        '<div class="rate"><span class="nm">Unemployment rate</span><span class="frac"><span class="' + hi(3) + '">' + part(['U'], d('U'), lv >= 3) + '</span><span class="' + hi(3) + '">' + part(['E', 'U'], dLF, lv >= 3) + '</span></span><span class="eqs">=</span><span class="res' + hi(4) + '">' + res(dUR, lv >= 4) + '</span></div>' +
-        '<div class="rate"><span class="nm">Participation rate</span><span class="frac"><span class="' + hi(6) + '">' + part(['E', 'U'], dLF, lv >= 6) + '</span><span class="' + hi(6) + '">' + one('Adult population', dPop, lv >= 6) + '</span></span><span class="eqs">=</span><span class="res' + hi(7) + '">' + res(dLFr, lv >= 7) + '</span></div>';
+        '<div class="rate"><span class="nm">Unemployment rate</span><span class="frac"><span class="' + hi(3) + '">' + part(['U'], d('U'), lv >= 3) + '</span><span class="' + hi(3) + '">' + part(['E', 'U'], dLF, lv >= 3) + '</span></span><span class="out"><span class="eqs">=</span><span class="res' + hi(4) + '">' + res(dUR, lv >= 4) + '</span></span></div>' +
+        '<div class="rate"><span class="nm">Participation rate</span><span class="frac"><span class="' + hi(6) + '">' + part(['E', 'U'], dLF, lv >= 6) + '</span><span class="' + hi(6) + '">' + one('Adult population', dPop, lv >= 6) + '</span></span><span class="out"><span class="eqs">=</span><span class="res' + hi(7) + '">' + res(dLFr, lv >= 7) + '</span></span></div>';
     }
     let rt = [];
     const stopR = () => { rt.forEach(clearTimeout); rt = []; rk.stop(); };
@@ -873,8 +873,10 @@
       const dLF = (m.E || 0) + (m.U || 0), dPop = dLF + (m.N || 0);
       const moved = Object.keys(m).map((k) => NM[k] + ' ' + (m[k] > 0 ? '↑' : '↓')).join(' · ');
       return [
-        { g: s.t, sit: moved, k: 'Unemployment rate ' + arrow(dirOf(ur(B), ur(v), 1e-9)) + ' · Participation ' + arrow(dirOf(lf(B), lf(v), 1e-9)),
-          t: 'Unemployed ' + arrow(m.U || 0) + ' · Labor force ' + arrow(dLF) + ' · Adult population ' + arrow(dPop), run: stage(m, [1, 3, 4, 6, 7]), wait: 3.6 }
+        { g: s.t, sit: moved, k: 'Unemployment rate ' + arrow(dirOf(ur(B), ur(v), 1e-9)),
+          t: 'Unemployed ' + arrow(m.U || 0) + ' · Labor force ' + arrow(dLF), run: stage(m, [1, 3, 4]), wait: 2.2 },
+        { g: s.t, sit: moved, k: 'Participation rate ' + arrow(dirOf(lf(B), lf(v), 1e-9)),
+          t: 'Labor force ' + arrow(dLF) + ' · Adult population ' + arrow(dPop), run: stage(m, [6, 7]), wait: 2.2 }
       ];
     }
     list($('#o28s'), SIT, (i) => { sit = i < 0 ? null : SIT[i]; if (i < 0) { pl2.clear(); stopR(); rates({}, 0); } else pl2.load(beats(SIT[i])); });

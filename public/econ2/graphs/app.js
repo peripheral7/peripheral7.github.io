@@ -574,7 +574,7 @@
     function formula(ev) {
       const nRes = $('#nRes'), nR = $('#nR'), nM = $('#nM');
       $('#mLab').textContent = ev && ev.dep ? '예금' : '통화량'; $('#mLabEn').textContent = ev && ev.dep ? 'Deposits' : 'Money supply';
-      $('#k29d').innerHTML = ev ? ev.d.split(' — ').map((x) => '<span class="dl">' + x.split(' → ').map((u, k) => '<span class="u">' + (k ? '→ ' : '') + arrows(u).replace(/==(.+?)==/g, '<mark>$1</mark>').replace(/\*\*(.+?)\*\*/g, '<b>$1</b>') + '</span>').join(' ') + '</span>').join('') : '';
+      $('#k29d').innerHTML = ev ? ev.d.split(' ¶ ').map((p) => '<span class="dp">' + p.split(' — ').map((x) => '<span class="dl">' + x.split(' → ').map((u, k) => '<span class="u">' + (k ? '→ ' : '') + arrows(u).replace(/==(.+?)==/g, '<mark>$1</mark>').replace(/\*\*(.+?)\*\*/g, '<b>$1</b>') + '</span>').join(' ') + '</span>').join('') + '</span>').join('') : '';
       if (!ev) { nRes.className = nR.className = nM.className = 'num'; nRes.textContent = money(RES0); nR.textContent = fmt(1 / R0); nM.textContent = money(RES0 / R0); return; }
       const R1 = ev.R || R0, dRes = ev.dRes || 0, dM = (RES0 + dRes) / R1 - RES0 / R0;
       nRes.className = 'num' + (dRes > 0 ? ' up' : dRes < 0 ? ' dn' : ''); nRes.textContent = dRes ? sgn(dRes) : money(RES0);
@@ -595,13 +595,13 @@
     }
     const mode = (cap) => { $('#k29').hidden = cap; $('#k29d').hidden = cap; $('#tacct').hidden = !cap; };
     // d: 식 아래 작은 글(세부). dRes: 지준 변화분, R: 새 지급준비율, dep: 결과 항을 '예금'으로
-    // d 의 ' — ' 는 내용 단위 줄바꿈(다음 줄이 '→ ' 로 시작하면 앞 줄에서 이어짐), ' → ' 조각은 통째로 넘어간다. ==…== 는 형광펜 강조, **…** 는 굵게(정답)
+    // d 의 ' ¶ ' 는 문단 나눔, ' — ' 는 내용 단위 줄바꿈(다음 줄이 '→ ' 로 시작하면 앞 줄에서 이어짐), ' → ' 조각은 통째로 넘어간다. ==…== 는 형광펜 강조, **…** 는 굵게(정답)
     const EV = [
       { t: '지급준비율 인상 10% → 20%', q: 'SA 10', dir: 'l', R: 0.2, d: 'R 10% → 20% → 승수 1/R 10 → 5 — 통화량 = $100 × 5 = $500 → **−$500**' },
       { t: '지급준비율 인하 10% → 5%', dir: 'r', R: 0.05, d: 'R 10% → 5% → 승수 1/R 10 → 20 — 통화량 = $100 × 20 = $2,000 → **+$1,000**' },
       { t: '은행이 초과지준을 더 보유', dir: 'l', R: 0.2, d: '은행이 필요지준보다 더 쌓음 — → 지급준비율 R 10% → 20% → 승수 10 → 5 — 통화량 → **−$500**' },
-      { t: '예금 $100 증가', dir: 'r', dRes: 100, dep: true, d: '이 $100 은 ==사람들이 이미 들고 있던 현금== = ==본원통화의 일부== — → 이미 통화량에 들어 있다 — 예금: 현금 −$100 → 지준 +$100 (본원통화 그대로) — → 예금 +$1,000 — 통화량 = 예금 +$1,000 − 현금 $100 = **+$900**' },
-      { t: '예금 $50 인출', dir: 'l', dRes: -50, dep: true, d: '이 $50 은 ==본원통화 안에 그대로== — 지준에서 현금으로 자리만 옮긴다 — 인출: 지준 −$50 → 예금 −$500 — 통화량 = 예금 −$500 + 현금 $50 = **−$450**' },
+      { t: '예금 $100 증가', dir: 'r', dRes: 100, dep: true, d: '이 $100 은 ==사람들이 이미 들고 있던 현금== = ==본원통화의 일부== — → 이미 통화량에 들어 있다 ¶ 예금: 현금 −$100 → 지준 +$100 (본원통화 그대로) — → 예금 +$1,000 ¶ 통화량 = 예금 +$1,000 − 현금 $100 = **+$900**' },
+      { t: '예금 $50 인출', dir: 'l', dRes: -50, dep: true, d: '이 $50 은 ==본원통화 안에 그대로== — 지준에서 현금으로 자리만 옮긴다 ¶ 인출: 지준 −$50 → 예금 −$500 ¶ 통화량 = 예금 −$500 + 현금 $50 = **−$450**' },
       { t: 'Fed 채권 매입 $100', q: 'SA 11', dir: 'r', dRes: 100, d: 'Fed 가 새 돈으로 지불 → ==본원통화 +$100== → 은행 지준 +$100 — 줄어든 현금이 없으므로 통화량 = **+$1,000**' },
       { t: 'Fed 채권 매각 $50', dir: 'l', dRes: -50, d: 'Fed 가 돈을 거둬들임 → ==본원통화 −$50== → 은행 지준 −$50 — 통화량 = **−$500**' },
       { t: 'Fed 가 은행에 $100 대출 (재할인율 인하)', dir: 'r', dRes: 100, d: '재할인율 ↓ → 은행이 Fed 에서 $100 차입 — → ==본원통화 +$100== → 은행 지준 +$100 — 통화량 = **+$1,000**' },
@@ -855,8 +855,8 @@
       const res = (dd, on) => (on ? wordOf(dd, ['상승', '하락']) : '<span class="q">?</span>');
       $('#rates').innerHTML =
         '<div class="who' + hi(1) + '"><span class="lb">인구</span>' + chip('E') + chip('U') + chip('N') + '</div>' +
-        '<div class="rate"><span class="nm">실업률</span><span class="frac"><span class="' + hi(3) + '">' + part(['U'], d('U'), lv >= 3) + '</span><span class="' + hi(3) + '">' + part(['E', 'U'], dLF, lv >= 3) + '</span></span><span class="eqs">=</span><span class="res' + hi(4) + '">' + res(dUR, lv >= 4) + '</span></div>' +
-        '<div class="rate"><span class="nm">경제활동참가율</span><span class="frac"><span class="' + hi(6) + '">' + part(['E', 'U'], dLF, lv >= 6) + '</span><span class="' + hi(6) + '">' + one('성인 인구', dPop, lv >= 6) + '</span></span><span class="eqs">=</span><span class="res' + hi(7) + '">' + res(dLFr, lv >= 7) + '</span></div>';
+        '<div class="rate"><span class="nm">실업률</span><span class="frac"><span class="' + hi(3) + '">' + part(['U'], d('U'), lv >= 3) + '</span><span class="' + hi(3) + '">' + part(['E', 'U'], dLF, lv >= 3) + '</span></span><span class="out"><span class="eqs">=</span><span class="res' + hi(4) + '">' + res(dUR, lv >= 4) + '</span></span></div>' +
+        '<div class="rate"><span class="nm">경제활동참가율</span><span class="frac"><span class="' + hi(6) + '">' + part(['E', 'U'], dLF, lv >= 6) + '</span><span class="' + hi(6) + '">' + one('성인 인구', dPop, lv >= 6) + '</span></span><span class="out"><span class="eqs">=</span><span class="res' + hi(7) + '">' + res(dLFr, lv >= 7) + '</span></span></div>';
     }
     let rt = [];
     const stopR = () => { rt.forEach(clearTimeout); rt = []; rk.stop(); };
@@ -873,8 +873,10 @@
       const dLF = (m.E || 0) + (m.U || 0), dPop = dLF + (m.N || 0);
       const moved = Object.keys(m).map((k) => NM[k] + ' ' + (m[k] > 0 ? '↑' : '↓')).join(' · ');
       return [
-        { g: s.t, sit: moved, k: '실업률 ' + arrow(dirOf(ur(B), ur(v), 1e-9)) + ' · 참가율 ' + arrow(dirOf(lf(B), lf(v), 1e-9)),
-          t: '실업자 ' + arrow(m.U || 0) + ' · 경제활동인구 ' + arrow(dLF) + ' · 성인 인구 ' + arrow(dPop), run: stage(m, [1, 3, 4, 6, 7]), wait: 3.6 }
+        { g: s.t, sit: moved, k: '실업률 ' + arrow(dirOf(ur(B), ur(v), 1e-9)),
+          t: '실업자 ' + arrow(m.U || 0) + ' · 경제활동인구 ' + arrow(dLF), run: stage(m, [1, 3, 4]), wait: 2.2 },
+        { g: s.t, sit: moved, k: '참가율 ' + arrow(dirOf(lf(B), lf(v), 1e-9)),
+          t: '경제활동인구 ' + arrow(dLF) + ' · 성인 인구 ' + arrow(dPop), run: stage(m, [6, 7]), wait: 2.2 }
       ];
     }
     list($('#o28s'), SIT, (i) => { sit = i < 0 ? null : SIT[i]; if (i < 0) { pl2.clear(); stopR(); rates({}, 0); } else pl2.load(beats(SIT[i])); });

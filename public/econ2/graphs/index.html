@@ -68,7 +68,6 @@
   /* 큰 탭(AD · AS, 균형임금 · 실업률): 고른 탭은 진한 바탕 흰 글자 */
   .sub{display:flex;flex-wrap:wrap;gap:8px;min-width:0}
   .sub button{flex:0 1 auto;min-width:0;padding:9px 18px;border:2px solid var(--ink);border-radius:10px;background:#fff;font-size:16.5px;font-weight:800;color:var(--ink);cursor:pointer}
-  .sub button small{margin-left:6px;font-size:13px;font-weight:700;opacity:.75}
   .sub button:hover:not([aria-selected="true"]){background:var(--tint)}
   .sub button[aria-selected="true"]{background:var(--ink);color:#fff}
 
@@ -158,6 +157,8 @@
   .eq mark{padding:0 3px;border-radius:4px;background:#fff3b0;color:var(--ink)}   /* 핵심 문장: 형광펜 + 굵게 */
   .eqdetail .dl{display:block}
   .eqdetail .dl + .dl{margin-top:4px}
+  .eqdetail .dp{display:block}
+  .eqdetail .dp + .dp{margin-top:14px}   /* 문단(¶) 사이 */
   .eqdetail .u{display:inline-block;max-width:100%}   /* ' → ' 조각은 통째로 다음 줄로 */
   .eqdetail mark{padding:0 3px;border-radius:4px;background:#fff3b0;color:var(--ink)}
   .eqdetail b{color:var(--ink);font-weight:800}
@@ -267,16 +268,17 @@
   .rate .nm{font-weight:800}
   .rate .eqs{font-weight:700;color:var(--soft)}
   .frac{display:inline-flex;flex-direction:column;align-items:stretch;min-width:0;text-align:center;line-height:1.35}
-  .frac>span{padding:3px 8px;border-radius:6px;transition:background .3s}
+  .frac>span{padding:6px 16px;border-radius:6px;transition:background .3s}   /* 분수: 분자 · 분모 위아래 · 좌우 여백 */
   .frac>span:first-child{border-bottom:2px solid var(--ink);border-radius:6px 6px 0 0}
   .frac .sum{display:inline-block;margin-left:6px;font-size:13.5px;font-weight:800;white-space:nowrap}
   .rate .res{justify-self:start;padding:2px 8px;border-radius:6px;font-size:19px;font-weight:800;transition:background .3s}
   .rate .res .q{color:#b3b8c2}
   .rate .res{white-space:nowrap}
   /* 이름은 분수 위 한 줄, 분수 · = · 결과는 칸이 모자라면 다음 줄로(겹치지 않게) */
-  .rates .rate{display:flex;flex-wrap:wrap;align-items:center;gap:4px 12px}
+  .rates .rate{display:flex;flex-wrap:wrap;align-items:center;gap:8px 18px}
   .rates .rate .nm{flex:0 0 100%}
   .rates .frac{flex:0 1 auto;min-width:0}
+  .rates .out{display:inline-flex;align-items:center;gap:12px;white-space:nowrap}   /* '=' 과 결과는 함께 줄바꿈 */
   .rates .hi{background:#dbe8fb}
   .t{font-weight:700}
   .t b{margin-left:2px}
@@ -291,7 +293,6 @@
     .ch.tabbed{grid-template-areas:"tabs" "fig" "play" "side"}
 
     .sub button{flex:1;min-width:0;padding:9px 6px;font-size:15.5px}
-    .sub button small{display:block;margin:0}
     .kdir{font-size:17px}
     .kt{font-size:17px}
     .keys{gap:6px}
@@ -482,7 +483,7 @@
 
   <!-- Ch33: AD · AS 큰 탭 | 그래프 + 지표 상자 | 설명 · 사건 / 걸음 카드 -->
   <section class="ch tabbed" id="c33" aria-label="Ch33 AD–AS">
-    <div class="sub" role="tablist" aria-label="AD · AS"><button role="tab" data-sub="ad">AD<small>총수요</small></button><button role="tab" data-sub="as">AS<small>총공급</small></button></div>
+    <div class="sub" role="tablist" aria-label="AD · AS"><button role="tab" data-sub="ad">AD</button><button role="tab" data-sub="as">AS</button></div>
     <div class="fig">
       <div class="stage" id="plot33ad"></div>
       <div class="stage" id="plot33as" hidden></div>
@@ -526,7 +527,7 @@
 
   <!-- Ch28: 균형임금 · 실업률 큰 탭, 한 번에 하나. 각 탭은 왼쪽 그림 + 지표 상자 | 오른쪽 설명 · 목록 / 걸음 카드 -->
   <section class="ch tabbed" id="c28" aria-label="Ch28 실업">
-    <div class="sub" role="tablist" aria-label="균형임금 · 실업률"><button role="tab" data-sub="w">균형임금<small>노동시장</small></button><button role="tab" data-sub="u">실업률<small>경제활동참가율</small></button></div>
+    <div class="sub" role="tablist" aria-label="균형임금 · 실업률"><button role="tab" data-sub="w">균형임금</button><button role="tab" data-sub="u">실업률</button></div>
     <div class="panel" id="p28w">
       <div class="fig">
         <div class="stage" id="plot28"></div>
