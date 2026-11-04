@@ -10,8 +10,8 @@ const get = async (id) => {
 const range = (rows, a, b) => rows.filter(([d]) => d >= a && d <= b);
 const r2 = (x) => Math.round(x * 100) / 100;
 
-const [base, m2, wl] = await Promise.all(['BOGMBASE', 'M2SL', 'WLCFLPCL'].map(get));
-const M2 = new Map(m2);
+const [base, m2, wl, cpi, m2v] = await Promise.all(['BOGMBASE', 'M2SL', 'WLCFLPCL', 'CPIAUCSL', 'M2V'].map(get));
+const M2 = new Map(m2), CPI = new Map(cpi);
 // 통화승수(넓은 뜻) = M2 ÷ 본원통화, 월별
 const mult = base.filter(([d]) => d >= '2000-01-01' && M2.has(d)).map(([d, b]) => [d.slice(0, 7), r2(M2.get(d) / b)]);
 // QE: 2008-08 = 100 으로 맞춘 본원통화 · M2
@@ -20,6 +20,12 @@ const qe = range(base, '2006-01-01', '2016-12-01').map(([d, b]) => [d.slice(0, 7
 // 재할인 창구(primary credit) 대출, 주별, 십억 달러
 const dw = range(wl, '2019-01-01', '2024-06-30').map(([d, v]) => [d, Math.round(v / 100) / 10]);
 
-const out = { source: 'FRED, Federal Reserve Bank of St. Louis', fetched: new Date().toISOString().slice(0, 10), mult, qe, dw };
+// Ch30: M2 · CPI 전년 같은 달 대비 %, 월별
+const yoy = (m, d) => { const p = (+d.slice(0, 4) - 1) + d.slice(4); return m.has(p) ? Math.round((m.get(d) / m.get(p) - 1) * 1000) / 10 : null; };
+const grow = m2.filter(([d]) => d >= '2015-01-01' && CPI.has(d)).map(([d]) => [d.slice(0, 7), yoy(M2, d), yoy(CPI, d)]);
+// Ch30: M2 유통속도(명목 GDP ÷ M2), 분기별
+const vel = m2v.filter(([d]) => d >= '1960-01-01').map(([d, v]) => [d.slice(0, 7), r2(v)]);
+
+const out = { source: 'FRED, Federal Reserve Bank of St. Louis', fetched: new Date().toISOString().slice(0, 10), mult, qe, dw, grow, vel };
 writeFileSync(new URL('../public/econ2/graphs/real-data.json', import.meta.url), JSON.stringify(out));
-console.log('mult', mult.length, 'qe', qe.length, 'dw', dw.length);
+console.log('mult', mult.length, 'qe', qe.length, 'dw', dw.length, 'grow', grow.length, 'vel', vel.length);

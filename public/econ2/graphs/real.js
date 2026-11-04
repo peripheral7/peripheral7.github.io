@@ -11,9 +11,9 @@
   const put = (v) => { try { localStorage.setItem(KEY, v); } catch (e) { /* no storage */ } };
 
   /* ───────── 사례 ───────── */
-  // m 버튼 · q 질문 · opts/ans 선택 · v 공개 · chart · th · src(k d t s u)
+  // 장 번호별 · m 버튼 · q 질문 · opts/ans 선택 · v 공개 · chart(marks: [날짜, 선, 글, 'below'?]) · th · src(k d t s u)
   const FED = 'https://www.federalreserve.gov/';
-  const CASES = [
+  const CASES = { 29: [
     {
       m: /^Reserve ratio cut/, when: 'March 2020 · United States', title: 'The Fed cut the reserve requirement to 0%',
       q: 'In March 2020 the Fed cut the required reserve ratio to 0%. In the model, the multiplier 1/R would explode. What happened to the money multiplier (M2 ÷ monetary base) over the next month?',
@@ -60,7 +60,42 @@
         { k: 'News', d: 'Mar 12, 2023', by: 'Treasury, Federal Reserve and FDIC', t: 'Joint statement on Silicon Valley Bank and Signature Bank', s: 'All depositors of the two failed banks would be protected, and the Fed opened a new Bank Term Funding Program lending to banks for up to one year.', u: FED + 'newsevents/pressreleases/monetary20230312a.htm' }
       ]
     }
-  ];
+  ], 30: [
+    {
+      m: /^Fed doubles/, when: '2020–2022 · United States', title: 'Pandemic money surge, then a 40-year high in inflation',
+      q: 'M2 grew 27% in the year to February 2021 — the fastest since records began in 1959. In the model, more money means a higher price level. When did CPI inflation peak?',
+      opts: ['Right away, in 2020', 'About 4 months later (mid-2021)', 'About 16 months later (mid-2022)'], ans: 2,
+      v: 'In June 2022, at 9.0% (9.1% before seasonal adjustment) — the highest since 1981.',
+      chart: { k: 'grow', from: '2015-01', to: '2025-12', marks: [['2021-02', 0, '27%'], ['2022-06', 1, '9.0%']], names: ['M2 growth', 'CPI inflation'], y: '% change from a year earlier', cap: 'M2SL and CPIAUCSL, monthly, % change from a year earlier' },
+      th: 'Direction: right — ==money grew fast and prices followed, with a lag of more than a year==. Size: smaller than M × V = P × Y alone suggests. From Feb 2020 to Feb 2022 M2 rose 40% but consumer prices only 10%, because V fell: people held on to the extra money (see "Credit cards spread").',
+      src: [
+        { k: 'News', d: 'Jul 13, 2022', by: 'U.S. Bureau of Labor Statistics', t: 'Consumer Price Index — June 2022', s: 'The all-items CPI rose 9.1% over the 12 months to June 2022, the largest 12-month increase since 1981.', u: 'https://www.bls.gov/news.release/archives/cpi_07132022.htm' },
+        { k: 'Research', d: '1995', by: 'McCandless & Weber, Minneapolis Fed Quarterly Review', t: 'Some Monetary Facts', s: 'Using up to 30 years of data for 110 countries, long-run money growth and inflation move almost one for one — the quantity theory works best over long periods.', u: 'https://www.minneapolisfed.org/research/qr/qr1931.pdf' }
+      ]
+    },
+    {
+      m: /^Fed cuts the money supply/, when: '2022–2023 · United States', title: 'M2 shrank for the first time on record',
+      q: 'From March 2022 to October 2023, M2 fell 4.9% — its first decline since records began in 1959. In the model, less money means a lower price level. What happened to consumer prices (CPI)?',
+      opts: ['Fell about 5%', 'Stayed about the same', 'Kept rising, about +7%'], ans: 2,
+      v: 'Prices rose 7.0% — but inflation slowed from 9% to about 3%.',
+      chart: { k: 'grow', from: '2021-01', to: '2024-12', marks: [['2023-04', 0, '−4.7%', 'below'], ['2023-06', 1, '3.1%']], names: ['M2 growth', 'CPI inflation'], y: '% change from a year earlier', cap: 'M2SL and CPIAUCSL, monthly, % change from a year earlier' },
+      th: 'The model compares long-run levels. In reality ==the 5% cut came right after a 40% rise==, so money was still far above its 2020 level and the earlier surge was still reaching prices. What the cut changed was the trend: inflation fell from 9% to about 3% — the growth rate of P, not its level.',
+      src: [
+        { k: 'News', d: 'May 4, 2022', by: 'Federal Reserve', t: 'Plans for reducing the size of the Federal Reserve\'s balance sheet', s: 'From June 1, 2022 the Fed began letting its bonds mature without replacing them — the reverse of quantitative easing, shrinking the monetary base.', u: FED + 'newsevents/pressreleases/monetary20220504b.htm' }
+      ]
+    },
+    {
+      m: /^Credit cards spread/, when: '1960–2026 · United States', title: 'The velocity of money is not constant',
+      q: 'Between 1960 and 1997, credit cards, ATMs and money-market funds spread. In the model people then hold less money for the same spending, so V = P × Y ÷ M rises. What happened to M2 velocity?',
+      opts: ['Rose', 'Stayed the same', 'Fell'], ans: 0,
+      v: 'It rose, from 1.82 to 2.19 (1997). Then it fell for two decades and hit a record low of 1.13 in 2020.',
+      chart: { k: 'vel', from: '1960-01', to: '2099-12', marks: [['1960-01', 0, '1.82'], ['1997-07', 0, '2.19'], ['2020-04', 0, '1.13']], y: 'M2 velocity = nominal GDP ÷ M2', cap: 'M2V, quarterly' },
+      th: 'The direction holds — ==easier payments raised V for decades==. But the shortcut "V is stable" did not: V fell after 1997 as interest rates dropped (holding money cost less), and collapsed in 2020 when people saved instead of spending. That is why the 2020 money surge raised prices far less than M2 alone suggested.',
+      src: [
+        { k: 'Data', d: 'quarterly since 1959', by: 'Federal Reserve Bank of St. Louis (FRED)', t: 'Velocity of M2 Money Stock (M2V)', s: 'Velocity is nominal GDP divided by M2: how many times a year the average dollar is spent on final goods and services.', u: 'https://fred.stlouisfed.org/series/M2V' }
+      ]
+    }
+  ] };
 
   /* ───────── 선그래프 ───────── */
   const W = 640, H = 290, L = 52, R = 18, T = 30, B = 30;
@@ -70,14 +105,14 @@
   function chart(c, data) {
     const rows = data[c.k].filter((r) => r[0] >= c.from && r[0] <= c.to);
     const n = rows[0].length - 1, xs = rows.map((r) => yr(r[0]));
-    let ymax = 0; rows.forEach((r) => { for (let j = 1; j <= n; j++) ymax = Math.max(ymax, r[j]); });
-    const step = nice(ymax * 1.08), top = Math.ceil(ymax * 1.08 / step) * step;
+    let ymax = 0, ymin = 0; rows.forEach((r) => { for (let j = 1; j <= n; j++) { ymax = Math.max(ymax, r[j]); ymin = Math.min(ymin, r[j]); } });
+    const step = nice((ymax - ymin) * 1.08), top = Math.ceil(ymax * 1.15 / step) * step, bot = -Math.ceil(-ymin * 1.08 / step) * step;   // 음수 값이 있으면 0 아래까지
     const x0 = xs[0], x1 = xs[xs.length - 1];
-    const X = (x) => L + (x - x0) / (x1 - x0) * (W - L - R), Y = (y) => T + (1 - y / top) * (H - T - B);
+    const X = (x) => L + (x - x0) / (x1 - x0) * (W - L - R), Y = (y) => T + (top - y) / (top - bot) * (H - T - B);
     let s = '<svg viewBox="0 0 ' + W + ' ' + H + '" role="img" aria-label="' + esc(c.y) + '">';
     if (c.band) s += '<rect x="' + X(yr(c.band[0])) + '" y="' + T + '" width="' + (X(yr(c.band[1])) - X(yr(c.band[0]))) + '" height="' + (H - T - B) + '" fill="#fff3b0" opacity=".7"/>';
-    for (let v = 0; v <= top + 1e-9; v += step) s += '<line x1="' + L + '" x2="' + (W - R) + '" y1="' + Y(v) + '" y2="' + Y(v) + '" stroke="#e3e6ea"/><text x="' + (L - 8) + '" y="' + (Y(v) + 6) + '" text-anchor="end" class="ax">' + (+v.toFixed(2)) + '</text>';
-    const span = x1 - x0, ys = span > 12 ? 4 : span > 6 ? 2 : 1;
+    for (let v = bot; v <= top + 1e-9; v += step) s += '<line x1="' + L + '" x2="' + (W - R) + '" y1="' + Y(v) + '" y2="' + Y(v) + '" stroke="' + (bot < 0 && Math.abs(v) < 1e-9 ? '#8d93a0' : '#e3e6ea') + '"/><text x="' + (L - 8) + '" y="' + (Y(v) + 6) + '" text-anchor="end" class="ax">' + (+v.toFixed(2)) + '</text>';
+    const span = x1 - x0, ys = span > 40 ? 10 : span > 12 ? 4 : span > 6 ? 2 : 1;
     for (let y = Math.ceil(x0); y <= x1; y++) if (y % ys === 0) s += '<line x1="' + X(y) + '" x2="' + X(y) + '" y1="' + (H - B) + '" y2="' + (H - B + 5) + '" stroke="#8d93a0"/><text x="' + X(y) + '" y="' + (H - 6) + '" text-anchor="middle" class="ax">' + y + '</text>';
     s += '<line x1="' + L + '" x2="' + (W - R) + '" y1="' + (H - B) + '" y2="' + (H - B) + '" stroke="#1f2537" stroke-width="1.5"/>';
     if (c.vline) { const vx = X(yr(c.vline[0])); s += '<line x1="' + vx + '" x2="' + vx + '" y1="' + T + '" y2="' + (H - B) + '" stroke="#c8352e" stroke-width="2" stroke-dasharray="5 4"/><text x="' + (vx + 6) + '" y="' + (T + 14) + '" class="vl">' + esc(c.vline[1]) + '</text>'; }
@@ -87,18 +122,18 @@
     (c.marks || []).forEach((mk) => {
       const r = rows.find((q) => q[0].indexOf(mk[0]) === 0); if (!r) return;
       const px = X(yr(r[0])), py = Y(r[mk[1] + 1]), right = px > W - 120;
-      s += '<circle cx="' + px + '" cy="' + py + '" r="6" fill="#fff" stroke="' + COL[mk[1]] + '" stroke-width="3"/><text x="' + (px + (right ? -10 : 10)) + '" y="' + (py - 10) + '" text-anchor="' + (right ? 'end' : 'start') + '" class="mk">' + esc(mk[2]) + '</text>';
+      s += '<circle cx="' + px + '" cy="' + py + '" r="6" fill="#fff" stroke="' + COL[mk[1]] + '" stroke-width="3"/><text x="' + (px + (right ? -10 : 10)) + '" y="' + (mk[3] === 'below' ? py + 28 : py - 10) + '" text-anchor="' + (right ? 'end' : 'start') + '" class="mk">' + esc(mk[2]) + '</text>';
     });
     return s + '</svg>';
   }
 
   /* ───────── 카드 ───────── */
-  let data = null, cur = null;
+  let data = null;
   const fmtT = (s) => esc(s).replace(/==(.+?)==/g, '<mark>$1</mark>');
-  function render(card) {
-    const c = cur;
+  function render(card, c) {
     if (!c) { card.innerHTML = '<p class="rwnote"><span class="rwtag">Real world</span>Pick an event marked <b class="rwchip">REAL</b> to test the model against U.S. data.</p>'; return; }
-    if (c === 'none') { card.innerHTML = '<p class="rwnote"><span class="rwtag">Real world</span>No real-world case for this event yet — try one marked <b class="rwchip">REAL</b>.</p>'; return; }
+    card.hidden = c === 'none';   // 이 사건엔 현실 사례가 없으면 카드를 띄우지 않는다
+    if (c === 'none') { card.innerHTML = ''; return; }
     card.innerHTML =
       '<div class="rwhd"><span class="rwtag">Real world</span><span class="rwwhen">' + esc(c.when) + '</span></div>' +
       '<h3>' + esc(c.title) + '</h3>' +
@@ -119,21 +154,28 @@
   }
 
   /* ───────── 붙이기 ───────── */
-  function init() {
-    const sec = $('#c29'), fig = sec && $('.fig', sec), ul = $('#o29 ul');
+  // 장 하나: 그림 칸 아래 카드 + 목록 REAL 표시. redo: 데이터가 늦게 오면 답 공개 전 카드 다시 그리기
+  const redo = [];
+  function attach(n, cases) {
+    const fig = $('#c' + n + ' .fig'), ul = $('#o' + n + ' ul');
     if (!fig || !ul) return;
-    const card = document.createElement('div'); card.className = 'rwcard'; card.id = 'rw29'; card.setAttribute('aria-live', 'polite');
+    const card = document.createElement('div'); card.className = 'rwcard'; card.id = 'rw' + n; card.setAttribute('aria-live', 'polite');
     fig.appendChild(card);
-    const caseOf = (b) => CASES.find((c) => c.m.test(b.textContent.trim())) || null;
+    let cur = null;
+    const caseOf = (b) => cases.find((c) => c.m.test(b.textContent.trim())) || null;
     ul.querySelectorAll('li button').forEach((b) => { if (caseOf(b)) b.parentNode.classList.add('hasrw'); });
     // 클릭된 사건 읽기
     ul.addEventListener('click', () => {
       const b = $('button[aria-pressed="true"]', ul);
       cur = b ? caseOf(b) || 'none' : null;
-      render(card);
+      render(card, cur);
     });
-    render(card);
-    fetch('/econ2/graphs/real-data.json').then((r) => r.json()).then((d) => { data = d; if (cur && cur !== 'none' && $('.rwans', card).hidden) render(card); }).catch(() => {});
+    render(card, cur);
+    redo.push(() => { if (cur && cur !== 'none' && $('.rwans', card).hidden) render(card, cur); });
+  }
+  function init() {
+    Object.keys(CASES).forEach((n) => attach(n, CASES[n]));
+    fetch('/econ2/graphs/real-data.json?v=20261105c').then((r) => r.json()).then((d) => { data = d; redo.forEach((f) => f()); }).catch(() => {});
 
     // 모드 토글
     const links = $('.top .links'), tg = document.createElement('div');
