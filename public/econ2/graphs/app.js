@@ -314,15 +314,18 @@
       spd.textContent = '속도 ' + SPEEDS.find((x) => x[1] === SPEED)[0];
       $('[data-a="prev"]', host).disabled = i <= 0; $('[data-a="next"]', host).disabled = end;
     }
-    function idle() { ol.innerHTML = ''; draw(); }
+    function idle() { ol.innerHTML = ''; setSit(''); draw(); }
     function schedule() {
       clearTimeout(timer);
       if (!playing) return;
       if (i >= beats.length - 1) { playing = false; draw(); return; }
       timer = setTimeout(() => go(i + 1, true), 1500 * (beats[i].wait || 1) / SPEED);
     }
+    const sitEl = () => { const r = host.closest('.panel') || host.closest('.ch'); return r && $('.sitline', r); };
+    const setSit = (x) => { const el = sitEl(); if (el) el.innerHTML = x ? '<span class="lb">상황</span><span class="st">' + String(x).split(' — ').map(arrows).join('<br>') + '</span>' : ''; };
     function go(k, anim) {
       i = Math.max(0, Math.min(beats.length - 1, k));
+      setSit(beats[i].sit);
       beats[i].run(anim !== false);
       draw(); schedule();
       if (self.onGo) self.onGo(i);
@@ -348,8 +351,8 @@
         // 글은 ' — ' 에서 줄을 바꾸고, ' → ' 로 나뉜 조각(.u, inline-block)은 통째로 다음 줄로 — 조각이 칸보다 길 때만 그 안에서 줄바꿈. b.s 는 작은 숫자 줄
         const unit = (x) => x.split(' → ').map((u) => '<span class="u">' + arrows(u) + '</span>').join(' → ');
         btn.innerHTML = '<span class="dot"></span><span class="k">[' + arrows(b.k || '') + ']</span><span class="tx">' + String(b.t || '').split(' — ').map(unit).join('<br>') + '</span>' + (b.s ? '<span class="sm">' + arrows(b.s) + '</span>' : '');
-        const from = k === gStart ? k - 1 : gStart;   // 단계 첫 마디(상황)는 앞 단계 끝에서, 나머지는 그 단계 상황에서
-        btn.addEventListener('click', () => { playing = false; if (from >= 0) beats[from].run(false); go(k, true); });
+        const from = k === gStart ? k - 1 : gStart;   // pre 가 없으면: 단계 첫 마디는 앞 단계 끝에서, 나머지는 그 단계 첫 마디에서
+        btn.addEventListener('click', () => { playing = false; if (b.pre) b.pre(false); else if (from >= 0) beats[from].run(false); go(k, true); });
         li.appendChild(btn); rows.appendChild(li);
       });
       if (rows) { const fin = document.createElement('span'); fin.className = 'fin'; fin.textContent = '끝'; rows.appendChild(fin); }   // 마지막 단계 줄 끝
@@ -474,10 +477,12 @@
       const stp = st.step || '', g = /장기/.test(stp) ? '장기' : /단기/.test(stp) ? '단기' : isAlt ? '장기' : num + '단계';
       const altList = isAlt ? alts.map((a, k) => ({ t: sc.stages[a].short || sc.stages[a].name, on: a === id, pick: () => rebuild(a) })) : null;
       const cause = ps.slice(0, at), after = ps.slice(at + 1).join(' → ');
-      const sit = id === 0 ? sc.sit || sc.t : cause.shift() || st.name;   // sc.sit: 상황 마디 글(' — ' 마다 줄바꿈)
-      out.push({ g, alts: altList, k: '상황', t: sit, run: snap(prevS, false), wait: 0.4 });   // 상황은 이미 아는 내용 — 빨리 지나간다
-      out.push({ g, alts: altList, k: ps[at], t: cause.join(' → '), run: snap(withNew, true), wait: 1.25 });
-      out.push({ g, alts: altList, k: '새 균형', t: after || o.result(prevS[prevS.length - 1], next, letter),
+      // 상황(그래프 아래 줄): 1단계는 사건 이름(또는 sc.sit), 다음 단계는 원인의 첫 조각(또는 st.sit)
+      const sit = id === 0 ? sc.sit || sc.t : st.sit || (cause.length ? cause.shift() : st.name);
+      // 결론 제목: result 의 ' — ' 앞(Y ↓ · P ↑ 등), 설명: 사슬의 뒤쪽 또는 result 의 ' — ' 뒤
+      const res = o.result(prevS[prevS.length - 1], next, letter).split(' — '), pre = snap(prevS, false);
+      out.push({ g, alts: altList, sit, pre, k: ps[at], t: cause.join(' → '), run: snap(withNew, true), wait: 1.25 });
+      out.push({ g, alts: altList, sit, pre, k: res[0], t: after || res.slice(1).join(' — '),
         run: (anim) => { snap(withNew, false)(anim); if (o.after) o.after(prevS[prevS.length - 1], next); }, wait: 1.8 });
       S = withNew;
     });
@@ -602,7 +607,8 @@
     ];
     function beats(ev) {
       const base = ev.base || B;
-      return ev.steps.map(([k, t, sm, v, hi]) => { const st = Object.assign({}, base, v); return { g: ev.t, k, t, s: sm, run: () => show(st, hi, base), wait: k === '상황' ? 0.4 : 1.3 }; });
+      const s0 = ev.steps[0], sit = s0[1] + (s0[2] ? ' — ' + s0[2] : '');   // 첫 걸음(상황)은 그래프 아래 줄로
+      return ev.steps.slice(1).map(([k, t, sm, v, hi]) => { const st = Object.assign({}, base, v); return { g: ev.t, sit, k: t, t: sm, run: () => show(st, hi, base), wait: 1.4 }; });
     }
     list($('#o29'), EV, (i) => { if (i < 0) { player.clear(); show(B, []); } else player.load(beats(EV[i])); });
     show(B, []);
@@ -629,7 +635,7 @@
     };
     const r = runner(plot, player, {
       start: 'A : MS = MD',
-      result: (a, b) => { const x = idx(a), y = idx(b); return '화폐가치 1/P ' + dirW(x.v, y.v, 0.02) + ' → 물가 P ' + dirW(x.P, y.P, 0.5); },
+      result: (a, b) => { const x = idx(a), y = idx(b); return '1/P ' + dirW(x.v, y.v, 0.02) + ' · P ' + dirW(x.P, y.P, 0.5); },   // 1/P 와 P 는 같은 것 — 쉼표 · 가운뎃점으로
       quiet: () => plot.hilite(null),
       // 새 균형에서: 바뀐 축 값(M · 1/P)을 한 번에 강조
       after: (a, b) => {
@@ -641,14 +647,14 @@
     });
     const keep = (why) => ({ name: 'Fed 가 MS 를 옮겨 물가 유지', ch: { abs: (o) => ({ MS: 5 * (1 + mdScale(o)) - 5 }) }, why });
     const EV = [
-      { t: 'Fed 통화량 2배', dir: 'r', stages: [{ name: 'MS →', at: 0, ch: { add: { MS: 5 } }, why: 'MS → → 1/P 절반 → P 2배' }] },
-      { t: 'Fed 통화량 감소', dir: 'l', stages: [{ name: 'MS ←', at: 0, ch: { add: { MS: -1.5 } }, why: 'MS ← → 1/P ↑ → P ↓' }] },
+      { t: 'Fed 통화량 2배', dir: 'r', stages: [{ name: 'MS →', at: 0, ch: { add: { MS: 5 } }, why: 'MS → → 1/P 절반, P 2배' }] },
+      { t: 'Fed 통화량 감소', dir: 'l', stages: [{ name: 'MS ←', at: 0, ch: { add: { MS: -1.5 } }, why: 'MS ← → 1/P ↑, P ↓' }] },
       { t: '신용카드 보급 → 현금 덜 보유', q: 'SA 2', dir: 'l', stages: [
-        { name: '화폐 수요 감소', ch: { add: { Vg: 0.5 } }, why: '카드 결제 → 돈 보유 ↓ → MD ← → 1/P ↓ → P ↑' },
-        keep('Fed 가 M ↓ → MS ← → 1/P 회복 → P 그대로')] },
+        { name: '화폐 수요 감소', ch: { add: { Vg: 0.5 } }, why: '카드 결제 → 돈 보유 ↓ → MD ← → 1/P ↓, P ↑' },
+        keep('Fed 가 M ↓ → MS ← → 1/P 회복, P 그대로')] },
       { t: '실질 GDP 증가 → 거래용 돈 더 필요', dir: 'r', stages: [
-        { name: '화폐 수요 증가', ch: { add: { Yg: 0.3 } }, why: 'Y ↑ → 돈 수요 ↑ → MD → → 1/P ↑ → P ↓' },
-        keep('Fed 가 M ↑ → MS → → 1/P 회복 → P 그대로')] }
+        { name: '화폐 수요 증가', ch: { add: { Yg: 0.3 } }, why: 'Y ↑ → 돈 수요 ↑ → MD → → 1/P ↑, P ↓' },
+        keep('Fed 가 M ↑ → MS → → 1/P 회복, P 그대로')] }
     ];
     list($('#o30'), EV, (i) => r.pick(i < 0 ? null : EV[i]));
     return plot;
@@ -707,7 +713,7 @@
     const srEv = (t, why, q) => ({ t, q, dir: 'l', stages: [
       { name: 'SRAS ←', step: '1단계 단기', ch: { add: { SRAS: -R } }, why },
       { name: '그대로 두면 SRAS 복귀', short: '그대로', ch: { abs: { SRAS: 0 } }, letter: 'A', at: 2, why: 'Y < Y* → 임금 · Pe ↓ → SRAS → → Y* 회복, P 회복 (오래 걸림)' },
-      { name: '정책으로 수용 AD →', short: '정책', from: 0, ch: { abs: lrAD }, chain: ['M ↑ · G ↑', 'AD →', 'Y* 회복, P 더 ↑'], at: 1 }] });
+      { name: '정책으로 수용 AD →', short: '정책', sit: 'Y < Y* : 정책으로 수용', from: 0, ch: { abs: lrAD }, chain: ['M ↑ · G ↑', 'AD →', 'Y* 회복, P 더 ↑'], at: 1 }] });
     // LRAS 가 움직이면 SRAS 도 같이 움직여 새 균형은 새 Y* 위(장기균형). AD 그대로면 P 는 반대로
     const lrEv = (t, dir, why, q) => ({ t, q, dir, stages: [
       { name: 'LRAS · SRAS ' + (dir === 'r' ? '→' : '←'), ch: { add: { LRAS: dir === 'r' ? 1 : -1 }, abs: lrSRAS }, why }] });
@@ -776,7 +782,7 @@
     const player = Player($('#pl28'));
     const r = runner(plot, player, {
       start: 'A : W = W_E, L = L_E',
-      result: (a, b) => (b.vis.W ? (b.off.W || 0) + 7 > eqW(b.off) + 0.05 ? 'W > W_E → 실업 = L_S − L_D' : 'W < W_E → 효과 없음' : 'W ↓ · L ↓, 실업 없음'),
+      result: (a, b) => (b.vis.W ? (b.off.W || 0) + 7 > eqW(b.off) + 0.05 ? '실업 ↑' : '변화 없음' : 'W ↓ · L ↓ — 실업 없음'),
       quiet: () => plot.hilite(null),
       // 새 균형에서: W 선, 또는 W · L(x · y 축 한 번에)
       after: (a, b) => plot.seq(b.vis.W ? [] : [{ axis: 'xy' }])
@@ -859,9 +865,8 @@
       const dLF = (m.E || 0) + (m.U || 0), dPop = dLF + (m.N || 0);
       const moved = Object.keys(m).map((k) => NM[k] + ' ' + (m[k] > 0 ? '↑' : '↓')).join(' · ');
       return [
-        { g: s.t, k: '상황', t: moved, run: () => { stopR(); rates(m, 1); }, wait: 0.5 },
-        { g: s.t, k: '실업률', t: '실업자 ' + arrow(m.U || 0) + ' · 경제활동인구 ' + arrow(dLF) + ' → 실업률 ' + arrow(dirOf(ur(B), ur(v), 1e-9)), run: stage(m, [3, 4], 'UR'), wait: 2.2 },
-        { g: s.t, k: '참가율', t: '경제활동인구 ' + arrow(dLF) + ' · 성인 인구 ' + arrow(dPop) + ' → 참가율 ' + arrow(dirOf(lf(B), lf(v), 1e-9)), run: stage(m, [6, 7], 'LF'), wait: 2.2 }
+        { g: s.t, sit: moved, k: '실업률 ' + arrow(dirOf(ur(B), ur(v), 1e-9)), t: '실업자 ' + arrow(m.U || 0) + ' · 경제활동인구 ' + arrow(dLF), run: stage(m, [1, 3, 4], 'UR'), wait: 2.4 },
+        { g: s.t, sit: moved, k: '참가율 ' + arrow(dirOf(lf(B), lf(v), 1e-9)), t: '경제활동인구 ' + arrow(dLF) + ' · 성인 인구 ' + arrow(dPop), run: stage(m, [6, 7], 'LF'), wait: 2.2 }
       ];
     }
     list($('#o28s'), SIT, (i) => { sit = i < 0 ? null : SIT[i]; if (i < 0) { pl2.clear(); stopR(); rates({}, 0); } else pl2.load(beats(SIT[i])); });
