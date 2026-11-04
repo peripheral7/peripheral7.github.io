@@ -166,7 +166,8 @@
       const shown = P.map((pts, i) => pts.filter((a) => !P.slice(i + 1).some((later) => later.some((b) => Math.abs(X(a.x) - X(b.x)) < 3 && Math.abs(Y(a.y) - Y(b.y)) < 3))));
       shown.forEach((pts, i) => pts.forEach((pt) => {
         if (pt.o.guide === false) return;
-        el('path', { d: 'M' + box[0] + ' ' + Y(pt.y) + 'H' + X(pt.x) + 'V' + (box[1] + box[3]), fill: 'none', stroke: i === n - 1 ? C.guide : C.ghost, 'stroke-width': 1.4, 'stroke-dasharray': '5 5' }, g);
+        const em = hl && hl.axis && i === n - 1 && !hideNow;   // 결론 마디: 새 균형 점선 강조
+        el('path', { d: 'M' + box[0] + ' ' + Y(pt.y) + 'H' + X(pt.x) + 'V' + (box[1] + box[3]), fill: 'none', stroke: em ? C.blue : i === n - 1 ? C.guide : C.ghost, 'stroke-width': em ? 2.6 : 1.4, 'stroke-dasharray': em ? '7 5' : '5 5' }, g);
       }));
       // 새 균형점(지금 상태)은 축 이름을 굵게, 바로 앞 균형과 견준 방향 삼각형을 옆에 둔다(강조가 끝나도 남는다)
       let prevPt = null;
@@ -178,18 +179,19 @@
         const now = i === n - 1 && !hideNow, col = i === n - 1 ? C.ink : C.soft, yl = pt.o.yl || cfg.yName + '_' + (i + 1), xl = xName(pt, offs[i], i);
         const dx = now && prevPt ? dirOf(prevPt.x, pt.x, tolX) : 0, dy = now && prevPt ? dirOf(prevPt.y, pt.y, tolY) : 0;
         const wt = (dd) => (now && dd ? 800 : 500), dc = (dd) => (now && dd ? (dd > 0 ? C.up : C.down) : col);
-        const pop = (t, ax, dd) => { if (t && now && dd && hl && hl.axis && hl.axis.indexOf(ax) >= 0) t.setAttribute('class', 'pop'); };
+        const big = (ax, dd) => !!(now && dd && hl && hl.axis && hl.axis.indexOf(ax) >= 0);   // 결론 마디: 바뀐 축 값 크게
+        const pop = () => {};
         if (!usedY.some((v) => Math.abs(v - Y(pt.y)) < 15) && usedT.indexOf('y' + yl) < 0) {
           usedY.push(Y(pt.y)); usedT.push('y' + yl);
           const gy = el('g', {}, g);   // 축 값 + 삼각형을 한 묶음으로(같이 커진다)
-          label(gy, box[0] - 8, Y(pt.y) + 6, yl, { anchor: 'end', size: 17, color: dc(dy), weight: wt(dy) });
+          label(gy, box[0] - 8, Y(pt.y) + 7, yl, { anchor: 'end', size: big('y', dy) ? 22 : 17, color: dc(dy), weight: wt(dy) });
           tri(gy, box[0] - 10 - textW(yl, 17), Y(pt.y) + 6, dy, 'end');
           pop(gy, 'y', dy);
         }
         if (!usedX.some((v) => Math.abs(v - X(pt.x)) < 28) && usedT.indexOf('x' + xl) < 0) {
           usedX.push(X(pt.x)); usedT.push('x' + xl);
           const gx = el('g', {}, g);
-          label(gx, X(pt.x), box[1] + box[3] + 24, xl, { anchor: 'middle', size: 17, color: dc(dx), weight: wt(dx) });
+          label(gx, X(pt.x), box[1] + box[3] + 25, xl, { anchor: 'middle', size: big('x', dx) ? 22 : 17, color: dc(dx), weight: wt(dx) });
           if (dx > 0) tri(gx, X(pt.x) + textW(xl, 17) / 2 + 4, box[1] + box[3] + 24, dx);
           else tri(gx, X(pt.x) - textW(xl, 17) / 2 - 4, box[1] + box[3] + 24, dx, 'end');
           pop(gx, 'x', dx);
@@ -259,12 +261,8 @@
     let hlT = [];
     self.hilite = (h) => { hlT.forEach(clearTimeout); hlT = []; hl = h; render(); };
     // items(축 'x' · 'y' · 'xy')를 곡선이 멈춘 뒤 차례로: 새 균형의 축 이름이 한 번 커졌다 작아진다(.pop). 색 · 굵기는 계속 남는다
-    self.seq = (items) => {
-      self.hilite(null);
-      const t0 = 780 / SPEED, step = 1300;
-      items.forEach((it, i) => hlT.push(setTimeout(() => { hl = it; render(); }, t0 + i * step)));
-      hlT.push(setTimeout(() => { hl = null; render(); }, t0 + items.length * step));
-    };
+    // items(축 'x' · 'y' · 'xy') 를 한 번에, 다음 걸음으로 넘어갈 때까지 강조(quiet 가 지운다)
+    self.seq = (items) => { const ax = items.map((it) => it.axis || '').join(''); self.hilite(ax ? { axis: ax } : null); };
     // 상태 줄을 통째로 바꾸고 지금(마지막) 상태로 움직인다. o.hide: 새 균형점은 아직 숨김, o.dur: 애니메이션 길이(ms)
     self.show = (states, o) => {
       o = o || {};
@@ -482,8 +480,8 @@
       // 결론 제목: result 의 ' — ' 앞(Y ↓ · P ↑ 등), 설명: 사슬의 뒤쪽 또는 result 의 ' — ' 뒤
       const res = o.result(prevS[prevS.length - 1], next, letter).split(' — '), pre = snap(prevS, false);
       out.push({ g, alts: altList, sit, pre, k: ps[at], t: cause.join(' → '), run: snap(withNew, true), wait: 1.25 });
-      out.push({ g, alts: altList, sit, pre, k: res[0], t: after || res.slice(1).join(' — '),
-        run: (anim) => { snap(withNew, false)(anim); if (o.after) o.after(prevS[prevS.length - 1], next); }, wait: 1.8 });
+      out.push({ g, alts: altList, sit, pre: snap(withNew, true), k: res[0], t: after || res.slice(1).join(' — '),
+        run: () => { snap(withNew, false)(false); if (o.after) o.after(prevS[prevS.length - 1], next); }, wait: 1.8 });
       S = withNew;
     });
     return out;
@@ -568,7 +566,7 @@
         $('#tNote').innerHTML = 'R = <b>' + Math.round(s.R * 100) + '%</b> · 필요지준 = R × 예금 = ' + money(req) + (Math.abs(gap) < 0.5 ? ' = 지준' : gap > 0 ? ' → 초과지준 <b>' + money(gap) + '</b>' : ' → 지준 부족 <b>' + money(-gap) + '</b>');
       } else {
         const A = (s.res || 0) + (s.L || 0) + (s.S || 0);
-        $('#tNote').innerHTML = '자산 ' + money(A) + ' · 레버리지 = 자산 ÷ 자본 = <b>' + (s.K > 0 ? fmt(A / s.K) : '— (자본 0)') + '</b>';
+        $('#tNote').innerHTML = '※ 레버리지 비율 = 자산 ÷ 자본';   // 주석: 구하는 법만(숫자 없이)
       }
       $$('#bank .tt [data-k]').forEach((e) => e.classList.toggle('hi', (hi || []).indexOf(e.getAttribute('data-k')) >= 0));
     }
@@ -601,9 +599,9 @@
         ['지준', '본원통화 ↓ → 지준 −$50', '지준 $100 → $50', { res: 50 }, ['res']],
         ['통화량', 'M = 지준 × 1/R ↓', '$50 × 10 = $500 (대출 $450 · 예금 $500)', { res: 50, L: 450, D: 500 }, ['M', 'L', 'D']]] },
       { t: '대출 부실 → 은행 자본 감소', dir: 'l', base: CB, steps: [
-        ['상황', '대출 부실', '레버리지 = 자산 ÷ 자본 = 20', {}, []],
-        ['자본', '대출 −$50 → 자본 −$50', '자산 −5% → 자본 −100%', { L: 650, K: 0 }, ['L', 'K']],
-        ['결과', '대출 ↓ (신용 경색) → 경기 ↓', '', { L: 650, K: 0 }, ['L']]] }
+        ['상황', '대출 부실', '', {}, []],
+        ['대출', '대출 ↓ $50', '자산 감소율 = $50 ÷ $1,000 = 5%', { L: 650 }, ['L']],
+        ['자본', '자본 ▼ 100%', '자본 감소율 = 자산 감소율 × 레버리지 = 5% × 20', { L: 650, K: 0 }, ['K']]] }
     ];
     function beats(ev) {
       const base = ev.base || B;
@@ -906,6 +904,11 @@
     bk.style.paddingTop = Math.max(0, Math.round(eq.getBoundingClientRect().top - bk.getBoundingClientRect().top)) + 'px';
   }
   window.addEventListener('resize', alignBank);
+  // 스크롤바를 숨겼으므로, 아래에 더 있으면 칸 아래쪽을 흐리게 해 더 내릴 수 있음을 보인다
+  function markMore() { $$('.side').forEach((e) => e.classList.toggle('more', e.scrollHeight - e.scrollTop - e.clientHeight > 4)); }
+  document.addEventListener('scroll', markMore, true);
+  window.addEventListener('resize', markMore);
+  document.addEventListener('click', () => setTimeout(markMore, 50));
 
   /* ───────── 챕터 탭 ───────── */
   ch29();
@@ -916,7 +919,7 @@
     $$('.tabs button').forEach((b) => b.setAttribute('aria-selected', String(b.getAttribute('data-ch') === id)));
     if (id === 'ch33') c33.showSub(sub === 'as' || sub === 'ad' ? sub : c33.current(), false);
     if (id === 'ch28') c28.showSub(sub === 'u' || sub === 'w' ? sub : c28.current(), false);
-    alignTabs(); alignBank();
+    alignTabs(); alignBank(); markMore();
     (plots[id] || []).forEach((p) => p.render());
   }
   $$('.tabs button').forEach((b) => b.addEventListener('click', () => { show(b.getAttribute('data-ch')); history.replaceState(null, '', '#' + b.getAttribute('data-ch')); }));

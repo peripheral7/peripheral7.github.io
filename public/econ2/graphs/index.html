@@ -33,6 +33,8 @@
   .top .links a{color:var(--soft)}
   main *{scrollbar-width:none}
   main *::-webkit-scrollbar{display:none}
+  /* 칸 아래에 내용이 더 있으면 아래쪽 글자를 흐리게(스크롤바 대신 더 있다는 표시) */
+  .side.more{-webkit-mask-image:linear-gradient(to bottom,#000 calc(100% - 56px),transparent);mask-image:linear-gradient(to bottom,#000 calc(100% - 56px),transparent)}
   #langAsk{position:fixed;left:0;right:0;bottom:28px;z-index:40;margin:0 auto;width:max-content;display:flex;flex-wrap:wrap;align-items:center;gap:10px;max-width:calc(100% - 28px);box-sizing:border-box;padding:14px 18px;border:2px solid var(--ink);border-radius:10px;background:#fff;color:var(--ink);font-size:16px;line-height:1.35;box-shadow:0 6px 24px rgba(0,0,0,.18)}
   #langAsk p{margin:0 8px 0 0}
   #langAsk button{font:inherit;font-weight:700;color:var(--ink);background:#fff;border:2px solid var(--ink);border-radius:8px;padding:6px 16px;cursor:pointer}
