@@ -120,14 +120,19 @@
   main{padding-bottom:84px}
   .pbar .cnt{font-size:14px;font-weight:800;color:var(--ink);font-variant-numeric:tabular-nums;min-width:40px}
   .seg{display:inline-flex;border:1.5px solid var(--ink);border-radius:8px;overflow:hidden}
-  .seg button{padding:7px 14px;border:0;border-left:1.5px solid var(--ink);background:#fff;font-size:14px;font-weight:700;cursor:pointer}
+  .seg button{padding:7px 14px;border:0;border-left:1.5px solid var(--ink);background:#fff;font-size:14px;font-weight:700;color:var(--ink);cursor:pointer;transition:background-color .15s,color .15s}
   .seg button:first-child{border-left:0}
-  .seg button:hover:not(:disabled){background:var(--tint)}
+  .seg button:active:not(:disabled){background:#e3e8f0}
   .seg button:disabled{color:#b3b8c2;cursor:default}
   .seg .pp{min-width:88px}
-  .seg .pp.on{background:var(--ink);color:#fff}
-  .pbar .spdb{padding:7px 12px;border:1.5px solid var(--line);border-radius:8px;background:#fff;font-size:13.5px;font-weight:700;color:var(--soft);cursor:pointer}
-  .pbar .spdb:hover{border-color:var(--ink);color:var(--ink)}
+  .seg .pp.on,.seg .pp.on:active{background:#e7f0fb;color:var(--blue)}   /* 재생 중: 검정 반전 대신 옅은 파랑 — 마우스 올림·누름에도 글자가 바탕에 묻히지 않게 */
+  .pbar .spdb{padding:7px 12px;border:1.5px solid var(--line);border-radius:8px;background:#fff;font-size:13.5px;font-weight:700;color:var(--soft);cursor:pointer;transition:border-color .15s,color .15s}
+  @media (hover:hover){
+    .seg button:hover:not(:disabled):not(:active){background:var(--tint)}
+    .seg .pp.on:hover:not(:active){background:#dbe8fb}
+    .pbar .spdb:hover{border-color:var(--ink);color:var(--ink)}
+  }
+  .seg button:focus-visible,.pbar .spdb:focus-visible{outline:2px solid var(--blue);outline-offset:-3px}
   .player.idle .pbar{display:none}
 
   .side{min-width:0}
