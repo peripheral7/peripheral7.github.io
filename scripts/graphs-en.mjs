@@ -356,6 +356,7 @@ let html = readFileSync(join(src, 'index.html'), 'utf8');
 html = html.replace('<html lang="ko">', '<html lang="en">')
   .replace('<script src="/econ2/graphs/app.js"></script>', '<script src="/econ2/graphs/en/app.js"></script>')
   .replace('<a href="/econ2/graphs/en/">EN</a>', '<a href="/econ2/graphs/">한국어</a>');
+html = html.replace('<h1><a href="/econ2/">', '<h1><a href="/econ2/en/">');
 html = translate(html);
 let js = translate(readFileSync(join(src, 'app.js'), 'utf8'));
 writeFileSync(join(out, 'index.html'), html);

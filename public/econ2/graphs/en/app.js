@@ -159,7 +159,7 @@
       const P = S.map((s, i) => (hideNow && i === n - 1 ? [] : pointsOf(offs[i], s.vis)));
       const lr = byId.LRAS, sx = (d[1] - d[0]) * 0.012;
       const xName = (pt, off, i) => {
-        if (pt.o.xl) return pt.o.xl;
+        if (pt.o.xl) return pt.o.xl + (i > 0 && P[0][0] && Math.abs(P[0][0].x - pt.x) > 1e-6 ? "'" : '');
         if (cfg.star && lr && Math.abs(lr.x + offOf(lr, off) - pt.x) < sx) return same(offOf(lr, off), 0) ? cfg.xName + '*' : cfg.xName + '*_2';
         return cfg.xName + '_' + (i + 1);
       };
@@ -171,12 +171,14 @@
       }));
       // New equilibrium점(지금 상태)은 축 이름을 굵게, 바로 앞 Equilibrium과 견준 방향 삼각형을 옆에 둔다(강조가 끝나도 남는다)
       let prevPt = null;
-      for (let i = n - 2; i >= 0; i--) if (P[i][0]) { prevPt = P[i][0]; break; }
+      if (cfg.cmp0) prevPt = n > 1 && P[0][0] ? P[0][0] : null;   // Start Equilibrium과 견줌(노동시장: Stage 1 수요 Shift 뒤 점은 임금이 묶여 거래되지 않는 자리)
+      else for (let i = n - 2; i >= 0; i--) if (P[i][0]) { prevPt = P[i][0]; break; }
       const tolX = (d[1] - d[0]) * 0.006, tolY = (d[3] - d[2]) * 0.006;
       const usedY = [], usedX = [], usedT = [];     // 지금 것부터: 같은 자리 · 같은 이름(W_E 등 고정 이름)은 한 번만
       for (let i = n - 1; i >= 0; i--) shown[i].forEach((pt) => {
         if (pt.o.guide === false) return;
-        const now = i === n - 1 && !hideNow, col = i === n - 1 ? C.ink : C.soft, yl = pt.o.yl || cfg.yName + '_' + (i + 1), xl = xName(pt, offs[i], i);
+        const moved0 = i > 0 && P[0][0] && (Math.abs(P[0][0].x - pt.x) > 1e-6 || Math.abs(P[0][0].y - pt.y) > 1e-6);   // 고정 이름(W_E)도 Start과 다른 자리면 ' 를 붙인다
+        const now = i === n - 1 && !hideNow, col = i === n - 1 ? C.ink : C.soft, yl = pt.o.yl ? pt.o.yl + (moved0 ? "'" : '') : cfg.yName + '_' + (i + 1), xl = xName(pt, offs[i], i);
         const dx = now && prevPt ? dirOf(prevPt.x, pt.x, tolX) : 0, dy = now && prevPt ? dirOf(prevPt.y, pt.y, tolY) : 0;
         const wt = (dd) => (now && dd ? 800 : 500), dc = (dd) => (now && dd ? (dd > 0 ? C.up : C.down) : col);
         const big = (ax, dd) => !!(now && dd && hl && hl.axis && hl.axis.indexOf(ax) >= 0);   // 결론 마디: 바뀐 축 값 크게
@@ -185,15 +187,16 @@
           usedY.push(Y(pt.y)); usedT.push('y' + yl);
           const gy = el('g', {}, g);   // 축 값 + 삼각형을 한 묶음으로(같이 커진다)
           label(gy, box[0] - 8, Y(pt.y) + 7, yl, { anchor: 'end', size: big('y', dy) ? 22 : 17, color: dc(dy), weight: wt(dy) });
-          tri(gy, box[0] - 10 - textW(yl, 17), Y(pt.y) + 6, dy, 'end');
+          tri(gy, box[0] - 12 - textW(yl, big('y', dy) ? 22 : 17), Y(pt.y) + 6, dy, 'end');   // 커진 글자 폭에 맞춰
           pop(gy, 'y', dy);
         }
         if (!usedX.some((v) => Math.abs(v - X(pt.x)) < 28) && usedT.indexOf('x' + xl) < 0) {
           usedX.push(X(pt.x)); usedT.push('x' + xl);
           const gx = el('g', {}, g);
           label(gx, X(pt.x), box[1] + box[3] + 25, xl, { anchor: 'middle', size: big('x', dx) ? 22 : 17, color: dc(dx), weight: wt(dx) });
-          if (dx > 0) tri(gx, X(pt.x) + textW(xl, 17) / 2 + 4, box[1] + box[3] + 24, dx);
-          else tri(gx, X(pt.x) - textW(xl, 17) / 2 - 4, box[1] + box[3] + 24, dx, 'end');
+          const xw = textW(xl, big('x', dx) ? 22 : 17) / 2 + 5;
+          if (dx > 0) tri(gx, X(pt.x) + xw, box[1] + box[3] + 24, dx);
+          else tri(gx, X(pt.x) - xw, box[1] + box[3] + 24, dx, 'end');
           pop(gx, 'x', dx);
         }
       });
@@ -744,7 +747,7 @@
         { id: 'D', kind: 'line', x: 5, y: 5, m: -0.9, span: 4.3, lab: 'Demand D' },
         { id: 'W', kind: 'horiz', y: 7, x0: 0, x1: 9.6, lab: 'W', hidden: true, color: C.red, ghost: false, plain: true, axisLab: true }
       ],
-      eqs: [['S', 'D', { xl: 'L_E', yl: 'W_E', lab: false }]],
+      eqs: [['S', 'D', { xl: 'L_E', yl: 'W_E', lab: false }]], cmp0: true,
       extra(ctx) {
         info = '';
         const cur = ctx.S[ctx.S.length - 1];
@@ -841,8 +844,8 @@
       // lv: 0 Start · 1 무리 옮김 · 3 Unemployment rate 분자 · 분모(한 번에) · 4 Result · 6 Participation 분자 · 분모(한 번에) · 7 Result
       const hi = (n) => (lv === n ? ' hi' : '');
       const chip = (k) => '<span class="grp">' + NM[k] + tri(d(k)) + '</span>';
-      const part = (ks, dd, on) => ks.map((k) => NM[k] + (ks.length > 1 ? tri(d(k)) : '')).join(' + ') + (on ? ' ' + wordOf(dd) : '');   // 여러 항이면 바뀐 무리마다 ▲▼
-      const one = (name, dd, on) => name + (on ? ' ' + wordOf(dd) : '');
+      const part = (ks, dd, on) => ks.map((k) => NM[k] + (ks.length > 1 ? tri(d(k)) : '')).join(' + ') + (on && dd ? ' ' + wordOf(dd) : '');   // 여러 항이면 바뀐 무리마다 ▲▼ · 안 바뀌면 아무것도
+      const one = (name, dd, on) => name + (on && dd ? ' ' + wordOf(dd) : '');
       const res = (dd, on) => (on ? wordOf(dd, ['up', 'down']) : '<span class="q">?</span>');
       $('#rates').innerHTML =
         '<div class="who' + hi(1) + '"><span class="lb">Population</span>' + chip('E') + chip('U') + chip('N') + '</div>' +
@@ -852,10 +855,11 @@
     let rt = [];
     const stopR = () => { rt.forEach(clearTimeout); rt = []; rk.stop(); };
     // 한 걸음 안에서 lvs 를 차례로(분자 · 분모 함께 → Result). 마지막 Result에서 Result 항을 짚는다
-    const stage = (m, lvs, key) => (anim) => {
+    const KEY = { 4: 'UR', 7: 'LF' };   // 그 단계에서 Result가 나오는 자리
+    const stage = (m, lvs) => (anim) => {
       stopR();
-      if (!anim || reduce) { rates(m, lvs[lvs.length - 1]); rk.seq([key]); return; }
-      lvs.forEach((lv, i) => rt.push(setTimeout(() => { rates(m, lv); if (i === lvs.length - 1) rk.seq([key]); }, i * 700 / SPEED)));
+      if (!anim || reduce) { rates(m, lvs[lvs.length - 1]); rk.seq(lvs.map((lv) => KEY[lv]).filter(Boolean)); return; }
+      lvs.forEach((lv, i) => rt.push(setTimeout(() => { rates(m, lv); if (KEY[lv]) rk.seq([KEY[lv]]); }, i * 700 / SPEED)));
     };
     const arrow = (dd) => (dd > 0 ? '↑' : dd < 0 ? '↓' : 'unchanged');
     function beats(s) {
@@ -863,8 +867,8 @@
       const dLF = (m.E || 0) + (m.U || 0), dPop = dLF + (m.N || 0);
       const moved = Object.keys(m).map((k) => NM[k] + ' ' + (m[k] > 0 ? '↑' : '↓')).join(' · ');
       return [
-        { g: s.t, sit: moved, k: 'Unemployment rate ' + arrow(dirOf(ur(B), ur(v), 1e-9)), t: 'Unemployed ' + arrow(m.U || 0) + ' · Labor force ' + arrow(dLF), run: stage(m, [1, 3, 4], 'UR'), wait: 2.4 },
-        { g: s.t, sit: moved, k: 'Participation ' + arrow(dirOf(lf(B), lf(v), 1e-9)), t: 'Labor force ' + arrow(dLF) + ' · Adult population ' + arrow(dPop), run: stage(m, [6, 7], 'LF'), wait: 2.2 }
+        { g: s.t, sit: moved, k: 'Unemployment rate ' + arrow(dirOf(ur(B), ur(v), 1e-9)) + ' · Participation ' + arrow(dirOf(lf(B), lf(v), 1e-9)),
+          t: 'Unemployed ' + arrow(m.U || 0) + ' · Labor force ' + arrow(dLF) + ' · Adult population ' + arrow(dPop), run: stage(m, [1, 3, 4, 6, 7]), wait: 3.6 }
       ];
     }
     list($('#o28s'), SIT, (i) => { sit = i < 0 ? null : SIT[i]; if (i < 0) { pl2.clear(); stopR(); rates({}, 0); } else pl2.load(beats(SIT[i])); });
