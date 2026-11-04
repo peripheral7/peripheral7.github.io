@@ -291,7 +291,7 @@
   /* ───────── 재생기: 단계 목록(전체 걸음이 한눈에, 지금 걸음만 크게) · 조작 줄(‹ Prev · 자동 · Next › · 속도) ───────── */
   // beat = { g: 묶음 이름(Stage 1 · Short run …), alts: [{ t, on, pick }](갈라지는 단계일 때), k: 꼬리표(Cause · Shift · Equilibrium …), t: 글자, run(anim), wait: 머무는 시간 배율 }
   // 사건을 고르기 전에는 안내 한 줄만 보이고 조작 줄은 숨는다(.idle)
-  const SPEEDS = [['slow', 0.5], ['normal', 1], ['fast', 2]];
+  const SPEEDS = [['normal', 1], ['fast', 2]];
   let SPEED = 2;   // 기본 'fast'
   const players = [];
   function Player(host) {
@@ -301,13 +301,13 @@
       '<button type="button" data-a="play" class="pp"></button><button type="button" data-a="next">Next ›</button></span>' +
       '<button type="button" data-a="spd" class="spdb"></button></div>';
     const ol = $('.steps', host), pp = $('.pp', host), cnt = $('.cnt', host), spd = $('[data-a="spd"]', host);
-    let beats = [], i = -1, playing = false, timer = 0;
+    let beats = [], i = -1, playing = false, timer = 0, fin = false;
     const self = { onGo: null };
     function draw() {
       host.classList.toggle('idle', !beats.length);
       $$('li[data-i]', ol).forEach((li) => { const k = +li.getAttribute('data-i'); li.className = k === i ? 'cur' : k < i ? 'done' : 'todo'; });
       $$('.stg', ol).forEach((st) => st.classList.toggle('cur', !!$('li.cur', st)));
-      host.classList.toggle('end', !!beats.length && i === beats.length - 1);   // 마지막 걸음: 끝 원 채움 + '끝'
+      host.classList.toggle('end', fin);   // 다 끝남: 마지막 걸음을 보여 준 뒤 색이 끝 원으로 옮겨 가 거기서 멈춘다
       const end = i >= beats.length - 1;
       pp.textContent = playing ? '❚❚ Pause' : end ? '↻ Replay' : '▶ Auto';
       pp.classList.toggle('on', playing);
@@ -318,14 +318,14 @@
     function idle() { ol.innerHTML = ''; setSit(''); draw(); }
     function schedule() {
       clearTimeout(timer);
-      if (!playing) return;
-      if (i >= beats.length - 1) { playing = false; draw(); return; }
-      timer = setTimeout(() => go(i + 1, true), 1500 * (beats[i].wait || 1) / SPEED);
+      const last = i >= beats.length - 1;
+      if (!beats.length || (!playing && !last)) return;
+      timer = setTimeout(() => { if (last) { fin = true; playing = false; draw(); } else go(i + 1, true); }, 1500 * (beats[i].wait || 1) / SPEED);
     }
     const sitEl = () => { const r = host.closest('.panel') || host.closest('.ch'); return r && $('.sitline', r); };
     const setSit = (x) => { const el = sitEl(); if (el) el.innerHTML = x ? '<span class="lb">Situation</span><span class="st">' + String(x).split(' — ').map(arrows).join('<br>') + '</span>' : ''; };
     function go(k, anim) {
-      i = Math.max(0, Math.min(beats.length - 1, k));
+      i = Math.max(0, Math.min(beats.length - 1, k)); fin = false;
       setSit(beats[i].sit);
       beats[i].run(anim !== false);
       draw(); schedule();
@@ -350,23 +350,22 @@
         li.setAttribute('data-i', k);
         btn.type = 'button';
         // 글은 ' — ' 에서 줄을 바꾸고, ' → ' 로 나뉜 조각(.u, inline-block)은 통째로 다음 줄로 — 조각이 칸보다 길 때만 그 안에서 줄바꿈. b.s 는 작은 숫자 줄
-        const unit = (x) => x.split(' → ').map((u) => '<span class="u">' + arrows(u) + '</span>').join(' → ');
+        const unit = (x) => x.split(' → ').map((u, k) => '<span class="u">' + (k ? '→ ' : '') + arrows(u) + '</span>').join(' ');   // 화살표는 다음 조각 앞에 붙여 줄 끝에 홀로 남지 않게
         btn.innerHTML = '<span class="dot"></span><span class="k">[' + arrows(b.k || '') + ']</span><span class="tx">' + String(b.t || '').split(' — ').map(unit).join('<br>') + '</span>' + (b.s ? '<span class="sm">' + arrows(b.s) + '</span>' : '');
         const from = k === gStart ? k - 1 : gStart;   // pre 가 없으면: 단계 첫 마디는 앞 단계 끝에서, 나머지는 그 단계 첫 마디에서
         btn.addEventListener('click', () => { playing = false; if (b.pre) b.pre(false); else if (from >= 0) beats[from].run(false); go(k, true); });
         li.appendChild(btn); rows.appendChild(li);
       });
-      if (rows) { const fin = document.createElement('span'); fin.className = 'fin'; fin.textContent = 'End'; rows.appendChild(fin); }   // 마지막 단계 줄 끝
     }
     self.load = (list, o) => {
       o = o || {};
       clearTimeout(timer);
-      beats = list; i = -1;
+      beats = list; i = -1; fin = false;
       build();
       playing = o.play !== false && !reduce;
       if (list.length) go(o.at || 0, o.anim !== false); else idle();
     };
-    self.clear = () => { clearTimeout(timer); playing = false; beats = []; i = -1; idle(); };
+    self.clear = () => { clearTimeout(timer); playing = false; fin = false; beats = []; i = -1; idle(); };
     self.index = () => i;
     self.redrawSpeed = () => { draw(); if (playing) schedule(); };
     const step = (dk) => { if (!beats.length) return; playing = false; go(i + dk, true); };
@@ -390,7 +389,7 @@
       playing = true;
       if (i >= beats.length - 1) go(0, true); else { draw(); schedule(); }
     });
-    spd.addEventListener('click', () => {   // slow → normal → fast → slow (모든 재생기 같이)
+    spd.addEventListener('click', () => {   // 보통 ↔ 빠르게 (모든 재생기 같이)
       const k = SPEEDS.findIndex((x) => x[1] === SPEED);
       SPEED = SPEEDS[(k + 1) % SPEEDS.length][1];
       players.forEach((q) => q.redrawSpeed());
@@ -490,10 +489,26 @@
     return out;
   }
   // 글자 목록: items = [{ t, q, dir }] → 누르면 onPick(i, 줄), 고른 줄을 다시 누르면 onPick(-1) 로 풀림
+  // 주요 요인: 시험에서 꼭 짚을 사건. 목록 세로선 위의 점(.imp — .key 는 지표 상자라 다른 이름)으로 표시하고, 패널마다 첫 목록 제목 줄 오른쪽에 범례 — 제목과 한 줄에 못 들어가면 숨긴다
+  const KEY = new Set(['Reserve ratio raised 10% → 20%', 'Deposits up $100', 'Fed buys $100 of bonds', 'Bad loans → bank capital falls',
+    'Fed doubles the money supply', 'Credit cards spread → less money held',
+    'Stock market crash', 'Money supply up', 'Government purchases rise', 'Expected price level rises', 'Oil price spike', 'Technological progress',
+    'Wage above equilibrium', 'Laid off, gives up searching']);
+  const keyFit = (lg) => { lg.hidden = false; if (lg.offsetTop > lg.parentNode.firstChild.offsetTop + 4 || !lg.offsetParent) lg.hidden = true; };
+  function keyLegend(host) {
+    const box = host.closest('.panel') || host.closest('.ch') || host.parentNode, h3 = $('h3', host);
+    if (!h3 || $('.keylg', box)) return;
+    const lg = document.createElement('span'); lg.className = 'keylg'; lg.innerHTML = '<i></i>Key factor';
+    const tt = document.createElement('span'); while (h3.firstChild) tt.appendChild(h3.firstChild);   // 원래 제목은 한 덩어리로(글 간격 그대로)
+    h3.classList.add('haslg'); h3.appendChild(tt); h3.appendChild(lg);
+    if (window.ResizeObserver) new ResizeObserver(() => keyFit(lg)).observe(h3); else keyFit(lg);
+  }
   function list(host, items, onPick, scope) {
     const ul = $('ul', host);
+    if (items.some((it) => KEY.has(it.t))) keyLegend(host);
     items.forEach((it, i) => {
       const li = document.createElement('li'), b = document.createElement('button');
+      if (KEY.has(it.t)) li.className = 'imp';
       b.type = 'button'; b.setAttribute('aria-pressed', 'false');
       b.innerHTML = arrows(it.t) + (it.dir ? '<span class="dir' + (it.dir === 'l' ? ' l' : '') + '">' + (it.dir === 'l' ? '←' : '→') + '</span>' : '') + (it.q ? '<span class="q">' + esc(it.q) + '</span>' : '');
       b.addEventListener('click', () => {
@@ -559,7 +574,7 @@
     function formula(ev) {
       const nRes = $('#nRes'), nR = $('#nR'), nM = $('#nM');
       $('#mLab').textContent = ev && ev.dep ? 'Deposits' : 'Money supply'; $('#mLabEn').textContent = '';
-      $('#k29d').innerHTML = ev ? ev.d.split(' — ').map((x) => '<span class="dl">' + arrows(x).replace(/==(.+?)==/g, '<mark>$1</mark>').replace(/\*\*(.+?)\*\*/g, '<b>$1</b>') + '</span>').join('') : '';
+      $('#k29d').innerHTML = ev ? ev.d.split(' — ').map((x) => '<span class="dl">' + x.split(' → ').map((u, k) => '<span class="u">' + (k ? '→ ' : '') + arrows(u).replace(/==(.+?)==/g, '<mark>$1</mark>').replace(/\*\*(.+?)\*\*/g, '<b>$1</b>') + '</span>').join(' ') + '</span>').join('') : '';
       if (!ev) { nRes.className = nR.className = nM.className = 'num'; nRes.textContent = money(RES0); nR.textContent = fmt(1 / R0); nM.textContent = money(RES0 / R0); return; }
       const R1 = ev.R || R0, dRes = ev.dRes || 0, dM = (RES0 + dRes) / R1 - RES0 / R0;
       nRes.className = 'num' + (dRes > 0 ? ' up' : dRes < 0 ? ' dn' : ''); nRes.textContent = dRes ? sgn(dRes) : money(RES0);
@@ -580,16 +595,16 @@
     }
     const mode = (cap) => { $('#k29').hidden = cap; $('#k29d').hidden = cap; $('#tacct').hidden = !cap; };
     // d: 식 아래 작은 글(세부). dRes: Reserves 변화분, R: 새 지급준비율, dep: Result 항을 '예금'으로
-    // d 의 ' — ' 는 줄바꿈, ==…== 는 형광펜 강조, **…** 는 굵게(정답)
+    // d 의 ' — ' 는 내용 단위 줄바꿈(다음 줄이 '→ ' 로 시작하면 앞 줄에서 이어짐), ' → ' 조각은 통째로 넘어간다. ==…== 는 형광펜 강조, **…** 는 굵게(정답)
     const EV = [
       { t: 'Reserve ratio raised 10% → 20%', q: 'SA 10', dir: 'l', R: 0.2, d: 'R 10% → 20% → multiplier 1/R 10 → 5 — Money supply = $100 × 5 = $500 → **−$500**' },
       { t: 'Reserve ratio cut 10% → 5%', dir: 'r', R: 0.05, d: 'R 10% → 5% → multiplier 1/R 10 → 20 — Money supply = $100 × 20 = $2,000 → **+$1,000**' },
-      { t: 'Banks hold more excess reserves', dir: 'l', R: 0.2, d: 'Banks keep reserves beyond the requirement → reserve ratio R 10% → 20% → multiplier 10 → 5 — Money supply → **−$500**' },
-      { t: 'Deposits up $100', dir: 'r', dRes: 100, dep: true, d: 'The $100 is ==currency people already held== = ==part of the monetary base==, already counted in the money supply — Deposited: currency −$100 → reserves +$100 (monetary base unchanged) → deposits +$1,000 — Money supply = +$1,000 deposits − $100 currency = **+$900**' },
+      { t: 'Banks hold more excess reserves', dir: 'l', R: 0.2, d: 'Banks keep reserves beyond the requirement — → reserve ratio R 10% → 20% → multiplier 10 → 5 — Money supply → **−$500**' },
+      { t: 'Deposits up $100', dir: 'r', dRes: 100, dep: true, d: 'The $100 is ==currency people already held== = ==part of the monetary base== — → already counted in the money supply — Deposited: currency −$100 → reserves +$100 (monetary base unchanged) — → deposits +$1,000 — Money supply = +$1,000 deposits − $100 currency = **+$900**' },
       { t: 'Withdrawal of $50', dir: 'l', dRes: -50, dep: true, d: 'The $50 ==stays in the monetary base== — it only moves from reserves to currency — Withdrawn: reserves −$50 → deposits −$500 — Money supply = −$500 deposits + $50 currency = **−$450**' },
-      { t: 'Fed buys $100 of bonds', q: 'SA 11', dir: 'r', dRes: 100, d: 'Fed pays with new money → ==monetary base +$100== → bank reserves +$100 — No currency was taken out of circulation, so money supply = **+$1,000**' },
+      { t: 'Fed buys $100 of bonds', q: 'SA 11', dir: 'r', dRes: 100, d: 'Fed pays with new money → ==monetary base +$100== → bank reserves +$100 — No currency was taken out of circulation — → money supply = **+$1,000**' },
       { t: 'Fed sells $50 of bonds', dir: 'l', dRes: -50, d: 'Fed takes money out → ==monetary base −$50== → bank reserves −$50 — Money supply = **−$500**' },
-      { t: 'Fed lends $100 to banks (discount rate cut)', dir: 'r', dRes: 100, d: 'Lower discount rate → banks borrow $100 from the Fed → ==monetary base +$100== → bank reserves +$100 — Money supply = **+$1,000**' },
+      { t: 'Fed lends $100 to banks (discount rate cut)', dir: 'r', dRes: 100, d: 'Lower discount rate → banks borrow $100 from the Fed — → ==monetary base +$100== → bank reserves +$100 — Money supply = **+$1,000**' },
       { t: 'Bad loans → bank capital falls', dir: 'l', cap: true }
     ];
     const CAP = EV.find((e) => e.cap);
@@ -711,7 +726,7 @@
       { name: 'LRAS · SRAS ' + (dir === 'r' ? '→' : '←'), ch: { add: { LRAS: dir === 'r' ? 1 : -1 }, abs: lrSRAS }, why }] });
     const AS = {
       SR: [srEv('Expected price level rises', 'P^e ↑ → wages · prices ↑ → SRAS ←', 'MC 11'), srEv('Oil price spike', 'Oil ↑ → production costs ↑ → SRAS ←'), srEv('Nominal wages rise', 'Nominal wages ↑ → costs ↑ → SRAS ←')],
-      LR: [lrEv('Technological progress', 'r', 'Technology ↑ → productivity ↑ → Y* ↑ → LRAS · SRAS →', 'SA 4c'), lrEv('Capital · human capital rise', 'r', 'Capital K · human capital H ↑ → Y* ↑ → LRAS · SRAS →', 'SA 5c'), lrEv('Immigration → labor rises', 'r', 'Labor L ↑ → Y* ↑ → LRAS · SRAS →', 'SA 1'), lrEv('Natural disaster · resources fall', 'l', 'Resources N · capital ↓ → Y* ↓ → LRAS · SRAS ←', 'SA 1'), lrEv('Natural rate of unemployment rises', 'l', 'Minimum wage ↑ → natural rate of unemployment ↑ → employed L ↓ → Y* ↓ → LRAS · SRAS ←')]
+      LR: [lrEv('Technological progress', 'r', 'Technology ↑ → productivity ↑ → Y* ↑ → LRAS · SRAS →', 'SA 4c'), lrEv('Capital · human capital rise', 'r', 'Capital K · human capital H ↑ → Y* ↑ → LRAS · SRAS →', 'SA 5c'), lrEv('Immigration → labor rises', 'r', 'Labor L ↑ → Y* ↑ → LRAS · SRAS →', 'SA 1'), lrEv('Natural disaster · resources fall', 'l', 'Resources N · capital ↓ → Y* ↓ → LRAS · SRAS ←', 'SA 1'), lrEv('Natural rate of unemployment rises', 'l', 'Minimum wage ↑ → natural rate of unemployment ↑ — → employed L ↓ → Y* ↓ → LRAS · SRAS ←')]
     };
     // 어느 목록에서 골라도 그 탭의 줄 표시를 모두 지우고 새 사건을 Start 상태 A 에서 시작한다(앞 사건의 LRAS Shift 등은 풀린다). 같은 줄을 다시 누르면 풀림
     $$('#side33ad [data-o]').forEach((h) => { const L = AD[h.getAttribute('data-o')]; list(h, L, (i) => rad.pick(i < 0 ? null : L[i]), $('#side33ad')); });
