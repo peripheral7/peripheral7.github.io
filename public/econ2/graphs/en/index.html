@@ -142,6 +142,23 @@
   .eq .f{display:block;font-size:19px;font-weight:800;letter-spacing:.01em;margin:0 0 2px}
   .eq .f + .f{margin-top:4px}
   .eq small{display:block;color:var(--soft);font-size:13.5px;line-height:1.5}
+  .eq small + .f{margin-top:10px}
+  .eq sup{font-size:.62em;line-height:0}
+  /* 파란 상자 안 펼침 글(SRAS 세 이론 · 마찰적 실업): 제목을 누르면 아래로 펼쳐진다 */
+  .eq .drop{margin:10px 0 2px;border-top:1px solid var(--line);padding-top:8px}
+  .eq .drop summary{display:flex;align-items:center;gap:6px;cursor:pointer;list-style:none;font-size:15px;font-weight:800;color:var(--blue)}
+  .eq .drop summary::-webkit-details-marker{display:none}
+  .eq .drop summary::after{content:"▾";font-size:14px;transition:transform .2s}
+  .eq .drop[open] summary::after{transform:rotate(180deg)}
+  .eq .drop summary:focus-visible{outline:2px solid var(--blue);outline-offset:2px;border-radius:4px}
+  .eq .drop p,.eq .drop ol{margin:6px 0 0;font-size:14px;line-height:1.55}
+  .eq .drop ol{padding-left:20px}
+  .eq .drop li + li{margin-top:4px}
+  .eqdetail .dl{display:block}
+  .eqdetail .dl + .dl{margin-top:4px}
+  .eqdetail mark{padding:0 3px;border-radius:4px;background:#fff3b0;color:var(--ink)}
+  .eqdetail b{color:var(--ink);font-weight:800}
+  .rows sup{font-size:.62em}
 
   /* 고를 것(Events 목록): 블로그 목차처럼 — 왼쪽 세로선 아래 작은 제목과 글줄. 고른 줄은 세로선 · 글자가 파랑, 다시 누르면 풀림 */
   .opts{margin:0 0 10px}
@@ -378,7 +395,7 @@
       <div class="eq">
         <span class="f">Money supply M = Reserves × 1/R</span>
         <span class="f">Required reserves = R × Deposits</span>
-        <small>R = reserve ratio. Assume people hold no currency (all deposits) and banks hold no excess reserves, lending out the rest (assumptions of SA 10 · 11).</small>
+        <small>R = reserve ratio. Monetary base = currency + reserves. Assume banks hold no excess reserves, lending out the rest, and people keep their money as deposits (assumptions of SA 10 · 11).</small>
       </div>
       <div class="opts" id="o29"><h3>Events <small>· click again to clear</small></h3><ul></ul></div>
     </div>
@@ -397,6 +414,8 @@
         <span class="f">M × V = P × Y</span>
         <span class="f">Value of money = 1 / P</span>
         <small>MS is set by the Fed, so it is vertical. MD slopes down: the lower the value of money (the higher P), the more money people need. With V · Y fixed, P rises in proportion to M (quantity theory, monetary neutrality).</small>
+        <span class="f">Fisher effect: i = r + π</span>
+        <small>Nominal interest rate i = real interest rate r + inflation rate π. In the long run, faster money growth raises π, and i rises one for one; r is unchanged.</small>
       </div>
       <div class="opts" id="o30"><h3>Events <small>· click again to clear</small></h3><ul></ul></div>
     </div>
@@ -426,9 +445,19 @@
       <div id="side33as" hidden>
         <h2><small>Ch33 Aggregate Supply</small>What shifts AS</h2>
         <div class="eq">
-          <span class="f">Short run: Y = Y* + α(P − Pe)</span>
-          <span class="f">Long run: Y* = f(L, K, H, N, technology)</span>
-          <small>Pe, nominal wages and input costs shift only SRAS; labor, capital, resources and technology shift LRAS (and SRAS). The money supply cannot move LRAS.</small>
+          <span class="f">Short run: Y = Y* + a(P − P<sup>e</sup>)</span>
+          <span class="f">Long run: Y* = A · F(L, K, H, N)</span>
+          <small>Y* = natural level of output, P<sup>e</sup> = expected price level, A = technology. P<sup>e</sup>, nominal wages and input costs shift only SRAS; labor, capital, resources and technology shift LRAS (and SRAS). The money supply cannot move LRAS.</small>
+          <details class="drop">
+            <summary><span>Why SRAS slopes upward</span></summary>
+            <p>All three theories say output departs from Y* when P differs from P<sup>e</sup>. If P falls below P<sup>e</sup>:</p>
+            <ol>
+              <li><b>Sticky-wage theory</b> — nominal wages were set on P<sup>e</sup>, so real wages are too high → firms hire less → Y ↓.</li>
+              <li><b>Sticky-price theory</b> — menu costs keep some prices from falling → those firms' prices are too high → sales ↓ → Y ↓.</li>
+              <li><b>Misperceptions theory</b> — suppliers mistake the fall in P for a fall in their relative price → they produce less → Y ↓.</li>
+            </ol>
+            <p>In the long run wages, prices and perceptions adjust (P<sup>e</sup> catches up with P), so Y returns to Y* and LRAS is vertical.</p>
+          </details>
         </div>
         <div class="opts" data-o="SR"><h3>SRAS only</h3><ul></ul></div>
         <div class="opts" data-o="LR"><h3>LRAS and SRAS together</h3><ul></ul></div>
@@ -450,6 +479,11 @@
         <div class="eq">
           <span class="f">Unemployment = labor supplied L<sub>S</sub> − labor demanded L<sub>D</sub></span>
           <small>At the equilibrium wage W<sub>E</sub> labor supplied equals labor demanded, so this graph shows no unemployment. Minimum wages, unions and efficiency wages hold the wage above W<sub>E</sub>, leaving the gap as unemployment (structural unemployment).</small>
+          <details class="drop">
+            <summary><span>Unemployment even at W<sub>E</sub>: frictional</span></summary>
+            <p><b>Frictional unemployment</b> — workers take time to search for jobs that fit them, even when the wage is at W<sub>E</sub>. Sectoral shifts (demand moving between industries) and unemployment insurance lengthen the search.</p>
+            <p><b>Natural rate</b> = frictional + structural unemployment, the level the economy normally has. <b>Cyclical unemployment</b> = the deviation from the natural rate over the business cycle.</p>
+          </details>
         </div>
         <div class="opts" id="o28"><h3>Wage · labor demand <small>· click again to clear</small></h3><ul></ul></div>
       </div>

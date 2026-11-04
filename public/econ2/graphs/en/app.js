@@ -54,7 +54,7 @@
   const same = (a, b) => Math.abs(a - b) < 1e-6;
   const sign = (a, b, tol) => (Math.abs(b - a) < tol ? '=' : b > a ? '↑' : '↓');
   const esc = (s) => String(s).replace(/[&<>]/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;' }[c]));
-  const arrows = (s) => esc(s).replace(/↑/g, '<span class="up">▲</span>').replace(/↓/g, '<span class="dn">▼</span>').replace(/_([A-Z0-9])/g, '<sub>$1</sub>');
+  const arrows = (s) => esc(s).replace(/↑/g, '<span class="up">▲</span>').replace(/↓/g, '<span class="dn">▼</span>').replace(/_([A-Z0-9])/g, '<sub>$1</sub>').replace(/\^([a-z])/g, '<sup>$1</sup>');
   const dirOf = (a, b, tol) => (Math.abs(b - a) < (tol || 1e-6) ? 0 : b > a ? 1 : -1);
   const dirW = (a, b, tol) => ['↓', 'unchanged', '↑'][dirOf(a, b, tol) + 1];
   function textW(s, size) {
@@ -559,7 +559,7 @@
     function formula(ev) {
       const nRes = $('#nRes'), nR = $('#nR'), nM = $('#nM');
       $('#mLab').textContent = ev && ev.dep ? 'Deposits' : 'Money supply'; $('#mLabEn').textContent = '';
-      $('#k29d').innerHTML = ev ? arrows(ev.d) : '';
+      $('#k29d').innerHTML = ev ? ev.d.split(' — ').map((x) => '<span class="dl">' + arrows(x).replace(/==(.+?)==/g, '<mark>$1</mark>').replace(/\*\*(.+?)\*\*/g, '<b>$1</b>') + '</span>').join('') : '';
       if (!ev) { nRes.className = nR.className = nM.className = 'num'; nRes.textContent = money(RES0); nR.textContent = fmt(1 / R0); nM.textContent = money(RES0 / R0); return; }
       const R1 = ev.R || R0, dRes = ev.dRes || 0, dM = (RES0 + dRes) / R1 - RES0 / R0;
       nRes.className = 'num' + (dRes > 0 ? ' up' : dRes < 0 ? ' dn' : ''); nRes.textContent = dRes ? sgn(dRes) : money(RES0);
@@ -580,18 +580,22 @@
     }
     const mode = (cap) => { $('#k29').hidden = cap; $('#k29d').hidden = cap; $('#tacct').hidden = !cap; };
     // d: 식 아래 작은 글(세부). dRes: Reserves 변화분, R: 새 지급준비율, dep: Result 항을 '예금'으로
+    // d 의 ' — ' 는 줄바꿈, ==…== 는 형광펜 강조, **…** 는 굵게(정답)
     const EV = [
-      { t: 'Reserve ratio raised 10% → 20%', q: 'SA 10', dir: 'l', R: 0.2, d: 'R 10% → 20% → multiplier 1/R 10 → 5' },
-      { t: 'Reserve ratio cut 10% → 5%', dir: 'r', R: 0.05, d: 'R 10% → 5% → multiplier 1/R 10 → 20' },
-      { t: 'Deposits up $100', dir: 'r', dRes: 100, dep: true, d: '$100 of currency deposited → reserves +$100 · money supply = +$1,000 − $100 currency = +$900' },
-      { t: 'Withdrawal of $50', dir: 'l', dRes: -50, dep: true, d: '$50 withdrawn as currency → reserves −$50 · money supply = −$500 + $50 currency = −$450' },
-      { t: 'Fed buys $100 of bonds', q: 'SA 11', dir: 'r', dRes: 100, d: 'Fed buys bonds → monetary base ↑ → bank reserves +$100' },
-      { t: 'Fed sells $50 of bonds', dir: 'l', dRes: -50, d: 'Fed sells bonds → monetary base ↓ → bank reserves −$50' },
+      { t: 'Reserve ratio raised 10% → 20%', q: 'SA 10', dir: 'l', R: 0.2, d: 'R 10% → 20% → multiplier 1/R 10 → 5 — Money supply = $100 × 5 = $500 → **−$500**' },
+      { t: 'Reserve ratio cut 10% → 5%', dir: 'r', R: 0.05, d: 'R 10% → 5% → multiplier 1/R 10 → 20 — Money supply = $100 × 20 = $2,000 → **+$1,000**' },
+      { t: 'Banks hold more excess reserves', dir: 'l', R: 0.2, d: 'Banks keep reserves beyond the requirement → reserve ratio R 10% → 20% → multiplier 10 → 5 — Money supply → **−$500**' },
+      { t: 'Deposits up $100', dir: 'r', dRes: 100, dep: true, d: 'The $100 is ==currency people already held== = ==part of the monetary base==, already counted in the money supply — Deposited: currency −$100 → reserves +$100 (monetary base unchanged) → deposits +$1,000 — Money supply = +$1,000 deposits − $100 currency = **+$900**' },
+      { t: 'Withdrawal of $50', dir: 'l', dRes: -50, dep: true, d: 'The $50 ==stays in the monetary base== — it only moves from reserves to currency — Withdrawn: reserves −$50 → deposits −$500 — Money supply = −$500 deposits + $50 currency = **−$450**' },
+      { t: 'Fed buys $100 of bonds', q: 'SA 11', dir: 'r', dRes: 100, d: 'Fed pays with new money → ==monetary base +$100== → bank reserves +$100 — No currency was taken out of circulation, so money supply = **+$1,000**' },
+      { t: 'Fed sells $50 of bonds', dir: 'l', dRes: -50, d: 'Fed takes money out → ==monetary base −$50== → bank reserves −$50 — Money supply = **−$500**' },
+      { t: 'Fed lends $100 to banks (discount rate cut)', dir: 'r', dRes: 100, d: 'Lower discount rate → banks borrow $100 from the Fed → ==monetary base +$100== → bank reserves +$100 — Money supply = **+$1,000**' },
       { t: 'Bad loans → bank capital falls', dir: 'l', cap: true }
     ];
+    const CAP = EV.find((e) => e.cap);
     const capBeats = () => [
-      { g: EV[6].t, sit: 'Bad loans', k: 'Loans ↓ $50', t: 'Asset decline = $50 ÷ $1,000 = 5%', run: () => tshow(Object.assign({}, CB, { L: 650 }), ['L']), wait: 1.4 },
-      { g: EV[6].t, sit: 'Bad loans', k: 'Capital ▼ 100%', t: 'Capital decline = asset decline × leverage = 5% × 20', run: () => tshow(Object.assign({}, CB, { L: 650, K: 0 }), ['K']), wait: 1.4 }
+      { g: CAP.t, sit: 'Bad loans', k: 'Loans ↓ $50', t: 'Asset decline = $50 ÷ $1,000 = 5%', run: () => tshow(Object.assign({}, CB, { L: 650 }), ['L']), wait: 1.4 },
+      { g: CAP.t, sit: 'Bad loans', k: 'Capital ▼ 100%', t: 'Capital decline = asset decline × leverage = 5% × 20', run: () => tshow(Object.assign({}, CB, { L: 650, K: 0 }), ['K']), wait: 1.4 }
     ];
     list($('#o29'), EV, (i) => {
       const ev = i < 0 ? null : EV[i];
@@ -642,8 +646,7 @@
         { name: 'Money demand falls', ch: { add: { Vg: 0.5 } }, why: 'Pay by card → money held ↓ → MD ← → 1/P ↓, P ↑' },
         keep('Fed cuts M → MS ← → 1/P restored, P unchanged')] },
       { t: 'Real GDP rises → more money for transactions', dir: 'r', stages: [
-        { name: 'Money demand rises', ch: { add: { Yg: 0.3 } }, why: 'Y ↑ → money demand ↑ → MD → → 1/P ↑, P ↓' },
-        keep('Fed raises M → MS → → 1/P restored, P unchanged')] }
+        { name: 'Money demand rises', ch: { add: { Yg: 0.3 } }, why: 'Y ↑ → money demand ↑ → MD → → 1/P ↑, P ↓' }] }
     ];
     list($('#o30'), EV, (i) => r.pick(i < 0 ? null : EV[i]));
     return plot;
@@ -662,8 +665,8 @@
   function longRun(S) {                        // Stage 2 설명: Stage 1 끝 상태가 Y* 보다 큰지 작은지
     const b = S[S.length - 1].off, L = 5 + (b.LRAS || 0);
     return eqX(b) > L + 0.03
-      ? 'Y > Y* → wages · Pe adjust ↑ → SRAS ← → Y* restored, P ↑'
-      : 'Y < Y* → wages · Pe adjust ↓ → SRAS → → Y* restored, P ↓';
+      ? 'Y > Y* → wages · P^e adjust ↑ → SRAS ← → Y* restored, P ↑'
+      : 'Y < Y* → wages · P^e adjust ↓ → SRAS → → Y* restored, P ↓';
   }
   function gap(off, pt) {
     const L = 5 + (off.LRAS || 0);
@@ -695,20 +698,20 @@
       { name: 'SRAS adjusts → Y*', step: 'Stage 2 · Long run', ch: { abs: lrSRAS }, why: longRun }] });
     const AD = {
       C: [adEv('Stock boom', 'r', 'Stocks ↑ → wealth ↑ → C ↑ → AD →'), adEv('Stock market crash', 'l', 'Stocks ↓ → wealth ↓ → C ↓ → AD ←', 'SA 4a'), adEv('Income tax cut', 'r', 'Income tax ↓ → disposable income ↑ → C ↑ → AD →')],
-      I: [adEv('Money supply up', 'r', 'M ↑ → r ↓ → I ↑ (exchange rate ↓ → NX ↑) → AD →'), adEv('Business optimism · investment boom', 'r', 'Expected profits ↑ → new plant & equipment I ↑ → AD →', 'SA 5'), adEv('Investment tax credit', 'r', 'Tax break on investment → I ↑ → AD →')],
+      I: [adEv('Money supply up', 'r', 'M ↑ → r ↓ → I ↑ → AD →'), adEv('Business optimism · investment boom', 'r', 'Expected profits ↑ → new plant & equipment I ↑ → AD →', 'SA 5'), adEv('Investment tax credit', 'r', 'Tax break on investment → I ↑ → AD →')],
       G: [adEv('Government purchases rise', 'r', 'Government purchases G ↑ → AD →', 'SA 4b')],
       NX: [adEv('Recession abroad', 'l', 'Foreign income ↓ → our exports ↓ → NX ↓ → AD ←', 'SA 4d'), adEv('Turmoil abroad → currency appreciates', 'l', 'Currency ↑ → exports ↓ · imports ↑ → NX ↓ → AD ←', 'MC 7')]
     };
     const srEv = (t, why, q) => ({ t, q, dir: 'l', stages: [
       { name: 'SRAS ←', step: 'Stage 1 · Short run', ch: { add: { SRAS: -R } }, why },
-      { name: 'Do nothing: SRAS returns', short: 'Wait', ch: { abs: { SRAS: 0 } }, letter: 'A', at: 2, why: 'Y < Y* → wages · Pe adjust ↓ → SRAS → → Y* and P restored (slow)' },
+      { name: 'Do nothing: SRAS returns', short: 'Wait', ch: { abs: { SRAS: 0 } }, letter: 'A', at: 2, why: 'Y < Y* → wages · P^e adjust ↓ → SRAS → → Y* and P restored (slow)' },
       { name: 'Accommodate: AD →', short: 'Policy', sit: 'Y < Y* : accommodate with policy', from: 0, ch: { abs: lrAD }, chain: ['M ↑ · G ↑', 'AD →', 'Y* restored, P higher still'], at: 1 }] });
     // LRAS 가 움직이면 SRAS 도 같이 움직여 New equilibrium은 새 Y* 위(Long runEquilibrium). AD unchanged면 P 는 반대로
     const lrEv = (t, dir, why, q) => ({ t, q, dir, stages: [
       { name: 'LRAS · SRAS ' + (dir === 'r' ? '→' : '←'), ch: { add: { LRAS: dir === 'r' ? 1 : -1 }, abs: lrSRAS }, why }] });
     const AS = {
-      SR: [srEv('Expected price level rises', 'Pe ↑ → wages · prices ↑ → SRAS ←', 'MC 11'), srEv('Oil price spike', 'Oil ↑ → production costs ↑ → SRAS ←'), srEv('Nominal wages rise', 'Nominal wages ↑ → costs ↑ → SRAS ←')],
-      LR: [lrEv('Technological progress', 'r', 'Technology ↑ → productivity ↑ → Y* ↑ → LRAS · SRAS →', 'SA 4c'), lrEv('Capital · human capital rise', 'r', 'Capital K · human capital H ↑ → Y* ↑ → LRAS · SRAS →', 'SA 5c'), lrEv('Immigration → labor rises', 'r', 'Labor L ↑ → Y* ↑ → LRAS · SRAS →', 'SA 1'), lrEv('Natural disaster · resources fall', 'l', 'Resources N · capital ↓ → Y* ↓ → LRAS · SRAS ←', 'SA 1')]
+      SR: [srEv('Expected price level rises', 'P^e ↑ → wages · prices ↑ → SRAS ←', 'MC 11'), srEv('Oil price spike', 'Oil ↑ → production costs ↑ → SRAS ←'), srEv('Nominal wages rise', 'Nominal wages ↑ → costs ↑ → SRAS ←')],
+      LR: [lrEv('Technological progress', 'r', 'Technology ↑ → productivity ↑ → Y* ↑ → LRAS · SRAS →', 'SA 4c'), lrEv('Capital · human capital rise', 'r', 'Capital K · human capital H ↑ → Y* ↑ → LRAS · SRAS →', 'SA 5c'), lrEv('Immigration → labor rises', 'r', 'Labor L ↑ → Y* ↑ → LRAS · SRAS →', 'SA 1'), lrEv('Natural disaster · resources fall', 'l', 'Resources N · capital ↓ → Y* ↓ → LRAS · SRAS ←', 'SA 1'), lrEv('Natural rate of unemployment rises', 'l', 'Minimum wage ↑ → natural rate of unemployment ↑ → employed L ↓ → Y* ↓ → LRAS · SRAS ←')]
     };
     // 어느 목록에서 골라도 그 탭의 줄 표시를 모두 지우고 새 사건을 Start 상태 A 에서 시작한다(앞 사건의 LRAS Shift 등은 풀린다). 같은 줄을 다시 누르면 풀림
     $$('#side33ad [data-o]').forEach((h) => { const L = AD[h.getAttribute('data-o')]; list(h, L, (i) => rad.pick(i < 0 ? null : L[i]), $('#side33ad')); });
@@ -793,9 +796,9 @@
     const SIT = [
       { t: 'Laid off, searching', c: '실직한 사람이 일자리를 찾으면', ce: 'If a laid-off worker looks for a job,', m: { E: -1, U: 1 } },
       { t: 'Laid off, gives up searching', q: 'MC 1', c: '실직한 사람이 구직을 포기하면', ce: 'If a laid-off worker gives up looking,', m: { E: -1, N: 1 } },
-      { t: 'Reclassify token job-seekers', q: 'MC 5', c: 'Reclassify token job-seekers 다시 세면', ce: 'If token job-seekers are recounted as not in the labor force,', m: { U: -1, N: 1 } },
-      { t: 'Unemployed finds a job', c: 'Unemployed finds a job하면', ce: 'If an unemployed person finds a job,', m: { U: -1, E: 1 } },
-      { t: 'Starts looking for a first job', c: 'Start으로 일자리를 찾기 시작하면', ce: 'If someone starts looking for a first job,', m: { N: -1, U: 1 } }
+      { t: 'Reclassify token job-seekers', q: 'MC 5', c: '구직 시늉만 하던 사람을 비경제활동인구로 다시 세면', ce: 'If token job-seekers are recounted as not in the labor force,', m: { U: -1, N: 1 } },
+      { t: 'Unemployed finds a job', c: '실업자가 취업하면', ce: 'If an unemployed person finds a job,', m: { U: -1, E: 1 } },
+      { t: 'Starts looking for a first job', c: '처음으로 일자리를 찾기 시작하면', ce: 'If someone starts looking for a first job,', m: { N: -1, U: 1 } }
     ];
     const pl2 = Player($('#pl28s'));
     // Result 문장: "{Situation}하면 Unemployment rate이 'down'하고 Participation rate은 'unchanged'이다." Result 자리는 방향 색, 아직이면 '?'. seq([k]) 로 그 자리를 잠깐 강조
