@@ -306,6 +306,7 @@
       host.classList.toggle('idle', !beats.length);
       $$('li[data-i]', ol).forEach((li) => { const k = +li.getAttribute('data-i'); li.className = k === i ? 'cur' : k < i ? 'done' : 'todo'; });
       $$('.stg', ol).forEach((st) => st.classList.toggle('cur', !!$('li.cur', st)));
+      host.classList.toggle('end', !!beats.length && i === beats.length - 1);   // 마지막 걸음: 끝 원 채움 + '끝'
       const end = i >= beats.length - 1;
       pp.textContent = playing ? '❚❚ Pause' : end ? '↻ Replay' : '▶ Auto';
       pp.classList.toggle('on', playing);
@@ -351,6 +352,7 @@
         btn.addEventListener('click', () => { playing = false; if (from >= 0) beats[from].run(false); go(k, true); });
         li.appendChild(btn); rows.appendChild(li);
       });
+      if (rows) { const fin = document.createElement('span'); fin.className = 'fin'; fin.textContent = 'End'; rows.appendChild(fin); }   // 마지막 단계 줄 끝
     }
     self.load = (list, o) => {
       o = o || {};
@@ -543,7 +545,7 @@
       '<p class="tnote" id="tNote"></p></div>';
     const money = (v) => (v == null ? '—' : '$' + fmt(v));
     let kt = [];
-    const num = (id, b, a, f) => { const e = $('#' + id); if (a == null) { e.className = 'num'; e.textContent = '—'; return; } const d = b == null ? 0 : dirOf(b, a, 1e-6); e.className = 'num' + (d > 0 ? ' up' : d < 0 ? ' dn' : ''); e.textContent = d ? f(b) + ' → ' + f(a) + (d > 0 ? ' ▲' : ' ▼') : f(a); };
+    const num = (id, b, a, f) => { const e = $('#' + id); if (a == null) { e.className = 'num'; e.textContent = '—'; return; } const d = b == null ? 0 : dirOf(b, a, 1e-6); e.className = 'num' + (d > 0 ? ' up' : d < 0 ? ' dn' : ''); e.innerHTML = d ? '<span class="old">' + esc(f(b)) + ' →</span> ' + esc(f(a)) + (d > 0 ? ' ▲' : ' ▼') : esc(f(a)); };
     const pulse = (ks) => { kt.forEach(clearTimeout); kt = []; const mark = (k) => $$('#k29 [data-k]').forEach((e) => e.classList.toggle('pulse', e.getAttribute('data-k') === k)); mark(null); ks.forEach((k, i) => kt.push(setTimeout(() => mark(k), i * 700 / SPEED))); kt.push(setTimeout(() => mark(null), ks.length * 700 / SPEED + 300)); };
     const cell = (id, base, v) => {
       $('#t' + id).textContent = money(v);
@@ -594,9 +596,9 @@
         ['Reserves', 'Monetary base ↓ → reserves −$50', 'Reserves $100 → $50', { res: 50 }, ['res']],
         ['Money supply', 'M = Reserves × 1/R ↓', '$50 × 10 = $500 (loans $450 · deposits $500)', { res: 50, L: 450, D: 500 }, ['M', 'L', 'D']]] },
       { t: 'Bad loans → bank capital falls', dir: 'l', base: CB, steps: [
-        ['Situation', 'Bad loans', 'Leverage = assets $1,000 ÷ capital $50 = 20', {}, []],
-        ['Capital', 'Loans −$50 → capital −$50', 'Assets $1,000 → $950 (−5%) · capital $50 → $0 (−100%)', { L: 650, K: 0 }, ['L', 'K']],
-        ['Result', 'Bank lending ↓ (credit crunch) → money supply ↓', 'Banks short of capital cut new lending', { L: 650, K: 0 }, ['L']]] }
+        ['Situation', 'Bad loans', 'Leverage = assets ÷ capital = 20', {}, []],
+        ['Capital', 'Loans −$50 → capital −$50', 'Assets −5% → capital −100%', { L: 650, K: 0 }, ['L', 'K']],
+        ['Result', 'Lending ↓ (credit crunch) → economic activity ↓', '', { L: 650, K: 0 }, ['L']]] }
     ];
     function beats(ev) {
       const base = ev.base || B;

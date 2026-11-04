@@ -306,6 +306,7 @@
       host.classList.toggle('idle', !beats.length);
       $$('li[data-i]', ol).forEach((li) => { const k = +li.getAttribute('data-i'); li.className = k === i ? 'cur' : k < i ? 'done' : 'todo'; });
       $$('.stg', ol).forEach((st) => st.classList.toggle('cur', !!$('li.cur', st)));
+      host.classList.toggle('end', !!beats.length && i === beats.length - 1);   // 마지막 걸음: 끝 원 채움 + '끝'
       const end = i >= beats.length - 1;
       pp.textContent = playing ? '❚❚ 멈춤' : end ? '↻ 다시' : '▶ 자동';
       pp.classList.toggle('on', playing);
@@ -351,6 +352,7 @@
         btn.addEventListener('click', () => { playing = false; if (from >= 0) beats[from].run(false); go(k, true); });
         li.appendChild(btn); rows.appendChild(li);
       });
+      if (rows) { const fin = document.createElement('span'); fin.className = 'fin'; fin.textContent = '끝'; rows.appendChild(fin); }   // 마지막 단계 줄 끝
     }
     self.load = (list, o) => {
       o = o || {};
@@ -543,7 +545,7 @@
       '<p class="tnote" id="tNote"></p></div>';
     const money = (v) => (v == null ? '—' : '$' + fmt(v));
     let kt = [];
-    const num = (id, b, a, f) => { const e = $('#' + id); if (a == null) { e.className = 'num'; e.textContent = '—'; return; } const d = b == null ? 0 : dirOf(b, a, 1e-6); e.className = 'num' + (d > 0 ? ' up' : d < 0 ? ' dn' : ''); e.textContent = d ? f(b) + ' → ' + f(a) + (d > 0 ? ' ▲' : ' ▼') : f(a); };
+    const num = (id, b, a, f) => { const e = $('#' + id); if (a == null) { e.className = 'num'; e.textContent = '—'; return; } const d = b == null ? 0 : dirOf(b, a, 1e-6); e.className = 'num' + (d > 0 ? ' up' : d < 0 ? ' dn' : ''); e.innerHTML = d ? '<span class="old">' + esc(f(b)) + ' →</span> ' + esc(f(a)) + (d > 0 ? ' ▲' : ' ▼') : esc(f(a)); };
     const pulse = (ks) => { kt.forEach(clearTimeout); kt = []; const mark = (k) => $$('#k29 [data-k]').forEach((e) => e.classList.toggle('pulse', e.getAttribute('data-k') === k)); mark(null); ks.forEach((k, i) => kt.push(setTimeout(() => mark(k), i * 700 / SPEED))); kt.push(setTimeout(() => mark(null), ks.length * 700 / SPEED + 300)); };
     const cell = (id, base, v) => {
       $('#t' + id).textContent = money(v);
@@ -594,9 +596,9 @@
         ['지준', '본원통화 ↓ → 지준 −$50', '지준 $100 → $50', { res: 50 }, ['res']],
         ['통화량', 'M = 지준 × 1/R ↓', '$50 × 10 = $500 (대출 $450 · 예금 $500)', { res: 50, L: 450, D: 500 }, ['M', 'L', 'D']]] },
       { t: '대출 부실 → 은행 자본 감소', dir: 'l', base: CB, steps: [
-        ['상황', '대출 부실', '레버리지 = 자산 $1,000 ÷ 자본 $50 = 20', {}, []],
-        ['자본', '대출 −$50 → 자본 −$50', '자산 $1,000 → $950 (−5%) · 자본 $50 → $0 (−100%)', { L: 650, K: 0 }, ['L', 'K']],
-        ['결과', '은행 대출 ↓ (신용 경색) → 통화량 ↓', '자본이 부족한 은행은 새 대출을 줄인다', { L: 650, K: 0 }, ['L']]] }
+        ['상황', '대출 부실', '레버리지 = 자산 ÷ 자본 = 20', {}, []],
+        ['자본', '대출 −$50 → 자본 −$50', '자산 −5% → 자본 −100%', { L: 650, K: 0 }, ['L', 'K']],
+        ['결과', '대출 ↓ (신용 경색) → 경기 ↓', '', { L: 650, K: 0 }, ['L']]] }
     ];
     function beats(ev) {
       const base = ev.base || B;

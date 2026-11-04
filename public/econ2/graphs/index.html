@@ -84,6 +84,11 @@
   .alt.on::before{content:"▸";left:0}
   .rows{position:relative;display:flex;margin:0;padding:0;list-style:none}
   .rows::before{content:"";position:absolute;left:11px;right:11px;top:11px;height:3px;background:var(--ink);border-radius:2px}
+  /* 줄 끝의 원. 마지막 걸음이면 마지막 단계의 끝 원이 파랗게 채워지고 위에 '끝' */
+  .rows::after{content:"";position:absolute;right:4px;top:5px;width:15px;height:15px;box-sizing:border-box;border:3px solid var(--ink);border-radius:50%;background:#fff}
+  .rows .fin{position:absolute;right:-2px;top:-22px;font-size:13px;font-weight:800;color:var(--blue);opacity:0;transition:opacity .3s}
+  .player.end .stg:last-child .rows::after{background:var(--blue);border-color:var(--blue)}
+  .player.end .rows .fin{opacity:1}
   .rows li{flex:1 1 0;min-width:0}
   .rows li button{position:relative;display:block;width:100%;padding:0 22px 0 0;border:0;background:none;text-align:left;cursor:pointer;color:#9aa0aa;overflow-wrap:anywhere}
   .rows .dot{display:block;width:24px;height:24px;border:3px solid var(--ink);border-radius:50%;background:#fff;box-sizing:border-box;margin-bottom:12px}
@@ -154,6 +159,7 @@
   .eqrow .num.up{color:var(--up)}
   .eqrow .num.dn{color:var(--down)}
   .eqrow .num.pulse{background:var(--tint)}
+  .eqrow .num .old{color:#a3a8b2;font-weight:600}
   .term{text-align:center;padding:6px 4px 8px;border-radius:10px;transition:background .35s}
   .term i{display:block;font-style:normal;font-size:14.5px;font-weight:700;letter-spacing:.03em;color:var(--soft)}
   .term i:empty{display:none}
@@ -265,6 +271,9 @@
     .stg.alts .gh{flex-direction:row;align-items:center;gap:4px 12px}
     .rows{flex-direction:column;gap:14px;padding-left:36px}
     .rows::before{left:9px;right:auto;top:6px;bottom:6px;width:3px;height:auto}
+    .rows::after{right:auto;left:3px;top:auto;bottom:0}
+    .rows .fin{right:auto;left:22px;top:auto;bottom:-3px}
+    .stg:last-child .rows{padding-bottom:22px}
     .rows li button{padding:0}
     .rows .sm{font-size:13.5px}
     .rows .dot{position:absolute;left:-36px;top:0;width:22px;height:22px;margin:0}
@@ -304,6 +313,7 @@
     .gh{padding-top:28px;font-size:15px}
     .rows .dot{width:20px;height:20px;border-width:2.5px;margin-bottom:8px}
     .rows::before{left:9px;right:9px;top:9px}
+    .rows::after{top:3px}
     .rows .k{font-size:16px}
     .rows li.cur .k{font-size:17px}
     .rows .tx{font-size:15px;margin-top:2px}
