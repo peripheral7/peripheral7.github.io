@@ -532,6 +532,8 @@
   }
   const MOVE = /(AD|SRAS|LRAS|MS|MD)( 가 더| further)?\s*[←→]/;
   // 사건(sc)의 갈래(branch: 갈라지는 단계 번호)를 따라 걸음을 만든다. o.start: A 설명, o.result(앞 상태, 새 상태, 글자): 새 균형 설명
+  // 결과 제목과 같은 말(1/P ↓, P ↑ 와 [1/P ↓ · P ↑])이면 세부 줄은 생략
+  const same0 = (a, b) => { const n = (x) => String(x).replace(/[\s,·\[\]]/g, '').replace(/▲/g, '↑').replace(/▼/g, '↓'); return n(a) === n(b); };
   function beatsFor(plot, sc, branch, o, rebuild) {
     const alts = sc.stages.map((s, i) => i).filter((i) => i > 0 && (sc.stages[i].from != null || sc.stages.some((x) => x.from != null)));
     let ids;
@@ -556,7 +558,7 @@
       // 결론 제목: result 의 ' — ' 앞(Y ↓ · P ↑ 등), 설명: 사슬의 뒤쪽 또는 result 의 ' — ' 뒤
       const res = o.result(prevS[prevS.length - 1], next, letter).split(' — '), pre = snap(prevS, false);
       out.push({ g, ev: sc.t, alts: altList, sit, pre, k: ps[at], t: cause.join(' → '), run: snap(withNew, true), wait: 1.25 });
-      out.push({ g, ev: sc.t, sw: st.sw, adj: /adjust|조정/.test(why || ''), rs: st.rs || (num > 1 && /Y = Y\*/.test(res[1] || '') ? res[0].replace(/^Y [↑↓]/, YBACK) : res[0]), alts: altList, sit, pre: snap(withNew, true), k: res[0], t: after || res.slice(1).join(' — '),
+      out.push({ g, ev: sc.t, sw: st.sw, adj: /adjust|조정/.test(why || ''), rs: st.rs || (num > 1 && /Y = Y\*/.test(res[1] || '') ? res[0].replace(/^Y [↑↓]/, YBACK) : res[0]), alts: altList, sit, pre: snap(withNew, true), k: res[0], t: (after && !same0(after, res[0]) ? after : '') || res.slice(1).join(' — '),
         run: () => { snap(withNew, false)(false); if (o.after) o.after(prevS[prevS.length - 1], next); }, wait: 1.8 });
       S = withNew;
     });
@@ -737,7 +739,7 @@
       { t: 'Fed 통화량 감소', dir: 'l', stages: [{ name: 'MS ←', at: 0, ch: { add: { MS: -1.5 } }, why: 'MS ← → 1/P ↑, P ↓' }] },
       { t: '신용카드 보급 → 현금 덜 보유', q: 'SA 2', dir: 'l', stages: [
         { name: '화폐 수요 감소', label: '화폐 수요 감소', ch: { add: { Vg: 0.5 } }, why: '카드 결제 → 돈 보유 ↓ → MD ← → 1/P ↓, P ↑' },
-        keep('Fed 가 M ↓ → MS ← → 1/P 회복, P 그대로')] },
+        keep('Fed 가 M ↓ → MS ← → 1/P, P 회복')] },
       { t: '실질 GDP 증가 → 거래용 돈 더 필요', dir: 'r', stages: [
         { name: '화폐 수요 증가', ch: { add: { Yg: 0.3 } }, why: 'Y ↑ → 돈 수요 ↑ → MD → → 1/P ↑, P ↓' }] }
     ];
@@ -879,7 +881,7 @@
         stages: [{ name: 'W > W_E', at: 0, ch: { vis: { W: true }, abs: { W: 0 } }, chain: ['W > W_E', 'L_S ↑ · L_D ↓ → 실업'] }] },
       { t: '노동 수요 감소', q: 'SA 4', dir: 'l', stages: [
         { name: '수요 D ←, 임금 그대로', step: '1단계 단기', at: 2, ch: { add: { D: -1.4 }, vis: { W: true }, abs: { W: -2 } }, why: '수입 ↑ → 국내 산업 쇠퇴 → D ← → W 는 W_E 에 묶임 → 실업' },
-        { name: '임금 ↓ → 새 균형', step: '2단계 장기', at: 0, ch: { vis: { W: false } }, why: 'W ↓ → L ↓, 실업 없음 (다른 산업으로 이동)' }] }
+        { name: '임금 ↓ → 새 균형', step: '2단계 장기', at: 0, ch: { vis: { W: false } }, why: 'W ↓ → 실업 없음 (다른 산업으로 이동)' }] }
     ];
     list($('#o28'), EV, (i) => r.pick(i < 0 ? null : EV[i]));
 
