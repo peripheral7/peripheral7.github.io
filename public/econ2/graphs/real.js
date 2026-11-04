@@ -11,7 +11,7 @@
   const put = (v) => { try { localStorage.setItem(KEY, v); } catch (e) { /* no storage */ } };
 
   /* ───────── 사례 ───────── */
-  // 장 번호별 · m 버튼 · q 질문 · opts/ans 선택 · v 공개 · chart(marks: [날짜, 선, 글, 'below'?]) · th · src(k d t s u)
+  // 장 번호별 · m 버튼 · q 질문 · opts/ans 선택 · v 공개 · chart(marks: [날짜, 선, 글, 'below'|'side'|'left'?]) · th · src(k d t s u)
   const FED = 'https://www.federalreserve.gov/';
   const CASES = { 29: [
     {
@@ -95,6 +95,140 @@
         { k: 'Data', d: 'quarterly since 1959', by: 'Federal Reserve Bank of St. Louis (FRED)', t: 'Velocity of M2 Money Stock (M2V)', s: 'Velocity is nominal GDP divided by M2: how many times a year the average dollar is spent on final goods and services.', u: 'https://fred.stlouisfed.org/series/M2V' }
       ]
     }
+  ], 33: [
+  {
+    m: /^Stock market crash/, when: 'March 2000 – October 2002 · United States', title: 'The dot-com crash: stocks fell 78%, but consumers kept spending',
+    q: 'The Nasdaq index fell 78% from its peak on March 10, 2000 to October 9, 2002. In the model, lower stock prices cut household wealth, so consumption falls and AD shifts left. What happened to real consumer spending from 2000 Q1 to 2002 Q4?',
+    opts: ['Fell about 8%', 'Rose about 7.5%', 'Stayed exactly flat'], ans: 1,
+    v: 'It rose 7.5% (from 9,040 to 9,719 billion inflation-adjusted dollars). Real private investment, in contrast, was 10.9% lower in 2001 Q4 than in 2000 Q3.',
+    chart: { k: 'c33_stock', from: '1999-01', to: '2004-10', marks: [['2002-07', 0, '−70%', 'below'], ['2002-10', 1, '+7.5%']], names: ['Nasdaq', 'Real consumer spending'], y: 'Index, 2000 Q1 = 100', cap: 'NASDAQCOM (quarterly average of daily closes) and PCECC96, quarterly, 2000 Q1 = 100' },
+    th: 'The model\'s chain is wealth ↓ → C ↓ → AD ←. Here the AD shift came mostly from somewhere else: ==business investment collapsed while households kept buying==. Unemployment rose from 4.0% (Jan 2000) to 5.9% (Apr 2002) even though spending did not fall. Fed officials said the stock decline did restrain consumers, but income gains and tax cuts kept household spending up. A crash hurts spending through wealth, but the effect was smaller than the textbook arrow suggests.',
+    src: [
+      { k: 'News', d: 'Nov 12, 2002', by: 'Roger Ferguson, Federal Reserve Vice Chairman', t: 'Recent Experience and Economic Outlook', s: 'He says the 2001 downturn was led by a collapse in business spending on equipment and software. The stock decline held back consumers, yet household spending held up well, helped by income gains and income tax cuts.', u: 'https://www.federalreserve.gov/boarddocs/speeches/2002/200211122/default.htm' },
+      { k: 'News', d: 'Jul 17, 2003', by: 'NBER Business Cycle Dating Committee', t: 'Business Cycle Dating Committee Announcement', s: 'The recession began in March 2001 and ended in November 2001; it lasted 8 months, a little shorter than the average postwar recession.', u: 'https://www.nber.org/news/business-cycle-dating-committee-announcement-july-17-2003' }
+    ]
+  },
+  {
+    m: /^Income tax cut/, when: 'May 2008 · United States', title: 'The 2008 tax rebates: income jumped, spending barely moved',
+    q: 'In mid-2008 the government mailed out economic stimulus payments (tax rebates). Real disposable income rose 4.9% from April to May 2008. In the model, a tax cut raises disposable income, so consumption rises. What happened to real consumer spending that month?',
+    opts: ['Rose about 5%', 'Rose about 2.5%', 'Barely changed: +0.2%'], ans: 2,
+    v: 'Only +0.2%. People saved most of the first month\'s money: the saving rate jumped from 2.4% (April) to 6.8% (May), then fell back to 3.6% by July.',
+    chart: { k: 'c33_rebate', from: '2007-02', to: '2009-06', marks: [['2008-05', 0, '+4.9%', 'side'], ['2008-05', 1, '+0.2%', 'below']], names: ['Disposable income', 'Consumer spending'], y: '% change from the previous month', cap: 'DSPIC96 and PCEC96, monthly, % change from the previous month' },
+    th: 'The model gets the direction right but not the speed. A one-time payment is ==saved first and spent over the following months==. A study using survey data found households spent 12–30% of their payment on nondurables within three months, and 50–90% when cars and other durables are counted; the authors put the boost to consumption at 1.3–2.3% in 2008 Q2. Still, in the monthly totals the effect is hard to see: real spending fell 2.1% from May to December 2008, in the middle of the recession that had begun in December 2007.',
+    src: [
+      { k: 'Research', d: '2011 (revised 2013)', by: 'Parker, Souleles, Johnson & McClelland, NBER Working Paper 16684', t: 'Consumer Spending and the Economic Stimulus Payments of 2008', s: 'Using the random timing of payments, the authors find that households spent a large share of the money, especially on durable goods such as vehicles, and that this raised consumption in mid-2008.', u: 'https://www.nber.org/papers/w16684' },
+      { k: 'Data', d: 'monthly since 1959', by: 'Federal Reserve Bank of St. Louis (FRED)', t: 'Real Disposable Personal Income (DSPIC96)', s: 'Income after taxes and transfers, adjusted for inflation; the series shows the one-month spike in May 2008 when the payments went out.', u: 'https://fred.stlouisfed.org/series/DSPIC96' }
+    ]
+  },
+  {
+    m: /^Government purchases rise/, when: '1965–1969 · United States', title: 'Vietnam War spending pushed an economy at full employment into inflation',
+    q: 'From early 1965 to spring 1968, federal defense spending rose 49% as the Vietnam War built up. In the model, higher government purchases shift AD right. U.S. inflation was 1.2% in December 1964. Where was it four years later?',
+    opts: ['Still about 1%', 'About 4.7%', 'About 12%'], ans: 1,
+    v: 'It reached 4.7% in December 1968 and 5.9% in December 1969, while unemployment fell to 3.4% (September 1968).',
+    chart: { k: 'c33_gov', from: '1963-01', to: '1970-10', marks: [['1966-07', 0, '20%'], ['1969-10', 1, '5.7%']], names: ['Defense spending', 'CPI inflation'], y: '% change from a year earlier', cap: 'FDEFX (nominal, quarterly) and CPIAUCSL (first month of each quarter), % change from a year earlier' },
+    th: 'This is the textbook case: ==AD shifted right when the economy was already near full employment, so prices rose more than output==. Real GDP grew 8.5% in the year to 1966 Q1, but only 2.7% in the year to 1967 Q4, while inflation kept climbing. War spending was not the only push: the Fed\'s history essay points to the Great Society programs and the war together, and President Johnson himself wrote in 1967 that inflation pressure had started in late 1965 as the economy neared full operation.',
+    src: [
+      { k: 'News', d: 'Jan 24, 1967', by: 'President Lyndon B. Johnson', t: 'Annual Budget Message to the Congress, Fiscal Year 1968', s: 'The President says that in late 1965 and early 1966, as the economy approached full operation, inflation pressure appeared and he asked Congress for tax changes to dampen it.', u: 'https://www.presidency.ucsb.edu/documents/annual-budget-message-the-congress-fiscal-year-1968' },
+      { k: 'Research', d: '2013', by: 'Federal Reserve History', t: 'The Great Inflation', s: 'Great Society spending programs arrived when the Vietnam War was already straining the federal budget; these fiscal imbalances made monetary policy harder.', u: 'https://www.federalreservehistory.org/essays/great-inflation' }
+    ]
+  },
+  {
+    m: /^Turmoil abroad/, when: '2014–2016 · United States', title: 'The strong dollar: exports stalled while imports kept growing',
+    q: 'From June 2014 to March 2015 the broad trade-weighted dollar index rose 14%. In the model, a stronger dollar makes U.S. goods dearer abroad, so net exports fall and AD shifts left. How much did real U.S. exports grow from 2014 Q3 to 2016 Q3?',
+    opts: ['They fell about 5%', 'They barely grew: +1.5%', 'They rose about 10%'], ans: 1,
+    v: 'Real exports rose only 1.5% (2,288 to 2,321 billion inflation-adjusted dollars), while real imports rose 6.8% (2,623 to 2,801).',
+    chart: { k: 'c33_nx', from: '2012-01', to: '2017-10', vline: ['2014-07', 'Dollar starts rising'], marks: [['2015-10', 0, '−1.5%', 'below'], ['2015-01', 1, '6.7%']], names: ['Real exports', 'Real imports'], y: '% change from a year earlier', cap: 'EXPGSC1 and IMPGSC1, quarterly, % change from a year earlier; dollar: DTWEXBGS' },
+    th: 'The direction is right: ==exports stalled and imports kept growing==, so net exports dragged on GDP. A Fed Vice Chairman estimated that net exports lowered GDP growth by almost ¾ of a percentage point over the year to late 2015, close to what the Fed\'s model predicted. Two things the simple model hides: GDP still grew 4.3% over those two years, since other parts of demand kept growing; and the trade deficit measured in dollars hardly changed (−$489 billion in 2014 Q3, −$481 billion in 2016 Q3), partly because a stronger dollar lowers the dollar price of each import.',
+    src: [
+      { k: 'News', d: 'Nov 12, 2015', by: 'Stanley Fischer, Federal Reserve Vice Chairman', t: 'The Transmission of Exchange Rate Changes to Output and Inflation', s: 'A stronger dollar raises the foreign price of U.S. goods and lowers exports; the effect on imports is weaker, so net exports fall and GDP is pushed down.', u: 'https://www.federalreserve.gov/newsevents/speech/fischer20151112a.htm' },
+      { k: 'Data', d: 'daily since 2006', by: 'Federal Reserve Bank of St. Louis (FRED)', t: 'Nominal Broad U.S. Dollar Index (DTWEXBGS)', s: 'A trade-weighted average of the dollar against the currencies of major U.S. trading partners; higher means a stronger dollar.', u: 'https://fred.stlouisfed.org/series/DTWEXBGS' }
+    ]
+  },
+  {
+    m: /^Oil price spike/, when: '1973–1975 · United States', title: 'The 1973–74 oil shock: inflation and unemployment rose together',
+    q: 'After the Arab oil embargo that began in October 1973, the crude oil price rose from $4.31 (September 1973) to $11.16 (October 1974). In the model, an oil shock shifts SRAS left. What happened to inflation and unemployment?',
+    opts: ['Both fell', 'Inflation rose to 12%, unemployment stayed near 5%', 'Inflation rose to 12%, unemployment rose to 9%'], ans: 2,
+    v: 'CPI inflation peaked at 12.2% (November 1974) and unemployment reached 9.0% (May 1975) — stagflation.',
+    chart: { k: 'c33_oil', from: '1972-01', to: '1977-12', vline: ['1973-10', 'Oil embargo'], marks: [['1974-11', 0, '12.2%'], ['1975-05', 1, '9.0%']], names: ['CPI inflation', 'Unemployment rate'], y: '% (inflation: change from a year earlier)', cap: 'CPIAUCSL and UNRATE, monthly; oil price: WTISPLC' },
+    th: 'Exactly the model\'s prediction: ==a leftward SRAS shift raises prices and cuts output at the same time==. Real GDP fell in four of the five quarters from 1974 Q1 to 1975 Q1. But oil was not the only cause: the Fed\'s history essay stresses that inflation was already high and factories were near full capacity before the embargo. The 2022 oil spike shows how much depends on the surrounding economy: oil rose 60% (Dec 2021 to Jun 2022) and inflation hit 9.0%, but unemployment stayed between 3.5% and 3.9% through 2022, and real GDP fell only in 2022 Q1 (−0.3%) before growing every quarter through 2023.',
+    src: [
+      { k: 'Research', d: 'Nov 22, 2013', by: 'Michael Corbett, Federal Reserve History', t: 'Oil Shock of 1973–74', s: 'The embargo and OAPEC production cuts nearly quadrupled the oil price by January 1974. Higher oil prices tend to push inflation up and growth down at once, which leaves a central bank facing a trade-off.', u: 'https://www.federalreservehistory.org/essays/oil-shock-of-1973-74' },
+      { k: 'Data', d: 'monthly since 1946', by: 'Federal Reserve Bank of St. Louis (FRED)', t: 'Spot Crude Oil Price: West Texas Intermediate (WTISPLC)', s: 'Monthly crude oil price in dollars per barrel; the 1970s values are posted prices that changed in steps.', u: 'https://fred.stlouisfed.org/series/WTISPLC' }
+    ]
+  },
+  {
+    m: /^Technological progress/, when: '1995–2000 · United States', title: 'The late-1990s productivity boom: faster growth without more inflation',
+    q: 'U.S. output per hour in the business sector grew 1.4% a year from 1973 to 1995. In the model, better technology raises Y* and shifts both LRAS and SRAS right. What was the average growth rate of productivity from the end of 1995 to the end of 2000?',
+    opts: ['About 3.0% a year', 'About 1.4%, no change', 'About 0.5% a year'], ans: 0,
+    v: 'About 3.0% a year. Unemployment fell from 5.6% (December 1995) to 3.8% (April 2000), yet inflation stayed between 1.4% and 3.8% (1996–2000).',
+    chart: { k: 'c33_tech', from: '1990-01', to: '2004-10', band: ['1995-10', '2000-10'], marks: [['1999-10', 0, '4.2%']], names: ['Productivity growth', 'CPI inflation'], y: '% change from a year earlier', cap: 'OPHNFB (output per hour, nonfarm business) and CPIAUCSL (quarterly average), quarterly, % change from a year earlier' },
+    th: 'The model says ==more productivity means more output at lower prices==. The output half is clear: growth was fast and unemployment fell to 3.8% in April 2000, the lowest in 30 years. The price half shows up differently: the price level did not fall; ==inflation stayed moderate even as unemployment dropped==, where weak productivity would have pushed it up. Fed economists estimate that information technology (computers and their production) explains about two-thirds of the 1-point step-up in productivity growth between the first and second halves of the 1990s.',
+    src: [
+      { k: 'Research', d: 'Apr 2000', by: 'Oliner & Sichel, Federal Reserve Board (FEDS 2000-20)', t: 'The Resurgence of Growth in the Late 1990s: Is Information Technology the Story?', s: 'Growth accounting shows IT use and computer production explain about two-thirds of the acceleration in productivity growth in the late 1990s.', u: 'https://www.federalreserve.gov/econres/feds/the-resurgence-of-growth-in-the-late-1990s-is-information-technology-the-story.htm' },
+      { k: 'Data', d: 'quarterly since 1947', by: 'Federal Reserve Bank of St. Louis (FRED)', t: 'Nonfarm Business Sector: Real Output Per Hour of All Persons (OPHNFB)', s: 'An index of how much output the business sector produces per hour worked.', u: 'https://fred.stlouisfed.org/series/OPHNFB' }
+    ]
+  }
+], '28w': [
+    {
+      m: /^Wage above equilibrium/, when: '1992 · New Jersey & Pennsylvania', title: 'New Jersey raised its minimum wage — fast-food jobs did not fall',
+      q: 'On April 1, 1992 New Jersey raised its minimum wage from $4.25 to $5.05 an hour; Pennsylvania left it at $4.25. Card and Krueger surveyed 410 fast-food restaurants in both states before and after. In the model a wage above equilibrium cuts employment. Relative to Pennsylvania, what happened to employment at New Jersey fast-food restaurants?',
+      opts: ['Fell by about 13%', 'Rose by about 13%', 'Did not change at all'], ans: 1,
+      v: 'It rose — by about 13% relative to Pennsylvania stores.',
+      th: 'The model predicts fewer jobs when the wage is forced above W_E. This classic study found ==no loss of fast-food jobs==, which suggests employers can absorb a modest increase in other ways. It compared similar restaurants on both sides of the border, because statewide numbers mix all workers and industries. The finding was challenged, and the authors answered their critics in the American Economic Review in 2000.',
+      src: [
+        { k: 'Research', d: 'Oct 1993 (AER, Sept 1994)', by: 'Card & Krueger, NBER Working Paper 4509', t: 'Minimum Wages and Employment: A Case Study of the Fast Food Industry in New Jersey and Pennsylvania', s: 'The authors compared stores on both sides of the border before and after the rise and report that their results challenge the prediction that a higher minimum lowers employment.', u: 'https://www.nber.org/papers/w4509' },
+        { k: 'Research', d: 'Dec 2000', by: 'Card & Krueger, American Economic Review 90(5)', t: 'Minimum Wages and Employment: A Case Study of the Fast-Food Industry in New Jersey and Pennsylvania: Reply', s: 'The authors\' reply to critics of the study, in the same journal — the minimum-wage question stayed under debate for years.', u: 'https://www.aeaweb.org/articles?id=10.1257/aer.90.5.1397' }
+      ]
+    },
+    {
+      m: /^Labor demand falls/, when: 'March – May 2020 · United States', title: 'COVID-19: labor demand collapsed, but average wages rose',
+      q: 'Between March and April 2020 U.S. payroll employment fell by about 20.5 million, and the unemployment rate jumped from 3.5% (Feb) to 14.8% (Apr). In the model the wage is stuck at W_E in the short run, then falls. What happened to average hourly earnings (production and nonsupervisory workers) compared with a year earlier?',
+      opts: ['Rose by almost 8%', 'Stayed about the same', 'Fell by about 5%'], ans: 0,
+      v: 'They rose: $25.14 in April 2020 versus $23.33 in April 2019, +7.8% (it was +3.6% in February).',
+      chart: { k: 'c28_covid', from: '2019-01', to: '2021-12', marks: [['2020-04', 0, '14.8%'], ['2020-04', 1, '+7.8%', 'below']], names: ['Unemployment rate', 'Hourly earnings'], y: '% (earnings: change from a year earlier)', cap: 'UNRATE and AHETPI (% change from a year earlier), monthly' },
+      th: 'Stage 1 fits: ==demand fell and unemployment jumped while firms did not cut wages==. Stage 2 (the wage falls to a new equilibrium) did not appear. The average rose because, as BLS noted, the jobs lost were mostly low-paid, so the ones left were higher paid — a composition effect. Also 18.1 million of the unemployed said they were on temporary layoff, expecting to be recalled, so this looked more like a pause than a permanent shift of D.',
+      src: [
+        { k: 'News', d: 'May 8, 2020', by: 'U.S. Bureau of Labor Statistics', t: 'The Employment Situation — April 2020', s: 'Payrolls dropped by 20.5 million in April and the number on temporary layoff rose about ten-fold; BLS said the rise in average earnings largely reflects job loss among lower-paid workers.', u: 'https://www.bls.gov/news.release/archives/empsit_05082020.htm' },
+        { k: 'Data', d: 'monthly since 1964', by: 'Federal Reserve Bank of St. Louis (FRED)', t: 'Average Hourly Earnings of Production and Nonsupervisory Employees, Total Private (AHETPI)', s: 'The series used in the chart, collected by BLS from employers\' payroll records.', u: 'https://fred.stlouisfed.org/series/AHETPI' }
+      ]
+    }
+  ], '28u': [
+    {
+      m: /^Laid off, searching/, when: '2007–2010 · United States', title: 'Looking for work took far longer in the Great Recession',
+      q: 'In the model a laid-off worker who searches counts as unemployed until a job is found. In November 2007 the median unemployed person had been looking for 8.6 weeks. By June 2010, how long was the median spell?',
+      opts: ['About 12 weeks', 'About 25 weeks', 'About 17 weeks'], ans: 1,
+      v: 'About 25 weeks (25.2) — nearly three times as long as in 2007.',
+      chart: { k: 'c28_dur', from: '2000-01', to: '2019-12', marks: [['2007-11', 0, '8.6 wks', 'left'], ['2010-06', 0, '25.2 wks'], ['2009-10', 1, '10.0%', 'below']], names: ['Median weeks', 'Unemployment rate'], y: 'Weeks / percent', cap: 'UEMPMED (median duration of unemployment, weeks) and UNRATE, monthly' },
+      th: 'Direction is right: ==a laid-off searcher is counted as unemployed==. But the model treats this as a short stop between jobs. In 2010 searching often lasted half a year, and the duration kept rising for months after the unemployment rate peaked (10.0% in Oct 2009). In April 2010 the long-term unemployed (27 weeks or more) made up 45.5% of all unemployed, a record share in the BLS data.',
+      src: [
+        { k: 'Research', d: '2018', by: 'U.S. Bureau of Labor Statistics, Monthly Labor Review', t: 'Great Recession, great recovery? Trends from the Current Population Survey', s: 'Median unemployment duration rose from 8.6 weeks in Nov 2007 to 25.2 weeks in June 2010, and long-term unemployment was 45.5 percent of the unemployed in April 2010.', u: 'https://www.bls.gov/opub/mlr/2018/article/great-recession-great-recovery.htm' },
+        { k: 'Data', d: 'monthly since 1967', by: 'Federal Reserve Bank of St. Louis (FRED)', t: 'Median Duration of Unemployment (UEMPMED)', s: 'The series used in the chart: the middle value of how long unemployed people have been looking, in weeks.', u: 'https://fred.stlouisfed.org/series/UEMPMED' }
+      ]
+    },
+    {
+      m: /^Laid off, gives up searching/, when: 'February – April 2020 · United States', title: 'Millions left the labor force in the COVID-19 shock',
+      q: 'The model says a laid-off worker who stops searching leaves the labor force, so participation falls and the unemployment rate rises less. From February to April 2020 the unemployment rate rose from 3.5% to 14.8%. By how many percentage points did the labor force participation rate fall (63.3% in Feb)?',
+      opts: ['About 0.5 points', 'About 1.5 points', 'About 3.2 points'], ans: 2,
+      v: 'It fell 3.2 points, to 60.1% — about 6.4 million people left the labor force from March to April.',
+      chart: { k: 'c28_lfp', from: '2020-01', to: '2022-12', marks: [['2020-04', 0, '−3.2', 'below'], ['2020-04', 1, '+11.3']], names: ['Participation', 'Unemployment rate'], y: 'Change since Feb 2020, percentage points', cap: 'CIVPART and UNRATE, monthly, change from Feb 2020' },
+      th: 'The flow is real: ==people who stop looking drop out of the labor force==, which keeps the official rate from rising even more. But the label "gives up" fits only a few of them. BLS counted 574,000 discouraged workers in April, against 9.9 million people outside the labor force who said they wanted a job. By definition none of them had searched in the last 4 weeks, so none counted as unemployed.',
+      src: [
+        { k: 'News', d: 'May 8, 2020', by: 'U.S. Bureau of Labor Statistics', t: 'The Employment Situation — April 2020', s: 'Reports the drop in participation, 9.9 million people not in the labor force who wanted a job, and 2.3 million marginally attached.', u: 'https://www.bls.gov/news.release/archives/empsit_05082020.htm' },
+        { k: 'Data', d: 'Current Population Survey definitions', by: 'U.S. Bureau of Labor Statistics', t: 'Concepts and definitions: discouraged workers and people who want a job now', s: 'Explains that people who want a job now but have not searched in 4 weeks are outside the labor force, and that discouraged workers are a subset of them.', u: 'https://www.bls.gov/cps/definitions.htm' }
+      ]
+    },
+    {
+      m: /^Reclassify token job-seekers/, when: '2009–2020 · United States', title: 'The official rate vs the broadest measure (U-6)',
+      q: 'The model shows how recounting people between "unemployed" and "not in the labor force" changes the official unemployment rate (U-3). BLS also publishes U-6, which adds people who want a job but stopped searching, plus part-timers who want full-time work. In April 2020 U-3 was 14.8%. What was U-6?',
+      opts: ['About 23%', 'About 19%', 'About 16%'], ans: 0,
+      v: 'U-6 was 22.9% — 8.1 points above the official rate that month.',
+      chart: { k: 'c28_u6', from: '1994-01', to: '2024-12', marks: [['2009-12', 1, '17.2%'], ['2020-04', 1, '22.9%'], ['2020-04', 0, '14.8%', 'below']], names: ['U-3 (official)', 'U-6 (broadest)'], y: '% of labor force', cap: 'UNRATE and U6RATE, monthly' },
+      th: 'The model is right that ==the rule for who counts as unemployed changes the rate== — U-6 is a different rule. It adds the marginally attached (2.3 million) and people working part time for economic reasons (10.9 million) in April 2020. The gap is large even in normal times: in Feb 2020 U-3 was 3.5% and U-6 7.0%, twice as high. So the official rate counts active searchers; it is not a full measure of slack.',
+      src: [
+        { k: 'Data', d: 'Current Population Survey definitions', by: 'U.S. Bureau of Labor Statistics', t: 'Concepts and definitions: alternative measures of labor underutilization (U-1 to U-6)', s: 'U-3 is the official rate; U-6 is the broadest, adding groups that the official rate leaves out.', u: 'https://www.bls.gov/cps/definitions.htm' },
+        { k: 'News', d: 'May 8, 2020', by: 'U.S. Bureau of Labor Statistics', t: 'The Employment Situation — April 2020', s: 'Gives the April 2020 counts of marginally attached workers and people working part time for economic reasons, and defines U-6.', u: 'https://www.bls.gov/news.release/archives/empsit_05082020.htm' }
+      ]
+    }
   ] };
 
   /* ───────── 선그래프 ───────── */
@@ -117,12 +251,16 @@
     s += '<line x1="' + L + '" x2="' + (W - R) + '" y1="' + (H - B) + '" y2="' + (H - B) + '" stroke="#1f2537" stroke-width="1.5"/>';
     if (c.vline) { const vx = X(yr(c.vline[0])); s += '<line x1="' + vx + '" x2="' + vx + '" y1="' + T + '" y2="' + (H - B) + '" stroke="#c8352e" stroke-width="2" stroke-dasharray="5 4"/><text x="' + (vx + 6) + '" y="' + (T + 14) + '" class="vl">' + esc(c.vline[1]) + '</text>'; }
     for (let j = 1; j <= n; j++) s += '<polyline fill="none" stroke="' + COL[j - 1] + '" stroke-width="' + (j === 1 ? 3 : 2.5) + '" stroke-linejoin="round" points="' + rows.map((r, i) => X(xs[i]).toFixed(1) + ',' + Y(r[j]).toFixed(1)).join(' ') + '"/>';
-    if (c.names) s += c.names.map((nm, j) => '<line x1="' + (L + 10 + j * 200) + '" x2="' + (L + 34 + j * 200) + '" y1="' + (T - 12) + '" y2="' + (T - 12) + '" stroke="' + COL[j] + '" stroke-width="3"/><text x="' + (L + 40 + j * 200) + '" y="' + (T - 6) + '" class="lg">' + esc(nm) + '</text>').join('');
+    // 범례: 앞 이름 길이만큼 띄운다(휴대폰 22px 글자 ≈ 13px/자 기준, 두 이름 합쳐 40자 안팎까지)
+    let lx = L + 10;
+    if (c.names) s += c.names.map((nm, j) => { const x = lx; lx += 70 + nm.length * 13; return '<line x1="' + x + '" x2="' + (x + 24) + '" y1="' + (T - 12) + '" y2="' + (T - 12) + '" stroke="' + COL[j] + '" stroke-width="3"/><text x="' + (x + 30) + '" y="' + (T - 6) + '" class="lg">' + esc(nm) + '</text>'; }).join('');
     else s += '<text x="' + L + '" y="' + (T - 10) + '" class="lg">' + esc(c.y) + '</text>';
     (c.marks || []).forEach((mk) => {
       const r = rows.find((q) => q[0].indexOf(mk[0]) === 0); if (!r) return;
-      const px = X(yr(r[0])), py = Y(r[mk[1] + 1]), right = px > W - 120;
-      s += '<circle cx="' + px + '" cy="' + py + '" r="6" fill="#fff" stroke="' + COL[mk[1]] + '" stroke-width="3"/><text x="' + (px + (right ? -10 : 10)) + '" y="' + (mk[3] === 'below' ? py + 28 : py - 10) + '" text-anchor="' + (right ? 'end' : 'start') + '" class="mk">' + esc(mk[2]) + '</text>';
+      // 글 자리: 기본 점 오른쪽 위 · below 아래 · side 바로 옆(위가 범례에 닿을 때) · left 왼쪽 위. 오른쪽 끝 가까우면 왼쪽으로
+      const px = X(yr(r[0])), py = Y(r[mk[1] + 1]), pos = mk[3], left = pos === 'left' || px > W - 120;
+      const ty = pos === 'below' ? py + 28 : pos === 'side' ? py + 8 : py - 10, tx = px + (left ? -10 : pos === 'side' ? 14 : 10);
+      s += '<circle cx="' + px + '" cy="' + py + '" r="6" fill="#fff" stroke="' + COL[mk[1]] + '" stroke-width="3"/><text x="' + tx + '" y="' + ty + '" text-anchor="' + (left ? 'end' : 'start') + '" class="mk">' + esc(mk[2]) + '</text>';
     });
     return s + '</svg>';
   }
@@ -131,8 +269,8 @@
   let data = null;
   const fmtT = (s) => esc(s).replace(/==(.+?)==/g, '<mark>$1</mark>');
   function render(card, c) {
+    card.hidden = c === 'none';   // 이 사건엔 현실 사례가 없으면 카드를 띄우지 않는다(선택을 풀면 다시 안내)
     if (!c) { card.innerHTML = '<p class="rwnote"><span class="rwtag">Real world</span>Pick an event marked <b class="rwchip">REAL</b> to test the model against U.S. data.</p>'; return; }
-    card.hidden = c === 'none';   // 이 사건엔 현실 사례가 없으면 카드를 띄우지 않는다
     if (c === 'none') { card.innerHTML = ''; return; }
     card.innerHTML =
       '<div class="rwhd"><span class="rwtag">Real world</span><span class="rwwhen">' + esc(c.when) + '</span></div>' +
@@ -141,7 +279,7 @@
       '<div class="rwopts">' + c.opts.map((o, i) => '<button type="button" data-i="' + i + '">' + esc(o) + '</button>').join('') + '<button type="button" class="rwskip" data-i="-1">Just show me</button></div>' +
       '<div class="rwans" hidden>' +
       '<p class="rwv"></p>' +
-      '<figure class="rwfig">' + (data ? chart(c.chart, data) : '<p class="rwnote">Data could not be loaded.</p>') + '<figcaption>Source: FRED — ' + esc(c.chart.cap) + (data ? ' · retrieved ' + esc(data.fetched) : '') + (c.chart.band ? ' · shaded: event period' : '') + '</figcaption></figure>' +
+      (c.chart ? '<figure class="rwfig">' + (data ? chart(c.chart, data) : '<p class="rwnote">Data could not be loaded.</p>') + '<figcaption>Source: FRED — ' + esc(c.chart.cap) + (data ? ' · retrieved ' + esc(data.fetched) : '') + (c.chart.band ? ' · shaded: event period' : '') + '</figcaption></figure>' : '') +   // chart 없으면 그림 생략(연구 사례)
       '<p class="rwth"><span class="lb">Theory vs reality</span>' + fmtT(c.th) + '</p>' +
       '<ul class="rwsrc">' + c.src.map((x) => '<li><span class="lb">' + x.k + '</span><div><a href="' + esc(x.u) + '" target="_blank" rel="noopener">' + esc(x.t) + '</a><small>' + esc(x.by) + ' · ' + esc(x.d) + '</small><p>' + esc(x.s) + '</p></div></li>').join('') + '</ul>' +
       '</div>';
@@ -150,32 +288,43 @@
       card.querySelectorAll('.rwopts button').forEach((x) => { const k = +x.getAttribute('data-i'); x.disabled = true; x.classList.toggle('ok', k === c.ans); x.classList.toggle('no', k === i && i !== c.ans); });
       $('.rwv', card).innerHTML = (i < 0 ? '' : i === c.ans ? '<b class="ok">✓ Right.</b> ' : '<b class="no">✗ Not quite.</b> ') + esc(c.v);
       $('.rwans', card).hidden = false;
+      card.dispatchEvent(new CustomEvent('rwanswer'));   // 시간선 숨김(attach)
     }));
   }
 
   /* ───────── 붙이기 ───────── */
-  // 장 하나: 그림 칸 아래 카드 + 목록 REAL 표시. redo: 데이터가 늦게 오면 답 공개 전 카드 다시 그리기
+  // 카드 자리: CASES 키 → [그림 칸, 사건 목록을 감싼 범위]. 탭 있는 장은 범위 안에 목록이 여럿(Ch33 AD·AS) 또는 패널마다 따로(Ch28)
+  const SPOT = { 29: ['#c29 .fig', '#o29'], 30: ['#c30 .fig', '#o30'], 33: ['#c33 .fig', '#c33 .side'], '28w': ['#p28w .fig', '#o28'], '28u': ['#p28u .fig', '#o28s'] };
+  // 범위 하나: 그림 칸 아래 카드 + 목록 REAL 표시. redo: 데이터가 늦게 오면 답 공개 전 카드 다시 그리기
   const redo = [];
-  function attach(n, cases) {
-    const fig = $('#c' + n + ' .fig'), ul = $('#o' + n + ' ul');
-    if (!fig || !ul) return;
-    const card = document.createElement('div'); card.className = 'rwcard'; card.id = 'rw' + n; card.setAttribute('aria-live', 'polite');
+  function attach(key, cases) {
+    const fig = $(SPOT[key][0]), scope = $(SPOT[key][1]);
+    if (!fig || !scope) return;
+    const card = document.createElement('div'); card.className = 'rwcard'; card.id = 'rw' + key; card.setAttribute('aria-live', 'polite');
     fig.appendChild(card);
     let cur = null;
     const caseOf = (b) => cases.find((c) => c.m.test(b.textContent.trim())) || null;
-    ul.querySelectorAll('li button').forEach((b) => { if (caseOf(b)) b.parentNode.classList.add('hasrw'); });
-    // 클릭된 사건 읽기
-    ul.addEventListener('click', () => {
-      const b = $('button[aria-pressed="true"]', ul);
-      cur = b ? caseOf(b) || 'none' : null;
-      render(card, cur);
-    });
+    scope.querySelectorAll('li button').forEach((b) => { if (caseOf(b)) b.parentNode.classList.add('hasrw'); });
+    // 시간선: 사례 카드가 있으면 rwdock(데스크톱 하단 고정), 정답을 고르면 rwgone(숨김). --dockh 는 시간선 높이
+    const host = fig.closest('.panel') || fig.closest('.ch'), player = host && $('.player', host);
+    if (player && window.ResizeObserver) new ResizeObserver(() => host.style.setProperty('--dockh', player.scrollHeight + 'px')).observe($('.steps', player) || player);
+    const dock = () => { if (!host) return; host.classList.toggle('rwdock', !!cur && cur !== 'none'); host.classList.remove('rwgone'); };
+    card.addEventListener('rwanswer', () => host && host.classList.add('rwgone'));
+    // 보이는 목록에서 눌린 사건 읽기(숨은 탭의 눌림은 무시)
+    const read = () => {
+      const b = Array.prototype.find.call(scope.querySelectorAll('button[aria-pressed="true"]'), (x) => !x.closest('[hidden]'));
+      const c = b ? caseOf(b) || 'none' : null;
+      if (c !== cur) { cur = c; render(card, cur); dock(); }
+    };
+    scope.addEventListener('click', (e) => { if (e.target.closest('li button')) { cur = undefined; read(); } });   // 같은 사건을 다시 골라도 새 카드
+    const tabs = fig.closest('.ch') && $('.sub', fig.closest('.ch'));
+    if (tabs) tabs.addEventListener('click', () => setTimeout(read, 0));
     render(card, cur);
     redo.push(() => { if (cur && cur !== 'none' && $('.rwans', card).hidden) render(card, cur); });
   }
   function init() {
-    Object.keys(CASES).forEach((n) => attach(n, CASES[n]));
-    fetch('/econ2/graphs/real-data.json?v=20261105c').then((r) => r.json()).then((d) => { data = d; redo.forEach((f) => f()); }).catch(() => {});
+    Object.keys(CASES).forEach((k) => attach(k, CASES[k]));
+    fetch('/econ2/graphs/real-data.json?v=20261105g').then((r) => r.json()).then((d) => { data = d; redo.forEach((f) => f()); }).catch(() => {});
 
     // 모드 토글
     const links = $('.top .links'), tg = document.createElement('div');

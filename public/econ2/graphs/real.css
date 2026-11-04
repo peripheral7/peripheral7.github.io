@@ -57,3 +57,19 @@
   .rwfig .mk{font-size:26px}
   .rwfig .vl{font-size:21px}
 }
+
+/* 사례 카드가 떠 있을 때 시간선(.player) — real.js 가 카드 자리(.panel 또는 .ch)에 rwdock, 정답을 고르면 rwgone 을 붙인다.
+   데스크톱: 위 내용 길이와 상관없이 화면 하단에 고정(조작 줄 .pbar 도 그 안에), 정답 고르면 아래로 빠르게 미끄러져 사라짐.
+   휴대폰: 세로 시간선이라 고정하지 않고, 정답 고르면 빠르게 접힘. --dockh = 시간선 높이(real.js 가 잼) */
+@media (min-width:901px){
+  .rw .rwdock .player{position:fixed;left:0;right:0;bottom:0;z-index:15;max-width:var(--max);margin:0 auto;padding:12px 24px 72px;background:#fff;border-top:1px solid var(--line);box-shadow:0 -6px 18px rgba(31,37,55,.07);transition:bottom .22s ease,opacity .18s ease}
+  .rw .rwdock{padding-bottom:calc(var(--dockh,0px) - 60px)}
+  .rw .rwdock.rwgone{padding-bottom:0}
+  .rw .rwdock.rwgone .player{bottom:calc(-1 * var(--dockh,240px) - 20px);opacity:0;pointer-events:none}
+}
+@media (max-width:900px){
+  .rw .rwdock .player{overflow:hidden;max-height:var(--dockh,none);transition:max-height .22s ease,opacity .18s ease,padding .22s ease}
+  .rw .rwdock.rwgone .player{max-height:0;opacity:0;padding-top:0;pointer-events:none}
+}
+@media (prefers-reduced-motion:reduce){.rw .rwdock .player{transition:none}}
+.rw .rwdock .player.idle{display:none}   /* 걸음이 없는 사건(Ch29 식 사건)은 빈 띠를 두지 않는다 */
