@@ -1,9 +1,7 @@
-/* Econ2 Interactive — 현실 연결 모드(Real world). app.js 와 따로 둔 덧붙이기: app.js 를 고치지 않고 DOM 으로만 붙는다.
-   · 머리줄에 [Basic | Real world] 토글. 고른 모드는 localStorage 'econ2.mode', <html class="rw"> 로 표시.
-   · Real world 이면 Ch29 그림 칸(.fig) 아래에 카드 한 장: ① 예측 질문 → 답을 고르면 ② 실제 데이터 그래프 ③ 이론과 맞았나 ④ 뉴스 · 연구.
-   · 사건 연결은 Events 버튼 글자(CASES[].m 정규식)로 한다 — 목록 순서가 바뀌어도 맞게.
-   · 데이터는 /econ2/graphs/real-data.json(scripts/econ2-real-data.mjs 로 FRED 에서 받은 사본). 카드 문장의 숫자는 그 데이터 기준.
-   · 지금은 영문판 Ch29 시제품. */
+/* Econ2 Interactive — Real world 모드
+   · 토글 [Basic | Real world] · localStorage 'econ2.mode' · <html class="rw">
+   · 카드: 예측 질문 → 실제 데이터 그래프 → 이론 대조 → 뉴스·연구
+   · 데이터: real-data.json (FRED, scripts/econ2-real-data.mjs) */
 (function () {
   'use strict';
   const $ = (s, r) => (r || document).querySelector(s);
@@ -13,7 +11,7 @@
   const put = (v) => { try { localStorage.setItem(KEY, v); } catch (e) { /* no storage */ } };
 
   /* ───────── 사례 ───────── */
-  // m: 사건 버튼 글자. q: 예측 질문, opts · ans: 고를 답, v: 답 공개 첫 줄, chart: 그래프, th: 이론과 맞았나, src: 뉴스 · 연구(k, d 날짜, t 제목, s 내 말로 쓴 요약, u 주소)
+  // m 버튼 · q 질문 · opts/ans 선택 · v 공개 · chart · th · src(k d t s u)
   const FED = 'https://www.federalreserve.gov/';
   const CASES = [
     {
@@ -64,7 +62,7 @@
     }
   ];
 
-  /* ───────── 선그래프(SVG 640 × 290) ───────── */
+  /* ───────── 선그래프 ───────── */
   const W = 640, H = 290, L = 52, R = 18, T = 30, B = 30;
   const COL = ['#1f6fd1', '#1f2537'];
   const yr = (d) => { const p = d.split('-').map(Number); return p[0] + (p[1] - 1) / 12 + ((p[2] || 1) - 1) / 365; };
@@ -128,7 +126,7 @@
     fig.appendChild(card);
     const caseOf = (b) => CASES.find((c) => c.m.test(b.textContent.trim())) || null;
     ul.querySelectorAll('li button').forEach((b) => { if (caseOf(b)) b.parentNode.classList.add('hasrw'); });
-    // app.js 의 버튼 처리(aria-pressed 바꿈)가 먼저 돌고, 그 뒤 목록(ul)까지 올라온 클릭에서 고른 사건을 읽는다
+    // 클릭된 사건 읽기
     ul.addEventListener('click', () => {
       const b = $('button[aria-pressed="true"]', ul);
       cur = b ? caseOf(b) || 'none' : null;
@@ -137,7 +135,7 @@
     render(card);
     fetch('/econ2/graphs/real-data.json').then((r) => r.json()).then((d) => { data = d; if (cur && cur !== 'none' && $('.rwans', card).hidden) render(card); }).catch(() => {});
 
-    // 머리줄 토글
+    // 모드 토글
     const links = $('.top .links'), tg = document.createElement('div');
     tg.className = 'rwtog'; tg.setAttribute('role', 'group'); tg.setAttribute('aria-label', 'Mode');
     tg.innerHTML = '<button type="button" data-m="basic">Basic</button><button type="button" data-m="rw">Real world</button>';

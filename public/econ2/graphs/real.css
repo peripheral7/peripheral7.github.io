@@ -1,4 +1,4 @@
-/* Econ2 Interactive 현실 연결 모드(real.js 와 짝). index.html 의 색 변수(--ink · --blue · --soft · --line · --tint)를 쓴다.
+/* Econ2 Interactive Real world (real.js)
    카드와 REAL 표시는 <html class="rw"> 일 때만 보인다 */
 .rwtog{display:flex;flex:none;border:1.5px solid var(--ink);border-radius:8px;overflow:hidden}
 .rwtog button{padding:4px 10px;border:0;background:#fff;font-size:13px;font-weight:700;color:var(--ink);cursor:pointer;white-space:nowrap}
@@ -50,7 +50,7 @@
   .rwtog button{padding:4px 8px;font-size:12.5px}
   .rwsrc li{grid-template-columns:minmax(0,1fr)}
   .rwsrc li .lb{justify-self:start;margin-bottom:2px}
-  /* 그래프는 viewBox 640 폭을 칸에 맞춰 줄이므로(휴대폰 ≈ 0.55배) SVG 글자를 키워 12px 안팎으로 */
+  /* 그래프 글자 확대 */
   .rwfig .ax{font-size:22px}
   .rwfig .lg{font-size:22px}
   .rwfig .mk{font-size:26px}

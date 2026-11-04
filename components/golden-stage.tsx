@@ -7,9 +7,9 @@ import { useCallback, useEffect, useRef, useState } from "react"
 type Photo = { src: string; alt: string }
 
 const SIDE = "clamp(0.75rem, 5vw, 4rem)"
-// 모든 화면 크기에서 한 장씩 보이고 좌우로 넘긴다(터치 스와이프 / 마우스 클릭 후 드래그) — 아래에 점·알약 표시.
+// 한 장씩 스와이프·드래그
 const PHOTO_H_MOBILE = `min(calc(100svh - 13.5rem), calc((100vw - 2 * ${SIDE}) * 4 / 3))`
-// 넘기는 창은 사진 한 장 너비로만 — 배경(검정 여백)은 끌리지도, 옆 사진이 비치지도 않는다.
+// 창 너비 = 사진 한 장
 const PHOTO_W_MOBILE = `calc(${PHOTO_H_MOBILE} * 3 / 4)`
 
 export function GoldenStage({ title, date, photos }: { title: string; date: string; photos: Photo[] }) {
@@ -37,7 +37,7 @@ export function GoldenStage({ title, date, photos }: { title: string; date: stri
     return () => el.removeEventListener("scroll", onScroll)
   }, [indexNow])
 
-  // 마우스 드래그(터치는 브라우저 기본 스와이프가 처리)
+  // 마우스 드래그
   const onPointerDown = (e: React.PointerEvent<HTMLDivElement>) => {
     if (e.pointerType !== "mouse" || e.button !== 0 || !scroller.current) return
     drag.current = { x: e.clientX, left: scroller.current.scrollLeft, moved: false }
@@ -57,7 +57,7 @@ export function GoldenStage({ title, date, photos }: { title: string; date: stri
     drag.current = null
     setDragging(false)
     if (el.hasPointerCapture(e.pointerId)) el.releasePointerCapture(e.pointerId)
-    // 조금만 끌어도 다음/이전 장으로 넘어가도록 방향 기준으로 목표 결정
+    // 방향 기준 목표 장
     const delta = e.clientX - d.x
     const start = Math.round(d.left / el.clientWidth)
     const threshold = el.clientWidth * 0.12

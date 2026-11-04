@@ -288,8 +288,8 @@
     return self;
   }
 
-  /* ───────── 결과 문장: Situation 줄 아래 "…하면 Y ▲ … 한다." — 결과 마디에 닿을 때마다 빈칸(?)이 채워진다 ───────── */
-  // COND: 사건 이름 → 조건절. rs: 결과 마디의 'Y ↑ · P 그대로' 같은 글(이름 + 방향 + 덧말)
+  /* ───────── 결과 문장 ───────── */
+  // COND: 조건절 · rs: 결과 마디 글
   const COND = {
     'Reserve ratio raised 10% → 20%': 'If the Fed raises the reserve ratio from 10% to 20%,',
     'Reserve ratio cut 10% → 5%': 'If the Fed cuts the reserve ratio from 10% to 5%,',
@@ -325,7 +325,7 @@
     'Labor demand falls': 'If labor demand falls,'
   };
   const rsTok = (s) => String(s).split(' · ').map((x) => { const m = /^(.+?) (↑|↓|▲|▼|unchanged|그대로|back)(?: (.+))?$/.exec(x.trim()); return m ? { n: m[1], d: /[↑▲]/.test(m[2]) ? 1 : /[↓▼]/.test(m[2]) ? -1 : 0, back: m[2] === 'back', x: m[3] || '' } : { n: x.trim(), d: null }; });
-  // parts: [{ g: 단계 이름(여러 단계일 때만 앞에 'in the short run'), rs, on: 채워졌나, b: 마디 번호 }]
+  // parts: [{ g 단계, rs, on, b }]
   function rsHTML(cond, parts) {
     const multi = new Set(parts.map((p) => p.g)).size > 1, when = { 'Short run': 'in the short run ', 'Long run': 'in the long run ' };
     const toks = [];
@@ -339,7 +339,7 @@
     };
     return esc(cond || '') + ' ' + toks.map((t, k) => (k ? (t.first && multi ? '; ' : ' and ') : '') + t.pre + (t.d == null && t.on ? '' : arrows(nm(t.n)) + ' ') + slot(t)).join('') + '.';
   }
-  const YBACK = 'Y back';   // 둘째 단계 이후 Y = Y* 이면 결과 문장에서 Y 의 오르내림 대신 'Y* 로 돌아온다'
+  const YBACK = 'Y back';   // Y = Y* 복귀
   const sitHTML = (x) => (x ? '<span class="lb">Situation</span><span class="st">' + String(x).split(' — ').map(arrows).join('<br>') + '</span>' : '');
   /* ───────── 재생기: 단계 목록(전체 걸음이 한눈에, 지금 걸음만 크게) · 조작 줄(‹ Prev · 자동 · Next › · 속도) ───────── */
   // beat = { g: 묶음 이름(Stage 1 · Short run …), alts: [{ t, on, pick }](갈라지는 단계일 때), k: 꼬리표(Cause · Shift · Equilibrium …), t: 글자, run(anim), wait: 머무는 시간 배율 }
@@ -361,7 +361,7 @@
       $$('li[data-i]', ol).forEach((li) => { const k = +li.getAttribute('data-i'); li.className = k === i ? 'cur' : k < i ? 'done' : 'todo'; });
       $$('.stg', ol).forEach((st) => st.classList.toggle('cur', !!$('li.cur', st)));
       $$('.gl', ol).forEach((x) => x.classList.toggle('cur', !!beats[i] && beats[i].g === x.getAttribute('data-g')));
-      host.classList.toggle('end', fin);   // 다 끝남: 마지막 걸음을 보여 준 뒤 색이 끝 원으로 옮겨 가 거기서 멈춘다
+      host.classList.toggle('end', fin);   // 끝 원
       const end = i >= beats.length - 1;
       pp.textContent = playing ? '❚❚ Pause' : end ? '↻ Replay' : '▶ Auto';
       pp.classList.toggle('on', playing);
@@ -378,7 +378,7 @@
     }
     const sitEl = () => { const r = host.closest('.panel') || host.closest('.ch'); return r && $('.sitline', r); };
     const setSit = (x) => { const el = sitEl(); if (el) el.innerHTML = sitHTML(x); };
-    // 결과 문장: Situation 줄 바로 아래 p.rsent.auto. 결과 마디(rs)가 있는 사건만 — 지금 마디까지 채우고, 방금 채운 칸은 잠깐 형광펜
+    // 결과 문장 채우기
     const rsEl = () => { const s = sitEl(), n = s && s.nextElementSibling; return n && n.classList.contains('auto') ? n : null; };
     let rsT = 0;
     function sentence(anim) {
@@ -398,7 +398,7 @@
     // 단계(묶음)마다 li.stg = 한 줄: 단계 이름(.gh, 갈래 ⓐ ⓑ 포함) + 마디 목록(ol.rows: 선 위의 점 · [제목] · 글)
     function build() {
       ol.innerHTML = '';
-      // 단계가 여럿이어도(단기 · 장기, 1 · 2단계) 선은 하나. 단계가 바뀌는 마디 위에 단계 이름(.gl)을 달아 나눈다. 갈래가 있으면 이름 옆에 글자 버튼(그대로 · 정책)
+      // 단계 이름(.gl) · 갈래 버튼
       const lab = new Set(beats.map((b) => b.g)).size > 1 || beats.some((b) => b.alts);
       ol.classList.add('solo');
       const st = document.createElement('li'), rows = document.createElement('ol');
@@ -419,7 +419,7 @@
         }
         btn.type = 'button';
         // 글은 ' — ' 에서 줄을 바꾸고, ' → ' 로 나뉜 조각(.u, inline-block)은 통째로 다음 줄로 — 조각이 칸보다 길 때만 그 안에서 줄바꿈. b.s 는 작은 숫자 줄
-        const unit = (x) => x.split(' → ').map((u, k) => '<span class="u">' + (k ? '→ ' : '') + arrows(u) + '</span>').join(' ');   // 화살표는 다음 조각 앞에 붙여 줄 끝에 홀로 남지 않게
+        const unit = (x) => x.split(' → ').map((u, k) => '<span class="u">' + (k ? '→ ' : '') + arrows(u) + '</span>').join(' ');   // 화살표 줄바꿈
         btn.innerHTML = '<span class="dot"></span><span class="k">[' + arrows(b.k || '') + ']</span><span class="tx">' + String(b.t || '').split(' — ').map(unit).join('<br>') + '</span>' + (b.s ? '<span class="sm">' + arrows(b.s) + '</span>' : '');
         const from = k === gStart ? k - 1 : gStart;   // pre 가 없으면: 단계 첫 마디는 앞 단계 끝에서, 나머지는 그 단계 첫 마디에서
         btn.addEventListener('click', () => { playing = false; if (b.pre) b.pre(false); else if (from >= 0) beats[from].run(false); go(k, true); });
@@ -458,7 +458,7 @@
       playing = true;
       if (i >= beats.length - 1) go(0, true); else { draw(); schedule(); }
     });
-    spd.addEventListener('click', () => {   // 보통 ↔ 빠르게 (모든 재생기 같이)
+    spd.addEventListener('click', () => {   // 속도 전환
       const k = SPEEDS.findIndex((x) => x[1] === SPEED);
       SPEED = SPEEDS[(k + 1) % SPEEDS.length][1];
       players.forEach((q) => q.redrawSpeed());
@@ -558,7 +558,7 @@
     return out;
   }
   // 글자 목록: items = [{ t, q, dir }] → 누르면 onPick(i, 줄), 고른 줄을 다시 누르면 onPick(-1) 로 풀림
-  // 주요 요인: 시험에서 꼭 짚을 사건. 목록 세로선 위의 점(.imp — .key 는 지표 상자라 다른 이름)으로 표시하고, 패널마다 첫 목록 제목 줄 오른쪽에 범례 — 제목과 한 줄에 못 들어가면 숨긴다
+  // 주요 요인 점 · 범례
   const KEY = new Set(['Reserve ratio raised 10% → 20%', 'Deposits up $100', 'Fed buys $100 of bonds', 'Bad loans → bank capital falls',
     'Fed doubles the money supply', 'Credit cards spread → less money held',
     'Stock market crash', 'Money supply up', 'Government purchases rise', 'Expected price level rises', 'Oil price spike', 'Technological progress',
@@ -568,7 +568,7 @@
     const box = host.closest('.panel') || host.closest('.ch') || host.parentNode, h3 = $('h3', host);
     if (!h3 || $('.keylg', box)) return;
     const lg = document.createElement('span'); lg.className = 'keylg'; lg.innerHTML = '<i></i>Key factor';
-    const tt = document.createElement('span'); while (h3.firstChild) tt.appendChild(h3.firstChild);   // 원래 제목은 한 덩어리로(글 간격 그대로)
+    const tt = document.createElement('span'); while (h3.firstChild) tt.appendChild(h3.firstChild);
     h3.classList.add('haslg'); h3.appendChild(tt); h3.appendChild(lg);
     if (window.ResizeObserver) new ResizeObserver(() => keyFit(lg)).observe(h3); else keyFit(lg);
   }
@@ -642,7 +642,7 @@
     // 식 숫자: Reserves(변화분 또는 수준) × Multiplier(바뀌면 '10 → 5') = Money supply 변화분 ▲▼. ev 가 없으면 Start 수준 $100 × 10 = $1,000
     function formula(ev) {
       const nRes = $('#nRes'), nR = $('#nR'), nM = $('#nM');
-      // 식 사건도 Situation 줄 + 결과 문장(통화량 변화 = 세부 글의 굵은 정답)
+      // 식 사건 결과 문장
       const sl = $('#c29 .sitline'), rsx = sl && sl.nextElementSibling, ans = ev && /\*\*([+−-])(\$[\d,]+)\*\*/.exec(ev.d);
       if (sl) sl.innerHTML = ev ? sitHTML(ev.t) : '';
       if (rsx) rsx.innerHTML = ans ? rsHTML(COND[ev.t], [{ g: '', rs: 'The money supply ' + (ans[1] === '+' ? '↑' : '↓') + ' ' + ans[2], on: true, b: -1 }]) : '';
@@ -668,7 +668,7 @@
     }
     const mode = (cap) => { $('#k29').hidden = cap; $('#k29d').hidden = cap; $('#tacct').hidden = !cap; };
     // d: 식 아래 작은 글(세부). dRes: Reserves 변화분, R: 새 지급준비율, dep: Result 항을 '예금'으로
-    // d 의 ' ¶ ' 는 문단 나눔, ' — ' 는 내용 단위 줄바꿈(다음 줄이 '→ ' 로 시작하면 앞 줄에서 이어짐), ' → ' 조각은 통째로 넘어간다. ==…== 는 형광펜 강조, **…** 는 굵게(정답)
+    // d 표기: ¶ 문단 · — 줄바꿈 · ==형광펜== · **굵게**
     const EV = [
       { t: 'Reserve ratio raised 10% → 20%', q: 'SA 10', dir: 'l', R: 0.2, d: 'R 10% → 20% → multiplier 1/R 10 → 5 — Money supply = $100 × 5 = $500 → **−$500**' },
       { t: 'Reserve ratio cut 10% → 5%', dir: 'r', R: 0.05, d: 'R 10% → 5% → multiplier 1/R 10 → 20 — Money supply = $100 × 20 = $2,000 → **+$1,000**' },
