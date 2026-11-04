@@ -9,7 +9,8 @@
 .top .rwtog + .links{margin-left:0}
 
 .rwcard{display:none}
-.rw .rwcard{display:block;margin:16px 0 0;padding:16px 18px;border:1.5px solid var(--line);border-radius:12px;background:#fff;font-size:15.5px;line-height:1.55;overflow-wrap:break-word}
+.rw .rwcard{display:block;margin:28px 0 0;padding:16px 18px;border:1.5px solid var(--line);border-radius:12px;background:#fff;font-size:15.5px;line-height:1.55;overflow-wrap:break-word}
+.rw .rwcard[hidden]{display:none}
 .rw .opts li.hasrw button::after{content:"REAL";margin-left:8px;padding:1px 6px;border-radius:5px;background:#e8f0fb;color:var(--blue);font-size:11px;font-weight:800;letter-spacing:.06em;vertical-align:2px}
 .rwchip{padding:1px 6px;border-radius:5px;background:#e8f0fb;color:var(--blue);font-size:11px;font-weight:800;letter-spacing:.06em}
 .rwtag{display:inline-block;margin-right:8px;padding:1px 8px;border-radius:6px;background:var(--blue);color:#fff;font-size:12px;font-weight:800;letter-spacing:.04em;vertical-align:1px}
