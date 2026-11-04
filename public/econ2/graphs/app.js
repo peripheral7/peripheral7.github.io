@@ -285,12 +285,11 @@
 
   /* ───────── 재생기: 단계 목록(전체 걸음이 한눈에, 지금 걸음만 크게) · 조작 줄(‹ 이전 · 자동 · 다음 › · 속도) ───────── */
   // beat = { g: 묶음 이름(1단계 단기 …), alts: [{ t, on, pick }](갈라지는 단계일 때), k: 꼬리표(원인 · 이동 · 균형 …), t: 글자, run(anim), wait: 머무는 시간 배율 }
-  // 사건을 고르기 전에는 안내 한 줄만 보이고 조작 줄은 숨는다(.idle)
+  // 사건을 고르기 전에는 단계 목록이 비고 조작 줄은 숨는다(.idle)
   const SPEEDS = [['느리게', 0.5], ['보통', 1], ['빠르게', 2]];
   let SPEED = 1;
   const players = [];
-  function Player(host, hint) {
-    hint = hint || '목록에서 사건을 고르면 전체 단계가 여기 나오고, 그래프가 한 걸음씩 움직입니다.';
+  function Player(host) {
     host.innerHTML =
       '<ol class="steps" aria-live="polite"></ol>' +
       '<div class="pbar"><span class="cnt"></span><span class="seg"><button type="button" data-a="prev">‹ 이전</button>' +
@@ -310,7 +309,7 @@
       spd.textContent = '속도 ' + SPEEDS.find((x) => x[1] === SPEED)[0];
       $('[data-a="prev"]', host).disabled = i <= 0; $('[data-a="next"]', host).disabled = end;
     }
-    function idle() { ol.innerHTML = '<li class="hint">' + esc(hint) + '</li>'; draw(); }
+    function idle() { ol.innerHTML = ''; draw(); }
     function schedule() {
       clearTimeout(timer);
       if (!playing) return;
@@ -523,7 +522,7 @@
   // 처음: 지준 $100, R 10% → 예금 $1,000 · 대출 $900 · 통화량 $1,000(현금 보유 없음). 사건마다 걸음별 값(R · 지준 · 대출 · 예금)을 차례로 보여 준다
   function ch29() {
     const B = { R: 0.1, res: 100, L: 900, D: 1000 };
-    const player = Player($('#pl29'), '목록에서 사건을 고르면 전체 단계가 여기 나오고, T계정이 한 걸음씩 바뀝니다.');
+    const player = Player($('#pl29'));
     $('#bank').innerHTML =
       // 위 수식: 영문(작게) / 한글 항 / 숫자(작게). 상자 없이 글자만
       '<div class="eqrow" id="k29">' +
@@ -769,7 +768,7 @@
       { t: '실업자가 취업 (실업자 → 취업자)', m: { U: -1, E: 1 } },
       { t: '처음으로 구직 시작 (비경제활동인구 → 실업자)', m: { N: -1, U: 1 } }
     ];
-    const pl2 = Player($('#pl28s'), '목록에서 상황을 고르면 전체 단계가 여기 나오고, 분자 · 분모 · 결과가 차례로 바뀝니다.');
+    const pl2 = Player($('#pl28s'));
     // 결과 항(Ch29 처럼 글자): 영문 · 한글 · 방향. set({UR: {d} 또는 {txt}}), seq([k]) 로 잠깐 강조
     let rkt = [];
     const rk = {
