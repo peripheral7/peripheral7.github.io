@@ -10,5 +10,5 @@ export const FEATURES: Feature[] = [
   { label: "시계", href: "/clock/" },
   { label: "슬라이드", href: "/slides/" },
   { label: "Econ2 Exam2 TA Session", href: "/econ2/" },
-  { label: "Econ2 핵심 그래프", href: "/econ2/graphs/" },
+  { label: "Econ 2 Interactive", href: "/econ2/graphs/" },
 ]

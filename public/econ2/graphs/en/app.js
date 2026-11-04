@@ -38,7 +38,7 @@
     });
     return t;
   }
-  const tri = (parent, x, y, dir, anchor) => (dir ? label(parent, x, y, dir > 0 ? '▲' : '▼', { size: 14, weight: 800, anchor: anchor || 'start', color: dir > 0 ? C.up : C.down }) : null);
+  const tri = (parent, x, y, dir, anchor) => (dir ? label(parent, x, y, dir > 0 ? '▲' : '▼', { size: 18, weight: 800, anchor: anchor || 'start', color: dir > 0 ? C.up : C.down }) : null);
   function head(parent, x, y, ang, color, s) {
     s = s || 10;
     const a1 = ang + 2.6, a2 = ang - 2.6;
@@ -181,14 +181,18 @@
         const pop = (t, ax, dd) => { if (t && now && dd && hl && hl.axis && hl.axis.indexOf(ax) >= 0) t.setAttribute('class', 'pop'); };
         if (!usedY.some((v) => Math.abs(v - Y(pt.y)) < 15) && usedT.indexOf('y' + yl) < 0) {
           usedY.push(Y(pt.y)); usedT.push('y' + yl);
-          pop(label(g, box[0] - 8, Y(pt.y) + 6, yl, { anchor: 'end', size: 17, color: dc(dy), weight: wt(dy) }), 'y', dy);
-          tri(g, box[0] - 10 - textW(yl, 17), Y(pt.y) + 5, dy, 'end');
+          const gy = el('g', {}, g);   // 축 값 + 삼각형을 한 묶음으로(같이 커진다)
+          label(gy, box[0] - 8, Y(pt.y) + 6, yl, { anchor: 'end', size: 17, color: dc(dy), weight: wt(dy) });
+          tri(gy, box[0] - 10 - textW(yl, 17), Y(pt.y) + 6, dy, 'end');
+          pop(gy, 'y', dy);
         }
         if (!usedX.some((v) => Math.abs(v - X(pt.x)) < 28) && usedT.indexOf('x' + xl) < 0) {
           usedX.push(X(pt.x)); usedT.push('x' + xl);
-          pop(label(g, X(pt.x), box[1] + box[3] + 24, xl, { anchor: 'middle', size: 17, color: dc(dx), weight: wt(dx) }), 'x', dx);
-          if (dx > 0) tri(g, X(pt.x) + textW(xl, 17) / 2 + 4, box[1] + box[3] + 23, dx);
-          else tri(g, X(pt.x) - textW(xl, 17) / 2 - 4, box[1] + box[3] + 23, dx, 'end');
+          const gx = el('g', {}, g);
+          label(gx, X(pt.x), box[1] + box[3] + 24, xl, { anchor: 'middle', size: 17, color: dc(dx), weight: wt(dx) });
+          if (dx > 0) tri(gx, X(pt.x) + textW(xl, 17) / 2 + 4, box[1] + box[3] + 24, dx);
+          else tri(gx, X(pt.x) - textW(xl, 17) / 2 - 4, box[1] + box[3] + 24, dx, 'end');
+          pop(gx, 'x', dx);
         }
       });
 
@@ -257,7 +261,7 @@
     // items(축 'x' · 'y' · 'xy')를 곡선이 멈춘 뒤 차례로: New equilibrium의 축 이름이 한 번 커졌다 작아진다(.pop). 색 · 굵기는 계속 남는다
     self.seq = (items) => {
       self.hilite(null);
-      const t0 = 780 / SPEED, step = 900;
+      const t0 = 780 / SPEED, step = 1300;
       items.forEach((it, i) => hlT.push(setTimeout(() => { hl = it; render(); }, t0 + i * step)));
       hlT.push(setTimeout(() => { hl = null; render(); }, t0 + items.length * step));
     };
@@ -285,9 +289,9 @@
 
   /* ───────── 재생기: 단계 목록(전체 걸음이 한눈에, 지금 걸음만 크게) · 조작 줄(‹ Prev · 자동 · Next › · 속도) ───────── */
   // beat = { g: 묶음 이름(Stage 1 · Short run …), alts: [{ t, on, pick }](갈라지는 단계일 때), k: 꼬리표(Cause · Shift · Equilibrium …), t: 글자, run(anim), wait: 머무는 시간 배율 }
-  // 사건을 고르기 전에는 단계 목록이 비고 조작 줄은 숨는다(.idle)
+  // 사건을 고르기 전에는 안내 한 줄만 보이고 조작 줄은 숨는다(.idle)
   const SPEEDS = [['slow', 0.5], ['normal', 1], ['fast', 2]];
-  let SPEED = 1;
+  let SPEED = 2;   // 기본 'fast'
   const players = [];
   function Player(host) {
     host.innerHTML =
@@ -327,10 +331,10 @@
       ol.innerHTML = '';
       const ng = new Set(beats.map((b) => b.g)).size;
       ol.classList.toggle('solo', ng < 2 && !beats.some((b) => b.alts));   // 단계가 하나면 단계 이름 줄을 숨긴다
-      let g = null, rows = null;
+      let g = null, rows = null, gStart = 0;
       beats.forEach((b, k) => {
         if (b.g !== g) {
-          g = b.g;
+          g = b.g; gStart = k;
           const st = document.createElement('li'), h = document.createElement('div'), nm = document.createElement('span');
           st.className = b.alts ? 'stg alts' : 'stg'; h.className = 'gh'; nm.textContent = b.g; h.appendChild(nm);   // 갈래가 있으면 단계 이름 아래에 글자 버튼(unchanged · 정책)
           if (b.alts) b.alts.forEach((a) => { const x = document.createElement('button'); x.type = 'button'; x.className = a.on ? 'alt on' : 'alt'; x.textContent = a.t; x.addEventListener('click', a.pick); h.appendChild(x); });
@@ -343,7 +347,8 @@
         // 글은 ' — ' 에서 줄을 바꾸고, ' → ' 로 나뉜 조각(.u, inline-block)은 통째로 다음 줄로 — 조각이 칸보다 길 때만 그 안에서 줄바꿈. b.s 는 작은 숫자 줄
         const unit = (x) => x.split(' → ').map((u) => '<span class="u">' + arrows(u) + '</span>').join(' → ');
         btn.innerHTML = '<span class="dot"></span><span class="k">[' + arrows(b.k || '') + ']</span><span class="tx">' + String(b.t || '').split(' — ').map(unit).join('<br>') + '</span>' + (b.s ? '<span class="sm">' + arrows(b.s) + '</span>' : '');
-        btn.addEventListener('click', () => { playing = false; go(k, true); });
+        const from = k === gStart ? k - 1 : gStart;   // 단계 첫 마디(Situation)는 앞 단계 끝에서, 나머지는 그 단계 Situation에서
+        btn.addEventListener('click', () => { playing = false; if (from >= 0) beats[from].run(false); go(k, true); });
         li.appendChild(btn); rows.appendChild(li);
       });
     }
@@ -559,11 +564,19 @@
         ['Situation', 'R 10% → 5%', '', { R: 0.05 }, ['R']],
         ['Multiplier', '1/R = 10 → 20', '', { R: 0.05 }, ['R']],
         ['Money supply', 'M = Reserves × 1/R ↑', '$100 × 20 = $2,000 (loans $1,900 · deposits $2,000)', { R: 0.05, L: 1900, D: 2000 }, ['M', 'L', 'D']]] },
-      { t: 'Fed buys $100 of bonds (open-market purchase)', q: 'SA 11', dir: 'r', steps: [
+      { t: 'Deposits up $100', dir: 'r', steps: [
+        ['Situation', 'Deposits +$100 (new cash comes into banks)', '', {}, []],
+        ['Reserves', 'Bank reserves +$100', 'Reserves $100 → $200', { res: 200 }, ['res']],
+        ['Money supply', 'M = Reserves × 1/R ↑', '$200 × 10 = $2,000 (loans $1,800 · deposits $2,000)', { res: 200, L: 1800, D: 2000 }, ['M', 'L', 'D']]] },
+      { t: 'Withdrawal of $50', dir: 'l', steps: [
+        ['Situation', 'Deposits −$50 (withdrawn as cash)', '', {}, []],
+        ['Reserves', 'Bank reserves −$50', 'Reserves $100 → $50', { res: 50 }, ['res']],
+        ['Money supply', 'Deposits = Reserves × 1/R ↓', '$50 × 10 = $500 (loans $450) · the $50 withdrawn stays in the money supply as currency', { res: 50, L: 450, D: 500 }, ['M', 'L', 'D']]] },
+      { t: 'Fed buys $100 of bonds', q: 'SA 11', dir: 'r', steps: [
         ['Situation', 'Fed buys $100 of bonds', '', {}, []],
         ['Reserves', 'Monetary base ↑ → reserves +$100', 'Reserves $100 → $200', { res: 200 }, ['res']],
         ['Money supply', 'M = Reserves × 1/R ↑', '$200 × 10 = $2,000 (loans $1,800 · deposits $2,000)', { res: 200, L: 1800, D: 2000 }, ['M', 'L', 'D']]] },
-      { t: 'Fed sells $50 of bonds (open-market sale)', dir: 'l', steps: [
+      { t: 'Fed sells $50 of bonds', dir: 'l', steps: [
         ['Situation', 'Fed sells $50 of bonds', '', {}, []],
         ['Reserves', 'Monetary base ↓ → reserves −$50', 'Reserves $100 → $50', { res: 50 }, ['res']],
         ['Money supply', 'M = Reserves × 1/R ↓', '$50 × 10 = $500 (loans $450 · deposits $500)', { res: 50, L: 450, D: 500 }, ['M', 'L', 'D']]] }
@@ -666,7 +679,7 @@
       { name: 'SRAS adjusts → Y*', step: 'Stage 2 · Long run', ch: { abs: lrSRAS }, why: longRun }] });
     const AD = {
       C: [adEv('Stock boom', 'r', 'Stocks ↑ → wealth ↑ → C ↑ → AD →'), adEv('Stock market crash', 'l', 'Stocks ↓ → wealth ↓ → C ↓ → AD ←', 'SA 4a'), adEv('Income tax cut', 'r', 'Income tax ↓ → disposable income ↑ → C ↑ → AD →')],
-      I: [adEv('Money supply up (M ↑ → r ↓)', 'r', 'M ↑ → r ↓ → I ↑ (exchange rate ↓ → NX ↑) → AD →'), adEv('Business optimism · investment boom', 'r', 'Expected profits ↑ → new plant & equipment I ↑ → AD →', 'SA 5'), adEv('Investment tax credit', 'r', 'Tax break on investment → I ↑ → AD →')],
+      I: [adEv('Money supply up', 'r', 'M ↑ → r ↓ → I ↑ (exchange rate ↓ → NX ↑) → AD →'), adEv('Business optimism · investment boom', 'r', 'Expected profits ↑ → new plant & equipment I ↑ → AD →', 'SA 5'), adEv('Investment tax credit', 'r', 'Tax break on investment → I ↑ → AD →')],
       G: [adEv('Government purchases rise', 'r', 'Government purchases G ↑ → AD →', 'SA 4b')],
       NX: [adEv('Recession abroad', 'l', 'Foreign income ↓ → our exports ↓ → NX ↓ → AD ←', 'SA 4d'), adEv('Turmoil abroad → currency appreciates', 'l', 'Currency ↑ → exports ↓ · imports ↑ → NX ↓ → AD ←', 'MC 7')]
     };
@@ -678,7 +691,7 @@
     const lrEv = (t, dir, why, q) => ({ t, q, dir, stages: [
       { name: 'LRAS · SRAS ' + (dir === 'r' ? '→' : '←'), ch: { add: { LRAS: dir === 'r' ? 1 : -1 }, abs: lrSRAS }, why }] });
     const AS = {
-      SR: [srEv('Expected price level rises', 'Pe ↑ → wages · prices ↑ → SRAS ←', 'MC 11'), srEv('Oil price spike (input costs ↑)', 'Oil ↑ → production costs ↑ → SRAS ←'), srEv('Nominal wages rise', 'Nominal wages ↑ → costs ↑ → SRAS ←')],
+      SR: [srEv('Expected price level rises', 'Pe ↑ → wages · prices ↑ → SRAS ←', 'MC 11'), srEv('Oil price spike', 'Oil ↑ → production costs ↑ → SRAS ←'), srEv('Nominal wages rise', 'Nominal wages ↑ → costs ↑ → SRAS ←')],
       LR: [lrEv('Technological progress', 'r', 'Technology ↑ → productivity ↑ → Y* ↑ → LRAS · SRAS →', 'SA 4c'), lrEv('Capital · human capital rise', 'r', 'Capital K · human capital H ↑ → Y* ↑ → LRAS · SRAS →', 'SA 5c'), lrEv('Immigration → labor rises', 'r', 'Labor L ↑ → Y* ↑ → LRAS · SRAS →', 'SA 1'), lrEv('Natural disaster · resources fall', 'l', 'Resources N · capital ↓ → Y* ↓ → LRAS · SRAS ←', 'SA 1')]
     };
     // 어느 목록에서 골라도 그 탭의 줄 표시를 모두 지우고 새 사건을 Start 상태 A 에서 시작한다(앞 사건의 LRAS Shift 등은 풀린다). 같은 줄을 다시 누르면 풀림
@@ -749,10 +762,10 @@
     });
     function eqW(off) { const m = meet(plot.byId.S, off.S || 0, plot.byId.D, off.D || 0, plot.dom); return m ? m.y : 5; }
     const EV = [
-      { t: 'Wage above equilibrium (minimum wage · union · efficiency wage)', q: 'MC 10 · 14', dir: 'r',
+      { t: 'Wage above equilibrium', q: 'MC 10 · 14', dir: 'r',
         sit: 'Minimum wage : set by law — Union : collective bargaining — Efficiency wage : firms choose it (effort ↑ · turnover ↓)',
         stages: [{ name: 'W > W_E', at: 0, ch: { vis: { W: true }, abs: { W: 0 } }, chain: ['W > W_E', 'L_S ↑ · L_D ↓ → unemployment'] }] },
-      { t: 'Labor demand falls (imports ↑ → domestic industry declines)', q: 'SA 4', dir: 'l', stages: [
+      { t: 'Labor demand falls', q: 'SA 4', dir: 'l', stages: [
         { name: 'Demand D ←, wage unchanged', step: 'Stage 1 · Short run', at: 2, ch: { add: { D: -1.4 }, vis: { W: true }, abs: { W: -2 } }, why: 'Imports ↑ → domestic industry declines → D ← → W stuck at W_E → unemployment' },
         { name: 'Wage ↓ → new equilibrium', step: 'Stage 2 · Long run', at: 0, ch: { vis: { W: false } }, why: 'W ↓ → L ↓, no unemployment (workers move to other industries)' }] }
     ];
@@ -762,19 +775,34 @@
     const B = { E: 140.196, U: 14.729, N: 80.729 };
     const NM = { E: 'Employed', U: 'Unemployed', N: 'Not in labor force' };
     const SIT = [
-      { t: 'Laid off, searching (Employed → Unemployed)', m: { E: -1, U: 1 } },
-      { t: 'Laid off, gives up searching (Employed → Not in labor force)', q: 'MC 1', m: { E: -1, N: 1 } },
-      { t: 'Reclassify token job-seekers (Unemployed → Not in labor force)', q: 'MC 5', m: { U: -1, N: 1 } },
-      { t: 'Unemployed finds a job (Unemployed → Employed)', m: { U: -1, E: 1 } },
-      { t: 'Starts looking for a first job (Not in labor force → Unemployed)', m: { N: -1, U: 1 } }
+      { t: 'Laid off, searching', c: '실직한 사람이 일자리를 찾으면', ce: 'If a laid-off worker looks for a job,', m: { E: -1, U: 1 } },
+      { t: 'Laid off, gives up searching', q: 'MC 1', c: '실직한 사람이 구직을 포기하면', ce: 'If a laid-off worker gives up looking,', m: { E: -1, N: 1 } },
+      { t: 'Reclassify token job-seekers', q: 'MC 5', c: 'Reclassify token job-seekers 다시 세면', ce: 'If token job-seekers are recounted as not in the labor force,', m: { U: -1, N: 1 } },
+      { t: 'Unemployed finds a job', c: 'Unemployed finds a job하면', ce: 'If an unemployed person finds a job,', m: { U: -1, E: 1 } },
+      { t: 'Starts looking for a first job', c: 'Start으로 일자리를 찾기 시작하면', ce: 'If someone starts looking for a first job,', m: { N: -1, U: 1 } }
     ];
     const pl2 = Player($('#pl28s'));
-    // Result 항(Ch29 처럼 글자): 영문 · 한글 · 방향. set({UR: {d} 또는 {txt}}), seq([k]) 로 잠깐 강조
-    let rkt = [];
+    // Result 문장: "{Situation}하면 Unemployment rate이 'down'하고 Participation rate은 'unchanged'이다." Result 자리는 방향 색, 아직이면 '?'. seq([k]) 로 그 자리를 잠깐 강조
+    const EN = document.documentElement.lang === 'en';
+    let rkt = [], sit = null, rv = {};
+    const KO_V = { 1: ['up하고', 'up한다'], '-1': ['down하고', 'down한다'], 0: ['unchanged이고', 'unchanged이다'] };
+    const EN_V = { 1: 'rises', '-1': 'falls', 0: 'stays the same' };
+    const slot = (k, x, last) => {
+      if (x == null || x.d == null) return '<b class="slot q" data-k="' + k + '">?</b>' + (EN ? '' : last ? '.' : '');
+      const c = x.d > 0 ? 'up' : x.d < 0 ? 'dn' : 'same', tr = x.d > 0 ? '▲ ' : x.d < 0 ? '▼ ' : '';
+      return '<b class="slot ' + c + '" data-k="' + k + '">' + tr + (EN ? EN_V[x.d] : KO_V[x.d][last ? 1 : 0]) + '</b>' + (EN ? '' : last ? '.' : '');
+    };
+    const sentence = () => {
+      const el = $('#k28s');
+      if (!sit) { el.innerHTML = ''; return; }
+      el.innerHTML = EN
+        ? esc(sit.ce) + ' the unemployment rate ' + slot('UR', rv.UR) + ' and the participation rate ' + slot('LF', rv.LF, true) + '.'
+        : esc(sit.c) + ' Unemployment rate이 ' + slot('UR', rv.UR) + ' Participation rate은 ' + slot('LF', rv.LF, true);
+    };
     const rk = {
-      set(v) { ['UR', 'LF'].forEach((k) => { const e = $('#k28s [data-k="' + k + '"] b'), x = v[k] || {}; if (x.d == null) { e.className = ''; e.textContent = x.txt || ''; return; } e.className = x.d > 0 ? 'up' : x.d < 0 ? 'dn' : ''; e.textContent = x.d > 0 ? '▲ up' : x.d < 0 ? '▼ down' : 'unchanged'; }); },
-      seq(ks) { rk.stop(); ks.forEach((k) => { const e = $('#k28s [data-k="' + k + '"]'); e.classList.add('pulse'); rkt.push(setTimeout(() => e.classList.remove('pulse'), 1000)); }); },
-      stop() { rkt.forEach(clearTimeout); rkt = []; $$('#k28s .term').forEach((e) => e.classList.remove('pulse')); }
+      set(v) { rv = { UR: v.UR && v.UR.d != null ? v.UR : null, LF: v.LF && v.LF.d != null ? v.LF : null }; sentence(); },
+      seq(ks) { rk.stop(); ks.forEach((k) => { const e = $('#k28s [data-k="' + k + '"]'); if (!e) return; e.classList.add('pulse'); rkt.push(setTimeout(() => e.classList.remove('pulse'), 1000)); }); },
+      stop() { rkt.forEach(clearTimeout); rkt = []; $$('#k28s .slot').forEach((e) => e.classList.remove('pulse')); }
     };
     const tri = (d) => (d > 0 ? '<b class="up">▲</b>' : d < 0 ? '<b class="dn">▼</b>' : '');
     const wordOf = (d, w) => { w = w || ['up', 'down']; return d > 0 ? '<span class="t up">▲ ' + w[0] + '</span>' : d < 0 ? '<span class="t dn">▼ ' + w[1] + '</span>' : '<span class="t same">unchanged</span>'; };
@@ -815,7 +843,7 @@
         { g: s.t, k: 'Participation', t: 'Labor force ' + arrow(dLF) + ' · Adult population ' + arrow(dPop) + ' → participation rate ' + arrow(dirOf(lf(B), lf(v), 1e-9)), run: stage(m, [6, 7], 'LF'), wait: 2.2 }
       ];
     }
-    list($('#o28s'), SIT, (i) => { if (i < 0) { pl2.clear(); stopR(); rates({}, 0); } else pl2.load(beats(SIT[i])); });
+    list($('#o28s'), SIT, (i) => { sit = i < 0 ? null : SIT[i]; if (i < 0) { pl2.clear(); stopR(); rates({}, 0); } else pl2.load(beats(SIT[i])); });
     rates({}, 0);
 
     // Equilibrium wage · Unemployment rate 탭: 한 번에 하나만
@@ -837,7 +865,7 @@
     $$('.ch.on.tabbed').forEach((sec) => {
       const svg = $$('.fig .stage:not([hidden]) svg.plot', sec)[0], sub = $('.sub', sec);
       if (!svg || !sub) return;
-      const r = svg.getBoundingClientRect(), f = sec.getBoundingClientRect();
+      const r = svg.getBoundingClientRect(), f = { left: sub.getBoundingClientRect().left - (parseFloat(sub.style.marginLeft) || 0) };   // 탭 칸의 왼쪽 기준
       if (!r.width) return;
       const dw = Math.min(r.width, r.height * 640 / 520), x = r.left + (r.width - dw) / 2 + dw * 74 / 640 - f.left;
       sub.style.marginLeft = window.matchMedia('(max-width:900px)').matches ? '' : Math.max(0, Math.round(x) - 1) + 'px';
