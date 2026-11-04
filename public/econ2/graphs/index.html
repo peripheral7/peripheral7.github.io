@@ -64,7 +64,7 @@
   /* 그래프 아래 상황 줄 */
   .sitline{display:flex;align-items:baseline;gap:10px;margin:8px 0 0;font-size:20px;font-weight:700;line-height:1.45}
   .sitline:empty{display:none}
-  .sitline .lb{flex:none;padding:1px 8px;border:1.5px solid var(--line);border-radius:6px;font-size:13px;font-weight:800;color:var(--soft)}
+  .sitline .lb{flex:none;margin-left:-9.5px;padding:1px 8px;border:1.5px solid var(--line);border-radius:6px;font-size:13px;font-weight:800;color:var(--soft)}   /* 왼쪽으로 당겨 글자 'Situation' 이 아래 문장 첫 글자와 같은 선에 */
   .sitline + .rsent{margin-top:8px}
   .rsent.auto{max-width:720px;font-size:18px}   /* Situation 아래 결과 문장(모든 사건) */
   /* 큰 탭(AD · AS, 균형임금 · 실업률): 고른 탭은 진한 바탕 흰 글자 */
@@ -267,7 +267,7 @@
   .rsent{margin:24px 0 0;max-width:620px;font-size:20px;font-weight:600;line-height:1.6}
   .rsent:empty{display:none}
   .rsent .slot{display:inline-block;margin:0 4px;font-weight:800;transition:transform .25s}
-  .rsent .slot.q{color:#b3b8c2}
+  .rsent .slot.q{display:inline-block;min-width:3.6em;height:1.05em;margin:0 4px;padding:0;border-bottom:2px solid #b3b8c2;border-radius:0;vertical-align:-3px}   /* 모르는 칸: 빈 밑줄 */
   .rsent .slot{padding:0 4px;border-radius:5px;transition:background .3s,box-shadow .3s}
   .rsent .slot.pulse{background:#fff3b0;box-shadow:inset 0 -3px 0 #f2c200}   /* 채워질 때: 형광펜 바탕 + 밑줄(확대 없음) */
   .who{display:flex;flex-wrap:wrap;align-items:center;gap:6px 8px;padding:8px 10px;border-radius:8px;font-size:15px;transition:background .3s}
@@ -609,6 +609,6 @@
   document.body.appendChild(box);
 })();
 </script>
-<script src="/econ2/graphs/app.js?v=20261105"></script>
+<script src="/econ2/graphs/app.js?v=20261105b"></script>
 </body>
 </html>

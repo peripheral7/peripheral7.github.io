@@ -328,12 +328,13 @@
   // parts: [{ g 단계, rs, on, b }]
   function rsHTML(cond, parts) {
     const multi = new Set(parts.map((p) => p.g)).size > 1, when = { 'Short run': 'in the short run ', 'Long run': 'in the long run ' };
+    const lead = (p, pi) => p.sw || (multi ? (p.adj && p.g === 'Long run' ? 'in the long run, as wages and P<sup>e</sup> adjust, ' : when[p.g] || (pi ? 'then ' : '')) : '');   // 장기 조정은 '임금 · Pᵉ 가 조정되며'
     const toks = [];
-    parts.forEach((p, pi) => rsTok(p.rs).forEach((t, ti) => toks.push(Object.assign({ pre: ti ? '' : multi ? (when[p.g] || (pi ? 'then ' : '')) : '', on: p.on, b: p.b, first: !ti }, t))));
+    parts.forEach((p, pi) => rsTok(p.rs).forEach((t, ti) => toks.push(Object.assign({ pre: ti ? '' : lead(p, pi), on: p.on, b: p.b, first: !ti }, t))));
     const nm = (n) => (/^[A-Z][a-z]/.test(n) ? n[0].toLowerCase() + n.slice(1) : n);
-    const verb = (t) => { const pl = /[^s]s$/.test(t.n); return t.back ? 'returns to Y*' : t.d > 0 ? (pl ? 'rise' : 'rises') : t.d < 0 ? (pl ? 'fall' : 'falls') : 'stays the same'; };
+    const verb = (t) => { const pl = /[^s]s$/.test(t.n); return t.back ? (t.n === 'Y' ? 'returns to Y*' : 'returns to where it was') : t.d > 0 ? (pl ? 'rise' : 'rises') : t.d < 0 ? (pl ? 'fall' : 'falls') : 'stays the same'; };
     const slot = (t) => {
-      if (!t.on) return '<b class="slot q" data-b="' + t.b + '">?</b>';
+      if (!t.on) return '<b class="slot q" data-b="' + t.b + '"></b>';
       if (t.d == null) return '<b class="slot same" data-b="' + t.b + '">' + esc(nm(t.n)) + '</b>';
       return '<b class="slot ' + (t.d > 0 ? 'up' : t.d < 0 ? 'dn' : 'same') + '" data-b="' + t.b + '">' + (t.d > 0 ? '▲ ' : t.d < 0 ? '▼ ' : '') + verb(t) + (t.x ? ' by ' + esc(t.x) : '') + '</b>';
     };
@@ -383,14 +384,14 @@
     let rsT = 0;
     function sentence(anim) {
       const el = rsEl(); if (!el) return;
-      const parts = beats.map((b, k) => ({ g: b.g, rs: b.rs, on: k <= i, b: k })).filter((p) => p.rs);
+      const parts = beats.map((b, k) => ({ g: b.g, rs: b.rs, adj: b.adj, sw: b.sw, on: k <= i, b: k })).filter((p) => p.rs);
       el.innerHTML = parts.length && i >= 0 ? rsHTML(COND[beats[0].ev], parts) : '';
       clearTimeout(rsT);
       if (anim && beats[i] && beats[i].rs) { const hs = $$('[data-b="' + i + '"]', el); hs.forEach((h) => h.classList.add('pulse')); rsT = setTimeout(() => hs.forEach((h) => h.classList.remove('pulse')), 1000); }
     }
     function go(k, anim) {
       i = Math.max(0, Math.min(beats.length - 1, k)); fin = false;
-      setSit(beats[i].sit); sentence(anim !== false);
+      setSit(beats[0].sit); sentence(anim !== false);   // Situation 은 처음 고른 사건 그대로
       beats[i].run(anim !== false);
       draw(); schedule();
       if (self.onGo) self.onGo(i);
@@ -543,7 +544,7 @@
       const withNew = S.concat([next]), letter = next.letter || LET[withNew.length - 1];
       num++;
       const isAlt = alts.length && id !== 0;
-      const stp = st.step || '', g = /Long run/.test(stp) ? 'Long run' : /Short run/.test(stp) ? 'Short run' : isAlt ? 'Long run' : num + ' stage';
+      const stp = st.step || '', g = st.label || (/Long run/.test(stp) ? 'Long run' : /Short run/.test(stp) ? 'Short run' : isAlt ? 'Long run' : num + ' stage');
       const altList = isAlt ? alts.map((a, k) => ({ t: sc.stages[a].short || sc.stages[a].name, on: a === id, pick: () => rebuild(a) })) : null;
       const cause = ps.slice(0, at), after = ps.slice(at + 1).join(' → ');
       // Situation(그래프 아래 줄): Stage 1는 Events 이름(또는 sc.sit), 다음 단계는 Cause의 첫 조각(또는 st.sit)
@@ -551,7 +552,7 @@
       // 결론 제목: result 의 ' — ' 앞(Y ↓ · P ↑ 등), 설명: 사슬의 뒤쪽 또는 result 의 ' — ' 뒤
       const res = o.result(prevS[prevS.length - 1], next, letter).split(' — '), pre = snap(prevS, false);
       out.push({ g, ev: sc.t, alts: altList, sit, pre, k: ps[at], t: cause.join(' → '), run: snap(withNew, true), wait: 1.25 });
-      out.push({ g, ev: sc.t, rs: num > 1 && /Y = Y\*/.test(res[1] || '') ? res[0].replace(/^Y [↑↓]/, YBACK) : res[0], alts: altList, sit, pre: snap(withNew, true), k: res[0], t: after || res.slice(1).join(' — '),
+      out.push({ g, ev: sc.t, sw: st.sw, adj: /adjust|조정/.test(why || ''), rs: st.rs || (num > 1 && /Y = Y\*/.test(res[1] || '') ? res[0].replace(/^Y [↑↓]/, YBACK) : res[0]), alts: altList, sit, pre: snap(withNew, true), k: res[0], t: after || res.slice(1).join(' — '),
         run: () => { snap(withNew, false)(false); if (o.after) o.after(prevS[prevS.length - 1], next); }, wait: 1.8 });
       S = withNew;
     });
@@ -726,12 +727,12 @@
         plot.seq(items);
       }
     });
-    const keep = (why) => ({ name: 'Fed shifts MS to hold P', ch: { abs: (o) => ({ MS: 5 * (1 + mdScale(o)) - 5 }) }, why });
+    const keep = (why) => ({ name: 'Fed shifts MS to hold P', label: 'For the Fed to keep P stable', sw: 'to keep P stable, the Fed cuts M, so ', rs: 'P back', ch: { abs: (o) => ({ MS: 5 * (1 + mdScale(o)) - 5 }) }, why });
     const EV = [
       { t: 'Fed doubles the money supply', dir: 'r', stages: [{ name: 'MS →', at: 0, ch: { add: { MS: 5 } }, why: 'MS → → 1/P halves, P doubles' }] },
       { t: 'Fed cuts the money supply', dir: 'l', stages: [{ name: 'MS ←', at: 0, ch: { add: { MS: -1.5 } }, why: 'MS ← → 1/P ↑, P ↓' }] },
       { t: 'Credit cards spread → less money held', q: 'SA 2', dir: 'l', stages: [
-        { name: 'Money demand falls', ch: { add: { Vg: 0.5 } }, why: 'Pay by card → money held ↓ → MD ← → 1/P ↓, P ↑' },
+        { name: 'Money demand falls', label: 'Money demand falls', ch: { add: { Vg: 0.5 } }, why: 'Pay by card → money held ↓ → MD ← → 1/P ↓, P ↑' },
         keep('Fed cuts M → MS ← → 1/P restored, P unchanged')] },
       { t: 'Real GDP rises → more money for transactions', dir: 'r', stages: [
         { name: 'Money demand rises', ch: { add: { Yg: 0.3 } }, why: 'Y ↑ → money demand ↑ → MD → → 1/P ↑, P ↓' }] }
@@ -862,7 +863,7 @@
     const player = Player($('#pl28'));
     const r = runner(plot, player, {
       start: 'A : W = W_E, L = L_E',
-      result: (a, b) => (b.vis.W ? (b.off.W || 0) + 7 > eqW(b.off) + 0.05 ? 'Unemployment ↑' : 'No change' : 'W ↓ · L ↓ — no unemployment'),
+      result: (a, b) => (b.vis.W ? (b.off.W || 0) + 7 > eqW(b.off) + 0.05 ? 'U ↑' : 'No change' : 'W ↓ · L ↓ — no unemployment'),
       quiet: () => plot.hilite(null),
       // New equilibrium에서: W 선, 또는 W · L(x · y 축 한 번에)
       after: (a, b) => plot.seq(b.vis.W ? [] : [{ axis: 'xy' }])
@@ -895,7 +896,7 @@
     const KO_V = { 1: ['up하고', 'up한다'], '-1': ['down하고', 'down한다'], 0: ['unchanged이고', 'unchanged이다'] };
     const EN_V = { 1: 'rises', '-1': 'falls', 0: 'stays the same' };
     const slot = (k, x, last) => {
-      if (x == null || x.d == null) return '<b class="slot q" data-k="' + k + '">?</b>' + (EN ? '' : last ? '.' : '');
+      if (x == null || x.d == null) return '<b class="slot q" data-k="' + k + '"></b>' + (EN ? '' : last ? '.' : '');
       const c = x.d > 0 ? 'up' : x.d < 0 ? 'dn' : 'same', tr = x.d > 0 ? '▲ ' : x.d < 0 ? '▼ ' : '';
       return '<b class="slot ' + c + '" data-k="' + k + '">' + tr + (EN ? EN_V[x.d] : KO_V[x.d][last ? 1 : 0]) + '</b>' + (EN ? '' : last ? '.' : '');
     };

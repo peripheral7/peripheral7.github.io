@@ -328,16 +328,17 @@
   // parts: [{ g 단계, rs, on, b }]
   function rsHTML(cond, parts) {
     const multi = new Set(parts.map((p) => p.g)).size > 1, when = { '단기': '단기에는 ', '장기': '장기에는 ' };
+    const lead = (p, pi) => p.sw || (multi ? (p.adj && p.g === '장기' ? '장기에는 임금 · 기대물가 P<sup>e</sup> 가 조정되어 ' : when[p.g] || (pi ? '이어서 ' : '')) : '');
     const toks = [];
-    parts.forEach((p, pi) => rsTok(p.rs).forEach((t, ti, all) => toks.push(Object.assign({ pre: ti ? '' : multi ? (when[p.g] || (pi ? '이어서 ' : '')) : '', on: p.on, b: p.b, partEnd: multi && ti === all.length - 1 }, t))));
+    parts.forEach((p, pi) => rsTok(p.rs).forEach((t, ti, all) => toks.push(Object.assign({ pre: ti ? '' : lead(p, pi), on: p.on, b: p.b, partEnd: multi && ti === all.length - 1 }, t))));
     // 받침이 있으면 '은', 없으면 '는'. 영문 기호는 읽는 소리로(L 엘 · M 엠 · N 엔 · R 알 → 은)
     const josa = (n) => { const c = n.replace(/[\s*′']+$/, '').slice(-1), h = c.charCodeAt(0) - 0xac00; return h >= 0 && h < 11172 ? (h % 28 ? '은' : '는') : /[LMNR]/.test(c) ? '은' : '는'; };
-    const qty = (n) => /^(Y|L|실업|통화량|자산|자본|대출|예금)/.test(n);
+    const qty = (n) => /^(Y|L|U|실업|통화량|자산|자본|대출|예금)/.test(n);
     const slot = (t, k) => {
       const last = k === toks.length - 1, end = last ? '다.' : t.partEnd ? '며,' : '고';
-      if (!t.on) return '<b class="slot q" data-b="' + t.b + '">?</b>' + (last ? '.' : t.partEnd ? ',' : '');
+      if (!t.on) return '<b class="slot q" data-b="' + t.b + '"></b>' + (last ? '.' : t.partEnd ? ',' : '');
       if (t.d == null) return '<b class="slot same" data-b="' + t.b + '">' + esc(t.n) + '</b>' + (last ? '.' : '');
-      if (t.back) return '<b class="slot same" data-b="' + t.b + '">Y* 로 ' + (last ? '돌아온다.' : t.partEnd ? '돌아오며,' : '돌아오고') + '</b>';
+      if (t.back) return '<b class="slot same" data-b="' + t.b + '">' + (t.n === 'Y' ? 'Y* 로 ' : '제자리로 ') + (last ? '돌아온다.' : t.partEnd ? '돌아오며,' : '돌아오고') + '</b>';
       const v = t.d ? (t.d > 0 ? (qty(t.n) ? '증가' : '상승') : (qty(t.n) ? '감소' : '하락')) + (last ? '한' : '하') : '그대로' + (last ? '이' : '이');
       return '<b class="slot ' + (t.d > 0 ? 'up' : t.d < 0 ? 'dn' : 'same') + '" data-b="' + t.b + '">' + (t.d > 0 ? '▲ ' : t.d < 0 ? '▼ ' : '') + (t.x ? esc(t.x) + ' ' : '') + v + end + '</b>';
     };
@@ -387,14 +388,14 @@
     let rsT = 0;
     function sentence(anim) {
       const el = rsEl(); if (!el) return;
-      const parts = beats.map((b, k) => ({ g: b.g, rs: b.rs, on: k <= i, b: k })).filter((p) => p.rs);
+      const parts = beats.map((b, k) => ({ g: b.g, rs: b.rs, adj: b.adj, sw: b.sw, on: k <= i, b: k })).filter((p) => p.rs);
       el.innerHTML = parts.length && i >= 0 ? rsHTML(COND[beats[0].ev], parts) : '';
       clearTimeout(rsT);
       if (anim && beats[i] && beats[i].rs) { const hs = $$('[data-b="' + i + '"]', el); hs.forEach((h) => h.classList.add('pulse')); rsT = setTimeout(() => hs.forEach((h) => h.classList.remove('pulse')), 1000); }
     }
     function go(k, anim) {
       i = Math.max(0, Math.min(beats.length - 1, k)); fin = false;
-      setSit(beats[i].sit); sentence(anim !== false);
+      setSit(beats[0].sit); sentence(anim !== false);   // Situation 은 처음 고른 사건 그대로
       beats[i].run(anim !== false);
       draw(); schedule();
       if (self.onGo) self.onGo(i);
@@ -547,7 +548,7 @@
       const withNew = S.concat([next]), letter = next.letter || LET[withNew.length - 1];
       num++;
       const isAlt = alts.length && id !== 0;
-      const stp = st.step || '', g = /장기/.test(stp) ? '장기' : /단기/.test(stp) ? '단기' : isAlt ? '장기' : num + '단계';
+      const stp = st.step || '', g = st.label || (/장기/.test(stp) ? '장기' : /단기/.test(stp) ? '단기' : isAlt ? '장기' : num + '단계');
       const altList = isAlt ? alts.map((a, k) => ({ t: sc.stages[a].short || sc.stages[a].name, on: a === id, pick: () => rebuild(a) })) : null;
       const cause = ps.slice(0, at), after = ps.slice(at + 1).join(' → ');
       // 상황(그래프 아래 줄): 1단계는 사건 이름(또는 sc.sit), 다음 단계는 원인의 첫 조각(또는 st.sit)
@@ -555,7 +556,7 @@
       // 결론 제목: result 의 ' — ' 앞(Y ↓ · P ↑ 등), 설명: 사슬의 뒤쪽 또는 result 의 ' — ' 뒤
       const res = o.result(prevS[prevS.length - 1], next, letter).split(' — '), pre = snap(prevS, false);
       out.push({ g, ev: sc.t, alts: altList, sit, pre, k: ps[at], t: cause.join(' → '), run: snap(withNew, true), wait: 1.25 });
-      out.push({ g, ev: sc.t, rs: num > 1 && /Y = Y\*/.test(res[1] || '') ? res[0].replace(/^Y [↑↓]/, YBACK) : res[0], alts: altList, sit, pre: snap(withNew, true), k: res[0], t: after || res.slice(1).join(' — '),
+      out.push({ g, ev: sc.t, sw: st.sw, adj: /adjust|조정/.test(why || ''), rs: st.rs || (num > 1 && /Y = Y\*/.test(res[1] || '') ? res[0].replace(/^Y [↑↓]/, YBACK) : res[0]), alts: altList, sit, pre: snap(withNew, true), k: res[0], t: after || res.slice(1).join(' — '),
         run: () => { snap(withNew, false)(false); if (o.after) o.after(prevS[prevS.length - 1], next); }, wait: 1.8 });
       S = withNew;
     });
@@ -730,12 +731,12 @@
         plot.seq(items);
       }
     });
-    const keep = (why) => ({ name: 'Fed 가 MS 를 옮겨 물가 유지', ch: { abs: (o) => ({ MS: 5 * (1 + mdScale(o)) - 5 }) }, why });
+    const keep = (why) => ({ name: 'Fed 가 MS 를 옮겨 물가 유지', label: 'Fed 가 물가를 지키려면', sw: '물가를 지키려면 Fed 가 M 을 줄이고, 그러면 ', rs: 'P back', ch: { abs: (o) => ({ MS: 5 * (1 + mdScale(o)) - 5 }) }, why });
     const EV = [
       { t: 'Fed 통화량 2배', dir: 'r', stages: [{ name: 'MS →', at: 0, ch: { add: { MS: 5 } }, why: 'MS → → 1/P 절반, P 2배' }] },
       { t: 'Fed 통화량 감소', dir: 'l', stages: [{ name: 'MS ←', at: 0, ch: { add: { MS: -1.5 } }, why: 'MS ← → 1/P ↑, P ↓' }] },
       { t: '신용카드 보급 → 현금 덜 보유', q: 'SA 2', dir: 'l', stages: [
-        { name: '화폐 수요 감소', ch: { add: { Vg: 0.5 } }, why: '카드 결제 → 돈 보유 ↓ → MD ← → 1/P ↓, P ↑' },
+        { name: '화폐 수요 감소', label: '화폐 수요 감소', ch: { add: { Vg: 0.5 } }, why: '카드 결제 → 돈 보유 ↓ → MD ← → 1/P ↓, P ↑' },
         keep('Fed 가 M ↓ → MS ← → 1/P 회복, P 그대로')] },
       { t: '실질 GDP 증가 → 거래용 돈 더 필요', dir: 'r', stages: [
         { name: '화폐 수요 증가', ch: { add: { Yg: 0.3 } }, why: 'Y ↑ → 돈 수요 ↑ → MD → → 1/P ↑, P ↓' }] }
@@ -866,7 +867,7 @@
     const player = Player($('#pl28'));
     const r = runner(plot, player, {
       start: 'A : W = W_E, L = L_E',
-      result: (a, b) => (b.vis.W ? (b.off.W || 0) + 7 > eqW(b.off) + 0.05 ? '실업 ↑' : '변화 없음' : 'W ↓ · L ↓ — 실업 없음'),
+      result: (a, b) => (b.vis.W ? (b.off.W || 0) + 7 > eqW(b.off) + 0.05 ? 'U ↑' : '변화 없음' : 'W ↓ · L ↓ — 실업 없음'),
       quiet: () => plot.hilite(null),
       // 새 균형에서: W 선, 또는 W · L(x · y 축 한 번에)
       after: (a, b) => plot.seq(b.vis.W ? [] : [{ axis: 'xy' }])
@@ -899,7 +900,7 @@
     const KO_V = { 1: ['상승하고', '상승한다'], '-1': ['하락하고', '하락한다'], 0: ['그대로이고', '그대로이다'] };
     const EN_V = { 1: 'rises', '-1': 'falls', 0: 'stays the same' };
     const slot = (k, x, last) => {
-      if (x == null || x.d == null) return '<b class="slot q" data-k="' + k + '">?</b>' + (EN ? '' : last ? '.' : '');
+      if (x == null || x.d == null) return '<b class="slot q" data-k="' + k + '"></b>' + (EN ? '' : last ? '.' : '');
       const c = x.d > 0 ? 'up' : x.d < 0 ? 'dn' : 'same', tr = x.d > 0 ? '▲ ' : x.d < 0 ? '▼ ' : '';
       return '<b class="slot ' + c + '" data-k="' + k + '">' + tr + (EN ? EN_V[x.d] : KO_V[x.d][last ? 1 : 0]) + '</b>' + (EN ? '' : last ? '.' : '');
     };
