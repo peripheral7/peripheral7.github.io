@@ -22,9 +22,12 @@
 /* 결과 목록: 검색 줄 아래에 떠 있다(본문을 밀지 않음) */
 .sxres{position:absolute;left:12px;right:12px;top:calc(100% - 4px);z-index:30;max-height:min(440px,60vh);overflow:auto;margin:0;padding:6px;list-style:none;border:1px solid var(--line);border-radius:10px;background:#fff;box-shadow:0 10px 30px rgba(31,37,55,.16)}
 .sxres[hidden]{display:none}
-.sxres li{display:flex;flex-direction:column;gap:2px;padding:8px 10px;border-radius:8px;cursor:pointer}
-.sxres li.on,.sxres li[data-k]:hover{background:var(--tint)}
-.sxres li.on{box-shadow:inset 3px 0 0 var(--blue)}
+.sxres li{position:relative;display:flex;flex-direction:column;gap:2px;padding:8px 64px 8px 10px;border-radius:8px;cursor:pointer}
+.sxres li[data-k]:hover{background:var(--tint)}
+/* 고른 결과: 테두리 대신 옅은 파랑 바탕 + 이름 파랑 + 오른쪽 'Enter ↵' 표시 */
+.sxres li.on{background:#e3edfb}
+.sxres li.on .sxt{color:var(--blue)}
+.sxres li.on::after{content:"Enter ↵";position:absolute;right:12px;top:50%;transform:translateY(-50%);padding:2px 7px;border-radius:6px;background:#fff;font-size:12px;font-weight:800;color:var(--blue)}
 .sxw{font-size:12.5px;font-weight:700;color:var(--soft)}
 .sxt{font-size:16.5px;font-weight:700;color:var(--ink)}
 .sxs{font-size:13.5px;line-height:1.45;color:var(--soft)}

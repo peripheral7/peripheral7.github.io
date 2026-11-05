@@ -63,13 +63,15 @@
     res = [0, 1, 2].reduce((out, r) => out.concat(hit.filter((it) => rank(it) === r)), []);
   }
   // 글에서 찾은 말을 <mark> 로. 길면 첫 일치 둘레만
+  // 강조 위치용 소문자 글: norm 과 달리 글자 수를 바꾸지 않는다(빈칸 겹침을 줄이면 <mark> 가 밀렸다)
+  const low1 = (x) => String(x).toLowerCase().replace(/▲/g, '↑').replace(/▼/g, '↓');
   function marked(s, terms, around) {
-    let txt = s, low = norm(s);
+    let txt = s, low = low1(s);
     if (around) {
       const i = Math.min.apply(null, terms.map((t) => low.indexOf(t)).filter((i) => i >= 0).concat([1e9]));
       if (i === 1e9) return '';
       const a = Math.max(0, i - around), z = Math.min(txt.length, i + around * 2);
-      txt = (a ? '… ' : '') + txt.slice(a, z) + (z < s.length ? ' …' : ''); low = norm(txt);
+      txt = (a ? '… ' : '') + txt.slice(a, z) + (z < s.length ? ' …' : ''); low = low1(txt);
     }
     const on = new Array(txt.length).fill(false);
     terms.forEach((t) => { let k = low.indexOf(t); while (k >= 0) { for (let j = k; j < k + t.length && j < on.length; j++) on[j] = true; k = low.indexOf(t, k + 1); } });
