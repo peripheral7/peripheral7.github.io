@@ -1,5 +1,3 @@
-/* Econ2 Interactive Real world (real.js)
-   카드와 REAL 표시는 <html class="rw"> 일 때만 보인다 */
 .rwtog{display:flex;flex:none;border:1.5px solid var(--ink);border-radius:8px;overflow:hidden}
 .rwtog button{padding:4px 10px;border:0;background:#fff;font-size:13px;font-weight:700;color:var(--ink);cursor:pointer;white-space:nowrap}
 .rwtog button + button{border-left:1.5px solid var(--ink)}
@@ -51,35 +49,32 @@
   .rwtog button{padding:4px 8px;font-size:12.5px}
   .rwsrc li{grid-template-columns:minmax(0,1fr)}
   .rwsrc li .lb{justify-self:start;margin-bottom:2px}
-  /* 그래프 글자 확대 */
+
   .rwfig .ax{font-size:22px}
   .rwfig .lg{font-size:22px}
   .rwfig .mk{font-size:26px}
   .rwfig .vl{font-size:21px}
 }
 
-/* 사건을 고르면(기본·현실 연결 모드 모두) 시간선(.player) — real.js 가 카드 자리(.panel 또는 .ch)에 rwdock, 정답을 고르면 rwgone 을 붙인다.
-   데스크톱: 위 내용 길이와 상관없이 화면 하단에 고정(조작 줄 .pbar 도 그 안에), 정답 고르면 아래로 빠르게 미끄러져 사라짐.
-   태블릿 세로 · 휴대폰(900px 이하): 세로 시간선이라 고정 · 접기 없음. --dockh = 시간선 높이(real.js 가 잼) */
 @media (min-width:901px){
   .rwdock .player{position:fixed;left:0;right:0;bottom:0;z-index:15;max-width:var(--max);margin:0 auto;padding:12px 24px 66px;background:#fff;border-top:1px solid var(--line);box-shadow:0 -6px 18px rgba(31,37,55,.07);transition:bottom .22s ease,opacity .18s ease}
   .rwdock.rwgone .player{bottom:calc(-1 * var(--dockh,240px) - 20px);box-shadow:none;pointer-events:none}
 }
-/* 내리기 단추(▾ ▴, 데스크톱만): 시간선을 내려도 조작 줄(화면 하단 고정)은 그대로 보인다. 태블릿 세로 · 휴대폰의 세로 시간선은 접지 않는다 */
+
 .rwfold{display:none}
 .rwdock .rwfold{display:inline-flex}
 .rwdock.rwgone .player .pbar{pointer-events:auto}
-@media (max-width:900px){   /* 휴대폰: 사례 카드는 장의 맨 아래(real.js 가 시간선 다음으로 옮김) */
+@media (max-width:900px){
   .rw .ch{grid-template-areas:"side" "fig" "play" "rw"}
   .rw .ch.tabbed{grid-template-areas:"tabs" "side" "fig" "play" "rw"}
   .rwcard{grid-area:rw}
   .rw .rwcard{margin-top:0}
 }
 @media (prefers-reduced-motion:reduce){.rwdock .player{transition:none}}
-.rwdock .player.idle{display:none}   /* 걸음이 없는 사건(Ch29 식 사건)은 빈 띠를 두지 않는다 */
-html.rw[lang="ko"] .opts li.hasrw button::after{content:"현실";letter-spacing:0}   /* 한국어판 표시 */
+.rwdock .player.idle{display:none}
+html.rw[lang="ko"] .opts li.hasrw button::after{content:"현실";letter-spacing:0}
 html[lang="ko"] .rwchip{letter-spacing:0}
-/* 용어 주석: 점선 밑줄 단어를 누르면 그 문단 아래에 뜻 상자가 열린다(real.js gloss·termClick) */
+
 .rwterm{display:inline;padding:0;border:0;background:none;font:inherit;color:inherit;text-decoration:underline dotted var(--blue) 1.5px;text-underline-offset:3px;cursor:pointer;border-radius:3px}
 .rwterm:hover{color:var(--blue)}
 .rwterm[aria-expanded="true"]{color:var(--blue);text-decoration-style:solid;background:#e8f0fb}
@@ -88,20 +83,19 @@ html[lang="ko"] .rwchip{letter-spacing:0}
 .rwdef b{color:var(--blue)}
 .rwsrc .rwdef{margin:6px 0 2px}
 @keyframes rwdefIn{from{opacity:0;transform:translateY(-4px)}to{opacity:1;transform:none}}
-.rwdef.swap{animation:rwdefSwap .2s ease-out}   /* 다른 용어로 바뀔 때: 자리는 그대로 글만 살짝 */
+.rwdef.swap{animation:rwdefSwap .2s ease-out}
 @keyframes rwdefSwap{from{opacity:.35}to{opacity:1}}
 @media (prefers-reduced-motion:reduce){.rwdef,.rwdef.swap{animation:none}}
-/* 사건 하나에 나라별 사례가 여럿이면 카드 머리의 [미국 | 한국] 고르기(real.js render 의 list) */
+
 .rwcc{display:inline-flex;margin-right:10px;border:1.5px solid var(--line);border-radius:7px;overflow:hidden;vertical-align:1px}
 .rwcc button{padding:1px 9px;border:0;background:#fff;font:inherit;font-size:12.5px;font-weight:700;color:var(--soft);cursor:pointer}
 .rwcc button + button{border-left:1.5px solid var(--line)}
 .rwcc button[aria-pressed="true"]{background:var(--ink);color:#fff}
 .rwcc button:focus-visible{outline:2px solid var(--blue);outline-offset:-2px}
-/* 2026-11-06 정답 선(real.js chart 의 hl): 범례 아래 줄의 "정답" 글자 */
+
 .rwfig .an{font-size:15px;font-weight:800;fill:#1d8a4a;paint-order:stroke;stroke:#fff;stroke-width:4px}
 .rwfig .vl{paint-order:stroke;stroke:#fff;stroke-width:4px}
-/* 조작 줄(app.js .pbar + real.js 문제 넘기기 · 내리기): 한 줄 [« 이전 문제][다음 문제 »] [n / N] [▶ 자동] [속도] [▾]
-   모든 단추 높이 36px · 같은 테두리 · 같은 글자. 걸음 ‹ 이전 · 다음 › 단추는 숨긴다(시간선의 마디를 눌러 옮길 수 있다) */
+
 .player .pbar{gap:8px;padding:6px 8px;align-items:center;flex-wrap:nowrap}
 .player .pbar button{height:36px;box-sizing:border-box;display:inline-flex;align-items:center;justify-content:center;padding:0 12px;border:1.5px solid var(--line);border-radius:8px;background:#fff;font-size:14px;font-weight:700;line-height:1;color:var(--ink);white-space:nowrap;cursor:pointer}
 .player .pbar .seg{border:0;border-radius:0;overflow:visible}
@@ -109,13 +103,13 @@ html[lang="ko"] .rwchip{letter-spacing:0}
 .player .pbar .seg .pp{min-width:84px;border:1.5px solid var(--ink)}
 .player .pbar .seg .pp.on{border-color:var(--blue)}
 .player .pbar .cnt{min-width:0;padding:0 2px;font-size:14px;line-height:36px}
-/* 속도 단추: 두 글자를 한 칸에 겹쳐(안 보이는 쪽 .spg — .gh 는 시간선 단계 머리라 쓰지 말 것) 눌러도 폭이 그대로(app.js) */
+
 .player .pbar [data-a="spd"]{flex-direction:column}
 .player .pbar [data-a="spd"]>.spg{height:0;overflow:hidden;visibility:hidden}
 .player .pbar .rwfold{min-width:36px;padding:0;font-size:15px}
 @media (hover:hover){.player .pbar button:hover:not(:disabled){border-color:var(--ink)}}
 .pbar .rwqb:focus-visible,.pbar .rwfold:focus-visible{outline:2px solid var(--blue);outline-offset:-3px}
-/* 카드 아래 .rwnav 는 조작 줄이 없는 사건(걸음 없음, Ch29)일 때만 */
+
 .rwnav{display:none}
 .rw .rwcard .rwnav{display:flex;justify-content:space-between;gap:8px;margin-top:12px;padding-top:10px;border-top:1px solid var(--line)}
 .rw .rwdock:has(.player:not(.idle)) .rwcard .rwnav{display:none}
@@ -124,17 +118,17 @@ html[lang="ko"] .rwchip{letter-spacing:0}
 .rwnav button:focus-visible{outline:2px solid var(--blue);outline-offset:-3px}
 @media (max-width:900px){
   .rwfig .an{font-size:21px}
-  html .player .pbar .rwfold{display:none}   /* 세로 시간선(태블릿 세로 · 휴대폰)에는 내리기 없음 */
+  html .player .pbar .rwfold{display:none}
   .pbar{max-width:calc(100vw - 16px)}
 }
-@media (max-width:639px){   /* 휴대폰: 한 줄에 들어가게 '문제' 글자를 빼고 간격 · 여백을 줄인다 */
+@media (max-width:639px){
   .pbar .qw{display:none}
   .player .pbar{gap:6px;padding:6px}
   .player .pbar button{padding:0 9px}
   .player .pbar .seg .pp{min-width:76px}
 }
-.player .pbar>*{flex:none}   /* 좁아도 숫자 칸 · 단추가 눌려 찌그러지지 않게 */
-@media (max-width:420px){   /* 390 · 360px 폭 휴대폰: 영문 글자가 길어 한 번 더 줄인다 */
+.player .pbar>*{flex:none}
+@media (max-width:420px){
   .player .pbar{gap:4px;padding:6px 5px}
   .player .pbar button{padding:0 7px;font-size:13px}
   .player .pbar .cnt{font-size:13px}

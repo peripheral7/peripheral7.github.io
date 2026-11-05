@@ -1,7 +1,3 @@
-/* Econ 2 Interactive 검색 — 한·영 공통(index.html 이 app.js · real.js 뒤에 읽는다).
-   · 찾는 단위 = 시나리오(사건 목록의 줄 하나). 글 = 사건 이름 + 목록 제목 + 장 · 탭 이름 + 사건 속 글(data-s, app.js) + 현실 사례 글(data-rw, real.js)
-   · 머리줄 돋보기(또는 / · Ctrl+K) → 머리줄 아래 검색 줄: 입력 · 결과 수 · ‹ › · 닫기, 그 아래 결과 목록
-   · 결과로 가기: 장 탭 → (AD·AS 같은) 작은 탭 → 사건 고르기. ‹ › · Enter 는 시나리오 하나씩(끝에서 처음으로) */
 (function () {
   'use strict';
   const $ = (s, r) => (r || document).querySelector(s);
@@ -11,17 +7,16 @@
     ? { btn: '검색', ph: '시나리오 검색 (예: 유가, 지급준비율, 부)', none: '맞는 시나리오가 없다', prev: '이전 시나리오', next: '다음 시나리오', close: '검색 닫기', rw: '현실 사례' }
     : { btn: 'Search', ph: 'Search scenarios (e.g. oil, reserve ratio, wealth)', none: 'No matching scenario', prev: 'Previous scenario', next: 'Next scenario', close: 'Close search', rw: 'real-world case' };
   const esc = (s) => String(s).replace(/[&<>"]/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
-  // 비교용 글: 소문자 · 표시 기호(** == ^ _ ¶ —) 지우기 · ▲▼ 는 ↑↓ 로
+
   const norm = (s) => String(s || '').normalize('NFKC').replace(/\*\*|==|[\^_¶]/g, '').replace(/ — /g, ' ').replace(/▲/g, '↑').replace(/▼/g, '↓').replace(/\s+/g, ' ').toLowerCase();
   const clean = (s) => String(s || '').replace(/\*\*|==|¶/g, '').replace(/\^([a-z])/g, '$1').replace(/_([A-Z0-9])/g, '$1').replace(/ — /g, ' ').replace(/\s+/g, ' ').trim();
 
-  /* ───────── 머리줄 단추 · 검색 줄 ───────── */
   const top = $('.top'), links = $('.top .links');
   if (!top || !links) return;
   const btn = document.createElement('button');
   btn.type = 'button'; btn.className = 'sxbtn'; btn.setAttribute('aria-label', UI.btn); btn.title = UI.btn + ' (/)';
   btn.innerHTML = '<svg viewBox="0 0 20 20" aria-hidden="true"><circle cx="8.5" cy="8.5" r="5.5"/><path d="M12.6 12.6L17 17"/></svg>';
-  const tg = links.previousElementSibling && !links.previousElementSibling.matches('nav') ? links.previousElementSibling : links;   // 모드 토글(real.js) 왼쪽
+  const tg = links.previousElementSibling && !links.previousElementSibling.matches('nav') ? links.previousElementSibling : links;
   tg.parentNode.insertBefore(btn, tg);
   const bar = document.createElement('div');
   bar.className = 'sxbar'; bar.hidden = true;
@@ -33,8 +28,8 @@
     '<button type="button" class="sxnav" data-d="1" aria-label="' + esc(UI.next) + '" title="' + esc(UI.next) + ' (Enter)">›</button>' +
     '<button type="button" class="sxx" aria-label="' + esc(UI.close) + '" title="' + esc(UI.close) + ' (Esc)">×</button></div>' +
     '<ul class="sxres" id="sxres" role="listbox" hidden></ul>';
-  document.body.appendChild(bar);   // 본문 위에 떠 있는 창(머리줄 높이 · 본문 배치를 바꾸지 않음)
-  // 자리: 돋보기 단추 바로 아래, 창 오른쪽 끝 = 단추 오른쪽 끝(화면 밖으로 나가면 왼쪽 여백 10px 에 맞춤)
+  document.body.appendChild(bar);
+
   function place() {
     const r = btn.getBoundingClientRect(), w = Math.min(520, window.innerWidth - 20);
     bar.style.top = Math.round(r.bottom + 8) + 'px';
@@ -44,7 +39,6 @@
   window.addEventListener('resize', () => { if (!bar.hidden) place(); });
   const inp = $('input', bar), cnt = $('.sxcnt', bar), ul = $('.sxres', bar);
 
-  /* ───────── 찾을 목록: 사건 줄 하나 = 시나리오 하나(페이지 순서) ───────── */
   let items = null;
   function build() {
     items = $$('.ch .opts li button').map((b) => {
@@ -52,7 +46,7 @@
       const tab = $('.tabs button[data-ch="' + ch + '"]'), sub = $$('.sub button', sec).find((t) => b.closest('[id$="' + t.getAttribute('data-sub') + '"]'));
       const h3 = b.closest('.opts') && $('h3', b.closest('.opts')), x = b.cloneNode(true);
       $$('.dir, .q', x).forEach((e) => e.remove());
-      const hx = h3 && h3.cloneNode(true); if (hx) $$('small, .keylg', hx).forEach((e) => e.remove());   // 목록 제목(작은 글 · 범례 빼고). 'Events' 같은 이름뿐인 제목은 생략
+      const hx = h3 && h3.cloneNode(true); if (hx) $$('small, .keylg', hx).forEach((e) => e.remove());
       const title = x.textContent.trim(), g0 = hx ? hx.textContent.trim() : '', grp = /^(Events|사건)$/.test(g0) ? '' : g0;
       const where = [tab ? tab.textContent.trim() : ch, sub ? sub.textContent.trim() : '', grp].filter(Boolean).join(' · ');
       const body = clean(b.getAttribute('data-s') || ''), rw = clean(b.getAttribute('data-rw') || '');
@@ -65,13 +59,12 @@
     const terms = norm(q).split(' ').filter(Boolean);
     if (!terms.length) { res = []; return; }
     const hit = items.filter((it) => terms.every((t) => (it.nT + ' ' + it.nW + ' ' + it.nB + ' ' + it.nR).indexOf(t) >= 0));
-    // 순서: 이름에 단어 첫머리로 다 있음(oil → Oil price) → 이름 어딘가에(Turmoil) → 사건 속 글에만. 같은 등급은 페이지 순서
+
     const head = (s, t) => (' ' + s).indexOf(' ' + t) >= 0 || new RegExp('[^a-z0-9]' + t.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')).test(' ' + s);
     const rank = (it) => { const n = it.nT + ' ' + it.nW; return terms.every((t) => head(n, t)) ? 0 : terms.every((t) => n.indexOf(t) >= 0) ? 1 : 2; };
     res = [0, 1, 2].reduce((out, r) => out.concat(hit.filter((it) => rank(it) === r)), []);
   }
-  // 글에서 찾은 말을 <mark> 로. 길면 첫 일치 둘레만
-  // 강조 위치용 소문자 글: norm 과 달리 글자 수를 바꾸지 않는다(빈칸 겹침을 줄이면 <mark> 가 밀렸다)
+
   const low1 = (x) => String(x).toLowerCase().replace(/▲/g, '↑').replace(/▼/g, '↓');
   function marked(s, terms, around) {
     let txt = s, low = low1(s);
@@ -105,7 +98,6 @@
     $$('.sxnav', bar).forEach((n) => { n.disabled = res.length < 1; });
   }
 
-  /* ───────── 시나리오로 가기 ───────── */
   function go(k) {
     if (!res.length) return;
     at = (k + res.length) % res.length; hi = at;
@@ -113,13 +105,12 @@
     if (tab && tab.getAttribute('aria-selected') !== 'true') tab.click();
     if (it.sub) { const sb = $('#c' + it.ch.slice(2) + ' .sub button[data-sub="' + it.sub + '"]'); if (sb && sb.getAttribute('aria-selected') !== 'true') sb.click(); }
     if (it.b.getAttribute('aria-pressed') !== 'true') it.b.click();
-    // 화면 위치는 사건 클릭이 맡는다(app.js bringFig: 데스크톱은 맨 위로, 휴대폰은 그림으로)
+
     const li = it.b.closest('li'); li.classList.remove('sxflash'); void li.offsetWidth; li.classList.add('sxflash');
     ul.hidden = true; inp.setAttribute('aria-expanded', 'false');
     drawCnt();
   }
 
-  /* ───────── 열기 · 닫기 · 키 ───────── */
   function open() { place(); bar.hidden = false; btn.setAttribute('aria-expanded', 'true'); document.documentElement.classList.add('sxon'); inp.focus(); inp.select(); if (inp.value.trim()) drawList(); }
   function close(keepFocus) { bar.hidden = true; ul.hidden = true; btn.setAttribute('aria-expanded', 'false'); document.documentElement.classList.remove('sxon'); if (!keepFocus) btn.focus(); }
   btn.addEventListener('click', () => (bar.hidden ? open() : close()));
@@ -142,9 +133,9 @@
       if (!ul.hidden) { ul.hidden = true; inp.setAttribute('aria-expanded', 'false'); } else close();
     }
   });
-  ul.addEventListener('mousedown', (e) => e.preventDefault());   // 누르는 동안 입력 칸 초점 유지
+  ul.addEventListener('mousedown', (e) => e.preventDefault());
   ul.addEventListener('click', (e) => { const li = e.target.closest('li[data-k]'); if (li) go(+li.getAttribute('data-k')); });
-  // 창 밖을 누르거나(배경 · 다른 단추 · 목록) 화면을 굴리면 닫는다. pointerdown 이라 결과로 가며 사건을 대신 누르는 click() 에는 반응하지 않는다
+
   document.addEventListener('pointerdown', (e) => { if (!bar.hidden && !bar.contains(e.target) && !btn.contains(e.target)) close(true); }, true);
   document.addEventListener('wheel', (e) => { if (!bar.hidden && !bar.contains(e.target)) close(true); }, { passive: true, capture: true });
   document.addEventListener('keydown', (e) => {

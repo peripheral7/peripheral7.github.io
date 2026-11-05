@@ -1,5 +1,3 @@
-/* Econ2 Interactive 현실 연결 모드 — 한국어판 사례(real.js 가 읽음). 영문 real.js 의 CASES 와 같은 구조·숫자·그래프, 글만 한국어.
-   m 은 한국어판 사건 버튼 글자(app.js). 영문 사례를 고치면 여기도 같이 고친다 */
 window.RW_KO = { cases: { 29: [
     {
       m: /^지급준비율 인하/, when: '2020년 3월 · 미국', title: 'Fed 가 지급준비율을 0% 로 내렸다',

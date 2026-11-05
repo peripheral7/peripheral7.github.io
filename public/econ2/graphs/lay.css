@@ -1,7 +1,3 @@
-/* Econ2 Interactive — 배치 보정(lay.js 와 함께). index.html · real.css 다음에 읽는다 */
-
-/* 데스크톱 · 태블릿 가로: 두 칸 높이를 실제로 보이는 화면 높이(dvh)로. 100vh 는 태블릿 브라우저의 주소창 · 도구줄까지 넣은 높이라
-   칸 아래쪽이 화면 밖 · 하단 시간선 밑으로 들어가 끝까지 내려도 가렸다. 칸 끝에는 여백을 둬 마지막 글이 흐림 표시 위로 올라오게 */
 @media (min-width:901px){
   @supports (height:100dvh){
     .side,.fig{max-height:calc(100dvh - var(--toph,53px) - 16px - 12px - var(--dockv,0px))}
@@ -10,10 +6,9 @@
   .side::after,.fig::after{content:"";display:block;height:28px}
 }
 
-/* ───── 900px 이하 공통: lay.js 가 해설(.lbox = 상황 줄 + 결과 문장) · 개념 상자(.cbox)를 따로 담는다 ───── */
 .lbox,.cbox{display:none}
 @media (max-width:900px){
-  /* 페이지 끝: 화면 하단 고정 조작 줄(높이 약 50px + 아래 14px) 위로 마지막 내용(개념 상자 · 현실 카드)을 올릴 수 있게 */
+
   main{padding-bottom:110px}
   .ch.lt .lbox,.ch.lm .lbox,.ch.lt .cbox,.ch.lm .cbox{display:block;min-width:0}
   .ch .lbox{grid-area:sit}
@@ -21,20 +16,19 @@
   .lbox .sitline{margin-top:0}
   .cbox .eq{margin:0}
   .cbox .eq + .eq{margin-top:10px}
-  .ch:has(#side33ad[hidden]) .cbox [data-of="side33ad"],.ch:has(#side33as[hidden]) .cbox [data-of="side33as"]{display:none}   /* Ch33: 고른 탭(AD · AS)의 개념 상자만 */
+  .ch:has(#side33ad[hidden]) .cbox [data-of="side33ad"],.ch:has(#side33as[hidden]) .cbox [data-of="side33as"]{display:none}
   html .ch.lt .rwcard,html .ch.lm .rwcard{grid-area:rw;margin-top:0}
-  /* 세로 시간선은 접지 않는다(real.css 의 접기 · 정답 뒤 숨김을 푼다) */
+
   html .rwdock .player,html .rwdock.rwgone .player{max-height:none;overflow:visible;pointer-events:auto}
-  /* 주요 요인 점(사건 왼쪽 -6px)이 스크롤 칸 왼쪽에 잘리지 않게 */
+
   .ch.lt .side,.ch.lm .side{padding-left:8px}
 }
 
-/* ───── 태블릿 세로(640~900px): [탭] / 그래프 / 해설(전체 폭) / [사건 | 세로 시간선] / 개념 / 현실 문제 ───── */
 @media (min-width:640px) and (max-width:900px){
   html .ch.lt,html .ch.lt.tabbed{grid-template-columns:minmax(0,1fr) minmax(0,1fr);grid-template-rows:none;gap:12px 24px;
     grid-template-areas:"fig fig" "sit sit" "side play" "con con" "rw rw"}
   html .ch.lt.tabbed{grid-template-areas:"tabs tabs" "fig fig" "sit sit" "side play" "con con" "rw rw"}
-  /* 두 칸 높이: 시간선 단계가 4개인 사건(예: Ch33 주가 폭락)이 다 들어가는 높이. 넘치면 칸마다 스크롤 */
+
   .ch.lt .side,html .ch.lt .player:not(.idle){height:var(--colh,440px);overflow-y:auto;overscroll-behavior:contain}
   .ch.lt .player{grid-area:play;padding-top:0}
   .ch.lt .side::after,.ch.lt .player::after{content:"";display:block;height:20px}
@@ -42,7 +36,6 @@
   .ch.lt .fig .stage[hidden]{display:none}
 }
 
-/* ───── 휴대폰(639px 이하): 한 줄. 그래프와 단계 해설을 한 상자에서 바꿔 보기, 해설 문장은 상자 밖에 늘 ───── */
 @media (max-width:639px){
   html .ch.lm,html .ch.lm.tabbed{grid-template-columns:minmax(0,1fr);grid-template-rows:none;gap:12px;grid-template-areas:"fig" "sit" "side" "con" "rw"}
   html .ch.lm.tabbed{grid-template-areas:"tabs" "fig" "sit" "side" "con" "rw"}
@@ -52,15 +45,14 @@
   .gsw button + button{border-left:1.5px solid var(--ink)}
   .gsw button[aria-pressed="true"]{background:var(--ink);color:#fff}
   .gsw button:focus-visible{outline:2px solid var(--blue);outline-offset:-3px}
-  .gbox:has(.player.idle) .gsw{display:none}   /* 걸음이 없는 사건 · 고르기 전: 바꿔 볼 것이 없다 */
-  /* 단계 보기: 그림은 숨기고 시간선 단계 목록만(조작 줄은 화면 하단 고정이라 그대로) */
+  .gbox:has(.player.idle) .gsw{display:none}
+
   .gbox[data-v="s"]:has(.player:not(.idle)) > :not(.gsw):not(.player){display:none}
   .gbox[data-v="s"] .player .steps{min-height:var(--gh,300px)}
   .gbox[data-v="g"] .player .steps,.gbox:not([data-v]) .player .steps{display:none}
   .gbox .player{padding-top:0}
 }
 
-/* ───── Ch28 실업률: 단계 해설(시간선)은 결과 문장과 겹쳐 없앤다. 조작 줄(문제 넘기기 · 자동 재생)만 남는다 ───── */
 #pl28s .steps,#pl28s .rwfold{display:none}
 @media (min-width:901px){
   .rwdock #pl28s{background:none;border-top:0;box-shadow:none;padding:0 0 66px;pointer-events:none}

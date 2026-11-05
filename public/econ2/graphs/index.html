@@ -6,17 +6,9 @@
 <meta name="robots" content="noindex">
 <title>Econ 2 Interactive</title>
 <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Cpath d='M4 4v24h24' fill='none' stroke='%23000' stroke-width='3'/%3E%3Cpath d='M8 8l18 18M8 24L26 8' stroke='%231f6fd1' stroke-width='2.5'/%3E%3C/svg%3E">
-<!--
-  Econ2 Exam2 핵심 그래프 — 챕터마다 한 구역(Ch29 은행 T계정 · Ch30 화폐시장 · Ch33 AD/AS 탭 · Ch28 노동시장 + 실업 지표).
-  교재의 기본 식 · 곡선만 쓴다. 고를 것은 글자 목록(.opts): 고르면 처음 상태 A 에서 변화가 한 걸음씩 재생되고(.player),
-  같은 줄을 다시 누르면 풀린다. 재생기는 전체 폭 시간선(단계마다 한 줄: [상황] → [곡선 ←] → [새 균형]) + 조작 줄(‹ 이전 · 자동 · 다음 › · 속도).
-  방향(▲ ▼)은 그래프의 새 균형점 축 이름 옆에 붙는다. 지표 상자는 그래프가 없는 Ch29 · 실업률 탭에만.
-  그래프 · 사건 내용은 app.js 한 곳. 주소 #ch29 · #ch30 · #ch33 · #ch33-as · #ch28 · #ch28-u 로 바로 열 수 있다(구역 id 는 c29 처럼 달리 둔다 — 같으면 브라우저가 그 구역으로 내려가 머리줄 밑에 가린다).
--->
-<style>
-  @font-face{font-family:"Pretendard Variable";font-weight:45 920;font-style:normal;font-display:swap;src:local("Pretendard Variable"),url("/fonts/PretendardVariable.woff2") format("woff2-variations")}
+<style>  @font-face{font-family:"Pretendard Variable";font-weight:45 920;font-style:normal;font-display:swap;src:local("Pretendard Variable"),url("/fonts/PretendardVariable.woff2") format("woff2-variations")}
   :root{--ink:#1f2537;--blue:#1f6fd1;--red:#c8352e;--soft:#5b6170;--line:#d8dbe0;--tint:#f3f6fb;--max:1240px;--up:#d6322b;--down:#1f6fd1}
-  /* 방향: 상승 ▲ 빨강 · 하락 ▼ 파랑 · 그대로 회색 (한국 주식 표기) */
+
   .up{color:var(--up)} .dn{color:var(--down)} .same{color:var(--soft)}
   *{box-sizing:border-box}
   html,body{margin:0;background:#fff;color:var(--ink);font-family:"Pretendard Variable",Pretendard,-apple-system,BlinkMacSystemFont,"Segoe UI","Apple SD Gothic Neo","Malgun Gothic",sans-serif;word-break:keep-all;-webkit-font-smoothing:antialiased}
@@ -28,7 +20,7 @@
   .tabs{display:flex;gap:2px;align-self:stretch;overflow-x:auto;scrollbar-width:none}
   .tabs::-webkit-scrollbar{display:none}
   .tabs button{position:relative;flex:none;padding:0 20px;border:0;border-radius:8px 8px 0 0;background:none;font-size:15px;font-weight:600;color:var(--soft);cursor:pointer;white-space:nowrap;transition:color .15s,background-color .15s}
-  .tabs button::after{content:"";position:absolute;left:12px;right:12px;bottom:0;height:3px;border-radius:3px 3px 0 0;background:var(--blue);transform:scaleX(0);transition:transform .22s ease}   /* 선택 밑줄: 머리줄 아래 경계선에 붙고, 선택하면 가운데서 펼쳐진다 */
+  .tabs button::after{content:"";position:absolute;left:12px;right:12px;bottom:0;height:3px;border-radius:3px 3px 0 0;background:var(--blue);transform:scaleX(0);transition:transform .22s ease}
   .tabs button[aria-selected="true"]{color:var(--ink)}
   .tabs button[aria-selected="true"]::after{transform:scaleX(1)}
   @media (hover:hover){.tabs button:hover{color:var(--ink);background:var(--tint)}}
@@ -38,18 +30,16 @@
   .top .links a{color:var(--soft)}
   main *{scrollbar-width:none}
   main *::-webkit-scrollbar{display:none}
-  /* 칸 아래에 내용이 더 있으면 아래쪽 글자를 흐리게(스크롤바 대신 더 있다는 표시) */
+
   .side.more,.fig.more{-webkit-mask-image:linear-gradient(to bottom,#000 calc(100% - 56px),transparent);mask-image:linear-gradient(to bottom,#000 calc(100% - 56px),transparent)}
   #langAsk{position:fixed;left:0;right:0;bottom:28px;z-index:40;margin:0 auto;width:max-content;display:flex;flex-wrap:wrap;align-items:center;gap:10px;max-width:calc(100% - 28px);box-sizing:border-box;padding:14px 18px;border:2px solid var(--ink);border-radius:10px;background:#fff;color:var(--ink);font-size:16px;line-height:1.35;box-shadow:0 6px 24px rgba(0,0,0,.18)}
   #langAsk p{margin:0 8px 0 0}
   #langAsk button{font:inherit;font-weight:700;color:var(--ink);background:#fff;border:2px solid var(--ink);border-radius:8px;padding:6px 16px;cursor:pointer}
   #langAsk button:first-of-type,#langAsk button:hover{background:var(--ink);color:#fff}
 
-  /* 챕터 한 구역: 왼쪽 그래프, 오른쪽 기본 식 · 사건 목록, 전체 폭 단계 목록(재생기).
-     단계 목록은 맨 아래 전체 폭. 휴대폰은 그래프 → 단계 → 설명. 탭 줄(.sub)은 app.js 가 그래프 y 축에 맞춰 왼쪽 여백을 준다 */
   main{max-width:var(--max);margin:0 auto;padding:14px 12px 40px}
   .ch{display:none;gap:12px 32px;grid-template-columns:minmax(300px,1fr) minmax(0,1.3fr);grid-template-areas:"side fig" "play play";align-items:start}
-  .ch.tabbed{grid-template-areas:"side tabs" "side fig" "play play";grid-template-rows:auto 1fr auto}   /* 왼쪽 설명 · 사건 목록, 오른쪽 그래프. 설명은 탭 줄 높이부터. 설명이 그래프보다 길 때 남는 높이는 그래프 줄(1fr)이 받는다 — auto 면 탭 줄에도 나뉘어 탭과 그래프 사이가 벌어졌다 */
+  .ch.tabbed{grid-template-areas:"side tabs" "side fig" "play play";grid-template-rows:auto 1fr auto}
   .ch.on{display:grid}
   .ch.tabbed .fig{align-self:stretch;display:flex;flex-direction:column}
   .ch>.sub{grid-area:tabs}
@@ -60,21 +50,18 @@
   .panel[hidden]{display:none}
   .fig .stage{position:relative;aspect-ratio:640/520;max-height:min(480px,56vh)}
   .fig svg.plot{position:absolute;inset:0;width:100%;height:100%}
-  /* 새 균형의 축 값: 한 번 커졌다 작아진다 */
-  /* 그래프 아래 상황 줄 */
+
   .sitline{display:flex;align-items:baseline;gap:10px;margin:8px 0 0;font-size:20px;font-weight:700;line-height:1.45}
   .sitline:empty{display:none}
-  .sitline .lb{flex:none;margin-left:0;padding:1px 8px;border:1.5px solid var(--line);border-radius:6px;font-size:13px;font-weight:800;color:var(--soft)}   /* 왼쪽으로 당겨 글자 'Situation' 이 아래 문장 첫 글자와 같은 선에 */
+  .sitline .lb{flex:none;margin-left:0;padding:1px 8px;border:1.5px solid var(--line);border-radius:6px;font-size:13px;font-weight:800;color:var(--soft)}
   .sitline + .rsent{margin-top:8px}
-  .rsent.auto{max-width:720px;font-size:18px}   /* Situation 아래 결과 문장(모든 사건) */
-  /* 큰 탭(AD · AS, 균형임금 · 실업률): 고른 탭은 진한 바탕 흰 글자 */
+  .rsent.auto{max-width:720px;font-size:18px}
+
   .sub{display:flex;flex-wrap:wrap;gap:8px;min-width:0}
   .sub button{flex:0 1 auto;min-width:0;padding:9px 18px;border:2px solid var(--ink);border-radius:10px;background:#fff;font-size:16.5px;font-weight:800;color:var(--ink);cursor:pointer}
   .sub button:hover:not([aria-selected="true"]){background:var(--tint)}
   .sub button[aria-selected="true"]{background:var(--ink);color:#fff}
 
-  /* 재생기: 시간선. 단계(단기 · 장기)마다 한 줄 — 왼쪽 단계 이름, 오른쪽에 선 위의 점 세 개(상황 · 곡선 이동 · 새 균형)와 [제목] · 글.
-     지금 마디는 파란 점 · 파란 제목, 지난 마디는 검정, 남은 마디는 흐리게. 휴대폰은 세로(선이 왼쪽, 마디가 아래로). 사건을 고르기 전엔 안내 한 줄만 */
   .steps{display:flex;flex-direction:column;gap:14px;margin:4px 0 0;padding:0;list-style:none}
   .steps li.hint{padding:12px 0;font-size:14.5px;color:var(--soft)}
   .stg{display:grid;grid-template-columns:104px minmax(0,1fr);gap:0 12px;align-items:start}
@@ -83,11 +70,11 @@
   .gh>span{white-space:nowrap}
   .alt{max-width:100%;white-space:normal}
   .stg.alts .gh>span{margin-bottom:2px}
-  .solo .stg{grid-template-columns:minmax(0,1fr)}   /* 단계가 하나면 이름 칸 없이 전체 폭 */
+  .solo .stg{grid-template-columns:minmax(0,1fr)}
   .solo .gh{display:none}
   .gh{display:flex;flex-wrap:wrap;align-items:center;gap:4px 8px;padding-top:38px;font-size:19px;font-weight:800;line-height:1.3;color:var(--soft)}
   .stg.cur .gh{color:var(--ink)}
-  /* 갈래 고르기(그대로 · 정책): 글자 버튼. 고른 것은 ▸ 와 파랑 굵은 글자, 나머지는 흐리게 */
+
   .alt{padding:0 0 0 14px;border:0;background:none;position:relative;font-size:15px;font-weight:600;color:#9aa0aa;cursor:pointer;text-align:left}
   .alt::before{content:"·";position:absolute;left:3px}
   .alt:hover{color:var(--ink)}
@@ -95,19 +82,19 @@
   .alt.on::before{content:"▸";left:0}
   .rows{position:relative;display:flex;margin:0;padding:0;list-style:none}
   .rows::before{content:"";position:absolute;left:11px;right:11px;top:11px;height:3px;background:var(--ink);border-radius:2px}
-  /* 줄 끝의 원. 마지막 걸음이면 마지막 단계의 끝 원이 파랗게 채워지고 위에 '끝' */
-  .rows::after{content:"";position:absolute;right:0;top:0;width:24px;height:24px;box-sizing:border-box;border:3px solid var(--ink);border-radius:50%;background:#fff;transition:background-color .3s,border-color .3s}   /* 끝 원: 마디 점과 같은 크기 */
-  .player.end .stg:last-child .rows::after{background:var(--blue);border-color:var(--blue);animation:finOut 1s ease .35s forwards}   /* 끝 원: 칠해진 뒤 잠깐 머물렀다 색만 빠진다(테두리는 남음) */
+
+  .rows::after{content:"";position:absolute;right:0;top:0;width:24px;height:24px;box-sizing:border-box;border:3px solid var(--ink);border-radius:50%;background:#fff;transition:background-color .3s,border-color .3s}
+  .player.end .stg:last-child .rows::after{background:var(--blue);border-color:var(--blue);animation:finOut 1s ease .35s forwards}
   @keyframes finOut{to{background:#fff;border-color:var(--ink)}}
   @media (prefers-reduced-motion:reduce){.player.end .stg:last-child .rows::after{animation:none;background:#fff;border-color:var(--ink)}}
-  .player.end .rows li.cur .dot{background:#fff;border-color:var(--ink)}   /* 끝나면 색은 끝 원에만 */
+  .player.end .rows li.cur .dot{background:#fff;border-color:var(--ink)}
   .rows li{position:relative;flex:1 1 0;min-width:0}
-  /* 단계 이름(.gl): 한 줄 시간선에서 단계가 바뀌는 마디 위. 두 번째 단계부터는 왼쪽 세로 막대로 나눈다 */
+
   .rows.lab{margin-top:30px}
   .rows .gl{position:absolute;left:0;top:-30px;display:flex;align-items:center;gap:4px 10px;max-width:calc(100% - 8px);font-size:14px;font-weight:800;letter-spacing:.04em;color:var(--soft);white-space:nowrap}
   .rows .gl.sep{left:-10px;padding-left:8px;border-left:2px solid #c9ccd2}
   .rows .gl.cur{color:var(--ink)}
-  .rows .gl .alt{flex:none;display:inline-block;width:auto;padding:0 0 0 14px;font-size:14px;font-weight:600;letter-spacing:0;white-space:nowrap;color:#9aa0aa}   /* .rows li button(마디 버튼) 규칙을 되돌린다 */
+  .rows .gl .alt{flex:none;display:inline-block;width:auto;padding:0 0 0 14px;font-size:14px;font-weight:600;letter-spacing:0;white-space:nowrap;color:#9aa0aa}
   .rows .gl .alt:hover{color:var(--ink)}
   .rows .gl .alt.on{color:var(--blue);font-weight:800}
   .rows li button{position:relative;display:block;width:100%;padding:0 22px 0 0;border:0;background:none;text-align:left;cursor:pointer;color:#9aa0aa;overflow-wrap:anywhere}
@@ -135,7 +122,7 @@
   .seg button:active:not(:disabled){background:#e3e8f0}
   .seg button:disabled{color:#b3b8c2;cursor:default}
   .seg .pp{min-width:88px}
-  .seg .pp.on,.seg .pp.on:active{background:#e7f0fb;color:var(--blue)}   /* 재생 중: 검정 반전 대신 옅은 파랑 — 마우스 올림·누름에도 글자가 바탕에 묻히지 않게 */
+  .seg .pp.on,.seg .pp.on:active{background:#e7f0fb;color:var(--blue)}
   .pbar .spdb{padding:7px 12px;border:1.5px solid var(--line);border-radius:8px;background:#fff;font-size:13.5px;font-weight:700;color:var(--soft);cursor:pointer;transition:border-color .15s,color .15s}
   @media (hover:hover){
     .seg button:hover:not(:disabled):not(:active){background:var(--tint)}
@@ -154,7 +141,7 @@
   .eq small{display:block;color:var(--soft);font-size:13.5px;line-height:1.5}
   .eq small + .f{margin-top:10px}
   .eq sup{font-size:.62em;line-height:0}
-  /* 파란 상자 안 펼침 글(SRAS 세 이론 · 마찰적 실업): 제목을 누르면 아래로 펼쳐진다 */
+
   .eq .drop{margin:10px 0 2px;border-top:1px solid var(--line);padding-top:8px}
   .eq .drop summary{display:flex;align-items:center;gap:6px;cursor:pointer;list-style:none;font-size:15px;font-weight:800;color:var(--blue)}
   .eq .drop summary::-webkit-details-marker{display:none}
@@ -164,17 +151,16 @@
   .eq .drop p,.eq .drop ol{margin:6px 0 0;font-size:14px;line-height:1.55}
   .eq .drop ol{padding-left:20px}
   .eq .drop li + li{margin-top:4px}
-  .eq mark{padding:0 3px;border-radius:4px;background:#fff3b0;color:var(--ink)}   /* 핵심 문장: 형광펜 + 굵게 */
+  .eq mark{padding:0 3px;border-radius:4px;background:#fff3b0;color:var(--ink)}
   .eqdetail .dl{display:block}
   .eqdetail .dl + .dl{margin-top:4px}
   .eqdetail .dp{display:block}
-  .eqdetail .dp + .dp{margin-top:14px}   /* 문단(¶) 사이 */
-  .eqdetail .u{display:inline-block;max-width:100%}   /* ' → ' 조각은 통째로 다음 줄로 */
+  .eqdetail .dp + .dp{margin-top:14px}
+  .eqdetail .u{display:inline-block;max-width:100%}
   .eqdetail mark{padding:0 3px;border-radius:4px;background:#fff3b0;color:var(--ink)}
   .eqdetail b{color:var(--ink);font-weight:800}
   .rows sup{font-size:.62em}
 
-  /* 고를 것(사건 목록): 블로그 목차처럼 — 왼쪽 세로선 아래 작은 제목과 글줄. 고른 줄은 세로선 · 글자가 파랑, 다시 누르면 풀림 */
   .opts{margin:0 0 10px}
   .opts h3{margin:0 0 3px;font-size:13.5px;font-weight:800;letter-spacing:.06em;color:var(--soft)}
   .opts h3 small{font-weight:600;letter-spacing:0}
@@ -186,7 +172,7 @@
   .opts li button .q{margin-left:6px;font-size:13px;font-weight:600;color:var(--soft)}
   .opts li button .dir{margin-left:5px;font-weight:800;color:var(--up)}
   .opts li button .dir.l{color:var(--down)}
-  /* 주요 요인 점: 목록 세로선 위에 얹어 글줄 자리는 그대로. 범례는 제목 줄 오른쪽(자리가 없으면 JS 가 숨김) */
+
   .opts li.imp button{position:relative}
   .opts li.imp button::before{content:"";position:absolute;left:-6px;top:calc(3px + .725em - 4px);width:8px;height:8px;border-radius:50%;background:#e8a33d;box-shadow:0 0 0 2px #fff}
   .opts h3.haslg{display:flex;flex-wrap:wrap;align-items:baseline;column-gap:12px}
@@ -194,7 +180,6 @@
   .keylg[hidden]{display:none}
   .keylg i{width:8px;height:8px;border-radius:50%;background:#e8a33d}
 
-  /* Ch29: 도식(지준 → ×1/R → 예금 = 통화량) + 은행 전체 T계정(폭을 줄여 가운데) */
   .bankfig{display:flex;flex-direction:column;align-items:center;gap:18px;padding:10px 0 4px}
   .flow{display:grid;grid-template-columns:1fr auto 1fr auto 1fr;align-items:center;gap:8px;width:100%;max-width:600px}
   .flow .bx{padding:10px 8px;border:2px solid var(--ink);text-align:center;font-size:14.5px;line-height:1.35;transition:background .3s,border-color .3s}
@@ -203,7 +188,7 @@
   .flow .bx.m b{color:var(--blue)}
   .flow .ar{text-align:center;font-size:13.5px;font-weight:700;color:var(--soft);line-height:1.2;padding:2px 4px;transition:background .3s}
   .flow .ar::after{content:"→";display:block;font-size:24px;color:var(--ink)}
-  /* 위 수식: 지급준비금 × 통화승수 = 통화량 — 영문(작게, 위) · 한글 항 · 숫자(작게, 아래). T계정과 같은 폭 */
+
   .eqrow{display:grid;grid-template-columns:1fr auto 1fr auto 1fr;align-items:end;gap:4px 12px;width:100%;max-width:720px;margin:0 0 4px}
   .eqrow.two{grid-template-columns:1fr 1fr;max-width:560px}
   .eqrow .kop{padding-bottom:6px;font-size:34px}
@@ -221,7 +206,7 @@
   .term i{display:block;font-style:normal;font-size:14.5px;font-weight:700;letter-spacing:.03em;color:var(--soft)}
   .term i:empty{display:none}
   .term span{display:block;font-size:34px;font-weight:800;line-height:1.25}
-  html[lang=en] .term span{font-size:clamp(15px,2vw,26px)}   /* 영문 항은 길어서 화면 폭에 맞춰 줄인다 */
+  html[lang=en] .term span{font-size:clamp(15px,2vw,26px)}
   .term b{display:block;min-height:20px;margin-top:4px;font-size:16px;font-weight:700;color:var(--soft);white-space:nowrap}
   .term b.up{color:var(--up)}
   .term b.dn{color:var(--down)}
@@ -241,8 +226,6 @@
   .bankfig .hi{background:#dbe8fb}
   .flow .bx.hi{border-color:var(--blue)}
 
-  /* 지표 상자: 이름 · 방향(▲ 증가 빨강 / ▼ 감소 파랑 / 그대로). 크기 · 비율 대신 방향만.
-     바뀌면 원인 → 결과 순서로 하나씩 잠깐 강조(.pulse)하고, 그래프에서도 같은 축 · 곡선을 함께 강조한다 */
   .keys{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px;margin:10px 0 0}
   .keys.k2{grid-template-columns:repeat(2,minmax(0,1fr))}
   .keys.ops{grid-template-columns:minmax(0,1fr) auto minmax(0,1fr) auto minmax(0,1fr);align-items:center;width:100%;max-width:600px;margin:0}
@@ -261,16 +244,15 @@
   .kt.on{color:var(--blue)}
   .kd{min-height:18px;margin-top:2px;font-size:12.5px;color:var(--soft)}
 
-  /* Ch28 실업률 탭: 숫자 대신 단어 + 방향. 걸음마다 옮긴 무리 → 분자 → 분모 → 결과 순서로 옅은 파랑 강조 */
   .rates{display:flex;flex-direction:column;gap:20px;padding:6px 0 0;max-width:620px;min-width:0}
-  /* 결과 문장: 결과 자리는 방향 색 · 굵게, 결과 직후 잠깐 커졌다 돌아온다 */
+
   .rsent{margin:24px 0 0;max-width:620px;font-size:20px;font-weight:600;line-height:1.6}
   .rsent:empty{display:none}
   .rsent .slot{display:inline-block;margin:0 4px;font-weight:800;transition:transform .25s}
-  .rsent .slot.q{display:inline-block;min-width:3.6em;height:1.05em;margin:0 4px;padding:0;border-bottom:2px solid #b3b8c2;border-radius:0;vertical-align:-3px}   /* 모르는 칸: 빈 밑줄 */
-  .rsent .slot{padding:0 4px;border-radius:5px 5px 0 0;transition:background .3s,box-shadow .3s}   /* 아래 모서리는 늘 각지게: 강조가 풀리며 밑줄이 사라지는 동안에도 끝이 휘지 않음 */
-  .rsent .slot.back,.rsent .slot.mv{color:var(--ink)}   /* 곡선 이동 · 이전 수준 회복: 회색 아닌 검정 굵게 */
-  .rsent .slot.pulse{background:#fff3b0;border-radius:5px 5px 0 0;box-shadow:inset 0 -3px 0 #f2c200}   /* 채워질 때: 형광펜 바탕 + 곧은 밑줄(아래 모서리는 각지게 해 밑줄 끝이 휘지 않음, 확대 없음) */
+  .rsent .slot.q{display:inline-block;min-width:3.6em;height:1.05em;margin:0 4px;padding:0;border-bottom:2px solid #b3b8c2;border-radius:0;vertical-align:-3px}
+  .rsent .slot{padding:0 4px;border-radius:5px 5px 0 0;transition:background .3s,box-shadow .3s}
+  .rsent .slot.back,.rsent .slot.mv{color:var(--ink)}
+  .rsent .slot.pulse{background:#fff3b0;border-radius:5px 5px 0 0;box-shadow:inset 0 -3px 0 #f2c200}
   .who{display:flex;flex-wrap:wrap;align-items:center;gap:6px 8px;padding:8px 10px;border-radius:8px;font-size:15px;transition:background .3s}
   .who .lb{font-size:13px;font-weight:800;color:var(--soft);margin-right:2px}
   .grp{padding:3px 10px;border:1.5px solid var(--line);border-radius:999px;background:#fff;font-weight:700}
@@ -279,17 +261,17 @@
   .rate .nm{font-weight:800}
   .rate .eqs{font-weight:700;color:var(--soft)}
   .frac{display:inline-flex;flex-direction:column;align-items:stretch;min-width:0;text-align:center;line-height:1.35}
-  .frac>span{padding:6px 16px;border-radius:6px;transition:background .3s}   /* 분수: 분자 · 분모 위아래 · 좌우 여백 */
+  .frac>span{padding:6px 16px;border-radius:6px;transition:background .3s}
   .frac>span:first-child{border-bottom:2px solid var(--ink);border-radius:6px 6px 0 0}
   .frac .sum{display:inline-block;margin-left:6px;font-size:13.5px;font-weight:800;white-space:nowrap}
   .rate .res{justify-self:start;padding:2px 8px;border-radius:6px;font-size:19px;font-weight:800;transition:background .3s}
   .rate .res .q{color:#b3b8c2}
   .rate .res{white-space:nowrap}
-  /* 이름은 분수 위 한 줄, 분수 · = · 결과는 칸이 모자라면 다음 줄로(겹치지 않게) */
+
   .rates .rate{display:flex;flex-wrap:wrap;align-items:center;gap:8px 18px}
   .rates .rate .nm{flex:0 0 100%}
   .rates .frac{flex:0 1 auto;min-width:0}
-  .rates .out{display:inline-flex;align-items:center;gap:12px;white-space:nowrap}   /* '=' 과 결과는 함께 줄바꿈 */
+  .rates .out{display:inline-flex;align-items:center;gap:12px;white-space:nowrap}
   .rates .hi{background:#dbe8fb}
   .t{font-weight:700}
   .t b{margin-left:2px}
@@ -343,23 +325,21 @@
     .rsent.auto{font-size:16px}
     .rows.lab{margin-top:0}
     .rows .gl{position:static;margin:0;padding-bottom:8px;flex-wrap:wrap;white-space:normal;max-width:none}
-    .rows li:first-child>.gl{position:relative;top:0;z-index:1;margin-left:-36px;padding-left:36px;background:#fff}   /* 첫 단계 이름이 세로선 윗부분을 가려 선이 첫 점에서 시작 */
+    .rows li:first-child>.gl{position:relative;top:0;z-index:1;margin-left:-36px;padding-left:36px;background:#fff}
     .rows .gl.sep{padding-top:10px;padding-left:0;border-left:0;border-top:2px solid #c9ccd2}
     .seg button{padding:7px 11px;font-size:13.5px}
 
     .fig .stage{max-height:none}
   }
 
-  /* 데스크톱(901px 이상): 가운데 최대 폭 1240px, 위아래 여백. 그래프는 사건과 상관없이 화면 높이의 절반으로 고정.
-     오른쪽 설명 · 사건 목록은 그래프 높이 안에서, 길면 그 칸만 스크롤 */
   @media (min-width:901px){
     main{padding:16px 24px 70px}
     .fig .stage{height:44vh;max-height:none;aspect-ratio:auto}
-    .ch.tabbed .fig .stage{height:auto;min-height:calc(44vh + 26px);flex:1}   /* 탭 줄 아래 그래프: 예전 왼쪽 칸 높이(44vh + 80px)에서 탭 줄을 뺀 만큼 */
+    .ch.tabbed .fig .stage{height:auto;min-height:calc(44vh + 26px);flex:1}
     .bankfig{padding-top:2px}
     .ratefig{padding-top:6px}
-    /* 왼쪽 · 오른쪽 칸은 따로 스크롤(아래 '데스크톱: 왼쪽 … 따로 스크롤'). 오른쪽 그래프는 위에 붙여 늘어나지 않게 */
-    .side{padding-right:6px;padding-left:6px;margin-left:-6px}   /* 왼쪽 6px: 주요 요인 점 자리(글 위치는 그대로) */
+
+    .side{padding-right:6px;padding-left:6px;margin-left:-6px}
     .ch.tabbed .side{grid-row:1 / 3}
     .ch.tabbed .fig{align-self:start}
     .player{padding-top:18px}
@@ -372,7 +352,7 @@
     .rows .sm{font-size:13.5px}
     .gh{font-size:16px}
   }
-  /* 낮은 화면(노트북): 그래프 · 여백 · 시간선을 한 단계 작게 해 한 화면에 */
+
   @media (min-width:901px) and (max-height:820px){
     .term span{font-size:27px}
     .eqrow .kop{font-size:28px}
@@ -405,15 +385,13 @@
   @media (max-width:900px){
     .fig .stage{max-height:none;aspect-ratio:640/520}
   }
-  /* 데스크톱: 왼쪽(설명 · 사건 목록)과 오른쪽(그래프 · 해설 · 퀴즈)을 따로 스크롤하고 페이지는 스크롤하지 않는다.
-     칸 높이 = 화면 − 머리줄(--toph, app.js 가 잼) − 위 여백 − 아래 여백 − 하단 고정 시간선(--dockv, real.js 가 잼). 탭 있는 장의 오른쪽은 탭 줄(56px)도 뺀다 */
+
   @media (min-width:901px){
     main{padding-bottom:12px}
     .side,.fig{max-height:calc(100vh - var(--toph,53px) - 16px - 12px - var(--dockv,0px));overflow-y:auto;overscroll-behavior:contain}
     .ch.tabbed .fig{max-height:calc(100vh - var(--toph,53px) - 16px - 12px - var(--dockv,0px) - 56px)}
   }
-  /* Ch29 그림 칸(.bankfig) 폭 3구간: 화면 폭이 아니라 그림 칸 폭(cqi)에 맞춘다 — 데스크톱에서도 칸이 좁아질 수 있어서.
-     숫자는 줄바꿈하지 않고, 구간 안에서는 칸 폭에 비례해 글자를 줄인다(clamp). --tfmax 는 낮은 화면에서 T계정 상한 */
+
   .bankfig{container-type:inline-size;--tfmax:24px}
   @media (min-width:901px) and (max-height:820px){.bankfig{--tfmax:20px}}
   .bankfig .tt .r{display:grid;grid-template-columns:minmax(0,1fr) auto auto;align-items:baseline;column-gap:8px}
@@ -421,7 +399,7 @@
   .bankfig .tt .r b,.bankfig .tt .r i{white-space:nowrap}
   .bankfig .tt .r b{margin-left:0}
   .bankfig .eqrow .num{white-space:nowrap}
-  /* 넓음(560px~): 칸 넓이 그대로, 증감 칸은 자리를 잡아 둔다 */
+
   @container (min-width:560px){
     .bankfig .tt{font-size:clamp(19px,3.6cqi,var(--tfmax));line-height:1.55}
     .bankfig .tt>div{padding:8px 16px 6px}
@@ -431,7 +409,7 @@
     .bankfig .eqrow .num{font-size:clamp(18px,3.4cqi,24px)}
     .bankfig .eqrow .num.up,.bankfig .eqrow .num.dn{font-size:clamp(19px,3.6cqi,26px)}
   }
-  /* 보통(380~559px): 여백 · 간격을 줄이고 증감은 작은 글로 바로 옆에 */
+
   @container (min-width:380px) and (max-width:559.98px){
     .bankfig .tt{font-size:clamp(14px,3.8cqi,19px);line-height:1.5}
     .bankfig .tt>div{padding:6px 8px 4px}
@@ -444,7 +422,7 @@
     .bankfig .eqrow .kop{font-size:22px;padding-bottom:2px}
     .bankfig .eqrow .num,.bankfig .eqrow .num.up,.bankfig .eqrow .num.dn{font-size:clamp(14px,3.7cqi,20px);padding:2px}
   }
-  /* 좁음(~379px): 증감은 숫자 아래 줄로 내린다 — 이름 · 숫자 · 증감이 한 줄에서 겹치지 않게 */
+
   @container (max-width:379.98px){
     .bankfig .tt{font-size:clamp(13px,4.4cqi,16px);line-height:1.45}
     .bankfig .tt>div{padding:6px 6px 4px}
@@ -462,9 +440,9 @@
     .bankfig .tnote{font-size:12.5px}
   }
 </style>
-<link rel="stylesheet" href="/econ2/graphs/real.css?v=20261106e">
-<link rel="stylesheet" href="/econ2/graphs/search.css?v=20261105u">
-<link rel="stylesheet" href="/econ2/graphs/lay.css?v=20261106g">
+<link rel="stylesheet" href="/econ2/graphs/real.css?v=20261106i">
+<link rel="stylesheet" href="/econ2/graphs/search.css?v=20261106i">
+<link rel="stylesheet" href="/econ2/graphs/lay.css?v=20261106i">
 </head>
 <body>
 <header class="top"><div class="in">
@@ -479,8 +457,7 @@
 </div></header>
 
 <main>
-  <!-- Ch29: 도식 + 은행 전체 T계정 | 설명 · 사건 / 걸음 카드 -->
-  <section class="ch" id="c29" aria-label="Ch29 통화승수">
+    <section class="ch" id="c29" aria-label="Ch29 통화승수">
     <div class="fig"><div class="bankfig" id="bank"></div><div class="sitline"></div><p class="rsent auto"></p></div>
     <div class="side">
       <h2><small>Ch29 The Monetary System</small>통화승수</h2>
@@ -494,8 +471,7 @@
     <div class="player" id="pl29"></div>
   </section>
 
-  <!-- Ch30: 화폐시장 그래프 + 지표 상자 | 설명 · 사건 / 걸음 카드 -->
-  <section class="ch" id="c30" aria-label="Ch30 화폐와 물가">
+    <section class="ch" id="c30" aria-label="Ch30 화폐와 물가">
     <div class="fig">
       <div class="stage" id="plot30"></div>
       <div class="sitline"></div><p class="rsent auto"></p>
@@ -514,8 +490,7 @@
     <div class="player" id="pl30"></div>
   </section>
 
-  <!-- Ch33: AD · AS 큰 탭 | 그래프 + 지표 상자 | 설명 · 사건 / 걸음 카드 -->
-  <section class="ch tabbed" id="c33" aria-label="Ch33 AD–AS">
+    <section class="ch tabbed" id="c33" aria-label="Ch33 AD–AS">
     <div class="sub" role="tablist" aria-label="AD · AS"><button role="tab" data-sub="ad">AD</button><button role="tab" data-sub="as">AS</button></div>
     <div class="fig">
       <div class="stage" id="plot33ad"></div>
@@ -558,8 +533,7 @@
     <div class="player" id="pl33"></div>
   </section>
 
-  <!-- Ch28: 균형임금 · 실업률 큰 탭, 한 번에 하나. 각 탭은 왼쪽 그림 + 지표 상자 | 오른쪽 설명 · 목록 / 걸음 카드 -->
-  <section class="ch tabbed" id="c28" aria-label="Ch28 실업">
+    <section class="ch tabbed" id="c28" aria-label="Ch28 실업">
     <div class="sub" role="tablist" aria-label="균형임금 · 실업률"><button role="tab" data-sub="w">균형임금</button><button role="tab" data-sub="u">실업률</button></div>
     <div class="panel" id="p28w">
       <div class="fig">
@@ -602,12 +576,10 @@
 </main>
 
 <script>
-/* 언어: 고른 언어는 슬라이드 덱과 같은 키(localStorage 'slides.lang')에 둔다. EN · 한국어 링크를 누르면 그 언어로 저장.
-   한국어판에서: 저장값이 en 이면 영문판으로, 저장값이 없고 브라우저 첫 언어가 영어면 영문판으로 갈지 묻는다(덱의 askLang 과 같은 창). */
 (function () {
   var KEY = 'slides.lang', EN = '/econ2/graphs/en/', KO = '/econ2/graphs/';
   function get() { try { return localStorage.getItem(KEY); } catch (e) { return null; } }
-  function set(v) { try { localStorage.setItem(KEY, v); } catch (e) { /* no storage */ } }
+  function set(v) { try { localStorage.setItem(KEY, v); } catch (e) {  } }
   var links = document.querySelectorAll('.top .links a');
   for (var i = 0; i < links.length; i++) (function (a) {
     var h = a.getAttribute('href');
@@ -628,10 +600,10 @@
   document.body.appendChild(box);
 })();
 </script>
-<script src="/econ2/graphs/app.js?v=20261106g"></script>
-<script src="/econ2/graphs/real-ko.js?v=20261106a"></script>
-<script src="/econ2/graphs/real.js?v=20261106h"></script>
-<script src="/econ2/graphs/search.js?v=20261105u"></script>
-<script src="/econ2/graphs/lay.js?v=20261106g"></script>
+<script src="/econ2/graphs/app.js?v=20261106i"></script>
+<script src="/econ2/graphs/real-ko.js?v=20261106i"></script>
+<script src="/econ2/graphs/real.js?v=20261106i"></script>
+<script src="/econ2/graphs/search.js?v=20261106i"></script>
+<script src="/econ2/graphs/lay.js?v=20261106i"></script>
 </body>
 </html>

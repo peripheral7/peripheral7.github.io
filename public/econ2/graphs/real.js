@@ -1,18 +1,11 @@
-/* Econ2 Interactive — Real world 모드
-   · 토글 [Basic | Real world] · localStorage 'econ2.mode' · <html class="rw">
-   · 카드: 예측 질문 → 실제 데이터 그래프 → 이론 대조 → 뉴스·연구
-   · 데이터: real-data.json (FRED, scripts/econ2-real-data.mjs)
-   · 한국어판(<html lang="ko">): real-ko.js 가 먼저 window.RW_KO = { cases } 를 둔다(사례 구조 · 숫자는 영문과 같고 글만 한국어). 화면 글자는 UI */
 (function () {
   'use strict';
   const $ = (s, r) => (r || document).querySelector(s);
   const KEY = 'econ2.mode';
   const esc = (s) => String(s).replace(/[&<>"]/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' })[c]);
   const get = () => { try { return localStorage.getItem(KEY); } catch (e) { return null; } };
-  const put = (v) => { try { localStorage.setItem(KEY, v); } catch (e) { /* no storage */ } };
+  const put = (v) => { try { localStorage.setItem(KEY, v); } catch (e) {  } };
 
-  /* ───────── 사례 ───────── */
-  // 장 번호별 · m 버튼 · q 질문 · opts/ans 선택 · v 공개 · chart(marks: [날짜, 선, 글, 'below'|'side'|'left'?]) · th · src(k d t s u)
   const FED = 'https://www.federalreserve.gov/';
   const CASES = { 29: [
     {
@@ -270,7 +263,7 @@
       src: [{k: 'News',d: 'May 13, 2020',by: 'Statistics Korea',t: 'Economically Active Population Survey in April 2020',s: 'Employment fell by 476,000 from a year earlier; the unemployment rate was 4.2%, down 0.2 points; the economically inactive population rose by 831,000.',u: 'https://mods.go.kr/board.es?mid=a20105020000&bid=11732&act=view&list_no=382428&tag=&nPage=8&ref_bid='}]
     }
   ] };
-  // 용어 주석: [찾을 글자, 뜻]. 카드마다 처음 나오는 곳만 누를 수 있다(한국어판은 real-ko.js 의 gloss)
+
   const GLOSS = [
     [/required reserve ratio|reserve requirements?/, "Reserve requirement: the minimum share of deposits a bank must, by law, keep as reserves (cash in the vault or deposits at the central bank)."],
     [/excess reserves/, "Excess reserves: reserves a bank holds above the legal minimum."],
@@ -315,7 +308,7 @@
     [/\bBLS\b/, "BLS (Bureau of Labor Statistics): the U.S. government agency that publishes jobs, wages and price data."]
   ];
   const KO = document.documentElement.lang === 'ko' && window.RW_KO;
-  const HOME = KO ? 'KR' : 'US';   // 사건에 사례가 여럿이면 이 나라 것을 먼저
+  const HOME = KO ? 'KR' : 'US';
   const CS = KO ? KO.cases : CASES;
   const G = KO ? KO.gloss || [] : GLOSS;
   const UI = KO ? {
@@ -328,21 +321,20 @@
     source: 'Source: FRED — ', got: ' · retrieved ', band: ' · shaded: event period', hl: ' · green line: answer', ans: 'Answer', prevQ: 'Prev', nextQ: 'Next', qWord: ' question', nodata: 'Data could not be loaded.', fold: 'Hide timeline', unfold: 'Show timeline', foldS: 'Hide', unfoldS: 'Show', mode: 'Mode', basic: 'Basic', rw: 'Real world'
   };
 
-  /* ───────── 선그래프 ───────── */
   const W = 640, R = 18, B = 30;
-  const COL = ['#1f6fd1', '#1f2537'], ANS = '#1d8a4a';   // 정답 선: 정답 버튼(.ok)과 같은 초록
+  const COL = ['#1f6fd1', '#1f2537'], ANS = '#1d8a4a';
   const yr = (d) => { const p = d.split('-').map(Number); return p[0] + (p[1] - 1) / 12 + ((p[2] || 1) - 1) / 365; };
   function nice(max) { const s = Math.pow(10, Math.floor(Math.log10(max / 4))); return [1, 2, 2.5, 5, 10].map((k) => k * s).find((k) => max / k <= 5); }
-  const tw = (t) => [...t].reduce((w, ch) => w + (ch.charCodeAt(0) > 127 ? 22 : 13), 0);   // 휴대폰 22px 글자 기준 대략의 글 폭(한글 22 · 영문 13)
+  const tw = (t) => [...t].reduce((w, ch) => w + (ch.charCodeAt(0) > 127 ? 22 : 13), 0);
   function chart(c, data) {
     const rows = data[c.k].filter((r) => r[0] >= c.from && r[0] <= c.to);
     const n = rows[0].length - 1, xs = rows.map((r) => yr(r[0]));
     let ymax = 0, ymin = 0; rows.forEach((r) => { for (let j = 1; j <= n; j++) { ymax = Math.max(ymax, r[j]); ymin = Math.min(ymin, r[j]); } });
-    const step = nice((ymax - ymin) * 1.08), top = Math.ceil(ymax * 1.15 / step) * step, bot = -Math.ceil(-ymin * 1.08 / step) * step;   // 음수 값이 있으면 0 아래까지
-    // 정답 표시(hl: [날짜] 또는 [시작, 끝])가 있으면 범례 아래 한 줄(정답 글자 · 구간 괄호)을 더 두고 그만큼 그림을 키운다
+    const step = nice((ymax - ymin) * 1.08), top = Math.ceil(ymax * 1.15 / step) * step, bot = -Math.ceil(-ymin * 1.08 / step) * step;
+
     const T = c.hl ? 72 : 30, H = 260 + T;
     const x0 = Math.min(xs[0], c.hl ? yr(c.hl[0]) : Infinity), x1 = Math.max(xs[xs.length - 1], c.hl ? yr(c.hl[c.hl.length - 1]) : -Infinity);
-    const L = Math.max(52, 14 + 13 * Math.max(String(top).length, String(bot).length));   // 왼쪽 여백: 축 숫자가 길면(1000, -500) 넓힌다(휴대폰 22px 글자 기준)
+    const L = Math.max(52, 14 + 13 * Math.max(String(top).length, String(bot).length));
     const X =(x) => L + (x - x0) / (x1 - x0) * (W - L - R), Y = (y) => T + (top - y) / (top - bot) * (H - T - B);
     let s = '<svg viewBox="0 0 ' + W + ' ' + H + '" role="img" aria-label="' + esc(c.y) + '">';
     if (c.band) s += '<rect x="' + X(yr(c.band[0])) + '" y="' + T + '" width="' + (X(yr(c.band[1])) - X(yr(c.band[0]))) + '" height="' + (H - T - B) + '" fill="#fff3b0" opacity=".7"/>';
@@ -351,7 +343,7 @@
     for (let y = Math.ceil(x0); y <= x1; y++) if (y % ys === 0) s += '<line x1="' + X(y) + '" x2="' + X(y) + '" y1="' + (H - B) + '" y2="' + (H - B + 5) + '" stroke="#8d93a0"/><text x="' + X(y) + '" y="' + (H - 6) + '" text-anchor="' + (X(y) - 30 < L ? 'start' : X(y) + 30 > W ? 'end' : 'middle') + '" class="ax">' + y + '</text>';
     s += '<line x1="' + L + '" x2="' + (W - R) + '" y1="' + (H - B) + '" y2="' + (H - B) + '" stroke="#1f2537" stroke-width="1.5"/>';
     if (c.vline) { const vx = X(yr(c.vline[0])); s += '<line x1="' + vx + '" x2="' + vx + '" y1="' + T + '" y2="' + (H - B) + '" stroke="#c8352e" stroke-width="2" stroke-dasharray="5 4"/><text x="' + (vx + 6) + '" y="' + (T + 14) + '" class="vl">' + esc(c.vline[1]) + '</text>'; }
-    // 정답 시점(세로선 하나) · 구간(양 끝 세로선 + 위쪽 괄호). 글자는 범례 아래 줄, 그림 칸 밖으로 넘치지 않게 가운데를 당긴다
+
     if (c.hl) {
       const a = X(yr(c.hl[0])), b = X(yr(c.hl[c.hl.length - 1])), top = T - 7, lw = tw(UI.ans) + 8;
       const mid = Math.max(L + lw / 2, Math.min(W - R - lw / 2, (a + b) / 2));
@@ -360,13 +352,13 @@
       s += '<text x="' + mid + '" y="' + (T - 15) + '" text-anchor="middle" class="an">' + esc(UI.ans) + '</text>';
     }
     for (let j = 1; j <= n; j++) s += '<polyline fill="none" stroke="' + COL[j - 1] + '" stroke-width="' + (j === 1 ? 3 : 2.5) + '" stroke-linejoin="round" points="' + rows.map((r, i) => X(xs[i]).toFixed(1) + ',' + Y(r[j]).toFixed(1)).join(' ') + '"/>';
-    // 범례: 앞 이름 길이만큼 띄운다(휴대폰 22px 글자 ≈ 13px/자 기준, 두 이름 합쳐 40자 안팎까지)
+
     let lx = L + 10;
     if (c.names) s += c.names.map((nm, j) => { const x = lx; lx += 70 + tw(nm); return '<line x1="' + x + '" x2="' + (x + 24) + '" y1="' + 18 + '" y2="' + 18 + '" stroke="' + COL[j] + '" stroke-width="3"/><text x="' + (x + 30) + '" y="' + 24 + '" class="lg">' + esc(nm) + '</text>'; }).join('');
     else s += '<text x="' + L + '" y="' + 20 + '" class="lg">' + esc(c.y) + '</text>';
     (c.marks || []).forEach((mk) => {
       const r = rows.find((q) => q[0].indexOf(mk[0]) === 0); if (!r) return;
-      // 글 자리: 기본 점 오른쪽 위 · below 아래 · side 바로 옆(위가 범례에 닿을 때) · left 왼쪽 위. 오른쪽 끝 가까우면 왼쪽으로
+
       const px = X(yr(r[0])), py = Y(r[mk[1] + 1]), pos = mk[3], left = pos === 'left' || px + 14 + tw(mk[2]) * 1.2 > W - 4;
       const ty = pos === 'below' ? py + 28 : pos === 'side' ? py + 8 : py - 10, tx = px + (left ? -10 : pos === 'side' ? 14 : 10);
       s += '<circle cx="' + px + '" cy="' + py + '" r="6" fill="#fff" stroke="' + COL[mk[1]] + '" stroke-width="3"/><text x="' + tx + '" y="' + ty + '" text-anchor="' + (left ? 'end' : 'start') + '" class="mk">' + esc(mk[2]) + '</text>';
@@ -374,10 +366,9 @@
     return s + '</svg>';
   }
 
-  /* ───────── 카드 ───────── */
   let data = null;
   const fmtT = (s) => esc(s).replace(/==(.+?)==/g, '<mark>$1</mark>');
-  // 용어 주석: 이미 이스케이프된 html 의 글자 부분에서, 이 카드에서 아직 안 쓴(used) 용어 중 가장 앞에 나오는 것부터 단추로 감싼다
+
   function gloss(html, used) {
     return html.split(/(<[^>]+>)/).map((p) => {
       if (p[0] === '<') return p;
@@ -392,8 +383,7 @@
       }
     }).join('');
   }
-  // 용어를 누르면 그 문단 바로 아래에 뜻 상자를 열고, 다시 누르면 닫는다. 뜻 상자는 페이지에 하나만:
-  // 다른 용어가 열린 채로 누르면 같은 문단이면 그 상자의 내용만 바꾸고, 다른 문단이면 상자를 그 문단 아래로 옮긴다
+
   function termClick(e) {
     const b = e.target.closest('.rwterm'); if (!b) return;
     const i = b.getAttribute('data-g'), host = b.closest('p, li');
@@ -402,7 +392,7 @@
     if (b.getAttribute('aria-expanded') === 'true') { if (box) box.remove(); off(); return; }
     off();
     const d = G[+i][1], k = d.indexOf(': '), html = k > 0 ? '<b>' + esc(d.slice(0, k)) + '</b> ' + esc(d.slice(k + 2)) : esc(d);
-    if (box && box.previousElementSibling === host) {   // 같은 문단: 내용만 바꾼다
+    if (box && box.previousElementSibling === host) {
       box.classList.remove('swap'); void box.offsetWidth; box.classList.add('swap');
     } else {
       if (box) box.remove();
@@ -412,12 +402,12 @@
     box.setAttribute('data-g', i); box.innerHTML = html;
     b.setAttribute('aria-expanded', 'true');
   }
-  // list: 같은 사건의 사례들(나라별, cc 없으면 미국). 둘 이상이면 머리에 [미국 | 한국] 고르기
+
   function render(card, c, list) {
-    card.hidden = c === 'none';   // 이 사건엔 현실 사례가 없으면 카드를 띄우지 않는다(선택을 풀면 다시 안내)
+    card.hidden = c === 'none';
     if (!c) { card.innerHTML = '<p class="rwnote"><span class="rwtag">' + UI.tag + '</span>' + UI.pick + '</p>'; return; }
     if (c === 'none') { card.innerHTML = ''; return; }
-    const used = new Set(), q = gloss(esc(c.q), used), vh = gloss(esc(c.v), used);   // 용어 주석은 읽는 순서(질문 → 답 → 이론 → 출처)대로 처음 한 번만
+    const used = new Set(), q = gloss(esc(c.q), used), vh = gloss(esc(c.v), used);
     const cc = list && list.length > 1 ? '<span class="rwcc" role="group" aria-label="' + UI.ccLabel + '">' + list.map((x, i) => '<button type="button" data-c="' + i + '" aria-pressed="' + (x === c) + '">' + UI.cc[x.cc || 'US'] + '</button>').join('') + '</span>' : '';
     const ecos = c.chart && c.chart.src === 'ecos';
     card.innerHTML =
@@ -427,7 +417,7 @@
       '<div class="rwopts">' + c.opts.map((o, i) => '<button type="button" data-i="' + i + '">' + esc(o) + '</button>').join('') + '<button type="button" class="rwskip" data-i="-1">' + UI.skip + '</button></div>' +
       '<div class="rwans" hidden>' +
       '<p class="rwv"></p>' +
-      (c.chart ? '<figure class="rwfig">' + (data ? chart(c.chart, data) : '<p class="rwnote">' + UI.nodata + '</p>') + '<figcaption>' + (ecos ? UI.sourceKr : UI.source) + esc(c.chart.cap) + (data ? UI.got + esc(ecos ? data.fetched_kr : data.fetched) : '') + (c.chart.band ? UI.band : '') + (c.chart.hl ? UI.hl : '') + '</figcaption></figure>' : '') +   // chart 없으면 그림 생략(연구 사례)
+      (c.chart ? '<figure class="rwfig">' + (data ? chart(c.chart, data) : '<p class="rwnote">' + UI.nodata + '</p>') + '<figcaption>' + (ecos ? UI.sourceKr : UI.source) + esc(c.chart.cap) + (data ? UI.got + esc(ecos ? data.fetched_kr : data.fetched) : '') + (c.chart.band ? UI.band : '') + (c.chart.hl ? UI.hl : '') + '</figcaption></figure>' : '') +
       '<p class="rwth"><span class="lb">' + UI.theory + '</span>' + gloss(fmtT(c.th), used) + '</p>' +
       '<ul class="rwsrc">' + c.src.map((x) => '<li><span class="lb">' + x.k + '</span><div><a href="' + esc(x.u) + '" target="_blank" rel="noopener">' + esc(x.t) + '</a><small>' + esc(x.by) + ' · ' + esc(x.d) + '</small><p>' + gloss(esc(x.s), used) + '</p></div></li>').join('') + '</ul>' +
       '</div>' +
@@ -437,21 +427,19 @@
       card.querySelectorAll('.rwopts button').forEach((x) => { const k = +x.getAttribute('data-i'); x.disabled = true; x.classList.toggle('ok', k === c.ans); x.classList.toggle('no', k === i && i !== c.ans); });
       $('.rwv', card).innerHTML = (i < 0 ? '' : i === c.ans ? '<b class="ok">' + UI.right + '</b> ' : '<b class="no">' + UI.wrong + '</b> ') + vh;
       $('.rwans', card).hidden = false;
-      card.dispatchEvent(new CustomEvent('rwanswer'));   // 시간선 숨김(attach)
+      card.dispatchEvent(new CustomEvent('rwanswer'));
     }));
     card.querySelectorAll('.rwcc button').forEach((b) => b.addEventListener('click', () => card.dispatchEvent(new CustomEvent('rwcountry', { detail: list[+b.getAttribute('data-c')] }))));
   }
 
-  /* ───────── 붙이기 ───────── */
-  // 카드 자리: CASES 키 → [그림 칸, 사건 목록을 감싼 범위]. 탭 있는 장은 범위 안에 목록이 여럿(Ch33 AD·AS) 또는 패널마다 따로(Ch28)
   const SPOT = { 29: ['#c29 .fig', '#o29'], 30: ['#c30 .fig', '#o30'], 33: ['#c33 .fig', '#c33 .side'], '28w': ['#p28w .fig', '#o28'], '28u': ['#p28u .fig', '#o28s'] };
-  // 범위 하나: 그림 칸 아래 카드 + 목록 REAL 표시. redo: 데이터가 늦게 오면 답 공개 전 카드 다시 그리기
+
   const redo = [];
-  // 사례 글 모으기(주소 · 정규식 · 숫자 제외)
+
   const rwText = (o) => { const out = []; (function walk(v, k) { if (typeof v === 'string') { if (k !== 'u' && !/^https?:/.test(v)) out.push(v); } else if (Array.isArray(v)) v.forEach((x) => walk(x)); else if (v && typeof v === 'object' && !(v instanceof RegExp)) Object.keys(v).forEach((kk) => walk(v[kk], kk)); })(o); return out.join(' ').replace(/<[^>]+>/g, ' '); };
-  // 시간선 내리기 상태: 내리기 단추로 정한 값은 장 · 문제를 바꿔도 유지(localStorage 'econ2.fold'). 정답을 고르면 잠깐 내려가는 것은 이 값을 바꾸지 않는다
+
   let folded = (() => { try { return localStorage.getItem('econ2.fold') === '1'; } catch (e) { return false; } })();
-  const setFolded = (v) => { folded = v; try { localStorage.setItem('econ2.fold', v ? '1' : '0'); } catch (e) { /* no storage */ } };
+  const setFolded = (v) => { folded = v; try { localStorage.setItem('econ2.fold', v ? '1' : '0'); } catch (e) {  } };
   function attach(key, cases) {
     const fig = $(SPOT[key][0]), scope = $(SPOT[key][1]);
     if (!fig || !scope) return;
@@ -459,26 +447,24 @@
     fig.appendChild(card);
     card.addEventListener('click', termClick);
     let cur = null, list = null;
-    // 사건 하나에 사례가 여럿(나라별)일 수 있다. 처음 보이는 것은 페이지 언어의 나라(한국어판 = 한국) 사례
+
     const casesOf = (b) => cases.filter((c) => c.m.test(b.textContent.trim())).sort((x, y) => (y.cc === HOME) - (x.cc === HOME));
     const caseOf = (b) => casesOf(b)[0] || null;
-    scope.querySelectorAll('li button').forEach((b) => { const cs = casesOf(b); if (!cs.length) return; b.parentNode.classList.add('hasrw'); b.setAttribute('data-rw', rwText(cs)); });   // data-rw: 검색(search.js)용 사례 글
-    card.addEventListener('rwcountry', (e) => { cur = e.detail; render(card, cur, list); });   // 나라만 바꿀 때는 시간선 상태(내려 둠 · 올려 둠)를 그대로 둔다
-    // 시간선: 사건을 고르면(기본 모드도) rwdock(데스크톱 하단 고정), 정답을 고르면 rwgone(숨김). --dockh 는 시간선 높이
-    // 내리기 단추(.rwfold): 조작 줄(.pbar) 안. 시간선을 내려도(정답을 골라도) 조작 줄은 남고, 누르면 다시 올라온다.
-    // 아래 여백 대신 --dockv: 데스크톱 두 칸(따로 스크롤)의 높이를 시간선 위까지로(index.html)
+    scope.querySelectorAll('li button').forEach((b) => { const cs = casesOf(b); if (!cs.length) return; b.parentNode.classList.add('hasrw'); b.setAttribute('data-rw', rwText(cs)); });
+    card.addEventListener('rwcountry', (e) => { cur = e.detail; render(card, cur, list); });
+
     const host = fig.closest('.panel') || fig.closest('.ch'), ch = fig.closest('.ch'), player = host && $('.player', host);
     const wide = window.matchMedia('(min-width:901px)');
     const sync = () => {
-      // 숨은 장(·탭)에서는 재지 않는다: 높이 0 이 --dockh 에 남으면, 정답으로 내려간 시간선이 장을 다시 열 때 떠올랐다 내려갔다
+
       if (!player || host.hidden || !ch.classList.contains('on')) return;
       const h = player.offsetHeight, on = wide.matches && host.classList.contains('rwdock') && !host.classList.contains('rwgone') && !player.classList.contains('idle');
       host.style.setProperty('--dockh', (wide.matches ? h : player.scrollHeight) + 'px');
-      // 데스크톱 두 칸의 아래 끝 = 시간선 윗변(--dockv). 내려 둔 시간선은 조작 줄 자리(64px)만
+
       const docked = wide.matches && host.classList.contains('rwdock') && !player.classList.contains('idle');
       host.style.setProperty('--dockv', on ? h + 'px' : docked ? '64px' : '0px');
     };
-    // 이전 · 다음 문제: 지금 보이는 사건 목록에서 앞뒤 사건을 누른다(현실 연결 모드는 현실 표시가 붙은 사건만, 끝에서는 반대쪽 끝으로)
+
     const navQ = (d) => {
       const rw = document.documentElement.classList.contains('rw');
       const all = Array.prototype.filter.call(scope.querySelectorAll('li button'), (x) => !x.closest('[hidden]') && x.offsetParent !== null && (!rw || x.parentNode.classList.contains('hasrw')));
@@ -487,34 +473,34 @@
       const k = at < 0 ? (d > 0 ? 0 : all.length - 1) : (at + d + all.length) % all.length;
       if (k !== at) all[k].click();
     };
-    // 문제 넘기기 단추: 단추가 flex 라 글 조각 앞뒤 일반 공백은 지워진다 → 줄바꿈 없는 공백(«  ·  » · qWord)
+
     const qbtn = (d) => { const b = document.createElement('button'); b.type = 'button'; b.className = 'spdb rwqb ' + (d < 0 ? 'rwqp' : 'rwqn'); const w = '<span class="qw">' + UI.qWord + '</span>'; b.innerHTML = d < 0 ? '« ' + UI.prevQ + w : UI.nextQ + w + ' »'; b.setAttribute('aria-label', (d < 0 ? UI.prevQ : UI.nextQ) + UI.qWord); b.addEventListener('click', () => navQ(d)); return b; };
-    card.addEventListener('click', (e) => { const b = e.target.closest('[data-q]'); if (b) navQ(+b.getAttribute('data-q')); });   // 걸음 없는 사건(Ch29)은 조작 줄이 없어 카드 아래 단추로
+    card.addEventListener('click', (e) => { const b = e.target.closest('[data-q]'); if (b) navQ(+b.getAttribute('data-q')); });
     let fold = null;
     if (player) {
       fold = document.createElement('button'); fold.type = 'button'; fold.className = 'spdb rwfold';
       fold.addEventListener('click', () => { host.classList.toggle('rwgone'); setFolded(host.classList.contains('rwgone')); setFold(); sync(); });
-      // 조작 줄 순서: [« 이전 문제][다음 문제 »] [n / N] [▶ 자동] [속도] [▾] — 걸음 ‹ 이전 · 다음 › 은 real.css 가 숨긴다. 내리기는 시간선이 가로(데스크톱)일 때만
+
       const pb = $('.pbar', player);
       pb.insertBefore(qbtn(1), pb.firstChild); pb.insertBefore(qbtn(-1), pb.firstChild);
       pb.appendChild(fold);
       if (window.ResizeObserver) new ResizeObserver(sync).observe(player);
-      new MutationObserver(sync).observe(player, { childList: true, subtree: true });   // 휴대폰은 max-height 로 크기가 묶여 ResizeObserver 만으로는 내용 변화를 못 잡는다
+      new MutationObserver(sync).observe(player, { childList: true, subtree: true });
       wide.addEventListener && wide.addEventListener('change', sync);
     }
-    // 카드 자리: 데스크톱은 그림 칸 안(Situation · 결과 문장 아래), 휴대폰은 시간선 다음(장의 맨 아래, grid-area rw)
-    const place = () => { if (wide.matches || !player) { if (card.parentNode !== fig) fig.appendChild(card); } else { const u = fig.closest('.panel') || fig.closest('.ch'); if (card.parentNode !== u) u.appendChild(card); } };   // 900px 이하: 장(패널) 바로 아래 칸(grid-area rw) — 시간선은 lay.js 가 옮긴다
+
+    const place = () => { if (wide.matches || !player) { if (card.parentNode !== fig) fig.appendChild(card); } else { const u = fig.closest('.panel') || fig.closest('.ch'); if (card.parentNode !== u) u.appendChild(card); } };
     place(); wide.addEventListener && wide.addEventListener('change', place);
     const setFold = () => { if (!fold) return; const d = host.classList.contains('rwgone'); fold.textContent = d ? '▴' : '▾'; fold.setAttribute('aria-label', d ? UI.unfold : UI.fold); fold.title = d ? UI.unfold : UI.fold; fold.setAttribute('aria-expanded', String(!d)); };
     const dock = () => { if (!host) return; host.classList.toggle('rwdock', !!cur); host.classList.toggle('rwgone', folded); setFold(); requestAnimationFrame(sync); };
     card.addEventListener('rwanswer', () => { if (!host) return; host.classList.add('rwgone'); setFold(); sync(); });
-    // 보이는 목록에서 눌린 사건 읽기(숨은 탭의 눌림은 무시)
+
     const read = () => {
       const b = Array.prototype.find.call(scope.querySelectorAll('button[aria-pressed="true"]'), (x) => !x.closest('[hidden]'));
       const all = b ? casesOf(b) : null, c = b ? all[0] || 'none' : null;
       if (c !== cur) { cur = c; list = all; render(card, cur, list); dock(); }
     };
-    scope.addEventListener('click', (e) => { if (e.target.closest('li button')) { cur = undefined; read(); } });   // 같은 사건을 다시 골라도 새 카드
+    scope.addEventListener('click', (e) => { if (e.target.closest('li button')) { cur = undefined; read(); } });
     const tabs = fig.closest('.ch') && $('.sub', fig.closest('.ch'));
     if (tabs) tabs.addEventListener('click', () => setTimeout(() => { read(); sync(); }, 0));
     render(card, cur);
@@ -522,10 +508,9 @@
   }
   function init() {
     Object.keys(CS).forEach((k) => attach(k, CS[k]));
-    if (/[?&]rwtest/.test(location.search)) window.RW_TEST = { cases: CS, chart: (c) => chart(c, data), ready: () => !!data };   // 점검용(그래프 글자 겹침 검사)
+    if (/[?&]rwtest/.test(location.search)) window.RW_TEST = { cases: CS, chart: (c) => chart(c, data), ready: () => !!data };
     fetch('/econ2/graphs/real-data.json?v=20261106a').then((r) => r.json()).then((d) => { data = d; redo.forEach((f) => f()); }).catch(() => {});
 
-    // 모드 토글
     const links = $('.top .links'), tg = document.createElement('div');
     tg.className = 'rwtog'; tg.setAttribute('role', 'group'); tg.setAttribute('aria-label', UI.mode);
     tg.innerHTML = '<button type="button" data-m="basic">' + UI.basic + '</button><button type="button" data-m="rw">' + UI.rw + '</button>';
