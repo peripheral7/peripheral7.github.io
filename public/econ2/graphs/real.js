@@ -411,6 +411,8 @@
   const SPOT = { 29: ['#c29 .fig', '#o29'], 30: ['#c30 .fig', '#o30'], 33: ['#c33 .fig', '#c33 .side'], '28w': ['#p28w .fig', '#o28'], '28u': ['#p28u .fig', '#o28s'] };
   // 범위 하나: 그림 칸 아래 카드 + 목록 REAL 표시. redo: 데이터가 늦게 오면 답 공개 전 카드 다시 그리기
   const redo = [];
+  // 사례 글 모으기(주소 · 정규식 · 숫자 제외)
+  const rwText = (o) => { const out = []; (function walk(v, k) { if (typeof v === 'string') { if (k !== 'u' && !/^https?:/.test(v)) out.push(v); } else if (Array.isArray(v)) v.forEach((x) => walk(x)); else if (v && typeof v === 'object' && !(v instanceof RegExp)) Object.keys(v).forEach((kk) => walk(v[kk], kk)); })(o); return out.join(' ').replace(/<[^>]+>/g, ' '); };
   function attach(key, cases) {
     const fig = $(SPOT[key][0]), scope = $(SPOT[key][1]);
     if (!fig || !scope) return;
@@ -421,7 +423,7 @@
     // 사건 하나에 사례가 여럿(나라별)일 수 있다. 처음 보이는 것은 페이지 언어의 나라(한국어판 = 한국) 사례
     const casesOf = (b) => cases.filter((c) => c.m.test(b.textContent.trim())).sort((x, y) => (y.cc === HOME) - (x.cc === HOME));
     const caseOf = (b) => casesOf(b)[0] || null;
-    scope.querySelectorAll('li button').forEach((b) => { if (caseOf(b)) b.parentNode.classList.add('hasrw'); });
+    scope.querySelectorAll('li button').forEach((b) => { const cs = casesOf(b); if (!cs.length) return; b.parentNode.classList.add('hasrw'); b.setAttribute('data-rw', rwText(cs)); });   // data-rw: 검색(search.js)용 사례 글
     card.addEventListener('rwcountry', (e) => { cur = e.detail; render(card, cur, list); dock(); });
     // 시간선: 사건을 고르면(기본 모드도) rwdock(데스크톱 하단 고정), 정답을 고르면 rwgone(숨김). --dockh 는 시간선 높이
     // 내리기 단추(.rwfold): 조작 줄(.pbar) 안. 시간선을 내려도(정답을 골라도) 조작 줄은 남고, 누르면 다시 올라온다.

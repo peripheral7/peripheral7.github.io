@@ -575,13 +575,15 @@
     h3.classList.add('haslg'); h3.appendChild(tt); h3.appendChild(lg);
     if (window.ResizeObserver) new ResizeObserver(() => keyFit(lg)).observe(h3); else keyFit(lg);
   }
+  // 검색(search.js)용 글: 사건 객체 안의 글자를 모두 모은다(함수 · 정규식 · 숫자 제외)
+  const flatText = (o) => { const out = []; (function walk(v) { if (typeof v === 'string') { if (v.length > 1) out.push(v); } else if (Array.isArray(v)) v.forEach(walk); else if (v && typeof v === 'object' && !(v instanceof RegExp)) Object.keys(v).forEach((k) => walk(v[k])); })(o); return out.join(' '); };
   function list(host, items, onPick, scope) {
     const ul = $('ul', host);
     if (items.some((it) => KEY.has(it.t))) keyLegend(host);
     items.forEach((it, i) => {
       const li = document.createElement('li'), b = document.createElement('button');
       if (KEY.has(it.t)) li.className = 'imp';
-      b.type = 'button'; b.setAttribute('aria-pressed', 'false');
+      b.type = 'button'; b.setAttribute('aria-pressed', 'false'); b.setAttribute('data-s', flatText(it));
       b.innerHTML = arrows(it.t) + (it.dir ? '<span class="dir' + (it.dir === 'l' ? ' l' : '') + '">' + (it.dir === 'l' ? '←' : '→') + '</span>' : '') + (it.q ? '<span class="q">' + esc(it.q) + '</span>' : '');
       b.addEventListener('click', () => {
         const was = b.getAttribute('aria-pressed') === 'true';

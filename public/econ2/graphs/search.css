@@ -1,0 +1,48 @@
+/* Econ 2 Interactive 검색(search.js) — 머리줄 돋보기 단추 · 머리줄 아래 검색 줄 · 결과 목록 */
+.sxbtn{display:inline-flex;align-items:center;justify-content:center;flex:none;width:34px;height:34px;padding:0;border:1.5px solid var(--line);border-radius:8px;background:#fff;color:var(--soft);cursor:pointer}
+/* 자리: 모드 토글(.rwtog) 바로 왼쪽 — 토글이 가진 margin-left:auto 를 단추가 대신 받는다 */
+.top .sxbtn{margin-left:auto}
+.top .sxbtn + .rwtog{margin-left:0}
+.sxbtn:hover,.sxbtn[aria-expanded="true"]{border-color:var(--ink);color:var(--ink)}
+.sxbtn:focus-visible{outline:2px solid var(--blue);outline-offset:2px}
+.sxbtn svg,.sxic{width:18px;height:18px;fill:none;stroke:currentColor;stroke-width:2;stroke-linecap:round}
+.sxbar{position:relative;max-width:var(--max);margin:0 auto;padding:8px 12px 10px}
+.sxbar[hidden]{display:none}
+.sxin{display:flex;align-items:center;gap:8px;padding:0 6px 0 12px;border:2px solid var(--ink);border-radius:10px;background:#fff}
+.sxin:focus-within{border-color:var(--blue)}
+.sxic{flex:none;color:var(--soft)}
+.sxin input{flex:1;min-width:0;height:42px;padding:0;border:0;outline:0;background:none;font:inherit;font-size:16.5px;color:var(--ink)}
+.sxin input::-webkit-search-cancel-button{display:none}
+.sxcnt{flex:none;font-size:14px;font-weight:800;color:var(--soft);font-variant-numeric:tabular-nums;white-space:nowrap}
+.sxnav,.sxx{flex:none;width:34px;height:34px;padding:0;border:1.5px solid var(--line);border-radius:8px;background:#fff;font-size:22px;font-weight:700;line-height:1;color:var(--ink);cursor:pointer}
+.sxnav:hover:not(:disabled),.sxx:hover{border-color:var(--ink);background:var(--tint)}
+.sxnav:disabled{color:#b3b8c2;cursor:default}
+.sxx{border-color:transparent;color:var(--soft);font-size:24px}
+.sxnav:focus-visible,.sxx:focus-visible{outline:2px solid var(--blue);outline-offset:2px}
+/* 결과 목록: 검색 줄 아래에 떠 있다(본문을 밀지 않음) */
+.sxres{position:absolute;left:12px;right:12px;top:calc(100% - 4px);z-index:30;max-height:min(440px,60vh);overflow:auto;margin:0;padding:6px;list-style:none;border:1px solid var(--line);border-radius:10px;background:#fff;box-shadow:0 10px 30px rgba(31,37,55,.16)}
+.sxres[hidden]{display:none}
+.sxres li{display:flex;flex-direction:column;gap:2px;padding:8px 10px;border-radius:8px;cursor:pointer}
+.sxres li.on,.sxres li[data-k]:hover{background:var(--tint)}
+.sxres li.on{box-shadow:inset 3px 0 0 var(--blue)}
+.sxw{font-size:12.5px;font-weight:700;color:var(--soft)}
+.sxt{font-size:16.5px;font-weight:700;color:var(--ink)}
+.sxs{font-size:13.5px;line-height:1.45;color:var(--soft)}
+.sxrw{display:inline-block;padding:0 6px;border-radius:5px;background:var(--tint);font-size:12px;font-weight:800;color:var(--blue)}
+.sxres mark{padding:0 1px;border-radius:3px;background:#fff3b0;color:inherit}
+.sxres li.sxnone{cursor:default;color:var(--soft);font-size:15px}
+/* 찾아간 사건 줄: 잠깐 노랗게 */
+.opts li.sxflash button{animation:sxflash 1.6s ease}
+@keyframes sxflash{0%,40%{background:#fff3b0}100%{background:transparent}}
+@media (prefers-reduced-motion:reduce){.opts li.sxflash button{animation:none}}
+@media (max-width:900px){
+  /* 휴대폰: 첫 줄(제목 · 토글 · 언어)이 넘치지 않게 단추는 둘째 줄 장 탭의 오른쪽 끝으로 */
+  .top .sxbtn{order:4;margin:0 0 4px auto;width:32px;height:32px}
+  .top .sxbtn + .rwtog{margin-left:auto}
+  .top .in .tabs{width:calc(100% - 44px)}
+  .sxbar{padding:6px 10px 8px}
+  .sxin{gap:6px;padding:0 4px 0 10px}
+  .sxin input{height:40px;font-size:16px}
+  .sxnav,.sxx{width:32px;height:32px}
+  .sxres{left:10px;right:10px;max-height:55vh}
+}
