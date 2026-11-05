@@ -316,11 +316,11 @@
   const G = KO ? KO.gloss || [] : GLOSS;
   const UI = KO ? {
     tag: '현실 연결', pick: '<b class="rwchip">현실</b> 표시가 붙은 사건을 고르면 모형을 미국·한국 실제 데이터와 맞춰 볼 수 있다.', cc: { US: '미국', KR: '한국' }, ccLabel: '나라', sourceKr: '출처: 한국은행 ECOS — ',
-    predict: '먼저 예측:', skip: '바로 보기', right: '✓ 정답.', wrong: '✗ 오답.', theory: '이론과 현실',
+    skip: '바로 보기', right: '✓ 정답.', wrong: '✗ 오답.', theory: '이론과 현실',
     source: '출처: FRED — ', got: ' · 받은 날 ', band: ' · 노란 칸: 사건 기간', nodata: '데이터를 불러오지 못했다.', fold: '시간선 내리기', unfold: '시간선 올리기', foldS: '내리기', unfoldS: '올리기', mode: '모드', basic: '기본', rw: '현실 연결'
   } : {
     tag: 'Real world', pick: 'Pick an event marked <b class="rwchip">REAL</b> to test the model against U.S. and Korean data.', cc: { US: 'U.S.', KR: 'Korea' }, ccLabel: 'Country', sourceKr: 'Source: Bank of Korea ECOS — ',
-    predict: 'Predict first.', skip: 'Just show me', right: '✓ Right.', wrong: '✗ Not quite.', theory: 'Theory vs reality',
+    skip: 'Just show me', right: '✓ Right.', wrong: '✗ Not quite.', theory: 'Theory vs reality',
     source: 'Source: FRED — ', got: ' · retrieved ', band: ' · shaded: event period', nodata: 'Data could not be loaded.', fold: 'Hide timeline', unfold: 'Show timeline', foldS: 'Hide', unfoldS: 'Show', mode: 'Mode', basic: 'Basic', rw: 'Real world'
   };
 
@@ -408,7 +408,7 @@
     card.innerHTML =
       '<div class="rwhd"><span class="rwtag">' + UI.tag + '</span>' + cc + '<span class="rwwhen">' + esc(c.when) + '</span></div>' +
       '<h3>' + esc(c.title) + '</h3>' +
-      '<p class="rwq"><b>' + UI.predict + '</b> ' + q + '</p>' +
+      '<p class="rwq">' + q + '</p>' +
       '<div class="rwopts">' + c.opts.map((o, i) => '<button type="button" data-i="' + i + '">' + esc(o) + '</button>').join('') + '<button type="button" class="rwskip" data-i="-1">' + UI.skip + '</button></div>' +
       '<div class="rwans" hidden>' +
       '<p class="rwv"></p>' +
