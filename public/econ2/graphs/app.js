@@ -583,12 +583,13 @@
   const flatText = (o) => { const out = []; (function walk(v) { if (typeof v === 'string') { if (v.length > 1) out.push(v); } else if (Array.isArray(v)) v.forEach(walk); else if (v && typeof v === 'object' && !(v instanceof RegExp)) Object.keys(v).forEach((k) => walk(v[k])); })(o); return out.join(' '); };
   function list(host, items, onPick, scope) {
     const ul = $('ul', host);
+    const tri = host.id === 'o29';   // Ch29 는 곡선이 없어 이동 화살표 대신 통화량 방향 ▲ ▼(it.dl: 다른 값이면 그 이름, 대출 부실 = 자본) (이름 속 '10% → 20%' 화살표와 섞이지 않게)
     if (items.some((it) => KEY.has(it.t))) keyLegend(host);
     items.forEach((it, i) => {
       const li = document.createElement('li'), b = document.createElement('button');
       if (KEY.has(it.t)) li.className = 'imp';
       b.type = 'button'; b.setAttribute('aria-pressed', 'false'); b.setAttribute('data-s', flatText(it));
-      b.innerHTML = arrows(it.t) + (it.dir ? '<span class="dir' + (it.dir === 'l' ? ' l' : '') + '">' + (it.dir === 'l' ? '←' : '→') + '</span>' : '') + (it.q ? '<span class="q">' + esc(it.q) + '</span>' : '');
+      b.innerHTML = arrows(it.t) + (it.dir ? '<span class="dir' + (it.dir === 'l' ? ' l' : '') + '"' + (tri ? ' title="' + (it.dl || '통화량') + ' ' + (it.dir === 'l' ? '▼' : '▲') + '"' : '') + '>' + (tri ? (it.dir === 'l' ? '▼' : '▲') : it.dir === 'l' ? '←' : '→') + '</span>' : '') + (it.q ? '<span class="q">' + esc(it.q) + '</span>' : '');
       b.addEventListener('click', () => {
         const was = b.getAttribute('aria-pressed') === 'true';
         unpress(scope || host);
@@ -687,7 +688,7 @@
       { t: 'Fed 채권 매입 $100', q: 'SA 11', dir: 'r', dRes: 100, d: 'Fed 가 새 돈으로 지불 → ==본원통화 +$100== → 은행 지준 +$100 — 줄어든 현금이 없으므로 통화량 = **+$1,000**' },
       { t: 'Fed 채권 매각 $50', dir: 'l', dRes: -50, d: 'Fed 가 돈을 거둬들임 → ==본원통화 −$50== → 은행 지준 −$50 — 통화량 = **−$500**' },
       { t: 'Fed 가 은행에 $100 대출 (재할인율 인하)', dir: 'r', dRes: 100, d: '재할인율 ↓ → 은행이 Fed 에서 $100 차입 — → ==본원통화 +$100== → 은행 지준 +$100 — 통화량 = **+$1,000**' },
-      { t: '대출 부실 → 은행 자본 감소', dir: 'l', cap: true }
+      { t: '대출 부실 → 은행 자본 감소', dir: 'l', cap: true, dl: '자본' }
     ];
     const CAP = EV.find((e) => e.cap);
     const capBeats = () => [
