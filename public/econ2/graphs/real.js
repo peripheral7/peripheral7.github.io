@@ -314,11 +314,11 @@
   const UI = KO ? {
     tag: '현실 연결', pick: '<b class="rwchip">현실</b> 표시가 붙은 사건을 고르면 모형을 미국·한국 실제 데이터와 맞춰 볼 수 있다.', cc: { US: '미국', KR: '한국' }, ccLabel: '나라', sourceKr: '출처: 한국은행 ECOS — ',
     skip: '바로 보기', right: '✓ 정답.', wrong: '✗ 오답.', theory: '이론과 현실',
-    source: '출처: FRED — ', got: ' · 받은 날 ', band: ' · 노란 칸: 사건 기간', hl: ' · 초록 선: 정답', ans: '정답', prevQ: '이전', nextQ: '다음', qWord: ' 문제', nodata: '데이터를 불러오지 못했다.', fold: '시간선 내리기', unfold: '시간선 올리기', foldS: '내리기', unfoldS: '올리기', mode: '모드', basic: '기본', rw: '현실 연결'
+    source: '출처: FRED — ', got: ' · 받은 날 ', band: ' · 노란 칸: 사건 기간', hl: ' · 초록 선: 정답', ans: '정답', prevQ: '이전', nextQ: '다음', qWord: ' 문제', nodata: '데이터를 불러오지 못했다.', mode: '모드', basic: '기본', rw: '현실 연결'
   } : {
     tag: 'Real world', pick: 'Pick an event marked <b class="rwchip">REAL</b> to test the model against U.S. and Korean data.', cc: { US: 'U.S.', KR: 'Korea' }, ccLabel: 'Country', sourceKr: 'Source: Bank of Korea ECOS — ',
     skip: 'Just show me', right: '✓ Right.', wrong: '✗ Not quite.', theory: 'Theory vs reality',
-    source: 'Source: FRED — ', got: ' · retrieved ', band: ' · shaded: event period', hl: ' · green line: answer', ans: 'Answer', prevQ: 'Prev', nextQ: 'Next', qWord: ' question', nodata: 'Data could not be loaded.', fold: 'Hide timeline', unfold: 'Show timeline', foldS: 'Hide', unfoldS: 'Show', mode: 'Mode', basic: 'Basic', rw: 'Real world'
+    source: 'Source: FRED — ', got: ' · retrieved ', band: ' · shaded: event period', hl: ' · green line: answer', ans: 'Answer', prevQ: 'Prev', nextQ: 'Next', qWord: ' question', nodata: 'Data could not be loaded.', mode: 'Mode', basic: 'Basic', rw: 'Real world'
   };
 
   const W = 640, R = 18, B = 30;
@@ -420,8 +420,7 @@
       (c.chart ? '<figure class="rwfig">' + (data ? chart(c.chart, data) : '<p class="rwnote">' + UI.nodata + '</p>') + '<figcaption>' + (ecos ? UI.sourceKr : UI.source) + esc(c.chart.cap) + (data ? UI.got + esc(ecos ? data.fetched_kr : data.fetched) : '') + (c.chart.band ? UI.band : '') + (c.chart.hl ? UI.hl : '') + '</figcaption></figure>' : '') +
       '<p class="rwth"><span class="lb">' + UI.theory + '</span>' + gloss(fmtT(c.th), used) + '</p>' +
       '<ul class="rwsrc">' + c.src.map((x) => '<li><span class="lb">' + x.k + '</span><div><a href="' + esc(x.u) + '" target="_blank" rel="noopener">' + esc(x.t) + '</a><small>' + esc(x.by) + ' · ' + esc(x.d) + '</small><p>' + gloss(esc(x.s), used) + '</p></div></li>').join('') + '</ul>' +
-      '</div>' +
-      '<div class="rwnav"><button type="button" data-q="-1">« ' + UI.prevQ + UI.qWord + '</button><button type="button" data-q="1">' + UI.nextQ + UI.qWord + ' »</button></div>';
+      '</div>';
     card.querySelectorAll('.rwopts button').forEach((b) => b.addEventListener('click', () => {
       const i = +b.getAttribute('data-i');
       card.querySelectorAll('.rwopts button').forEach((x) => { const k = +x.getAttribute('data-i'); x.disabled = true; x.classList.toggle('ok', k === c.ans); x.classList.toggle('no', k === i && i !== c.ans); });
@@ -438,8 +437,6 @@
 
   const rwText = (o) => { const out = []; (function walk(v, k) { if (typeof v === 'string') { if (k !== 'u' && !/^https?:/.test(v)) out.push(v); } else if (Array.isArray(v)) v.forEach((x) => walk(x)); else if (v && typeof v === 'object' && !(v instanceof RegExp)) Object.keys(v).forEach((kk) => walk(v[kk], kk)); })(o); return out.join(' ').replace(/<[^>]+>/g, ' '); };
 
-  let folded = (() => { try { return localStorage.getItem('econ2.fold') === '1'; } catch (e) { return false; } })();
-  const setFolded = (v) => { folded = v; try { localStorage.setItem('econ2.fold', v ? '1' : '0'); } catch (e) {  } };
   function attach(key, cases) {
     const fig = $(SPOT[key][0]), scope = $(SPOT[key][1]);
     if (!fig || !scope) return;
@@ -458,11 +455,10 @@
     const sync = () => {
 
       if (!player || host.hidden || !ch.classList.contains('on')) return;
-      const h = player.offsetHeight, on = wide.matches && host.classList.contains('rwdock') && !host.classList.contains('rwgone') && !player.classList.contains('idle');
+      const h = player.offsetHeight, on = wide.matches && host.classList.contains('rwdock') && !player.classList.contains('idle');
       host.style.setProperty('--dockh', (wide.matches ? h : player.scrollHeight) + 'px');
 
-      const docked = wide.matches && host.classList.contains('rwdock') && !player.classList.contains('idle');
-      host.style.setProperty('--dockv', on ? h + 'px' : docked ? '64px' : '0px');
+      host.style.setProperty('--dockv', wide.matches ? (on ? h : 64) + 'px' : '0px');
     };
 
     const navQ = (d) => {
@@ -475,15 +471,10 @@
     };
 
     const qbtn = (d) => { const b = document.createElement('button'); b.type = 'button'; b.className = 'spdb rwqb ' + (d < 0 ? 'rwqp' : 'rwqn'); const w = '<span class="qw">' + UI.qWord + '</span>'; b.innerHTML = d < 0 ? '« ' + UI.prevQ + w : UI.nextQ + w + ' »'; b.setAttribute('aria-label', (d < 0 ? UI.prevQ : UI.nextQ) + UI.qWord); b.addEventListener('click', () => navQ(d)); return b; };
-    card.addEventListener('click', (e) => { const b = e.target.closest('[data-q]'); if (b) navQ(+b.getAttribute('data-q')); });
-    let fold = null;
     if (player) {
-      fold = document.createElement('button'); fold.type = 'button'; fold.className = 'spdb rwfold';
-      fold.addEventListener('click', () => { host.classList.toggle('rwgone'); setFolded(host.classList.contains('rwgone')); setFold(); sync(); });
 
       const pb = $('.pbar', player);
       pb.insertBefore(qbtn(1), pb.firstChild); pb.insertBefore(qbtn(-1), pb.firstChild);
-      pb.appendChild(fold);
       if (window.ResizeObserver) new ResizeObserver(sync).observe(player);
       new MutationObserver(sync).observe(player, { childList: true, subtree: true });
       wide.addEventListener && wide.addEventListener('change', sync);
@@ -491,9 +482,7 @@
 
     const place = () => { if (wide.matches || !player) { if (card.parentNode !== fig) fig.appendChild(card); } else { const u = fig.closest('.panel') || fig.closest('.ch'); if (card.parentNode !== u) u.appendChild(card); } };
     place(); wide.addEventListener && wide.addEventListener('change', place);
-    const setFold = () => { if (!fold) return; const d = host.classList.contains('rwgone'); fold.textContent = d ? '▴' : '▾'; fold.setAttribute('aria-label', d ? UI.unfold : UI.fold); fold.title = d ? UI.unfold : UI.fold; fold.setAttribute('aria-expanded', String(!d)); };
-    const dock = () => { if (!host) return; host.classList.toggle('rwdock', !!cur); host.classList.toggle('rwgone', folded); setFold(); requestAnimationFrame(sync); };
-    card.addEventListener('rwanswer', () => { if (!host) return; host.classList.add('rwgone'); setFold(); sync(); });
+    const dock = () => { if (!host) return; host.classList.toggle('rwdock', !!cur); requestAnimationFrame(sync); };
 
     const read = () => {
       const b = Array.prototype.find.call(scope.querySelectorAll('button[aria-pressed="true"]'), (x) => !x.closest('[hidden]'));

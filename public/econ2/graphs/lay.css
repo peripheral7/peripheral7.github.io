@@ -1,7 +1,7 @@
 @media (min-width:901px){
   @supports (height:100dvh){
-    .side,.fig{max-height:calc(100dvh - var(--toph,53px) - 16px - 12px - var(--dockv,0px))}
-    .ch.tabbed .fig{max-height:calc(100dvh - var(--toph,53px) - 16px - 12px - var(--dockv,0px) - 56px)}
+    .side,.fig{max-height:calc(100dvh - var(--toph,53px) - 16px - 12px - var(--dockv,64px))}
+    .ch.tabbed .fig{max-height:calc(100dvh - var(--toph,53px) - 16px - 12px - var(--dockv,64px) - 56px)}
   }
   .side::after,.fig::after{content:"";display:block;height:28px}
 }
@@ -19,7 +19,6 @@
   .ch:has(#side33ad[hidden]) .cbox [data-of="side33ad"],.ch:has(#side33as[hidden]) .cbox [data-of="side33as"]{display:none}
   html .ch.lt .rwcard,html .ch.lm .rwcard{grid-area:rw;margin-top:0}
 
-  html .rwdock .player,html .rwdock.rwgone .player{max-height:none;overflow:visible;pointer-events:auto}
 
   .ch.lt .side,.ch.lm .side{padding-left:8px}
 }
@@ -53,7 +52,6 @@
   .gbox .player{padding-top:0}
 }
 
-#pl28s .steps,#pl28s .rwfold{display:none}
 @media (min-width:901px){
   .rwdock #pl28s{background:none;border-top:0;box-shadow:none;padding:0 0 66px;pointer-events:none}
   .rwdock #pl28s .pbar{pointer-events:auto}
@@ -62,3 +60,5 @@
   html .ch.lt.tabbed:has(#p28u:not([hidden])){grid-template-areas:"tabs tabs" "fig fig" "sit sit" "side side" "con con" "rw rw"}
   html .ch #pl28s{grid-area:con;height:0;padding:0;overflow:visible;align-self:start}
 }
+
+#pl28s .steps{display:none}
