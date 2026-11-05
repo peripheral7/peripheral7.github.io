@@ -444,7 +444,7 @@
     const casesOf = (b) => cases.filter((c) => c.m.test(b.textContent.trim())).sort((x, y) => (y.cc === HOME) - (x.cc === HOME));
     const caseOf = (b) => casesOf(b)[0] || null;
     scope.querySelectorAll('li button').forEach((b) => { const cs = casesOf(b); if (!cs.length) return; b.parentNode.classList.add('hasrw'); b.setAttribute('data-rw', rwText(cs)); });   // data-rw: 검색(search.js)용 사례 글
-    card.addEventListener('rwcountry', (e) => { cur = e.detail; render(card, cur, list); dock(); });
+    card.addEventListener('rwcountry', (e) => { cur = e.detail; render(card, cur, list); });   // 나라만 바꿀 때는 시간선 상태(내려 둠 · 올려 둠)를 그대로 둔다
     // 시간선: 사건을 고르면(기본 모드도) rwdock(데스크톱 하단 고정), 정답을 고르면 rwgone(숨김). --dockh 는 시간선 높이
     // 내리기 단추(.rwfold): 조작 줄(.pbar) 안. 시간선을 내려도(정답을 골라도) 조작 줄은 남고, 누르면 다시 올라온다.
     // 아래 여백 대신 --dockv: 데스크톱 두 칸(따로 스크롤)의 높이를 시간선 위까지로(index.html)
