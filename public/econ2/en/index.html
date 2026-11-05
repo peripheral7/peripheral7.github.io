@@ -6,7 +6,7 @@
 <meta name="robots" content="noindex">
 <title>Econ 2 Interactive</title>
 <!--
-  Econ 2 Interactive — 영문 대문. 챕터 넷을 고르면 /econ2/graphs/en/#chXX 로 바로 연다. 한국어판 대문은 /econ2/.
+  Econ 2 Interactive — 영문 대문. 챕터 넷을 고르면 /econ2/graphs/en/#chXX 로 바로 연다. 한국어판 대문은 /econ2/ko/ (/econ2/ 는 TA 세션 슬라이드).
 -->
 <style>
   @font-face{font-family:"Pretendard Variable";font-weight:45 920;font-style:normal;font-display:swap;src:local("Pretendard Variable"),url("/fonts/PretendardVariable.woff2") format("woff2-variations")}
@@ -39,18 +39,7 @@
     <li><a href="/econ2/graphs/en/#ch33"><span class="ch">CH 33</span><span class="nm">AD–AS</span><span class="ds">What shifts AD and AS, short run and long run</span></a></li>
     <li><a href="/econ2/graphs/en/#ch28"><span class="ch">CH 28</span><span class="nm">Unemployment</span><span class="ds">Wages above equilibrium, unemployment rate, participation rate</span></a></li>
   </ul>
-  <p class="foot"><a href="/econ2/graphs/en/">Open the graphs</a><a href="/econ2/graphs/">한국어</a></p>
+  <p class="foot"><a href="/econ2/graphs/en/">Open the graphs</a><a href="/econ2/ko/">한국어</a></p>
 </main>
-<script>
-/* 한·영 공통 대문: 한국어판 그래프에서 왔거나(제목 클릭) 고른 언어가 한국어면 장 링크를 한국어판으로 */
-(function () {
-  var ko = false;
-  try { ko = localStorage.getItem('slides.lang') === 'ko'; } catch (e) { /* no storage */ }
-  if (/\/econ2\/graphs\/(?!en\/)/.test(document.referrer)) ko = true;
-  if (!ko) return;
-  var a = document.querySelectorAll('.grid a[href^="/econ2/graphs/en/"], .foot a[href="/econ2/graphs/en/"]');
-  for (var i = 0; i < a.length; i++) a[i].setAttribute('href', a[i].getAttribute('href').replace('/econ2/graphs/en/', '/econ2/graphs/'));
-})();
-</script>
 </body>
 </html>
