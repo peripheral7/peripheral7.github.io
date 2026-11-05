@@ -103,7 +103,7 @@
     if (tab && tab.getAttribute('aria-selected') !== 'true') tab.click();
     if (it.sub) { const sb = $('#c' + it.ch.slice(2) + ' .sub button[data-sub="' + it.sub + '"]'); if (sb && sb.getAttribute('aria-selected') !== 'true') sb.click(); }
     if (it.b.getAttribute('aria-pressed') !== 'true') it.b.click();
-    if (window.matchMedia('(min-width:901px)').matches) it.b.scrollIntoView({ block: 'nearest' });   // 휴대폰은 app.js 가 그림으로 올려 준다
+    // 화면 위치는 사건 클릭이 맡는다(app.js bringFig: 데스크톱은 맨 위로, 휴대폰은 그림으로)
     const li = it.b.closest('li'); li.classList.remove('sxflash'); void li.offsetWidth; li.classList.add('sxflash');
     ul.hidden = true; inp.setAttribute('aria-expanded', 'false');
     drawCnt();

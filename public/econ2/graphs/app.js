@@ -602,8 +602,9 @@
     });
   }
   // 휴대폰(한 줄 배치)에서는 목록이 그래프 아래에 있으므로, 사건을 고르면 그 그림 · 카드가 보이게 올린다
+  // 데스크톱(두 칸)은 아래로 내려 둔 채 고르면 맨 위로 올려 그래프 · 결과 문장이 보이게 한다
   function bringFig(from) {
-    if (!window.matchMedia('(max-width:900px)').matches) return;
+    if (!window.matchMedia('(max-width:900px)').matches) { if (window.scrollY > 0) window.scrollTo({ top: 0, behavior: reduce ? 'auto' : 'smooth' }); return; }
     const root = from.closest('.panel') || from.closest('.ch'), t = root && $('.fig', root);
     if (!t) return;
     const top = t.getBoundingClientRect().top - $('.top').offsetHeight - 8;
