@@ -11,5 +11,6 @@
   "linkLabel": "Open gallery",
   "date": "2026.10.16",
   "description": "",
-  "tags": ["photo"]
+  "tags": ["photo"],
+  "hideOnBoard": true
 }
