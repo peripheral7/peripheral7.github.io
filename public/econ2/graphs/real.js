@@ -498,7 +498,7 @@
       wide.addEventListener && wide.addEventListener('change', sync);
     }
     // 카드 자리: 데스크톱은 그림 칸 안(Situation · 결과 문장 아래), 휴대폰은 시간선 다음(장의 맨 아래, grid-area rw)
-    const place = () => { if (wide.matches || !player) { if (card.parentNode !== fig) fig.appendChild(card); } else if (card.previousElementSibling !== player) player.after(card); };
+    const place = () => { if (wide.matches || !player) { if (card.parentNode !== fig) fig.appendChild(card); } else { const u = fig.closest('.panel') || fig.closest('.ch'); if (card.parentNode !== u) u.appendChild(card); } };   // 900px 이하: 장(패널) 바로 아래 칸(grid-area rw) — 시간선은 lay.js 가 옮긴다
     place(); wide.addEventListener && wide.addEventListener('change', place);
     const setFold = () => { if (!fold) return; const d = host.classList.contains('rwgone'); fold.innerHTML = (d ? '▴' : '▾') + '<span class="fl"> ' + (d ? UI.unfoldS : UI.foldS) + '</span>'; fold.setAttribute('aria-label', d ? UI.unfold : UI.fold); fold.title = d ? UI.unfold : UI.fold; fold.setAttribute('aria-expanded', String(!d)); };
     const dock = () => { if (!host) return; host.classList.toggle('rwdock', !!cur); host.classList.remove('rwgone'); setFold(); requestAnimationFrame(sync); };
