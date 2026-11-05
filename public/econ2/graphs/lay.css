@@ -62,3 +62,4 @@
 }
 
 #pl28s .steps{display:none}
+@media (max-width:639px){.ch.lm .side{margin-top:14px;padding-top:18px;border-top:1px solid var(--line)}}
