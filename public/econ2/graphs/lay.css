@@ -59,3 +59,14 @@
   .gbox[data-v="g"] .player .steps,.gbox:not([data-v]) .player .steps{display:none}
   .gbox .player{padding-top:0}
 }
+
+/* ───── Ch28 실업률: 단계 해설(시간선)은 결과 문장과 겹쳐 없앤다. 조작 줄(문제 넘기기 · 자동 재생)만 남는다 ───── */
+#pl28s .steps,#pl28s .rwfold{display:none}
+@media (min-width:901px){
+  .rwdock #pl28s{background:none;border-top:0;box-shadow:none;padding:0 0 66px;pointer-events:none}
+  .rwdock #pl28s .pbar{pointer-events:auto}
+}
+@media (max-width:900px){
+  html .ch.lt.tabbed:has(#p28u:not([hidden])){grid-template-areas:"tabs tabs" "fig fig" "sit sit" "side side" "con con" "rw rw"}
+  html .ch #pl28s{grid-area:con;height:0;padding:0;overflow:visible;align-self:start}
+}

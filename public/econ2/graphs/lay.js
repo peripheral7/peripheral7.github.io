@@ -47,7 +47,7 @@
       x.u.appendChild(x.lbox); x.u.appendChild(x.cbox);
       [x.sit, x.rs].forEach((n) => { if (n) { park(n); x.lbox.appendChild(n); } });
       x.eqs.forEach((n) => { park(n); x.cbox.appendChild(n); });
-      if (!x.player) return;
+      if (!x.player || x.player.id === 'pl28s') return;   // Ch28 실업률: 단계 해설 없음(lay.css) — 그래프 · 단계 바꾸기도 없다
       park(x.player);
       if (mode === 't') { x.sw.remove(); x.fig.removeAttribute('data-v'); }   // 태블릿: 시간선은 제자리(grid-area play, 사건 오른쪽)
       else { x.fig.insertBefore(x.sw, x.fig.firstChild); x.fig.appendChild(x.player); if (!x.fig.hasAttribute('data-v')) view(x, 'g'); }

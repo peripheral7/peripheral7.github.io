@@ -269,6 +269,7 @@
   .rsent .slot{display:inline-block;margin:0 4px;font-weight:800;transition:transform .25s}
   .rsent .slot.q{display:inline-block;min-width:3.6em;height:1.05em;margin:0 4px;padding:0;border-bottom:2px solid #b3b8c2;border-radius:0;vertical-align:-3px}   /* 모르는 칸: 빈 밑줄 */
   .rsent .slot{padding:0 4px;border-radius:5px 5px 0 0;transition:background .3s,box-shadow .3s}   /* 아래 모서리는 늘 각지게: 강조가 풀리며 밑줄이 사라지는 동안에도 끝이 휘지 않음 */
+  .rsent .slot.back,.rsent .slot.mv{color:var(--ink)}   /* 곡선 이동 · 이전 수준 회복: 회색 아닌 검정 굵게 */
   .rsent .slot.pulse{background:#fff3b0;border-radius:5px 5px 0 0;box-shadow:inset 0 -3px 0 #f2c200}   /* 채워질 때: 형광펜 바탕 + 곧은 밑줄(아래 모서리는 각지게 해 밑줄 끝이 휘지 않음, 확대 없음) */
   .who{display:flex;flex-wrap:wrap;align-items:center;gap:6px 8px;padding:8px 10px;border-radius:8px;font-size:15px;transition:background .3s}
   .who .lb{font-size:13px;font-weight:800;color:var(--soft);margin-right:2px}
@@ -463,7 +464,7 @@
 </style>
 <link rel="stylesheet" href="/econ2/graphs/real.css?v=20261106e">
 <link rel="stylesheet" href="/econ2/graphs/search.css?v=20261105u">
-<link rel="stylesheet" href="/econ2/graphs/lay.css?v=20261106b">
+<link rel="stylesheet" href="/econ2/graphs/lay.css?v=20261106g">
 </head>
 <body>
 <header class="top"><div class="in">
@@ -627,9 +628,9 @@
   document.body.appendChild(box);
 })();
 </script>
-<script src="/econ2/graphs/en/app.js?v=20261106a"></script>
-<script src="/econ2/graphs/real.js?v=20261106f"></script>
+<script src="/econ2/graphs/en/app.js?v=20261106g"></script>
+<script src="/econ2/graphs/real.js?v=20261106h"></script>
 <script src="/econ2/graphs/search.js?v=20261105u"></script>
-<script src="/econ2/graphs/lay.js?v=20261106b"></script>
+<script src="/econ2/graphs/lay.js?v=20261106g"></script>
 </body>
 </html>

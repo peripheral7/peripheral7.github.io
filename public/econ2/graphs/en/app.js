@@ -326,19 +326,28 @@
   };
   const rsTok = (s) => String(s).split(' · ').map((x) => { const m = /^(.+?) (↑|↓|▲|▼|unchanged|그대로|back)(?: (.+))?$/.exec(x.trim()); return m ? { n: m[1], d: /[↑▲]/.test(m[2]) ? 1 : /[↓▼]/.test(m[2]) ? -1 : 0, back: m[2] === 'back', x: m[3] || '' } : { n: x.trim(), d: null }; });
   // parts: [{ g 단계, rs, on, b }]
+  // 곡선 이동 마디 글('[AD ←]', 'LRAS · SRAS →', 'AD further ←') → 'AD shifts left' 등. 곡선 이동이 아니면 null
+  function mvText(k) {
+    const m = /^\[?\s*([A-Z][A-Za-z]*(?:\s*·\s*[A-Z][A-Za-z]*)*)\s*(가 더|further)?\s*([←→])\s*\]?$/.exec(String(k || '').trim());
+    if (!m) return null;
+    const c = m[1].split(/\s*·\s*/);
+    return c.join(' and ') + (c.length > 1 ? ' shift ' : ' shifts ') + (m[2] ? 'further ' : '') + (m[3] === '←' ? 'left' : 'right');
+  }
   function rsHTML(cond, parts) {
     const multi = new Set(parts.map((p) => p.g)).size > 1, when = { 'Short run': 'in the short run ', 'Long run': 'in the long run ' };
-    const lead = (p, pi) => p.sw || (multi ? (p.adj && p.g === 'Long run' ? 'in the long run, as wages and P<sup>e</sup> adjust, ' : when[p.g] || (pi ? 'then ' : '')) : '');   // 장기 조정은 '임금 · Pᵉ 가 조정되며'
+    const lead = (p, pi) => (pi && parts[pi - 1].g === p.g ? '' : p.sw || (multi ? (p.adj && p.g === 'Long run' ? 'in the long run, as wages and P<sup>e</sup> adjust, ' : when[p.g] || (pi ? 'then ' : '')) : ''));   // 머리말은 단계가 바뀔 때 한 번(이동 마디 앞)   // 장기 조정은 '임금 · Pᵉ 가 조정되며'
     const toks = [];
-    parts.forEach((p, pi) => rsTok(p.rs).forEach((t, ti) => toks.push(Object.assign({ pre: ti ? '' : lead(p, pi), on: p.on, b: p.b, first: !ti }, t))));
+    parts.forEach((p, pi) => (p.mv ? [{ mv: p.mv }] : rsTok(p.rs)).forEach((t, ti) => toks.push(Object.assign({ pre: ti ? '' : lead(p, pi), on: p.on, b: p.b, first: !ti && (!pi || parts[pi - 1].g !== p.g) }, t))));
     const nm = (n) => (/^[A-Z][a-z]/.test(n) ? n[0].toLowerCase() + n.slice(1) : n);
-    const verb = (t) => { const pl = /[^s]s$/.test(t.n); return t.back ? (t.n === 'Y' ? 'returns to Y*' : 'returns to where it was') : t.d > 0 ? (pl ? 'rise' : 'rises') : t.d < 0 ? (pl ? 'fall' : 'falls') : 'stays the same'; };
+    const verb = (t) => { const pl = /[^s]s$/.test(t.n); return t.back ? (t.n === 'Y' ? 'returns to Y*' : 'returns to its previous level') : t.d > 0 ? (pl ? 'rise' : 'rises') : t.d < 0 ? (pl ? 'fall' : 'falls') : 'stays the same'; };
     const slot = (t) => {
       if (!t.on) return '<b class="slot q" data-b="' + t.b + '"></b>';
+      if (t.mv) return '<b class="slot mv" data-b="' + t.b + '">' + esc(t.mv) + '</b>';
+      if (t.back) return '<b class="slot back" data-b="' + t.b + '">' + verb(t) + '</b>';
       if (t.d == null) return '<b class="slot same" data-b="' + t.b + '">' + esc(nm(t.n)) + '</b>';
       return '<b class="slot ' + (t.d > 0 ? 'up' : t.d < 0 ? 'dn' : 'same') + '" data-b="' + t.b + '">' + (t.d > 0 ? '▲ ' : t.d < 0 ? '▼ ' : '') + verb(t) + (t.x ? ' by ' + esc(t.x) : '') + '</b>';
     };
-    return esc(cond || '') + ' ' + toks.map((t, k) => (k ? (t.first && multi ? '; ' : ' and ') : '') + t.pre + (t.d == null && t.on ? '' : arrows(nm(t.n)) + ' ') + slot(t)).join('') + '.';
+    return esc(cond || '') + ' ' + toks.map((t, k) => (k ? (toks[k - 1].mv ? ', so ' : t.first && multi ? '; ' : ' and ') : '') + t.pre + (t.mv || (t.d == null && t.on) ? '' : arrows(nm(t.n)) + ' ') + slot(t)).join('') + '.';
   }
   const YBACK = 'Y back';   // Y = Y* 복귀
   const sitHTML = (x) => (x ? '<span class="lb">Situation</span><span class="st">' + String(x).split(' — ').map(arrows).join('<br>') + '</span>' : '');
@@ -384,10 +393,10 @@
     let rsT = 0;
     function sentence(anim) {
       const el = rsEl(); if (!el) return;
-      const parts = beats.map((b, k) => ({ g: b.g, rs: b.rs, adj: b.adj, sw: b.sw, on: k <= i, b: k })).filter((p) => p.rs);
+      const parts = beats.map((b, k) => ({ g: b.g, rs: b.rs, mv: mvText(b.mv), adj: b.adj, sw: b.sw, on: k <= i, b: k })).filter((p) => p.rs || p.mv);
       el.innerHTML = parts.length && i >= 0 ? rsHTML(COND[beats[0].ev], parts) : '';
       clearTimeout(rsT);
-      if (anim && beats[i] && beats[i].rs) { const hs = $$('[data-b="' + i + '"]', el); hs.forEach((h) => h.classList.add('pulse')); rsT = setTimeout(() => hs.forEach((h) => h.classList.remove('pulse')), 1000); }
+      if (anim && beats[i] && (beats[i].rs || mvText(beats[i].mv))) { const hs = $$('[data-b="' + i + '"]', el); hs.forEach((h) => h.classList.add('pulse')); rsT = setTimeout(() => hs.forEach((h) => h.classList.remove('pulse')), 1000); }
     }
     function go(k, anim) {
       i = Math.max(0, Math.min(beats.length - 1, k)); fin = false;
@@ -553,7 +562,7 @@
       const sit = id === 0 ? sc.sit || sc.t : st.sit || (cause.length ? cause.shift() : st.name);
       // 결론 제목: result 의 ' — ' 앞(Y ↓ · P ↑ 등), 설명: 사슬의 뒤쪽 또는 result 의 ' — ' 뒤
       const res = o.result(prevS[prevS.length - 1], next, letter).split(' — '), pre = snap(prevS, false);
-      out.push({ g, ev: sc.t, alts: altList, sit, pre, k: ps[at], t: cause.join(' → '), run: snap(withNew, true), wait: 1.25 });
+      out.push({ g, ev: sc.t, mv: ps[at], sw: st.sw, adj: /adjust|조정/.test(why || ''), alts: altList, sit, pre, k: ps[at], t: cause.join(' → '), run: snap(withNew, true), wait: 1.25 });   // mv: 결과 문장에 곡선 이동도(rsHTML)
       out.push({ g, ev: sc.t, sw: st.sw, adj: /adjust|조정/.test(why || ''), rs: st.rs || (num > 1 && /Y = Y\*/.test(res[1] || '') ? res[0].replace(/^Y [↑↓]/, YBACK) : res[0]), alts: altList, sit, pre: snap(withNew, true), k: res[0], t: (after && !same0(after, res[0]) ? after : '') || res.slice(1).join(' — '),
         run: () => { snap(withNew, false)(false); if (o.after) o.after(prevS[prevS.length - 1], next); }, wait: 1.8 });
       S = withNew;
@@ -738,7 +747,7 @@
         plot.seq(items);
       }
     });
-    const keep = (why) => ({ name: 'Fed shifts MS to hold P', label: 'For the Fed to keep P stable', sw: 'to keep P stable, the Fed cuts M, so ', rs: 'P back', ch: { abs: (o) => ({ MS: 5 * (1 + mdScale(o)) - 5 }) }, why });
+    const keep = (why) => ({ name: 'Fed shifts MS to hold P', label: 'For the Fed to keep P stable', sw: 'to keep P stable, the Fed cuts M and ', rs: 'P back', ch: { abs: (o) => ({ MS: 5 * (1 + mdScale(o)) - 5 }) }, why });
     const EV = [
       { t: 'Fed doubles the money supply', dir: 'r', stages: [{ name: 'MS →', at: 0, ch: { add: { MS: 5 } }, why: 'MS → → 1/P halves, P doubles' }] },
       { t: 'Fed cuts the money supply', dir: 'l', stages: [{ name: 'MS ←', at: 0, ch: { add: { MS: -1.5 } }, why: 'MS ← → 1/P ↑, P ↓' }] },
@@ -805,7 +814,7 @@
     const srEv = (t, why, q) => ({ t, q, dir: 'l', stages: [
       { name: 'SRAS ←', step: 'Stage 1 · Short run', ch: { add: { SRAS: -R } }, why },
       { name: 'Do nothing: SRAS returns', short: 'Wait', ch: { abs: { SRAS: 0 } }, letter: 'A', at: 2, why: 'Y < Y* → wages · P^e adjust ↓ → SRAS → → Y* and P restored (slow)' },
-      { name: 'Accommodate: AD →', short: 'Policy', sit: 'Y < Y* : accommodate with policy', from: 0, ch: { abs: lrAD }, chain: ['M ↑ · G ↑', 'AD →', 'Y* restored, P higher still'], at: 1 }] });
+      { name: 'Accommodate: AD →', short: 'Policy', sw: 'in the long run, policy accommodates (M ↑ · G ↑): ', sit: 'Y < Y* : accommodate with policy', from: 0, ch: { abs: lrAD }, chain: ['M ↑ · G ↑', 'AD →', 'Y* restored, P higher still'], at: 1 }] });
     // LRAS 가 움직이면 SRAS 도 같이 움직여 New equilibrium은 새 Y* 위(Long runEquilibrium). AD unchanged면 P 는 반대로
     const lrEv = (t, dir, why, q) => ({ t, q, dir, stages: [
       { name: 'LRAS · SRAS ' + (dir === 'r' ? '→' : '←'), ch: { add: { LRAS: dir === 'r' ? 1 : -1 }, abs: lrSRAS }, why }] });

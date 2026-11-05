@@ -487,7 +487,8 @@
       const k = at < 0 ? (d > 0 ? 0 : all.length - 1) : (at + d + all.length) % all.length;
       if (k !== at) all[k].click();
     };
-    const qbtn = (d) => { const b = document.createElement('button'); b.type = 'button'; b.className = 'spdb rwqb ' + (d < 0 ? 'rwqp' : 'rwqn'); const w = '<span class="qw">' + UI.qWord + '</span>'; b.innerHTML = d < 0 ? '« ' + UI.prevQ + w : UI.nextQ + w + ' »';   // 단추가 flex 라 글 조각 앞뒤 일반 공백은 지워진다 → 줄바꿈 없는 공백 b.setAttribute('aria-label', (d < 0 ? UI.prevQ : UI.nextQ) + UI.qWord); b.addEventListener('click', () => navQ(d)); return b; };
+    // 문제 넘기기 단추: 단추가 flex 라 글 조각 앞뒤 일반 공백은 지워진다 → 줄바꿈 없는 공백(«  ·  » · qWord)
+    const qbtn = (d) => { const b = document.createElement('button'); b.type = 'button'; b.className = 'spdb rwqb ' + (d < 0 ? 'rwqp' : 'rwqn'); const w = '<span class="qw">' + UI.qWord + '</span>'; b.innerHTML = d < 0 ? '« ' + UI.prevQ + w : UI.nextQ + w + ' »'; b.setAttribute('aria-label', (d < 0 ? UI.prevQ : UI.nextQ) + UI.qWord); b.addEventListener('click', () => navQ(d)); return b; };
     card.addEventListener('click', (e) => { const b = e.target.closest('[data-q]'); if (b) navQ(+b.getAttribute('data-q')); });   // 걸음 없는 사건(Ch29)은 조작 줄이 없어 카드 아래 단추로
     let fold = null;
     if (player) {
