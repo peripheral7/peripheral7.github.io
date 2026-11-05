@@ -108,6 +108,5 @@ html[lang="ko"] .rwchip{letter-spacing:0}
 .pbar .rwqb:focus-visible{outline:2px solid var(--blue);outline-offset:-3px}
 @media (max-width:420px){html[lang="en"] .pbar .qw{display:none}}
 .player.idle .pbar{display:flex;pointer-events:auto}
-.player.idle .pbar [data-a="spd"]{display:none}
 .player .pbar .rwqp{order:-2}
 .player .pbar [data-a="spd"]{order:-1}

@@ -332,7 +332,7 @@
   const sitHTML = (x) => (x ? '<span class="lb">상황</span><span class="st">' + String(x).split(' — ').map(arrows).join('<br>') + '</span>' : '');
 
   const SPEEDS = [['보통', 1], ['빠름', 2]];
-  let SPEED = 2;
+  let SPEED = (() => { try { return +localStorage.getItem('econ2.speed') === 1 ? 1 : 2; } catch (e) { return 2; } })();
   const players = [];
   function Player(host) {
     host.innerHTML =
@@ -447,7 +447,7 @@
     });
     spd.addEventListener('click', () => {
       const k = SPEEDS.findIndex((x) => x[1] === SPEED);
-      SPEED = SPEEDS[(k + 1) % SPEEDS.length][1];
+      SPEED = SPEEDS[(k + 1) % SPEEDS.length][1]; try { localStorage.setItem('econ2.speed', String(SPEED)); } catch (e) {}
       players.forEach((q) => q.redrawSpeed());
     });
     idle();
