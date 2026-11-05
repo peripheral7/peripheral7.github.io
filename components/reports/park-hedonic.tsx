@@ -11,7 +11,6 @@ const BASIC: LightboxMap[] = [
   { key: "dn", label: "동탄2 북부", sub: "동탄여울공원 + 청계중앙공원 · 47개 단지", src: `${IMG}/basic/dongtan-north.jpg` },
   { key: "d1", label: "동탄1", sub: "동탄센트럴파크 36.8ha · 66개 단지", src: `${IMG}/basic/dongtan1.jpg` },
   { key: "gg", label: "광교", sub: "광교호수공원 132.8ha · 71개 단지", src: `${IMG}/basic/gwanggyo.jpg` },
-  { key: "iw", label: "일월저수지 일대", sub: "일월공원 28.1ha · 73개 단지", src: `${IMG}/basic/ilwol.jpg` },
 ]
 
 const COMMERCE: LightboxMap[] = [
