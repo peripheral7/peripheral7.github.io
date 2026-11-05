@@ -364,18 +364,25 @@
       }
     }).join('');
   }
-  // 용어를 누르면 그 문단 바로 아래에 뜻 상자를 열고, 다시 누르면 닫는다
+  // 용어를 누르면 그 문단 바로 아래에 뜻 상자를 열고, 다시 누르면 닫는다. 뜻 상자는 페이지에 하나만:
+  // 다른 용어가 열린 채로 누르면 같은 문단이면 그 상자의 내용만 바꾸고, 다른 문단이면 상자를 그 문단 아래로 옮긴다
   function termClick(e) {
     const b = e.target.closest('.rwterm'); if (!b) return;
-    const i = b.getAttribute('data-g'), host = b.closest('p, li'), open = b.getAttribute('aria-expanded') === 'true';
-    let box = host.nextElementSibling;
-    while (box && box.classList.contains('rwdef') && box.getAttribute('data-g') !== i) box = box.nextElementSibling;
-    if (open) { if (box && box.classList.contains('rwdef')) box.remove(); b.setAttribute('aria-expanded', 'false'); return; }
-    const d = G[+i][1], k = d.indexOf(': ');
-    box = document.createElement('div'); box.className = 'rwdef'; box.setAttribute('data-g', i);
-    box.innerHTML = k > 0 ? '<b>' + esc(d.slice(0, k)) + '</b> ' + esc(d.slice(k + 2)) : esc(d);
-    let at = host; while (at.nextElementSibling && at.nextElementSibling.classList.contains('rwdef')) at = at.nextElementSibling;
-    at.after(box); b.setAttribute('aria-expanded', 'true');
+    const i = b.getAttribute('data-g'), host = b.closest('p, li');
+    const off = () => document.querySelectorAll('.rwterm[aria-expanded="true"]').forEach((x) => x.setAttribute('aria-expanded', 'false'));
+    let box = document.querySelector('.rwdef');
+    if (b.getAttribute('aria-expanded') === 'true') { if (box) box.remove(); off(); return; }
+    off();
+    const d = G[+i][1], k = d.indexOf(': '), html = k > 0 ? '<b>' + esc(d.slice(0, k)) + '</b> ' + esc(d.slice(k + 2)) : esc(d);
+    if (box && box.previousElementSibling === host) {   // 같은 문단: 내용만 바꾼다
+      box.classList.remove('swap'); void box.offsetWidth; box.classList.add('swap');
+    } else {
+      if (box) box.remove();
+      box = document.createElement('div'); box.className = 'rwdef';
+      host.after(box);
+    }
+    box.setAttribute('data-g', i); box.innerHTML = html;
+    b.setAttribute('aria-expanded', 'true');
   }
   // list: 같은 사건의 사례들(나라별, cc 없으면 미국). 둘 이상이면 머리에 [미국 | 한국] 고르기
   function render(card, c, list) {
