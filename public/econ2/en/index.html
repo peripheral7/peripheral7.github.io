@@ -41,5 +41,16 @@
   </ul>
   <p class="foot"><a href="/econ2/graphs/en/">Open the graphs</a><a href="/econ2/graphs/">한국어</a></p>
 </main>
+<script>
+/* 한·영 공통 대문: 한국어판 그래프에서 왔거나(제목 클릭) 고른 언어가 한국어면 장 링크를 한국어판으로 */
+(function () {
+  var ko = false;
+  try { ko = localStorage.getItem('slides.lang') === 'ko'; } catch (e) { /* no storage */ }
+  if (/\/econ2\/graphs\/(?!en\/)/.test(document.referrer)) ko = true;
+  if (!ko) return;
+  var a = document.querySelectorAll('.grid a[href^="/econ2/graphs/en/"], .foot a[href="/econ2/graphs/en/"]');
+  for (var i = 0; i < a.length; i++) a[i].setAttribute('href', a[i].getAttribute('href').replace('/econ2/graphs/en/', '/econ2/graphs/'));
+})();
+</script>
 </body>
 </html>
