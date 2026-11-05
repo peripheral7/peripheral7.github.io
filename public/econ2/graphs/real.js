@@ -33,7 +33,7 @@
       opts: ['Rose', 'Stayed near 9', 'Fell'], ans: 2,
       v: 'It fell — from 9.2 to 2.8.',
       chart: { k: 'mult', from: '2000-01', to: '2019-12', band: ['2008-09', '2014-10'], marks: [['2008-08', 0, '9.2'], ['2014-08', 0, '2.8']], y: 'M2 ÷ monetary base', cap: 'M2SL ÷ BOGMBASE, monthly' },
-      th: 'Just as the model says: ==when banks hold more reserves, the reserve ratio R rises and the multiplier 1/R falls==. Banks held them because lending looked risky in the crisis and, from October 2008, the Fed paid interest on reserves.',
+      th: 'Just as the model says: when banks hold more reserves, the reserve ratio R rises and the multiplier 1/R falls. Banks held them because ==lending looked risky in the crisis and, from October 2008, the Fed paid interest on reserves==.',
       src: [
         { k: 'News', d: 'Oct 6, 2008', by: 'Federal Reserve', t: 'The Fed starts paying interest on reserves', s: 'The Board announced it would pay interest on banks\' required and excess reserves — so simply holding reserves at the Fed now earned a return.', u: FED + 'newsevents/pressreleases/monetary20081006a.htm' }
       ]
@@ -44,7 +44,7 @@
       opts: ['About +$30 trillion', 'About +$10 trillion', 'About +$3.7 trillion'], ans: 2,
       v: 'About +$3.7 trillion ($7.8T → $11.5T). The base grew ×4.8, M2 only ×1.47.',
       chart: { k: 'qe', from: '2006-01', to: '2016-12', band: ['2008-11', '2014-10'], marks: [['2014-08', 0, '×4.8'], ['2014-08', 1, '×1.47']], names: ['Monetary base', 'M2'], y: 'Index, Aug 2008 = 100', cap: 'BOGMBASE and M2SL, monthly, Aug 2008 = 100' },
-      th: 'Step one of the model worked: ==buying bonds added reserves dollar for dollar==. Step two — banks lending the new reserves out again and again — mostly did not happen. The reserves stayed at the Fed as excess reserves (see "Banks hold more excess reserves").',
+      th: 'Step one of the model worked: buying bonds added reserves dollar for dollar. Step two — banks lending the new reserves out again and again — mostly did not happen. ==The reserves stayed at the Fed as excess reserves== (see "Banks hold more excess reserves").',
       src: [
         { k: 'News', d: 'Nov 25, 2008', by: 'Federal Reserve', t: 'The Fed launches large-scale purchases of mortgage-backed securities', s: 'The start of QE1: the Fed said it would buy debt issued by Fannie Mae, Freddie Mac and the Federal Home Loan Banks, plus mortgage-backed securities they guarantee.', u: FED + 'newsevents/pressreleases/monetary20081125b.htm' },
         { k: 'Research', d: '2009', by: 'Keister & McAndrews, New York Fed Staff Report 380', t: 'Why are banks holding so many excess reserves?', s: 'The total amount of reserves is set by the Fed\'s own actions; banks as a group cannot lend it away. A huge stock of reserves does not by itself mean banks stopped lending.', u: 'https://www.newyorkfed.org/research/staff_reports/sr380.html' }
@@ -56,7 +56,7 @@
       opts: ['About $10 billion', 'About $50 billion', 'About $153 billion'], ans: 2,
       v: '$152.9 billion — a record, above the 2008 crisis peak of $110.7 billion.',
       chart: { k: 'dw', from: '2019-01-01', to: '2024-06-30', marks: [['2020-03-25', 0, 'COVID $51B'], ['2023-03-15', 0, 'SVB $153B']], y: 'Discount-window loans, $ billion', cap: 'WLCFLPCL (primary credit), weekly' },
-      th: 'As in the model, ==loans from the Fed add reserves and raise the monetary base==. But banks borrowed to pay depositors who were leaving, not to make new loans: the Fed acted as lender of last resort, keeping deposits — and the money supply — from collapsing rather than expanding them.',
+      th: 'As in the model, loans from the Fed add reserves and raise the monetary base. But ==banks borrowed to pay depositors who were leaving, not to make new loans==: the Fed acted as lender of last resort, keeping deposits — and the money supply — from collapsing rather than expanding them. No multiplier showed up: from February to March 2023 the monetary base rose $250 billion, but M2 fell $309 billion (monthly averages).',
       src: [
         { k: 'News', d: 'Mar 12, 2023', by: 'Treasury, Federal Reserve and FDIC', t: 'Joint statement on Silicon Valley Bank and Signature Bank', s: 'All depositors of the two failed banks would be protected, and the Fed opened a new Bank Term Funding Program lending to banks for up to one year.', u: FED + 'newsevents/pressreleases/monetary20230312a.htm' }
       ]
@@ -163,7 +163,7 @@
     opts: ['About 3.0% a year', 'About 1.4%, no change', 'About 0.5% a year'], ans: 0,
     v: 'About 3.0% a year. Unemployment fell from 5.6% (December 1995) to 3.8% (April 2000), yet inflation stayed between 1.4% and 3.8% (1996–2000).',
     chart: { k: 'c33_tech', from: '1990-01', to: '2004-10', band: ['1995-10', '2000-10'], marks: [['1999-10', 0, '4.2%']], names: ['Productivity growth', 'CPI inflation'], y: '% change from a year earlier', cap: 'OPHNFB (output per hour, nonfarm business) and CPIAUCSL (quarterly average), quarterly, % change from a year earlier' },
-    th: 'The model says ==more productivity means more output at lower prices==. The output half is clear: growth was fast and unemployment fell to 3.8% in April 2000, the lowest in 30 years. The price half shows up differently: the price level did not fall; ==inflation stayed moderate even as unemployment dropped==, where weak productivity would have pushed it up. Fed economists estimate that information technology (computers and their production) explains about two-thirds of the 1-point step-up in productivity growth between the first and second halves of the 1990s.',
+    th: 'The model says more productivity means more output at lower prices. The output half is clear: growth was fast and unemployment fell to 3.8% in April 2000, the lowest in 30 years. The price half shows up differently: the price level did not fall; ==inflation stayed moderate even as unemployment dropped==, where weak productivity would have pushed it up. Fed economists estimate that information technology (computers and their production) explains about two-thirds of the 1-point step-up in productivity growth between the first and second halves of the 1990s.',
     src: [
       { k: 'Research', d: 'Apr 2000', by: 'Oliner & Sichel, Federal Reserve Board (FEDS 2000-20)', t: 'The Resurgence of Growth in the Late 1990s: Is Information Technology the Story?', s: 'Growth accounting shows IT use and computer production explain about two-thirds of the acceleration in productivity growth in the late 1990s.', u: 'https://www.federalreserve.gov/econres/feds/the-resurgence-of-growth-in-the-late-1990s-is-information-technology-the-story.htm' },
       { k: 'Data', d: 'quarterly since 1947', by: 'Federal Reserve Bank of St. Louis (FRED)', t: 'Nonfarm Business Sector: Real Output Per Hour of All Persons (OPHNFB)', s: 'An index of how much output the business sector produces per hour worked.', u: 'https://fred.stlouisfed.org/series/OPHNFB' }
@@ -187,7 +187,7 @@
       opts: ['Rose by almost 8%', 'Stayed about the same', 'Fell by about 5%'], ans: 0,
       v: 'They rose: $25.14 in April 2020 versus $23.33 in April 2019, +7.8% (it was +3.6% in February).',
       chart: { k: 'c28_covid', from: '2019-01', to: '2021-12', marks: [['2020-04', 0, '14.8%'], ['2020-04', 1, '+7.8%', 'below']], names: ['Unemployment rate', 'Hourly earnings'], y: '% (earnings: change from a year earlier)', cap: 'UNRATE and AHETPI (% change from a year earlier), monthly' },
-      th: 'Stage 1 fits: ==demand fell and unemployment jumped while firms did not cut wages==. Stage 2 (the wage falls to a new equilibrium) did not appear. The average rose because, as BLS noted, the jobs lost were mostly low-paid, so the ones left were higher paid — a composition effect. Also 18.1 million of the unemployed said they were on temporary layoff, expecting to be recalled, so this looked more like a pause than a permanent shift of D.',
+      th: 'Stage 1 fits: demand fell and unemployment jumped while firms did not cut wages. Stage 2 (the wage falls to a new equilibrium) did not appear. The average rose because, as BLS noted, ==the jobs lost were mostly low-paid, so the ones left were higher paid== — a composition effect. Also 18.1 million of the unemployed said they were on temporary layoff, expecting to be recalled, so this looked more like a pause than a permanent shift of D.',
       src: [
         { k: 'News', d: 'May 8, 2020', by: 'U.S. Bureau of Labor Statistics', t: 'The Employment Situation — April 2020', s: 'Payrolls dropped by 20.5 million in April and the number on temporary layoff rose about ten-fold; BLS said the rise in average earnings largely reflects job loss among lower-paid workers.', u: 'https://www.bls.gov/news.release/archives/empsit_05082020.htm' },
         { k: 'Data', d: 'monthly since 1964', by: 'Federal Reserve Bank of St. Louis (FRED)', t: 'Average Hourly Earnings of Production and Nonsupervisory Employees, Total Private (AHETPI)', s: 'The series used in the chart, collected by BLS from employers\' payroll records.', u: 'https://fred.stlouisfed.org/series/AHETPI' }
@@ -200,7 +200,7 @@
       opts: ['About 12 weeks', 'About 25 weeks', 'About 17 weeks'], ans: 1,
       v: 'About 25 weeks (25.2) — nearly three times as long as in 2007.',
       chart: { k: 'c28_dur', from: '2000-01', to: '2019-12', marks: [['2007-11', 0, '8.6 wks', 'left'], ['2010-06', 0, '25.2 wks'], ['2009-10', 1, '10.0%', 'below']], names: ['Median weeks', 'Unemployment rate'], y: 'Weeks / percent', cap: 'UEMPMED (median duration of unemployment, weeks) and UNRATE, monthly' },
-      th: 'Direction is right: ==a laid-off searcher is counted as unemployed==. But the model treats this as a short stop between jobs. In 2010 searching often lasted half a year, and the duration kept rising for months after the unemployment rate peaked (10.0% in Oct 2009). In April 2010 the long-term unemployed (27 weeks or more) made up 45.5% of all unemployed, a record share in the BLS data.',
+      th: 'Direction is right: a laid-off searcher is counted as unemployed. But the model treats this as a short stop between jobs. ==In 2010 searching often lasted half a year==, and the duration kept rising for months after the unemployment rate peaked (10.0% in Oct 2009). In April 2010 the long-term unemployed (27 weeks or more) made up 45.5% of all unemployed, a record share in the BLS data.',
       src: [
         { k: 'Research', d: '2018', by: 'U.S. Bureau of Labor Statistics, Monthly Labor Review', t: 'Great Recession, great recovery? Trends from the Current Population Survey', s: 'Median unemployment duration rose from 8.6 weeks in Nov 2007 to 25.2 weeks in June 2010, and long-term unemployment was 45.5 percent of the unemployed in April 2010.', u: 'https://www.bls.gov/opub/mlr/2018/article/great-recession-great-recovery.htm' },
         { k: 'Data', d: 'monthly since 1967', by: 'Federal Reserve Bank of St. Louis (FRED)', t: 'Median Duration of Unemployment (UEMPMED)', s: 'The series used in the chart: the middle value of how long unemployed people have been looking, in weeks.', u: 'https://fred.stlouisfed.org/series/UEMPMED' }
@@ -212,7 +212,7 @@
       opts: ['About 0.5 points', 'About 1.5 points', 'About 3.2 points'], ans: 2,
       v: 'It fell 3.2 points, to 60.1% — about 6.4 million people left the labor force from March to April.',
       chart: { k: 'c28_lfp', from: '2020-01', to: '2022-12', marks: [['2020-04', 0, '−3.2', 'below'], ['2020-04', 1, '+11.3']], names: ['Participation', 'Unemployment rate'], y: 'Change since Feb 2020, percentage points', cap: 'CIVPART and UNRATE, monthly, change from Feb 2020' },
-      th: 'The flow is real: ==people who stop looking drop out of the labor force==, which keeps the official rate from rising even more. But the label "gives up" fits only a few of them. BLS counted 574,000 discouraged workers in April, against 9.9 million people outside the labor force who said they wanted a job. By definition none of them had searched in the last 4 weeks, so none counted as unemployed.',
+      th: 'The flow is real: people who stop looking drop out of the labor force, which keeps the official rate from rising even more. But ==the label "gives up" fits only a few of them==. BLS counted 574,000 discouraged workers in April, against 9.9 million people outside the labor force who said they wanted a job. By definition none of them had searched in the last 4 weeks, so none counted as unemployed.',
       src: [
         { k: 'News', d: 'May 8, 2020', by: 'U.S. Bureau of Labor Statistics', t: 'The Employment Situation — April 2020', s: 'Reports the drop in participation, 9.9 million people not in the labor force who wanted a job, and 2.3 million marginally attached.', u: 'https://www.bls.gov/news.release/archives/empsit_05082020.htm' },
         { k: 'Data', d: 'Current Population Survey definitions', by: 'U.S. Bureau of Labor Statistics', t: 'Concepts and definitions: discouraged workers and people who want a job now', s: 'Explains that people who want a job now but have not searched in 4 weeks are outside the labor force, and that discouraged workers are a subset of them.', u: 'https://www.bls.gov/cps/definitions.htm' }
@@ -224,7 +224,7 @@
       opts: ['About 23%', 'About 19%', 'About 16%'], ans: 0,
       v: 'U-6 was 22.9% — 8.1 points above the official rate that month.',
       chart: { k: 'c28_u6', from: '1994-01', to: '2024-12', marks: [['2009-12', 1, '17.2%'], ['2020-04', 1, '22.9%'], ['2020-04', 0, '14.8%', 'below']], names: ['U-3 (official)', 'U-6 (broadest)'], y: '% of labor force', cap: 'UNRATE and U6RATE, monthly' },
-      th: 'The model is right that ==the rule for who counts as unemployed changes the rate== — U-6 is a different rule. It adds the marginally attached (2.3 million) and people working part time for economic reasons (10.9 million) in April 2020. The gap is large even in normal times: in Feb 2020 U-3 was 3.5% and U-6 7.0%, twice as high. So the official rate counts active searchers; it is not a full measure of slack.',
+      th: 'The model is right that the rule for who counts as unemployed changes the rate — U-6 is a different rule. It adds the marginally attached (2.3 million) and people working part time for economic reasons (10.9 million) in April 2020. The gap is large even in normal times: ==in Feb 2020 U-3 was 3.5% and U-6 7.0%, twice as high==. So the official rate counts active searchers; it is not a full measure of slack.',
       src: [
         { k: 'Data', d: 'Current Population Survey definitions', by: 'U.S. Bureau of Labor Statistics', t: 'Concepts and definitions: alternative measures of labor underutilization (U-1 to U-6)', s: 'U-3 is the official rate; U-6 is the broadest, adding groups that the official rate leaves out.', u: 'https://www.bls.gov/cps/definitions.htm' },
         { k: 'News', d: 'May 8, 2020', by: 'U.S. Bureau of Labor Statistics', t: 'The Employment Situation — April 2020', s: 'Gives the April 2020 counts of marginally attached workers and people working part time for economic reasons, and defines U-6.', u: 'https://www.bls.gov/news.release/archives/empsit_05082020.htm' }
@@ -236,11 +236,11 @@
   const UI = KO ? {
     tag: '현실 연결', pick: '<b class="rwchip">현실</b> 표시가 붙은 사건을 고르면 모형을 미국 실제 데이터와 맞춰 볼 수 있다.',
     predict: '먼저 예측:', skip: '바로 보기', right: '✓ 정답.', wrong: '✗ 오답.', theory: '이론과 현실',
-    source: '출처: FRED — ', got: ' · 받은 날 ', band: ' · 노란 칸: 사건 기간', nodata: '데이터를 불러오지 못했다.', mode: '모드', basic: '기본', rw: '현실 연결'
+    source: '출처: FRED — ', got: ' · 받은 날 ', band: ' · 노란 칸: 사건 기간', nodata: '데이터를 불러오지 못했다.', fold: '시간선 내리기', unfold: '시간선 올리기', mode: '모드', basic: '기본', rw: '현실 연결'
   } : {
     tag: 'Real world', pick: 'Pick an event marked <b class="rwchip">REAL</b> to test the model against U.S. data.',
     predict: 'Predict first.', skip: 'Just show me', right: '✓ Right.', wrong: '✗ Not quite.', theory: 'Theory vs reality',
-    source: 'Source: FRED — ', got: ' · retrieved ', band: ' · shaded: event period', nodata: 'Data could not be loaded.', mode: 'Mode', basic: 'Basic', rw: 'Real world'
+    source: 'Source: FRED — ', got: ' · retrieved ', band: ' · shaded: event period', nodata: 'Data could not be loaded.', fold: 'Hide timeline', unfold: 'Show timeline', mode: 'Mode', basic: 'Basic', rw: 'Real world'
   };
 
   /* ───────── 선그래프 ───────── */
@@ -317,11 +317,30 @@
     let cur = null;
     const caseOf = (b) => cases.find((c) => c.m.test(b.textContent.trim())) || null;
     scope.querySelectorAll('li button').forEach((b) => { if (caseOf(b)) b.parentNode.classList.add('hasrw'); });
-    // 시간선: 사례 카드가 있으면 rwdock(데스크톱 하단 고정), 정답을 고르면 rwgone(숨김). --dockh 는 시간선 높이
-    const host = fig.closest('.panel') || fig.closest('.ch'), player = host && $('.player', host);
-    if (player && window.ResizeObserver) new ResizeObserver(() => host.style.setProperty('--dockh', player.scrollHeight + 'px')).observe($('.steps', player) || player);
-    const dock = () => { if (!host) return; host.classList.toggle('rwdock', !!cur && cur !== 'none'); host.classList.remove('rwgone'); };
-    card.addEventListener('rwanswer', () => host && host.classList.add('rwgone'));
+    // 시간선: 사건을 고르면(기본 모드도) rwdock(데스크톱 하단 고정), 정답을 고르면 rwgone(숨김). --dockh 는 시간선 높이
+    // 내리기 단추(.rwfold, 데스크톱): 시간선 위 가운데 손잡이. 내리면(정답을 골라도) 손잡이만 남고 누르면 다시 올라온다.
+    // 아래 여백은 .ch 에 준다(Ch28 의 .panel 은 display:contents 라 padding 이 먹지 않았다)
+    const host = fig.closest('.panel') || fig.closest('.ch'), ch = fig.closest('.ch'), player = host && $('.player', host);
+    const wide = window.matchMedia('(min-width:901px)');
+    const sync = () => {
+      if (!player || host.hidden) return;
+      const h = player.offsetHeight, on = wide.matches && host.classList.contains('rwdock') && !host.classList.contains('rwgone') && !player.classList.contains('idle');
+      host.style.setProperty('--dockh', (wide.matches ? h : player.scrollHeight) + 'px');
+      ch.style.paddingBottom = on ? Math.max(0, h - 24) + 'px' : '';
+    };
+    let fold = null;
+    if (player) {
+      fold = document.createElement('button'); fold.type = 'button'; fold.className = 'rwfold';
+      fold.innerHTML = '<svg viewBox="0 0 16 16" aria-hidden="true"><path d="M3.5 6l4.5 4.5L12.5 6"/></svg>';
+      fold.addEventListener('click', () => { host.classList.toggle('rwgone'); setFold(); sync(); });
+      player.after(fold);
+      if (window.ResizeObserver) new ResizeObserver(sync).observe(player);
+      new MutationObserver(sync).observe(player, { childList: true, subtree: true });   // 휴대폰은 max-height 로 크기가 묶여 ResizeObserver 만으로는 내용 변화를 못 잡는다
+      wide.addEventListener && wide.addEventListener('change', sync);
+    }
+    const setFold = () => { if (!fold) return; const d = host.classList.contains('rwgone'); fold.setAttribute('aria-label', d ? UI.unfold : UI.fold); fold.title = d ? UI.unfold : UI.fold; fold.setAttribute('aria-expanded', String(!d)); };
+    const dock = () => { if (!host) return; host.classList.toggle('rwdock', !!cur); host.classList.remove('rwgone'); setFold(); requestAnimationFrame(sync); };
+    card.addEventListener('rwanswer', () => { if (!host) return; host.classList.add('rwgone'); setFold(); sync(); });
     // 보이는 목록에서 눌린 사건 읽기(숨은 탭의 눌림은 무시)
     const read = () => {
       const b = Array.prototype.find.call(scope.querySelectorAll('button[aria-pressed="true"]'), (x) => !x.closest('[hidden]'));
@@ -330,13 +349,13 @@
     };
     scope.addEventListener('click', (e) => { if (e.target.closest('li button')) { cur = undefined; read(); } });   // 같은 사건을 다시 골라도 새 카드
     const tabs = fig.closest('.ch') && $('.sub', fig.closest('.ch'));
-    if (tabs) tabs.addEventListener('click', () => setTimeout(read, 0));
+    if (tabs) tabs.addEventListener('click', () => setTimeout(() => { read(); sync(); }, 0));
     render(card, cur);
     redo.push(() => { if (cur && cur !== 'none' && $('.rwans', card).hidden) render(card, cur); });
   }
   function init() {
     Object.keys(CS).forEach((k) => attach(k, CS[k]));
-    fetch('/econ2/graphs/real-data.json?v=20261105h').then((r) => r.json()).then((d) => { data = d; redo.forEach((f) => f()); }).catch(() => {});
+    fetch('/econ2/graphs/real-data.json?v=20261105i').then((r) => r.json()).then((d) => { data = d; redo.forEach((f) => f()); }).catch(() => {});
 
     // 모드 토글
     const links = $('.top .links'), tg = document.createElement('div');
