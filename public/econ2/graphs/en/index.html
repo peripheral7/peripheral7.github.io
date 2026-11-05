@@ -64,7 +64,7 @@
   /* 그래프 아래 Situation 줄 */
   .sitline{display:flex;align-items:baseline;gap:10px;margin:8px 0 0;font-size:20px;font-weight:700;line-height:1.45}
   .sitline:empty{display:none}
-  .sitline .lb{flex:none;margin-left:-9.5px;padding:1px 8px;border:1.5px solid var(--line);border-radius:6px;font-size:13px;font-weight:800;color:var(--soft)}   /* 왼쪽으로 당겨 글자 'Situation' 이 아래 문장 첫 글자와 같은 선에 */
+  .sitline .lb{flex:none;margin-left:0;padding:1px 8px;border:1.5px solid var(--line);border-radius:6px;font-size:13px;font-weight:800;color:var(--soft)}   /* 왼쪽으로 당겨 글자 'Situation' 이 아래 문장 첫 글자와 같은 선에 */
   .sitline + .rsent{margin-top:8px}
   .rsent.auto{max-width:720px;font-size:18px}   /* Situation 아래 결과 문장(모든 사건) */
   /* 큰 탭(AD · AS, Equilibrium wage · Unemployment rate): 고른 탭은 진한 바탕 흰 글자 */
@@ -112,8 +112,8 @@
   .rows .gl .alt.on{color:var(--blue);font-weight:800}
   .rows li button{position:relative;display:block;width:100%;padding:0 22px 0 0;border:0;background:none;text-align:left;cursor:pointer;color:#9aa0aa;overflow-wrap:anywhere}
   .rows .dot{display:block;width:24px;height:24px;border:3px solid var(--ink);border-radius:50%;background:#fff;box-sizing:border-box;margin-bottom:12px}
-  .rows .k{display:block;font-size:44px;font-weight:800;line-height:1.15;letter-spacing:-.01em}
-  .rows .tx{display:block;margin-top:6px;font-size:17px;font-weight:600;line-height:1.45}
+  .rows .k{display:block;font-size:var(--kf,44px);font-weight:800;line-height:1.15;letter-spacing:-.01em}
+  .rows .tx{display:block;margin-top:6px;font-size:var(--tf,17px);font-weight:600;line-height:1.45}
   .rows .u{display:inline-block;max-width:100%}
   .rows .sm{display:block;margin-top:4px;font-size:15.5px;font-weight:600;color:var(--soft);line-height:1.4}
   .rows li.todo .sm{color:inherit}
@@ -299,8 +299,8 @@
     .tabs button{padding:11px 12px;font-size:14px}
     .tabs button::after{left:8px;right:8px}
     main{padding:10px 10px 84px}
-    .ch,.ch.tabbed{grid-template-columns:minmax(0,1fr);grid-template-rows:none;grid-template-areas:"fig" "play" "side";gap:14px}
-    .ch.tabbed{grid-template-areas:"tabs" "fig" "play" "side"}
+    .ch,.ch.tabbed{grid-template-columns:minmax(0,1fr);grid-template-rows:none;grid-template-areas:"side" "fig" "play";gap:14px}
+    .ch.tabbed{grid-template-areas:"tabs" "side" "fig" "play"}
 
     .sub button{flex:1;min-width:0;padding:9px 6px;font-size:15.5px}
     .kdir{font-size:17px}
@@ -341,7 +341,8 @@
     .sitline{font-size:16px}
     .rsent.auto{font-size:16px}
     .rows.lab{margin-top:0}
-    .rows .gl{position:static;margin:0 0 8px;flex-wrap:wrap;white-space:normal;max-width:none}
+    .rows .gl{position:static;margin:0;padding-bottom:8px;flex-wrap:wrap;white-space:normal;max-width:none}
+    .rows li:first-child>.gl{position:relative;top:0;z-index:1;margin-left:-36px;padding-left:36px;background:#fff}   /* 첫 단계 이름이 세로선 윗부분을 가려 선이 첫 점에서 시작 */
     .rows .gl.sep{padding-top:10px;padding-left:0;border-left:0;border-top:2px solid #c9ccd2}
     .seg button{padding:7px 11px;font-size:13.5px}
 
@@ -359,6 +360,14 @@
     .side{max-height:calc(44vh + 60px);overflow:auto;padding-right:6px;padding-left:6px;margin-left:-6px}   /* 왼쪽 6px: 주요 요인 점이 스크롤 칸에 잘리지 않게(글 위치는 그대로) */
     .ch.tabbed .side{grid-row:1 / 3;max-height:calc(44vh + 80px)}
     .player{padding-top:18px}
+  }
+  @media (min-width:901px){
+    .rows li{min-height:calc(var(--dh,36px) + var(--kf,44px) * 1.15 + 6px + var(--tf,17px) * 1.45 * 2)}
+  }
+  @media (min-width:901px) and (max-width:1180px){
+    .player{--kf:clamp(26px,3.2vw,38px);--tf:15px}
+    .rows .sm{font-size:13.5px}
+    .gh{font-size:16px}
   }
   /* 낮은 화면(노트북): 그래프 · 여백 · 시간선을 한 단계 작게 해 한 화면에 */
   @media (min-width:901px) and (max-height:820px){
@@ -378,7 +387,7 @@
     .rows .dot{width:20px;height:20px;border-width:2.5px;margin-bottom:8px}
     .rows::before{left:9px;right:9px;top:9px}
     .rows::after{top:0;width:20px;height:20px;border-width:2.5px}
-    .rows .k{font-size:34px}
+    .player{--kf:34px;--tf:15px;--dh:28px}
     .rows .tx{font-size:15px;margin-top:2px}
     .rows .sm{font-size:13px}
     .pbar{margin-top:4px}
@@ -388,7 +397,7 @@
   @media (min-width:901px) and (max-height:720px){
     .fig .stage{height:33vh}
     .ch.tabbed .fig .stage{min-height:31vh}
-    .rows .k{font-size:30px}
+    .player{--kf:30px}
     .side{max-height:calc(33vh + 60px)}
     .ch.tabbed .side{max-height:calc(33vh + 110px)}
     .gh{padding-top:24px}
@@ -446,7 +455,7 @@
     .bankfig .tnote{font-size:12.5px}
   }
 </style>
-<link rel="stylesheet" href="/econ2/graphs/real.css?v=20261105i">
+<link rel="stylesheet" href="/econ2/graphs/real.css?v=20261105j">
 </head>
 <body>
 <header class="top"><div class="in">
@@ -610,7 +619,7 @@
   document.body.appendChild(box);
 })();
 </script>
-<script src="/econ2/graphs/en/app.js?v=20261105f"></script>
-<script src="/econ2/graphs/real.js?v=20261105i"></script>
+<script src="/econ2/graphs/en/app.js?v=20261105j"></script>
+<script src="/econ2/graphs/real.js?v=20261105j"></script>
 </body>
 </html>

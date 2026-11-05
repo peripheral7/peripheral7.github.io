@@ -425,7 +425,7 @@
         btn.type = 'button';
         // 글은 ' — ' 에서 줄을 바꾸고, ' → ' 로 나뉜 조각(.u, inline-block)은 통째로 다음 줄로 — 조각이 칸보다 길 때만 그 안에서 줄바꿈. b.s 는 작은 숫자 줄
         const unit = (x) => x.split(' → ').map((u, k) => '<span class="u">' + (k ? '→ ' : '') + arrows(u) + '</span>').join(' ');   // 화살표 줄바꿈
-        btn.innerHTML = '<span class="dot"></span><span class="k">[' + arrows(b.k || '') + ']</span><span class="tx">' + String(b.t || '').split(' — ').map(unit).join('<br>') + '</span>' + (b.s ? '<span class="sm">' + arrows(b.s) + '</span>' : '');
+        btn.innerHTML = '<span class="dot"></span><span class="k">' + (/[←→]/.test(b.k || '') ? '[' + arrows(b.k) + ']' : arrows(b.k || '')) + '</span><span class="tx">' + String(b.t || '').split(' — ').map(unit).join('<br>') + '</span>' + (b.s ? '<span class="sm">' + arrows(b.s) + '</span>' : '');
         const from = k === gStart ? k - 1 : gStart;   // pre 가 없으면: 단계 첫 마디는 앞 단계 끝에서, 나머지는 그 단계 첫 마디에서
         btn.addEventListener('click', () => { playing = false; if (b.pre) b.pre(false); else if (from >= 0) beats[from].run(false); go(k, true); });
         li.appendChild(btn); rows.appendChild(li);

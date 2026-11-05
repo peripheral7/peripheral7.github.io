@@ -52,11 +52,11 @@
     },
     {
       m: /^Fed lends/, when: 'March 2023 · United States', title: 'Silicon Valley Bank run: banks borrow from the Fed',
-      q: 'Silicon Valley Bank failed on March 10, 2023 after depositors rushed to pull their money. Discount-window loans to banks were $4.6 billion in the week of March 8. What were they one week later?',
-      opts: ['About $10 billion', 'About $50 billion', 'About $153 billion'], ans: 2,
-      v: '$152.9 billion — a record, above the 2008 crisis peak of $110.7 billion.',
+      q: 'Silicon Valley Bank failed on March 10, 2023 after depositors rushed to pull their money. Other banks borrowed heavily from the Fed, and the monetary base rose $250 billion from February to March. In the model, new reserves are lent out again and again, so with a multiplier of about 4 the money supply should rise about $1 trillion. What happened to M2 from February to March?',
+      opts: ['Rose about $1 trillion', 'Rose a little', 'Fell about $300 billion'], ans: 2,
+      v: 'M2 fell $309 billion ($21.24 trillion → $20.93 trillion, monthly averages) and another $195 billion in April. Meanwhile discount-window loans jumped from $4.6 billion to a record $152.9 billion in one week, above the 2008 crisis peak of $110.7 billion.',
       chart: { k: 'dw', from: '2019-01-01', to: '2024-06-30', marks: [['2020-03-25', 0, 'COVID $51B'], ['2023-03-15', 0, 'SVB $153B']], y: 'Discount-window loans, $ billion', cap: 'WLCFLPCL (primary credit), weekly' },
-      th: 'As in the model, loans from the Fed add reserves and raise the monetary base. But ==banks borrowed to pay depositors who were leaving, not to make new loans==: the Fed acted as lender of last resort, keeping deposits — and the money supply — from collapsing rather than expanding them. No multiplier showed up: from February to March 2023 the monetary base rose $250 billion, but M2 fell $309 billion (monthly averages).',
+      th: 'The first step of the model happened: loans from the Fed added reserves and raised the monetary base. The multiplier step did not, because ==banks borrowed to pay depositors who were leaving, not to make new loans==. Deposits kept flowing out, so M2 shrank even as the base grew. The Fed acted as lender of last resort: it kept deposits — and the money supply — from collapsing, rather than expanding them.',
       src: [
         { k: 'News', d: 'Mar 12, 2023', by: 'Treasury, Federal Reserve and FDIC', t: 'Joint statement on Silicon Valley Bank and Signature Bank', s: 'All depositors of the two failed banks would be protected, and the Fed opened a new Bank Term Funding Program lending to banks for up to one year.', u: FED + 'newsevents/pressreleases/monetary20230312a.htm' }
       ]
@@ -159,9 +159,9 @@
   },
   {
     m: /^Technological progress/, when: '1995–2000 · United States', title: 'The late-1990s productivity boom: faster growth without more inflation',
-    q: 'U.S. output per hour in the business sector grew 1.4% a year from 1973 to 1995. In the model, better technology raises Y* and shifts both LRAS and SRAS right. What was the average growth rate of productivity from the end of 1995 to the end of 2000?',
-    opts: ['About 3.0% a year', 'About 1.4%, no change', 'About 0.5% a year'], ans: 0,
-    v: 'About 3.0% a year. Unemployment fell from 5.6% (December 1995) to 3.8% (April 2000), yet inflation stayed between 1.4% and 3.8% (1996–2000).',
+    q: 'U.S. output per hour in the business sector grew about 3.0% a year from the end of 1995 to the end of 2000, up from 1.4% in 1973–95. In the model, better technology shifts both LRAS and SRAS right: more output at lower prices. Meanwhile unemployment fell from 5.6% (December 1995) to 3.8% (April 2000). What did inflation do in 1996–2000?',
+    opts: ['Prices fell (deflation)', 'Stayed moderate, 1.4–3.8%', 'Climbed above 6%'], ans: 1,
+    v: 'It stayed between 1.4% and 3.8% — no deflation, but no overheating either, even with unemployment at a 30-year low.',
     chart: { k: 'c33_tech', from: '1990-01', to: '2004-10', band: ['1995-10', '2000-10'], marks: [['1999-10', 0, '4.2%']], names: ['Productivity growth', 'CPI inflation'], y: '% change from a year earlier', cap: 'OPHNFB (output per hour, nonfarm business) and CPIAUCSL (quarterly average), quarterly, % change from a year earlier' },
     th: 'The model says more productivity means more output at lower prices. The output half is clear: growth was fast and unemployment fell to 3.8% in April 2000, the lowest in 30 years. The price half shows up differently: the price level did not fall; ==inflation stayed moderate even as unemployment dropped==, where weak productivity would have pushed it up. Fed economists estimate that information technology (computers and their production) explains about two-thirds of the 1-point step-up in productivity growth between the first and second halves of the 1990s.',
     src: [
@@ -231,8 +231,49 @@
       ]
     }
   ] };
+  // 용어 주석: [찾을 글자, 뜻]. 카드마다 처음 나오는 곳만 누를 수 있다(한국어판은 real-ko.js 의 gloss)
+  const GLOSS = [
+    [/required reserve ratio|reserve requirements?/, "Reserve requirement: the minimum share of deposits a bank must, by law, keep as reserves (cash in the vault or deposits at the central bank)."],
+    [/excess reserves/, "Excess reserves: reserves a bank holds above the legal minimum."],
+    [/monetary base/, "Monetary base: currency in circulation plus bank reserves, the money the central bank creates directly."],
+    [/money multiplier/, "Money multiplier: how many dollars of money (here M2) exist per dollar of monetary base. In the simple model it equals 1/R."],
+    [/\bM2\b/, "M2: a broad measure of money: currency, checking and savings deposits, small time deposits and retail money-market funds."],
+    [/ample reserves/, "Ample-reserves system: since 2008 reserves are so plentiful that the Fed steers interest rates by the rate it pays on reserves, not by making reserves scarce."],
+    [/interest (?:it pays )?on reserves/, "Interest on reserves: interest the Fed pays banks on the reserves they keep at the Fed. A higher rate makes holding reserves more attractive than lending them out cheaply."],
+    [/quantitative easing|\bQE\b/, "Quantitative easing (QE): the central bank buys large amounts of long-term bonds with newly created reserves to push long-term interest rates down."],
+    [/mortgage-backed securities/, "Mortgage-backed securities: bonds backed by a pool of home loans; holders receive the borrowers’ payments."],
+    [/Fannie Mae, Freddie Mac/, "Fannie Mae and Freddie Mac: government-sponsored U.S. companies that buy home loans from lenders and package them into securities."],
+    [/[Dd]iscount-window loans?/, "Discount window: the Fed’s standing facility that lends to banks against collateral, usually overnight or for a few weeks."],
+    [/lender of last resort/, "Lender of last resort: the central bank’s role of lending to sound banks in a panic, so that a run does not force them to fail."],
+    [/Bank Term Funding Program/, "Bank Term Funding Program (BTFP): an emergency Fed program (March 2023 to March 2024) that lent to banks for up to a year, valuing their Treasury and similar bonds at face value."],
+    [/\bCPI\b/, "CPI (Consumer Price Index): the price of a fixed basket of goods and services that households buy, compared with a base period."],
+    [/velocity/, "Velocity of money (V): how many times a year the average dollar is spent on final goods and services; V = P × Y ÷ M."],
+    [/money-market funds/, "Money-market funds: funds that hold short-term, safe debt and let investors take money out almost like a bank account."],
+    [/Nasdaq index/, "Nasdaq index: a stock index of companies listed on the Nasdaq exchange, heavy in technology firms."],
+    [/[Rr]eal disposable income/, "Real disposable income: household income after taxes and government transfers, adjusted for inflation."],
+    [/saving rate/, "Saving rate: the share of disposable income that households do not spend."],
+    [/nondurables/, "Nondurables: goods used up quickly, such as food and gasoline. Durables (cars, appliances) last for years."],
+    [/Great Society/, "Great Society: President Johnson’s 1960s domestic programs, such as Medicare, Medicaid and anti-poverty spending."],
+    [/trade-weighted dollar index/, "Trade-weighted dollar index: the dollar’s average value against the currencies of U.S. trading partners, weighted by how much the U.S. trades with each."],
+    [/net exports/, "Net exports: exports minus imports."],
+    [/Arab oil embargo/, "1973 Arab oil embargo: after the October 1973 war, Arab oil producers stopped selling oil to the U.S. and some other countries and cut output."],
+    [/stagflation/, "Stagflation: rising prices together with falling output and rising unemployment."],
+    [/[Oo]utput per hour/, "Output per hour (labor productivity): how much is produced per hour worked."],
+    [/[Gg]rowth accounting/, "Growth accounting: splitting output growth into the parts due to more labor, more capital and better technology."],
+    [/payroll employment|[Pp]ayrolls/, "Payroll employment: the number of jobs on employers’ payrolls outside farming, from the BLS survey of businesses."],
+    [/temporary layoff/, "Temporary layoff: laid off but expecting to be recalled; counted as unemployed even without searching."],
+    [/composition effect/, "Composition effect: an average changes because the mix of the group changes, not because anyone’s own value changes."],
+    [/production and nonsupervisory workers/, "Production and nonsupervisory workers: about four in five private employees: everyone except managers and supervisors."],
+    [/long-term unemployed/, "Long-term unemployed: people who have been looking for work for 27 weeks or more."],
+    [/discouraged workers/, "Discouraged workers: people who want a job and searched in the past year, but not in the last 4 weeks because they think no job is available. They are not in the labor force."],
+    [/marginally attached/, "Marginally attached: people who want a job, are available, and searched in the past 12 months but not in the last 4 weeks, for any reason. Discouraged workers are a subset."],
+    [/part time for economic reasons|part-timers who want full-time work/, "Part time for economic reasons: people who want full-time work but work part time because business is slack or they cannot find a full-time job."],
+    [/Card and Krueger/, "David Card and Alan Krueger: labor economists. Card shared the 2021 Nobel Prize partly for this kind of natural-experiment research."],
+    [/\bBLS\b/, "BLS (Bureau of Labor Statistics): the U.S. government agency that publishes jobs, wages and price data."]
+  ];
   const KO = document.documentElement.lang === 'ko' && window.RW_KO;
   const CS = KO ? KO.cases : CASES;
+  const G = KO ? KO.gloss || [] : GLOSS;
   const UI = KO ? {
     tag: '현실 연결', pick: '<b class="rwchip">현실</b> 표시가 붙은 사건을 고르면 모형을 미국 실제 데이터와 맞춰 볼 수 있다.',
     predict: '먼저 예측:', skip: '바로 보기', right: '✓ 정답.', wrong: '✗ 오답.', theory: '이론과 현실',
@@ -280,25 +321,54 @@
   /* ───────── 카드 ───────── */
   let data = null;
   const fmtT = (s) => esc(s).replace(/==(.+?)==/g, '<mark>$1</mark>');
+  // 용어 주석: 이미 이스케이프된 html 의 글자 부분에서, 이 카드에서 아직 안 쓴(used) 용어 중 가장 앞에 나오는 것부터 단추로 감싼다
+  function gloss(html, used) {
+    return html.split(/(<[^>]+>)/).map((p) => {
+      if (p[0] === '<') return p;
+      let out = '';
+      for (;;) {
+        let best = null;
+        G.forEach((g, i) => { if (used.has(i)) return; const m = g[0].exec(p); if (m && (!best || m.index < best.m.index)) best = { m, i }; });
+        if (!best) return out + p;
+        used.add(best.i);
+        out += p.slice(0, best.m.index) + '<button type="button" class="rwterm" data-g="' + best.i + '" aria-expanded="false">' + best.m[0] + '</button>';
+        p = p.slice(best.m.index + best.m[0].length);
+      }
+    }).join('');
+  }
+  // 용어를 누르면 그 문단 바로 아래에 뜻 상자를 열고, 다시 누르면 닫는다
+  function termClick(e) {
+    const b = e.target.closest('.rwterm'); if (!b) return;
+    const i = b.getAttribute('data-g'), host = b.closest('p, li'), open = b.getAttribute('aria-expanded') === 'true';
+    let box = host.nextElementSibling;
+    while (box && box.classList.contains('rwdef') && box.getAttribute('data-g') !== i) box = box.nextElementSibling;
+    if (open) { if (box && box.classList.contains('rwdef')) box.remove(); b.setAttribute('aria-expanded', 'false'); return; }
+    const d = G[+i][1], k = d.indexOf(': ');
+    box = document.createElement('div'); box.className = 'rwdef'; box.setAttribute('data-g', i);
+    box.innerHTML = k > 0 ? '<b>' + esc(d.slice(0, k)) + '</b> ' + esc(d.slice(k + 2)) : esc(d);
+    let at = host; while (at.nextElementSibling && at.nextElementSibling.classList.contains('rwdef')) at = at.nextElementSibling;
+    at.after(box); b.setAttribute('aria-expanded', 'true');
+  }
   function render(card, c) {
     card.hidden = c === 'none';   // 이 사건엔 현실 사례가 없으면 카드를 띄우지 않는다(선택을 풀면 다시 안내)
     if (!c) { card.innerHTML = '<p class="rwnote"><span class="rwtag">' + UI.tag + '</span>' + UI.pick + '</p>'; return; }
     if (c === 'none') { card.innerHTML = ''; return; }
+    const used = new Set(), q = gloss(esc(c.q), used), vh = gloss(esc(c.v), used);   // 용어 주석은 읽는 순서(질문 → 답 → 이론 → 출처)대로 처음 한 번만
     card.innerHTML =
       '<div class="rwhd"><span class="rwtag">' + UI.tag + '</span><span class="rwwhen">' + esc(c.when) + '</span></div>' +
       '<h3>' + esc(c.title) + '</h3>' +
-      '<p class="rwq"><b>' + UI.predict + '</b> ' + esc(c.q) + '</p>' +
+      '<p class="rwq"><b>' + UI.predict + '</b> ' + q + '</p>' +
       '<div class="rwopts">' + c.opts.map((o, i) => '<button type="button" data-i="' + i + '">' + esc(o) + '</button>').join('') + '<button type="button" class="rwskip" data-i="-1">' + UI.skip + '</button></div>' +
       '<div class="rwans" hidden>' +
       '<p class="rwv"></p>' +
       (c.chart ? '<figure class="rwfig">' + (data ? chart(c.chart, data) : '<p class="rwnote">' + UI.nodata + '</p>') + '<figcaption>' + UI.source + esc(c.chart.cap) + (data ? UI.got + esc(data.fetched) : '') + (c.chart.band ? UI.band : '') + '</figcaption></figure>' : '') +   // chart 없으면 그림 생략(연구 사례)
-      '<p class="rwth"><span class="lb">' + UI.theory + '</span>' + fmtT(c.th) + '</p>' +
-      '<ul class="rwsrc">' + c.src.map((x) => '<li><span class="lb">' + x.k + '</span><div><a href="' + esc(x.u) + '" target="_blank" rel="noopener">' + esc(x.t) + '</a><small>' + esc(x.by) + ' · ' + esc(x.d) + '</small><p>' + esc(x.s) + '</p></div></li>').join('') + '</ul>' +
+      '<p class="rwth"><span class="lb">' + UI.theory + '</span>' + gloss(fmtT(c.th), used) + '</p>' +
+      '<ul class="rwsrc">' + c.src.map((x) => '<li><span class="lb">' + x.k + '</span><div><a href="' + esc(x.u) + '" target="_blank" rel="noopener">' + esc(x.t) + '</a><small>' + esc(x.by) + ' · ' + esc(x.d) + '</small><p>' + gloss(esc(x.s), used) + '</p></div></li>').join('') + '</ul>' +
       '</div>';
     card.querySelectorAll('.rwopts button').forEach((b) => b.addEventListener('click', () => {
       const i = +b.getAttribute('data-i');
       card.querySelectorAll('.rwopts button').forEach((x) => { const k = +x.getAttribute('data-i'); x.disabled = true; x.classList.toggle('ok', k === c.ans); x.classList.toggle('no', k === i && i !== c.ans); });
-      $('.rwv', card).innerHTML = (i < 0 ? '' : i === c.ans ? '<b class="ok">' + UI.right + '</b> ' : '<b class="no">' + UI.wrong + '</b> ') + esc(c.v);
+      $('.rwv', card).innerHTML = (i < 0 ? '' : i === c.ans ? '<b class="ok">' + UI.right + '</b> ' : '<b class="no">' + UI.wrong + '</b> ') + vh;
       $('.rwans', card).hidden = false;
       card.dispatchEvent(new CustomEvent('rwanswer'));   // 시간선 숨김(attach)
     }));
@@ -314,6 +384,7 @@
     if (!fig || !scope) return;
     const card = document.createElement('div'); card.className = 'rwcard'; card.id = 'rw' + key; card.setAttribute('aria-live', 'polite');
     fig.appendChild(card);
+    card.addEventListener('click', termClick);
     let cur = null;
     const caseOf = (b) => cases.find((c) => c.m.test(b.textContent.trim())) || null;
     scope.querySelectorAll('li button').forEach((b) => { if (caseOf(b)) b.parentNode.classList.add('hasrw'); });
@@ -338,6 +409,9 @@
       new MutationObserver(sync).observe(player, { childList: true, subtree: true });   // 휴대폰은 max-height 로 크기가 묶여 ResizeObserver 만으로는 내용 변화를 못 잡는다
       wide.addEventListener && wide.addEventListener('change', sync);
     }
+    // 카드 자리: 데스크톱은 그림 칸 안(Situation · 결과 문장 아래), 휴대폰은 시간선 다음(장의 맨 아래, grid-area rw)
+    const place = () => { if (wide.matches || !player) { if (card.parentNode !== fig) fig.appendChild(card); } else if (card.previousElementSibling !== (fold || player)) (fold || player).after(card); };
+    place(); wide.addEventListener && wide.addEventListener('change', place);
     const setFold = () => { if (!fold) return; const d = host.classList.contains('rwgone'); fold.setAttribute('aria-label', d ? UI.unfold : UI.fold); fold.title = d ? UI.unfold : UI.fold; fold.setAttribute('aria-expanded', String(!d)); };
     const dock = () => { if (!host) return; host.classList.toggle('rwdock', !!cur); host.classList.remove('rwgone'); setFold(); requestAnimationFrame(sync); };
     card.addEventListener('rwanswer', () => { if (!host) return; host.classList.add('rwgone'); setFold(); sync(); });
@@ -355,7 +429,7 @@
   }
   function init() {
     Object.keys(CS).forEach((k) => attach(k, CS[k]));
-    fetch('/econ2/graphs/real-data.json?v=20261105i').then((r) => r.json()).then((d) => { data = d; redo.forEach((f) => f()); }).catch(() => {});
+    fetch('/econ2/graphs/real-data.json?v=20261105j').then((r) => r.json()).then((d) => { data = d; redo.forEach((f) => f()); }).catch(() => {});
 
     // 모드 토글
     const links = $('.top .links'), tg = document.createElement('div');

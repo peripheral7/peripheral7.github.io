@@ -62,7 +62,7 @@
    데스크톱: 위 내용 길이와 상관없이 화면 하단에 고정(조작 줄 .pbar 도 그 안에), 정답 고르면 아래로 빠르게 미끄러져 사라짐.
    휴대폰: 세로 시간선이라 고정하지 않고, 정답 고르면 빠르게 접힘. --dockh = 시간선 높이(real.js 가 잼) */
 @media (min-width:901px){
-  .rwdock .player{position:fixed;left:0;right:0;bottom:0;z-index:15;max-width:var(--max);margin:0 auto;padding:12px 24px 72px;background:#fff;border-top:1px solid var(--line);box-shadow:0 -6px 18px rgba(31,37,55,.07);transition:bottom .22s ease,opacity .18s ease}
+  .rwdock .player{position:fixed;left:0;right:0;bottom:0;z-index:15;max-width:var(--max);margin:0 auto;padding:12px 24px 66px;background:#fff;border-top:1px solid var(--line);box-shadow:0 -6px 18px rgba(31,37,55,.07);transition:bottom .22s ease,opacity .18s ease}
   .rwdock.rwgone .player{bottom:calc(-1 * var(--dockh,240px) - 20px);opacity:0;pointer-events:none}
   /* 내리기 손잡이: 시간선 윗변 가운데 탭. 내리면 화면 맨 아래에 손잡이만 남고 화살표가 위로 */
   .rwdock .rwfold{display:flex;position:fixed;left:50%;bottom:calc(var(--dockh,0px) - 1px);z-index:16;transform:translateX(-50%);align-items:center;justify-content:center;width:52px;height:22px;padding:0;border:1px solid var(--line);border-bottom:0;border-radius:10px 10px 0 0;background:#fff;color:var(--soft);cursor:pointer;box-shadow:0 -4px 10px rgba(31,37,55,.06);transition:bottom .22s ease,color .15s}
@@ -78,7 +78,23 @@
   .rwdock .player{overflow:hidden;max-height:var(--dockh,none);transition:max-height .22s ease,opacity .18s ease,padding .22s ease}
   .rwdock.rwgone .player{max-height:0;opacity:0;padding-top:0;pointer-events:none}
 }
+@media (max-width:900px){   /* 휴대폰: 사례 카드는 장의 맨 아래(real.js 가 시간선 다음으로 옮김) */
+  .rw .ch{grid-template-areas:"side" "fig" "play" "rw"}
+  .rw .ch.tabbed{grid-template-areas:"tabs" "side" "fig" "play" "rw"}
+  .rwcard{grid-area:rw}
+  .rw .rwcard{margin-top:0}
+}
 @media (prefers-reduced-motion:reduce){.rwdock .player,.rwdock .rwfold,.rwdock .rwfold svg{transition:none}}
 .rwdock .player.idle{display:none}   /* 걸음이 없는 사건(Ch29 식 사건)은 빈 띠를 두지 않는다 */
 html.rw[lang="ko"] .opts li.hasrw button::after{content:"현실";letter-spacing:0}   /* 한국어판 표시 */
 html[lang="ko"] .rwchip{letter-spacing:0}
+/* 용어 주석: 점선 밑줄 단어를 누르면 그 문단 아래에 뜻 상자가 열린다(real.js gloss·termClick) */
+.rwterm{display:inline;padding:0;border:0;background:none;font:inherit;color:inherit;text-decoration:underline dotted var(--blue) 1.5px;text-underline-offset:3px;cursor:pointer;border-radius:3px}
+.rwterm:hover{color:var(--blue)}
+.rwterm[aria-expanded="true"]{color:var(--blue);text-decoration-style:solid;background:#e8f0fb}
+.rwterm:focus-visible{outline:2px solid var(--blue);outline-offset:1px}
+.rwdef{margin:6px 0 10px;padding:8px 12px;border-left:3px solid var(--blue);border-radius:0 8px 8px 0;background:#f2f6fc;font-size:14px;font-weight:400;line-height:1.5;color:var(--ink);animation:rwdefIn .18s ease-out}
+.rwdef b{color:var(--blue)}
+.rwsrc .rwdef{margin:6px 0 2px}
+@keyframes rwdefIn{from{opacity:0;transform:translateY(-4px)}to{opacity:1;transform:none}}
+@media (prefers-reduced-motion:reduce){.rwdef{animation:none}}
