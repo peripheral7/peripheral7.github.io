@@ -60,26 +60,15 @@
 
 /* 사건을 고르면(기본·현실 연결 모드 모두) 시간선(.player) — real.js 가 카드 자리(.panel 또는 .ch)에 rwdock, 정답을 고르면 rwgone 을 붙인다.
    데스크톱: 위 내용 길이와 상관없이 화면 하단에 고정(조작 줄 .pbar 도 그 안에), 정답 고르면 아래로 빠르게 미끄러져 사라짐.
-   휴대폰: 세로 시간선이라 고정하지 않고, 정답 고르면 빠르게 접힘. --dockh = 시간선 높이(real.js 가 잼) */
+   태블릿 세로 · 휴대폰(900px 이하): 세로 시간선이라 고정 · 접기 없음. --dockh = 시간선 높이(real.js 가 잼) */
 @media (min-width:901px){
   .rwdock .player{position:fixed;left:0;right:0;bottom:0;z-index:15;max-width:var(--max);margin:0 auto;padding:12px 24px 66px;background:#fff;border-top:1px solid var(--line);box-shadow:0 -6px 18px rgba(31,37,55,.07);transition:bottom .22s ease,opacity .18s ease}
   .rwdock.rwgone .player{bottom:calc(-1 * var(--dockh,240px) - 20px);box-shadow:none;pointer-events:none}
 }
-/* 내리기 단추: 조작 줄(.pbar) 안의 마지막 단추. 시간선을 내려도 조작 줄(화면 하단 고정)은 그대로 보인다 */
+/* 내리기 단추(▾ ▴, 데스크톱만): 시간선을 내려도 조작 줄(화면 하단 고정)은 그대로 보인다. 태블릿 세로 · 휴대폰의 세로 시간선은 접지 않는다 */
 .rwfold{display:none}
-.rwdock .rwfold{display:inline-block}
+.rwdock .rwfold{display:inline-flex}
 .rwdock.rwgone .player .pbar{pointer-events:auto}
-@media (max-width:900px){   /* 휴대폰: 조작 줄이 화면 폭(390px)을 넘지 않게 — 간격을 줄이고 내리기 단추는 화살표만 */
-  .pbar{gap:6px;padding:5px 6px}
-  .pbar .cnt{min-width:0}
-  .pbar .seg button{padding:7px 9px}
-  .pbar .spdb{padding:7px 8px}
-  .rwfold .fl{display:none}
-}
-@media (max-width:900px){
-  .rwdock .player{overflow:hidden;max-height:var(--dockh,none);transition:max-height .22s ease,opacity .18s ease,padding .22s ease}
-  .rwdock.rwgone .player{max-height:0;padding-top:0;pointer-events:none}
-}
 @media (max-width:900px){   /* 휴대폰: 사례 카드는 장의 맨 아래(real.js 가 시간선 다음으로 옮김) */
   .rw .ch{grid-template-areas:"side" "fig" "play" "rw"}
   .rw .ch.tabbed{grid-template-areas:"tabs" "side" "fig" "play" "rw"}
@@ -111,28 +100,43 @@ html[lang="ko"] .rwchip{letter-spacing:0}
 /* 2026-11-06 정답 선(real.js chart 의 hl): 범례 아래 줄의 "정답" 글자 */
 .rwfig .an{font-size:15px;font-weight:800;fill:#1d8a4a;paint-order:stroke;stroke:#fff;stroke-width:4px}
 .rwfig .vl{paint-order:stroke;stroke:#fff;stroke-width:4px}
+/* 조작 줄(app.js .pbar + real.js 문제 넘기기 · 내리기): 한 줄 [« 이전 문제][다음 문제 »] [n / N] [▶ 자동] [속도] [▾]
+   모든 단추 높이 36px · 같은 테두리 · 같은 글자. 걸음 ‹ 이전 · 다음 › 단추는 숨긴다(시간선의 마디를 눌러 옮길 수 있다) */
+.player .pbar{gap:8px;padding:6px 8px;align-items:center;flex-wrap:nowrap}
+.player .pbar button{height:36px;box-sizing:border-box;display:inline-flex;align-items:center;justify-content:center;padding:0 12px;border:1.5px solid var(--line);border-radius:8px;background:#fff;font-size:14px;font-weight:700;line-height:1;color:var(--ink);white-space:nowrap;cursor:pointer}
+.player .pbar .seg{border:0;border-radius:0;overflow:visible}
+.player .pbar .seg [data-a="prev"],.player .pbar .seg [data-a="next"]{display:none}
+.player .pbar .seg .pp{min-width:84px;border:1.5px solid var(--ink)}
+.player .pbar .seg .pp.on{border-color:var(--blue)}
+.player .pbar .cnt{min-width:0;padding:0 2px;font-size:14px;line-height:36px}
 /* 속도 단추: 두 글자를 한 칸에 겹쳐(안 보이는 쪽 .spg — .gh 는 시간선 단계 머리라 쓰지 말 것) 눌러도 폭이 그대로(app.js) */
-.pbar .spdb[data-a="spd"]{display:inline-flex;flex-direction:column;align-items:center}
-.pbar .spdb[data-a="spd"]>.spg{height:0;overflow:hidden;visibility:hidden}
-/* 이전 · 다음 문제(real.js qbtn): 조작 줄 양 끝. 카드 아래 .rwnav 는 조작 줄이 없는 사건(걸음 없음)일 때만 */
-.pbar .rwq{color:var(--ink)}
-.pbr{display:none}
+.player .pbar [data-a="spd"]{flex-direction:column}
+.player .pbar [data-a="spd"]>.spg{height:0;overflow:hidden;visibility:hidden}
+.player .pbar .rwfold{min-width:36px;padding:0;font-size:15px}
+@media (hover:hover){.player .pbar button:hover:not(:disabled){border-color:var(--ink)}}
+.pbar .rwqb:focus-visible,.pbar .rwfold:focus-visible{outline:2px solid var(--blue);outline-offset:-3px}
+/* 카드 아래 .rwnav 는 조작 줄이 없는 사건(걸음 없음, Ch29)일 때만 */
 .rwnav{display:none}
 .rw .rwcard .rwnav{display:flex;justify-content:space-between;gap:8px;margin-top:12px;padding-top:10px;border-top:1px solid var(--line)}
 .rw .rwdock:has(.player:not(.idle)) .rwcard .rwnav{display:none}
-.rwnav button{padding:7px 14px;border:1.5px solid var(--line);border-radius:8px;background:#fff;font-size:14px;font-weight:700;color:var(--ink);cursor:pointer}
+.rwnav button{height:36px;padding:0 14px;border:1.5px solid var(--line);border-radius:8px;background:#fff;font-size:14px;font-weight:700;color:var(--ink);cursor:pointer}
 @media (hover:hover){.rwnav button:hover{border-color:var(--ink)}}
-.rwnav button:focus-visible,.pbar .rwq:focus-visible{outline:2px solid var(--blue);outline-offset:-3px}
+.rwnav button:focus-visible{outline:2px solid var(--blue);outline-offset:-3px}
 @media (max-width:900px){
   .rwfig .an{font-size:21px}
-  /* 휴대폰 조작 줄 두 줄: 위 [« 이전 문제][▾ 내리기][다음 문제 »] · 아래 걸음 조작 */
-  .pbar{left:8px;right:8px;transform:none;flex-wrap:wrap;justify-content:center;row-gap:6px}   /* left:50% 이면 줄 폭이 화면 절반으로 눌려 세로로 쌓인다 */
-  .pbar>*{order:1}
-  .pbar .rwqp{order:-3}
-  .pbar .rwfold{order:-2}
-  .pbar .rwqn{order:-1}
-  .pbr{display:block;order:0;flex-basis:100%;height:0}
-  .pbar .rwq,.pbar .rwfold{padding:8px 9px;font-size:15px}
-  .pbar .rwfold{min-width:76px}
-  .rwfold .fl{display:inline}
+  html .player .pbar .rwfold{display:none}   /* 세로 시간선(태블릿 세로 · 휴대폰)에는 내리기 없음 */
+  .pbar{max-width:calc(100vw - 16px)}
+}
+@media (max-width:639px){   /* 휴대폰: 한 줄에 들어가게 '문제' 글자를 빼고 간격 · 여백을 줄인다 */
+  .pbar .qw{display:none}
+  .player .pbar{gap:6px;padding:6px}
+  .player .pbar button{padding:0 9px}
+  .player .pbar .seg .pp{min-width:76px}
+}
+.player .pbar>*{flex:none}   /* 좁아도 숫자 칸 · 단추가 눌려 찌그러지지 않게 */
+@media (max-width:420px){   /* 390 · 360px 폭 휴대폰: 영문 글자가 길어 한 번 더 줄인다 */
+  .player .pbar{gap:4px;padding:6px 5px}
+  .player .pbar button{padding:0 7px;font-size:13px}
+  .player .pbar .cnt{font-size:13px}
+  .player .pbar .seg .pp{min-width:68px}
 }

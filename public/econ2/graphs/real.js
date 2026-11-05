@@ -321,11 +321,11 @@
   const UI = KO ? {
     tag: '현실 연결', pick: '<b class="rwchip">현실</b> 표시가 붙은 사건을 고르면 모형을 미국·한국 실제 데이터와 맞춰 볼 수 있다.', cc: { US: '미국', KR: '한국' }, ccLabel: '나라', sourceKr: '출처: 한국은행 ECOS — ',
     skip: '바로 보기', right: '✓ 정답.', wrong: '✗ 오답.', theory: '이론과 현실',
-    source: '출처: FRED — ', got: ' · 받은 날 ', band: ' · 노란 칸: 사건 기간', hl: ' · 초록 선: 정답', ans: '정답', prevQ: '이전 문제', nextQ: '다음 문제', nodata: '데이터를 불러오지 못했다.', fold: '시간선 내리기', unfold: '시간선 올리기', foldS: '내리기', unfoldS: '올리기', mode: '모드', basic: '기본', rw: '현실 연결'
+    source: '출처: FRED — ', got: ' · 받은 날 ', band: ' · 노란 칸: 사건 기간', hl: ' · 초록 선: 정답', ans: '정답', prevQ: '이전', nextQ: '다음', qWord: ' 문제', nodata: '데이터를 불러오지 못했다.', fold: '시간선 내리기', unfold: '시간선 올리기', foldS: '내리기', unfoldS: '올리기', mode: '모드', basic: '기본', rw: '현실 연결'
   } : {
     tag: 'Real world', pick: 'Pick an event marked <b class="rwchip">REAL</b> to test the model against U.S. and Korean data.', cc: { US: 'U.S.', KR: 'Korea' }, ccLabel: 'Country', sourceKr: 'Source: Bank of Korea ECOS — ',
     skip: 'Just show me', right: '✓ Right.', wrong: '✗ Not quite.', theory: 'Theory vs reality',
-    source: 'Source: FRED — ', got: ' · retrieved ', band: ' · shaded: event period', hl: ' · green line: answer', ans: 'Answer', prevQ: 'Prev question', nextQ: 'Next question', nodata: 'Data could not be loaded.', fold: 'Hide timeline', unfold: 'Show timeline', foldS: 'Hide', unfoldS: 'Show', mode: 'Mode', basic: 'Basic', rw: 'Real world'
+    source: 'Source: FRED — ', got: ' · retrieved ', band: ' · shaded: event period', hl: ' · green line: answer', ans: 'Answer', prevQ: 'Prev', nextQ: 'Next', qWord: ' question', nodata: 'Data could not be loaded.', fold: 'Hide timeline', unfold: 'Show timeline', foldS: 'Hide', unfoldS: 'Show', mode: 'Mode', basic: 'Basic', rw: 'Real world'
   };
 
   /* ───────── 선그래프 ───────── */
@@ -431,7 +431,7 @@
       '<p class="rwth"><span class="lb">' + UI.theory + '</span>' + gloss(fmtT(c.th), used) + '</p>' +
       '<ul class="rwsrc">' + c.src.map((x) => '<li><span class="lb">' + x.k + '</span><div><a href="' + esc(x.u) + '" target="_blank" rel="noopener">' + esc(x.t) + '</a><small>' + esc(x.by) + ' · ' + esc(x.d) + '</small><p>' + gloss(esc(x.s), used) + '</p></div></li>').join('') + '</ul>' +
       '</div>' +
-      '<div class="rwnav"><button type="button" data-q="-1">« ' + UI.prevQ + '</button><button type="button" data-q="1">' + UI.nextQ + ' »</button></div>';
+      '<div class="rwnav"><button type="button" data-q="-1">« ' + UI.prevQ + UI.qWord + '</button><button type="button" data-q="1">' + UI.nextQ + UI.qWord + ' »</button></div>';
     card.querySelectorAll('.rwopts button').forEach((b) => b.addEventListener('click', () => {
       const i = +b.getAttribute('data-i');
       card.querySelectorAll('.rwopts button').forEach((x) => { const k = +x.getAttribute('data-i'); x.disabled = true; x.classList.toggle('ok', k === c.ans); x.classList.toggle('no', k === i && i !== c.ans); });
@@ -449,6 +449,9 @@
   const redo = [];
   // 사례 글 모으기(주소 · 정규식 · 숫자 제외)
   const rwText = (o) => { const out = []; (function walk(v, k) { if (typeof v === 'string') { if (k !== 'u' && !/^https?:/.test(v)) out.push(v); } else if (Array.isArray(v)) v.forEach((x) => walk(x)); else if (v && typeof v === 'object' && !(v instanceof RegExp)) Object.keys(v).forEach((kk) => walk(v[kk], kk)); })(o); return out.join(' ').replace(/<[^>]+>/g, ' '); };
+  // 시간선 내리기 상태: 내리기 단추로 정한 값은 장 · 문제를 바꿔도 유지(localStorage 'econ2.fold'). 정답을 고르면 잠깐 내려가는 것은 이 값을 바꾸지 않는다
+  let folded = (() => { try { return localStorage.getItem('econ2.fold') === '1'; } catch (e) { return false; } })();
+  const setFolded = (v) => { folded = v; try { localStorage.setItem('econ2.fold', v ? '1' : '0'); } catch (e) { /* no storage */ } };
   function attach(key, cases) {
     const fig = $(SPOT[key][0]), scope = $(SPOT[key][1]);
     if (!fig || !scope) return;
@@ -484,15 +487,16 @@
       const k = at < 0 ? (d > 0 ? 0 : all.length - 1) : (at + d + all.length) % all.length;
       if (k !== at) all[k].click();
     };
-    const qbtn = (d) => { const b = document.createElement('button'); b.type = 'button'; b.className = 'spdb rwq ' + (d < 0 ? 'rwqp' : 'rwqn'); b.innerHTML = d < 0 ? '« ' + UI.prevQ : UI.nextQ + ' »'; b.addEventListener('click', () => navQ(d)); return b; };
+    const qbtn = (d) => { const b = document.createElement('button'); b.type = 'button'; b.className = 'spdb rwqb ' + (d < 0 ? 'rwqp' : 'rwqn'); const w = '<span class="qw">' + UI.qWord + '</span>'; b.innerHTML = d < 0 ? '« ' + UI.prevQ + w : UI.nextQ + w + ' »';   // 단추가 flex 라 글 조각 앞뒤 일반 공백은 지워진다 → 줄바꿈 없는 공백 b.setAttribute('aria-label', (d < 0 ? UI.prevQ : UI.nextQ) + UI.qWord); b.addEventListener('click', () => navQ(d)); return b; };
     card.addEventListener('click', (e) => { const b = e.target.closest('[data-q]'); if (b) navQ(+b.getAttribute('data-q')); });   // 걸음 없는 사건(Ch29)은 조작 줄이 없어 카드 아래 단추로
     let fold = null;
     if (player) {
       fold = document.createElement('button'); fold.type = 'button'; fold.className = 'spdb rwfold';
-      fold.addEventListener('click', () => { host.classList.toggle('rwgone'); setFold(); sync(); });
-      const pb = $('.pbar', player), br = document.createElement('i'); br.className = 'pbr';   // 휴대폰: 문제 넘기기 · 내리기 줄과 걸음 조작 줄을 나누는 줄바꿈
-      pb.insertBefore(qbtn(-1), pb.firstChild);
-      pb.appendChild(fold); pb.appendChild(qbtn(1)); pb.appendChild(br);
+      fold.addEventListener('click', () => { host.classList.toggle('rwgone'); setFolded(host.classList.contains('rwgone')); setFold(); sync(); });
+      // 조작 줄 순서: [« 이전 문제][다음 문제 »] [n / N] [▶ 자동] [속도] [▾] — 걸음 ‹ 이전 · 다음 › 은 real.css 가 숨긴다. 내리기는 시간선이 가로(데스크톱)일 때만
+      const pb = $('.pbar', player);
+      pb.insertBefore(qbtn(1), pb.firstChild); pb.insertBefore(qbtn(-1), pb.firstChild);
+      pb.appendChild(fold);
       if (window.ResizeObserver) new ResizeObserver(sync).observe(player);
       new MutationObserver(sync).observe(player, { childList: true, subtree: true });   // 휴대폰은 max-height 로 크기가 묶여 ResizeObserver 만으로는 내용 변화를 못 잡는다
       wide.addEventListener && wide.addEventListener('change', sync);
@@ -500,8 +504,8 @@
     // 카드 자리: 데스크톱은 그림 칸 안(Situation · 결과 문장 아래), 휴대폰은 시간선 다음(장의 맨 아래, grid-area rw)
     const place = () => { if (wide.matches || !player) { if (card.parentNode !== fig) fig.appendChild(card); } else { const u = fig.closest('.panel') || fig.closest('.ch'); if (card.parentNode !== u) u.appendChild(card); } };   // 900px 이하: 장(패널) 바로 아래 칸(grid-area rw) — 시간선은 lay.js 가 옮긴다
     place(); wide.addEventListener && wide.addEventListener('change', place);
-    const setFold = () => { if (!fold) return; const d = host.classList.contains('rwgone'); fold.innerHTML = (d ? '▴' : '▾') + '<span class="fl"> ' + (d ? UI.unfoldS : UI.foldS) + '</span>'; fold.setAttribute('aria-label', d ? UI.unfold : UI.fold); fold.title = d ? UI.unfold : UI.fold; fold.setAttribute('aria-expanded', String(!d)); };
-    const dock = () => { if (!host) return; host.classList.toggle('rwdock', !!cur); host.classList.remove('rwgone'); setFold(); requestAnimationFrame(sync); };
+    const setFold = () => { if (!fold) return; const d = host.classList.contains('rwgone'); fold.textContent = d ? '▴' : '▾'; fold.setAttribute('aria-label', d ? UI.unfold : UI.fold); fold.title = d ? UI.unfold : UI.fold; fold.setAttribute('aria-expanded', String(!d)); };
+    const dock = () => { if (!host) return; host.classList.toggle('rwdock', !!cur); host.classList.toggle('rwgone', folded); setFold(); requestAnimationFrame(sync); };
     card.addEventListener('rwanswer', () => { if (!host) return; host.classList.add('rwgone'); setFold(); sync(); });
     // 보이는 목록에서 눌린 사건 읽기(숨은 탭의 눌림은 무시)
     const read = () => {

@@ -1,6 +1,6 @@
 /* Econ2 Interactive — 태블릿 세로 · 휴대폰 배치(lay.css 와 함께). 데스크톱(901px 이상)은 index.html 그대로.
    app.js 를 고치지 않고, 900px 이하에서만 칸을 옮겨 담는다. 옮긴 자리마다 주석 표시를 남겨 두었다가 크기가 바뀌면 되돌린 뒤 다시 옮긴다.
-   · 태블릿 세로(640~900px, .lt): [탭] / 그래프 / [해설 + 시간선 | 사건 목록] (두 칸은 같은 높이, 각자 스크롤) / 파란 개념 상자 / 현실 문제
+   · 태블릿 세로(640~900px, .lt): [탭] / 그래프 / 해설(전체 폭) / [사건 목록 | 세로 시간선] (두 칸은 같은 높이, 각자 스크롤) / 파란 개념 상자 / 현실 문제
    · 휴대폰(639px 이하, .lm): 같은 순서, 그래프와 시간선(단계 목록)은 한 상자에 두고 [그래프 | 단계] 단추로 바꿔 본다. 해설(상황 · 결과 문장)은 늘 보인다
    app.js 가 찾는 관계는 그대로 둔다: 상황 줄(.sitline) 바로 다음에 결과 문장(.rsent), 둘 다 같은 장(.ch) · 패널(.panel) 안 */
 (function () {
@@ -49,7 +49,7 @@
       x.eqs.forEach((n) => { park(n); x.cbox.appendChild(n); });
       if (!x.player) return;
       park(x.player);
-      if (mode === 't') { x.lbox.appendChild(x.player); x.sw.remove(); x.fig.removeAttribute('data-v'); }
+      if (mode === 't') { x.sw.remove(); x.fig.removeAttribute('data-v'); }   // 태블릿: 시간선은 제자리(grid-area play, 사건 오른쪽)
       else { x.fig.insertBefore(x.sw, x.fig.firstChild); x.fig.appendChild(x.player); if (!x.fig.hasAttribute('data-v')) view(x, 'g'); }
     });
     // 현실 문제 카드(real.js)는 900px 이하에서 장(패널)의 바로 아래 칸 — 옮긴 시간선 안에 들어가 있지 않게
