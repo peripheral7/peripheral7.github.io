@@ -95,6 +95,19 @@
       src: [
         { k: 'Data', d: 'quarterly since 1959', by: 'Federal Reserve Bank of St. Louis (FRED)', t: 'Velocity of M2 Money Stock (M2V)', s: 'Velocity is nominal GDP divided by M2: how many times a year the average dollar is spent on final goods and services.', u: 'https://fred.stlouisfed.org/series/M2V' }
       ]
+    },
+    {
+      m: /^Fed doubles/,
+      cc: 'KR',
+      when: '2020–2022 · Korea',
+      title: 'Korea: money grew 11% a year, prices followed a year later',
+      q: 'Korea’s M2 grew 11.1% in 2020 and 11.4% in 2021 (annual averages) — about 24% in two years. In the model, more money means a higher price level. How much did consumer prices rise in 2021?',
+      opts: ['About 24%','About 11%','Only 2.5%'],
+      ans: 2,
+      v: 'Only 2.5%. Prices jumped a year later: 5.1% in 2022, the highest since 1998, peaking at 6.3% (July 2022, from a year earlier).',
+      chart: {k: 'kr_money',from: '2018-01',to: '2023-12',marks: [['2020-07',0,'12.3%'],['2022-07',1,'6.3%','left']],names: ['M2 growth','CPI inflation'],y: '% change from a year earlier',cap: 'M2 average balance (161Y006) and CPI (901Y009), monthly',src: 'ecos'},
+      th: 'Direction: right — money grew fast and prices followed, a year later. Size: much smaller. M2 rose about 24% from 2019 to 2021, but consumer prices only 7.7% from 2020 to 2022. M × V = P × Y explains the gap: V (nominal GDP ÷ M2) fell from 0.78 in 2019 to 0.69 in 2021, because ==households and firms held the extra money instead of spending it==.',
+      src: [{k: 'News',d: 'Dec 30, 2022',by: 'Statistics Korea',t: 'Consumer Price Index in December 2022',s: 'Consumer prices in 2022 were 5.1 percent higher than in 2021; December was up 5.0 percent from a year earlier.',u: 'https://mods.go.kr/board.es?mid=a20109020000&bid=11751&act=view&list_no=422841&tag=&nPage=5&ref_bid='},{k: 'Data',d: 'monthly and annual',by: 'Bank of Korea, ECOS',t: 'Economic Statistics System',s: 'M2 average balance (161Y006), consumer price index (901Y009) and nominal GDP (200Y101): the chart, and V = nominal GDP ÷ M2.',u: 'https://ecos.bok.or.kr/'}]
     }
   ], 33: [
   {
@@ -229,6 +242,19 @@
         { k: 'Data', d: 'Current Population Survey definitions', by: 'U.S. Bureau of Labor Statistics', t: 'Concepts and definitions: alternative measures of labor underutilization (U-1 to U-6)', s: 'U-3 is the official rate; U-6 is the broadest, adding groups that the official rate leaves out.', u: 'https://www.bls.gov/cps/definitions.htm' },
         { k: 'News', d: 'May 8, 2020', by: 'U.S. Bureau of Labor Statistics', t: 'The Employment Situation — April 2020', s: 'Gives the April 2020 counts of marginally attached workers and people working part time for economic reasons, and defines U-6.', u: 'https://www.bls.gov/news.release/archives/empsit_05082020.htm' }
       ]
+    },
+    {
+      m: /^Laid off, gives up searching/,
+      cc: 'KR',
+      when: 'April 2020 · Korea',
+      title: 'Korea: 476,000 fewer jobs, yet the unemployment rate fell',
+      q: 'In April 2020 the COVID-19 shock left Korea with 476,000 fewer employed people than a year earlier. In the model, laid-off workers who keep searching count as unemployed; those who stop searching leave the labor force. The unemployment rate was 4.4% in April 2019. What was it in April 2020?',
+      opts: ['About 6%','About 5%','4.2%, lower than a year earlier'],
+      ans: 2,
+      v: '4.2% — down 0.2 points. The number of unemployed fell by 73,000, while the population outside the labor force rose by 831,000.',
+      chart: {k: 'kr_jobs',from: '2019-01',to: '2021-12',marks: [['2020-04',1,'+831k'],['2020-04',0,'−73k','below']],names: ['Unemployed','Not in labor force'],y: 'Change from a year earlier, thousands',cap: 'Economically Active Population Survey (901Y027), not seasonally adjusted, monthly',src: 'ecos'},
+      th: 'The flow in the model is real, and in Korea it dominated: ==the people who lost work mostly did not search, so they were counted outside the labor force, not as unemployed==. That is why the unemployment rate fell while jobs disappeared. The employment rate (59.4%, down 1.4 points) and the participation rate (62.0%, down 1.6 points) showed the shock; the unemployment rate did not.',
+      src: [{k: 'News',d: 'May 13, 2020',by: 'Statistics Korea',t: 'Economically Active Population Survey in April 2020',s: 'Employment fell by 476,000 from a year earlier; the unemployment rate was 4.2%, down 0.2 points; the economically inactive population rose by 831,000.',u: 'https://mods.go.kr/board.es?mid=a20105020000&bid=11732&act=view&list_no=382428&tag=&nPage=8&ref_bid='}]
     }
   ] };
   // 용어 주석: [찾을 글자, 뜻]. 카드마다 처음 나오는 곳만 누를 수 있다(한국어판은 real-ko.js 의 gloss)
@@ -272,14 +298,15 @@
     [/\bBLS\b/, "BLS (Bureau of Labor Statistics): the U.S. government agency that publishes jobs, wages and price data."]
   ];
   const KO = document.documentElement.lang === 'ko' && window.RW_KO;
+  const HOME = KO ? 'KR' : 'US';   // 사건에 사례가 여럿이면 이 나라 것을 먼저
   const CS = KO ? KO.cases : CASES;
   const G = KO ? KO.gloss || [] : GLOSS;
   const UI = KO ? {
-    tag: '현실 연결', pick: '<b class="rwchip">현실</b> 표시가 붙은 사건을 고르면 모형을 미국 실제 데이터와 맞춰 볼 수 있다.',
+    tag: '현실 연결', pick: '<b class="rwchip">현실</b> 표시가 붙은 사건을 고르면 모형을 미국·한국 실제 데이터와 맞춰 볼 수 있다.', cc: { US: '미국', KR: '한국' }, ccLabel: '나라', sourceKr: '출처: 한국은행 ECOS — ',
     predict: '먼저 예측:', skip: '바로 보기', right: '✓ 정답.', wrong: '✗ 오답.', theory: '이론과 현실',
     source: '출처: FRED — ', got: ' · 받은 날 ', band: ' · 노란 칸: 사건 기간', nodata: '데이터를 불러오지 못했다.', fold: '시간선 내리기', unfold: '시간선 올리기', foldS: '내리기', unfoldS: '올리기', mode: '모드', basic: '기본', rw: '현실 연결'
   } : {
-    tag: 'Real world', pick: 'Pick an event marked <b class="rwchip">REAL</b> to test the model against U.S. data.',
+    tag: 'Real world', pick: 'Pick an event marked <b class="rwchip">REAL</b> to test the model against U.S. and Korean data.', cc: { US: 'U.S.', KR: 'Korea' }, ccLabel: 'Country', sourceKr: 'Source: Bank of Korea ECOS — ',
     predict: 'Predict first.', skip: 'Just show me', right: '✓ Right.', wrong: '✗ Not quite.', theory: 'Theory vs reality',
     source: 'Source: FRED — ', got: ' · retrieved ', band: ' · shaded: event period', nodata: 'Data could not be loaded.', fold: 'Hide timeline', unfold: 'Show timeline', foldS: 'Hide', unfoldS: 'Show', mode: 'Mode', basic: 'Basic', rw: 'Real world'
   };
@@ -295,7 +322,8 @@
     let ymax = 0, ymin = 0; rows.forEach((r) => { for (let j = 1; j <= n; j++) { ymax = Math.max(ymax, r[j]); ymin = Math.min(ymin, r[j]); } });
     const step = nice((ymax - ymin) * 1.08), top = Math.ceil(ymax * 1.15 / step) * step, bot = -Math.ceil(-ymin * 1.08 / step) * step;   // 음수 값이 있으면 0 아래까지
     const x0 = xs[0], x1 = xs[xs.length - 1];
-    const X = (x) => L + (x - x0) / (x1 - x0) * (W - L - R), Y = (y) => T + (top - y) / (top - bot) * (H - T - B);
+    const L = Math.max(52, 14 + 13 * Math.max(String(top).length, String(bot).length));   // 왼쪽 여백: 축 숫자가 길면(1000, -500) 넓힌다(휴대폰 22px 글자 기준)
+    const X =(x) => L + (x - x0) / (x1 - x0) * (W - L - R), Y = (y) => T + (top - y) / (top - bot) * (H - T - B);
     let s = '<svg viewBox="0 0 ' + W + ' ' + H + '" role="img" aria-label="' + esc(c.y) + '">';
     if (c.band) s += '<rect x="' + X(yr(c.band[0])) + '" y="' + T + '" width="' + (X(yr(c.band[1])) - X(yr(c.band[0]))) + '" height="' + (H - T - B) + '" fill="#fff3b0" opacity=".7"/>';
     for (let v = bot; v <= top + 1e-9; v += step) s += '<line x1="' + L + '" x2="' + (W - R) + '" y1="' + Y(v) + '" y2="' + Y(v) + '" stroke="' + (bot < 0 && Math.abs(v) < 1e-9 ? '#8d93a0' : '#e3e6ea') + '"/><text x="' + (L - 8) + '" y="' + (Y(v) + 6) + '" text-anchor="end" class="ax">' + (+v.toFixed(2)) + '</text>';
@@ -349,19 +377,22 @@
     let at = host; while (at.nextElementSibling && at.nextElementSibling.classList.contains('rwdef')) at = at.nextElementSibling;
     at.after(box); b.setAttribute('aria-expanded', 'true');
   }
-  function render(card, c) {
+  // list: 같은 사건의 사례들(나라별, cc 없으면 미국). 둘 이상이면 머리에 [미국 | 한국] 고르기
+  function render(card, c, list) {
     card.hidden = c === 'none';   // 이 사건엔 현실 사례가 없으면 카드를 띄우지 않는다(선택을 풀면 다시 안내)
     if (!c) { card.innerHTML = '<p class="rwnote"><span class="rwtag">' + UI.tag + '</span>' + UI.pick + '</p>'; return; }
     if (c === 'none') { card.innerHTML = ''; return; }
     const used = new Set(), q = gloss(esc(c.q), used), vh = gloss(esc(c.v), used);   // 용어 주석은 읽는 순서(질문 → 답 → 이론 → 출처)대로 처음 한 번만
+    const cc = list && list.length > 1 ? '<span class="rwcc" role="group" aria-label="' + UI.ccLabel + '">' + list.map((x, i) => '<button type="button" data-c="' + i + '" aria-pressed="' + (x === c) + '">' + UI.cc[x.cc || 'US'] + '</button>').join('') + '</span>' : '';
+    const ecos = c.chart && c.chart.src === 'ecos';
     card.innerHTML =
-      '<div class="rwhd"><span class="rwtag">' + UI.tag + '</span><span class="rwwhen">' + esc(c.when) + '</span></div>' +
+      '<div class="rwhd"><span class="rwtag">' + UI.tag + '</span>' + cc + '<span class="rwwhen">' + esc(c.when) + '</span></div>' +
       '<h3>' + esc(c.title) + '</h3>' +
       '<p class="rwq"><b>' + UI.predict + '</b> ' + q + '</p>' +
       '<div class="rwopts">' + c.opts.map((o, i) => '<button type="button" data-i="' + i + '">' + esc(o) + '</button>').join('') + '<button type="button" class="rwskip" data-i="-1">' + UI.skip + '</button></div>' +
       '<div class="rwans" hidden>' +
       '<p class="rwv"></p>' +
-      (c.chart ? '<figure class="rwfig">' + (data ? chart(c.chart, data) : '<p class="rwnote">' + UI.nodata + '</p>') + '<figcaption>' + UI.source + esc(c.chart.cap) + (data ? UI.got + esc(data.fetched) : '') + (c.chart.band ? UI.band : '') + '</figcaption></figure>' : '') +   // chart 없으면 그림 생략(연구 사례)
+      (c.chart ? '<figure class="rwfig">' + (data ? chart(c.chart, data) : '<p class="rwnote">' + UI.nodata + '</p>') + '<figcaption>' + (ecos ? UI.sourceKr : UI.source) + esc(c.chart.cap) + (data ? UI.got + esc(ecos ? data.fetched_kr : data.fetched) : '') + (c.chart.band ? UI.band : '') + '</figcaption></figure>' : '') +   // chart 없으면 그림 생략(연구 사례)
       '<p class="rwth"><span class="lb">' + UI.theory + '</span>' + gloss(fmtT(c.th), used) + '</p>' +
       '<ul class="rwsrc">' + c.src.map((x) => '<li><span class="lb">' + x.k + '</span><div><a href="' + esc(x.u) + '" target="_blank" rel="noopener">' + esc(x.t) + '</a><small>' + esc(x.by) + ' · ' + esc(x.d) + '</small><p>' + gloss(esc(x.s), used) + '</p></div></li>').join('') + '</ul>' +
       '</div>';
@@ -372,6 +403,7 @@
       $('.rwans', card).hidden = false;
       card.dispatchEvent(new CustomEvent('rwanswer'));   // 시간선 숨김(attach)
     }));
+    card.querySelectorAll('.rwcc button').forEach((b) => b.addEventListener('click', () => card.dispatchEvent(new CustomEvent('rwcountry', { detail: list[+b.getAttribute('data-c')] }))));
   }
 
   /* ───────── 붙이기 ───────── */
@@ -385,9 +417,12 @@
     const card = document.createElement('div'); card.className = 'rwcard'; card.id = 'rw' + key; card.setAttribute('aria-live', 'polite');
     fig.appendChild(card);
     card.addEventListener('click', termClick);
-    let cur = null;
-    const caseOf = (b) => cases.find((c) => c.m.test(b.textContent.trim())) || null;
+    let cur = null, list = null;
+    // 사건 하나에 사례가 여럿(나라별)일 수 있다. 처음 보이는 것은 페이지 언어의 나라(한국어판 = 한국) 사례
+    const casesOf = (b) => cases.filter((c) => c.m.test(b.textContent.trim())).sort((x, y) => (y.cc === HOME) - (x.cc === HOME));
+    const caseOf = (b) => casesOf(b)[0] || null;
     scope.querySelectorAll('li button').forEach((b) => { if (caseOf(b)) b.parentNode.classList.add('hasrw'); });
+    card.addEventListener('rwcountry', (e) => { cur = e.detail; render(card, cur, list); dock(); });
     // 시간선: 사건을 고르면(기본 모드도) rwdock(데스크톱 하단 고정), 정답을 고르면 rwgone(숨김). --dockh 는 시간선 높이
     // 내리기 단추(.rwfold): 조작 줄(.pbar) 안. 시간선을 내려도(정답을 골라도) 조작 줄은 남고, 누르면 다시 올라온다.
     // 아래 여백은 .ch 에 준다(Ch28 의 .panel 은 display:contents 라 padding 이 먹지 않았다)
@@ -417,18 +452,18 @@
     // 보이는 목록에서 눌린 사건 읽기(숨은 탭의 눌림은 무시)
     const read = () => {
       const b = Array.prototype.find.call(scope.querySelectorAll('button[aria-pressed="true"]'), (x) => !x.closest('[hidden]'));
-      const c = b ? caseOf(b) || 'none' : null;
-      if (c !== cur) { cur = c; render(card, cur); dock(); }
+      const all = b ? casesOf(b) : null, c = b ? all[0] || 'none' : null;
+      if (c !== cur) { cur = c; list = all; render(card, cur, list); dock(); }
     };
     scope.addEventListener('click', (e) => { if (e.target.closest('li button')) { cur = undefined; read(); } });   // 같은 사건을 다시 골라도 새 카드
     const tabs = fig.closest('.ch') && $('.sub', fig.closest('.ch'));
     if (tabs) tabs.addEventListener('click', () => setTimeout(() => { read(); sync(); }, 0));
     render(card, cur);
-    redo.push(() => { if (cur && cur !== 'none' && $('.rwans', card).hidden) render(card, cur); });
+    redo.push(() => { if (cur && cur !== 'none' && $('.rwans', card).hidden) render(card, cur, list); });
   }
   function init() {
     Object.keys(CS).forEach((k) => attach(k, CS[k]));
-    fetch('/econ2/graphs/real-data.json?v=20261105j').then((r) => r.json()).then((d) => { data = d; redo.forEach((f) => f()); }).catch(() => {});
+    fetch('/econ2/graphs/real-data.json?v=20261105l').then((r) => r.json()).then((d) => { data = d; redo.forEach((f) => f()); }).catch(() => {});
 
     // 모드 토글
     const links = $('.top .links'), tg = document.createElement('div');

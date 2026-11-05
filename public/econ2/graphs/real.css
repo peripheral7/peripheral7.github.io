@@ -100,3 +100,9 @@ html[lang="ko"] .rwchip{letter-spacing:0}
 .rwsrc .rwdef{margin:6px 0 2px}
 @keyframes rwdefIn{from{opacity:0;transform:translateY(-4px)}to{opacity:1;transform:none}}
 @media (prefers-reduced-motion:reduce){.rwdef{animation:none}}
+/* 사건 하나에 나라별 사례가 여럿이면 카드 머리의 [미국 | 한국] 고르기(real.js render 의 list) */
+.rwcc{display:inline-flex;margin-right:10px;border:1.5px solid var(--line);border-radius:7px;overflow:hidden;vertical-align:1px}
+.rwcc button{padding:1px 9px;border:0;background:#fff;font:inherit;font-size:12.5px;font-weight:700;color:var(--soft);cursor:pointer}
+.rwcc button + button{border-left:1.5px solid var(--line)}
+.rwcc button[aria-pressed="true"]{background:var(--ink);color:#fff}
+.rwcc button:focus-visible{outline:2px solid var(--blue);outline-offset:-2px}
