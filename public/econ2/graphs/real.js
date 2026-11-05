@@ -195,6 +195,19 @@
       ]
     },
     {
+      m: /^Wage above equilibrium/,
+      cc: 'KR',
+      when: '2018 · Korea',
+      title: 'Korea: the minimum wage rose 16.4% — low-wage industries shed jobs',
+      q: 'In January 2018 Korea raised its minimum wage 16.4%, from 6,470 to 7,530 won an hour — the largest rise in 17 years. In the model, a wage above equilibrium cuts employment. Total employment still rose in 2018, by 97,000. What happened to employment in accommodation & food services and in wholesale & retail, where many minimum-wage workers work?',
+      opts: ['It rose with total employment', 'It hardly changed', 'It fell by 117,000 together'],
+      ans: 2,
+      v: 'It fell: accommodation & food −45,000 and wholesale & retail −72,000 from 2017. Total employment grew by only 97,000, the smallest rise since 2009.',
+      chart: {k: 'kr_minwage',from: '2017-01',to: '2019-12',band: ['2018-01', '2018-12'],marks: [['2018-10',0,'−97k','side'],['2018-08',1,'−123k','left']],names: ['Accommodation & food','Wholesale & retail'],y: 'Change in employment from a year earlier, thousands',cap: 'Economically Active Population Survey (901Y027), employed by industry, not seasonally adjusted, monthly',src: 'ecos'},
+      th: 'Direction: as the model predicts, ==employment fell in the industries where minimum-wage jobs are concentrated==. The cause is harder to pin down. Accommodation & food jobs were already falling from mid-2017, before the rise; weak consumer demand and self-service kiosks hit the same industries; and in 2019, after a further 10.9% rise to 8,350 won, accommodation & food employment grew again (+60,000). Studies of 2018 disagree on how much of the loss the minimum wage caused.',
+      src: [{k: 'Data',d: 'monthly and annual',by: 'Bank of Korea, ECOS',t: 'Economic Statistics System',s: 'Economically Active Population Survey (901Y027): employed by industry — the chart, and annual totals (2017 26.725 million, 2018 26.822 million).',u: 'https://ecos.bok.or.kr/'},{k: 'Data',d: '2017–2019',by: 'Minimum Wage Commission',t: 'Minimum wage by year',s: 'Hourly minimum wage: 6,470 won (2017), 7,530 won (2018, +16.4%), 8,350 won (2019, +10.9%).',u: 'https://www.minimumwage.go.kr/'}]
+    },
+    {
       m: /^Labor demand falls/, when: 'March – May 2020 · United States', title: 'COVID-19: labor demand collapsed, but average wages rose',
       q: 'Between March and April 2020 U.S. payroll employment fell by about 20.5 million, and the unemployment rate jumped from 3.5% (Feb) to 14.8% (Apr). In the model the wage is stuck at W_E in the short run, then falls. What happened to average hourly earnings (production and nonsupervisory workers) compared with a year earlier?',
       opts: ['Rose by almost 8%', 'Stayed about the same', 'Fell by about 5%'], ans: 0,
@@ -438,7 +451,8 @@
     const host = fig.closest('.panel') || fig.closest('.ch'), ch = fig.closest('.ch'), player = host && $('.player', host);
     const wide = window.matchMedia('(min-width:901px)');
     const sync = () => {
-      if (!player || host.hidden) return;
+      // 숨은 장(·탭)에서는 재지 않는다: 높이 0 이 --dockh 에 남으면, 정답으로 내려간 시간선이 장을 다시 열 때 떠올랐다 내려갔다
+      if (!player || host.hidden || !ch.classList.contains('on')) return;
       const h = player.offsetHeight, on = wide.matches && host.classList.contains('rwdock') && !host.classList.contains('rwgone') && !player.classList.contains('idle');
       host.style.setProperty('--dockh', (wide.matches ? h : player.scrollHeight) + 'px');
       ch.style.paddingBottom = on ? Math.max(0, h - 24) + 'px' : '';

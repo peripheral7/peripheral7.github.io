@@ -36,6 +36,12 @@ const UR = await series('901Y027', 'I61BC', 'I28A', '201801', '202112');
 const NL = new Map([...P15].map(([k, v]) => [k, v - LF.get(k)]));
 const kr_jobs = months('201901', '202112').map((k) => [key(k), UN.get(k) - UN.get(prevY(k)), NL.get(k) - NL.get(prevY(k))]);
 
+// 사례 4(Ch28 최저임금 2018): 숙박·음식점업(I61BAAEC) · 도매 및 소매업(I61BAAEA) 취업자(원계열, 천 명), 전년 같은 달 대비 증감
+const ACC = await series('901Y027', 'I61BAAEC', 'I28A', '201601', '201912');
+const RET = await series('901Y027', 'I61BAAEA', 'I28A', '201601', '201912');
+const kr_minwage = months('201701', '201912').map((k) => [key(k), ACC.get(k) - ACC.get(prevY(k)), RET.get(k) - RET.get(prevY(k))]);
+console.log('최저임금 2018', kr_minwage.filter((r) => r[0] < '2019').map((r) => r.join(':')).join(' '));
+
 // 카드 문장 숫자 확인용
 const show = (name, m, ks) => console.log(name, ks.map((k) => k + '=' + m.get(k)).join(' '));
 show('M2', M2, ['201912', '202012', '202112', '202212']); show('CPI', CPI, ['202012', '202112', '202207', '202212']);
@@ -43,6 +49,6 @@ console.log('2020-04 취업자', EM.get('202004'), '전년', EM.get('201904'), '
 console.log('2020-04 실업률', UR.get('202004'), '전년', UR.get('201904'), ' 실업자 차', UN.get('202004') - UN.get('201904'), ' 비경활', NL.get('202004'), '차', NL.get('202004') - NL.get('201904'));
 
 const out = JSON.parse(readFileSync(FILE, 'utf8'));
-Object.assign(out, { fetched_kr: new Date().toISOString().slice(0, 10), kr_money, kr_jobs });
+Object.assign(out, { fetched_kr: new Date().toISOString().slice(0, 10), kr_money, kr_jobs, kr_minwage });
 writeFileSync(FILE, JSON.stringify(out));
 console.log('kr_money', kr_money.length, 'kr_jobs', kr_jobs.length);
