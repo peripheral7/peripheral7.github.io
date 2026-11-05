@@ -349,8 +349,8 @@
   /* ───────── 재생기: 단계 목록(전체 걸음이 한눈에, 지금 걸음만 크게) · 조작 줄(‹ 이전 · 자동 · 다음 › · 속도) ───────── */
   // beat = { g: 묶음 이름(1단계 단기 …), alts: [{ t, on, pick }](갈라지는 단계일 때), k: 꼬리표(원인 · 이동 · 균형 …), t: 글자, run(anim), wait: 머무는 시간 배율 }
   // 사건을 고르기 전에는 안내 한 줄만 보이고 조작 줄은 숨는다(.idle)
-  const SPEEDS = [['보통', 1], ['빠르게', 2]];
-  let SPEED = 2;   // 기본 '빠르게'
+  const SPEEDS = [['보통', 1], ['빠름', 2]];
+  let SPEED = 2;   // 기본 '빠름'
   const players = [];
   function Player(host) {
     host.innerHTML =
@@ -371,7 +371,7 @@
       pp.textContent = playing ? '❚❚ 멈춤' : end ? '↻ 다시' : '▶ 자동';
       pp.classList.toggle('on', playing);
       cnt.textContent = beats.length ? (i + 1) + ' / ' + beats.length : '';
-      spd.textContent = '속도 ' + SPEEDS.find((x) => x[1] === SPEED)[0];
+      spd.innerHTML = SPEEDS.map((x) => '<span' + (x[1] === SPEED ? '' : ' class="spg" aria-hidden="true"') + '>속도 ' + x[0] + '</span>').join('');   // 안 보이는 다른 글자도 같은 칸에 겹쳐 두어 눌러도 단추 폭이 그대로
       $('[data-a="prev"]', host).disabled = i <= 0; $('[data-a="next"]', host).disabled = end;
     }
     function idle() { ol.innerHTML = ''; setSit(''); sentence(); draw(); }

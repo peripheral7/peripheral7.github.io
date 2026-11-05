@@ -108,3 +108,31 @@ html[lang="ko"] .rwchip{letter-spacing:0}
 .rwcc button + button{border-left:1.5px solid var(--line)}
 .rwcc button[aria-pressed="true"]{background:var(--ink);color:#fff}
 .rwcc button:focus-visible{outline:2px solid var(--blue);outline-offset:-2px}
+/* 2026-11-06 정답 선(real.js chart 의 hl): 범례 아래 줄의 "정답" 글자 */
+.rwfig .an{font-size:15px;font-weight:800;fill:#1d8a4a;paint-order:stroke;stroke:#fff;stroke-width:4px}
+.rwfig .vl{paint-order:stroke;stroke:#fff;stroke-width:4px}
+/* 속도 단추: 두 글자를 한 칸에 겹쳐(안 보이는 쪽 .spg — .gh 는 시간선 단계 머리라 쓰지 말 것) 눌러도 폭이 그대로(app.js) */
+.pbar .spdb[data-a="spd"]{display:inline-flex;flex-direction:column;align-items:center}
+.pbar .spdb[data-a="spd"]>.spg{height:0;overflow:hidden;visibility:hidden}
+/* 이전 · 다음 문제(real.js qbtn): 조작 줄 양 끝. 카드 아래 .rwnav 는 조작 줄이 없는 사건(걸음 없음)일 때만 */
+.pbar .rwq{color:var(--ink)}
+.pbr{display:none}
+.rwnav{display:none}
+.rw .rwcard .rwnav{display:flex;justify-content:space-between;gap:8px;margin-top:12px;padding-top:10px;border-top:1px solid var(--line)}
+.rw .rwdock:has(.player:not(.idle)) .rwcard .rwnav{display:none}
+.rwnav button{padding:7px 14px;border:1.5px solid var(--line);border-radius:8px;background:#fff;font-size:14px;font-weight:700;color:var(--ink);cursor:pointer}
+@media (hover:hover){.rwnav button:hover{border-color:var(--ink)}}
+.rwnav button:focus-visible,.pbar .rwq:focus-visible{outline:2px solid var(--blue);outline-offset:-3px}
+@media (max-width:900px){
+  .rwfig .an{font-size:21px}
+  /* 휴대폰 조작 줄 두 줄: 위 [« 이전 문제][▾ 내리기][다음 문제 »] · 아래 걸음 조작 */
+  .pbar{left:8px;right:8px;transform:none;flex-wrap:wrap;justify-content:center;row-gap:6px}   /* left:50% 이면 줄 폭이 화면 절반으로 눌려 세로로 쌓인다 */
+  .pbar>*{order:1}
+  .pbar .rwqp{order:-3}
+  .pbar .rwfold{order:-2}
+  .pbar .rwqn{order:-1}
+  .pbr{display:block;order:0;flex-basis:100%;height:0}
+  .pbar .rwq,.pbar .rwfold{padding:8px 9px;font-size:15px}
+  .pbar .rwfold{min-width:76px}
+  .rwfold .fl{display:inline}
+}

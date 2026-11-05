@@ -367,7 +367,7 @@
       pp.textContent = playing ? '❚❚ Pause' : end ? '↻ Replay' : '▶ Auto';
       pp.classList.toggle('on', playing);
       cnt.textContent = beats.length ? (i + 1) + ' / ' + beats.length : '';
-      spd.textContent = 'Speed ' + SPEEDS.find((x) => x[1] === SPEED)[0];
+      spd.innerHTML = SPEEDS.map((x) => '<span' + (x[1] === SPEED ? '' : ' class="spg" aria-hidden="true"') + '>Speed ' + x[0] + '</span>').join('');   // 안 보이는 다른 글자도 같은 칸에 겹쳐 두어 눌러도 단추 폭이 그대로
       $('[data-a="prev"]', host).disabled = i <= 0; $('[data-a="next"]', host).disabled = end;
     }
     function idle() { ol.innerHTML = ''; setSit(''); sentence(); draw(); }
