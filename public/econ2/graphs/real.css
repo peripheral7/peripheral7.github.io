@@ -63,20 +63,22 @@
    휴대폰: 세로 시간선이라 고정하지 않고, 정답 고르면 빠르게 접힘. --dockh = 시간선 높이(real.js 가 잼) */
 @media (min-width:901px){
   .rwdock .player{position:fixed;left:0;right:0;bottom:0;z-index:15;max-width:var(--max);margin:0 auto;padding:12px 24px 66px;background:#fff;border-top:1px solid var(--line);box-shadow:0 -6px 18px rgba(31,37,55,.07);transition:bottom .22s ease,opacity .18s ease}
-  .rwdock.rwgone .player{bottom:calc(-1 * var(--dockh,240px) - 20px);opacity:0;pointer-events:none}
-  /* 내리기 손잡이: 시간선 윗변 가운데 탭. 내리면 화면 맨 아래에 손잡이만 남고 화살표가 위로 */
-  .rwdock .rwfold{display:flex;position:fixed;left:50%;bottom:calc(var(--dockh,0px) - 1px);z-index:16;transform:translateX(-50%);align-items:center;justify-content:center;width:52px;height:22px;padding:0;border:1px solid var(--line);border-bottom:0;border-radius:10px 10px 0 0;background:#fff;color:var(--soft);cursor:pointer;box-shadow:0 -4px 10px rgba(31,37,55,.06);transition:bottom .22s ease,color .15s}
-  .rwdock .rwfold:hover{color:var(--ink)}
-  .rwdock .rwfold:focus-visible{outline:2px solid var(--blue);outline-offset:2px}
-  .rwdock .rwfold svg{width:16px;height:16px;fill:none;stroke:currentColor;stroke-width:2;stroke-linecap:round;stroke-linejoin:round;transition:transform .22s ease}
-  .rwdock.rwgone .rwfold{bottom:0}
-  .rwdock.rwgone .rwfold svg{transform:rotate(180deg)}
-  .rwdock .player.idle + .rwfold{display:none}
+  .rwdock.rwgone .player{bottom:calc(-1 * var(--dockh,240px) - 20px);box-shadow:none;pointer-events:none}
 }
+/* 내리기 단추: 조작 줄(.pbar) 안의 마지막 단추. 시간선을 내려도 조작 줄(화면 하단 고정)은 그대로 보인다 */
 .rwfold{display:none}
+.rwdock .rwfold{display:inline-block}
+.rwdock.rwgone .player .pbar{pointer-events:auto}
+@media (max-width:900px){   /* 휴대폰: 조작 줄이 화면 폭(390px)을 넘지 않게 — 간격을 줄이고 내리기 단추는 화살표만 */
+  .pbar{gap:6px;padding:5px 6px}
+  .pbar .cnt{min-width:0}
+  .pbar .seg button{padding:7px 9px}
+  .pbar .spdb{padding:7px 8px}
+  .rwfold .fl{display:none}
+}
 @media (max-width:900px){
   .rwdock .player{overflow:hidden;max-height:var(--dockh,none);transition:max-height .22s ease,opacity .18s ease,padding .22s ease}
-  .rwdock.rwgone .player{max-height:0;opacity:0;padding-top:0;pointer-events:none}
+  .rwdock.rwgone .player{max-height:0;padding-top:0;pointer-events:none}
 }
 @media (max-width:900px){   /* 휴대폰: 사례 카드는 장의 맨 아래(real.js 가 시간선 다음으로 옮김) */
   .rw .ch{grid-template-areas:"side" "fig" "play" "rw"}
@@ -84,7 +86,7 @@
   .rwcard{grid-area:rw}
   .rw .rwcard{margin-top:0}
 }
-@media (prefers-reduced-motion:reduce){.rwdock .player,.rwdock .rwfold,.rwdock .rwfold svg{transition:none}}
+@media (prefers-reduced-motion:reduce){.rwdock .player{transition:none}}
 .rwdock .player.idle{display:none}   /* 걸음이 없는 사건(Ch29 식 사건)은 빈 띠를 두지 않는다 */
 html.rw[lang="ko"] .opts li.hasrw button::after{content:"현실";letter-spacing:0}   /* 한국어판 표시 */
 html[lang="ko"] .rwchip{letter-spacing:0}

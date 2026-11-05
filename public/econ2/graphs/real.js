@@ -277,11 +277,11 @@
   const UI = KO ? {
     tag: '현실 연결', pick: '<b class="rwchip">현실</b> 표시가 붙은 사건을 고르면 모형을 미국 실제 데이터와 맞춰 볼 수 있다.',
     predict: '먼저 예측:', skip: '바로 보기', right: '✓ 정답.', wrong: '✗ 오답.', theory: '이론과 현실',
-    source: '출처: FRED — ', got: ' · 받은 날 ', band: ' · 노란 칸: 사건 기간', nodata: '데이터를 불러오지 못했다.', fold: '시간선 내리기', unfold: '시간선 올리기', mode: '모드', basic: '기본', rw: '현실 연결'
+    source: '출처: FRED — ', got: ' · 받은 날 ', band: ' · 노란 칸: 사건 기간', nodata: '데이터를 불러오지 못했다.', fold: '시간선 내리기', unfold: '시간선 올리기', foldS: '내리기', unfoldS: '올리기', mode: '모드', basic: '기본', rw: '현실 연결'
   } : {
     tag: 'Real world', pick: 'Pick an event marked <b class="rwchip">REAL</b> to test the model against U.S. data.',
     predict: 'Predict first.', skip: 'Just show me', right: '✓ Right.', wrong: '✗ Not quite.', theory: 'Theory vs reality',
-    source: 'Source: FRED — ', got: ' · retrieved ', band: ' · shaded: event period', nodata: 'Data could not be loaded.', fold: 'Hide timeline', unfold: 'Show timeline', mode: 'Mode', basic: 'Basic', rw: 'Real world'
+    source: 'Source: FRED — ', got: ' · retrieved ', band: ' · shaded: event period', nodata: 'Data could not be loaded.', fold: 'Hide timeline', unfold: 'Show timeline', foldS: 'Hide', unfoldS: 'Show', mode: 'Mode', basic: 'Basic', rw: 'Real world'
   };
 
   /* ───────── 선그래프 ───────── */
@@ -389,7 +389,7 @@
     const caseOf = (b) => cases.find((c) => c.m.test(b.textContent.trim())) || null;
     scope.querySelectorAll('li button').forEach((b) => { if (caseOf(b)) b.parentNode.classList.add('hasrw'); });
     // 시간선: 사건을 고르면(기본 모드도) rwdock(데스크톱 하단 고정), 정답을 고르면 rwgone(숨김). --dockh 는 시간선 높이
-    // 내리기 단추(.rwfold, 데스크톱): 시간선 위 가운데 손잡이. 내리면(정답을 골라도) 손잡이만 남고 누르면 다시 올라온다.
+    // 내리기 단추(.rwfold): 조작 줄(.pbar) 안. 시간선을 내려도(정답을 골라도) 조작 줄은 남고, 누르면 다시 올라온다.
     // 아래 여백은 .ch 에 준다(Ch28 의 .panel 은 display:contents 라 padding 이 먹지 않았다)
     const host = fig.closest('.panel') || fig.closest('.ch'), ch = fig.closest('.ch'), player = host && $('.player', host);
     const wide = window.matchMedia('(min-width:901px)');
@@ -401,18 +401,17 @@
     };
     let fold = null;
     if (player) {
-      fold = document.createElement('button'); fold.type = 'button'; fold.className = 'rwfold';
-      fold.innerHTML = '<svg viewBox="0 0 16 16" aria-hidden="true"><path d="M3.5 6l4.5 4.5L12.5 6"/></svg>';
+      fold = document.createElement('button'); fold.type = 'button'; fold.className = 'spdb rwfold';
       fold.addEventListener('click', () => { host.classList.toggle('rwgone'); setFold(); sync(); });
-      player.after(fold);
+      $('.pbar', player).appendChild(fold);
       if (window.ResizeObserver) new ResizeObserver(sync).observe(player);
       new MutationObserver(sync).observe(player, { childList: true, subtree: true });   // 휴대폰은 max-height 로 크기가 묶여 ResizeObserver 만으로는 내용 변화를 못 잡는다
       wide.addEventListener && wide.addEventListener('change', sync);
     }
     // 카드 자리: 데스크톱은 그림 칸 안(Situation · 결과 문장 아래), 휴대폰은 시간선 다음(장의 맨 아래, grid-area rw)
-    const place = () => { if (wide.matches || !player) { if (card.parentNode !== fig) fig.appendChild(card); } else if (card.previousElementSibling !== (fold || player)) (fold || player).after(card); };
+    const place = () => { if (wide.matches || !player) { if (card.parentNode !== fig) fig.appendChild(card); } else if (card.previousElementSibling !== player) player.after(card); };
     place(); wide.addEventListener && wide.addEventListener('change', place);
-    const setFold = () => { if (!fold) return; const d = host.classList.contains('rwgone'); fold.setAttribute('aria-label', d ? UI.unfold : UI.fold); fold.title = d ? UI.unfold : UI.fold; fold.setAttribute('aria-expanded', String(!d)); };
+    const setFold = () => { if (!fold) return; const d = host.classList.contains('rwgone'); fold.innerHTML = (d ? '▴' : '▾') + '<span class="fl"> ' + (d ? UI.unfoldS : UI.foldS) + '</span>'; fold.setAttribute('aria-label', d ? UI.unfold : UI.fold); fold.title = d ? UI.unfold : UI.fold; fold.setAttribute('aria-expanded', String(!d)); };
     const dock = () => { if (!host) return; host.classList.toggle('rwdock', !!cur); host.classList.remove('rwgone'); setFold(); requestAnimationFrame(sync); };
     card.addEventListener('rwanswer', () => { if (!host) return; host.classList.add('rwgone'); setFold(); sync(); });
     // 보이는 목록에서 눌린 사건 읽기(숨은 탭의 눌림은 무시)
