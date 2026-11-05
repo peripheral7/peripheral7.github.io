@@ -11,7 +11,7 @@
   시험용 시계 — 아날로그 시계 + 아래 전자시계 + 공지. 흑백만 쓴다. 외부 라이브러리 없이 파일 하나로 돌아간다(기본 고딕체 Pretendard 글꼴 파일만 이 사이트에서 받고, 세리프는 기기에 있는 글꼴을 쓴다).
   PPT 슬라이드에 웹 페이지로 넣거나 브라우저를 전체 화면(F11 또는 F 키)으로 띄워 쓴다.
 
-  ■ 주소는 늘 그대로다(바꾸지 않는다). 공지·흑/백·글꼴 선택은 이 브라우저(localStorage)에 저장돼 새로고침해도 유지된다.
+  ■ 주소는 늘 그대로다(바꾸지 않는다). 흑/백·글꼴 선택은 이 브라우저(localStorage)에 저장돼 새로고침해도 유지된다.
     다른 PC나 슬라이드에 같은 설정을 옮기려면 편집 창의 "Copy link"로 설정이 담긴 주소를 복사해 쓴다(복사만 하며 주소창은 그대로).
   ■ 공지 바꾸는 법 (3가지)
     1) 화면에서: E 키 또는 마우스를 움직이면 아래쪽에 나타나는 "Edit notice" 버튼 → 글을 쓰고 Save.
@@ -164,13 +164,13 @@ html.dark #editor{background:#000}
     del: function (k) { try { window.localStorage.removeItem('examClock.' + k); } catch (e) { /* 저장 불가 */ } }
   };
   // 우선순위: 주소 옵션(직접 쓴 경우) > 이 브라우저에 저장된 값 > 기본값
-  var savedNotice = LS.get('notice');
+  LS.del('notice');                                              // 공지는 저장하지 않는다 — 열 때마다 Clear(빈 공지)로 시작
   var state = {
     dark: hasParam('theme') ? (params.theme === 'dark' || params.theme === 'black') : LS.get('theme') === 'dark',
     font: (hasParam('font') ? params.font : LS.get('font')) === 'serif' ? 'serif' : 'sans',
     h12: params.fmt === '12',
     tz: params.tz || '',
-    notice: hasParam('notice') ? params.notice.replace(/\r\n?/g, '\n').replace(/\\n/g, '\n') : (savedNotice !== null ? savedNotice : DEFAULT_NOTICE)
+    notice: hasParam('notice') ? params.notice.replace(/\r\n?/g, '\n').replace(/\\n/g, '\n') : DEFAULT_NOTICE
   };
 
   /* ───────── 시간대 ───────── */
@@ -350,7 +350,7 @@ html.dark #editor{background:#000}
     if (state.tz) q.push('tz=' + encodeURIComponent(state.tz));
     return baseUrl() + (q.length ? '?' + q.join('&') : '');
   }
-  function saveNotice() { if (state.notice === DEFAULT_NOTICE) LS.del('notice'); else LS.set('notice', state.notice); }
+  function saveNotice() { /* 저장하지 않음 */ }
   function applyTheme() { if (state.dark) root.classList.add('dark'); else root.classList.remove('dark'); }
   function toggleTheme() { state.dark = !state.dark; applyTheme(); if (state.dark) LS.set('theme', 'dark'); else LS.del('theme'); }
   function applyFont() {
