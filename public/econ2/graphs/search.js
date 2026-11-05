@@ -33,7 +33,15 @@
     '<button type="button" class="sxnav" data-d="1" aria-label="' + esc(UI.next) + '" title="' + esc(UI.next) + ' (Enter)">›</button>' +
     '<button type="button" class="sxx" aria-label="' + esc(UI.close) + '" title="' + esc(UI.close) + ' (Esc)">×</button></div>' +
     '<ul class="sxres" id="sxres" role="listbox" hidden></ul>';
-  top.appendChild(bar);
+  document.body.appendChild(bar);   // 본문 위에 떠 있는 창(머리줄 높이 · 본문 배치를 바꾸지 않음)
+  // 자리: 돋보기 단추 바로 아래, 창 오른쪽 끝 = 단추 오른쪽 끝(화면 밖으로 나가면 왼쪽 여백 10px 에 맞춤)
+  function place() {
+    const r = btn.getBoundingClientRect(), w = Math.min(520, window.innerWidth - 20);
+    bar.style.top = Math.round(r.bottom + 8) + 'px';
+    bar.style.left = Math.round(Math.max(10, Math.min(r.right - w, window.innerWidth - 10 - w))) + 'px';
+    bar.style.width = w + 'px';
+  }
+  window.addEventListener('resize', () => { if (!bar.hidden) place(); });
   const inp = $('input', bar), cnt = $('.sxcnt', bar), ul = $('.sxres', bar);
 
   /* ───────── 찾을 목록: 사건 줄 하나 = 시나리오 하나(페이지 순서) ───────── */
@@ -112,8 +120,8 @@
   }
 
   /* ───────── 열기 · 닫기 · 키 ───────── */
-  function open() { bar.hidden = false; btn.setAttribute('aria-expanded', 'true'); document.documentElement.classList.add('sxon'); inp.focus(); inp.select(); if (inp.value.trim()) drawList(); }
-  function close() { bar.hidden = true; ul.hidden = true; btn.setAttribute('aria-expanded', 'false'); document.documentElement.classList.remove('sxon'); btn.focus(); }
+  function open() { place(); bar.hidden = false; btn.setAttribute('aria-expanded', 'true'); document.documentElement.classList.add('sxon'); inp.focus(); inp.select(); if (inp.value.trim()) drawList(); }
+  function close(keepFocus) { bar.hidden = true; ul.hidden = true; btn.setAttribute('aria-expanded', 'false'); document.documentElement.classList.remove('sxon'); if (!keepFocus) btn.focus(); }
   btn.addEventListener('click', () => (bar.hidden ? open() : close()));
   $('.sxx', bar).addEventListener('click', close);
   $$('.sxnav', bar).forEach((n) => n.addEventListener('click', () => go(at < 0 ? (+n.getAttribute('data-d') > 0 ? 0 : res.length - 1) : at + +n.getAttribute('data-d'))));
@@ -136,7 +144,9 @@
   });
   ul.addEventListener('mousedown', (e) => e.preventDefault());   // 누르는 동안 입력 칸 초점 유지
   ul.addEventListener('click', (e) => { const li = e.target.closest('li[data-k]'); if (li) go(+li.getAttribute('data-k')); });
-  document.addEventListener('click', (e) => { if (!bar.hidden && !ul.hidden && !bar.contains(e.target)) { ul.hidden = true; inp.setAttribute('aria-expanded', 'false'); } });
+  // 창 밖을 누르거나(배경 · 다른 단추 · 목록) 화면을 굴리면 닫는다. pointerdown 이라 결과로 가며 사건을 대신 누르는 click() 에는 반응하지 않는다
+  document.addEventListener('pointerdown', (e) => { if (!bar.hidden && !bar.contains(e.target) && !btn.contains(e.target)) close(true); }, true);
+  document.addEventListener('wheel', (e) => { if (!bar.hidden && !bar.contains(e.target)) close(true); }, { passive: true, capture: true });
   document.addEventListener('keydown', (e) => {
     const typing = /^(INPUT|TEXTAREA|SELECT)$/.test(e.target.tagName) || e.target.isContentEditable;
     if ((e.key === '/' && !typing) || ((e.ctrlKey || e.metaKey) && (e.key === 'k' || e.key === 'K'))) { e.preventDefault(); open(); }

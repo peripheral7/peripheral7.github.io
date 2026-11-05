@@ -6,7 +6,8 @@
 .sxbtn:hover,.sxbtn[aria-expanded="true"]{border-color:var(--ink);color:var(--ink)}
 .sxbtn:focus-visible{outline:2px solid var(--blue);outline-offset:2px}
 .sxbtn svg,.sxic{width:18px;height:18px;fill:none;stroke:currentColor;stroke-width:2;stroke-linecap:round}
-.sxbar{position:relative;max-width:var(--max);margin:0 auto;padding:8px 12px 10px}
+/* 검색 창: 본문 위에 떠 있다(search.js place 가 단추 아래 자리 · 폭 520px 을 잡음) */
+.sxbar{position:fixed;z-index:40;padding:8px;border:1px solid var(--line);border-radius:12px;background:#fff;box-shadow:0 12px 32px rgba(31,37,55,.18)}
 .sxbar[hidden]{display:none}
 .sxin{display:flex;align-items:center;gap:8px;padding:0 6px 0 12px;border:2px solid var(--ink);border-radius:10px;background:#fff}
 .sxin:focus-within{border-color:var(--blue)}
@@ -19,8 +20,8 @@
 .sxnav:disabled{color:#b3b8c2;cursor:default}
 .sxx{border-color:transparent;color:var(--soft);font-size:24px}
 .sxnav:focus-visible,.sxx:focus-visible{outline:2px solid var(--blue);outline-offset:2px}
-/* 결과 목록: 검색 줄 아래에 떠 있다(본문을 밀지 않음) */
-.sxres{position:absolute;left:12px;right:12px;top:calc(100% - 4px);z-index:30;max-height:min(440px,60vh);overflow:auto;margin:0;padding:6px;list-style:none;border:1px solid var(--line);border-radius:10px;background:#fff;box-shadow:0 10px 30px rgba(31,37,55,.16)}
+/* 결과 목록: 검색 칸 바로 아래, 창 안 */
+.sxres{max-height:min(440px,60vh);overflow:auto;margin:6px 0 0;padding:0;list-style:none}
 .sxres[hidden]{display:none}
 .sxres li{position:relative;display:flex;flex-direction:column;gap:2px;padding:8px 64px 8px 10px;border-radius:8px;cursor:pointer}
 .sxres li[data-k]:hover{background:var(--tint)}
@@ -43,9 +44,9 @@
   .top .sxbtn{order:4;margin:0 0 4px auto;width:32px;height:32px}
   .top .sxbtn + .rwtog{margin-left:auto}
   .top .in .tabs{width:calc(100% - 44px)}
-  .sxbar{padding:6px 10px 8px}
+  .sxbar{padding:6px}
   .sxin{gap:6px;padding:0 4px 0 10px}
   .sxin input{height:40px;font-size:16px}
   .sxnav,.sxx{width:32px;height:32px}
-  .sxres{left:10px;right:10px;max-height:55vh}
+  .sxres{max-height:55vh}
 }
