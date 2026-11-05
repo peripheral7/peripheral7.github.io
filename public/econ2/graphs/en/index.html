@@ -39,7 +39,7 @@
   main *{scrollbar-width:none}
   main *::-webkit-scrollbar{display:none}
   /* 칸 아래에 내용이 더 있으면 아래쪽 글자를 흐리게(스크롤바 대신 더 있다는 표시) */
-  .side.more{-webkit-mask-image:linear-gradient(to bottom,#000 calc(100% - 56px),transparent);mask-image:linear-gradient(to bottom,#000 calc(100% - 56px),transparent)}
+  .side.more,.fig.more{-webkit-mask-image:linear-gradient(to bottom,#000 calc(100% - 56px),transparent);mask-image:linear-gradient(to bottom,#000 calc(100% - 56px),transparent)}
   #langAsk{position:fixed;left:0;right:0;bottom:28px;z-index:40;margin:0 auto;width:max-content;display:flex;flex-wrap:wrap;align-items:center;gap:10px;max-width:calc(100% - 28px);box-sizing:border-box;padding:14px 18px;border:2px solid var(--ink);border-radius:10px;background:#fff;color:var(--ink);font-size:16px;line-height:1.35;box-shadow:0 6px 24px rgba(0,0,0,.18)}
   #langAsk p{margin:0 8px 0 0}
   #langAsk button{font:inherit;font-weight:700;color:var(--ink);background:#fff;border:2px solid var(--ink);border-radius:8px;padding:6px 16px;cursor:pointer}
@@ -357,8 +357,7 @@
     .ch.tabbed .fig .stage{height:auto;min-height:calc(44vh + 26px);flex:1}   /* 탭 줄 아래 그래프: 예전 왼쪽 칸 높이(44vh + 80px)에서 탭 줄을 뺀 만큼 */
     .bankfig{padding-top:2px}
     .ratefig{padding-top:6px}
-    /* 왼쪽 설명 · 사건 목록은 높이 제한 · 안쪽 스크롤 없이 다 보인다(사건을 고르면 시간선은 하단 고정이라 목록이 시간선을 밀어내지 않음).
-       길면 페이지가 스크롤된다. 오른쪽 그래프는 위에 붙여 늘어나지 않게 */
+    /* 왼쪽 · 오른쪽 칸은 따로 스크롤(아래 '데스크톱: 왼쪽 … 따로 스크롤'). 오른쪽 그래프는 위에 붙여 늘어나지 않게 */
     .side{padding-right:6px;padding-left:6px;margin-left:-6px}   /* 왼쪽 6px: 주요 요인 점 자리(글 위치는 그대로) */
     .ch.tabbed .side{grid-row:1 / 3}
     .ch.tabbed .fig{align-self:start}
@@ -404,6 +403,13 @@
   }
   @media (max-width:900px){
     .fig .stage{max-height:none;aspect-ratio:640/520}
+  }
+  /* 데스크톱: 왼쪽(설명 · 사건 목록)과 오른쪽(그래프 · 해설 · 퀴즈)을 따로 스크롤하고 페이지는 스크롤하지 않는다.
+     칸 높이 = 화면 − 머리줄(--toph, app.js 가 잼) − 위 여백 − 아래 여백 − 하단 고정 시간선(--dockv, real.js 가 잼). 탭 있는 장의 오른쪽은 탭 줄(56px)도 뺀다 */
+  @media (min-width:901px){
+    main{padding-bottom:12px}
+    .side,.fig{max-height:calc(100vh - var(--toph,53px) - 16px - 12px - var(--dockv,0px));overflow-y:auto;overscroll-behavior:contain}
+    .ch.tabbed .fig{max-height:calc(100vh - var(--toph,53px) - 16px - 12px - var(--dockv,0px) - 56px)}
   }
   /* Ch29 그림 칸(.bankfig) 폭 3구간: 화면 폭이 아니라 그림 칸 폭(cqi)에 맞춘다 — 데스크톱에서도 칸이 좁아질 수 있어서.
      숫자는 줄바꿈하지 않고, 구간 안에서는 칸 폭에 비례해 글자를 줄인다(clamp). --tfmax 는 낮은 화면에서 T계정 상한 */
@@ -620,8 +626,8 @@
   document.body.appendChild(box);
 })();
 </script>
-<script src="/econ2/graphs/en/app.js?v=20261105q"></script>
-<script src="/econ2/graphs/real.js?v=20261105o"></script>
+<script src="/econ2/graphs/en/app.js?v=20261105r"></script>
+<script src="/econ2/graphs/real.js?v=20261105r"></script>
 <script src="/econ2/graphs/search.js?v=20261105q"></script>
 </body>
 </html>

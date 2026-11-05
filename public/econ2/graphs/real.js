@@ -447,7 +447,7 @@
     card.addEventListener('rwcountry', (e) => { cur = e.detail; render(card, cur, list); dock(); });
     // 시간선: 사건을 고르면(기본 모드도) rwdock(데스크톱 하단 고정), 정답을 고르면 rwgone(숨김). --dockh 는 시간선 높이
     // 내리기 단추(.rwfold): 조작 줄(.pbar) 안. 시간선을 내려도(정답을 골라도) 조작 줄은 남고, 누르면 다시 올라온다.
-    // 아래 여백은 .ch 에 준다(Ch28 의 .panel 은 display:contents 라 padding 이 먹지 않았다)
+    // 아래 여백 대신 --dockv: 데스크톱 두 칸(따로 스크롤)의 높이를 시간선 위까지로(index.html)
     const host = fig.closest('.panel') || fig.closest('.ch'), ch = fig.closest('.ch'), player = host && $('.player', host);
     const wide = window.matchMedia('(min-width:901px)');
     const sync = () => {
@@ -455,7 +455,9 @@
       if (!player || host.hidden || !ch.classList.contains('on')) return;
       const h = player.offsetHeight, on = wide.matches && host.classList.contains('rwdock') && !host.classList.contains('rwgone') && !player.classList.contains('idle');
       host.style.setProperty('--dockh', (wide.matches ? h : player.scrollHeight) + 'px');
-      ch.style.paddingBottom = on ? Math.max(0, h - 24) + 'px' : '';
+      // 데스크톱 두 칸의 아래 끝 = 시간선 윗변(--dockv). 내려 둔 시간선은 조작 줄 자리(64px)만
+      const docked = wide.matches && host.classList.contains('rwdock') && !player.classList.contains('idle');
+      host.style.setProperty('--dockv', on ? h + 'px' : docked ? '64px' : '0px');
     };
     let fold = null;
     if (player) {

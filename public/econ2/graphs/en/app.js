@@ -598,9 +598,14 @@
     });
   }
   // 휴대폰(한 줄 배치)에서는 목록이 그래프 아래에 있으므로, 사건을 고르면 그 그림 · 카드가 보이게 올린다
-  // 데스크톱(두 칸)은 아래로 내려 둔 채 고르면 맨 위로 올려 그래프 · 결과 문장이 보이게 한다
+  // 데스크톱(두 칸 따로 스크롤)은 오른쪽 칸을 맨 위로 올려 그래프 · 결과 문장이 보이게 한다
   function bringFig(from) {
-    if (!window.matchMedia('(max-width:900px)').matches) { if (window.scrollY > 0) window.scrollTo({ top: 0, behavior: reduce ? 'auto' : 'smooth' }); return; }
+    if (!window.matchMedia('(max-width:900px)').matches) {   // 데스크톱: 오른쪽 칸(그래프 · 해설)을 맨 위로
+      const f = (from.closest('.panel') || from.closest('.ch')).querySelector('.fig');
+      if (f && f.scrollTop > 0) f.scrollTo({ top: 0, behavior: reduce ? 'auto' : 'smooth' });
+      if (window.scrollY > 0) window.scrollTo({ top: 0 });
+      return;
+    }
     const root = from.closest('.panel') || from.closest('.ch'), t = root && $('.fig', root);
     if (!t) return;
     const top = t.getBoundingClientRect().top - $('.top').offsetHeight - 8;
@@ -997,9 +1002,12 @@
   }
   window.addEventListener('resize', alignBank);
   // 스크롤바를 숨겼으므로, 아래에 더 있으면 칸 아래쪽을 흐리게 해 더 내릴 수 있음을 보인다
-  function markMore() { $$('.side').forEach((e) => e.classList.toggle('more', e.scrollHeight - e.scrollTop - e.clientHeight > 4)); }
+  function markMore() { $$('.side, .fig').forEach((e) => e.classList.toggle('more', e.scrollHeight - e.scrollTop - e.clientHeight > 4)); }
   document.addEventListener('scroll', markMore, true);
   window.addEventListener('resize', markMore);
+  // 머리줄 높이(검색 줄이 열리면 커진다) → --toph: 데스크톱 두 칸의 높이 계산에 쓴다
+  const setTop = () => document.documentElement.style.setProperty('--toph', $('.top').offsetHeight + 'px');
+  setTop(); if (window.ResizeObserver) new ResizeObserver(() => { setTop(); markMore(); }).observe($('.top'));
   document.addEventListener('click', () => setTimeout(markMore, 50));
 
   /* ───────── Chapters 탭 ───────── */
