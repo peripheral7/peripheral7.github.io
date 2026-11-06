@@ -238,7 +238,7 @@
       ]
     },
     {
-      m: /^Reclassify discouraged workers/, when: 'April 2020 · United States', title: 'The official rate vs the broadest measure (U-6)',
+      m: /^Discouraged workers/, when: 'April 2020 · United States', title: 'The official rate vs the broadest measure (U-6)',
       q: 'The model shows how recounting people between "unemployed" and "not in the labor force" changes the official unemployment rate (U-3). BLS also publishes U-6, which adds people who want a job but stopped searching, plus part-timers who want full-time work. In April 2020 U-3 was 14.8%. What was U-6?',
       opts: ['About 23%', 'About 19%', 'About 16%'], ans: 0,
       v: 'As the model shows, the counting rule matters: U-6 was 22.9%, 8.1 points above the official rate that month.',
