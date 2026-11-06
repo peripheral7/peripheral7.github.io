@@ -861,7 +861,7 @@
     const SIT = [
       { t: 'Laid off, searching', c: '실직한 사람이 일자리를 찾으면', ce: 'If a laid-off worker looks for a job,', m: { E: -1, U: 1 } },
       { t: 'Laid off, gives up searching', q: 'MC 1', c: '실직한 사람이 구직을 포기하면', ce: 'If a laid-off worker gives up looking,', m: { E: -1, N: 1 } },
-      { t: 'Reclassify token job-seekers', q: 'MC 5', c: '구직 시늉만 하던 사람을 비경제활동인구로 다시 세면', ce: 'If token job-seekers are recounted as not in the labor force,', m: { U: -1, N: 1 } },
+      { t: 'Reclassify discouraged workers', q: 'MC 5', c: '구직단념자를 비경제활동인구로 다시 세면', ce: 'If discouraged workers are recounted as not in the labor force,', m: { U: -1, N: 1 } },
       { t: 'Unemployed finds a job', c: '실업자가 취업하면', ce: 'If an unemployed person finds a job,', m: { U: -1, E: 1 } },
       { t: 'Starts looking for a first job', c: '처음으로 일자리를 찾기 시작하면', ce: 'If someone starts looking for a first job,', m: { N: -1, U: 1 } }
     ];
