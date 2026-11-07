@@ -14,15 +14,15 @@ const BASIC: LightboxMap[] = [
 ]
 
 const COMMERCE: LightboxMap[] = [
-  { key: "ds", label: "동탄2 남부", sub: "생활상권 밀도 · 단지 33개", src: `${IMG}/commerce/dongtan-south.jpg` },
-  { key: "dn", label: "동탄2 북부", sub: "생활상권 밀도", src: `${IMG}/commerce/dongtan-north.jpg` },
-  { key: "gg", label: "광교", sub: "생활상권 밀도", src: `${IMG}/commerce/gwanggyo.jpg` },
-  { key: "uj", label: "운정", sub: "생활상권 밀도", src: `${IMG}/commerce/unjeong.jpg` },
+  { key: "ds", label: "동탄2 남부", sub: "생활업종 점포 밀도", src: `${IMG}/heat/dongtan-south.jpg` },
+  { key: "dn", label: "동탄2 북부", sub: "생활업종 점포 밀도", src: `${IMG}/heat/dongtan-north.jpg` },
+  { key: "d1", label: "동탄1", sub: "생활업종 점포 밀도", src: `${IMG}/heat/dongtan1.jpg` },
+  { key: "gg", label: "광교", sub: "생활업종 점포 밀도", src: `${IMG}/heat/gwanggyo.jpg` },
 ]
 
 const TABS = [
   { id: "basic", label: "기본", note: "대표공원(진한 초록)과 분석 단지(점)의 분포", maps: BASIC },
-  { id: "commerce", label: "상권", note: "공원 둘레의 생활상권 밀도(육각 셀)", maps: COMMERCE },
+  { id: "commerce", label: "상권", note: "공원 둘레의 생활업종 점포 밀도(반경 300m 커널 밀도)", maps: COMMERCE },
 ] as const
 
 export function ParkHedonicReport() {
