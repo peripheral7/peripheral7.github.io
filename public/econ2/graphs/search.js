@@ -14,7 +14,7 @@
   const top = $('.top'), links = $('.top .links');
   if (!top || !links) return;
   const btn = document.createElement('button');
-  btn.type = 'button'; btn.className = 'sxbtn'; btn.setAttribute('aria-label', UI.btn); btn.title = UI.btn + ' (/)';
+  btn.type = 'button'; btn.className = 'sxbtn'; btn.setAttribute('aria-label', UI.btn); btn.title = UI.btn + ' (Ctrl+F)';
   btn.innerHTML = '<svg viewBox="0 0 20 20" aria-hidden="true"><circle cx="8.5" cy="8.5" r="5.5"/><path d="M12.6 12.6L17 17"/></svg>';
   const tg = links.previousElementSibling && !links.previousElementSibling.matches('nav') ? links.previousElementSibling : links;
   tg.parentNode.insertBefore(btn, tg);
@@ -140,7 +140,7 @@
   document.addEventListener('wheel', (e) => { if (!bar.hidden && !bar.contains(e.target)) close(true); }, { passive: true, capture: true });
   document.addEventListener('keydown', (e) => {
     const typing = /^(INPUT|TEXTAREA|SELECT)$/.test(e.target.tagName) || e.target.isContentEditable;
-    if ((e.key === '/' && !typing) || ((e.ctrlKey || e.metaKey) && (e.key === 'k' || e.key === 'K'))) { e.preventDefault(); open(); }
+    if ((e.key === '/' && !typing) || ((e.ctrlKey || e.metaKey) && /^[kKfF]$/.test(e.key))) { e.preventDefault(); open(); }
   });
   drawCnt();
 })();

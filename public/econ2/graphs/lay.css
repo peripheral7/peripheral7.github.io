@@ -28,9 +28,8 @@
     grid-template-areas:"fig fig" "sit sit" "side play" "con con" "rw rw"}
   html .ch.lt.tabbed{grid-template-areas:"tabs tabs" "fig fig" "sit sit" "side play" "con con" "rw rw"}
 
-  .ch.lt .side,html .ch.lt .player:not(.idle){height:var(--colh,440px);overflow-y:auto;overscroll-behavior:contain}
+  /* 좌우 두 칸(목록 | 단계)은 안쪽 스크롤 없이 내용 높이대로 — 그 구간에서도 페이지가 스크롤된다 */
   .ch.lt .player{grid-area:play;padding-top:0}
-  .ch.lt .side::after,.ch.lt .player::after{content:"";display:block;height:20px}
   .ch.lt .fig .stage{aspect-ratio:auto;height:min(48vh,500px)}
   .ch.lt .fig .stage[hidden]{display:none}
 }
@@ -63,3 +62,13 @@
 
 #pl28s .steps{display:none}
 @media (max-width:639px){.ch.lm .side{margin-top:0;padding-top:10px;border-top:1px solid var(--line)}}
+/* 휴대폰: '상황' 문장 아래와 파란 상자 위 여백을 같게(둘 다 16px = 칸 간격 12px + 4px) */
+@media (max-width:639px){.ch.lm .lbox{margin-bottom:4px}.ch.lm .side .opts:last-child{margin-bottom:4px}}
+
+/* 가로 폭은 넓어도 터치 기기나 낮은 화면(휴대폰 가로 · 태블릿)은 두 칸 따로 스크롤 대신 페이지 스크롤.
+   하단 고정 시간선(--dockv)만큼 칸 아래를 비워 마지막 줄이 가리지 않게 */
+@media (min-width:901px) and (pointer:coarse),(min-width:901px) and (max-height:600px){
+  html .side,html .fig,html .ch.tabbed .fig{max-height:none;overflow:visible;padding-bottom:var(--dockv,64px)}
+  .side::after,.fig::after{display:none}
+  .side.more,.fig.more{-webkit-mask-image:none;mask-image:none}
+}
