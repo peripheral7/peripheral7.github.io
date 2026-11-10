@@ -1,0 +1,68 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="robots" content="noindex">
+<title>BF · IA 학습자료</title>
+<!--
+  Business Finance · Investment Analysis 학습자료 목차. 메인 화면 기능모음(lib/features.ts)의 "BF·IA 학습자료" 가 여기로 온다.
+  장마다 폴더 하나: bf11·ia9 = 예습(빈칸 채운 그림 덱 index.html · 채운 PDF · preview/ 예습 덱),
+                    bf9·ia7 = 복습(review/ 요약+연습문제 덱 · quiz.html 퀴즈, quiz_template_integrated 기반).
+  덱은 /slides/deck.css·deck.js 엔진을 쓴다. 새 장을 더하면 폴더를 만들고 아래 목록에 한 줄을 더한다.
+-->
+<style>
+  :root{ color-scheme:light dark; --bg:#fff; --ink:#1a1a1a; --muted:#6b6b6b; --line:#e6e6e6; --link:#1a56db; --btn:#fff; --btn-h:#f5f5f5; --btn-line:#d4d4d4; }
+  @media (prefers-color-scheme:dark){ :root{ --bg:#161618; --ink:#ececee; --muted:#a1a1a6; --line:#2e2e31; --link:#7aa7ff; --btn:#1f1f22; --btn-h:#2a2a2e; --btn-line:#3a3a3e; } }
+  body{ background:var(--bg); color:var(--ink); font-family:system-ui,-apple-system,"Apple SD Gothic Neo","Malgun Gothic",sans-serif; max-width:44rem; margin:0 auto; padding:2rem 16px 4rem; line-height:1.6; }
+  h1{ font-size:1.4rem; margin:0 0 .25rem; }
+  h2{ font-size:1.35rem; font-weight:700; margin:2.4rem 0 .2rem; }
+  .sec{ color:var(--muted); font-size:.9rem; margin:0 0 .7rem; }
+  .sub{ color:var(--muted); margin:0; }
+  ul{ list-style:none; padding:0; margin:0; }
+  li{ border-top:1px solid var(--line); padding:.8rem 0; display:flex; align-items:center; justify-content:space-between; gap:1rem; }
+  li:last-child{ border-bottom:1px solid var(--line); }
+  .name{ min-width:0; }
+  .name a{ color:var(--ink); text-decoration:none; font-weight:600; }
+  .name a:hover{ color:var(--link); }
+  .name .c{ color:var(--muted); font-weight:600; margin-right:.35rem; }
+  .name span{ display:block; color:var(--muted); font-size:.85rem; }
+  .act{ display:flex; flex-wrap:wrap; gap:.4rem; flex-shrink:0; }
+  .act a{ font-size:.85rem; padding:.3rem .7rem; border:1px solid var(--btn-line); border-radius:6px; background:var(--btn); color:var(--ink); text-decoration:none; white-space:nowrap; }
+  .act a:hover{ background:var(--btn-h); }
+  .act a.main{ border-color:var(--link); color:var(--link); }
+  @media (max-width:560px){ li{ flex-direction:column; align-items:flex-start; gap:.5rem; } }
+</style>
+</head>
+<body>
+<h1>BF · IA 학습자료</h1>
+<p class="sub">Business Finance (Prof. Gemma Lee) · Investment Analysis (Prof. G. Lee). 슬라이드는 → ← 로 넘기고, O 로 목록, F 로 전체 화면. 복습 덱의 연습문제는 → 를 누르면 풀이가 나옵니다.</p>
+
+<h2>예습</h2>
+<p class="sec">빈칸을 채운 강의 슬라이드(채운 답은 빨간 글자)와, 장 구조를 먼저 잡는 짧은 예습자료.</p>
+<ul>
+  <li><div class="name"><a href="bf11/preview/"><span class="c">BF Ch.11</span>Risk and Return</a><span>26쪽 · 9쪽에 걸쳐 빈칸 약 40곳 채움 · 예습자료 11장</span></div>
+    <div class="act"><a class="main" href="bf11/preview/">예습자료</a><a href="bf11/">빈칸 채운 슬라이드</a><a href="bf11/BF_Ch11_filled.pdf" download>PDF</a></div></li>
+  <li><div class="name"><a href="ia9/preview/"><span class="c">IA Ch.9</span>Behavioral Finance and Technical Analysis</a><span>24쪽 · 13쪽에 걸쳐 빈칸 32곳 채움 · 예습자료 10장</span></div>
+    <div class="act"><a class="main" href="ia9/preview/">예습자료</a><a href="ia9/">빈칸 채운 슬라이드</a><a href="ia9/IA_Ch09_filled.pdf" download>PDF</a></div></li>
+</ul>
+
+<h2>복습</h2>
+<p class="sec">핵심 정리 뒤에 연습문제가 한 장에 한 문제씩 이어집니다.</p>
+<ul>
+  <li><div class="name"><a href="bf9/review/"><span class="c">BF Ch.9</span>Making Capital Investment Decisions</a><span>핵심 정리 11장 · 연습문제 20개 (OCF·NWC·MACRS·세후 잔존가치·NPV)</span></div>
+    <div class="act"><a class="main" href="bf9/review/">복습·연습문제</a></div></li>
+  <li><div class="name"><a href="ia7/review/"><span class="c">IA Ch.7</span>CAPM and APT</a><span>핵심 정리 12장 · 연습문제 18개 (CAPM·SML·α·지수모형·FF·APT)</span></div>
+    <div class="act"><a class="main" href="ia7/review/">복습·연습문제</a></div></li>
+</ul>
+
+<h2>퀴즈</h2>
+<p class="sec">개념은 객관식(누르면 바로 채점·해설), 계산은 서술형(식과 풀이를 쓰고 확인). 진행 상황은 이 브라우저에 저장되고, 인쇄·정답 인쇄도 됩니다.</p>
+<ul>
+  <li><div class="name"><a href="bf9/quiz.html"><span class="c">BF Ch.9</span>복습 퀴즈</a><span>22문항 · 객관식 14 · 서술형 8 (표 채우기 6)</span></div>
+    <div class="act"><a class="main" href="bf9/quiz.html">풀기</a></div></li>
+  <li><div class="name"><a href="ia7/quiz.html"><span class="c">IA Ch.7</span>복습 퀴즈</a><span>22문항 · 객관식 14 · 서술형 8 (표 채우기 3)</span></div>
+    <div class="act"><a class="main" href="ia7/quiz.html">풀기</a></div></li>
+</ul>
+</body>
+</html>

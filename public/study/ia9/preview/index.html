@@ -1,0 +1,187 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta name="pinterest" content="nopin">
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="robots" content="noindex">
+<title>IA Ch.9 Behavioral Finance and Technical Analysis — 예습</title>
+<link rel="stylesheet" href="/slides/deck.css">
+<!--
+  IA Ch.9 예습 덱(BKM Essentials of Investments Ch.9). 수업 전에 장의 구조만 잡기 위한 10장.
+  숫자 예시는 강의 PDF(Investment Chap09_stidents.pdf)의 것을 그대로 썼다. 빈칸 채운 슬라이드는 ../ (IA_Ch09_filled.pdf).
+  글자색은 고정하지 않는다(흰/검은 바탕 전환). 테두리는 currentColor.
+-->
+<style>
+  .slide{padding:64px 96px}
+  .slide h2{font-size:58px;margin-bottom:30px}
+  .slide h3{font-size:36px;margin-bottom:12px}
+  .slide p{font-size:31px;line-height:1.45}
+  .slide ul{font-size:31px}
+  .slide li{margin:.32em 0}
+  .slide table{font-size:27px;line-height:1.3;width:100%}
+  .slide th,.slide td{padding:8px 16px;vertical-align:top}
+  .slide .small{font-size:25px}
+  .cols{gap:48px}
+  .flow{display:flex;align-items:stretch;gap:14px;margin:0 0 22px}
+  .flow>div{flex:1;border:3px solid currentColor;padding:12px 14px;font-size:24px;line-height:1.3}
+  .flow>div b{display:block;font-size:26px;margin-bottom:4px}
+  .flow>i{align-self:center;font-style:normal;font-size:34px;font-weight:700}
+  .tag{display:inline-block;border:2px solid currentColor;padding:0 10px;font-size:22px;font-weight:700;margin-right:8px;vertical-align:.15em}
+  .eq{border:3px solid currentColor;padding:14px 22px;font-size:30px;margin:0 0 18px}
+</style>
+</head>
+<body>
+<noscript>JavaScript is required.</noscript>
+
+<main id="stage">
+
+  <section class="slide title" data-title="표지">
+    <h1>IA Ch.9 예습</h1>
+    <p class="sub">행동재무학과 기술적 분석 · Behavioral Finance and Technical Analysis</p>
+    <p class="hint">BKM <i>Essentials of Investments</i> · Prof. G. Lee · → 로 넘기기 · O 목록</p>
+  </section>
+
+  <section class="slide" data-title="앞 장과의 연결: Ch.8 → Ch.9">
+    <h2>앞 장과의 연결: Ch.8 EMH → Ch.9</h2>
+    <table>
+      <tr><th style="width:30%">Ch.8 에서 남은 것</th><th>Ch.9 가 하는 일</th></tr>
+      <tr><td>효율적 시장 가설(EMH): 약형 효율성(weak-form) → 과거 가격으로는 돈을 못 번다</td><td>"그럴 수도, 아닐 수도" — 실수가 지속되고 차익거래가 막히면 패턴이 남을 수 있다</td></tr>
+      <tr><td>이상현상(anomalies)의 세 해석: ① 빠진 위험 프리미엄 ② 진짜 비효율 ③ 데이터 마이닝</td><td>②를 진지하게 받아 "어떤 투자자가 이런 패턴을 만드나?"를 묻는다</td></tr>
+      <tr><td>과소반응(underreaction) — 실적 발표 후 드리프트, 단기 모멘텀</td><td>보수주의(conservatism): 믿음을 너무 느리게 고친다</td></tr>
+      <tr><td>과잉반응(overreaction) — 장기 반전(long-horizon reversal)</td><td>대표성(representativeness): 작은 표본을 추세로 읽는다</td></tr>
+    </table>
+    <p class="small muted" style="margin-top:18px">행동재무학은 가격 이론의 경쟁자라기보다 "가격이 왜 틀릴 수 있나"에 대한 다른 설명이다.</p>
+  </section>
+
+  <section class="slide" data-title="장 전체 지도">
+    <h2>장 전체 지도 — 왜 이 순서인가</h2>
+    <div class="flow">
+      <div><b>9.1 ① 다리 1</b>정보처리 오류 · 행동편향 · 전망이론<br><span class="muted">투자자가 틀린다</span></div><i>+</i>
+      <div><b>9.1 ② 다리 2</b>차익거래의 한계(limits to arbitrage)<br><span class="muted">틀려도 아무도 못 고친다</span></div><i>→</i>
+      <div><b>9.1 ③ 증거·평가</b>일물일가 위반 · 버블 · 비판의 평가<br><span class="muted">정말 그런가?</span></div>
+    </div>
+    <div class="flow">
+      <div><b>9.2 ① 연결</b>느린 가격 조정 = 추세<br><span class="muted">기술적 분석의 부활</span></div><i>→</i>
+      <div><b>9.2 ② 추세 지표</b>다우 이론 · 이동평균 · 등락주선(breadth) · 상대강도</div><i>→</i>
+      <div><b>9.2 ③ 심리 지표</b>Trin · 신뢰지수 · 풋/콜 비율</div><i>→</i>
+      <div><b>9.2 ④ 경고</b>무작위 자료에도 패턴은 보인다</div>
+    </div>
+    <ul>
+      <li>비합리성만으로는 부족 — 합리적 투자자가 자유롭게 거래하면 가격은 맞는다. <b>두 다리가 모두</b> 있어야 오가격(mispricing)이 남는다.</li>
+      <li>오가격이 느리게 사라지면 추세가 생긴다 → 그래서 9.2 가 기술적 분석을 다시 본다.</li>
+    </ul>
+  </section>
+
+  <section class="slide" data-title="9.1 정보처리 오류 네 가지">
+    <h2>9.1 다리 1 — 정보처리 오류 네 가지</h2>
+    <p><b>핵심 질문</b> 투자자는 정보를 어떻게 잘못 처리하고, 그것이 가격에 어떤 모양으로 나타나나?</p>
+    <table>
+      <tr><th>오류 (information-processing error)</th><th>무엇인가</th><th>가격에 나타나는 결과</th></tr>
+      <tr><td>예측 오류 (forecasting errors)</td><td>최근 경험에 과도한 가중, 너무 극단적인 예측</td><td>과잉반응 — 막 좋은 실적을 낸 기업의 높은 P/E</td></tr>
+      <tr><td>과신 (overconfidence)</td><td>자기 믿음·능력의 정밀도를 과대평가</td><td>과다 거래, 분산 부족, 액티브 운용 선호</td></tr>
+      <tr><td>보수주의 (conservatism)</td><td>새 증거에 믿음을 너무 느리게 수정</td><td><b>과소반응</b> — 실적 발표 후 드리프트</td></tr>
+      <tr><td>대표성 (representativeness)</td><td>작은 표본을 모집단처럼 취급</td><td><b>과잉반응</b> — 외삽 후 나중에 반전</td></tr>
+    </table>
+    <p class="small muted" style="margin-top:14px">방향이 반대: 보수주의는 가격을 너무 적게, 대표성은 너무 많이 움직인다.</p>
+  </section>
+
+  <section class="slide" data-title="9.1 행동편향과 전망이론">
+    <h2>9.1 다리 1 — 행동편향과 전망이론</h2>
+    <div class="cols">
+      <div>
+        <h3>행동편향 (behavioral biases)</h3>
+        <p class="small muted">믿음이 맞아도 결정이 일관되지 않다</p>
+        <table>
+          <tr><td><b>프레이밍</b> (framing)</td><td>10년 중 8년 이익 vs 2년 손실</td></tr>
+          <tr><td><b>심적 회계</b> (mental accounting)</td><td>배당은 쓰고, 같은 액수의 주식은 안 판다</td></tr>
+          <tr><td><b>후회 회피</b> (regret avoidance)</td><td>비관습적 선택의 손실이 더 아프다</td></tr>
+          <tr><td><b>감정</b> (affect)</td><td>좋아하는 회사·내 직장 주식을 분석 없이 보유</td></tr>
+        </table>
+      </div>
+      <div>
+        <h3>전망이론 (prospect theory)</h3>
+        <div class="eq">v(x) = x<sup>0.88</sup> (x ≥ 0)<br>v(x) = −2.25·(−x)<sup>0.88</sup> (x &lt; 0)</div>
+        <ul>
+          <li>기준점(reference point) 대비 이익·손실로 가치를 잰다 — 총 부(wealth)가 아니다</li>
+          <li>이익에서 위험회피(오목), 손실에서 위험추구(볼록)</li>
+          <li>손실회피(loss aversion): 같은 크기 손실이 약 2배 아프다</li>
+        </ul>
+      </div>
+    </div>
+  </section>
+
+  <section class="slide" data-title="9.1 차익거래의 한계">
+    <h2>9.1 다리 2 — 차익거래의 한계</h2>
+    <p><b>핵심 질문</b> $80 에 거래되는 주식이 $50 짜리라고 확신한다. 공매도(short)하면 끝일까?</p>
+    <table>
+      <tr><th style="width:28%">한계 (limits to arbitrage)</th><th>무슨 일이 생기나</th></tr>
+      <tr><td><b>근본적 위험</b> (fundamental risk)</td><td>가격이 $50 로 가기 전에 $100 로 갈 수 있다 — 가치는 맞혀도 돈을 잃고, 증명되기 전에 청산당한다</td></tr>
+      <tr><td><b>실행 비용</b> (implementation costs)</td><td>공매도하려면 주식을 빌려야 한다 — 없거나, 비싸거나, 회수(recall)된다. 그래서 <b>고평가가 저평가보다 오래 간다</b></td></tr>
+      <tr><td><b>모형 위험</b> (model risk)</td><td>틀린 건 내 $50 일 수도 있다 — 그 의심이 베팅 크기를 줄인다</td></tr>
+    </table>
+    <p class="small muted" style="margin-top:14px">세 한계 모두 가격이 가치에서 가장 멀어졌을 때 가장 세게 작동한다 — 차익거래는 가장 필요할 때 가장 약하다.</p>
+  </section>
+
+  <section class="slide" data-title="9.1 일물일가 위반 · 버블 · 평가">
+    <h2>9.1 증거 — 일물일가 위반 · 버블 · 평가</h2>
+    <table>
+      <tr><th>사례 (law of one price)</th><th>반드시 성립해야 할 것</th><th>시장이 한 일</th></tr>
+      <tr><td><b>샴쌍둥이</b> (Siamese twins)<br><span class="small">Royal Dutch / Shell, 60 : 40</span></td><td>V<sub>A</sub> = 1.5 × V<sub>B</sub></td><td>패리티에서 −35% ~ +15%, 2001년까지 지속</td></tr>
+      <tr><td><b>지분 분할상장</b> (equity carve-out)<br><span class="small">3Com / Palm, 2000.3</span></td><td>모회사 가격 ≥ 1.5 × 자회사 가격</td><td>81.81 − 1.5 × 95.06 = <b>−60.78</b> (47거래일 음수)</td></tr>
+      <tr><td><b>폐쇄형 펀드</b> (closed-end funds)</td><td>가격 ≈ 순자산가치(NAV)</td><td>보통 NAV 대비 10–20% 할인</td></tr>
+    </table>
+    <ul>
+      <li><b>버블</b>: 최근 이익 → "새 시대"(대표성) → 의심 축출(과신·차익거래 한계) → 붕괴. 사후에만 확실하다.</li>
+      <li><b>평가</b>: 가격이 <i>왜 틀릴 수 있는지</i>는 잘 설명하지만 <i>얼마여야 하는지</i>는 말하지 못한다.</li>
+    </ul>
+  </section>
+
+  <section class="slide" data-title="9.2 추세 지표">
+    <h2>9.2 기술적 분석 — 추세 지표</h2>
+    <p><b>핵심 질문</b> 느린 가격 조정이 추세라면, 그 추세를 어떻게 읽나? <span class="muted">(설명이 있다 ≠ 규칙이 돈을 번다)</span></p>
+    <table>
+      <tr><th style="width:24%">지표</th><th>핵심 아이디어</th><th>강의 예시</th></tr>
+      <tr><td><b>다우 이론</b> (Dow theory)</td><td>1차 추세(primary trend, 조류) · 2차 조정(secondary correction, 파도) · 일간 변동(잡음)</td><td>150 → 140 → 148(고점 실패) → 135(저점 140 붕괴) = 전환</td></tr>
+      <tr><td><b>이동평균</b> (moving average)</td><td>가격이 이동평균을 위로 뚫으면 매수, 아래로 뚫으면 매도 신호</td><td>5일 평균 53.0 → 53.8: 6일째 가격은 57 → 54로 내렸는데 평균은 올랐다(지연, lag)</td></tr>
+      <tr><td><b>시장 폭</b> (breadth)</td><td>등락주선(advance–decline line) = (상승 − 하락) 누적</td><td>지수는 매일 상승, 누적 +120 → +80 → −10 → −160: 좁은 랠리</td></tr>
+      <tr><td><b>상대강도</b> (relative strength)</td><td>주가 ÷ 지수 — 상승이 아니라 <i>초과 성과</i>를 잰다</td><td>44/2,300 × 100 = 1.91 &lt; 2.00: 10% 올랐지만 상대강도는 하락</td></tr>
+    </table>
+  </section>
+
+  <section class="slide" data-title="9.2 심리 지표와 경고">
+    <h2>9.2 심리 지표(sentiment) · 경고</h2>
+    <div class="cols">
+      <div>
+        <div class="eq">Trin = (하락 거래량 / 하락 종목 수) ÷ (상승 거래량 / 상승 종목 수)</div>
+        <p class="small">(1,000/800) ÷ (900/1,200) = 1.25 ÷ 0.75 = <b>1.67</b> &gt; 1 → 약세(bearish)</p>
+        <div class="eq">신뢰지수 = 최상위 등급 채권 수익률 ÷ 중간 등급 채권 수익률</div>
+        <p class="small">5/7 = 0.714 → 5/6 = 0.833 (스프레드 축소). 하지만 6/8 = 0.750 — 스프레드가 그대로여도 상승한다(비율 ≠ 스프레드)</p>
+      </div>
+      <div>
+        <div class="eq">풋/콜 비율 = 미결제 풋옵션 ÷ 미결제 콜옵션</div>
+        <p class="small">1.2/2.0 = 0.60 → 1.8/2.0 = <b>0.90</b>. 군중을 따를까(하락 예상), 거스를까(contrarian, 상승 예상)? 같은 숫자, 반대 거래 → 검증 불가</p>
+        <h3 style="margin-top:20px">경고 (warning)</h3>
+        <p class="small">동전 던지기로 만든 무작위 계열에도 고점·저점·채널이 보인다. 규칙은 찾을 때 쓰지 않은 자료로 검증해야 한다(데이터 마이닝, Ch.8).</p>
+      </div>
+    </div>
+  </section>
+
+  <section class="slide" data-title="수업 전 체크리스트">
+    <h2>수업 전 체크리스트 — 헷갈리는 쌍</h2>
+    <table>
+      <tr><th style="width:32%">쌍</th><th>구별 포인트</th></tr>
+      <tr><td>보수주의 vs 대표성</td><td>느린 수정 → <b>과소반응</b>(단기 모멘텀) / 작은 표본 외삽 → <b>과잉반응</b>(장기 반전)</td></tr>
+      <tr><td>정보처리 오류 vs 행동편향</td><td>믿음 자체가 틀림(예측 오류·과신…) / 믿음이 맞아도 결정이 비일관(프레이밍·심적 회계…)</td></tr>
+      <tr><td>근본적 위험 vs 모형 위험</td><td>내가 맞아도 오가격이 더 벌어질 위험 / 내 가치평가가 틀렸을 위험</td></tr>
+      <tr><td>Trin &gt; 1 은 강세? 약세?</td><td><b>약세</b> — 하락 종목에 거래량이 몰렸다는 뜻</td></tr>
+      <tr><td>신뢰지수 상승 = 스프레드 축소?</td><td>아니다 — 비율이라 두 수익률이 같이 올라도 상승한다</td></tr>
+    </table>
+    <p class="small muted" style="margin-top:14px">빈칸 채운 강의 슬라이드: <a href="../">IA Ch.9 — 빈칸 채움</a></p>
+  </section>
+
+</main>
+
+<script src="/slides/deck.js"></script>
+</body>
+</html>

@@ -1,0 +1,701 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta name="pinterest" content="nopin">
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="robots" content="noindex">
+<title>BF Ch.9 Making Capital Investment Decisions — 복습·연습문제</title>
+<link rel="stylesheet" href="/slides/deck.css">
+<!--
+  BF Ch.9 복습 덱 — 복습 요약 11장 + 연습문제 20문제(한 장에 한 문제, 풀이는 class="step" 블록: → 를 누르면 나타남).
+  원본: BF_Chap09_students.pdf (Prof. Gemma Lee, RWJ Essentials of Corporate Finance). 학생용 PDF 의 빈 풀이 칸은 직접 계산해 채웠다(파이썬 검산).
+  글자색은 고정하지 않는다(흰/검은 바탕 전환 D 키).
+-->
+<style>
+  .slide.d{padding:58px 96px 40px}
+  .slide.d h2{font-size:50px;margin:0 0 24px;padding-left:26px;border-left-width:6px}
+  .slide.d h3{font-size:35px;margin:0 0 10px}
+  .slide.d p{font-size:32px;line-height:1.42;margin:0 0 .4em}
+  .slide.d ul,.slide.d ol{font-size:31px;line-height:1.38}
+  .slide.d li{margin:.22em 0;padding-left:1.3em}
+  .slide.d ul>li::before{top:.66em;width:.65em;height:2px}
+  .slide.d table{font-size:27px;line-height:1.25}
+  .slide.d th,.slide.d td{padding:5px 14px;border-width:1.5px}
+  .slide.d table.num td+td,.slide.d table.num th+th{text-align:right}
+  .slide.d table.wide{width:100%}
+  .slide.d .cols{gap:44px}
+  .slide.d .small{font-size:25px}
+  .slide.d .q{font-size:31px}
+  .slide.d .sol{margin-top:14px;padding-top:12px;border-top:3px dashed currentColor}
+  .slide.d .sol p,.slide.d .sol li{font-size:28px;line-height:1.38}
+  .slide.d .sol table{font-size:25px}
+  .slide.d .sol th,.slide.d .sol td{padding:3px 12px}
+  .slide.d pre.ba{font-size:22px;line-height:1.35;padding:10px 16px;border-width:2px}
+  .slide.d .box{border:3px solid currentColor;padding:12px 22px;margin:8px 0}
+  .slide.d .box p{margin:0}
+  .slide.d .eq{font-size:32px;font-weight:700;text-align:center;margin:6px 0 14px}
+  .slide.d tr.tot td{font-weight:700;border-top-width:3px}
+  .slide.d td.st{min-width:120px}
+</style>
+</head>
+<body>
+<noscript>JavaScript is required.</noscript>
+
+<main id="stage">
+
+<!-- ───────────── 표지 ───────────── -->
+<section class="slide title" data-title="표지">
+  <h1 style="font-size:104px">BF Ch.9<br>Making Capital<br>Investment Decisions</h1>
+  <p class="sub">복습 요약 + 연습문제 20 · Business Finance (Prof. Gemma Lee)</p>
+  <p class="hint">→ 다음 / 풀이 한 단계씩 &nbsp;·&nbsp; O 목록 &nbsp;·&nbsp; D 흰/검은 바탕 &nbsp;·&nbsp; F 전체 화면</p>
+</section>
+
+<!-- ───────────── 복습 요약 ───────────── -->
+<section class="slide d" data-title="장 전체 지도">
+  <h2>장 전체 지도 — 무엇을 셀지 정한 뒤, 계산하고, 할인한다</h2>
+  <table class="wide">
+    <tr><th>절</th><th>핵심 질문</th><th>결과물</th></tr>
+    <tr><td>9.1 Project cash flows</td><td>어떤 현금흐름이 관련 있는가 (relevant)? — with vs without</td><td>독립 원칙 (stand-alone principle)</td></tr>
+    <tr><td>9.2 Incremental cash flows</td><td>매몰·기회비용, 부수효과, NWC, 금융비용은 넣는가?</td><td>In / Out 판단</td></tr>
+    <tr><td>9.3 Pro forma &amp; project CF</td><td>추정 손익계산서 → OCF → 연도별 프로젝트 현금흐름</td><td>CF<sub>0</sub> … CF<sub>T</sub>, NPV·IRR</td></tr>
+    <tr><td>9.4 More about project CF</td><td>NWC 변화, 세법 감가상각(MACRS), 세후 잔존가치</td><td>정확한 양 끝 연도</td></tr>
+    <tr><td>9.5 Alternative OCF definitions</td><td>Bottom-up · Top-down · Tax shield — 왜 모두 같은가</td><td>OCF 검산 도구</td></tr>
+  </table>
+  <p style="margin-top:22px"><b>왜 이 순서?</b> 할인(Ch.8)은 쉽다. 어려운 것은 <b>올바른 현금흐름</b>을 만드는 것 — 그래서 "무엇을 넣나(9.1–9.2) → 어떻게 계산하나(9.3) → 양 끝 연도 다듬기(9.4) → 검산(9.5)" 순서로 간다.</p>
+  <p class="small muted">흐름: 증분 판단 → pro forma (EBIT, 세금, NOPAT) → OCF − 순자본지출 − ΔNWC → Project CF → NPV / IRR</p>
+</section>
+
+<section class="slide d" data-title="9.1 관련 현금흐름">
+  <h2>9.1 관련 현금흐름 (relevant cash flow)</h2>
+  <div class="box"><p><b>정의</b> — 프로젝트를 채택하기로 한 결정의 <b>직접적 결과</b>로 생기는 회사 전체 미래 현금흐름의 변화.</p></div>
+  <div class="cols">
+    <div>
+      <h3>With and without — "전후"가 아니다</h3>
+      <ul>
+        <li>프로젝트가 <b>있을 때</b>와 <b>없을 때</b>의 회사 현금흐름 차이 = 증분 현금흐름 (incremental cash flow)</li>
+        <li>출시 뒤 기존 사업부 매출이 줄어도, <b>어차피 줄었을 몫</b>은 프로젝트 탓이 아니다</li>
+      </ul>
+    </div>
+    <div>
+      <h3>독립 원칙 (stand-alone principle)</h3>
+      <ul>
+        <li>증분 현금흐름을 찾고 나면 프로젝트를 <b>작은 회사 하나</b>처럼 — 자체 매출·비용·자산·현금흐름으로 — 평가한다</li>
+        <li>회사 전체를 두 번 평가할 필요가 없다</li>
+      </ul>
+    </div>
+  </div>
+</section>
+
+<section class="slide d" data-title="9.2 증분 판단 규칙">
+  <h2>9.2 증분 판단 — "프로젝트를 기각해도 이 현금흐름이 생기는가?"</h2>
+  <p>생긴다 → 증분 아님, 제외. &nbsp;생기지 않는다 → 증분, 포함 (회계 처리와 무관).</p>
+  <table class="wide">
+    <tr><th>항목</th><th>판단</th><th>규칙 · 예</th></tr>
+    <tr><td>매몰원가 (sunk cost)</td><td><b>Out</b></td><td>이미 지급했거나 되돌릴 수 없게 약정. 예: 끝난 마케팅 조사 $120,000. 자본화돼 나중에 비용 처리돼도 제외</td></tr>
+    <tr><td>기회비용 (opportunity cost)</td><td><b>In</b></td><td>보유 자산의 최선의 대체 용도. <b>오늘 시장가치(매각 세금 차감 후)</b>로 부과 — 매입가·장부가 아님</td></tr>
+    <tr><td>잠식 (erosion, cannibalization)</td><td><b>In (−)</b></td><td>기존 제품에서 빼앗아 오는 현금흐름. 단, 경쟁사에 어차피 뺏길 몫은 제외</td></tr>
+    <tr><td>시너지 (synergy)</td><td><b>In (+)</b></td><td>기존 제품 매출을 늘려 주는 효과</td></tr>
+    <tr><td>순운전자본 (NWC)</td><td><b>In</b></td><td>시작 때 유출, 끝에 회수. 명목 합은 0이어도 시간가치만큼 실제 비용</td></tr>
+    <tr><td>금융비용 (interest, dividends, principal)</td><td><b>Out</b></td><td>할인율(요구수익률, Ch.12)에 이미 반영. 빼면 이중 차감 → pro forma에 이자 줄 없음</td></tr>
+  </table>
+</section>
+
+<section class="slide d" data-title="Quick check: Is it incremental?">
+  <h2>Quick check — Is it incremental? (강의 p.12 정답)</h2>
+  <table class="wide">
+    <tr><th>Item</th><th>In or out?</th><th>Why</th></tr>
+    <tr><td>Marketing study completed last year</td><td><b>Out</b></td><td>Sunk — 결정과 무관하게 지급됨</td></tr>
+    <tr><td>Market value of land the firm already owns</td><td><b>In</b></td><td>Opportunity cost — 매각 기회를 포기</td></tr>
+    <tr><td>Original purchase price of that land</td><td><b>Out</b></td><td>Sunk — 장부가는 경제적 비용이 아님</td></tr>
+    <tr><td>Lost profit on an existing product</td><td><b>In</b> (일부)</td><td>Erosion — 이 프로젝트가 일으킨 부분만</td></tr>
+    <tr><td>Increase in inventory and receivables</td><td><b>In</b></td><td>NWC 투자, 끝에 회수</td></tr>
+    <tr><td>Interest on the loan financing the project</td><td><b>Out</b></td><td>Financing cost — 할인율에 반영</td></tr>
+    <tr><td>Allocated head-office overhead</td><td><b>총 간접비가 실제로 늘어난 만큼만 In</b></td><td>배부만 바뀐 것은 증분 아님</td></tr>
+    <tr><td>Depreciation on the new equipment</td><td><b>In (세금 효과로)</b></td><td>현금흐름은 아니지만 세금을 바꾼다 (D × T)</td></tr>
+  </table>
+  <p class="small muted" style="margin-top:12px">마지막 두 줄이 꼼꼼한 분석가와 부주의한 분석가를 가른다.</p>
+</section>
+
+<section class="slide d" data-title="9.3 Pro forma와 프로젝트 현금흐름">
+  <h2>9.3 Pro forma → OCF → 프로젝트 현금흐름</h2>
+  <div class="cols">
+    <div>
+      <h3>추정 손익계산서 (pro forma)</h3>
+      <table class="num">
+        <tr><td>Sales</td><td>Units × price</td></tr>
+        <tr><td>− Variable costs</td><td>Units × cost/unit</td></tr>
+        <tr><td>− Fixed costs</td><td>증분만</td></tr>
+        <tr><td>− Depreciation</td><td>세법 감가상각</td></tr>
+        <tr class="tot"><td>= EBIT</td><td></td></tr>
+        <tr><td>− Taxes</td><td>EBIT × T</td></tr>
+        <tr class="tot"><td>= NOPAT</td><td>EBIT × (1 − T)</td></tr>
+      </table>
+      <p class="small" style="margin-top:10px">이자 줄 없음 → NOPAT = 순이익(net income). 감가상각은 세금을 줄이기 때문에만 들어간다.</p>
+    </div>
+    <div>
+      <h3>프로젝트 현금흐름 — 세 요소뿐</h3>
+      <div class="box"><p class="eq" style="margin:0">Project CF = OCF − 순자본지출 − ΔNWC</p></div>
+      <p><b>OCF</b> = EBIT + D − Taxes = NOPAT + D</p>
+      <ul>
+        <li>순자본지출 (capital spending): 자산 구입(Year 0), 끝에 <b>세후</b> 매각대금은 유입</li>
+        <li>ΔNWC: 증가 = 유출, 별말 없으면 마지막 해에 전액 회수</li>
+        <li>모양: Year 0 큰 유출 → 중간 연도는 OCF뿐 → 마지막 해 NWC·잔존가치 회수로 큼</li>
+      </ul>
+    </div>
+  </div>
+</section>
+
+<section class="slide d" data-title="9.4 순운전자본">
+  <h2>9.4 순운전자본 (NWC) — 매출과 현금 수입은 다르다</h2>
+  <div class="cols">
+    <div>
+      <h3>발생주의 vs 현금</h3>
+      <ul>
+        <li>회계는 거래 시점에 매출·비용을 기록 (accrual basis). 외상 매출 $1,000 → 매출 $1,000, 매출채권 $1,000, 현금 0</li>
+        <li><b>현금 회수 = 매출 − 매출채권 증가</b></li>
+        <li>pro forma는 발생주의 → <b>ΔNWC를 빼는 것이 현금으로 되돌리는 보정</b>이다 (추가 비용이 아님)</li>
+      </ul>
+    </div>
+    <div>
+      <h3>부호와 시점</h3>
+      <table class="wide">
+        <tr><th>상황</th><th>현금흐름</th></tr>
+        <tr><td>NWC 증가 (재고·채권 늘어남)</td><td>유출 (−)</td></tr>
+        <tr><td>NWC 감소 (채권 회수)</td><td>유입 (+)</td></tr>
+        <tr><td>마지막 해</td><td>남은 NWC 전액 회수 (+)</td></tr>
+      </table>
+      <p class="small" style="margin-top:12px">성장기에는 NWC가 매출과 함께 늘어 초반 조정이 음(−), 사업을 접을 때 반대로 돈다. 셀 것은 <b>수준이 아니라 변화(Δ)</b>.</p>
+    </div>
+  </div>
+</section>
+
+<section class="slide d" data-title="9.4 세법 감가상각과 MACRS">
+  <h2>9.4 세법 감가상각 — 정액법 vs MACRS</h2>
+  <div class="cols wide-right">
+    <div>
+      <ul>
+        <li><b>정액법 (straight-line)</b>: 원가 ÷ 내용연수, 0 또는 주어진 잔존가치까지. 수업 기본값</li>
+        <li><b>MACRS</b>: 자산마다 class life, 매년 <b>원가(original cost)</b>에 고정 비율</li>
+        <li><b>반년 관례 (half-year convention)</b>: 연중 매입 가정 → 3년 class는 4년, 5년 class는 6년에 걸쳐 상각</li>
+        <li>MACRS는 잔존가치를 무시, 항상 0까지 상각</li>
+        <li>총 공제액은 같다 — MACRS는 공제를 <b>앞당길</b> 뿐</li>
+      </ul>
+    </div>
+    <div>
+      <table class="num wide">
+        <tr><th>Year</th><th>3-year</th><th>5-year</th><th>7-year</th></tr>
+        <tr><td>1</td><td>33.33%</td><td>20.00%</td><td>14.29%</td></tr>
+        <tr><td>2</td><td>44.45%</td><td>32.00%</td><td>24.49%</td></tr>
+        <tr><td>3</td><td>14.81%</td><td>19.20%</td><td>17.49%</td></tr>
+        <tr><td>4</td><td>7.41%</td><td>11.52%</td><td>12.49%</td></tr>
+        <tr><td>5</td><td></td><td>11.52%</td><td>8.93%</td></tr>
+        <tr><td>6</td><td></td><td>5.76%</td><td>8.92%</td></tr>
+      </table>
+      <p class="small" style="margin-top:10px">D<sub>t</sub> = 원가 × rate<sub>t</sub> (줄어든 장부가에 곱하지 않는다)</p>
+    </div>
+  </div>
+</section>
+
+<section class="slide d" data-title="9.4 세후 잔존가치">
+  <h2>9.4 장부가 vs 시장가 — 세후 잔존가치 (after-tax salvage)</h2>
+  <div class="box"><p class="eq" style="margin:0">After-tax salvage = MV − T × (MV − BV)</p></div>
+  <div class="cols">
+    <div>
+      <h3>장부가보다 비싸게 판매 (MV &gt; BV)</h3>
+      <ul><li>감가상각을 너무 많이 받았다 → 차익 환수 과세 (recapture)</li><li>세후 대금 &lt; 매각가</li></ul>
+    </div>
+    <div>
+      <h3>장부가보다 싸게 판매 (MV &lt; BV)</h3>
+      <ul><li>감가상각을 덜 받았다 → 손실 공제, 절세액을 더함</li><li>세후 대금 &gt; 매각가</li></ul>
+    </div>
+  </div>
+  <p><b>강의 예</b>: $90,000, 정액 5년, 3년 뒤 매각 → BV = 90,000 − 3 × 18,000 = 36,000. $25,000에 팔면 손실 11,000 × 0.21 = 2,310 절세 → <b>$27,310</b>; $45,000에 팔면 차익 9,000 × 0.21 = 1,890 과세 → <b>$43,110</b>.</p>
+  <p class="small muted">BV = 원가 − 누적 감가상각. MACRS 자산을 class life 전에 팔면 남은 비율만큼 BV가 남는다.</p>
+</section>
+
+<section class="slide d" data-title="9.5 OCF 세 가지 정의">
+  <h2>9.5 OCF 세 가지 정의 — 한 항등식의 재배열</h2>
+  <table class="wide">
+    <tr><th>방법</th><th>식</th><th>강의 프로젝트 (S 160,000 · C 110,000 · D 30,000 · T 21%)</th></tr>
+    <tr><td>Bottom-up</td><td>OCF = NOPAT + D<br><span class="small">(교재: net income + D, 이자 없으면 같음)</span></td><td>15,800 + 30,000 = 45,800</td></tr>
+    <tr><td>Top-down</td><td>OCF = Sales − Costs − Taxes</td><td>160,000 − 110,000 − 4,200 = 45,800</td></tr>
+    <tr><td>Tax shield</td><td>OCF = (Sales − Costs)(1 − T) + D × T</td><td>39,500 + 6,300 = 45,800</td></tr>
+  </table>
+  <ul style="margin-top:18px">
+    <li><b>감가상각 절세효과 (depreciation tax shield)</b> = D × T — 감가상각이 현금흐름에 미치는 유일한 경로</li>
+    <li>Top-down은 식에 D가 안 보이지만 <b>Taxes 안에</b> D가 들어 있다</li>
+    <li>셋이 다르게 나오면 계산 실수 — 서로 검산용으로 쓴다</li>
+  </ul>
+</section>
+
+<section class="slide d" data-title="헷갈리는 쌍 비교">
+  <h2>헷갈리는 쌍 비교</h2>
+  <table class="wide">
+    <tr><th>쌍</th><th>구별 포인트</th></tr>
+    <tr><td>With/without vs before/after</td><td>비교 대상은 "프로젝트 없을 때" — 시간상 전후가 아님</td></tr>
+    <tr><td>매몰원가 vs 기회비용</td><td>과거에 쓴 돈(제외) vs 지금 포기하는 가치(포함, 시장가 기준)</td></tr>
+    <tr><td>잠식 vs 시너지</td><td>기존 제품 현금흐름 감소(−) vs 증가(+); 어차피 잃을 몫은 잠식 아님</td></tr>
+    <tr><td>NOPAT vs OCF</td><td>NOPAT에 D를 더해야 OCF. NOPAT만 할인하면 과소평가</td></tr>
+    <tr><td>장부가 vs 시장가</td><td>세금은 그 차이에 붙는다: MV − T(MV − BV)</td></tr>
+    <tr><td>정액법 vs MACRS</td><td>총 공제액 같음, MACRS는 앞당김 → 절세효과 PV↑. 단, 조기 매각 시 BV가 낮아 차익 과세↑</td></tr>
+    <tr><td>NWC 수준 vs 변화</td><td>현금흐름은 ΔNWC. 명목 합 0이어도 PV 비용은 양(+)</td></tr>
+    <tr><td>프로젝트 세금 vs 회사 실제 세금</td><td>프로젝트 세금 = EBIT × T (전액 자기자본 조달 가정). 이자 절세는 할인율 쪽</td></tr>
+  </table>
+</section>
+
+<section class="slide d" data-title="풀이 순서와 자주 하는 실수">
+  <h2>풀이 순서 · 자주 하는 실수</h2>
+  <div class="cols">
+    <div>
+      <h3>풀이 순서</h3>
+      <ol>
+        <li>항목별 In / Out 판단 (매몰·이자 제외, 기회비용·잠식 포함)</li>
+        <li>감가상각표 (정액 또는 MACRS) → 매각 시 BV</li>
+        <li>Pro forma: EBIT → Taxes → NOPAT</li>
+        <li>OCF = NOPAT + D (다른 정의로 검산)</li>
+        <li>Year 0: −자산 − NWC; 마지막 해: + NWC + 세후 잔존가치</li>
+        <li>NPV · IRR (BA II Plus CF 워크시트)</li>
+      </ol>
+    </div>
+    <div>
+      <h3>자주 하는 실수 (Sorensen 예, 정답 NPV $11,565.74)</h3>
+      <table class="num wide">
+        <tr><th>실수</th><th>잘못된 NPV</th></tr>
+        <tr><td>매몰원가 $75,000 포함</td><td>−63,434.26</td></tr>
+        <tr><td>NWC 회수 누락</td><td>−59,483.89</td></tr>
+        <tr><td>세후 이자 차감</td><td>−36,772.75</td></tr>
+        <tr><td>기회비용(임대료) 누락</td><td>+103,639.05</td></tr>
+      </table>
+      <p class="small" style="margin-top:10px">앞 세 실수는 좋은 프로젝트를 기각하게 만들고, 마지막은 가치를 크게 부풀린다.</p>
+    </div>
+  </div>
+</section>
+
+<!-- ───────────── 연습문제 ───────────── -->
+<section class="slide section" data-title="연습문제">
+  <h1>연습문제</h1>
+  <p class="sub" style="font-size:44px;opacity:.72;margin-top:30px">20문제 · 한 장에 한 문제 · → 로 풀이</p>
+</section>
+
+<section class="slide d" data-title="Q1 · With and without">
+  <h2>Q1 · With and without</h2>
+  <p class="q">한 사업부의 매출은 현재 $2,000,000이다. 경쟁사 진입 때문에 내년 매출이 <b>5%</b> 줄 것으로 이미 예상돼 있었다. 회사가 신제품을 출시한 뒤 이 사업부 매출은 <b>8%</b> 줄었다. 매출 감소 중 신제품 때문인 부분(잠식, erosion)은 얼마인가? 출시 "전후(before and after)" 비교가 왜 틀리는지도 설명하라.</p>
+  <div class="sol step">
+    <p><b>Without</b> (프로젝트 없음): −5% → 2,000,000 × 5% = 100,000 감소 — 경쟁사 탓, 어차피 발생</p>
+    <p><b>With</b> (프로젝트 있음): −8% → 2,000,000 × 8% = 160,000 감소</p>
+    <p><b>증분 잠식</b> = (8% − 5%) × 2,000,000 = <b>$60,000</b> (분석에서는 이 매출에서 잃는 공헌이익을 비용으로 뺀다)</p>
+  </div>
+  <div class="sol step">
+    <p>전후 비교는 160,000 전부를 신제품 탓으로 돌려 프로젝트를 과소평가한다. 기준은 "출시 전"이 아니라 "출시하지 않았을 때"다.</p>
+  </div>
+</section>
+
+<section class="slide d" data-title="Q2 · 매몰원가">
+  <h2>Q2 · 매몰원가 (sunk cost)</h2>
+  <p class="q">회사는 시제품 개발에 이미 <b>$3.0 million</b>을 썼다(환불 불가). 완성하려면 <b>$1.2 million</b>이 더 들고, 완성된 제품의 미래 현금흐름 현재가치는 <b>$2.0 million</b>이다. 한 임원은 "총비용 4.2 &gt; 가치 2.0이니 중단하자"고 한다. 옳은가?</p>
+  <div class="sol step">
+    <p>오늘의 결정: 완성하면 +2.0 − 1.2 = <b>NPV +$0.8 million</b> &gt; 0 → <b>완성한다</b></p>
+    <p>$3.0 million은 완성하든 중단하든 이미 사라졌다 — 어떤 결정도 바꿀 수 없으므로 분석에서 완전히 뺀다</p>
+  </div>
+  <div class="sol step">
+    <p>임원의 논리대로 중단하면 0.8 million의 가치를 버린다 — 매몰원가를 "두 번" 낭비하는 셈 (강의 p.7)</p>
+    <p class="small">주의: 아직 돈이 나가지 않았어도 <b>취소할 수 없게 약정된(irrevocably committed)</b> 지출은 매몰원가다. 자본화돼 나중에 비용 처리되더라도 마찬가지.</p>
+  </div>
+</section>
+
+<section class="slide d" data-title="Q3 · 기회비용">
+  <h2>Q3 · 기회비용 (opportunity cost)</h2>
+  <p class="q">프로젝트가 회사가 몇 년 전 <b>$200,000</b>에 산 창고를 쓴다(장부가도 $200,000). 이 창고는 오늘 <b>$550,000</b>에 팔 수 있다. 세율 21%. Year 0에 프로젝트에 부과할 기회비용은? 매입가는 어떻게 처리하나?</p>
+  <div class="sol step">
+    <p>규칙: 오늘 시장가치, <b>매각 세금 차감 후</b> (강의 p.8 "net of any tax on the sale")</p>
+    <p>매각 차익 세금 = 0.21 × (550,000 − 200,000) = 73,500</p>
+    <p>기회비용 = 550,000 − 73,500 = <b>$476,500</b> → Year 0 현금흐름에 −476,500</p>
+  </div>
+  <div class="sol step">
+    <p>매입가 $200,000은 매몰원가 — 판단에 쓰지 않는다. 장부가도 경제적 비용이 아니다(세금 계산에만 쓰인다).</p>
+    <p>"이미 갖고 있으니 공짜" — 나쁜 프로젝트를 좋아 보이게 만드는 가장 흔한 실수.</p>
+  </div>
+</section>
+
+<section class="slide d" data-title="Q4 · 부수효과">
+  <h2>Q4 · 부수효과 (side effects): 잠식과 시너지</h2>
+  <p class="q">신제품의 공헌이익(contribution)은 연 $600,000이다. 기존 제품의 공헌이익이 연 $100,000 줄어드는데, 그중 $40,000은 경쟁사 때문에 신제품이 없어도 잃을 몫이다. 신제품은 액세서리 판매를 늘려 공헌이익을 연 $25,000 더한다. 프로젝트의 연간 증분 공헌이익은?</p>
+  <div class="sol step">
+    <p>잠식 (erosion) — 프로젝트가 일으킨 몫만: 100,000 − 40,000 = 60,000</p>
+    <p>시너지 (synergy): +25,000</p>
+    <p>증분 공헌이익 = 600,000 − 60,000 + 25,000 = <b>$565,000</b></p>
+  </div>
+  <div class="sol step">
+    <table class="num">
+      <tr><th>흔한 오답</th><th>값</th><th>실수</th></tr>
+      <tr><td>잠식 전부 차감</td><td>525,000</td><td>어차피 잃을 40,000까지 차감</td></tr>
+      <tr><td>시너지 누락</td><td>540,000</td><td>기존 제품 증가분 무시</td></tr>
+      <tr><td>부수효과 무시</td><td>600,000</td><td>독립 원칙을 회사 전체 효과 없이 적용</td></tr>
+    </table>
+  </div>
+</section>
+
+<section class="slide d" data-title="Q5 · Is it incremental?">
+  <h2>Q5 · Is it incremental? — 각 항목 In / Out</h2>
+  <table class="wide">
+    <tr><th>Item</th><th>판단 · 이유</th></tr>
+    <tr><td>Marketing study completed last year</td><td class="step"><b>Out</b> — sunk</td></tr>
+    <tr><td>Market value of land the firm already owns</td><td class="step"><b>In</b> — opportunity cost (세후 매각대금)</td></tr>
+    <tr><td>Original purchase price of that land</td><td class="step"><b>Out</b> — sunk; 장부가는 경제적 비용 아님</td></tr>
+    <tr><td>Lost profit on an existing product</td><td class="step"><b>In</b> — erosion, 이 프로젝트가 일으킨 부분만</td></tr>
+    <tr><td>Increase in inventory and receivables</td><td class="step"><b>In</b> — NWC 투자, 끝에 회수</td></tr>
+    <tr><td>Interest on the loan financing the project</td><td class="step"><b>Out</b> — financing, 할인율에 반영</td></tr>
+    <tr><td>Allocated head-office overhead</td><td class="step">총 간접비가 <b>실제로 늘어난 만큼만 In</b></td></tr>
+    <tr><td>Depreciation on the new equipment</td><td class="step">현금흐름은 아니지만 <b>세금을 바꾸므로 In</b> (D × T)</td></tr>
+  </table>
+</section>
+
+<section class="slide d" data-title="Q6 · 금융비용 제외">
+  <h2>Q6 · 금융비용은 현금흐름에서 뺀다</h2>
+  <p class="q">프로젝트의 EBIT는 연 $180,000, 감가상각은 연 $50,000이다. 자금 일부를 대출로 조달해 이자가 연 $30,000이다. 세율 21%. 프로젝트 현금흐름 예측에 넣을 세금과 OCF는?</p>
+  <div class="sol step">
+    <p>Pro forma에 이자 줄 없음 → EBIT에서 바로 세금: Taxes = 0.21 × 180,000 = <b>$37,800</b></p>
+    <p>OCF = EBIT + D − Taxes = 180,000 + 50,000 − 37,800 = <b>$192,200</b></p>
+  </div>
+  <div class="sol step">
+    <p>오답 0.21 × (180,000 − 30,000) = 31,500: 이자 절세효과를 현금흐름에 넣은 것 — 그 효과는 할인율(Ch.12) 쪽에 있다</p>
+    <p>이자를 빼고 부채비용이 들어간 할인율로 다시 할인하면 같은 차입을 <b>두 번</b> 벌주는 셈. 그래서 프로젝트 세금은 "전액 자기자본 조달일 때 낼 세금"이다.</p>
+  </div>
+</section>
+
+<section class="slide d" data-title="Q7 · 강의 프로젝트 ① Pro forma와 OCF">
+  <h2>Q7 · 강의 프로젝트 ① Pro forma와 OCF</h2>
+  <p class="q">고정자산 $90,000 (3년 정액, 잔존가치 0) · 수명 3년 · NWC $20,000 (3년 말 회수) · 매출 연 $160,000 · 비용(변동+고정, 감가상각 제외) 연 $110,000 · 세율 21% · 요구수익률 12%. 매년 같은 pro forma를 만들고 OCF를 구하라. 감가상각은 세금을 얼마나 줄이나?</p>
+  <div class="cols">
+    <div class="sol step">
+      <table class="num">
+        <tr><th>Each year</th><th>$</th></tr>
+        <tr><td>Sales</td><td>160,000</td></tr>
+        <tr><td>− Costs</td><td>110,000</td></tr>
+        <tr><td>− Depreciation (90,000 / 3)</td><td>30,000</td></tr>
+        <tr class="tot"><td>= EBIT</td><td>20,000</td></tr>
+        <tr><td>− Taxes (21%)</td><td>4,200</td></tr>
+        <tr class="tot"><td>= NOPAT</td><td>15,800</td></tr>
+      </table>
+    </div>
+    <div class="sol step">
+      <p>OCF = EBIT + D − Taxes = 20,000 + 30,000 − 4,200 = <b>$45,800</b></p>
+      <p>= NOPAT + D = 15,800 + 30,000</p>
+      <p>절세효과 = 30,000 × 0.21 = <b>$6,300</b> — 감가상각이 없으면 세금은 50,000 × 0.21 = 10,500 (실제 4,200)</p>
+    </div>
+  </div>
+</section>
+
+<section class="slide d" data-title="Q8 · 강의 프로젝트 ② 현금흐름과 NPV">
+  <h2>Q8 · 강의 프로젝트 ② 현금흐름, NPV, IRR</h2>
+  <p class="q">Q7의 프로젝트 (OCF 연 $45,800, 자산 $90,000, NWC $20,000 3년 말 회수, r = 12%). Year 0–3 현금흐름표를 만들고 NPV·IRR을 구해 결정하라.</p>
+  <div class="sol step">
+    <table class="num wide">
+      <tr><th>Year</th><th>0</th><th>1</th><th>2</th><th>3</th></tr>
+      <tr><td>Operating cash flow</td><td></td><td>45,800</td><td>45,800</td><td>45,800</td></tr>
+      <tr><td>Capital spending</td><td>−90,000</td><td></td><td></td><td></td></tr>
+      <tr><td>Change in NWC</td><td>−20,000</td><td></td><td></td><td>+20,000</td></tr>
+      <tr class="tot"><td>Project cash flow</td><td>−110,000</td><td>45,800</td><td>45,800</td><td>65,800</td></tr>
+    </table>
+  </div>
+  <div class="cols">
+    <div class="sol step">
+      <p>NPV = −110,000 + 45,800/1.12 + 45,800/1.12<sup>2</sup> + 65,800/1.12<sup>3</sup></p>
+      <p>= −110,000 + 40,892.86 + 36,511.48 + 46,835.14 = <b>$14,239.48</b></p>
+      <p>IRR = <b>18.93%</b> &gt; 12% → <b>채택</b> (전통적 프로젝트라 두 규칙이 일치)</p>
+    </div>
+    <pre class="ba sol step">CF  2nd [CLR WORK]
+CF0 −110000 ENTER ↓
+C01  45800 ENTER ↓  F01 2 ENTER ↓
+C02  65800 ENTER ↓  F02 1 ENTER ↓
+NPV  I 12 ENTER ↓  CPT → 14,239.48
+IRR  CPT → 18.93</pre>
+  </div>
+</section>
+
+<section class="slide d" data-title="Q9 · Sorensen (a) 증분 판단">
+  <h2>Q9 · Sorensen Manufacturing (a) — 증분이 아닌 항목은?</h2>
+  <ul class="q" style="font-size:27px">
+    <li>작년 시장조사비 $75,000 지급</li>
+    <li>장비 $540,000, 4년 정액법으로 0까지, 종료 시 가치 없음</li>
+    <li>회사 소유 건물 사용 — 현재 연 $40,000(세전)에 임대 중, 세입자는 나가야 함</li>
+    <li>연 30,000개 × $42 판매, 변동비 $28/개, 고정비 연 $95,000 추가</li>
+    <li>기존 제품 판매 연 4,000개 감소, 개당 공헌이익 $15</li>
+    <li>NWC $120,000 처음 투입, 끝에 전액 회수</li>
+    <li>$300,000을 7%로 차입, 이자 연 $21,000 · 세율 21% · 요구수익률 14%</li>
+  </ul>
+  <div class="cols">
+    <div class="sol step">
+      <p><b>증분 아님</b></p>
+      <p>· 시장조사 $75,000 — 매몰원가, 진행 여부와 무관</p>
+      <p>· 이자 $21,000/년 — 금융비용, 14% 할인율에 반영</p>
+    </div>
+    <div class="sol step">
+      <p><b>증분이고 놓치기 쉬움</b></p>
+      <p>· 포기한 임대료 $40,000/년 — 건물의 기회비용</p>
+      <p>· 잠식 4,000 × $15 = $60,000/년 — 기존 제품 공헌이익 손실</p>
+    </div>
+  </div>
+</section>
+
+<section class="slide d" data-title="Q10 · Sorensen (b) Pro forma와 OCF">
+  <h2>Q10 · Sorensen (b) — Pro forma와 OCF</h2>
+  <p class="q">Q9의 Sorensen 자료로 매년 같은 pro forma 손익계산서를 만들고 OCF를 구하라. (세율 21%)</p>
+  <div class="cols">
+    <div class="sol step">
+      <table class="num">
+        <tr><th>Pro forma, each year</th><th>$</th></tr>
+        <tr><td>Sales (30,000 × $42)</td><td>1,260,000</td></tr>
+        <tr><td>− Variable costs (30,000 × $28)</td><td>840,000</td></tr>
+        <tr><td>− Fixed costs</td><td>95,000</td></tr>
+        <tr><td>− Forgone rent</td><td>40,000</td></tr>
+        <tr><td>− Erosion (4,000 × $15)</td><td>60,000</td></tr>
+        <tr><td>− Depreciation (540,000 / 4)</td><td>135,000</td></tr>
+        <tr class="tot"><td>= EBIT</td><td>90,000</td></tr>
+        <tr><td>− Taxes (21%)</td><td>18,900</td></tr>
+        <tr class="tot"><td>= NOPAT</td><td>71,100</td></tr>
+      </table>
+    </div>
+    <div class="sol step">
+      <p>OCF = NOPAT + D = 71,100 + 135,000 = <b>$206,100</b></p>
+      <p>검산 (tax shield):</p>
+      <p>S − C = 1,260,000 − 840,000 − 95,000 − 40,000 − 60,000 = 225,000</p>
+      <p>225,000 × 0.79 + 135,000 × 0.21 = 177,750 + 28,350 = 206,100 ✓</p>
+      <p class="small">이자 $21,000은 어디에도 없다 — EBIT에서 바로 세금.</p>
+    </div>
+  </div>
+</section>
+
+<section class="slide d" data-title="Q11 · Sorensen (c)(d) 현금흐름과 NPV">
+  <h2>Q11 · Sorensen (c)(d) — 현금흐름, NPV, IRR</h2>
+  <p class="q">OCF 연 $206,100 (4년), 장비 $540,000, NWC $120,000 (4년 말 회수), r = 14%. Year 0–4 현금흐름을 만들고 NPV·IRR로 결정하라.</p>
+  <div class="sol step">
+    <table class="num wide">
+      <tr><th>Year</th><th>0</th><th>1</th><th>2</th><th>3</th><th>4</th></tr>
+      <tr><td>Operating cash flow</td><td></td><td>206,100</td><td>206,100</td><td>206,100</td><td>206,100</td></tr>
+      <tr><td>Capital spending</td><td>−540,000</td><td></td><td></td><td></td><td></td></tr>
+      <tr><td>Change in NWC</td><td>−120,000</td><td></td><td></td><td></td><td>+120,000</td></tr>
+      <tr class="tot"><td>Project cash flow</td><td>−660,000</td><td>206,100</td><td>206,100</td><td>206,100</td><td>326,100</td></tr>
+    </table>
+  </div>
+  <div class="cols">
+    <div class="sol step">
+      <p>NPV = −660,000 + 206,100 × [1 − 1/1.14<sup>4</sup>]/0.14 + 120,000/1.14<sup>4</sup></p>
+      <p>= −660,000 + 600,516.11 + 71,049.63 = <b>$11,565.74</b></p>
+      <p>IRR = <b>14.79%</b> &gt; 14% → <b>채택</b> (여유는 작다)</p>
+    </div>
+    <pre class="ba sol step">CF  2nd [CLR WORK]
+CF0 −660000 ENTER ↓
+C01 206100 ENTER ↓  F01 3 ENTER ↓
+C02 326100 ENTER ↓  F02 1 ENTER ↓
+NPV  I 14 ENTER ↓  CPT → 11,565.74
+IRR  CPT → 14.79</pre>
+  </div>
+</section>
+
+<section class="slide d" data-title="Q12 · Sorensen 흔한 실수의 대가">
+  <h2>Q12 · Sorensen — 실수 하나가 NPV를 얼마나 바꾸나?</h2>
+  <p class="q">정답 NPV는 $11,565.74 (r = 14%, 4년). 분석가가 다음 실수를 <b>하나씩</b> 했다면 NPV는 각각 얼마인가? (1) 시장조사 $75,000을 Year 0에 차감 (2) NWC 회수 누락 (3) 세후 이자를 매년 차감 (4) 임대료 기회비용 누락</p>
+  <div class="sol step">
+    <p>(1) 11,565.74 − 75,000 = <b>−$63,434.26</b> → 잘못 기각</p>
+    <p>(2) 회수액의 PV = 120,000 / 1.14<sup>4</sup> = 71,049.63 → 11,565.74 − 71,049.63 = <b>−$59,483.89</b> → 잘못 기각</p>
+  </div>
+  <div class="sol step">
+    <p>(3) 세후 이자 = 21,000 × 0.79 = 16,590/년, PV = 16,590 × 2.91371 = 48,338.49 → <b>−$36,772.75</b> → 잘못 기각 (금융비용 이중 계산)</p>
+    <p>(4) 세후 임대료 = 40,000 × 0.79 = 31,600/년, PV = 92,073.31 → <b>+$103,639.05</b> → "공짜 건물"로 가치를 9배 부풀림</p>
+  </div>
+  <p class="small muted step">연금현가계수 [1 − 1/1.14<sup>4</sup>]/0.14 = 2.91371 · BA II Plus: 4 N, 14 I/Y, −16590 PMT, 0 FV, CPT PV</p>
+</section>
+
+<section class="slide d" data-title="Q13 · NWC 변화와 비용">
+  <h2>Q13 · NWC — 수준이 아니라 변화를 센다</h2>
+  <p class="q">3년 프로젝트의 연말 NWC 필요액: Year 0 $30,000 · Year 1 $45,000 · Year 2 $45,000 · Year 3 $0 (전액 회수). (a) 연도별 NWC 현금흐름은? (b) r = 10%에서 NWC가 프로젝트에 주는 PV 비용은?</p>
+  <div class="sol step">
+    <table class="num wide">
+      <tr><th>Year</th><th>0</th><th>1</th><th>2</th><th>3</th></tr>
+      <tr><td>NWC level (year end)</td><td>30,000</td><td>45,000</td><td>45,000</td><td>0</td></tr>
+      <tr><td>ΔNWC</td><td>+30,000</td><td>+15,000</td><td>0</td><td>−45,000</td></tr>
+      <tr class="tot"><td>Cash flow = −ΔNWC</td><td>−30,000</td><td>−15,000</td><td>0</td><td>+45,000</td></tr>
+    </table>
+  </div>
+  <div class="sol step">
+    <p>(b) PV = −30,000 − 15,000/1.10 + 45,000/1.10<sup>3</sup> = −30,000 − 13,636.36 + 33,809.17 = <b>−$9,827.20</b></p>
+    <p>명목 합은 0이지만, 돈을 프로젝트 기간 동안 묶어 두므로 PV로는 $9,827.20의 실제 비용이다.</p>
+    <p class="small">같은 논리: 외상 매출 $1,000 → 매출 1,000, 현금 0. 현금 회수 = 매출 − 매출채권 증가.</p>
+  </div>
+</section>
+
+<section class="slide d" data-title="Q14 · MACRS vs 정액법">
+  <h2>Q14 · MACRS vs 정액법 — 연간 감가상각</h2>
+  <p class="q">장비 원가 $200,000, 5-year MACRS class. 대안은 5년 정액법으로 0까지. 두 감가상각표를 만들고 Year 2의 MACRS 감가상각을 식으로 보여라.</p>
+  <div class="cols wide-left">
+    <div class="sol step">
+      <table class="num wide">
+        <tr><th>Year</th><th>MACRS rate</th><th>MACRS D</th><th>Straight-line</th></tr>
+        <tr><td>1</td><td>20.00%</td><td>40,000</td><td>40,000</td></tr>
+        <tr><td>2</td><td>32.00%</td><td>64,000</td><td>40,000</td></tr>
+        <tr><td>3</td><td>19.20%</td><td>38,400</td><td>40,000</td></tr>
+        <tr><td>4</td><td>11.52%</td><td>23,040</td><td>40,000</td></tr>
+        <tr><td>5</td><td>11.52%</td><td>23,040</td><td>40,000</td></tr>
+        <tr><td>6</td><td>5.76%</td><td>11,520</td><td>—</td></tr>
+        <tr class="tot"><td>Total</td><td>100%</td><td>200,000</td><td>200,000</td></tr>
+      </table>
+    </div>
+    <div class="sol step">
+      <p>Year 2 = 200,000 × 32.00% = <b>$64,000</b> — 비율은 항상 <b>원가</b>에 곱한다 (줄어든 장부가 아님)</p>
+      <p>Year 1이 같은 이유: 반년 관례가 가속 비율을 반으로 줄여 정액 금액과 같아짐</p>
+      <p>5년 자산이 6년에 걸쳐 상각 — 처음 놓친 반년을 끝에서 회복</p>
+      <p>총액은 같다 — MACRS는 공제를 <b>앞당길</b> 뿐</p>
+    </div>
+  </div>
+</section>
+
+<section class="slide d" data-title="Q15 · 세후 잔존가치 (손실·차익)">
+  <h2>Q15 · 세후 잔존가치 — 손실일 때와 차익일 때</h2>
+  <p class="q">원가 $90,000 자산을 5년 정액법으로 상각 중인데 프로젝트가 3년 만에 끝난다. 세율 21%. (a) $25,000에 팔 때 (b) $45,000에 팔 때 세후 잔존가치는?</p>
+  <div class="sol step">
+    <p>연 감가상각 = 90,000 / 5 = 18,000 → BV = 90,000 − 3 × 18,000 = <b>36,000</b></p>
+    <p class="eq" style="font-size:28px">After-tax salvage = MV − T × (MV − BV)</p>
+  </div>
+  <div class="cols">
+    <div class="sol step">
+      <p><b>(a) MV 25,000 &lt; BV</b></p>
+      <p>손실 11,000 → 절세 0.21 × 11,000 = 2,310</p>
+      <p>= 25,000 − 0.21 × (25,000 − 36,000) = <b>$27,310</b> (매각가보다 큼)</p>
+    </div>
+    <div class="sol step">
+      <p><b>(b) MV 45,000 &gt; BV</b></p>
+      <p>차익 9,000 → 세금 0.21 × 9,000 = 1,890</p>
+      <p>= 45,000 − 0.21 × (45,000 − 36,000) = <b>$43,110</b> (매각가보다 작음)</p>
+    </div>
+  </div>
+</section>
+
+<section class="slide d" data-title="Q16 · 세후 잔존가치: 정액법 vs MACRS">
+  <h2>Q16 · 같은 자산, 다른 세후 대금 — 정액법 vs MACRS</h2>
+  <p class="q">Q14의 $200,000 자산을 <b>4년 말 $60,000</b>에 판다. 세율 21%. (a) 5년 정액법 (b) 5-year MACRS 각각의 세후 잔존가치와 그 차이를 구하라.</p>
+  <div class="sol step">
+    <table class="num wide">
+      <tr><th></th><th>Straight-line</th><th>MACRS</th></tr>
+      <tr><td>누적 감가상각 (Years 1–4)</td><td>4 × 40,000 = 160,000</td><td>200,000 × 82.72% = 165,440</td></tr>
+      <tr><td>Book value, end of year 4</td><td>40,000</td><td>34,560</td></tr>
+      <tr><td>Taxable gain (60,000 − BV)</td><td>20,000</td><td>25,440</td></tr>
+      <tr><td>Tax (21%)</td><td>4,200</td><td>5,342.40</td></tr>
+      <tr class="tot"><td>After-tax salvage</td><td>55,800</td><td>54,657.60</td></tr>
+    </table>
+  </div>
+  <div class="sol step">
+    <p>차이 = 55,800 − 54,657.60 = <b>$1,142.40</b> = BV 차이 5,440 × 21%</p>
+    <p>MACRS가 빨리 상각해 BV가 낮다 → 과세 차익이 크다. 앞서 받은 공제의 일부를 매각 때 되돌려 준다.</p>
+  </div>
+</section>
+
+<section class="slide d" data-title="Q17 · OCF 세 가지 정의">
+  <h2>Q17 · OCF 세 가지 정의로 같은 답</h2>
+  <p class="q">어떤 프로젝트의 연간 매출 $500,000, 현금 비용 $310,000, 감가상각 $80,000, 세율 21%, 이자 없음. OCF를 bottom-up, top-down, tax shield 세 방법으로 구하라.</p>
+  <div class="sol step">
+    <p>EBIT = 500,000 − 310,000 − 80,000 = 110,000 · Taxes = 0.21 × 110,000 = 23,100 · NOPAT = 86,900</p>
+  </div>
+  <div class="sol step">
+    <table class="wide">
+      <tr><th>방법</th><th>식과 대입</th><th>OCF</th></tr>
+      <tr><td>Bottom-up</td><td>NOPAT + D = 86,900 + 80,000</td><td><b>166,900</b></td></tr>
+      <tr><td>Top-down</td><td>S − C − Taxes = 500,000 − 310,000 − 23,100</td><td><b>166,900</b></td></tr>
+      <tr><td>Tax shield</td><td>(S − C)(1 − T) + D × T = 190,000 × 0.79 + 80,000 × 0.21 = 150,100 + 16,800</td><td><b>166,900</b></td></tr>
+    </table>
+  </div>
+  <p class="small step">함정: NOPAT 86,900을 OCF로 쓰면 감가상각 80,000을 빠뜨린다. (S − C)(1 − T) = 150,100만 쓰면 절세효과 16,800을 빠뜨린다.</p>
+</section>
+
+<section class="slide d" data-title="Q18 · Northfield (a)(b) 증분 판단과 MACRS">
+  <h2>Q18 · Northfield Precision (a)(b)</h2>
+  <p class="q" style="font-size:26px">장비 $900,000 (5-year MACRS), 4년 운영 후 $250,000에 매각 · NWC $80,000 (처음 투입, 끝에 회수) · 매년 40,000개 × $60, 변동비 $44/개, 증분 고정비 $180,000 · 공간은 현재 연 $50,000에 임대 중(세입자 퇴거) · 기존 제품 공헌이익 연 $90,000 감소 · 작년 끝난 타당성 조사 $150,000 · $400,000을 8%로 차입, 이자 연 $32,000 · 세율 21% · r = 13%.<br>(a) 증분이 아닌 항목은? (b) MACRS 감가상각표와 4년 말 장부가는?</p>
+  <div class="cols">
+    <div class="sol step">
+      <p><b>증분 아님</b>: 타당성 조사 $150,000 (매몰) · 이자 $32,000/년 (금융, 13%에 반영)</p>
+      <p><b>증분, 놓치기 쉬움</b>: 포기 임대료 $50,000/년 (기회비용) · 공헌이익 손실 $90,000/년 (잠식)</p>
+    </div>
+    <div class="sol step">
+      <table class="num">
+        <tr><th>Year</th><th>Rate</th><th>Depreciation</th></tr>
+        <tr><td>1</td><td>20.00%</td><td>180,000</td></tr>
+        <tr><td>2</td><td>32.00%</td><td>288,000</td></tr>
+        <tr><td>3</td><td>19.20%</td><td>172,800</td></tr>
+        <tr><td>4</td><td>11.52%</td><td>103,680</td></tr>
+        <tr class="tot"><td>누적</td><td>82.72%</td><td>744,480</td></tr>
+      </table>
+      <p class="small">BV = 900,000 − 744,480 = <b>$155,520</b> — 5·6년차 공제(17.28%)를 받지 못하고 판다</p>
+    </div>
+  </div>
+</section>
+
+<section class="slide d" data-title="Q19 · Northfield (c) OCF">
+  <h2>Q19 · Northfield (c) — OCF, 세 방법으로 Year 1 확인</h2>
+  <p class="q">Q18 자료로 Year 1 pro forma를 만들고, 4년 동안의 OCF를 tax shield 방식으로 구하라. Year 1은 세 정의로 확인하라.</p>
+  <div class="cols">
+    <div class="sol step">
+      <table class="num">
+        <tr><th>Year 1 pro forma</th><th>$</th></tr>
+        <tr><td>Sales (40,000 × $60)</td><td>2,400,000</td></tr>
+        <tr><td>− Variable (40,000 × $44)</td><td>1,760,000</td></tr>
+        <tr><td>− Fixed / − Rent / − Erosion</td><td>180,000 / 50,000 / 90,000</td></tr>
+        <tr><td>− Depreciation</td><td>180,000</td></tr>
+        <tr class="tot"><td>= EBIT</td><td>140,000</td></tr>
+        <tr><td>− Taxes (21%)</td><td>29,400</td></tr>
+        <tr class="tot"><td>= NOPAT</td><td>110,600</td></tr>
+      </table>
+    </div>
+    <div class="sol step">
+      <p>Bottom-up: 110,600 + 180,000 = <b>290,600</b></p>
+      <p>Top-down: 320,000 − 29,400 = <b>290,600</b> (S − C = 320,000)</p>
+      <p>Tax shield: 320,000 × 0.79 + 180,000 × 0.21 = 252,800 + 37,800 = <b>290,600</b></p>
+    </div>
+  </div>
+  <div class="sol step">
+    <table class="num wide">
+      <tr><th>Year</th><th>1</th><th>2</th><th>3</th><th>4</th></tr>
+      <tr><td>(S − C)(1 − T)</td><td>252,800</td><td>252,800</td><td>252,800</td><td>252,800</td></tr>
+      <tr><td>D × T</td><td>37,800</td><td>60,480</td><td>36,288</td><td>21,772.80</td></tr>
+      <tr class="tot"><td>OCF</td><td>290,600</td><td>313,280</td><td>289,088</td><td>274,572.80</td></tr>
+    </table>
+  </div>
+</section>
+
+<section class="slide d" data-title="Q20 · Northfield (d) 현금흐름과 NPV">
+  <h2>Q20 · Northfield (d) — 현금흐름, NPV, 결정</h2>
+  <p class="q">Q18–Q19 결과(OCF 290,600 / 313,280 / 289,088 / 274,572.80, BV 155,520, 매각가 250,000)로 Year 0–4 현금흐름을 만들고 r = 13%에서 NPV·IRR을 구하라.</p>
+  <div class="sol step">
+    <p>세후 잔존가치 = 250,000 − 0.21 × (250,000 − 155,520) = 250,000 − 19,840.80 = <b>230,159.20</b></p>
+    <table class="num wide">
+      <tr><th>Year</th><th>0</th><th>1</th><th>2</th><th>3</th><th>4</th></tr>
+      <tr><td>OCF</td><td></td><td>290,600</td><td>313,280</td><td>289,088</td><td>274,572.80</td></tr>
+      <tr><td>Capital spending</td><td>−900,000</td><td></td><td></td><td></td><td></td></tr>
+      <tr><td>Change in NWC</td><td>−80,000</td><td></td><td></td><td></td><td>+80,000</td></tr>
+      <tr><td>After-tax salvage</td><td></td><td></td><td></td><td></td><td>+230,159.20</td></tr>
+      <tr class="tot"><td>Project cash flow</td><td>−980,000</td><td>290,600</td><td>313,280</td><td>289,088</td><td>584,732</td></tr>
+    </table>
+  </div>
+  <div class="cols">
+    <div class="sol step">
+      <p>NPV = −980,000 + 290,600/1.13 + 313,280/1.13<sup>2</sup> + 289,088/1.13<sup>3</sup> + 584,732/1.13<sup>4</sup> = <b>$81,491.91</b></p>
+      <p>IRR = <b>16.52%</b> &gt; 13% → <b>채택</b></p>
+    </div>
+    <pre class="ba sol step">CF0 −980000 · C01 290600 F01 1
+C02 313280 F02 1 · C03 289088 F03 1
+C04 584732 F04 1
+NPV I 13 ENTER ↓ CPT → 81,491.91
+IRR CPT → 16.52</pre>
+  </div>
+</section>
+
+<section class="slide title" data-title="끝">
+  <h1>끝</h1>
+  <p class="sub">현금흐름이 맞으면 나머지는 Ch.8의 할인 계산이다</p>
+</section>
+
+</main>
+
+<script src="/slides/deck.js"></script>
+</body>
+</html>

@@ -1,0 +1,478 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta name="pinterest" content="nopin">
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="robots" content="noindex">
+<title>IA Ch.7 CAPM and APT — 복습·연습문제</title>
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Cpath d='M4 4v24h24' fill='none' stroke='%23000' stroke-width='3'/%3E%3Cpath d='M7 22L27 9' stroke='%23000' stroke-width='2.5'/%3E%3C/svg%3E">
+<link rel="stylesheet" href="/slides/deck.css">
+<!--
+  IA Ch.7 Capital Asset Pricing and Arbitrage Pricing Theory — 복습 덱(복습 요약 12장 + 연습문제 18문제).
+  원본: IA_Chap07_students.pdf (54쪽), 정답판 Investment_Chap07_filled.pdf. 연습문제 숫자는 강의 예제 구조를 따르되 새로 바꿨다(파이썬 검산).
+  문제 장: 문제는 위, 풀이는 class="step" 블록(→ 를 누를 때마다 하나씩).
+-->
+<style>
+  .slide.rv{padding:56px 92px 40px}
+  .slide.rv h2{margin:0 0 30px;padding-left:28px;border-left-width:6px;font-size:58px}
+  .slide.rv p,.slide.rv ul,.slide.rv ol{font-size:35px;line-height:1.42}
+  .slide.rv p{margin:0 0 .45em}
+  .slide.rv li{margin:.22em 0}
+  .slide.rv h3{font-size:38px;margin:0 0 10px}
+  .slide.rv table{font-size:30px;line-height:1.3}
+  .slide.rv th,.slide.rv td{padding:7px 16px;vertical-align:top}
+  .slide.rv .cols{gap:56px}
+  .slide .eq{display:inline-block;margin:0 0 18px;padding:8px 24px;border:3px solid currentColor;font-size:37px;line-height:1.35}
+  .slide .eqs{display:flex;flex-wrap:wrap;gap:0 24px}
+  .slide.rv .note{font-size:28px;opacity:.7;line-height:1.4}
+  .slide .tag{font-size:24px;letter-spacing:.12em;opacity:.6;margin:0 0 6px}
+  .slide.qz .prob{font-size:37px;line-height:1.45;margin:0 0 12px}
+  .slide.qz .sol{font-size:33px;line-height:1.42;margin:12px 0 0;padding:2px 0 2px 22px;border-left:4px solid currentColor}
+  .slide.qz .sol b:first-child{margin-right:.4em}
+  .slide.qz .sol table{font-size:30px;margin-top:6px}
+  .slide.qz .sol th,.slide.qz .sol td{padding:4px 14px}
+  .slide.rv.big table{font-size:33px}
+  .slide.rv.big p{font-size:36px}
+  .slide .kbd{font-family:Consolas,"Cascadia Mono",Menlo,monospace;font-size:.85em;opacity:.85}
+  .slide sub,.slide sup{font-size:.68em}
+</style>
+</head>
+<body>
+<noscript>JavaScript is required.</noscript>
+
+<main id="stage">
+
+  <!-- ───────── 표지 ───────── -->
+  <section class="slide title" data-title="표지">
+    <h1>IA Ch.7<br>CAPM과 APT — 복습</h1>
+    <p class="sub">Capital Asset Pricing and Arbitrage Pricing Theory<br>복습 요약 12장 · 연습문제 18문제 (풀이는 → 로 한 단계씩)</p>
+    <p class="hint">Investment Analysis · Prof. G. Lee · BKM <i>Essentials of Investments</i> &nbsp;·&nbsp; → ← 이동 · O 목록 · D 흰/검은 바탕</p>
+  </section>
+
+  <!-- ───────── 복습 요약 ───────── -->
+  <section class="slide rv" data-title="장 전체 지도">
+    <h2>장 전체 지도 — 한 줄의 식을 세 번 다시 본다</h2>
+    <table>
+      <tr><th>절</th><th>핵심 질문</th><th>핵심 결과</th></tr>
+      <tr><td>7.1 CAPM</td><td>모두가 Ch.6 의 최적화를 하면 기대수익률은 얼마여야 하나?</td><td>E(r<sub>i</sub>) = r<sub>f</sub> + β<sub>i</sub>[E(r<sub>M</sub>) − r<sub>f</sub>] · SML · 알파(α)</td></tr>
+      <tr><td>7.2 지수모형 (index model)</td><td>보이지 않는 기대값을 어떻게 추정하나?</td><td>초과수익률 회귀 = SCL, 기울기 β, R²</td></tr>
+      <tr><td>7.3 현실의 CAPM</td><td>검증할 수 있나? 데이터에 맞나?</td><td>Roll's critique · 너무 평평한 SML · 이상현상(anomalies)</td></tr>
+      <tr><td>7.4 다요인 모형 (multifactor)</td><td>위험 요인이 시장 하나뿐인가?</td><td>Fama-French 3요인(SMB, HML) · Carhart · FF5</td></tr>
+      <tr><td>7.5 APT</td><td>훨씬 약한 가정으로 같은 식을 얻을 수 있나?</td><td>무차익(no-arbitrage) → E(r) = r<sub>f</sub> + Σβ<sub>k</sub>RP<sub>k</sub></td></tr>
+    </table>
+    <p style="margin-top:22px">흐름: <b>이론(7.1)</b> → <b>추정(7.2)</b> → <b>검증·한계(7.3)</b> → <b>요인 추가(7.4)</b> → <b>가정 완화(7.5)</b></p>
+    <p class="note">Ch.6 은 "기대수익률이 주어지면 내 최적 포트폴리오는?"(입력), Ch.7 은 "모두가 그렇게 하면 기대수익률은?"(균형의 결과물)</p>
+  </section>
+
+  <section class="slide rv" data-title="7.1 CAPM 가정과 세 결과">
+    <p class="tag">7.1 THE CAPM</p>
+    <h2>가정(assumptions)과 세 가지 결과(results)</h2>
+    <div class="cols">
+      <div>
+        <h3>투자자 가정</h3>
+        <ul>
+          <li>평균·분산만 본다 (Markowitz)</li>
+          <li>같은 투자기간 (same horizon)</li>
+          <li>같은 추정치 — 동질적 기대 (homogeneous expectations)</li>
+          <li>가격 수용자 (price takers)</li>
+        </ul>
+        <h3 style="margin-top:16px">시장 가정</h3>
+        <ul>
+          <li>모든 자산 거래·분할 가능, 하나의 r<sub>f</sub> 로 차입·대출</li>
+          <li>세금 없음(동일) · 거래비용 없음</li>
+        </ul>
+        <p class="note">모형은 가정의 현실성이 아니라 예측의 정확성으로 평가한다.</p>
+      </div>
+      <div>
+        <h3>결과 1 · 모두 시장 포트폴리오 M</h3>
+        <p>같은 프런티어 + 같은 r<sub>f</sub> → 같은 접점 포트폴리오 = <b>시가총액 가중</b> M. 차이는 M 과 r<sub>f</sub> 의 비율뿐 → 모두 <b>CML</b> 위.</p>
+        <h3>결과 2 · 수동 전략이 효율적</h3>
+        <p>뮤추얼펀드 정리(mutual fund theorem): 인덱스펀드 + T-bill 이면 충분. 수동 투자자는 무임승차(free-rider).</p>
+        <h3>결과 3 · 시장위험프리미엄</h3>
+        <p class="eq">E(r<sub>M</sub>) − r<sub>f</sub> = Ā · σ<sub>M</sub><sup>2</sup></p>
+      </div>
+    </div>
+  </section>
+
+  <section class="slide rv" data-title="7.1 베타와 기대수익률–베타 관계">
+    <p class="tag">7.1 THE CAPM</p>
+    <h2>베타(beta)와 기대수익률–베타 관계</h2>
+    <div class="eqs">
+      <p class="eq">β<sub>i</sub> = Cov(r<sub>i</sub>, r<sub>M</sub>) / σ<sub>M</sub><sup>2</sup> = ρ<sub>iM</sub> σ<sub>i</sub> / σ<sub>M</sub></p>
+      <p class="eq">E(r<sub>i</sub>) = r<sub>f</sub> + β<sub>i</sub> [E(r<sub>M</sub>) − r<sub>f</sub>]</p>
+    </div>
+    <div class="cols wide-right">
+      <div>
+        <p><b>왜 β인가:</b> 분산된 포트폴리오 안에서 주식의 위험은 시장 분산에 대한 기여 w<sub>i</sub>·Cov(r<sub>i</sub>, r<sub>M</sub>) 뿐.</p>
+        <p>r<sub>f</sub> = 시간가치 · β<sub>i</sub> = 위험의 <b>양</b> · E(r<sub>M</sub>) − r<sub>f</sub> = 위험의 <b>가격</b>(모든 자산 동일)</p>
+        <p class="note">식에 자산 자신의 σ 는 없다 — 분산 가능 위험(diversifiable risk)은 보상받지 못한다.</p>
+      </div>
+      <table>
+        <tr><th>β</th><th>읽는 법</th></tr>
+        <tr><td>β &gt; 1</td><td>공격적(aggressive) — 시장 움직임 증폭</td></tr>
+        <tr><td>β = 1</td><td>시장과 1:1 (시장 포트폴리오)</td></tr>
+        <tr><td>0 &lt; β &lt; 1</td><td>방어적(defensive) — 유틸리티·필수소비재</td></tr>
+        <tr><td>β = 0</td><td>체계적 위험 없음 → σ 가 커도 r<sub>f</sub> 만</td></tr>
+        <tr><td>β &lt; 0</td><td>헤지 자산 → E(r) &lt; r<sub>f</sub></td></tr>
+      </table>
+    </div>
+  </section>
+
+  <section class="slide rv big" data-title="7.1 SML vs CML">
+    <p class="tag">7.1 THE CAPM</p>
+    <h2>SML 과 CML — 헷갈리지 말 것</h2>
+    <table>
+      <tr><th></th><th>자본시장선 CML (Capital Market Line)</th><th>증권시장선 SML (Security Market Line)</th></tr>
+      <tr><td>가로축</td><td>표준편차 σ (총위험)</td><td>베타 β (체계적 위험)</td></tr>
+      <tr><td>선 위에 오는 것</td><td>효율적 포트폴리오만 (M 과 r<sub>f</sub> 의 조합)</td><td>모든 증권·포트폴리오 (효율적이든 아니든)</td></tr>
+      <tr><td>기울기</td><td>[E(r<sub>M</sub>) − r<sub>f</sub>] / σ<sub>M</sub> = M 의 샤프비율</td><td>E(r<sub>M</sub>) − r<sub>f</sub> = 시장위험프리미엄</td></tr>
+      <tr><td>선 아래면</td><td>비효율적 — 개별 주식이면 정상</td><td>고평가(overpriced) — 진짜 가격 오류 신호</td></tr>
+      <tr><td>쓰임</td><td>내 완전 포트폴리오(complete portfolio) 고르기</td><td>자산 가격 평가 · 기준수익률(hurdle rate)</td></tr>
+    </table>
+    <p style="margin-top:22px">SML: 절편 r<sub>f</sub>, 기울기 MRP, 반드시 점 (β = 1, E(r<sub>M</sub>)) 을 지난다.</p>
+    <p class="note">r<sub>f</sub> 만 오르고 E(r<sub>M</sub>) 이 그대로면 절편↑ 기울기↓ → SML 이 β = 1 을 축으로 돈다.</p>
+  </section>
+
+  <section class="slide rv" data-title="7.1 알파와 포트폴리오 베타">
+    <p class="tag">7.1 THE CAPM</p>
+    <h2>알파(alpha) 판단 규칙과 포트폴리오 베타</h2>
+    <div class="eqs">
+      <p class="eq">α = E(r)<sub>forecast</sub> − [r<sub>f</sub> + β(E(r<sub>M</sub>) − r<sub>f</sub>)]</p>
+      <p class="eq">E(r)<sub>forecast</sub> = [E(P<sub>1</sub>) − P<sub>0</sub> + D<sub>1</sub>] / P<sub>0</sub></p>
+    </div>
+    <div class="cols">
+      <table>
+        <tr><th>α</th><th>위치</th><th>판단 → 조정</th></tr>
+        <tr><td>α &gt; 0</td><td>SML 위</td><td>저평가 BUY → 가격↑, E(r)↓</td></tr>
+        <tr><td>α &lt; 0</td><td>SML 아래</td><td>고평가 SELL → 가격↓, E(r)↑</td></tr>
+        <tr><td>α = 0</td><td>SML 위</td><td>공정가격 (균형에서는 모두 0)</td></tr>
+      </table>
+      <div>
+        <p>α = 0 이 되는 가격: P<sub>0</sub> = [E(P<sub>1</sub>) + D<sub>1</sub>] / (1 + 요구수익률)</p>
+        <p class="eq">β<sub>P</sub> = Σ w<sub>i</sub> β<sub>i</sub></p>
+        <p>분산과 달리 β 는 <b>가중평균</b> → E(r<sub>P</sub>) = r<sub>f</sub> + β<sub>P</sub>·MRP (개별 CAPM 수익률의 가중평균과 같다)</p>
+        <p>목표 β 맞추기: 포트폴리오 비중 w = β<sub>target</sub> / β<sub>P</sub>, 나머지 1 − w 는 r<sub>f</sub> (음수면 차입)</p>
+      </div>
+    </div>
+  </section>
+
+  <section class="slide rv" data-title="7.2 지수모형·SCL·R²">
+    <p class="tag">7.2 THE CAPM AND INDEX MODELS</p>
+    <h2>지수모형(index model), SCL, 위험 분해</h2>
+    <div class="cols">
+      <div>
+        <p class="eq">R<sub>i,t</sub> = α<sub>i</sub> + β<sub>i</sub> R<sub>M,t</sub> + e<sub>i,t</sub></p>
+        <ul>
+          <li>R = <b>초과수익률</b>(r − r<sub>f</sub>) — 관측 가능, OLS 로 추정 (보통 60개월)</li>
+          <li>회귀선 = 증권특성선 SCL (security characteristic line): 기울기 β, 절편 α (CAPM 예측 α = 0), 세로 거리 = 잔차 e</li>
+          <li>t = 추정치 / 표준오차, p &lt; 0.05 면 유의 · 95% 구간 ≈ β ± 2·se</li>
+          <li>조정 베타 β<sub>adj</sub> = (2/3)β<sub>sample</sub> + 1/3 (1 쪽으로 당김)</li>
+        </ul>
+      </div>
+      <div>
+        <p class="eq">σ<sub>i</sub><sup>2</sup> = β<sub>i</sub><sup>2</sup>σ<sub>M</sub><sup>2</sup> + σ<sup>2</sup>(e<sub>i</sub>)</p>
+        <p>총위험 = 체계적(systematic) + 기업 고유(firm-specific)</p>
+        <p class="eq">R<sup>2</sup> = β<sup>2</sup>σ<sub>M</sub><sup>2</sup> / σ<sub>i</sub><sup>2</sup></p>
+        <p>R² = 분산 중 체계적 비율. 개별 주식 0.20–0.40, 분산된 펀드 0.90 이상</p>
+        <p class="note">강의 예: β = 1.20, σ<sub>M</sub> = 5%, σ(e) = 6% → 36 + 36 = 72 (%²), R² = 0.50</p>
+      </div>
+    </div>
+  </section>
+
+  <section class="slide rv" data-title="7.3 Roll's critique·평평한 SML">
+    <p class="tag">7.3 THE CAPM AND THE REAL WORLD</p>
+    <h2>Roll's critique 와 너무 평평한 SML</h2>
+    <div class="cols">
+      <div>
+        <h3>Roll (1977)</h3>
+        <ul>
+          <li>검증 가능한 유일한 함의 = <b>진짜</b> 시장 포트폴리오가 평균-분산 효율적</li>
+          <li>진짜 M(채권·부동산·인적자본까지)은 관측 불가</li>
+          <li>대용치(proxy, 예: S&amp;P 500)로 검정 = 대용치의 효율성 검정</li>
+          <li>효율적인 대용치면 β–수익률 관계가 <b>항등식</b>처럼 성립 → 순환</li>
+        </ul>
+        <p class="note">대응: 지수모형을 유용한 근사로 보고 설명·예측력으로 평가</p>
+      </div>
+      <div>
+        <h3>실증: SML 이 너무 평평하다</h3>
+        <ul>
+          <li>절편이 너무 높다 → 저β 자산이 CAPM 예측보다 <b>더</b> 벌었다</li>
+          <li>기울기가 너무 평평 → 고β 자산이 예측보다 <b>덜</b> 벌었다</li>
+          <li>β 가 전부가 아니다 → 규모·가치·모멘텀</li>
+        </ul>
+        <p>저베타 이상현상(low-beta anomaly) → betting-against-beta, 저변동성 펀드</p>
+      </div>
+    </div>
+  </section>
+
+  <section class="slide rv big" data-title="7.3 이상현상과 CAPM 이 살아남는 이유">
+    <p class="tag">7.3 THE CAPM AND THE REAL WORLD</p>
+    <h2>이상현상(anomalies)과 CAPM 이 살아남는 이유</h2>
+    <table>
+      <tr><th>이상현상</th><th>내용 (β 가 설명 못 하는 것)</th><th>근거</th></tr>
+      <tr><td>규모 (size)</td><td>소형주가 β 에 비해 높은 수익</td><td>Banz (1981)</td></tr>
+      <tr><td>가치 (value)</td><td>높은 장부/시장(B/M) 가치주 &gt; 낮은 B/M 성장주</td><td>Fama-French (1992)</td></tr>
+      <tr><td>모멘텀 (momentum)</td><td>지난 3–12개월 승자가 몇 달 더 이긴다</td><td>Jegadeesh-Titman (1993)</td></tr>
+      <tr><td>수익성·투자</td><td>수익성 높고 보수적으로 투자하는 기업이 더 높은 수익</td><td>Fama-French (2015)</td></tr>
+    </table>
+    <p style="margin-top:18px">두 해석: (a) 시장 비효율 → 가격 오류 &nbsp;/&nbsp; (b) 시장은 효율적, 위험 요인이 여럿 → <b>7.4 는 (b)</b></p>
+    <p>그래도 CAPM: 옳은 정성적 결론(체계적 위험만 보상) · 규율 있는 기준(benchmark) · 단순하고 조작하기 어렵다(요율 심사·법정) · 경쟁 모형도 요인 프리미엄이 불안정</p>
+  </section>
+
+  <section class="slide rv" data-title="7.4 다요인 모형">
+    <p class="tag">7.4 MULTIFACTOR MODELS</p>
+    <h2>다요인 모형 — Fama-French 와 그 너머</h2>
+    <p class="eq">E(r<sub>i</sub>) − r<sub>f</sub> = β<sub>M</sub>[E(r<sub>M</sub>) − r<sub>f</sub>] + β<sub>SMB</sub>E(SMB) + β<sub>HML</sub>E(HML)</p>
+    <div class="cols">
+      <table>
+        <tr><th>요인 / 로딩</th><th>뜻</th></tr>
+        <tr><td>SMB (Small Minus Big)</td><td>소형주 − 대형주 수익률</td></tr>
+        <tr><td>HML (High Minus Low)</td><td>고 B/M(가치) − 저 B/M(성장)</td></tr>
+        <tr><td>β<sub>SMB</sub> &gt; 0 / &lt; 0</td><td>소형주 기울기 / 대형주 기울기</td></tr>
+        <tr><td>β<sub>HML</sub> &gt; 0 / &lt; 0</td><td>가치주 기울기 / 성장주 기울기</td></tr>
+      </table>
+      <ul>
+        <li><b>Carhart 4요인 (1997)</b>: + 모멘텀 UMD — 펀드 성과평가 표준</li>
+        <li><b>FF 5요인 (2015)</b>: + 수익성 RMW, 투자 CMA → 미국 자료에서 HML 거의 중복</li>
+        <li>요인 동물원(factor zoo): 수백 개, 표본 밖·발표 후 약해짐</li>
+        <li>CAPM α &gt; 0 인데 FF α &lt; 0 → "실력"이 아니라 소형·가치 기울기(ETF 로 싸게 살 수 있음)</li>
+      </ul>
+    </div>
+  </section>
+
+  <section class="slide rv" data-title="7.5 APT 와 차익거래">
+    <p class="tag">7.5 ARBITRAGE PRICING THEORY</p>
+    <h2>차익거래(arbitrage)와 APT</h2>
+    <div class="cols">
+      <div>
+        <p><b>차익거래 = </b>순투자 0 + 위험 0(요인 노출 상쇄) + 모든 상태에서 확실한 이익. "높은 기대수익"이나 α &gt; 0 은 차익거래가 아니다.</p>
+        <h3>잘 분산된 포트폴리오로 하는 순서</h3>
+        <ol>
+          <li>같은 β 의 기준(benchmark): w 를 M, 1 − w 를 T-bill (w = β)</li>
+          <li>E(r) 비교 → 높은 쪽 매수, 낮은 쪽 공매도(같은 금액)</li>
+          <li>순투자 0, 노출 0, 이익 = 수익률 차 × 금액</li>
+          <li>무한히 키움 → 가격 조정 → 차이 소멸</li>
+        </ol>
+      </div>
+      <div>
+        <p class="eq">E(r<sub>i</sub>) = r<sub>f</sub> + β<sub>i1</sub>RP<sub>1</sub> + … + β<sub>ik</sub>RP<sub>k</sub></p>
+        <p>요인 프리미엄은 <b>음수</b>일 수 있다: 나쁜 상태(예: 예상 밖 인플레이션)에서 돈을 주는 노출은 보험 → 낮은 수익을 받아들인다.</p>
+        <p class="note">강의 Ex.12: 4% + 1.20(6%) + 0.70(−7%) = 6.3% (생산 요인만 쓰면 11.2%)</p>
+      </div>
+    </div>
+  </section>
+
+  <section class="slide rv big" data-title="7.5 APT vs CAPM">
+    <p class="tag">7.5 ARBITRAGE PRICING THEORY</p>
+    <h2>APT 대 CAPM</h2>
+    <table>
+      <tr><th></th><th>CAPM</th><th>APT</th></tr>
+      <tr><td>핵심 가정</td><td>모든 투자자가 평균-분산 최적화</td><td>요인모형 세계에서 무차익</td></tr>
+      <tr><td>합리적이어야 하는 사람</td><td>사실상 모든 투자자</td><td>자금력 있는 소수의 차익거래자</td></tr>
+      <tr><td>요인 수</td><td>정확히 하나: 시장 포트폴리오</td><td>몇 개든 — 이론은 말하지 않음</td></tr>
+      <tr><td>적용 대상</td><td>모든 증권에 정확히</td><td>잘 분산된 포트폴리오</td></tr>
+      <tr><td>약점</td><td>강한 가정, 실증적으로 기각</td><td>어떤 요인이 중요한지 침묵</td></tr>
+    </table>
+    <p style="margin-top:22px">결론은 같은 꼴: 기대수익률 = r<sub>f</sub> + Σ(요인 베타 × 요인 프리미엄). CAPM 은 요인이 시장 하나인 특수한 경우처럼 보인다.</p>
+  </section>
+
+  <section class="slide rv big" data-title="헷갈리는 쌍 비교표">
+    <h2>헷갈리는 쌍 비교표</h2>
+    <table>
+      <tr><th>쌍</th><th>구분하는 기준</th></tr>
+      <tr><td>σ 대 β</td><td>σ = 총위험(CML 축) · β = 체계적 위험(SML 축, 가격 결정)</td></tr>
+      <tr><td>CML 아래 대 SML 아래</td><td>비효율적(개별 주식이면 정상) 대 고평가(SELL 신호)</td></tr>
+      <tr><td>SCL 대 SML</td><td>한 주식의 시계열 회귀선(기울기 β) 대 모든 자산의 E(r)–β 선(기울기 MRP)</td></tr>
+      <tr><td>β 대 R²</td><td>시장에 대한 민감도 대 분산 중 체계적 비율 (β 가 커도 R² 는 낮을 수 있다)</td></tr>
+      <tr><td>Cov 대 ρ</td><td>β = Cov/σ<sub>M</sub><sup>2</sup> = ρσ<sub>i</sub>/σ<sub>M</sub> — Cov 는 이미 σ<sub>i</sub>σ<sub>M</sub> 를 품고 있다</td></tr>
+      <tr><td>CAPM α 대 FF α</td><td>기준이 다르다: 요인 기울기를 빼면 "실력"이 사라질 수 있다</td></tr>
+      <tr><td>α &gt; 0 대 차익거래</td><td>α 는 위험이 남은 기대 초과수익 · 차익거래는 순투자 0·위험 0·확실한 이익</td></tr>
+      <tr><td>% 대 소수</td><td>Ā σ<sub>M</sub><sup>2</sup> 는 소수로 (2 × 0.20² = 0.08) · 분산은 %² 로 써도 되지만 단위를 섞지 말 것</td></tr>
+    </table>
+  </section>
+
+  <!-- ───────── 연습문제 ───────── -->
+  <section class="slide section" data-title="연습문제">
+    <h1>연습문제</h1>
+    <p class="sub" style="margin:40px 0 0 6px;font-size:44px;opacity:.72">18문제 · 문제를 먼저 풀고 → 로 풀이를 한 단계씩</p>
+  </section>
+
+  <section class="slide rv qz" data-title="Q1 · 시장위험프리미엄">
+    <h2>Q1 · 시장위험프리미엄</h2>
+    <p class="prob">투자자들의 평균 위험회피계수 Ā = 3, 시장 포트폴리오의 표준편차 σ<sub>M</sub> = 18% 이다. (a) 균형 시장위험프리미엄(market risk premium)은? (b) σ<sub>M</sub> 만 27% 로 오르면 프리미엄은 몇 배가 되나?</p>
+    <div class="sol step"><b>공식</b> E(r<sub>M</sub>) − r<sub>f</sub> = Ā · σ<sub>M</sub><sup>2</sup> (σ 는 소수로)</div>
+    <div class="sol step"><b>(a)</b> 3 × 0.18<sup>2</sup> = 3 × 0.0324 = 0.0972 = <b>9.72%</b> <span class="kbd">· BA II Plus: 0.18 x² × 3 = 0.0972</span></div>
+    <div class="sol step"><b>(b)</b> 3 × 0.27<sup>2</sup> = 0.2187 = 21.87% → (27/18)<sup>2</sup> = <b>2.25배</b>. 프리미엄은 σ 가 아니라 <b>분산</b>에 비례한다(σ 1.5배 → 2.25배).</div>
+  </section>
+
+  <section class="slide rv qz" data-title="Q2 · 베타 계산 (두 공식)">
+    <h2>Q2 · 베타 계산 (두 공식)</h2>
+    <p class="prob">주식 K: σ<sub>K</sub> = 40%, σ<sub>M</sub> = 16%, ρ<sub>KM</sub> = 0.48. 공분산 Cov(r<sub>K</sub>, r<sub>M</sub>) 과 β<sub>K</sub> 를 구하고 두 번째 공식으로 확인하라. K 는 시장보다 훨씬 변동성이 큰데 β 는 어떻게 읽나?</p>
+    <div class="sol step"><b>Step 1</b> Cov = ρσ<sub>K</sub>σ<sub>M</sub> = 0.48 × 0.40 × 0.16 = <b>0.03072</b> (= 307.2 %²)</div>
+    <div class="sol step"><b>Step 2</b> β<sub>K</sub> = Cov / σ<sub>M</sub><sup>2</sup> = 0.03072 / 0.0256 = <b>1.20</b> <span class="kbd">· BA II Plus: 0.16 x² = 0.0256 → 0.03072 ÷ 0.0256 = 1.2</span></div>
+    <div class="sol step"><b>확인</b> β = ρσ<sub>K</sub>/σ<sub>M</sub> = 0.48 × 40 / 16 = 1.20 ✓</div>
+    <div class="sol step"><b>해석</b> σ<sub>K</sub>/σ<sub>M</sub> = 2.5배지만 ρ = 0.48 이라 β 는 1.20 — 공격적(aggressive)이지만 총변동성의 상당 부분은 기업 고유 위험이라 가격에 반영되지 않는다.</div>
+  </section>
+
+  <section class="slide rv qz" data-title="Q3 · CAPM 요구수익률 표">
+    <h2>Q3 · CAPM 요구수익률 표</h2>
+    <p class="prob">r<sub>f</sub> = 3%, E(r<sub>M</sub>) = 11%. β 가 0.50, 0.90, 1.00, 1.50, −0.25, 0 인 자산의 CAPM 요구수익률을 구하라.</p>
+    <div class="sol step"><b>Step 1</b> 시장위험프리미엄 = 11% − 3% = 8% → E(r) = 3% + β × 8%</div>
+    <div class="sol step"><table>
+      <tr><th>β</th><th>0.50</th><th>0.90</th><th>1.00</th><th>1.50</th><th>−0.25</th><th>0</th></tr>
+      <tr><td>계산</td><td>3 + 0.5(8)</td><td>3 + 0.9(8)</td><td>3 + 1.0(8)</td><td>3 + 1.5(8)</td><td>3 − 0.25(8)</td><td>3 + 0</td></tr>
+      <tr><th>E(r)</th><th>7.0%</th><th>10.2%</th><th>11.0%</th><th>15.0%</th><th>1.0%</th><th>3.0%</th></tr>
+    </table></div>
+    <div class="sol step"><b>읽기</b> β = 1 은 시장과 같은 11%. β &lt; 0 인 헤지 자산은 r<sub>f</sub> 보다 낮은 1% 로도 보유된다. 모든 점이 하나의 SML 위에 있다.</div>
+  </section>
+
+  <section class="slide rv qz" data-title="Q4 · SML 과 CML 로 판단하기">
+    <h2>Q4 · SML 과 CML 로 판단하기</h2>
+    <p class="prob">주식 X 의 예측 기대수익률은 SML 이 요구하는 값보다 1.5%p 높다. 그런데 (σ, E(r)) 그림에서 X 는 CML 보다 한참 아래에 있다. (a) X 는 고평가인가 저평가인가? (b) CML 아래라는 사실은 무엇을 뜻하나? (c) 가격 판단에는 어느 선을 쓰나?</p>
+    <div class="sol step"><b>(a)</b> SML 위 1.5%p → α = +1.5% → <b>저평가(underpriced), BUY</b>. 매수 압력으로 가격↑, 기대수익률↓ → SML 로 돌아간다.</div>
+    <div class="sol step"><b>(b)</b> CML 아래 = <b>비효율적</b>(inefficient) 포트폴리오라는 뜻일 뿐. 단일 종목은 기업 고유 위험 때문에 거의 늘 CML 아래 — 가격 오류 신호가 아니다.</div>
+    <div class="sol step"><b>(c)</b> 가격 판단·기준수익률 = <b>SML</b>(가로축 β, 모든 자산). CML(가로축 σ, 효율적 포트폴리오만)은 자기 완전 포트폴리오를 고를 때 쓴다.</div>
+  </section>
+
+  <section class="slide rv qz" data-title="Q5 · 알파와 매수·매도">
+    <h2>Q5 · 알파와 매수·매도</h2>
+    <p class="prob">주식 L: 현재가 P<sub>0</sub> = $40, 1년 뒤 예상가격 E(P<sub>1</sub>) = $43, 예상배당 D<sub>1</sub> = $1.00, β = 0.80, r<sub>f</sub> = 3.5%, E(r<sub>M</sub>) = 9.5%. (a) 예측 보유기간수익률 (b) CAPM 요구수익률 (c) α 와 판단 (d) α = 0 이 되는 현재가격은?</p>
+    <div class="sol step"><b>(a)</b> [E(P<sub>1</sub>) − P<sub>0</sub> + D<sub>1</sub>] / P<sub>0</sub> = (43 − 40 + 1.00) / 40 = 4.00 / 40 = <b>10.0%</b></div>
+    <div class="sol step"><b>(b)</b> 3.5% + 0.80 × (9.5% − 3.5%) = 3.5% + 4.8% = <b>8.3%</b></div>
+    <div class="sol step"><b>(c)</b> α = 10.0% − 8.3% = <b>+1.7%</b> → SML 위 → 저평가 → <b>BUY</b></div>
+    <div class="sol step"><b>(d)</b> P<sub>0</sub> = (43 + 1.00) / 1.083 = <b>$40.63</b> <span class="kbd">· BA II Plus: 44 ÷ 1.083 = 40.63</span> — 매수 압력이 가격을 $40.63 까지 올리면 α = 0.</div>
+  </section>
+
+  <section class="slide rv qz" data-title="Q6 · 포트폴리오 베타">
+    <h2>Q6 · 포트폴리오 베타</h2>
+    <p class="prob">포트폴리오: 주식 A 50% (β = 1.40), 주식 B 30% (β = 0.70), T-bill 20%. r<sub>f</sub> = 4%, E(r<sub>M</sub>) = 10%. β<sub>P</sub> 와 E(r<sub>P</sub>) 를 구하고, 개별 CAPM 수익률의 가중평균으로 확인하라.</p>
+    <div class="sol step"><b>Step 1</b> β<sub>P</sub> = Σw<sub>i</sub>β<sub>i</sub> = 0.50(1.40) + 0.30(0.70) + 0.20(0) = 0.70 + 0.21 + 0 = <b>0.91</b></div>
+    <div class="sol step"><b>Step 2</b> E(r<sub>P</sub>) = 4% + 0.91 × 6% = 4% + 5.46% = <b>9.46%</b></div>
+    <div class="sol step"><b>확인</b> A: 4 + 1.40(6) = 12.4% · B: 4 + 0.70(6) = 8.2% · T-bill: 4% → 0.5(12.4) + 0.3(8.2) + 0.2(4) = 6.2 + 2.46 + 0.8 = 9.46% ✓</div>
+    <div class="sol step"><b>포인트</b> β 는 가중평균이라 그대로 더해진다(분산은 공분산 항 때문에 그렇지 않다).</div>
+  </section>
+
+  <section class="slide rv qz" data-title="Q7 · 목표 베타 맞추기">
+    <h2>Q7 · 목표 베타 맞추기</h2>
+    <p class="prob">펀드 F 의 β = 1.25. r<sub>f</sub> = 3%, 시장위험프리미엄 6%. 펀드와 무위험자산만으로 (a) β = 0.75 (b) β = 1.50 을 만들려면 펀드 비중은? 각 기대수익률은?</p>
+    <div class="sol step"><b>규칙</b> w × β<sub>F</sub> + (1 − w) × 0 = β<sub>target</sub> → w = β<sub>target</sub> / β<sub>F</sub></div>
+    <div class="sol step"><b>(a)</b> w = 0.75 / 1.25 = <b>0.60</b> → 펀드 60%, T-bill 40% (대출) · E(r) = 3% + 0.75 × 6% = <b>7.5%</b></div>
+    <div class="sol step"><b>(b)</b> w = 1.50 / 1.25 = <b>1.20</b> → 펀드 120%, r<sub>f</sub> 로 20% 차입 · E(r) = 3% + 1.50 × 6% = <b>12.0%</b></div>
+    <div class="sol step"><b>확인</b> E(r<sub>F</sub>) = 3 + 1.25(6) = 10.5% → 1.20(10.5) − 0.20(3) = 12.6 − 0.6 = 12.0% ✓</div>
+  </section>
+
+  <section class="slide rv qz" data-title="Q8 · 무위험이자율 변화와 SML">
+    <h2>Q8 · 무위험이자율 변화와 SML</h2>
+    <p class="prob">E(r<sub>M</sub>) = 11% 는 그대로인데 r<sub>f</sub> 가 3% 에서 5% 로 오른다. β = 0.5, 1.0, 1.5 자산의 요구수익률은 어떻게 바뀌나? SML 의 모양은?</p>
+    <div class="sol step"><table>
+      <tr><th>β</th><th>전: 3% + β(8%)</th><th>후: 5% + β(6%)</th><th>변화</th></tr>
+      <tr><td>0.5</td><td>7.0%</td><td>8.0%</td><td>+1.0%p</td></tr>
+      <tr><td>1.0</td><td>11.0%</td><td>11.0%</td><td>0</td></tr>
+      <tr><td>1.5</td><td>15.0%</td><td>14.0%</td><td>−1.0%p</td></tr>
+    </table></div>
+    <div class="sol step"><b>모양</b> 절편 r<sub>f</sub> 3% → 5%↑, 기울기 MRP 8% → 6%↓ → SML 이 점 (1, 11%) 을 축으로 <b>회전</b>. 평행이동이 아니다.</div>
+    <div class="sol step"><b>이유</b> E(r) = r<sub>f</sub>(1 − β) + βE(r<sub>M</sub>) — β &lt; 1 이면 r<sub>f</sub> 비중이 양(+), β &gt; 1 이면 음(−).</div>
+  </section>
+
+  <section class="slide rv qz" data-title="Q9 · 회귀 출력 읽기">
+    <h2>Q9 · 회귀 출력 읽기</h2>
+    <p class="prob">60개월 초과수익률 회귀: 절편 α = 0.30%/월 (표준오차 0.40%), 기울기 β = 0.85 (표준오차 0.10). (a) α 는 유의한가? (b) β 는? (c) β 의 95% 구간(t ≈ 2)은? (d) CAPM 은 α 에 대해 무엇을 예측하나?</p>
+    <div class="sol step"><b>(a)</b> t = 0.30 / 0.40 = <b>0.75</b> &lt; 2 → α = 0 을 기각 못 함 → 종목선택 실력(stock-picking skill)의 통계적 증거 없음</div>
+    <div class="sol step"><b>(b)</b> t = 0.85 / 0.10 = <b>8.5</b> → β = 0 기각, 유의</div>
+    <div class="sol step"><b>(c)</b> 0.85 ± 2 × 0.10 = <b>0.65 ~ 1.05</b> — 유의해도 구간이 넓다 → 기준수익률(hurdle rate)이 그만큼 불확실</div>
+    <div class="sol step"><b>(d)</b> 회귀식 R<sub>i,t</sub> = α + βR<sub>M,t</sub> + e 에서 CAPM 은 <b>α = 0</b> 을 예측한다. 기울기 = β, 각 달의 세로 거리 = 잔차 e (SCL).</div>
+  </section>
+
+  <section class="slide rv qz" data-title="Q10 · 위험 분해와 R²">
+    <h2>Q10 · 위험 분해와 R²</h2>
+    <p class="prob">연간 초과수익률 회귀: β = 1.10, σ<sub>M</sub> = 20%, σ(e) = 30%. (a) 체계적 분산과 체계적 표준편차 (b) 총분산과 총표준편차 (c) R² 를 구하라.</p>
+    <div class="sol step"><b>공식</b> σ<sup>2</sup> = β<sup>2</sup>σ<sub>M</sub><sup>2</sup> + σ<sup>2</sup>(e), &nbsp; R<sup>2</sup> = β<sup>2</sup>σ<sub>M</sub><sup>2</sup> / σ<sup>2</sup> (모두 % 단위, 분산은 %²)</div>
+    <div class="sol step"><b>(a)</b> β<sup>2</sup>σ<sub>M</sub><sup>2</sup> = 1.21 × 400 = <b>484 (%²)</b>, 체계적 SD = 1.10 × 20 = <b>22%</b></div>
+    <div class="sol step"><b>(b)</b> σ<sup>2</sup> = 484 + 30<sup>2</sup> = 484 + 900 = <b>1,384 (%²)</b>, σ = √1,384 = <b>37.20%</b> <span class="kbd">· BA II Plus: 1.1 x² × 400 = 484 + 900 = 1384 √x</span></div>
+    <div class="sol step"><b>(c)</b> R<sup>2</sup> = 484 / 1,384 = <b>0.350</b> → 분산의 35% 만 체계적, 65% 는 분산 가능(diversifiable) — 개별 주식의 전형적 범위(0.20–0.40).</div>
+  </section>
+
+  <section class="slide rv qz" data-title="Q11 · 조정 베타 (adjusted beta)">
+    <h2>Q11 · 조정 베타 (adjusted beta)</h2>
+    <p class="prob">표본 베타가 1.50 인 주식 G 와 0.60 인 주식 U 의 조정 베타를 공식 β<sub>adj</sub> = (2/3)β<sub>sample</sub> + 1/3 로 구하고, 무엇을 하는 조정인지 설명하라.</p>
+    <div class="sol step"><b>G</b> (2/3)(1.50) + 1/3 = 1.000 + 0.333 = <b>1.333</b></div>
+    <div class="sol step"><b>U</b> (2/3)(0.60) + 1/3 = 0.400 + 0.333 = <b>0.733</b></div>
+    <div class="sol step"><b>의미</b> 둘 다 <b>1 쪽으로</b> 당겨진다(1.50↓, 0.60↑). 표본 베타는 추정오차가 크고, 극단값은 다음 기간에 평균 1 쪽으로 돌아가는 경향이 있기 때문.</div>
+  </section>
+
+  <section class="slide rv qz" data-title="Q12 · Roll's critique">
+    <h2>Q12 · Roll's critique</h2>
+    <p class="prob">연구자 1 은 S&amp;P 500 을 시장 포트폴리오로 써서 CAPM 을 검정했더니 β–평균수익률 관계가 맞지 않았다. 연구자 2 는 사후적으로 평균-분산 효율적인 지수를 찾아 관계가 완벽히 맞았다. Roll (1977) 에 따르면 각각 무엇을 보여 주나?</p>
+    <div class="sol step"><b>핵심</b> CAPM 의 유일한 검증 가능 함의 = <b>진짜</b> 시장 포트폴리오가 효율적이라는 것. 진짜 M(전 세계 주식·채권·부동산·비상장기업·인적자본)은 관측할 수 없다.</div>
+    <div class="sol step"><b>연구자 1</b> S&amp;P 500 이라는 대용치(proxy)가 효율적이지 않다는 것만 보였다 — CAPM 기각이 아니다.</div>
+    <div class="sol step"><b>연구자 2</b> 효율적 대용치를 쓰면 β–수익률 관계는 수학적으로 <b>항등식</b>처럼 성립 → 증거가 아니라 순환 논리.</div>
+    <div class="sol step"><b>대응</b> 지수모형을 유용한 근사로 보고, 설명력·예측력으로 평가한다.</div>
+  </section>
+
+  <section class="slide rv qz" data-title="Q13 · 평평한 SML 과 이상현상">
+    <h2>Q13 · 평평한 SML 과 이상현상</h2>
+    <p class="prob">(a) 고전적 횡단면 검정에서 추정 SML 은 CAPM 예측과 비교해 어떻게 다른가? 저β·고β 주식에 대해 무엇을 뜻하나? (b) 다음을 이상현상 이름·근거 논문과 짝지어라: ① 소형주가 β 에 비해 높은 수익 ② 지난 3–12개월 승자가 계속 이김 ③ 고 B/M 주식이 저 B/M 주식을 이김 ④ 수익성 높고 투자가 보수적인 기업이 높은 수익</p>
+    <div class="sol step"><b>(a)</b> 절편이 너무 높고 기울기가 너무 평평 → 저β 는 예측보다 <b>더</b>, 고β 는 <b>덜</b> 벌었다 = 저베타 이상현상 → betting-against-beta·저변동성 펀드의 근거</div>
+    <div class="sol step"><b>(b)</b> ① 규모(size) — Banz (1981) · ② 모멘텀(momentum) — Jegadeesh-Titman (1993) · ③ 가치(value) — Fama-French (1992) · ④ 수익성·투자 — Fama-French (2015)</div>
+    <div class="sol step"><b>해석</b> (a) 시장 비효율(가격 오류) 또는 (b) 위험 요인이 여럿 — 7.4 의 다요인 모형은 (b) 를 따른다.</div>
+  </section>
+
+  <section class="slide rv qz" data-title="Q14 · Fama-French 3요인 대 CAPM">
+    <h2>Q14 · Fama-French 3요인 대 CAPM</h2>
+    <p class="prob">r<sub>f</sub> = 3%. 요인 프리미엄: 시장 6%, SMB 3%, HML 5%. 펀드 로딩: β<sub>M</sub> = 0.90, β<sub>SMB</sub> = 0.50, β<sub>HML</sub> = 0.60. 펀드는 작년에 11.0% 를 벌었다. (a) 3요인 요구수익률 (b) CAPM 요구수익률 (c) 두 알파와 해석</p>
+    <div class="sol step"><b>(a)</b> 3% + 0.90(6%) + 0.50(3%) + 0.60(5%) = 3 + 5.4 + 1.5 + 3.0 = <b>12.9%</b></div>
+    <div class="sol step"><b>(b)</b> 3% + 0.90(6%) = 3 + 5.4 = <b>8.4%</b></div>
+    <div class="sol step"><b>(c)</b> CAPM α = 11.0 − 8.4 = <b>+2.6%</b> · 3요인 α = 11.0 − 12.9 = <b>−1.9%</b></div>
+    <div class="sol step"><b>해석</b> 로딩이 SMB +, HML + → 소형·가치 기울기. CAPM 기준의 "초과성과"는 이 체계적 기울기에서 왔고, 3요인 기준으로는 오히려 부진 — 이 기울기는 인덱스 ETF 로 싸게 살 수 있다. 3요인 α 가 더 정보가 많다.</div>
+  </section>
+
+  <section class="slide rv qz" data-title="Q15 · 요인 로딩 해석과 확장 모형">
+    <h2>Q15 · 요인 로딩 해석과 확장 모형</h2>
+    <p class="prob">(a) 펀드 A: β<sub>SMB</sub> = +0.6, β<sub>HML</sub> = +0.5 / 펀드 B: β<sub>SMB</sub> = −0.3, β<sub>HML</sub> = −0.7 의 스타일은? (b) FF3 에 모멘텀을 더한 모형과 수익성·투자를 더한 모형의 이름과 요인 기호는? (c) "factor zoo" 문제란?</p>
+    <div class="sol step"><b>(a)</b> SMB = 소형 − 대형, HML = 고 B/M(가치) − 저 B/M(성장) → A: <b>소형 가치(small-cap value)</b> · B: <b>대형 성장(large-cap growth)</b></div>
+    <div class="sol step"><b>(b)</b> <b>Carhart 4요인 (1997)</b>: + UMD(up minus down, 모멘텀) · <b>Fama-French 5요인 (2015)</b>: + RMW(수익성), CMA(투자) → 미국 자료에서 HML 이 거의 중복</div>
+    <div class="sol step"><b>(c)</b> 발표된 요인이 수백 개, 상당수는 표본 밖에서 재현되지 않고 발표 후 약해진다. 요인을 더하면 과거 적합도는 늘 좋아진다 — 문제는 어느 요인이 미래에도 위험프리미엄을 받는가.</div>
+  </section>
+
+  <section class="slide rv qz" data-title="Q16 · 차익거래 (arbitrage)">
+    <h2>Q16 · 차익거래 (arbitrage)</h2>
+    <p class="prob">잘 분산된 포트폴리오 A: β = 1.00, E(r) = 12% / B: β = 0.60, E(r) = 8%. r<sub>f</sub> = 5%. 차익거래 기회가 있나? $1,000,000 규모의 거래를 보이고, 균형에서 B 의 기대수익률은?</p>
+    <div class="sol step"><b>Step 1</b> 같은 β 의 기준 D = 60% A + 40% T-bill → β<sub>D</sub> = 0.6(1.00) + 0.4(0) = 0.60, E(r<sub>D</sub>) = 0.6(12) + 0.4(5) = <b>9.2%</b> &gt; 8% → B 고평가</div>
+    <div class="sol step"><table>
+      <tr><th>포지션</th><th>오늘 현금흐름</th><th>요인 노출</th><th>1년 뒤 손익</th></tr>
+      <tr><td>B 공매도 $1,000,000</td><td>+$1,000,000</td><td>−0.60</td><td>−$80,000</td></tr>
+      <tr><td>D 매수 ($600,000 A + $400,000 T-bill)</td><td>−$1,000,000</td><td>+0.60</td><td>+$92,000</td></tr>
+      <tr><th>순(net)</th><th>$0</th><th>0</th><th>+$12,000 확실</th></tr>
+    </table></div>
+    <div class="sol step"><b>균형</b> 공매도 압력 → B 가격↓ → E(r<sub>B</sub>) 가 5% + 0.60 × (12% − 5%) = <b>9.2%</b> 가 될 때까지 오른다.</div>
+  </section>
+
+  <section class="slide rv qz" data-title="Q17 · 다요인 APT">
+    <h2>Q17 · 다요인 APT</h2>
+    <p class="prob">r<sub>f</sub> = 3%. 요인 1(경기·GDP 서프라이즈): β<sub>1</sub> = 1.40, RP<sub>1</sub> = +4%. 요인 2(예상 밖 인플레이션): β<sub>2</sub> = 0.50, RP<sub>2</sub> = −3%. (a) APT 요구수익률 (b) 요인 1 만 쓰는 단일요인 모형과 비교 (c) RP<sub>2</sub> 가 음수인 이유</p>
+    <div class="sol step"><b>(a)</b> E(r) = r<sub>f</sub> + β<sub>1</sub>RP<sub>1</sub> + β<sub>2</sub>RP<sub>2</sub> = 3% + 1.40(4%) + 0.50(−3%) = 3 + 5.6 − 1.5 = <b>7.1%</b></div>
+    <div class="sol step"><b>(b)</b> 3% + 5.6% = <b>8.6%</b> → 인플레이션 헤지를 무시하면 요구수익률을 1.5%p 과대평가</div>
+    <div class="sol step"><b>(c)</b> 인플레이션 요인에 대한 노출은 물가가 예상보다 오르는 나쁜 상태에서 돈을 준다 = 보험(hedge). 투자자는 보험의 대가로 더 낮은 기대수익률을 받아들인다 → 프리미엄 음수.</div>
+  </section>
+
+  <section class="slide rv qz" data-title="Q18 · APT 대 CAPM">
+    <h2>Q18 · APT 대 CAPM</h2>
+    <p class="prob">다섯 항목으로 CAPM 과 APT 를 비교하라: 핵심 가정 · 합리적이어야 하는 사람 · 요인 수 · 적용 대상 · 약점. APT 가 "더 약한 가정"이라는 말의 뜻은?</p>
+    <div class="sol step"><b>가정</b> CAPM: 모든 투자자가 평균-분산 최적화 / APT: 요인모형 세계에서 무차익(no-arbitrage)</div>
+    <div class="sol step"><b>누가</b> CAPM: 사실상 모든 투자자 / APT: 자금력 있는 소수의 차익거래자</div>
+    <div class="sol step"><b>요인·대상</b> CAPM: 시장 하나, 모든 증권에 정확히 / APT: 몇 개든(이론은 침묵), 잘 분산된 포트폴리오</div>
+    <div class="sol step"><b>약점</b> CAPM: 강한 가정, 실증적으로 기각 / APT: 어떤 요인이 중요한지 말해 주지 않음</div>
+    <div class="sol step"><b>뜻</b> 모두가 최적화할 필요 없이 "공짜 점심은 없다" 하나로 E(r) = r<sub>f</sub> + Σβ<sub>k</sub>RP<sub>k</sub> 를 얻는다.</div>
+  </section>
+
+  <section class="slide title" data-title="끝">
+    <h1>끝</h1>
+    <p class="sub">다음: 퀴즈 /study/ia7/quiz.html (영어, 22문항)</p>
+  </section>
+
+</main>
+
+<script src="/slides/deck.js"></script>
+</body>
+</html>

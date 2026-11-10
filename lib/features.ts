@@ -11,4 +11,5 @@ export const FEATURES: Feature[] = [
   { label: "슬라이드", href: "/slides/" },
   { label: "Econ2 Exam2 TA Session", href: "/econ2/" },
   { label: "Econ 2 Interactive", href: "/econ2/graphs/" },
+  { label: "BF·IA 학습자료", href: "/study/" },
 ]

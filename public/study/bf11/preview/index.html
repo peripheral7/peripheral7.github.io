@@ -1,0 +1,198 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta name="pinterest" content="nopin">
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="robots" content="noindex">
+<title>BF Ch.11 Risk and Return — 예습</title>
+<link rel="stylesheet" href="/slides/deck.css">
+<!--
+  BF Ch.11 Risk and Return 예습 덱(HTML 장 11장). 숫자 예시는 강의 PDF(BF_Chap11_students.pdf) 그대로.
+  글자색은 고정하지 않는다(흰/검은 바탕 전환 D 키). 테두리는 currentColor, 흐린 글은 opacity.
+-->
+<style>
+  .slide h2{font-size:58px;margin-bottom:34px}
+  .slide p,.slide ul,.slide ol{font-size:32px}
+  .slide li{margin:.3em 0}
+  .slide table{font-size:27px;line-height:1.3}
+  .slide th,.slide td{padding:8px 18px}
+  .slide .small{font-size:25px}
+  .slide .muted{opacity:.68}
+  .flow{display:flex;flex-wrap:wrap;align-items:center;gap:10px 8px;font-size:25px;line-height:1.25;margin:0 0 26px}
+  .flow>span{border:2px solid currentColor;padding:8px 12px}
+  .flow>i{font-style:normal;opacity:.7}
+  .eq{display:inline-block;border:3px solid currentColor;padding:12px 26px;font-size:34px;margin:0 0 22px;font-family:"Cambria Math",Cambria,Georgia,serif}
+  .slide td.r,.slide th.r{text-align:right}
+</style>
+</head>
+<body>
+<noscript>JavaScript is required.</noscript>
+
+<main id="stage">
+
+  <section class="slide title" data-title="표지">
+    <h1>Ch.11 Risk and Return</h1>
+    <p class="sub">위험과 수익률 — 위험 중 <b>어느 부분</b>에 보상이 붙는가</p>
+    <p class="hint">Business Finance · Prof. Gemma Lee · RWJ Essentials of Corporate Finance · 예습</p>
+  </section>
+
+  <section class="slide" data-title="장 전체 지도">
+    <h2>장 전체 지도</h2>
+    <div class="flow">
+      <span>기대수익률·분산</span><i>→</i><span>포트폴리오</span><i>→</i><span>기대 + 놀람(U)</span><i>→</i><span>체계적 / 비체계적</span><i>→</i><span>분산투자</span><i>→</i><span>베타 β</span><i>→</i><span>SML · CAPM</span><i>→</i><span>자본비용</span>
+    </div>
+    <table>
+      <tr><th>§</th><th>핵심 질문</th><th>답이 되는 도구</th></tr>
+      <tr><td>11.1–11.2</td><td>앞으로의 수익률·위험을 어떻게 재나? 섞으면?</td><td>E(R), σ², 가중평균</td></tr>
+      <tr><td>11.3–11.4</td><td>가격을 움직이는 건 무엇인가? 위험은 몇 종류?</td><td>R = E(R) + U, 체계적/비체계적</td></tr>
+      <tr><td>11.5</td><td>많이 섞으면 어떤 위험이 사라지나?</td><td>분산투자(diversification)</td></tr>
+      <tr><td>11.6</td><td>남는 위험을 어떻게 재나?</td><td>베타(beta)</td></tr>
+      <tr><td>11.7–11.8</td><td>그 위험에 얼마를 요구하나? 어디에 쓰나?</td><td>SML·CAPM → 할인율</td></tr>
+    </table>
+    <p class="small muted" style="margin-top:22px">왜 이 순서인가: 위험을 재고(σ) → 쪼개고(체계적/비체계적) → 분산으로 걸러낸 뒤 → 남는 것만 재서(β) → 값을 매긴다(CAPM).</p>
+  </section>
+
+  <section class="slide" data-title="앞 장과의 연결: Ch.10 → 11">
+    <h2>앞 장과의 연결: Ch.10 → Ch.11</h2>
+    <table>
+      <tr><th></th><th>Ch.10 자본시장 역사의 교훈</th><th>Ch.11 위험과 수익률</th></tr>
+      <tr><td>시점</td><td>과거 — 실제로 일어난 수익률의 평균</td><td>미래 — 일어날 수 있는 상황의 확률가중평균</td></tr>
+      <tr><td>위험의 척도</td><td>분산·표준편차 = 총위험(total risk)</td><td>베타 = 체계적 위험(systematic risk)만</td></tr>
+      <tr><td>보상</td><td>위험 프리미엄(risk premium): 위험할수록 평균 수익률이 높았다</td><td>보상은 분산으로 없앨 수 <b>없는</b> 위험에만</td></tr>
+      <tr><td>남긴 질문</td><td>“위험 1단위에 얼마?”</td><td>답: SML / CAPM</td></tr>
+    </table>
+    <p class="small muted" style="margin-top:22px">Ch.10 의 “얼마나 위험한가” → Ch.11 의 “그 위험 중 얼마만큼이 보상받는가”.</p>
+  </section>
+
+  <section class="slide" data-title="11.1 기대수익률과 분산">
+    <h2>11.1 기대수익률과 분산</h2>
+    <div class="cols wide-right">
+      <div>
+        <p><b>핵심 질문</b> 아직 안 일어난 수익률을 어떻게 요약하나?</p>
+        <p><span class="eq">E(R) = Σ p<sub>s</sub>·R<sub>s</sub></span><br><span class="eq">σ² = Σ p<sub>s</sub>·(R<sub>s</sub> − E(R))²</span></p>
+        <p class="small muted">기대수익률(expected return), 분산(variance), 표준편차(standard deviation) σ = √σ²</p>
+      </div>
+      <table>
+        <tr><th>상황</th><th>확률</th><th class="r">A</th><th class="r">B</th></tr>
+        <tr><td>Recession</td><td>0.50</td><td class="r">−20%</td><td class="r">+30%</td></tr>
+        <tr><td>Boom</td><td>0.50</td><td class="r">+70%</td><td class="r">+10%</td></tr>
+        <tr><th>E(R)</th><td></td><td class="r">25%</td><td class="r">20%</td></tr>
+        <tr><th>σ²</th><td></td><td class="r">0.2025</td><td class="r">0.0100</td></tr>
+        <tr><th>σ</th><td></td><td class="r">45%</td><td class="r">10%</td></tr>
+      </table>
+    </div>
+  </section>
+
+  <section class="slide" data-title="11.2 포트폴리오">
+    <h2>11.2 포트폴리오(portfolio)</h2>
+    <p><b>핵심 질문</b> 섞으면 수익률과 위험이 어떻게 되나? (A 50% + B 50%)</p>
+    <p><span class="eq">E(R<sub>P</sub>) = w<sub>1</sub>E(R<sub>1</sub>) + w<sub>2</sub>E(R<sub>2</sub>) + …</span></p>
+    <table>
+      <tr><th></th><th>가중평균으로 계산하면</th><th>포트폴리오 자체 상황별로 계산하면</th><th>같은가?</th></tr>
+      <tr><td>기대수익률</td><td>0.5×25% + 0.5×20% = 22.5%</td><td>0.5×5% + 0.5×40% = 22.5%</td><td>같다</td></tr>
+      <tr><td>표준편차</td><td>0.5×45% + 0.5×10% = 27.5%</td><td>√0.030625 = 17.5%</td><td><b>다르다</b></td></tr>
+    </table>
+    <p class="small muted" style="margin-top:22px">두 주식이 반대로 움직여 서로를 상쇄하므로 위험은 가중평균보다 작다 — 분산투자의 씨앗.</p>
+  </section>
+
+  <section class="slide" data-title="11.3–11.4 놀람과 두 종류의 위험">
+    <h2>11.3–11.4 놀람(surprise)과 두 종류의 위험</h2>
+    <p><span class="eq">R = E(R) + U</span> &nbsp; <span class="small muted">실제 수익률 = 기대(이미 가격에 반영) + 예상치 못한 부분(unexpected return)</span></p>
+    <table>
+      <tr><th></th><th>체계적 위험 (systematic risk)</th><th>비체계적 위험 (unsystematic risk)</th></tr>
+      <tr><td>다른 이름</td><td>시장위험, 분산 불가능 위험</td><td>고유위험, 자산 특유 위험</td></tr>
+      <tr><td>영향 범위</td><td>거의 모든 자산</td><td>한 기업 또는 소수</td></tr>
+      <tr><td>예</td><td>금리, 인플레이션, GDP, 세법 변경</td><td>파업, 제품 실패, 소송, 화재</td></tr>
+      <tr><td>큰 포트폴리오에서</td><td>남는다</td><td>상쇄되어 사라진다</td></tr>
+    </table>
+    <p class="small muted" style="margin-top:20px">예: 기대 25%, 실제 30% → U = +5%. 가격을 움직이는 건 뉴스 중 <b>놀람</b>뿐.</p>
+  </section>
+
+  <section class="slide" data-title="11.5 분산투자">
+    <h2>11.5 분산투자(diversification)</h2>
+    <div class="cols">
+      <div>
+        <p><b>핵심 질문</b> 종목을 늘리면 위험은 어디까지 줄어드나?</p>
+        <p><span class="eq">Total risk = systematic + unsystematic</span></p>
+        <ul>
+          <li>비체계적 위험 → 거의 공짜로 제거</li>
+          <li>체계적 위험 → 바닥(floor)으로 남음</li>
+          <li><b>체계적 위험 원칙</b>: 보상은 체계적 위험에만</li>
+        </ul>
+      </div>
+      <table>
+        <tr><th>보유 종목 수</th><th class="r">포트폴리오 σ</th></tr>
+        <tr><td>1</td><td class="r">49.0%</td></tr>
+        <tr><td>5</td><td class="r">25.2%</td></tr>
+        <tr><td>10</td><td class="r">22.2%</td></tr>
+        <tr><td>30</td><td class="r">20.2%</td></tr>
+        <tr><td>50</td><td class="r">19.8%</td></tr>
+      </table>
+    </div>
+  </section>
+
+  <section class="slide" data-title="11.6 베타">
+    <h2>11.6 베타(beta, β)</h2>
+    <div class="cols">
+      <div>
+        <p><b>핵심 질문</b> 분산 뒤에 남는 위험을 어떻게 재나?</p>
+        <table>
+          <tr><th>β</th><th>뜻</th></tr>
+          <tr><td>= 1</td><td>시장과 1:1로 움직임</td></tr>
+          <tr><td>&gt; 1</td><td>시장 변동을 키움 (항공·기술)</td></tr>
+          <tr><td>0 ~ 1</td><td>시장 변동을 줄임 (전력·식품)</td></tr>
+          <tr><td>= 0</td><td>시장과 무관</td></tr>
+        </table>
+      </div>
+      <div>
+        <p><span class="eq">β<sub>P</sub> = w<sub>1</sub>β<sub>1</sub> + w<sub>2</sub>β<sub>2</sub> + …</span></p>
+        <p class="small">40% × 1.60 + 60% × 0.80 = 0.64 + 0.48 = <b>1.12</b></p>
+        <p class="small muted">포트폴리오 베타는 가중평균이 <b>된다</b>. 표준편차는 안 된다.<br>σ 가 크다고 β 가 큰 것은 아니다(금광회사).</p>
+      </div>
+    </div>
+  </section>
+
+  <section class="slide" data-title="11.7 SML과 CAPM">
+    <h2>11.7 증권시장선(SML)과 CAPM</h2>
+    <p><span class="eq">Reward-to-risk = (E(R<sub>i</sub>) − R<sub>f</sub>) / β<sub>i</sub></span> &nbsp;→ 균형에서는 모든 자산이 같다</p>
+    <p><span class="eq">E(R<sub>i</sub>) = R<sub>f</sub> + β<sub>i</sub> × [E(R<sub>M</sub>) − R<sub>f</sub>]</span></p>
+    <table>
+      <tr><th>R<sub>f</sub> = 8%, 시장위험프리미엄 7%</th><th class="r">β</th><th class="r">제시</th><th class="r">SML 요구</th><th>판정</th></tr>
+      <tr><td>Asset A — SML 위</td><td class="r">1.60</td><td class="r">22%</td><td class="r">19.2%</td><td>저평가(undervalued)</td></tr>
+      <tr><td>Asset B — SML 아래</td><td class="r">1.20</td><td class="r">13%</td><td class="r">16.4%</td><td>고평가(overvalued)</td></tr>
+    </table>
+    <p class="small muted" style="margin-top:20px">SML 의 기울기 = 시장위험프리미엄(market risk premium). 절편 = 무위험이자율(risk-free rate).</p>
+  </section>
+
+  <section class="slide" data-title="11.8 자본비용 · 다음 장 연결">
+    <h2>11.8 SML과 자본비용 → Ch.12</h2>
+    <div class="flow">
+      <span>프로젝트의 β</span><i>→</i><span>SML 요구수익률</span><i>→</i><span>NPV 할인율</span><i>→</i><span>Ch.12 자본비용(cost of capital)</span>
+    </div>
+    <ul>
+      <li>SML 위에 있는 프로젝트 = NPV &gt; 0 — 같은 판정</li>
+      <li>회사의 β가 아니라 <b>프로젝트의 β</b>로 할인한다</li>
+      <li>Ch.12: 자기자본비용 R<sub>E</sub> = R<sub>f</sub> + β<sub>E</sub>(R<sub>M</sub> − R<sub>f</sub>) 를 부채비용과 섞어 <b>WACC</b>(가중평균자본비용)를 만든다</li>
+    </ul>
+    <p class="small muted">Ch.8–9 에서 “주어진” 할인율이 어디서 오는지 여기서 닫히고, Ch.12 에서 회사 전체로 넓힌다.</p>
+  </section>
+
+  <section class="slide" data-title="수업 전 체크리스트">
+    <h2>수업 전 체크리스트 — 헷갈리는 쌍</h2>
+    <table>
+      <tr><th>헷갈리는 쌍</th><th>구별 기준</th></tr>
+      <tr><td>표준편차 σ vs 베타 β</td><td>σ = 총위험, β = 체계적 위험만. 보상은 β 에.</td></tr>
+      <tr><td>체계적 vs 비체계적 위험</td><td>시장 전체에 닿나(금리·경기) vs 한 기업만(파업·소송)</td></tr>
+      <tr><td>포트폴리오 E(R)·β vs σ</td><td>E(R)·β 는 가중평균 O, σ 는 가중평균 X (더 작다)</td></tr>
+      <tr><td>SML 위 vs 아래</td><td>위 = 저평가(살 것, 가격↑), 아래 = 고평가</td></tr>
+      <tr><td>E(R<sub>M</sub>) − R<sub>f</sub> vs β × [E(R<sub>M</sub>) − R<sub>f</sub>]</td><td>시장위험프리미엄(기울기) vs 그 자산의 위험프리미엄</td></tr>
+    </table>
+    <p class="small muted" style="margin-top:20px">스스로 확인: A·B 반반 포트폴리오의 E(R) 22.5%, σ 17.5% 를 손으로 다시 계산할 수 있는가?</p>
+  </section>
+
+</main>
+
+<script src="/slides/deck.js"></script>
+</body>
+</html>
