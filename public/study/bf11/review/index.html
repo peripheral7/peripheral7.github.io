@@ -1,0 +1,729 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta name="pinterest" content="nopin">
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="robots" content="noindex">
+<title>BF Ch.11 Risk and Return — 복습 문제</title>
+<link rel="stylesheet" href="/slides/deck.css">
+<!--
+  BF Ch.11 복습 덱 — 복습 요약 13장 + 연습문제 20문제(한 장에 한 문제, 풀이는 class="step" 블록: → 를 누르면 나타남).
+  원본: BF_Chap11_students.pdf (Prof. Gemma Lee, RWJ Essentials of Corporate Finance). 요약은 강의 예제 숫자 그대로, 연습문제는 강의 예제와 같은 구조에 숫자·상황을 새로 바꿨다(복습 퀴즈와 겹치지 않게, 파이썬 검산).
+  글자색은 고정하지 않는다(흰/검은 바탕 전환 D 키). SML 그림은 currentColor 로 그린 인라인 SVG.
+-->
+<style>
+  .slide.d{padding:58px 96px 40px}
+  .slide.d h2{font-size:50px;margin:0 0 24px;padding-left:26px;border-left-width:6px}
+  .slide.d h3{font-size:35px;margin:0 0 10px}
+  .slide.d p{font-size:32px;line-height:1.42;margin:0 0 .4em}
+  .slide.d ul,.slide.d ol{font-size:31px;line-height:1.38}
+  .slide.d li{margin:.22em 0;padding-left:1.3em}
+  .slide.d ul>li::before{top:.66em;width:.65em;height:2px}
+  .slide.d table{font-size:27px;line-height:1.25}
+  .slide.d th,.slide.d td{padding:5px 14px;border-width:1.5px}
+  .slide.d table.num td+td,.slide.d table.num th+th{text-align:right}
+  .slide.d table.wide{width:100%}
+  .slide.d .cols{gap:44px}
+  .slide.d .small{font-size:25px}
+  .slide.d .q{font-size:31px}
+  .slide.d .sol{margin-top:14px;padding-top:12px;border-top:3px dashed currentColor}
+  .slide.d .sol p,.slide.d .sol li{font-size:28px;line-height:1.38}
+  .slide.d .sol table{font-size:25px}
+  .slide.d .sol th,.slide.d .sol td{padding:3px 12px}
+  .slide.d pre.ba{font-size:22px;line-height:1.35;padding:10px 16px;border-width:2px}
+  .slide.d .box{border:3px solid currentColor;padding:12px 22px;margin:8px 0}
+  .slide.d .box p{margin:0}
+  .slide.d .eq{font-size:32px;font-weight:700;text-align:center;margin:6px 0 14px}
+  .slide.d tr.tot td{font-weight:700;border-top-width:3px}
+  .slide.d td.st{min-width:120px}
+  .slide.d svg.sml{width:100%;height:auto;display:block}
+  .slide.d svg.sml text{font-family:inherit}
+</style>
+</head>
+<body>
+<noscript>JavaScript is required.</noscript>
+
+<main id="stage">
+
+<!-- ───────────── 표지 ───────────── -->
+<section class="slide title" data-title="표지">
+  <h1 style="font-size:116px">BF Ch.11<br>Risk and Return</h1>
+  <p class="sub">복습 요약 + 연습문제 20 · Business Finance (Prof. Gemma Lee)</p>
+  <p class="hint">→ 다음 / 풀이 한 단계씩 &nbsp;·&nbsp; O 목록 &nbsp;·&nbsp; D 흰/검은 바탕 &nbsp;·&nbsp; F 전체 화면</p>
+</section>
+
+<!-- ───────────── 복습 요약 ───────────── -->
+<section class="slide d" data-title="장 전체 지도">
+  <h2>장 전체 지도 — 위험 중 "얼마만큼"이 보상받는가</h2>
+  <table class="wide">
+    <tr><th>절</th><th>핵심 질문</th><th>결과물</th></tr>
+    <tr><td>11.1 Expected returns &amp; variances</td><td>상황(state)별 확률로 미래 수익률과 위험을 어떻게 재나?</td><td>E(R), σ², σ</td></tr>
+    <tr><td>11.2 Portfolios</td><td>섞으면 E(R)와 위험은 어떻게 되나?</td><td>E(R<sub>P</sub>)는 가중평균, σ<sub>P</sub>는 아님</td></tr>
+    <tr><td>11.3 Announcements &amp; surprises</td><td>뉴스가 나오면 왜 가격이 움직이나?</td><td>R = E(R) + U</td></tr>
+    <tr><td>11.4 Systematic vs unsystematic</td><td>놀람(U)은 몇 개 기업에 닿는가?</td><td>위험의 두 종류</td></tr>
+    <tr><td>11.5 Diversification</td><td>분산투자로 없앨 수 있는 위험은?</td><td>비체계적 위험만 제거</td></tr>
+    <tr><td>11.6 Beta</td><td>남는 위험을 어떻게 재나?</td><td>β, β<sub>P</sub> = Σwβ</td></tr>
+    <tr><td>11.7 SML (CAPM)</td><td>β 1단위의 값은?</td><td>E(R<sub>i</sub>) = R<sub>f</sub> + β<sub>i</sub>[E(R<sub>M</sub>) − R<sub>f</sub>]</td></tr>
+    <tr><td>11.8 SML &amp; cost of capital</td><td>프로젝트 할인율은 어디서 오나?</td><td>프로젝트 β의 SML 요구수익률</td></tr>
+  </table>
+  <p class="small muted" style="margin-top:14px">흐름: σ로 위험 재기 → 포트폴리오로 섞기 → R = E(R) + U → U를 체계적/비체계적으로 → 분산투자로 비체계적 제거 → 남은 위험 β → SML/CAPM → 프로젝트 할인율</p>
+</section>
+
+<section class="slide d" data-title="11.1 기대수익률">
+  <h2>11.1 기대수익률 (expected return) — 확률가중평균</h2>
+  <p>Ch.10은 <b>실제로 일어난 일</b>을 평균했다. 11장은 <b>일어날 수 있는 일</b>을 각 상황(state)의 확률로 가중해 평균한다.</p>
+  <div class="box"><p class="eq" style="margin:0">E(R) = p<sub>1</sub>R<sub>1</sub> + p<sub>2</sub>R<sub>2</sub> + … + p<sub>n</sub>R<sub>n</sub> &nbsp;&nbsp;(Σp = 1)</p></div>
+  <div class="cols">
+    <div>
+      <table class="num wide">
+        <tr><th>State</th><th>Chance</th><th>Stock A</th><th>Stock B</th></tr>
+        <tr><td>Recession</td><td>0.50</td><td>−20%</td><td>+30%</td></tr>
+        <tr><td>Boom</td><td>0.50</td><td>+70%</td><td>+10%</td></tr>
+        <tr class="tot"><td>E(R)</td><td></td><td>25%</td><td>20%</td></tr>
+      </table>
+    </div>
+    <div>
+      <p>E(R<sub>A</sub>) = 0.50 × (−20%) + 0.50 × 70% = −10% + 35% = <b>25%</b></p>
+      <p>E(R<sub>B</sub>) = 0.50 × 30% + 0.50 × 10% = 15% + 5% = <b>20%</b></p>
+      <p class="small">A의 기대수익률이 더 높지만 그래서 "더 좋은 주식"인 것은 아니다 — 위험(σ)을 봐야 한다.</p>
+    </div>
+  </div>
+  <p class="small muted" style="margin-top:10px">빠진 확률이 있으면 먼저 1 − (나머지 확률의 합)으로 채운다.</p>
+</section>
+
+<section class="slide d" data-title="11.1 분산과 표준편차">
+  <h2>11.1 분산 (variance) · 표준편차 (standard deviation)</h2>
+  <div class="box"><p class="eq" style="margin:0">σ² = p<sub>1</sub>(R<sub>1</sub> − E(R))² + … + p<sub>n</sub>(R<sub>n</sub> − E(R))² &nbsp;&nbsp;·&nbsp;&nbsp; σ = √σ²</p></div>
+  <div class="cols">
+    <div>
+      <table class="num wide">
+        <tr><th>State</th><th>A: p(R − 25%)²</th><th>B: p(R − 20%)²</th></tr>
+        <tr><td>Recession</td><td>0.50 × (−0.45)² = 0.10125</td><td>0.50 × 0.10² = 0.005</td></tr>
+        <tr><td>Boom</td><td>0.50 × 0.45² = 0.10125</td><td>0.50 × (−0.10)² = 0.005</td></tr>
+        <tr class="tot"><td>Variance</td><td>0.2025</td><td>0.0100</td></tr>
+        <tr class="tot"><td>σ</td><td>√0.2025 = 45%</td><td>√0.0100 = 10%</td></tr>
+      </table>
+    </div>
+    <div>
+      <ul>
+        <li>분산 = 기대수익률에서 벗어난 정도(편차²)의 <b>확률가중평균</b></li>
+        <li><b>소수(decimal)</b>로 계산하고 마지막에 √ — 소수 넷째 자리 이상 유지</li>
+        <li>A: 25%, σ 45% · B: 20%, σ 10% → A는 수익도 위험도 크다</li>
+      </ul>
+    </div>
+  </div>
+  <p class="small" style="margin-top:8px"><b>BA II Plus</b>: 2nd DATA에 X = 수익률(%), Y = 확률 × 100 → 2nd STAT에서 x̄ = E(R), <b>σx</b> = σ (Sx 아님). 강의 연습(C·D, p.9): E(R) 12.60% · 8.25%, σ 20.01% · 6.94%</p>
+</section>
+
+<section class="slide d" data-title="11.2 포트폴리오 기대수익률">
+  <h2>11.2 포트폴리오 기대수익률 — 두 경로, 같은 답</h2>
+  <div class="box"><p class="eq" style="margin:0">E(R<sub>P</sub>) = w<sub>1</sub>E(R<sub>1</sub>) + w<sub>2</sub>E(R<sub>2</sub>) + … &nbsp;&nbsp;(w = 투자금 비중, Σw = 1)</p></div>
+  <div class="cols">
+    <div>
+      <h3>경로 1 — 기대수익률을 평균</h3>
+      <p>A 50% · B 50%</p>
+      <p>E(R<sub>P</sub>) = 0.50 × 25% + 0.50 × 20% = 12.5% + 10% = <b>22.5%</b></p>
+    </div>
+    <div>
+      <h3>경로 2 — 상황별 포트폴리오 수익률</h3>
+      <table class="num wide">
+        <tr><th>State</th><th>p</th><th>R<sub>P</sub></th></tr>
+        <tr><td>Recession</td><td>0.50</td><td>0.5(−20%) + 0.5(30%) = +5%</td></tr>
+        <tr><td>Boom</td><td>0.50</td><td>0.5(70%) + 0.5(10%) = +40%</td></tr>
+        <tr class="tot"><td>Expected</td><td></td><td>0.5(5%) + 0.5(40%) = 22.5%</td></tr>
+      </table>
+    </div>
+  </div>
+  <p style="margin-top:14px">기대수익률은 가중평균이므로 <b>"먼저 평균 → 결합"</b>이든 <b>"먼저 결합 → 평균"</b>이든 항상 같다.</p>
+</section>
+
+<section class="slide d" data-title="11.2 포트폴리오 위험">
+  <h2>11.2 포트폴리오 위험은 가중평균이 아니다</h2>
+  <p>σ<sub>A</sub> = 45%, σ<sub>B</sub> = 10%. 반반 포트폴리오의 σ는 27.5%가 <b>아니다</b> — 포트폴리오 자체의 상황별 수익률로 계산한다.</p>
+  <table class="num wide">
+    <tr><th>State</th><th>p</th><th>R<sub>P</sub></th><th>p × (R<sub>P</sub> − 22.5%)²</th></tr>
+    <tr><td>Recession</td><td>0.50</td><td>+5%</td><td>0.50 × (−0.175)² = 0.0153125</td></tr>
+    <tr><td>Boom</td><td>0.50</td><td>+40%</td><td>0.50 × 0.175² = 0.0153125</td></tr>
+    <tr class="tot"><td>Variance</td><td></td><td></td><td>0.030625</td></tr>
+  </table>
+  <div class="cols" style="margin-top:16px">
+    <div class="box"><p>가중평균이라면: 0.50 × 45% + 0.50 × 10% = 27.5%</p></div>
+    <div class="box"><p>실제: σ<sub>P</sub> = √0.030625 = <b>17.5%</b></p></div>
+  </div>
+  <p style="margin-top:10px"><b>왜 작은가?</b> 불황에 A↓ B↑ — 반대로 움직여 서로 상쇄한다. 이것이 분산투자(diversification)의 씨앗이다.</p>
+</section>
+
+<section class="slide d" data-title="11.3 기대수익률과 놀람">
+  <h2>11.3 발표와 놀람 — R = E(R) + U</h2>
+  <div class="box"><p class="eq" style="margin:0">실제 수익률 R = 기대수익률 E(R) + 예상치 못한 수익률 U</p></div>
+  <div class="cols">
+    <div>
+      <h3>E(R) — 이미 가격에 반영</h3>
+      <ul>
+        <li>연초 전에 시장이 이미 예상해 가격에 넣어 둔 부분</li>
+        <li>예상대로 나와도 추가로 벌어 주는 것은 없다</li>
+        <li>발표(announcement) = 예상된 부분 + 놀람(surprise)</li>
+      </ul>
+    </div>
+    <div>
+      <h3>U — 놀람</h3>
+      <ul>
+        <li>예상하지 못한 모든 것. 가격을 움직이는 것은 <b>이 부분뿐</b></li>
+        <li>여러 기간 평균하면 <b>0</b> — 부호를 예측할 수 있다면 이미 E(R)에 들어가 있을 것</li>
+      </ul>
+    </div>
+  </div>
+  <p style="margin-top:14px"><b>강의 예</b>: 시장은 A의 올해 수익률을 25%로 예상, 실제는 30% → U = 30% − 25% = <b>+5%</b>. 이 5%p만이 아무도 계획할 수 없었던 부분이다.</p>
+</section>
+
+<section class="slide d" data-title="11.4 체계적 vs 비체계적 위험">
+  <h2>11.4 위험의 두 종류 — 놀람이 몇 개 기업에 닿는가</h2>
+  <table class="wide">
+    <tr><th></th><th>체계적 위험 (systematic risk)</th><th>비체계적 위험 (unsystematic risk)</th></tr>
+    <tr><td><b>다른 이름</b></td><td>시장위험 (market risk), 분산 불가능 위험 (nondiversifiable)</td><td>고유위험 (unique risk), 자산 특유 위험 (asset-specific)</td></tr>
+    <tr><td><b>영향 범위</b></td><td>거의 모든 자산에, 정도 차이는 있지만</td><td>한 기업, 많아야 소수 기업</td></tr>
+    <tr><td><b>예</b></td><td>금리, 인플레이션, GDP 성장률, 세법 변경</td><td>한 공장의 파업, 제품 실패, 소송, 화재</td></tr>
+    <tr><td><b>큰 포트폴리오에서</b></td><td><b>남는다</b> — 모든 보유 종목이 노출</td><td><b>상쇄된다</b> — 한 기업의 불운을 다른 기업의 행운이 메운다</td></tr>
+  </table>
+  <p style="margin-top:18px">총위험 (total risk) = 체계적 위험 + 비체계적 위험. 놀람 U도 같은 방식으로 나눌 수 있다: 시장 전체 놀람 + 기업 고유 놀람.</p>
+  <p class="small muted">분류 기준은 "얼마나 큰 사건인가"나 "예상했는가"가 아니라 <b>영향이 미치는 기업의 범위</b>다.</p>
+</section>
+
+<section class="slide d" data-title="11.5 분산투자">
+  <h2>11.5 분산투자 — 줄어드는 위험과 바닥</h2>
+  <div class="cols wide-right">
+    <div>
+      <table class="num wide">
+        <tr><th>보유 종목 수</th><th>σ</th></tr>
+        <tr><td>1</td><td>49.0%</td></tr>
+        <tr><td>5</td><td>25.2%</td></tr>
+        <tr><td>10</td><td>22.2%</td></tr>
+        <tr><td>30</td><td>20.2%</td></tr>
+        <tr><td>50</td><td>19.8%</td></tr>
+      </table>
+      <p class="small" style="margin-top:8px">1 → 10종목: (49.0 − 22.2)/49.0 = 54.7% 감소<br>30 → 50종목: 0.4%p 감소</p>
+    </div>
+    <div>
+      <ul>
+        <li><b>효과는 초반에 몰린다</b> — 처음 몇 종목이 위험의 절반 이상을 없앤다</li>
+        <li>곡선은 약 20% 근처에서 평평해진다 = <b>체계적 위험 (바닥)</b></li>
+        <li>분산투자는 <b>비체계적 위험</b>을 없앤다 — 비용은 거의 0</li>
+        <li>분산투자는 <b>체계적 위험</b>을 없앨 수 없다 — 모든 종목이 금리·인플레·경기에 노출</li>
+      </ul>
+      <div class="box" style="margin-top:12px"><p><b>체계적 위험 원칙 (systematic risk principle)</b>: 공짜로 없앨 수 있는 위험에는 아무도 보상하지 않는다 → 위험 프리미엄은 체계적 위험에만 붙는다.</p></div>
+    </div>
+  </div>
+</section>
+
+<section class="slide d" data-title="11.6 베타와 포트폴리오 베타">
+  <h2>11.6 베타 (β) — 시장 움직임을 얼마나 따라가나</h2>
+  <div class="cols">
+    <div>
+      <p>σ = <b>총위험</b>. β = 시장과 함께 움직이는 부분, 즉 분산투자 뒤에도 남는 <b>체계적 위험만</b>.</p>
+      <table class="wide">
+        <tr><th>β</th><th>의미</th><th>예</th></tr>
+        <tr><td>β = 1</td><td>시장과 1 대 1</td><td>시장지수 1.0</td></tr>
+        <tr><td>β &gt; 1</td><td>시장 움직임을 증폭</td><td>항공·명품·기술 ≈ 1.5</td></tr>
+        <tr><td>0 &lt; β &lt; 1</td><td>완화</td><td>전력·필수식품 ≈ 0.5</td></tr>
+        <tr><td>β = 0</td><td>시장과 무관</td><td>무위험자산</td></tr>
+      </table>
+      <p class="small" style="margin-top:8px">σ가 커도 β는 작을 수 있다 — 금광회사는 변동이 크지만 시장을 거의 따라가지 않는다.</p>
+    </div>
+    <div>
+      <h3>포트폴리오 β — 여기서는 가중평균이 맞다</h3>
+      <div class="box"><p class="eq" style="margin:0">β<sub>P</sub> = w<sub>1</sub>β<sub>1</sub> + w<sub>2</sub>β<sub>2</sub> + …</p></div>
+      <table class="num wide">
+        <tr><th>보유</th><th>w</th><th>β</th><th>w × β</th></tr>
+        <tr><td>Stock A</td><td>40%</td><td>1.60</td><td>0.64</td></tr>
+        <tr><td>Stock B</td><td>60%</td><td>0.80</td><td>0.48</td></tr>
+        <tr class="tot"><td>Portfolio</td><td>100%</td><td></td><td>1.12</td></tr>
+      </table>
+      <p class="small" style="margin-top:8px">E(R<sub>P</sub>)와 β<sub>P</sub>는 가중평균, σ<sub>P</sub>는 가중평균이 아니다.</p>
+    </div>
+  </div>
+</section>
+
+<section class="slide d" data-title="11.7 보상 대 위험 비율과 CAPM">
+  <h2>11.7 보상 대 위험 비율 (reward-to-risk ratio) → CAPM</h2>
+  <div class="box"><p class="eq" style="margin:0">Reward-to-risk = (E(R<sub>i</sub>) − R<sub>f</sub>) / β<sub>i</sub> &nbsp;&nbsp;— 체계적 위험 1단위당 초과 기대수익률</p></div>
+  <div class="cols">
+    <div>
+      <table class="num wide">
+        <tr><th>R<sub>f</sub> = 8%</th><th>E(R)</th><th>β</th><th>비율</th></tr>
+        <tr><td>Asset A</td><td>22%</td><td>1.60</td><td>14% / 1.60 = 8.75%</td></tr>
+        <tr><td>Asset B</td><td>13%</td><td>1.20</td><td>5% / 1.20 = 4.17%</td></tr>
+      </table>
+      <p style="margin-top:12px">오래갈 수 없다: 투자자는 B를 팔고 A를 산다 → A 가격↑·E(R)↓, B 가격↓·E(R)↑ → 두 비율이 같아질 때까지.</p>
+    </div>
+    <div>
+      <p>균형에서는 <b>모든 자산의 비율이 같다</b>. 시장 포트폴리오(β = 1)의 비율은 E(R<sub>M</sub>) − R<sub>f</sub>이므로:</p>
+      <div class="box"><p class="eq" style="margin:0">E(R<sub>i</sub>) = R<sub>f</sub> + β<sub>i</sub> × [E(R<sub>M</sub>) − R<sub>f</sub>]</p></div>
+      <table class="num wide">
+        <tr><th>β</th><th>8% + β × 7%</th></tr>
+        <tr><td>0.0</td><td>8.0% (= R<sub>f</sub>)</td></tr>
+        <tr><td>1.0</td><td>15.0% (= E(R<sub>M</sub>))</td></tr>
+        <tr><td>1.6</td><td>19.2%</td></tr>
+      </table>
+    </div>
+  </div>
+</section>
+
+<section class="slide d" data-title="11.7 SML 위·아래 판정">
+  <h2>11.7 증권시장선 (SML) — 위는 저평가, 아래는 고평가</h2>
+  <div class="cols">
+    <div>
+      <svg class="sml" viewBox="0 0 640 380" role="img" aria-label="SML: 절편 8%, 기울기 7%. A는 선 위, B는 선 아래">
+        <g fill="none" stroke="currentColor">
+          <path d="M70 20V330H600" stroke-width="2.5"/>
+          <path d="M70 234L570 66" stroke-width="4"/>
+          <path d="M470 66V100M370 174V133" stroke-width="2" stroke-dasharray="6 5"/>
+        </g>
+        <g fill="currentColor">
+          <circle cx="70" cy="234" r="7"/><circle cx="320" cy="150" r="7"/>
+          <circle cx="470" cy="66" r="9"/><circle cx="370" cy="174" r="9"/>
+        </g>
+        <g fill="currentColor" font-size="24">
+          <text x="62" y="240" text-anchor="end">8%</text>
+          <text x="62" y="156" text-anchor="end">15%</text>
+          <text x="62" y="72" text-anchor="end">22%</text>
+          <text x="70" y="358" text-anchor="middle">0</text>
+          <text x="320" y="358" text-anchor="middle">1.0</text>
+          <text x="570" y="358" text-anchor="middle">2.0</text>
+          <text x="600" y="320" text-anchor="end">β</text>
+          <text x="84" y="18">E(R)</text>
+          <text x="306" y="134" text-anchor="end">M (시장)</text>
+          <text x="420" y="54">A (22%) 위</text>
+          <text x="384" y="205">B (13%) 아래</text>
+          <text x="560" y="100" text-anchor="end">SML</text>
+        </g>
+      </svg>
+    </div>
+    <div>
+      <table class="num wide">
+        <tr><th></th><th>제시</th><th>SML 요구</th><th>판정</th></tr>
+        <tr><td>A</td><td>22%</td><td>8% + 1.6 × 7% = 19.2%</td><td>저평가 (α +2.8%)</td></tr>
+        <tr><td>B</td><td>13%</td><td>8% + 1.2 × 7% = 16.4%</td><td>고평가 (α −3.4%)</td></tr>
+      </table>
+      <ul style="margin-top:10px">
+        <li>α = 제시 E(R) − CAPM 요구수익률</li>
+        <li><b>위 (α &gt; 0) = 저평가 (undervalued)</b>: 사려는 사람이 몰려 가격↑, E(R)↓ → 선 위로 수렴</li>
+        <li><b>아래 (α &lt; 0) = 고평가 (overvalued)</b>: 팔려서 가격↓, E(R)↑</li>
+        <li>절편 = R<sub>f</sub>, 기울기 = 시장위험프리미엄 (market risk premium) 7%</li>
+      </ul>
+    </div>
+  </div>
+</section>
+
+<section class="slide d" data-title="11.7 CAPM 포트폴리오 예">
+  <h2>11.7 CAPM 항목과 포트폴리오 예</h2>
+  <table class="wide">
+    <tr><th>항목</th><th>의미</th><th>강의 예</th></tr>
+    <tr><td>R<sub>f</sub></td><td>체계적 위험이 없을 때의 수익률 (SML 절편)</td><td>8%</td></tr>
+    <tr><td>E(R<sub>M</sub>) − R<sub>f</sub></td><td>시장위험프리미엄 — SML의 기울기</td><td>7% (E(R<sub>M</sub>) = 15%)</td></tr>
+    <tr><td>β<sub>i</sub></td><td>그 위험을 이 자산이 얼마나 지고 있나</td><td>자산마다 다름</td></tr>
+  </table>
+  <h3 style="margin-top:22px">예: β = 1.60 주식 40%, β = 0.80 주식 60%</h3>
+  <p>β<sub>P</sub> = 0.40 × 1.60 + 0.60 × 0.80 = 0.64 + 0.48 = <b>1.12</b></p>
+  <p>E(R<sub>P</sub>) = 8% + 1.12 × 7% = 8% + 7.84% = <b>15.84%</b></p>
+  <p class="small">검산: 각 주식의 CAPM 수익률 19.2%, 13.6%의 가중평균 = 0.40 × 19.2% + 0.60 × 13.6% = 7.68% + 8.16% = 15.84% — 같은 값 (SML이 직선이기 때문).</p>
+</section>
+
+<section class="slide d" data-title="11.8 SML과 자본비용">
+  <h2>11.8 요구수익률이 곧 할인율 (cost of capital)</h2>
+  <p>Ch.8–9에서 프로젝트 현금흐름을 "요구수익률"로 할인했지만 그 숫자의 출처는 말하지 않았다. <b>출처는 SML이다.</b></p>
+  <div class="cols">
+    <div>
+      <h3>규칙</h3>
+      <ul>
+        <li>프로젝트의 기대수익률 &gt; 그 체계적 위험에 대해 시장이 요구하는 수익률 → 채택</li>
+        <li>= 프로젝트가 <b>SML 위</b>에 있다</li>
+        <li>SML 요구수익률을 NPV 할인율로 쓰면 <b>NPV &gt; 0 ⇔ SML 위</b> — 같은 검사</li>
+      </ul>
+    </div>
+    <div>
+      <h3>회사가 아니라 프로젝트의 위험</h3>
+      <ul>
+        <li>안정적인 전력회사가 소프트웨어 사업을 시작하면 <b>소프트웨어 β</b>로 할인해야 한다</li>
+        <li>회사 자신의 낮은 β를 쓰면 거의 모든 위험한 프로젝트가 좋아 보인다</li>
+        <li>회사 전체 단일 할인율 → 위험한 프로젝트 과다 채택, 안전한 프로젝트 과소 채택</li>
+      </ul>
+    </div>
+  </div>
+</section>
+
+<section class="slide d" data-title="공식 요약">
+  <h2>공식 요약</h2>
+  <table class="wide" style="font-size:26px">
+    <tr><th>개념</th><th>공식</th><th>메모</th></tr>
+    <tr><td>Expected return</td><td>E(R) = Σ p<sub>s</sub> R<sub>s</sub></td><td>Σp = 1</td></tr>
+    <tr><td>Variance · SD</td><td>σ² = Σ p<sub>s</sub>(R<sub>s</sub> − E(R))², σ = √σ²</td><td>소수로, BA II Plus σx</td></tr>
+    <tr><td>Portfolio E(R)</td><td>E(R<sub>P</sub>) = Σ w<sub>i</sub>E(R<sub>i</sub>)</td><td>상황별 계산과 같은 값</td></tr>
+    <tr><td>Portfolio variance</td><td>R<sub>P,s</sub> = Σ w<sub>i</sub>R<sub>i,s</sub> → σ<sub>P</sub>² = Σ p<sub>s</sub>(R<sub>P,s</sub> − E(R<sub>P</sub>))²</td><td>가중평균 σ 아님 (≤)</td></tr>
+    <tr><td>Actual return</td><td>R = E(R) + U</td><td>U 평균 0</td></tr>
+    <tr><td>Total risk</td><td>체계적 + 비체계적</td><td>분산투자는 비체계적만 제거</td></tr>
+    <tr><td>Portfolio beta</td><td>β<sub>P</sub> = Σ w<sub>i</sub>β<sub>i</sub></td><td>무위험자산 β = 0</td></tr>
+    <tr><td>Reward-to-risk</td><td>(E(R<sub>i</sub>) − R<sub>f</sub>) / β<sub>i</sub></td><td>균형에서 모두 = E(R<sub>M</sub>) − R<sub>f</sub></td></tr>
+    <tr><td>CAPM / SML</td><td>E(R<sub>i</sub>) = R<sub>f</sub> + β<sub>i</sub>[E(R<sub>M</sub>) − R<sub>f</sub>]</td><td>절편 R<sub>f</sub>, 기울기 MRP, 시장 β = 1</td></tr>
+    <tr><td>Alpha</td><td>α = 제시 E(R) − CAPM 요구수익률</td><td>α &gt; 0 저평가, α &lt; 0 고평가</td></tr>
+    <tr><td>Project</td><td>할인율 = R<sub>f</sub> + β<sub>project</sub> × MRP</td><td>NPV &gt; 0 ⇔ SML 위 → 채택</td></tr>
+  </table>
+</section>
+
+<!-- ───────────── 연습문제 ───────────── -->
+<section class="slide section" data-title="연습문제">
+  <h1>연습문제</h1>
+  <p class="sub" style="font-size:44px;opacity:.72;margin-top:30px">20문제 · 한 장에 한 문제 · → 로 풀이</p>
+</section>
+
+<section class="slide d" data-title="문제 1 · 기대수익률 (상황표)">
+  <h2>문제 1 · 상황표로 기대수익률 구하기</h2>
+  <p class="q">경기 상황별 두 주식의 수익률이 아래와 같다. (a) 불황의 확률은? (b) 각 주식의 기대수익률은? (c) 기대수익률이 높은 주식이 더 좋은 투자인가?</p>
+  <div class="cols">
+    <table class="num wide">
+      <tr><th>State</th><th>Probability</th><th>Stock X</th><th>Stock Y</th></tr>
+      <tr><td>Boom</td><td>0.30</td><td>+35%</td><td>+3%</td></tr>
+      <tr><td>Normal</td><td>0.45</td><td>+14%</td><td>+10%</td></tr>
+      <tr><td>Recession</td><td>?</td><td>−18%</td><td>+15%</td></tr>
+    </table>
+    <div class="sol step" style="margin-top:0">
+      <p>(a) 확률의 합은 1 → P(recession) = 1 − 0.30 − 0.45 = <b>0.25</b></p>
+      <p class="small">Y는 불황에 오히려 수익이 높은 방어적 주식이다.</p>
+    </div>
+  </div>
+  <div class="sol step">
+    <p>(b) E(R) = Σ p × R</p>
+    <p>E(R<sub>X</sub>) = 0.30 × 35% + 0.45 × 14% + 0.25 × (−18%) = 10.50% + 6.30% − 4.50% = <b>12.30%</b></p>
+    <p>E(R<sub>Y</sub>) = 0.30 × 3% + 0.45 × 10% + 0.25 × 15% = 0.90% + 4.50% + 3.75% = <b>9.15%</b></p>
+  </div>
+  <div class="sol step">
+    <p>(c) 알 수 없다 — X의 기대수익률이 높지만 상황별 폭(+35% ~ −18%)이 훨씬 크다. 위험(σ)을 함께 봐야 한다 → 문제 2.</p>
+  </div>
+</section>
+
+<section class="slide d" data-title="문제 2 · 분산과 표준편차 (상황표)">
+  <h2>문제 2 · 분산과 표준편차 — 상황표 워크시트</h2>
+  <p class="q">문제 1의 X (E = 12.30%)와 Y (E = 9.15%)의 분산과 표준편차를 구하라. 소수로 계산하라.</p>
+  <div class="sol step">
+    <table class="num wide">
+      <tr><th>State</th><th>p</th><th>R<sub>X</sub> − E</th><th>p(R<sub>X</sub> − E)²</th><th>R<sub>Y</sub> − E</th><th>p(R<sub>Y</sub> − E)²</th></tr>
+      <tr><td>Boom</td><td>0.30</td><td>0.227</td><td>0.30 × 0.227² = 0.015459</td><td>−0.0615</td><td>0.30 × 0.0615² = 0.0011347</td></tr>
+      <tr><td>Normal</td><td>0.45</td><td>0.017</td><td>0.45 × 0.017² = 0.000130</td><td>0.0085</td><td>0.45 × 0.0085² = 0.0000325</td></tr>
+      <tr><td>Recession</td><td>0.25</td><td>−0.303</td><td>0.25 × 0.303² = 0.022952</td><td>0.0585</td><td>0.25 × 0.0585² = 0.0008556</td></tr>
+      <tr class="tot"><td>Variance</td><td></td><td></td><td>0.038541</td><td></td><td>0.0020228</td></tr>
+      <tr class="tot"><td>σ</td><td></td><td></td><td>√0.038541 = 19.63%</td><td></td><td>√0.0020228 = 4.50%</td></tr>
+    </table>
+  </div>
+  <div class="cols">
+    <div class="sol step">
+      <p>X: 기대수익률 12.30%, σ <b>19.63%</b> · Y: 9.15%, σ <b>4.50%</b></p>
+      <p>X는 3.15%p 더 벌지만 위험은 4배 이상 — 어느 쪽이 나은지는 다음 질문(포트폴리오 안에서의 위험)에 달려 있다.</p>
+    </div>
+    <pre class="ba sol step">2nd DATA  2nd CLR WORK
+X01 35 ENTER ↓  Y01 30 ENTER ↓
+X02 14 ENTER ↓  Y02 45 ENTER ↓
+X03 18 +/− ENTER ↓  Y03 25 ENTER ↓
+2nd STAT ↓ ↓  x̄ = 12.30  σx = 19.63</pre>
+  </div>
+</section>
+
+<section class="slide d" data-title="문제 3 · 포트폴리오 기대수익률 두 경로">
+  <h2>문제 3 · 포트폴리오 기대수익률 — 두 경로로 확인</h2>
+  <p class="q">문제 1의 X에 <b>60%</b>, Y에 <b>40%</b>를 투자한다. (a) 기대수익률의 가중평균으로 E(R<sub>P</sub>)를 구하라. (b) 상황별 포트폴리오 수익률을 먼저 구한 뒤 기대값을 구해 같은지 확인하라.</p>
+  <div class="sol step">
+    <p>(a) E(R<sub>P</sub>) = 0.60 × 12.30% + 0.40 × 9.15% = 7.38% + 3.66% = <b>11.04%</b></p>
+  </div>
+  <div class="sol step">
+    <table class="num wide">
+      <tr><th>State</th><th>p</th><th>R<sub>P</sub> = 0.60 R<sub>X</sub> + 0.40 R<sub>Y</sub></th><th>p × R<sub>P</sub></th></tr>
+      <tr><td>Boom</td><td>0.30</td><td>0.60 × 35% + 0.40 × 3% = 21.0% + 1.2% = 22.2%</td><td>6.66%</td></tr>
+      <tr><td>Normal</td><td>0.45</td><td>0.60 × 14% + 0.40 × 10% = 8.4% + 4.0% = 12.4%</td><td>5.58%</td></tr>
+      <tr><td>Recession</td><td>0.25</td><td>0.60 × (−18%) + 0.40 × 15% = −10.8% + 6.0% = −4.8%</td><td>−1.20%</td></tr>
+      <tr class="tot"><td>E(R<sub>P</sub>)</td><td></td><td></td><td>11.04%</td></tr>
+    </table>
+  </div>
+  <p class="small step" style="margin-top:12px">두 경로가 같다 — 기대수익률은 가중평균이라 순서를 바꿔도 결과가 같다. 하지만 위험은 경로 (b)로만 구할 수 있다 → 문제 4.</p>
+</section>
+
+<section class="slide d" data-title="문제 4 · 포트폴리오 표준편차">
+  <h2>문제 4 · 포트폴리오 표준편차 vs 가중평균 σ</h2>
+  <p class="q">문제 3의 60/40 포트폴리오 (상황별 22.2% · 12.4% · −4.8%, E = 11.04%)의 분산과 표준편차를 구하고, σ의 가중평균 (σ<sub>X</sub> = 19.63%, σ<sub>Y</sub> = 4.50%)과 비교하라.</p>
+  <div class="sol step">
+    <table class="num wide">
+      <tr><th>State</th><th>p</th><th>R<sub>P</sub> − E(R<sub>P</sub>)</th><th>p × (R<sub>P</sub> − E(R<sub>P</sub>))²</th></tr>
+      <tr><td>Boom</td><td>0.30</td><td>0.222 − 0.1104 = 0.1116</td><td>0.30 × 0.1116² = 0.003736</td></tr>
+      <tr><td>Normal</td><td>0.45</td><td>0.124 − 0.1104 = 0.0136</td><td>0.45 × 0.0136² = 0.000083</td></tr>
+      <tr><td>Recession</td><td>0.25</td><td>−0.048 − 0.1104 = −0.1584</td><td>0.25 × 0.1584² = 0.006273</td></tr>
+      <tr class="tot"><td>Variance</td><td></td><td></td><td>0.010092</td></tr>
+    </table>
+  </div>
+  <div class="cols">
+    <div class="sol step">
+      <p>σ<sub>P</sub> = √0.010092 = <b>10.05%</b></p>
+      <p>가중평균이라면 0.60 × 19.63% + 0.40 × 4.50% = <b>13.58%</b></p>
+    </div>
+    <div class="sol step">
+      <p>10.05% &lt; 13.58% — Y는 불황에 오르고 X는 떨어져 서로 상쇄한다.</p>
+      <p>σ를 가중평균하는 것은 대표적인 함정이다. σ<sub>P</sub>는 항상 포트폴리오 자체의 상황별 수익률로 계산한다.</p>
+    </div>
+  </div>
+</section>
+
+<section class="slide d" data-title="문제 5 · 금액으로 주어진 포트폴리오">
+  <h2>문제 5 · 금액으로 주어진 포트폴리오의 기대수익률</h2>
+  <p class="q">Stock A에 $4,500 (기대수익률 10%), Stock B에 $7,500 (16%), Stock C에 $3,000 (5%)를 투자했다. 포트폴리오의 기대수익률은? 세 수익률의 단순평균과 왜 다른가?</p>
+  <div class="sol step">
+    <p>총액 = 4,500 + 7,500 + 3,000 = $15,000 → 비중 w = 금액 ÷ 총액</p>
+    <p>w<sub>A</sub> = 4,500 / 15,000 = 0.30 · w<sub>B</sub> = 7,500 / 15,000 = 0.50 · w<sub>C</sub> = 3,000 / 15,000 = 0.20</p>
+  </div>
+  <div class="sol step">
+    <p>E(R<sub>P</sub>) = Σ w × E(R) = 0.30 × 10% + 0.50 × 16% + 0.20 × 5% = 3.0% + 8.0% + 1.0% = <b>12.0%</b></p>
+  </div>
+  <div class="sol step">
+    <p>단순평균 (10% + 16% + 5%) / 3 = 10.33%는 세 주식에 같은 금액을 넣었을 때의 답이다. 돈의 절반이 16%짜리 B에 있으므로 포트폴리오 수익률이 더 높다.</p>
+    <p class="small">비중은 항상 <b>투자금</b> 기준 — 주식 수나 종목 수가 아니다.</p>
+  </div>
+</section>
+
+<section class="slide d" data-title="문제 6 · 위험이 0인 포트폴리오">
+  <h2>문제 6 · 위험을 완전히 없애는 비중</h2>
+  <p class="q">두 상황(확률 각 0.50)에서 Stock K는 불황 −10%, 호황 +30%, Stock L은 불황 +20%, 호황 0%를 번다. (a) 각 주식의 E(R)는? (b) K의 비중 w를 얼마로 하면 포트폴리오 수익률이 두 상황에서 같아지는가? 그때 E(R<sub>P</sub>)와 σ<sub>P</sub>는?</p>
+  <div class="sol step">
+    <p>(a) E(R<sub>K</sub>) = 0.50 × (−10%) + 0.50 × 30% = <b>10%</b> · E(R<sub>L</sub>) = 0.50 × 20% + 0.50 × 0% = <b>10%</b></p>
+  </div>
+  <div class="sol step">
+    <p>(b) 불황 = 호황: w(−10%) + (1 − w)(20%) = w(30%) + (1 − w)(0%)</p>
+    <p>20% − 30%w = 30%w → 60%w = 20% → <b>w = 1/3</b> (K 1/3, L 2/3)</p>
+  </div>
+  <div class="sol step">
+    <p>불황: (1/3)(−10%) + (2/3)(20%) = 10% · 호황: (1/3)(30%) + (2/3)(0%) = 10%</p>
+    <p>E(R<sub>P</sub>) = <b>10%</b>, 두 상황 모두 10%이므로 σ<sub>P</sub> = <b>0</b> — 각 주식의 σ는 20%, 10%인데도.</p>
+    <p class="small">완전히 반대로 움직이는 두 자산이라 가능한 극단적인 경우. 현실에서는 0까지는 못 가지만 같은 원리로 위험이 줄어든다.</p>
+  </div>
+</section>
+
+<section class="slide d" data-title="문제 7 · R = E(R) + U">
+  <h2>문제 7 · 실제 수익률을 기대 + 놀람으로 나누기</h2>
+  <p class="q">연초에 시장은 Hanul Pharma의 올해 수익률을 <b>10%</b>로 예상했다. 한 해 동안 (1) 중앙은행이 예상 밖으로 금리를 올려 주가가 <b>3%</b> 하락, (2) 회사가 예상 밖으로 특허소송에서 이겨 <b>5%</b> 상승, (3) 이미 발표 예정이던 신약 출시가 예정대로 이뤄졌다. 실제 수익률과 U는? U를 체계적/비체계적 부분으로 나눠라.</p>
+  <div class="sol step">
+    <p>(3) 예정대로의 출시 — 이미 E(R) 10%에 반영되어 있으므로 추가 효과 <b>0</b></p>
+    <p>U = −3% + 5% = <b>+2%</b> · R = E(R) + U = 10% + 2% = <b>12%</b></p>
+  </div>
+  <div class="sol step">
+    <table class="wide">
+      <tr><th>놀람</th><th>크기</th><th>종류</th><th>이유</th></tr>
+      <tr><td>금리 인상</td><td>−3%</td><td>체계적</td><td>거의 모든 기업에 영향</td></tr>
+      <tr><td>소송 승소</td><td>+5%</td><td>비체계적</td><td>이 회사에만 영향</td></tr>
+    </table>
+  </div>
+  <p class="small step" style="margin-top:12px">가격을 움직인 것은 발표 자체가 아니라 그 안의 <b>놀람</b>뿐이다. 소송 같은 기업 고유 놀람은 큰 포트폴리오에서는 다른 기업의 놀람과 상쇄된다.</p>
+</section>
+
+<section class="slide d" data-title="문제 8 · 체계적 vs 비체계적 분류">
+  <h2>문제 8 · 체계적 위험인가, 비체계적 위험인가?</h2>
+  <table class="wide">
+    <tr><th>예상 밖의 사건</th><th>분류 · 이유</th></tr>
+    <tr><td>정부가 법인세율을 전면 인하</td><td class="step"><b>체계적</b> — 세법 변경은 거의 모든 기업에 닿는다</td></tr>
+    <tr><td>한 자동차 회사의 대규모 리콜</td><td class="step"><b>비체계적</b> — 그 회사(와 일부 부품사)에 한정</td></tr>
+    <tr><td>물가상승률이 예측보다 2%p 높게 발표</td><td class="step"><b>체계적</b> — 인플레이션</td></tr>
+    <tr><td>한 바이오 기업의 CEO가 갑자기 사임</td><td class="step"><b>비체계적</b> — 한 기업의 사건</td></tr>
+    <tr><td>GDP 성장률이 예상보다 크게 낮음</td><td class="step"><b>체계적</b> — 경기 전반</td></tr>
+    <tr><td>한 식품회사 공장의 화재</td><td class="step"><b>비체계적</b> — 큰 손실이어도 한 기업에만</td></tr>
+  </table>
+  <p class="small step" style="margin-top:14px">기준은 사건의 크기도, 예상 여부도 아니라 <b>영향이 미치는 기업의 범위</b>다. 체계적 위험만 분산투자로 없앨 수 없고, 그래서 체계적 위험만 보상받는다.</p>
+</section>
+
+<section class="slide d" data-title="문제 9 · 분산투자 효과">
+  <h2>문제 9 · 분산투자 — 얼마나, 어디까지 줄어드나</h2>
+  <p class="q">무작위로 고른 포트폴리오의 평균 σ: 1종목 52.0% · 4종목 30.5% · 10종목 24.0% · 25종목 21.4% · 60종목 20.6%. (a) 1 → 10종목에서 위험이 몇 % 줄었나? (b) 25 → 60종목은? (c) 60종목으로도 남는 약 20%는 무엇이며, 더 늘리면 0이 되는가?</p>
+  <div class="sol step">
+    <p>(a) (52.0 − 24.0) / 52.0 = 28.0 / 52.0 = <b>53.8%</b> 감소 — 처음 3종목 추가(1 → 4)만으로도 21.5%p</p>
+    <p>(b) 21.4 − 20.6 = <b>0.8%p</b> — 35종목을 더 사서 얻는 것이 거의 없다</p>
+  </div>
+  <div class="sol step">
+    <p>(c) 남는 부분은 <b>체계적 위험</b> — 모든 종목이 금리·인플레·경기에 함께 노출되므로 평균해도 사라지지 않는다. 종목을 아무리 늘려도 0이 되지 않고 이 바닥에 수렴한다.</p>
+    <p>사라진 부분 (52.0% → 약 20%)이 <b>비체계적 위험</b> — 거의 공짜로 없앨 수 있으므로 시장은 이것을 지는 대가를 주지 않는다.</p>
+  </div>
+</section>
+
+<section class="slide d" data-title="문제 10 · σ와 β, 무엇이 보상받나">
+  <h2>문제 10 · 총위험이 큰 주식이 더 많이 벌어야 하나?</h2>
+  <p class="q">R<sub>f</sub> = 3.5%, 시장위험프리미엄 = 6%. Stock P(광산 탐사회사)는 σ = 60%, β = 0.4. Stock Q(항공사)는 σ = 30%, β = 1.4. CAPM 요구수익률은 각각? 어느 주식의 위험이 "보상받는" 위험인가?</p>
+  <div class="sol step">
+    <p>E(R<sub>i</sub>) = R<sub>f</sub> + β<sub>i</sub> × MRP</p>
+    <p>P = 3.5% + 0.4 × 6% = 3.5% + 2.4% = <b>5.9%</b></p>
+    <p>Q = 3.5% + 1.4 × 6% = 3.5% + 8.4% = <b>11.9%</b></p>
+  </div>
+  <div class="sol step">
+    <p>σ는 P가 두 배지만 요구수익률은 Q가 두 배 이상이다. P의 위험은 대부분 <b>비체계적</b>(탐사 성공·실패 같은 기업 고유 사건)이라 분산투자로 공짜로 없어진다 → 보상 없음.</p>
+    <p>Q의 위험은 경기에 따라 움직이는 <b>체계적</b> 부분이 크다(β 1.4) → 보상은 β에 붙는다. 높은 σ ≠ 높은 β.</p>
+  </div>
+</section>
+
+<section class="slide d" data-title="문제 11 · 포트폴리오 베타">
+  <h2>문제 11 · 포트폴리오 베타</h2>
+  <p class="q">Stock D에 $24,000 (β = 1.5), Stock E에 $36,000 (β = 0.8), Stock F에 $20,000 (β = 1.1)을 보유하고 있다. 포트폴리오 β는? 시장보다 위험한가?</p>
+  <div class="sol step">
+    <table class="num">
+      <tr><th>보유</th><th>금액</th><th>w</th><th>β</th><th>w × β</th></tr>
+      <tr><td>Stock D</td><td>24,000</td><td>0.30</td><td>1.5</td><td>0.450</td></tr>
+      <tr><td>Stock E</td><td>36,000</td><td>0.45</td><td>0.8</td><td>0.360</td></tr>
+      <tr><td>Stock F</td><td>20,000</td><td>0.25</td><td>1.1</td><td>0.275</td></tr>
+      <tr class="tot"><td>Portfolio</td><td>80,000</td><td>1.00</td><td></td><td>1.085</td></tr>
+    </table>
+  </div>
+  <div class="sol step">
+    <p>β<sub>P</sub> = Σ w × β = 0.450 + 0.360 + 0.275 = <b>1.085</b> &gt; 1 → 시장보다 체계적 위험이 약간 크다 (시장이 10% 움직이면 평균 약 10.85%)</p>
+    <p class="small">함정: β의 단순평균 (1.5 + 0.8 + 1.1)/3 = 1.133은 금액 비중을 무시한 값. β는 가중평균이 맞지만 σ는 아니다.</p>
+  </div>
+</section>
+
+<section class="slide d" data-title="문제 12 · 목표 베타 만들기">
+  <h2>문제 12 · 목표 베타에 맞추는 비중</h2>
+  <p class="q">$80,000을 Stock G (β = 1.5)와 Stock H (β = 0.7)에 나눠 투자해 포트폴리오 β를 <b>1.2</b>로 만들고 싶다. (a) 각 주식에 얼마를 넣어야 하나? (b) R<sub>f</sub> = 4%, 시장위험프리미엄 = 7%일 때 이 포트폴리오의 CAPM 기대수익률은?</p>
+  <div class="sol step">
+    <p>(a) β<sub>P</sub> = w × 1.5 + (1 − w) × 0.7 = 1.2</p>
+    <p>0.7 + 0.8w = 1.2 → 0.8w = 0.5 → <b>w<sub>G</sub> = 0.625</b>, w<sub>H</sub> = 0.375</p>
+    <p>G: 0.625 × 80,000 = <b>$50,000</b> · H: 0.375 × 80,000 = <b>$30,000</b></p>
+  </div>
+  <div class="sol step">
+    <p>(b) E(R<sub>P</sub>) = 4% + 1.2 × 7% = 4% + 8.4% = <b>12.4%</b></p>
+    <p class="small">검산: G = 4% + 1.5 × 7% = 14.5%, H = 4% + 0.7 × 7% = 8.9% → 0.625 × 14.5% + 0.375 × 8.9% = 9.0625% + 3.3375% = 12.4% ✓</p>
+  </div>
+</section>
+
+<section class="slide d" data-title="문제 13 · 보상 대 위험 비율">
+  <h2>문제 13 · 보상 대 위험 비율 비교</h2>
+  <p class="q">R<sub>f</sub> = 5%. Asset C의 기대수익률은 17%, β = 1.5이고 Asset D의 기대수익률은 11%, β = 0.8이다. (a) 각 자산의 보상 대 위험 비율은? (b) 투자자는 어떻게 행동하고, 두 자산의 가격과 기대수익률은 어떻게 변하나?</p>
+  <div class="sol step">
+    <p>(a) Reward-to-risk = (E(R) − R<sub>f</sub>) / β</p>
+    <p>C = (17% − 5%) / 1.5 = 12% / 1.5 = <b>8.0%</b> · D = (11% − 5%) / 0.8 = 6% / 0.8 = <b>7.5%</b></p>
+  </div>
+  <div class="sol step">
+    <p>(b) C는 체계적 위험 1단위당 8.0%, D는 7.5%를 준다 → 투자자는 <b>D를 팔고 C를 산다</b></p>
+    <p>C 가격↑ → C의 기대수익률↓ · D 가격↓ → D의 기대수익률↑ — 두 비율이 같아질 때까지 계속된다</p>
+  </div>
+  <p class="small step" style="margin-top:12px">기대수익률이 높아서가 아니라(β가 다르므로) β 1단위당 보상이 높아서 C를 산다. 균형에서는 모든 자산의 비율이 같고, 그 값이 시장위험프리미엄이다.</p>
+</section>
+
+<section class="slide d" data-title="문제 14 · CAPM 요구수익률표">
+  <h2>문제 14 · β별 CAPM 요구수익률</h2>
+  <p class="q">무위험이자율 4.5%, 시장 기대수익률 11%. (a) 시장위험프리미엄은? (b) β = 0, 0.6, 1.0, 1.4, 2.0의 요구수익률을 구하라. (c) β가 0.4 오를 때마다 요구수익률은 얼마씩 오르나?</p>
+  <div class="cols">
+    <div class="sol step">
+      <p>(a) MRP = E(R<sub>M</sub>) − R<sub>f</sub> = 11% − 4.5% = <b>6.5%</b></p>
+      <p>E(R<sub>i</sub>) = 4.5% + β<sub>i</sub> × 6.5%</p>
+      <p>(c) 0.4 × 6.5% = <b>2.6%p</b>씩 — SML은 기울기 6.5%의 직선</p>
+    </div>
+    <div class="sol step">
+      <table class="num wide">
+        <tr><th>β</th><th>4.5% + β × 6.5%</th><th>요구수익률</th></tr>
+        <tr><td>0</td><td>4.5% + 0</td><td>4.5%</td></tr>
+        <tr><td>0.6</td><td>4.5% + 3.9%</td><td>8.4%</td></tr>
+        <tr><td>1.0</td><td>4.5% + 6.5%</td><td>11.0%</td></tr>
+        <tr><td>1.4</td><td>4.5% + 9.1%</td><td>13.6%</td></tr>
+        <tr><td>2.0</td><td>4.5% + 13.0%</td><td>17.5%</td></tr>
+      </table>
+    </div>
+  </div>
+  <p class="small step" style="margin-top:12px">β = 0이면 R<sub>f</sub>, β = 1이면 시장 기대수익률 — 표의 두 줄로 SML의 절편과 시장 포트폴리오 점을 확인할 수 있다.</p>
+</section>
+
+<section class="slide d" data-title="문제 15 · 두 자산으로 SML 찾기">
+  <h2>문제 15 · SML 선상의 두 자산으로 R<sub>f</sub>와 MRP 역산</h2>
+  <p class="q">올바르게 평가된(SML 선상의) 두 주식: Stock S는 β = 1.5, 기대수익률 14.0%; Stock T는 β = 0.5, 기대수익률 7.0%. (a) 시장위험프리미엄 (b) 무위험이자율 (c) 시장 기대수익률 (d) β = 0.8인 주식의 요구수익률을 구하라.</p>
+  <div class="sol step">
+    <p>(a) SML의 기울기 = MRP = (14.0% − 7.0%) / (1.5 − 0.5) = 7.0% / 1.0 = <b>7.0%</b></p>
+    <p>(b) R<sub>f</sub> = 14.0% − 1.5 × 7.0% = 14.0% − 10.5% = <b>3.5%</b> (검산: 7.0% − 0.5 × 7.0% = 3.5% ✓)</p>
+  </div>
+  <div class="sol step">
+    <p>(c) E(R<sub>M</sub>) = R<sub>f</sub> + 1.0 × MRP = 3.5% + 7.0% = <b>10.5%</b></p>
+    <p>(d) 3.5% + 0.8 × 7.0% = 3.5% + 5.6% = <b>9.1%</b></p>
+  </div>
+  <p class="small step" style="margin-top:12px">SML은 직선이므로 선상의 두 점이면 절편(R<sub>f</sub>)과 기울기(MRP)가 정해진다.</p>
+</section>
+
+<section class="slide d" data-title="문제 16 · 기대수익률에서 베타 역산">
+  <h2>문제 16 · 기대수익률에서 β 역산</h2>
+  <p class="q">R<sub>f</sub> = 4%, 시장 기대수익률 = 12%. 올바르게 평가된 Stock V의 기대수익률은 13.2%다. (a) V의 β는? (b) 투자금을 V와 무위험자산에 반씩 넣으면 포트폴리오의 β와 기대수익률은?</p>
+  <div class="sol step">
+    <p>(a) 13.2% = 4% + β × (12% − 4%) → 9.2% = β × 8%</p>
+    <p>β<sub>V</sub> = 9.2% / 8% = <b>1.15</b></p>
+  </div>
+  <div class="sol step">
+    <p>(b) β<sub>P</sub> = 0.50 × 1.15 + 0.50 × 0 = <b>0.575</b> (무위험자산 β = 0)</p>
+    <p>E(R<sub>P</sub>) = 4% + 0.575 × 8% = 4% + 4.6% = <b>8.6%</b></p>
+    <p class="small">검산: 0.50 × 13.2% + 0.50 × 4% = 6.6% + 2.0% = 8.6% ✓ — 기대수익률과 β 모두 가중평균</p>
+  </div>
+</section>
+
+<section class="slide d" data-title="문제 17 · 저평가·고평가 판정">
+  <h2>문제 17 · SML 대비 저평가 · 고평가 판정</h2>
+  <p class="q">R<sub>f</sub> = 2.5%, 시장 기대수익률 = 9.5%. 애널리스트의 예상수익률: Stock J (β = 0.9) 10.0%, Stock K (β = 1.3) 11.0%, Stock L (β = 1.6) 13.7%. 각 주식의 요구수익률과 α를 구하고 판정하라.</p>
+  <div class="sol step">
+    <p>MRP = 9.5% − 2.5% = 7% · E(R<sub>i</sub>) = 2.5% + β<sub>i</sub> × 7% · α = 예상 − 요구</p>
+  </div>
+  <div class="sol step">
+    <table class="num wide">
+      <tr><th>Stock</th><th>β</th><th>요구수익률</th><th>예상</th><th>α</th><th>판정</th></tr>
+      <tr><td>J</td><td>0.9</td><td>2.5% + 6.3% = 8.8%</td><td>10.0%</td><td>+1.2%</td><td>SML 위 → 저평가 (매수)</td></tr>
+      <tr><td>K</td><td>1.3</td><td>2.5% + 9.1% = 11.6%</td><td>11.0%</td><td>−0.6%</td><td>SML 아래 → 고평가 (매도)</td></tr>
+      <tr><td>L</td><td>1.6</td><td>2.5% + 11.2% = 13.7%</td><td>13.7%</td><td>0</td><td>SML 선상 → 적정</td></tr>
+    </table>
+  </div>
+  <p class="small step" style="margin-top:12px">K는 예상수익률이 J보다 높지만 β가 요구하는 만큼은 못 준다. 판정 기준은 수익률의 크기가 아니라 <b>β에 비해</b> 많은가 적은가다. J는 매수세로 가격↑·E(R)↓, K는 가격↓·E(R)↑ → 둘 다 SML로 돌아간다.</p>
+</section>
+
+<section class="slide d" data-title="문제 18 · 가격으로 본 저평가">
+  <h2>문제 18 · 가격에서 기대수익률을 구해 SML과 비교</h2>
+  <p class="q">Stock W의 현재 주가는 $50이다. 1년 뒤 배당 $2와 주가 $54가 예상된다. β = 1.2, R<sub>f</sub> = 4%, 시장위험프리미엄 = 6%. (a) W의 기대수익률은? (b) 저평가인가 고평가인가? (c) 기대수익률이 SML에 정확히 오려면 오늘 주가는 얼마여야 하나?</p>
+  <div class="sol step">
+    <p>(a) E(R) = (D<sub>1</sub> + P<sub>1</sub> − P<sub>0</sub>) / P<sub>0</sub> = (2 + 54 − 50) / 50 = 6 / 50 = <b>12.0%</b></p>
+    <p>(b) 요구수익률 = 4% + 1.2 × 6% = <b>11.2%</b> → 12.0% &gt; 11.2%, α = +0.8% → SML 위 → <b>저평가</b></p>
+  </div>
+  <div class="sol step">
+    <p>(c) 11.2%를 벌 수 있는 가격: P<sub>0</sub> = (D<sub>1</sub> + P<sub>1</sub>) / (1 + 0.112) = 56 / 1.112 = <b>$50.36</b></p>
+    <p>매수세가 가격을 $50 → $50.36으로 올리면 기대수익률이 12.0% → 11.2%로 내려가 SML 위에 놓인다 — "위 = 저평가 → 가격 상승 → 선으로 수렴"을 숫자로 본 것.</p>
+  </div>
+</section>
+
+<section class="slide d" data-title="문제 19 · 프로젝트 할인율과 NPV">
+  <h2>문제 19 · 회사 β가 아니라 프로젝트 β로 할인</h2>
+  <p class="q">β = 0.7인 식품회사가 β = 1.4 수준의 게임 사업 프로젝트를 검토한다. 투자 $1,000,000, 3년간 매년 $400,000 유입 (IRR 9.70%). R<sub>f</sub> = 4%, MRP = 6%. (a) 회사 β와 프로젝트 β의 할인율은? (b) 각각의 NPV는? (c) 결정은?</p>
+  <div class="sol step">
+    <p>(a) 회사 할인율 = 4% + 0.7 × 6% = <b>8.2%</b> · 프로젝트 할인율 = 4% + 1.4 × 6% = <b>12.4%</b></p>
+  </div>
+  <div class="sol step">
+    <p>(b) NPV = −1,000,000 + 400,000 × [1 − 1/(1 + r)<sup>3</sup>] / r</p>
+    <p>r = 8.2%: −1,000,000 + 400,000 × 2.56783 = <b>+$27,130.02</b> &nbsp;·&nbsp; r = 12.4%: −1,000,000 + 400,000 × 2.38542 = <b>−$45,832.84</b></p>
+  </div>
+  <div class="sol step">
+    <p>(c) 프로젝트 위험에 맞는 요구수익률은 12.4%. IRR 9.70% &lt; 12.4% → SML 아래, NPV &lt; 0 → <b>기각</b></p>
+    <p>회사 할인율 8.2%를 쓰면 NPV가 양(+)으로 나와 잘못 채택한다. "NPV &gt; 0"과 "SML 위"는 같은 검사다.</p>
+  </div>
+</section>
+
+<section class="slide d" data-title="문제 20 · 개념 참/거짓">
+  <h2>문제 20 · 개념 점검 — 참인가 거짓인가?</h2>
+  <table class="wide">
+    <tr><th>진술</th><th>판정 · 이유</th></tr>
+    <tr><td>기대수익률이 더 높은 주식이 항상 더 좋은 투자다.</td><td class="step"><b>거짓</b> — 위험(σ, β)을 함께 봐야 한다</td></tr>
+    <tr><td>포트폴리오 β는 보유 종목 β의 가중평균이다.</td><td class="step"><b>참</b> — E(R)도 가중평균</td></tr>
+    <tr><td>포트폴리오 σ는 보유 종목 σ의 가중평균이다.</td><td class="step"><b>거짓</b> — 상쇄 효과 때문에 보통 더 작다</td></tr>
+    <tr><td>β = 0인 주식은 위험이 전혀 없다.</td><td class="step"><b>거짓</b> — σ는 클 수 있다. 체계적 위험이 없을 뿐이라 요구수익률이 R<sub>f</sub></td></tr>
+    <tr><td>예상대로 나온 실적 발표는 주가를 거의 움직이지 않는다.</td><td class="step"><b>참</b> — 예상된 부분은 이미 가격에 있음, U만 움직인다</td></tr>
+    <tr><td>SML 아래의 주식은 사려는 사람이 몰려 가격이 오른다.</td><td class="step"><b>거짓</b> — 아래 = 고평가, 팔려서 가격↓·E(R)↑</td></tr>
+    <tr><td>회사 전체 할인율 하나로 모든 프로젝트를 평가하면 위험한 프로젝트를 과다 채택한다.</td><td class="step"><b>참</b> — 프로젝트 β의 SML 요구수익률을 써야 한다</td></tr>
+  </table>
+</section>
+
+<section class="slide title" data-title="끝">
+  <h1>끝</h1>
+  <p class="sub">보상받는 위험은 분산투자로 없앨 수 없는 위험, β뿐이다</p>
+</section>
+
+</main>
+
+<script src="/slides/deck.js"></script>
+</body>
+</html>
