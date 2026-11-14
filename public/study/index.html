@@ -93,8 +93,11 @@
     .seg .long{ display:none; } .seg .short{ display:inline; }
     .ch{ grid-template-columns:36px minmax(0,1fr); align-items:start; padding:14px; }
     .num{ font-size:19px; padding-top:1px; }
-    .act{ display:flex; flex-wrap:wrap; grid-column:2; justify-content:flex-start; margin-top:6px; }
-    .act .btn{ padding:0 12px; }
+    /* 휴대폰: 버튼은 한 줄, 넘치면 옆으로 밀어서 본다(스크롤바 숨김, 오른쪽 끝은 카드 가장자리까지) */
+    .act{ display:flex; flex-wrap:nowrap; grid-column:1 / -1; justify-content:flex-start; margin:6px -14px 0 0; padding:0 14px 2px 50px;
+          overflow-x:auto; overscroll-behavior-x:contain; -webkit-overflow-scrolling:touch; scrollbar-width:none; scroll-padding-left:50px; scroll-snap-type:x proximity; }
+    .act::-webkit-scrollbar{ display:none; }
+    .act .btn{ padding:0 12px; flex:none; scroll-snap-align:start; }
   }
   @media (prefers-reduced-motion:reduce){ *{ transition:none !important; animation:none !important; } }
 </style>

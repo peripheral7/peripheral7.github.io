@@ -43,13 +43,16 @@
                             text after ? is its answer. Numbers: 1,260,000  (840,000)  −540,000  20.00%  are all read as numbers;
                             alternatives with " / " (?Out / Exclude). In a row whose label starts with "−" or "Less" the sign is not
                             checked (840,000 = (840,000)). Several @grid lines = several tables. A TABLE passes with 80 % of its items.
-                  @write [n]         MC only: add a ruled box (n printed lines, default 3)
-                  @short             WRITTEN: a short descriptive answer (3 printed lines, about two handwritten sentences)
-                  @lines n           WRITTEN / TABLE: exactly n printed lines
+                  @write [n]         MC only: add a ruled box (n printed lines, default 2)
+                  @short             WRITTEN: a short descriptive answer (2 printed lines, about two handwritten sentences)
+                  @lines n           WRITTEN / TABLE: n printed lines (capped at 8). Use it only when the automatic size below is wrong.
     ALL VIEW "All chapters" numbers every question 1..N straight through (no chapter headings or restarts); printing from that view gives one sheet with the same numbers.
-    PRINT SPACE (automatic)   short written / @short: 3 lines (≈ 2 sentences) · written calculation (model answer has a computed "= number"): steps + 3 lines (6-14) · other written: 3 lines if 1-2 steps
-                              TABLE: every blank cell is an empty box 8 mm high, plus 3 lines for working · MC: none (+ @write lines)
-                              One printed line = 8 mm.
+    PRINT SPACE (automatic)   leave only the room a real handwritten answer needs — not the length of the model answer (which also explains).
+                              One printed line = 7 mm ≈ one handwritten step (a formula with numbers, or one short sentence).
+                              written calculation (model answer has a computed "= number"): one line per step, 3-8 lines
+                              short written / @short / other written with 1-2 steps: 2 lines · TABLE: every blank cell is an empty box 7 mm high,
+                              plus 2 lines for working · MC: none (+ @write lines, default 2) · @lines n: n lines, never more than 8
+                              Question text prints at 10 pt (tables 9 pt), so a question is never larger than the space for its answer.
 
   EXPLANATION STYLE  explain the CORRECT answer only. For calculations give BOTH the formula with the substituted numbers AND the
               calculator solution. A leading label before " = " or ":" (≤ 30 characters, e.g. "OCF = ...", "BA II Plus: ...") is set in
@@ -95,6 +98,9 @@
   - MC: 개념, 판단, 한 단계 계산. 4지선다 단일정답.
   - MC + WRITE (@write): 고른 뒤 근거를 1–2문장으로 쓰게 할 때 — 판단의 이유가 핵심인 문항.
   - WRITTEN: 다단계 계산(공식을 쓰고 숫자를 대입). key results = 중간값과 최종값. @short = 2문장 서술(정의·이유·비교).
+  - 인쇄 답안 칸은 "실제로 손으로 쓸 분량"만큼만 남긴다(한 줄 7 mm ≈ 손글씨 한 단계). 템플릿이 모범답안의 단계 수로 자동 계산하므로
+    (계산형 단계당 1줄, 3–8줄 · @short·짧은 서술 2줄 · 표 풀이 2줄) @lines 는 꼭 필요할 때만, 8 이하로 쓴다. 모범답안의 "; " 단계는
+    학생이 실제로 적을 계산 단계 단위로 나누고, 해설·계산기 풀이를 길게 늘려 칸이 커지지 않게 한다.
   - TABLE (@grid): 참고 자료가 표를 채우게 하는 계산(예: 현금흐름표, 재무제표·pro forma, 상환표, 감가상각표, 진리표,
     풀이 단계표)은 반드시 표로 낸다. 학생이 계산할 칸만 빈칸(?정답)으로, 행·열 라벨과 주어진 값은 채워 둔다.
   - 다단계 계산을 객관식 여러 개로 잘게 쪼개지 말 것. 한 사례 = 표/서술 1–2문항 + 핵심 판단 MC 1–3문항.
@@ -496,25 +502,25 @@ Efficient enough that almost no one beats the market after costs, and inefficien
   @media print{
     html, body{background:#fff !important; color:#000 !important; padding:0 !important; margin:0 !important;}
     body > *:not(#printSheet){display:none !important;}
-    #printSheet{display:block; font-family:var(--serif); font-size:10.5pt; line-height:1.5; color:#000;}
-    #printSheet h1{font-size:13pt; font-weight:400; text-align:center; margin:0 0 9mm;}
-    #printSheet .p-q{break-inside:avoid; page-break-inside:avoid; margin:0 0 5mm;}
+    #printSheet{display:block; font-family:var(--serif); font-size:10pt; line-height:1.42; color:#000;}
+    #printSheet h1{font-size:12.5pt; font-weight:400; text-align:center; margin:0 0 7mm;}
+    #printSheet .p-q{break-inside:avoid; page-break-inside:avoid; margin:0 0 4.5mm;}
     #printSheet .p-q p{margin:0;}
     #printSheet .p-ref{color:#444;}
     #printSheet .p-opt{margin:0 0 0 5mm !important;}
     #printSheet .p-fig{margin:1.5mm 0 2mm; max-width:130mm;}
-    #printSheet .p-lines{height:calc(var(--n, 6) * 8mm); background-image:linear-gradient(to bottom, transparent calc(8mm - 0.2mm), #bbb calc(8mm - 0.2mm)); background-size:100% 8mm; -webkit-print-color-adjust:exact; print-color-adjust:exact; margin-top:1mm;}
+    #printSheet .p-lines{height:calc(var(--n, 3) * 7mm); background-image:linear-gradient(to bottom, transparent calc(7mm - 0.2mm), #bbb calc(7mm - 0.2mm)); background-size:100% 7mm; -webkit-print-color-adjust:exact; print-color-adjust:exact; margin-top:1mm;}
     #printSheet .p-gridq{margin:2mm 0 1mm;}
     #printSheet .p-gridq table.t{margin-bottom:3mm;}
-    #printSheet table.grid td{height:8mm; vertical-align:middle;}
+    #printSheet table.grid td{height:7mm; vertical-align:middle;}
     #printSheet table.grid td.p-blank{min-width:22mm; border:0.2mm solid #999 !important; background:#fff;}
     #printSheet .p-ex{break-inside:avoid; page-break-inside:avoid; border-top:0.3mm solid #000; border-bottom:0.3mm solid #000; padding:3mm 0 1mm; margin:2mm 0 6mm;}
     #printSheet .p-ex h2{font-size:12.5pt; font-weight:400; margin:0;}
     #printSheet .p-ex .uses{font-size:9pt; margin:0 0 3mm; font-style:italic; color:#333;}
     #printSheet .p-ex .tables{display:flex; flex-wrap:wrap; gap:4mm 8mm; align-items:flex-start;}
     #printSheet .p-ex .tables > table{flex:1 1 0;}
-    #printSheet table.t{font-size:9.3pt; color:#000;}
-    #printSheet table.t caption{color:#000; font-size:10.5pt; padding-bottom:1.5mm;}
+    #printSheet table.t{font-size:9pt; color:#000;}
+    #printSheet table.t caption{color:#000; font-size:10pt; padding-bottom:1.5mm;}
     #printSheet table.t thead th{border-top:0.35mm solid #000;}
     #printSheet table.t tbody tr:last-child td{border-bottom:0.35mm solid #000;}
     #printSheet table.t th, #printSheet table.t td{color:#000;}
@@ -729,7 +735,7 @@ function parseQuizData(raw){
       else if(l.startsWith('@tbl ')) q.fig = { type: 'tbl', t: parseTbl(l.slice(5)) };
       else if(l.startsWith('@img ')) q.fig = { type: 'img', src: l.slice(5).trim() };
       else if(l.startsWith('@grid ')) q.grids.push(gridify(parseTbl(l.slice(6)), q.blanks));
-      else if(l === '@write' || l.startsWith('@write ')) q.write = parseInt(l.slice(6), 10) || 3;
+      else if(l === '@write' || l.startsWith('@write ')) q.write = Math.min(8, parseInt(l.slice(6), 10) || 2);
       else if(l.startsWith('@lines ')) linesN = parseInt(l.slice(7), 10) || 0;
       else if(l === '@short') short = true;
       else if(l.startsWith('@')) errs.push(`${who}: unknown line "${l.slice(0, 12)}…" (use @use, @focus, @tbl, @img, @grid, @write, @lines or @short)`);
@@ -741,7 +747,8 @@ function parseQuizData(raw){
     q.self = q.kind === 'written' && !q.kws.length;
     const steps = explLines(q.explain).length;
     const calc = /=\s*[−\-$(]?\d/.test(q.explain);
-    q.lines = q.kind === 'mc' ? q.write : linesN !== null ? linesN : short ? 3 : q.kind === 'grid' ? 3 : (!calc && steps <= 2) ? 3 : Math.min(14, Math.max(6, steps + 3));
+    /* print space = what a handwritten answer needs (1 line ≈ 1 step), not the length of the model answer */
+    q.lines = q.kind === 'mc' ? q.write : linesN !== null ? Math.min(8, linesN) : short ? 2 : q.kind === 'grid' ? 2 : (!calc && steps <= 2) ? 2 : Math.min(8, Math.max(3, steps));
     if(q.focus && !q.use) errs.push(`${who}: @focus without @use`);
     chapters[ch].idx.push(questions.length);
     q.n = chapters[ch].idx.length;
