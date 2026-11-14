@@ -8,7 +8,7 @@
 <title>BF · IA 학습자료</title>
 <!--
   Business Finance · Investment Analysis 학습자료 목차. 메인 화면 기능모음(lib/features.ts)의 "BF·IA 학습자료" 가 여기로 온다.
-  과목별로 장을 챕터 순서(오름차순)로 한 줄씩. 버튼 순서: 예습자료 → 빈칸 채운 슬라이드 → PDF → 복습·연습문제 → 퀴즈(맨 오른쪽). 강조 버튼은 퀴즈, 퀴즈가 없으면 예습자료. 장마다 폴더 하나(bf12, ia9 …):
+  과목별로 장을 챕터 순서(오름차순)로 한 줄씩. 버튼 순서: 예습자료 → 슬라이드 → PDF → 복습·연습문제 → 퀴즈(맨 오른쪽). 강조 버튼은 퀴즈, 퀴즈가 없으면 예습자료. 장마다 폴더 하나(bf12, ia9 …):
     index.html = 빈칸 채운 슬라이드 덱 · *_filled.pdf · preview/ = 예습 덱 · review/ = 복습·연습문제 덱 · quiz.html = 복습 퀴즈(quiz_template_integrated 기반).
   덱은 /slides/deck.css·deck.js 엔진을 쓴다. 새 장을 더하면 폴더를 만들고 해당 과목 <ol> 의 챕터 순서 자리에 <li class="ch"> 한 줄을 더한다.
   안내 문구는 화면에 늘어놓지 않고 ⓘ 버튼(.tip) 안에 둔다 — 마우스는 호버, 터치는 탭으로 연다.
@@ -62,8 +62,8 @@
   .tag{ font-size:11.5px; font-weight:650; padding:2px 8px; border-radius:999px; background:#f1f2f5; color:var(--ink-2); }
   .tag.next{ background:var(--next-soft); color:var(--next); }
   .tag.m{ display:none; }   /* 휴대폰 전용: 챕터 숫자 아래에 놓는 복습/예습 표시 */
-  /* 버튼은 고정 칸: 1 예습자료 · 2 빈칸 채운 슬라이드 · 3 PDF · 4 복습·연습문제 · 5 퀴즈 — 없는 버튼 자리는 비워 둔다(모든 줄에서 같은 세로줄) */
-  .act{ display:grid; grid-template-columns:76px 136px 52px 112px 56px; gap:6px; justify-content:end; }
+  /* 버튼은 고정 칸: 1 예습자료 · 2 슬라이드(빈칸 채운 강의 슬라이드) · 3 PDF · 4 복습·연습문제 · 5 퀴즈 — 없는 버튼 자리는 비워 둔다(모든 줄에서 같은 세로줄) */
+  .act{ display:grid; grid-template-columns:76px 72px 52px 112px 56px; gap:6px; justify-content:end; }
   .act .btn{ justify-content:center; padding:0 8px; }
   .act .s1{ grid-column:1; } .act .s2{ grid-column:2; } .act .s3{ grid-column:3; } .act .s4{ grid-column:4; } .act .s5{ grid-column:5; }
   @media (max-width:899px){ .ch{ grid-template-columns:44px minmax(0,1fr); } .act{ grid-column:2; justify-content:start; margin-top:6px; } }
@@ -117,7 +117,7 @@
         <span class="tip-box" role="tooltip">
           <p><b>슬라이드</b> <kbd>→</kbd> <kbd>←</kbd> 넘기기, <kbd>O</kbd> 목록, <kbd>F</kbd> 전체 화면. 연습문제에서는 <kbd>→</kbd> 를 누르면 풀이가 나옵니다.</p>
           <p><b>퀴즈</b> 객관식은 고르면 바로 채점되고, 서술형과 표는 쓰고 나서 확인을 누릅니다. 푼 내용은 이 브라우저에 남고, 정답을 넣어 인쇄할 수도 있습니다.</p>
-          <p><b>빈칸 채운 슬라이드</b> 빨간 글자가 채운 답입니다.</p>
+          <p><b>슬라이드</b> 빈칸을 채워 둔 강의 슬라이드입니다. 빨간 글자가 채운 답입니다.</p>
         </span></span>
     </div>
     <nav class="seg" aria-label="과목">
@@ -147,7 +147,7 @@
         <div class="num"><small>CH</small>11<span class="tag m">복습</span></div>
         <div class="title"><b>Risk and Return</b><span class="tag">복습</span>
           <span class="tip"><button class="tip-btn" type="button" aria-label="Ch.11 안내">i</button><span class="tip-box" role="tooltip"><p>기대수익률·분산, 포트폴리오, 예상한 수익률과 예상 밖 수익률, 체계적·비체계적 위험, 베타, SML·CAPM, 프로젝트 할인율</p><p class="tip-sub">퀴즈 23문항(객관식 17, 서술형 6 중 표 1) · 계산 13, 개념 10 · 슬라이드 빈칸 약 40곳 채움</p></span></span></div>
-        <div class="act"><a class="btn s1" href="bf11/preview/">예습자료</a><a class="btn s2" href="bf11/">빈칸 채운 슬라이드</a><a class="btn s3" href="bf11/BF_Ch11_filled.pdf" download>PDF</a><a class="btn pri s5" href="bf11/quiz.html">퀴즈</a></div>
+        <div class="act"><a class="btn s1" href="bf11/preview/">예습자료</a><a class="btn s2" href="bf11/">슬라이드</a><a class="btn s3" href="bf11/BF_Ch11_filled.pdf" download>PDF</a><a class="btn pri s5" href="bf11/quiz.html">퀴즈</a></div>
       </li>
       <li class="ch">
         <div class="num"><small>CH</small>12<span class="tag m next">예습</span></div>
@@ -176,8 +176,8 @@
       <li class="ch">
         <div class="num"><small>CH</small>9<span class="tag m next">예습</span></div>
         <div class="title"><b>Behavioral Finance and Technical Analysis</b><span class="tag next">예습</span>
-          <span class="tip"><button class="tip-btn" type="button" aria-label="IA Ch.9 안내">i</button><span class="tip-box" role="tooltip"><p>전망이론, 차익거래의 한계, 이동평균, 상대강도, Trin, 신뢰지수, 풋/콜 비율</p><p class="tip-sub">예습자료와 빈칸 채운 슬라이드</p></span></span></div>
-        <div class="act"><a class="btn pri s1" href="ia9/preview/">예습자료</a><a class="btn s2" href="ia9/">빈칸 채운 슬라이드</a><a class="btn s3" href="ia9/IA_Ch09_filled.pdf" download>PDF</a></div>
+          <span class="tip"><button class="tip-btn" type="button" aria-label="IA Ch.9 안내">i</button><span class="tip-box" role="tooltip"><p>전망이론, 차익거래의 한계, 이동평균, 상대강도, Trin, 신뢰지수, 풋/콜 비율</p><p class="tip-sub">예습자료와 빈칸을 채운 슬라이드</p></span></span></div>
+        <div class="act"><a class="btn pri s1" href="ia9/preview/">예습자료</a><a class="btn s2" href="ia9/">슬라이드</a><a class="btn s3" href="ia9/IA_Ch09_filled.pdf" download>PDF</a></div>
       </li>
     </ol>
   </section>
