@@ -1,0 +1,262 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta name="pinterest" content="nopin">
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="robots" content="noindex">
+<title>BF Ch.12 Cost of Capital — 예습</title>
+<link rel="stylesheet" href="/slides/deck.css">
+<!--
+  BF Ch.12 Cost of Capital 예습 덱(HTML 장 12장). 숫자 예시는 강의 PDF(BF_Chap12_students.pdf) 그대로, 빈칸은 채운 값.
+  12.7 발행비용은 PDF 에 슬라이드가 없어 예시 수치를 가정으로 표시했다.
+  글자색은 고정하지 않는다(흰/검은 바탕 전환 D 키). 테두리는 currentColor, 흐린 글은 opacity.
+-->
+<style>
+  .slide h2{font-size:58px;margin-bottom:34px}
+  .slide p,.slide ul,.slide ol{font-size:32px}
+  .slide li{margin:.3em 0}
+  .slide table{font-size:27px;line-height:1.3}
+  .slide th,.slide td{padding:8px 18px}
+  .slide .small{font-size:25px}
+  .slide .muted{opacity:.68}
+  .flow{display:flex;flex-wrap:wrap;align-items:center;gap:10px 8px;font-size:25px;line-height:1.25;margin:0 0 26px}
+  .flow>span{border:2px solid currentColor;padding:8px 12px}
+  .flow>i{font-style:normal;opacity:.7}
+  .eq{display:inline-block;border:3px solid currentColor;padding:12px 26px;font-size:34px;margin:0 0 22px;font-family:"Cambria Math",Cambria,Georgia,serif}
+  .slide td.r,.slide th.r{text-align:right}
+  .chart{width:100%;height:auto;display:block}
+  .chart text{font-size:19px}
+</style>
+</head>
+<body>
+<noscript>JavaScript is required.</noscript>
+
+<main id="stage">
+
+  <section class="slide title" data-title="표지">
+    <h1>Ch.12 Cost of Capital</h1>
+    <p class="sub">자본비용 — 투자자의 요구수익률을 회사의 <b>할인율 하나</b>로</p>
+    <p class="hint">Business Finance · Prof. Gemma Lee · RWJ Essentials of Corporate Finance · 예습</p>
+  </section>
+
+  <section class="slide" data-title="장 전체 지도">
+    <h2>장 전체 지도</h2>
+    <div class="flow">
+      <span>요구수익률 = 자본비용</span><i>→</i><span>R<sub>E</sub> (DGM · SML)</span><i>→</i><span>R<sub>D</sub>(1−T<sub>C</sub>) · R<sub>P</sub></span><i>→</i><span>시장가치 가중치</span><i>→</i><span>WACC</span><i>→</i><span>프로젝트별 할인율</span><i>→</i><span>기업가치</span><i>→</i><span>발행비용</span>
+    </div>
+    <table>
+      <tr><th>§</th><th>핵심 질문</th><th>답이 되는 도구</th></tr>
+      <tr><td>12.1</td><td>자본비용은 누구의 요구수익률이고, 무엇이 정하나?</td><td>돈의 <b>용도</b>의 위험 (출처 아님)</td></tr>
+      <tr><td>12.2</td><td>주주가 요구하는 수익률은?</td><td>배당성장모형(DGM), SML</td></tr>
+      <tr><td>12.3</td><td>채권자·우선주주는?</td><td>YTM × (1 − T<sub>C</sub>), D / P<sub>0</sub></td></tr>
+      <tr><td>12.4</td><td>셋을 어떻게 섞나?</td><td>시장가치 가중 → WACC</td></tr>
+      <tr><td>12.5</td><td>위험이 다른 프로젝트에도 WACC를 쓰나?</td><td>SML, pure play, subjective approach</td></tr>
+      <tr><td>12.6–12.7</td><td>회사 전체 가치는? 조달 비용은?</td><td>FCF ÷ (WACC − g), 1 / (1 − f<sub>A</sub>)</td></tr>
+    </table>
+  </section>
+
+  <section class="slide" data-title="앞 장과의 연결: Ch.11 → 12">
+    <h2>앞 장과의 연결: Ch.11 → Ch.12</h2>
+    <table>
+      <tr><th></th><th>Ch.11 위험과 수익률</th><th>Ch.12 자본비용</th></tr>
+      <tr><td>관점</td><td>투자자 — 이 위험에 얼마를 요구하나</td><td>회사 — 그 돈을 쓰는 데 얼마가 드나</td></tr>
+      <tr><td>결과물</td><td>요구수익률(required return), SML</td><td>자본비용(cost of capital), WACC</td></tr>
+      <tr><td>대상</td><td>주식 하나, 자산 하나</td><td>자기자본 + 우선주 + 부채를 합친 회사 전체</td></tr>
+      <tr><td>남긴 질문</td><td>“프로젝트의 β로 할인한다”</td><td>그런데 회사들은 WACC 하나를 쓴다 → 무엇이 틀리나</td></tr>
+    </table>
+    <ul style="margin-top:24px">
+      <li>투자자의 요구수익률 = 회사가 그 돈에 치르는 비용 — <b>같은 숫자</b></li>
+      <li>할인율을 정하는 건 돈이 <b>쓰이는 곳</b>의 위험이지, 돈이 <b>나온 곳</b>이 아니다</li>
+    </ul>
+  </section>
+
+  <section class="slide" data-title="12.2 자기자본비용 두 가지 방법">
+    <h2>12.2 자기자본비용(cost of equity) — 두 가지 방법</h2>
+    <p class="small muted">이 장의 회사: 주가 $40, 내년 배당 D<sub>1</sub> $2.20, 성장률 6% · β 1.20, R<sub>f</sub> 4%, 시장위험프리미엄 7%</p>
+    <div class="cols">
+      <div>
+        <p><b>배당성장모형</b> (dividend growth model)</p>
+        <p><span class="eq">R<sub>E</sub> = D<sub>1</sub> / P<sub>0</sub> + g</span></p>
+        <p class="small">2.20 / 40 + 6% = 5.50% + 6% = <b>11.50%</b></p>
+        <p class="small muted">약점: g 에 매우 민감, 무배당 기업엔 못 쓴다</p>
+      </div>
+      <div>
+        <p><b>증권시장선</b> (SML)</p>
+        <p><span class="eq">R<sub>E</sub> = R<sub>f</sub> + β<sub>E</sub>[E(R<sub>M</sub>) − R<sub>f</sub>]</span></p>
+        <p class="small">4% + 1.20 × 7% = 4% + 8.40% = <b>12.40%</b></p>
+        <p class="small muted">장점: 무배당 기업에도, 위험을 명시적으로 → 프로젝트에도 쓸 수 있다</p>
+      </div>
+    </div>
+    <p class="small" style="margin-top:12px">같은 회사, 같은 날인데 거의 1%p 차이 — 정상이다. 둘 다 구해 판단하고, <b>프로젝트에는 SML</b>. 둘 다 과거를 연장한 추정치(backward-looking).</p>
+  </section>
+
+  <section class="slide" data-title="12.3 부채비용과 우선주">
+    <h2>12.3 부채비용(cost of debt)과 우선주</h2>
+    <div class="cols">
+      <div>
+        <p><b>쿠폰이 아니라 오늘의 YTM</b></p>
+        <table>
+          <tr><td>쿠폰 9%, 반기 지급, 만기 20년</td><td class="r">가격 $1,099</td></tr>
+          <tr><td>N = 40, PV = −1,099, PMT = 45, FV = 1,000</td><td class="r">I/Y = 4.00%</td></tr>
+          <tr><th>R<sub>D</sub> = YTM</th><th class="r">4.00% × 2 = 8.00%</th></tr>
+        </table>
+        <p class="small muted" style="margin-top:14px">액면보다 비싸게 팔린다 = 시장은 9%보다 덜 요구한다. 9%는 과거의 사실.</p>
+      </div>
+      <div>
+        <p><b>부채는 세후로</b> (이자는 비용공제)</p>
+        <p><span class="eq">R<sub>D</sub>(1 − T<sub>C</sub>) = 8% × 0.79 = 6.32%</span></p>
+        <p class="small">이자 $1,000,000 → 절세 $210,000 → 순비용 $790,000 (79%)</p>
+        <p><b>우선주</b> (preferred stock) — 성장 없는 영구연금</p>
+        <p><span class="eq">R<sub>P</sub> = D / P<sub>0</sub> = 3.00 / 40 = 7.50%</span></p>
+      </div>
+    </div>
+    <p class="small muted">배당은 세후 이익에서 나가므로 R<sub>E</sub>·R<sub>P</sub>에는 (1 − T<sub>C</sub>)가 없다 — 이 비대칭이 Ch.13 자본구조 논의의 출발점.</p>
+  </section>
+
+  <section class="slide" data-title="12.4 시장가치 가중치와 WACC">
+    <h2>12.4 가중평균자본비용(WACC)</h2>
+    <p><span class="eq">WACC = (E/V)R<sub>E</sub> + (P/V)R<sub>P</sub> + (D/V)R<sub>D</sub>(1 − T<sub>C</sub>)</span></p>
+    <table>
+      <tr><th>원천</th><th class="r">시장가치</th><th class="r">가중치</th><th class="r">비용</th><th class="r">기여</th></tr>
+      <tr><td>자기자본 E</td><td class="r">$60M</td><td class="r">0.60</td><td class="r">12.40%</td><td class="r">7.44%</td></tr>
+      <tr><td>부채 D (세후)</td><td class="r">$40M</td><td class="r">0.40</td><td class="r">8.00% × 0.79 = 6.32%</td><td class="r">2.53%</td></tr>
+      <tr><th>합계 V</th><th class="r">$100M</th><th class="r">1.00</th><th></th><th class="r">WACC = 9.97%</th></tr>
+    </table>
+    <ul style="margin-top:20px">
+      <li class="small">가중치는 <b>시장가치</b> — 장부가치(book value)는 회계용. 가장 크게 어긋나는 건 자기자본</li>
+      <li class="small">가중치 합 = 1. 안 맞으면 시장가·장부가가 섞였거나 빠진 청구권이 있다</li>
+      <li class="small">9.97%는 <b>기존 사업과 위험이 같은</b> 프로젝트의 할인율 — 그 외엔 아니다</li>
+    </ul>
+  </section>
+
+  <section class="slide" data-title="12.5 하나의 할인율이 틀리는 이유">
+    <h2>12.5 회사 전체 WACC 하나로 평가하면</h2>
+    <div class="cols wide-left">
+      <svg class="chart" viewBox="0 0 640 440" role="img" aria-label="수평인 WACC 9.97% 선과 우상향 SML. 저위험 프로젝트는 SML 위 WACC 아래, 고위험 프로젝트는 WACC 위 SML 아래">
+        <g fill="none" stroke="currentColor">
+          <path d="M60 20V380H600" stroke-width="2"/>
+          <path d="M60 290H600M60 200H600M60 110H600M60 20H600" stroke-width="1" opacity=".2"/>
+          <path d="M60 308L600 56" stroke-width="4"/>
+          <path d="M60 200.5H600" stroke-width="3" stroke-dasharray="12 8"/>
+          <path d="M222 218V232.4M546 128V81.2" stroke-width="2" opacity=".6"/>
+        </g>
+        <circle cx="222" cy="218" r="9" fill="currentColor"/>
+        <circle cx="546" cy="128" r="9" fill="none" stroke="currentColor" stroke-width="3"/>
+        <circle cx="290" cy="200.5" r="5" fill="currentColor" opacity=".6"/>
+        <g fill="currentColor">
+          <text x="50" y="386" text-anchor="end">0</text><text x="50" y="296" text-anchor="end">5</text><text x="50" y="206" text-anchor="end">10</text><text x="50" y="116" text-anchor="end">15</text><text x="50" y="26" text-anchor="end">20</text>
+          <text x="60" y="402" text-anchor="middle">0</text><text x="195" y="402" text-anchor="middle">0.5</text><text x="330" y="402" text-anchor="middle">1</text><text x="465" y="402" text-anchor="middle">1.5</text><text x="600" y="402" text-anchor="middle">2</text>
+          <text x="330" y="432" text-anchor="middle">프로젝트 베타 β</text>
+          <text x="20" y="200" text-anchor="middle" transform="rotate(-90 20 200)">수익률 (%)</text>
+          <text x="250" y="120" font-weight="700">SML: 4% + 7%·β</text>
+          <text x="70" y="190" font-weight="700">WACC 9.97%</text>
+          <text x="230" y="268">저위험 β0.6</text><text x="230" y="290">9.0% vs SML 8.2%</text>
+          <text x="470" y="160">고위험 β1.8</text><text x="470" y="182">14.0% vs 16.6%</text>
+          <text x="300" y="228" opacity=".75">교차 β≈0.85</text>
+        </g>
+      </svg>
+      <div>
+        <table>
+          <tr><th></th><th>저위험</th><th>고위험</th></tr>
+          <tr><td>β · 제시</td><td>0.60 · 9.0%</td><td>1.80 · 14.0%</td></tr>
+          <tr><td>SML 요구</td><td>8.2%</td><td>16.6%</td></tr>
+          <tr><td>옳은 판정</td><td><b>채택</b></td><td><b>기각</b></td></tr>
+          <tr><td>9.97% 기준</td><td>기각 ✗</td><td>채택 ✗</td></tr>
+        </table>
+        <p class="small" style="margin-top:18px">두 판정 모두 뒤집힌다. 교차점 왼쪽은 안전한 좋은 프로젝트를 버리고, 오른쪽은 위험한 나쁜 프로젝트를 받는다 — <b>항상 같은 방향</b>.</p>
+      </div>
+    </div>
+  </section>
+
+  <section class="slide" data-title="12.5 프로젝트에 맞는 할인율">
+    <h2>12.5 프로젝트에 맞는 할인율 찾기</h2>
+    <div class="cols">
+      <div>
+        <p><b>Pure play approach</b> — 물류 사업 진출</p>
+        <table>
+          <tr><td>물류 상장사 β: 0.70, 0.85, 0.79</td><td class="r">평균 0.78</td></tr>
+          <tr><td>R<sub>E</sub> = 4% + 0.78 × 7%</td><td class="r">9.46%</td></tr>
+          <tr><td>0.60 × 9.46% + 0.40 × 6.32%</td><td class="r"><b>8.20%</b></td></tr>
+        </table>
+        <p class="small" style="margin-top:14px">$10M 투자, 매년 $900,000 영구(9.0%) → 9.97%: NPV −$973,000 기각 / 8.20%: NPV +$970,000 채택</p>
+      </div>
+      <div>
+        <p><b>Subjective approach</b> — 위험등급별 가감</p>
+        <table>
+          <tr><th>등급</th><th class="r">조정</th><th class="r">할인율</th></tr>
+          <tr><td>교체, 검증된 기술</td><td class="r">−2%</td><td class="r">7.97%</td></tr>
+          <tr><td>기존 사업 확장</td><td class="r">없음</td><td class="r">9.97%</td></tr>
+          <tr><td>새 사업 분야</td><td class="r">+2%</td><td class="r">11.97%</td></tr>
+          <tr><td>투기적 신제품</td><td class="r">+5%</td><td class="r">14.97%</td></tr>
+        </table>
+      </div>
+    </div>
+    <p class="small muted" style="margin-top:14px">둘 다 정확하진 않다(단일사업 상장사는 드물고, 조정 폭은 판단). 그래도 단일 할인율의 <b>체계적 편향</b>을 없앤다.</p>
+  </section>
+
+  <section class="slide" data-title="12.6 WACC로 기업가치 평가">
+    <h2>12.6 WACC로 회사 전체 가치 평가</h2>
+    <p>회사 = 프로젝트의 묶음 → 회사의 잉여현금흐름(free cash flow)을 회사의 WACC로 할인. 위험이 정의상 회사 자신의 것이라 WACC가 맞는 할인율.</p>
+    <p><span class="eq">V<sub>0</sub> = FCF<sub>1</sub> / (WACC − g)</span></p>
+    <div class="cols">
+      <table>
+        <tr><td>내년 FCF</td><td class="r">$7.0M</td></tr>
+        <tr><td>영구 성장률 g</td><td class="r">3%</td></tr>
+        <tr><td>WACC</td><td class="r">9.97%</td></tr>
+        <tr><th>기업가치 = 7.0 / 0.0697</th><th class="r">$100.43M</th></tr>
+      </table>
+      <table>
+        <tr><td>기업 전체 가치</td><td class="r">$100.43M</td></tr>
+        <tr><td>− 부채의 시장가치</td><td class="r">$40.00M</td></tr>
+        <tr><th>자기자본 가치</th><th class="r">$60.43M</th></tr>
+      </table>
+    </div>
+    <p class="small muted" style="margin-top:20px">자기자본 $60.43M ≈ 처음 주어진 시장가치 $60M — 장 전체 숫자가 서로 맞물린다.</p>
+  </section>
+
+  <section class="slide" data-title="12.7 발행비용">
+    <h2>12.7 발행비용(flotation costs)</h2>
+    <p>새 증권을 발행하면 인수 수수료 등으로 조달액 일부가 사라진다 → <b>필요한 금액보다 더 많이 조달</b>해야 한다.</p>
+    <p><span class="eq">f<sub>A</sub> = (E/V)·f<sub>E</sub> + (D/V)·f<sub>D</sub></span> &nbsp; <span class="eq">조달액 = 필요액 / (1 − f<sub>A</sub>)</span></p>
+    <table>
+      <tr><td>가중치 E/V 0.60, D/V 0.40 · 가정 f<sub>E</sub> 10%, f<sub>D</sub> 5%</td><td class="r">f<sub>A</sub> = 6% + 2% = 8%</td></tr>
+      <tr><td>필요액 $10M</td><td class="r">10 / 0.92 = $10.87M 조달</td></tr>
+      <tr><th>발행비용</th><th class="r">$0.87M → 초기 투자비에 더한다</th></tr>
+    </table>
+    <p class="small muted" style="margin-top:20px">강의 PDF(28장)에는 12.7 슬라이드가 없어 f<sub>E</sub>·f<sub>D</sub>는 설명용 가정 수치. 발행비용은 할인율이 아니라 <b>현금흐름(초기 비용)</b>에서 처리한다 — 수업에서 확인.</p>
+  </section>
+
+  <section class="slide" data-title="공식 요약">
+    <h2>공식 요약</h2>
+    <table>
+      <tr><th>항목</th><th>공식</th><th class="r">이 장의 값</th></tr>
+      <tr><td>자기자본 — DGM</td><td>D<sub>1</sub>/P<sub>0</sub> + g</td><td class="r">11.50%</td></tr>
+      <tr><td>자기자본 — SML</td><td>R<sub>f</sub> + β<sub>E</sub>[E(R<sub>M</sub>) − R<sub>f</sub>]</td><td class="r">12.40%</td></tr>
+      <tr><td>부채 (세전 → 세후)</td><td>YTM → R<sub>D</sub>(1 − T<sub>C</sub>)</td><td class="r">8.00% → 6.32%</td></tr>
+      <tr><td>우선주</td><td>D / P<sub>0</sub></td><td class="r">7.50%</td></tr>
+      <tr><td>WACC</td><td>(E/V)R<sub>E</sub> + (P/V)R<sub>P</sub> + (D/V)R<sub>D</sub>(1 − T<sub>C</sub>)</td><td class="r">9.97%</td></tr>
+      <tr><td>프로젝트 할인율</td><td>R<sub>f</sub> + β<sub>project</sub> × 7%</td><td class="r">β0.6 → 8.2%, β1.8 → 16.6%</td></tr>
+      <tr><td>기업가치 / 자기자본</td><td>FCF<sub>1</sub>/(WACC − g), V − D</td><td class="r">$100.43M / $60.43M</td></tr>
+      <tr><td>발행비용</td><td>필요액 / (1 − f<sub>A</sub>)</td><td class="r">(슬라이드 없음)</td></tr>
+    </table>
+  </section>
+
+  <section class="slide" data-title="수업 전에 스스로 확인할 질문">
+    <h2>수업 전에 스스로 확인할 질문</h2>
+    <ol class="small">
+      <li>채권 가격이 $1,099(쿠폰 9%)인데 왜 부채비용은 9%가 아니라 8%인가? <span class="step muted">→ 할증 거래 = 시장 요구수익률(YTM) 8% &lt; 쿠폰. 지금 조달하는 비용은 YTM.</span></li>
+      <li>왜 R<sub>D</sub>에만 (1 − T<sub>C</sub>)를 곱하나? <span class="step muted">→ 이자는 비용공제, 배당은 세후 이익에서 지급.</span></li>
+      <li>배당 $1.60을 “방금 지급”했고 g = 4%, 주가 $35면 R<sub>E</sub>는? <span class="step muted">→ D<sub>1</sub> = 1.664, 1.664/35 + 4% = 8.75% (1.60 그대로면 8.57% — 오답).</span></li>
+      <li>가중치에 장부가치를 쓰면 안 되는 이유는? <span class="step muted">→ 투자자는 오늘의 가치를 본다. 장부 자기자본은 시장가와 크게 어긋난다.</span></li>
+      <li>WACC 9.97% 회사가 β 0.6, 수익률 9.0% 프로젝트를 WACC로 평가하면? <span class="step muted">→ 기각. 하지만 SML 요구 8.2% &lt; 9.0% 이므로 채택이 옳다.</span></li>
+      <li>FCF<sub>1</sub> $7.0M, g 3%, WACC 9.97%, 부채 $40M일 때 자기자본 가치는? <span class="step muted">→ 7.0/0.0697 = $100.43M − $40M = $60.43M.</span></li>
+    </ol>
+    <p class="small muted" style="margin-top:10px">→ 키로 답이 하나씩 나타난다.</p>
+  </section>
+
+</main>
+
+<script src="/slides/deck.js"></script>
+</body>
+</html>
