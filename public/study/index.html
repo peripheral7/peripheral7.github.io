@@ -8,9 +8,9 @@
 <title>BF · IA 학습자료</title>
 <!--
   Business Finance · Investment Analysis 학습자료 목차. 메인 화면 기능모음(lib/features.ts)의 "BF·IA 학습자료" 가 여기로 온다.
-  과목별로 장을 최신순으로 한 줄씩. 장마다 폴더 하나(bf12, ia9 …):
+  과목별로 장을 챕터 순서(오름차순)로 한 줄씩. 버튼 순서: 예습자료 → 빈칸 채운 슬라이드 → PDF → 복습·연습문제 → 퀴즈(맨 오른쪽). 강조 버튼은 퀴즈, 퀴즈가 없으면 예습자료. 장마다 폴더 하나(bf12, ia9 …):
     index.html = 빈칸 채운 슬라이드 덱 · *_filled.pdf · preview/ = 예습 덱 · review/ = 복습·연습문제 덱 · quiz.html = 복습 퀴즈(quiz_template_integrated 기반).
-  덱은 /slides/deck.css·deck.js 엔진을 쓴다. 새 장을 더하면 폴더를 만들고 해당 과목 <ol> 맨 위에 <li class="ch"> 한 줄을 더한다.
+  덱은 /slides/deck.css·deck.js 엔진을 쓴다. 새 장을 더하면 폴더를 만들고 해당 과목 <ol> 의 챕터 순서 자리에 <li class="ch"> 한 줄을 더한다.
   안내 문구는 화면에 늘어놓지 않고 ⓘ 버튼(.tip) 안에 둔다 — 마우스는 호버, 터치는 탭으로 연다.
 -->
 <style>
@@ -50,7 +50,6 @@
   section + section{ margin-top:40px; }
   .sec-head{ display:flex; align-items:baseline; gap:10px; margin:0 0 12px 2px; }
   .sec-head h2{ font-size:20px; font-weight:750; letter-spacing:-.02em; margin:0; }
-  .sec-head .prof{ font-size:13px; color:var(--muted); }
 
   /* chapter list */
   ol.chs{ list-style:none; margin:0; padding:0; background:var(--surface); border:1px solid var(--line); border-radius:var(--r); box-shadow:var(--shadow); }
@@ -116,19 +115,13 @@
 
 <main>
   <section id="bf" aria-labelledby="bf-h">
-    <div class="sec-head"><h2 id="bf-h">Business Finance</h2><span class="prof">Prof. Gemma Lee</span></div>
+    <div class="sec-head"><h2 id="bf-h">Business Finance</h2></div>
     <ol class="chs">
       <li class="ch">
-        <div class="num"><small>CH</small>12</div>
-        <div class="title"><b>Cost of Capital</b><span class="tag next">예습</span>
-          <span class="tip"><button class="tip-btn" type="button" aria-label="Ch.12 안내">i</button><span class="tip-box" role="tooltip"><p>다음 수업 예습 덱 12장. 자기자본비용 두 방식(배당성장·SML), 세후 부채비용, 시장가치 WACC, 프로젝트별 할인율, WACC 기업가치. 숫자 예시는 강의 슬라이드 그대로입니다.</p><p>12.7 발행비용은 슬라이드에 없어 교재 기준 가정 예시로 넣었습니다.</p></span></span></div>
-        <div class="act"><a class="btn pri" href="bf12/preview/">예습자료</a></div>
-      </li>
-      <li class="ch">
-        <div class="num"><small>CH</small>11</div>
-        <div class="title"><b>Risk and Return</b><span class="tag">복습</span>
-          <span class="tip"><button class="tip-btn" type="button" aria-label="Ch.11 안내">i</button><span class="tip-box" role="tooltip"><p data-q="bf11">퀴즈 23문항 · 객관식 17 · 서술형 6(표 채우기 1). 계산 13 : 개념 10.</p><p>기대수익률·분산, 포트폴리오, 기대·비기대 수익률, 체계적·비체계적 위험, 베타, SML·CAPM, 프로젝트 할인율.</p><p>슬라이드 26쪽 중 빈칸 약 40곳을 채웠고, 예습 덱은 11장입니다.</p></span></span></div>
-        <div class="act"><a class="btn pri" href="bf11/quiz.html">퀴즈</a><a class="btn" href="bf11/">빈칸 채운 슬라이드</a><a class="btn" href="bf11/preview/">예습자료</a><a class="btn" href="bf11/BF_Ch11_filled.pdf" download>PDF</a></div>
+        <div class="num"><small>CH</small>9</div>
+        <div class="title"><b>Making Capital Investment Decisions</b><span class="tag">복습</span>
+          <span class="tip"><button class="tip-btn" type="button" aria-label="Ch.9 안내">i</button><span class="tip-box" role="tooltip"><p>복습 덱: 핵심 정리 11장 + 연습문제 20개(OCF·NWC·MACRS·세후 잔존가치·NPV).</p><p>퀴즈 22문항 · 객관식 14 · 서술형 8(표 채우기 6).</p></span></span></div>
+        <div class="act"><a class="btn" href="bf9/review/">복습·연습문제</a><a class="btn pri" href="bf9/quiz.html">퀴즈</a></div>
       </li>
       <li class="ch">
         <div class="num"><small>CH</small>10</div>
@@ -137,22 +130,28 @@
         <div class="act"><a class="btn pri" href="bf10/quiz.html">퀴즈</a></div>
       </li>
       <li class="ch">
-        <div class="num"><small>CH</small>9</div>
-        <div class="title"><b>Making Capital Investment Decisions</b><span class="tag">복습</span>
-          <span class="tip"><button class="tip-btn" type="button" aria-label="Ch.9 안내">i</button><span class="tip-box" role="tooltip"><p>복습 덱: 핵심 정리 11장 + 연습문제 20개(OCF·NWC·MACRS·세후 잔존가치·NPV).</p><p>퀴즈 22문항 · 객관식 14 · 서술형 8(표 채우기 6).</p></span></span></div>
-        <div class="act"><a class="btn pri" href="bf9/quiz.html">퀴즈</a><a class="btn" href="bf9/review/">복습·연습문제</a></div>
+        <div class="num"><small>CH</small>11</div>
+        <div class="title"><b>Risk and Return</b><span class="tag">복습</span>
+          <span class="tip"><button class="tip-btn" type="button" aria-label="Ch.11 안내">i</button><span class="tip-box" role="tooltip"><p data-q="bf11">퀴즈 23문항 · 객관식 17 · 서술형 6(표 채우기 1). 계산 13 : 개념 10.</p><p>기대수익률·분산, 포트폴리오, 기대·비기대 수익률, 체계적·비체계적 위험, 베타, SML·CAPM, 프로젝트 할인율.</p><p>슬라이드 26쪽 중 빈칸 약 40곳을 채웠고, 예습 덱은 11장입니다.</p></span></span></div>
+        <div class="act"><a class="btn" href="bf11/preview/">예습자료</a><a class="btn" href="bf11/">빈칸 채운 슬라이드</a><a class="btn" href="bf11/BF_Ch11_filled.pdf" download>PDF</a><a class="btn pri" href="bf11/quiz.html">퀴즈</a></div>
+      </li>
+      <li class="ch">
+        <div class="num"><small>CH</small>12</div>
+        <div class="title"><b>Cost of Capital</b><span class="tag next">예습</span>
+          <span class="tip"><button class="tip-btn" type="button" aria-label="Ch.12 안내">i</button><span class="tip-box" role="tooltip"><p>다음 수업 예습 덱 12장. 자기자본비용 두 방식(배당성장·SML), 세후 부채비용, 시장가치 WACC, 프로젝트별 할인율, WACC 기업가치. 숫자 예시는 강의 슬라이드 그대로입니다.</p><p>12.7 발행비용은 슬라이드에 없어 교재 기준 가정 예시로 넣었습니다.</p></span></span></div>
+        <div class="act"><a class="btn pri" href="bf12/preview/">예습자료</a></div>
       </li>
     </ol>
   </section>
 
   <section id="ia" aria-labelledby="ia-h">
-    <div class="sec-head"><h2 id="ia-h">Investment Analysis</h2><span class="prof">Prof. G. Lee</span></div>
+    <div class="sec-head"><h2 id="ia-h">Investment Analysis</h2></div>
     <ol class="chs">
       <li class="ch">
-        <div class="num"><small>CH</small>9</div>
-        <div class="title"><b>Behavioral Finance and Technical Analysis</b><span class="tag next">예습</span>
-          <span class="tip"><button class="tip-btn" type="button" aria-label="IA Ch.9 안내">i</button><span class="tip-box" role="tooltip"><p>다음 수업 예습 덱. 행동재무(전망이론·차익거래 한계)와 기술적 분석 지표(이동평균·상대강도·Trin·신뢰지수·풋콜비율). 빈칸 채운 슬라이드의 빨간 글자가 답입니다.</p></span></span></div>
-        <div class="act"><a class="btn pri" href="ia9/preview/">예습자료</a><a class="btn" href="ia9/">빈칸 채운 슬라이드</a><a class="btn" href="ia9/IA_Ch09_filled.pdf" download>PDF</a></div>
+        <div class="num"><small>CH</small>7</div>
+        <div class="title"><b>CAPM and APT</b><span class="tag">복습</span>
+          <span class="tip"><button class="tip-btn" type="button" aria-label="IA Ch.7 안내">i</button><span class="tip-box" role="tooltip"><p>복습 덱: 핵심 정리 12장 + 연습문제 18개(CAPM·SML·α·지수모형·FF·APT).</p><p>퀴즈 22문항 · 객관식 14 · 서술형 8(표 채우기 3).</p></span></span></div>
+        <div class="act"><a class="btn" href="ia7/review/">복습·연습문제</a><a class="btn pri" href="ia7/quiz.html">퀴즈</a></div>
       </li>
       <li class="ch">
         <div class="num"><small>CH</small>8</div>
@@ -161,10 +160,10 @@
         <div class="act"><a class="btn pri" href="ia8/quiz.html">퀴즈</a></div>
       </li>
       <li class="ch">
-        <div class="num"><small>CH</small>7</div>
-        <div class="title"><b>CAPM and APT</b><span class="tag">복습</span>
-          <span class="tip"><button class="tip-btn" type="button" aria-label="IA Ch.7 안내">i</button><span class="tip-box" role="tooltip"><p>복습 덱: 핵심 정리 12장 + 연습문제 18개(CAPM·SML·α·지수모형·FF·APT).</p><p>퀴즈 22문항 · 객관식 14 · 서술형 8(표 채우기 3).</p></span></span></div>
-        <div class="act"><a class="btn pri" href="ia7/quiz.html">퀴즈</a><a class="btn" href="ia7/review/">복습·연습문제</a></div>
+        <div class="num"><small>CH</small>9</div>
+        <div class="title"><b>Behavioral Finance and Technical Analysis</b><span class="tag next">예습</span>
+          <span class="tip"><button class="tip-btn" type="button" aria-label="IA Ch.9 안내">i</button><span class="tip-box" role="tooltip"><p>다음 수업 예습 덱. 행동재무(전망이론·차익거래 한계)와 기술적 분석 지표(이동평균·상대강도·Trin·신뢰지수·풋콜비율). 빈칸 채운 슬라이드의 빨간 글자가 답입니다.</p></span></span></div>
+        <div class="act"><a class="btn pri" href="ia9/preview/">예습자료</a><a class="btn" href="ia9/">빈칸 채운 슬라이드</a><a class="btn" href="ia9/IA_Ch09_filled.pdf" download>PDF</a></div>
       </li>
     </ol>
   </section>
