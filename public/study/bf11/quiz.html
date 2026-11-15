@@ -46,13 +46,31 @@
                   @write [n]         MC only: add a ruled box (n printed lines, default 2)
                   @short             WRITTEN: a short descriptive answer (2 printed lines, about two handwritten sentences)
                   @lines n           WRITTEN / TABLE: n printed lines (capped at 8). Use it only when the automatic size below is wrong.
+                  @space n           WRITTEN: n × 5 mm of blank space instead of the automatic lines — for answers the student lays out
+                                     by hand, e.g. "draw your own worksheet". n = the number of handwritten lines the answer needs at the
+                                     question's font size (≈ half the area of the same @grid). Example: a 3-state E(R)/variance table for two
+                                     stocks (header, 3 states, E(R), variance, SD) plus 2 formula lines ≈ @space 9.
     ALL VIEW "All chapters" numbers every question 1..N straight through (no chapter headings or restarts); printing from that view gives one sheet with the same numbers.
     PRINT SPACE (automatic)   leave only the room a real handwritten answer needs — not the length of the model answer (which also explains).
-                              One printed line = 7 mm ≈ one handwritten step (a formula with numbers, or one short sentence).
+                              Answer space prints BLANK (no ruled lines). One line of space = 5 mm = one line of question text (10 pt): handwriting is assumed to be the same size as
+                              the printed question, so a line holds one step (a formula with numbers, or one short sentence).
                               written calculation (model answer has a computed "= number"): one line per step, 3-8 lines
                               short written / @short / other written with 1-2 steps: 2 lines · TABLE: every blank cell is an empty box 7 mm high,
                               plus 2 lines for working · MC: none (+ @write lines, default 2) · @lines n: n lines, never more than 8
                               Question text prints at 10 pt (tables 9 pt), so a question is never larger than the space for its answer.
+
+  PRINT RULES (from user review — follow them when writing data; the CSS already does the layout part)
+    1. Answer space prints BLANK — never ruled lines.
+    2. Handwriting = question font size: 1 line of space = 5 mm = one printed line of question text. Give only the space a real
+       answer needs (count the handwritten lines), never the length of the model answer. 1 step ≈ 1 line.
+    3. Within one exhibit group, the question that needs more writing gets more space (a hand-drawn worksheet > a short calculation).
+    4. A worksheet the student can lay out by hand → "No worksheet is provided — lay out your own table" + @space n
+       (≈ half the area of the printed @grid). Keep @grid only when the given row/column labels are essential.
+    5. Never ask for the same computation twice; two different data sets (e.g. two stocks) are fine.
+    6. All questions of an exhibit print on the SAME page as the exhibit when possible: keep their space tight and do not put an
+       unrelated question just before the exhibit (move it after the group).
+    7. Exhibits are compact: tables only as wide as their content, small row padding (CSS: .p-ex tables width:auto, td 0.2 mm).
+    8. Question text prints at 10 pt, tables at 9 pt.
 
   EXPLANATION STYLE  explain the CORRECT answer only. For calculations give BOTH the formula with the substituted numbers AND the
               calculator solution. A leading label before " = " or ":" (≤ 30 characters, e.g. "OCF = ...", "BA II Plus: ...") is set in
@@ -63,7 +81,7 @@
               Ctrl+Enter check.  Ctrl+Q memo.
   FEATURES    exam mode (MC and written graded together at the end), review incorrect / not passed, mark for review, question search
               (1, 3-5), memo, save in browser, night mode, single-question view, copy question + answer.
-  PRINT       A4 exam paper: each exhibit once before its questions, ruled answer space and empty table boxes as above.
+  PRINT       A4 exam paper: each exhibit once before its questions, blank answer space (no ruled lines) and empty table boxes as above.
               "Print with solution" adds the answer key: MC letters, every explanation / model answer and the filled-in tables.
   Mistakes in the data are listed in a red box at the top of the page.
 
@@ -98,7 +116,13 @@
   - MC: 개념, 판단, 한 단계 계산. 4지선다 단일정답.
   - MC + WRITE (@write): 고른 뒤 근거를 1–2문장으로 쓰게 할 때 — 판단의 이유가 핵심인 문항.
   - WRITTEN: 다단계 계산(공식을 쓰고 숫자를 대입). key results = 중간값과 최종값. @short = 2문장 서술(정의·이유·비교).
-  - 인쇄 답안 칸은 "실제로 손으로 쓸 분량"만큼만 남긴다(한 줄 7 mm ≈ 손글씨 한 단계). 템플릿이 모범답안의 단계 수로 자동 계산하므로
+  - 표를 손으로 직접 그려 풀게 할 때는 @grid 대신 @space n(줄 없는 빈칸, 같은 표의 절반 정도 면적)을 쓰고, 같은 계산을
+    문제에 "No worksheet is provided — lay out your own table" 처럼 적는다. 한 exhibit 을 쓰는 문항은 exhibit 과 같은 쪽에 들어가도록
+    답안 칸을 꼭 필요한 만큼만 잡는다.
+  - 인쇄 규칙(사용자 검토 반영, 위 PRINT RULES 1–8): 답안 칸은 밑줄 없이 빈칸 · 손글씨 = 문제 글자 크기(한 줄 5 mm) · 같은 exhibit 안에서는
+    더 많이 쓰는 문항에 더 큰 칸 · 손으로 그릴 표는 @space · 같은 계산 반복 금지 · exhibit 문항은 exhibit 과 같은 쪽 ·
+    exhibit 표는 내용 폭만큼 작게, 행 여백 최소.
+  - 인쇄 답안 칸은 "실제로 손으로 쓸 분량"만큼만 남긴다(한 줄 5 mm = 문제 글자 한 줄 — 손글씨도 문제 글자 크기와 같다고 본다). 템플릿이 모범답안의 단계 수로 자동 계산하므로
     (계산형 단계당 1줄, 3–8줄 · @short·짧은 서술 2줄 · 표 풀이 2줄) @lines 는 꼭 필요할 때만, 8 이하로 쓴다. 모범답안의 "; " 단계는
     학생이 실제로 적을 계산 단계 단위로 나누고, 해설·계산기 풀이를 길게 늘려 칸이 커지지 않게 한다.
   - TABLE (@grid): 참고 자료가 표를 채우게 하는 계산(예: 현금흐름표, 재무제표·pro forma, 상환표, 감가상각표, 진리표,
@@ -151,25 +175,17 @@ sub: Chapter 11 · 23 questions (17 MC · 6 written)
 subject: Business Finance, Prof. Gemma Lee, Kyung Hee University
 textbook: Lecture notes, Chapter 11 (RWJ, Essentials of Corporate Finance)
 ===
-11.1 Expected return
-An analyst gives the economy a 30% chance of a boom and a 50% chance of a normal year; the only other possibility is a recession. Stock M returns 25% in a boom, 10% in a normal year and −15% in a recession. What is the expected return on M?
-6.67%|*9.50%|12.50%|15.50%
-P(recession) = 1 − 0.30 − 0.50 = 0.20 (probabilities sum to 1); E(R) = Σ p × R = 0.30 × 25% + 0.50 × 10% + 0.20 × (−15%) = 7.50% + 5.00% − 3.00% = 9.50%; BA II Plus: 2nd DATA, 25 ENTER ↓ 30 ENTER ↓ 10 ENTER ↓ 50 ENTER ↓ 15 +/− ENTER ↓ 20 ENTER, 2nd STAT ↓ → x̄ = 9.50; (6.67% weights the states equally; 12.50% leaves out the recession; 15.50% adds the recession return with the wrong sign.)
-===
 @case A
 Kumsan Electronics (K) and Gwangmyeong Gold (G)
 @tbl Returns by state of the economy :: State|Probability|Return on K|Return on G;;Boom|0.20|+30%|+4%;;Normal|0.60|+12%|+8%;;Recession|0.20|−10%|+14%
 ===
 11.1 Expected return and variance
-Kumsan and Gwangmyeong. Complete the worksheet: the expected return, the variance and the standard deviation of each stock. Work in decimals for the variance; write the formulas you use.
-~
+Kumsan and Gwangmyeong. Using Exhibit A, compute the expected return, the variance (in decimals) and the standard deviation of each stock. No worksheet is provided — lay out your own table and write the formulas you use.
+11.2 / 11.20 / 0.112|8.4 / 8.40 / 0.084|0.016096 / 0.0161|0.001024|12.69 / 0.1269|3.2 / 3.20 / 0.032
 E(R) = Σ p × R: E(R_K) = 0.20 × 30% + 0.60 × 12% + 0.20 × (−10%) = 6.00% + 7.20% − 2.00% = 11.20%; E(R_G) = 0.20 × 4% + 0.60 × 8% + 0.20 × 14% = 0.80% + 4.80% + 2.80% = 8.40%; σ² = Σ p × (R − E(R))²: σ_K² = 0.20 × 0.188² + 0.60 × 0.008² + 0.20 × (−0.212)² = 0.0070688 + 0.0000384 + 0.0089888 = 0.016096; σ_G² = 0.20 × (−0.044)² + 0.60 × (−0.004)² + 0.20 × 0.056² = 0.0003872 + 0.0000096 + 0.0006272 = 0.001024; σ_K = √0.016096 = 12.69%; σ_G = √0.001024 = 3.20%; BA II Plus (K): 2nd DATA, 2nd CLR WORK, 30 ENTER ↓ 20 ENTER ↓ 12 ENTER ↓ 60 ENTER ↓ 10 +/− ENTER ↓ 20 ENTER, 2nd STAT ↓ ↓ → x̄ = 11.20, σx = 12.69; K has the higher expected return — and four times the standard deviation.
 @use A
 @focus 1
-@grid Expected return :: State|Probability|R_K|p × R_K|R_G|p × R_G;;Boom|0.20|30%|?6.00%|4%|?0.80%;;Normal|0.60|12%|?7.20%|8%|?4.80%;;Recession|0.20|−10%|?−2.00%|14%|?2.80%;;=Expected return|1.00|—|?11.20%|—|?8.40%
-@grid Stock K — variance and standard deviation :: State|Probability|R_K − E(R_K)|p × (R_K − E(R_K))²;;Boom|0.20|?18.80%|?0.0070688 / 0.007069;;Normal|0.60|?0.80%|?0.0000384 / 0.000038;;Recession|0.20|?−21.20%|?0.0089888 / 0.008989;;=Variance|—|—|?0.016096;;=Standard deviation|—|—|?12.69%
-@grid Stock G — variance and standard deviation :: State|Probability|R_G − E(R_G)|p × (R_G − E(R_G))²;;Boom|0.20|?−4.40%|?0.0003872 / 0.000387;;Normal|0.60|?−0.40%|?0.0000096 / 0.000010;;Recession|0.20|?5.60%|?0.0006272 / 0.000627;;=Variance|—|—|?0.001024;;=Standard deviation|—|—|?3.20%
-@lines 3
+@space 10
 ===
 11.2 Portfolio expected return and variance
 Kumsan and Gwangmyeong. You put 60% of your money in K and 40% in G. Compute the portfolio's return in each state, its expected return, its variance and its standard deviation, writing each formula. Then compare the standard deviation with the 60/40 weighted average of the two stocks' own standard deviations.
@@ -177,6 +193,7 @@ Kumsan and Gwangmyeong. You put 60% of your money in K and 40% in G. Compute the
 State returns R_P = 0.60 × R_K + 0.40 × R_G: Boom = 0.60 × 30% + 0.40 × 4% = 19.60%; Normal = 0.60 × 12% + 0.40 × 8% = 10.40%; Recession = 0.60 × (−10%) + 0.40 × 14% = −0.40%; E(R_P) = 0.20 × 19.60% + 0.60 × 10.40% + 0.20 × (−0.40%) = 10.08% (= 0.60 × 11.20% + 0.40 × 8.40%, the same by either route); σ_P² = 0.20 × (0.196 − 0.1008)² + 0.60 × (0.104 − 0.1008)² + 0.20 × (−0.004 − 0.1008)² = 0.0018126 + 0.0000061 + 0.0021966 = 0.004015; σ_P = √0.004015 = 6.34%; Weighted average of SDs = 0.60 × 12.69% + 0.40 × 3.20% = 8.89%; The portfolio's 6.34% is well below 8.89% — risk is not a weighted average.
 @use A
 @focus 1
+@lines 5
 ===
 -
 Kumsan and Gwangmyeong. The 60/40 portfolio of K and G has a standard deviation of 6.34%, although the 60/40 weighted average of the two stocks' standard deviations is 8.89%. Why is the portfolio's figure lower?
@@ -184,6 +201,11 @@ Diversification removes the systematic risk of K and G|The portfolio's expected 
 The portfolio is combined state by state before squaring: boom 19.60%, normal 10.40%, recession −0.40% sit much closer together than K's 30% / 12% / −10%; K and G move in opposite directions across the states, so their swings partly offset; (The weighted average of variances, 0.60 × 0.016096 + 0.40 × 0.001024 = 0.010067, has a square root of 10.03% — not 6.34%; diversification removes unsystematic, not systematic, risk.)
 @use A
 @focus 1
+===
+11.1 Expected return
+An analyst gives the economy a 30% chance of a boom and a 50% chance of a normal year; the only other possibility is a recession. Stock M returns 25% in a boom, 10% in a normal year and −15% in a recession. What is the expected return on M?
+6.67%|*9.50%|12.50%|15.50%
+P(recession) = 1 − 0.30 − 0.50 = 0.20 (probabilities sum to 1); E(R) = Σ p × R = 0.30 × 25% + 0.50 × 10% + 0.20 × (−15%) = 7.50% + 5.00% − 3.00% = 9.50%; BA II Plus: 2nd DATA, 25 ENTER ↓ 30 ENTER ↓ 10 ENTER ↓ 50 ENTER ↓ 15 +/− ENTER ↓ 20 ENTER, 2nd STAT ↓ → x̄ = 9.50; (6.67% weights the states equally; 12.50% leaves out the recession; 15.50% adds the recession return with the wrong sign.)
 ===
 11.2 Portfolio expected return
 You invest $5,000 in Stock X (expected return 12%), $3,000 in Stock Y (expected return 18%) and $2,000 in Stock Z (expected return 6%). What is the expected return on your portfolio?
@@ -516,24 +538,26 @@ Correct rates from the SML: utility = 4% + 0.6 × 7% = 8.2%; semiconductor = 4% 
     #printSheet .p-ref{color:#444;}
     #printSheet .p-opt{margin:0 0 0 5mm !important;}
     #printSheet .p-fig{margin:1.5mm 0 2mm; max-width:130mm;}
-    #printSheet .p-lines{height:calc(var(--n, 3) * 7mm); background-image:linear-gradient(to bottom, transparent calc(7mm - 0.2mm), #bbb calc(7mm - 0.2mm)); background-size:100% 7mm; -webkit-print-color-adjust:exact; print-color-adjust:exact; margin-top:1mm;}
+    #printSheet .p-lines{height:calc(var(--n, 3) * 5mm); margin-top:1mm;}   /* answer space prints blank: no ruled lines */
+    #printSheet .p-space{height:calc(var(--n, 6) * 5mm);}
     #printSheet .p-gridq{margin:2mm 0 1mm;}
     #printSheet .p-gridq table.t{margin-bottom:3mm;}
     #printSheet table.grid td{height:7mm; vertical-align:middle;}
     #printSheet table.grid td.p-blank{min-width:22mm; border:0.2mm solid #999 !important; background:#fff;}
-    #printSheet .p-ex{break-inside:avoid; page-break-inside:avoid; border-top:0.3mm solid #000; border-bottom:0.3mm solid #000; padding:3mm 0 1mm; margin:2mm 0 6mm;}
+    #printSheet .p-ex{break-inside:avoid; page-break-inside:avoid; border-top:0.3mm solid #000; border-bottom:0.3mm solid #000; padding:2.5mm 0 1mm; margin:2mm 0 5mm;}
     #printSheet .p-ex h2{font-size:12.5pt; font-weight:400; margin:0;}
-    #printSheet .p-ex .uses{font-size:9pt; margin:0 0 3mm; font-style:italic; color:#333;}
+    #printSheet .p-ex .uses{font-size:9pt; margin:0 0 2mm; font-style:italic; color:#333;}
     #printSheet .p-ex .tables{display:flex; flex-wrap:wrap; gap:4mm 8mm; align-items:flex-start;}
-    #printSheet .p-ex .tables > table{flex:1 1 0;}
-    #printSheet table.t{font-size:9pt; color:#000;}
-    #printSheet table.t caption{color:#000; font-size:10pt; padding-bottom:1.5mm;}
+    #printSheet .p-ex .tables > table{flex:0 0 auto; width:auto; margin-bottom:1mm;}   /* exhibits stay as narrow as their content */
+    #printSheet table.t{font-size:9pt; line-height:1.25; color:#000; width:auto;}
+    #printSheet table.t th + th, #printSheet table.t td + td{padding-left:5mm;}   /* compact width: modest gap between columns */
+    #printSheet table.t caption{color:#000; font-size:10pt; padding-bottom:1mm;}
     #printSheet table.t thead th{border-top:0.35mm solid #000;}
     #printSheet table.t tbody tr:last-child td{border-bottom:0.35mm solid #000;}
     #printSheet table.t th, #printSheet table.t td{color:#000;}
-    #printSheet table.t th{ border-bottom:0.3mm solid #000; padding:0.8mm 1.5mm;}
-    #printSheet table.t td{padding:0.4mm 1.5mm; border-bottom:0.1mm solid #ddd;}
-    #printSheet table.t tr.sec td{color:#000; border-bottom:none; padding-top:2mm;}
+    #printSheet table.t th{ border-bottom:0.3mm solid #000; padding:0.5mm 1.5mm;}
+    #printSheet table.t td{padding:0.2mm 1.5mm; border-bottom:0.1mm solid #ddd;}
+    #printSheet table.t tr.sec td{color:#000; border-bottom:none; padding-top:1.2mm;}
     #printSheet table.t tr.tot td{border-top:0.25mm solid #000;}
     #printSheet table.t td.kcell{font-style:italic;}
     #printSheet .p-key{break-before:page; page-break-before:always;}
@@ -724,7 +748,7 @@ function parseQuizData(raw){
     prevTag = tag;
     const raw3 = L[2].split('|');
     const kind0 = raw3.some(o => o.trim().startsWith('*')) ? 'mc' : 'written';
-    const q = { tag, text: L[1], explain: L[3], ch, who, kind: kind0, options: [], correct: 0, kws: [], self: false, grids: [], blanks: [], fig: null, use: null, focus: null, write: 0, lines: 0 };
+    const q = { tag, text: L[1], explain: L[3], ch, who, kind: kind0, options: [], correct: 0, kws: [], self: false, grids: [], blanks: [], fig: null, use: null, focus: null, write: 0, lines: 0, space: 0 };
     if(kind0 === 'mc'){
       q.options = raw3.map((o, i) => { o = o.trim(); if(o.startsWith('*')){ q.correct = i; return o.slice(1).trim(); } return o; });
       const stars = raw3.filter(o => o.trim().startsWith('*')).length;
@@ -745,7 +769,8 @@ function parseQuizData(raw){
       else if(l === '@write' || l.startsWith('@write ')) q.write = Math.min(8, parseInt(l.slice(6), 10) || 2);
       else if(l.startsWith('@lines ')) linesN = parseInt(l.slice(7), 10) || 0;
       else if(l === '@short') short = true;
-      else if(l.startsWith('@')) errs.push(`${who}: unknown line "${l.slice(0, 12)}…" (use @use, @focus, @tbl, @img, @grid, @write, @lines or @short)`);
+      else if(l.startsWith('@space ')) q.space = Math.min(30, parseInt(l.slice(7), 10) || 0);
+      else if(l.startsWith('@')) errs.push(`${who}: unknown line "${l.slice(0, 12)}…" (use @use, @focus, @tbl, @img, @grid, @write, @lines, @space or @short)`);
     });
     if(q.kind === 'mc' && q.grids.length) errs.push(`${who}: @grid belongs to a written question (line 3 = key results or ~), not to MC`);
     if(q.kind === 'written' && q.write) errs.push(`${q.who}: @write is for MC questions; use @lines for a written question`);
@@ -755,7 +780,7 @@ function parseQuizData(raw){
     const steps = explLines(q.explain).length;
     const calc = /=\s*[−\-$(]?\d/.test(q.explain);
     /* print space = what a handwritten answer needs (1 line ≈ 1 step), not the length of the model answer */
-    q.lines = q.kind === 'mc' ? q.write : linesN !== null ? Math.min(8, linesN) : short ? 2 : q.kind === 'grid' ? 2 : (!calc && steps <= 2) ? 2 : Math.min(8, Math.max(3, steps));
+    q.lines = q.kind === 'mc' ? q.write : linesN !== null ? Math.min(8, linesN) : q.space ? 0 : short ? 2 : q.kind === 'grid' ? 2 : (!calc && steps <= 2) ? 2 : Math.min(8, Math.max(3, steps));
     if(q.focus && !q.use) errs.push(`${who}: @focus without @use`);
     chapters[ch].idx.push(questions.length);
     q.n = chapters[ch].idx.length;
@@ -987,7 +1012,7 @@ function writtenBody(qi, main, side){
     });
     main.appendChild(w);
   });
-  const ed = answerBox(qi, q.grids.length ? 'Working (formulas, NPV / IRR, decision)…' : 'Write the formulas and your working here…', q.lines <= 3 ? 2 : Math.min(5, Math.ceil(q.lines / 2)));
+  const ed = answerBox(qi, q.grids.length ? 'Working (formulas, NPV / IRR, decision)…' : 'Write the formulas and your working here…', q.space ? Math.min(6, Math.ceil(q.space / 2)) : q.lines <= 3 ? 2 : Math.min(5, Math.ceil(q.lines / 2)));
   main.appendChild(ed);
   if(g && !g.self && q.kws.length) markIn(ed, q.kws.filter((_, i) => g.kwHits[i]), 'ok');
   const acts = document.createElement('div'); acts.className = 'acts';
@@ -1261,7 +1286,7 @@ function sheetHtml(title, idx){
     html += `<div class="p-q"><p>${qno(qi)}. ${q.use ? `<span class="p-ref">[Exhibit ${esc(q.use)}]</span> ` : ''}${fm(q.text)}</p>` + (q.fig ? `<div class="p-fig">${figHTML(q.fig)}</div>` : '') +
       (q.kind === 'mc' ? q.options.map((o, oi) => `<p class="p-opt">${L(oi)}. ${fm(o)}</p>`).join('') : '') +
       (q.grids.length ? `<div class="p-gridq">${q.grids.map(t => gridHTML(t, 'print')).join('')}</div>` : '') +
-      (q.lines ? `<div class="p-lines" style="--n:${q.lines}"></div>` : '') + '</div>';
+      (q.lines ? `<div class="p-lines" style="--n:${q.lines}"></div>` : '') + (q.space ? `<div class="p-space" style="--n:${q.space}"></div>` : '') + '</div>';
   });
   const mcs = idx.filter(isMC);
   html += `<div class="p-key"><h1>${esc(title)} — Answers</h1><div class="p-letters">` + mcs.map(qi => `<div>${qno(qi)}. ${L(QUESTIONS[qi].correct)}</div>`).join('') +

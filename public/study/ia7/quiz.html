@@ -46,13 +46,31 @@
                   @write [n]         MC only: add a ruled box (n printed lines, default 2)
                   @short             WRITTEN: a short descriptive answer (2 printed lines, about two handwritten sentences)
                   @lines n           WRITTEN / TABLE: n printed lines (capped at 8). Use it only when the automatic size below is wrong.
+                  @space n           WRITTEN: n × 5 mm of blank space instead of the automatic lines — for answers the student lays out
+                                     by hand, e.g. "draw your own worksheet". n = the number of handwritten lines the answer needs at the
+                                     question's font size (≈ half the area of the same @grid). Example: a 3-state E(R)/variance table for two
+                                     stocks (header, 3 states, E(R), variance, SD) plus 2 formula lines ≈ @space 9.
     ALL VIEW "All chapters" numbers every question 1..N straight through (no chapter headings or restarts); printing from that view gives one sheet with the same numbers.
     PRINT SPACE (automatic)   leave only the room a real handwritten answer needs — not the length of the model answer (which also explains).
-                              One printed line = 7 mm ≈ one handwritten step (a formula with numbers, or one short sentence).
+                              Answer space prints BLANK (no ruled lines). One line of space = 5 mm = one line of question text (10 pt): handwriting is assumed to be the same size as
+                              the printed question, so a line holds one step (a formula with numbers, or one short sentence).
                               written calculation (model answer has a computed "= number"): one line per step, 3-8 lines
                               short written / @short / other written with 1-2 steps: 2 lines · TABLE: every blank cell is an empty box 7 mm high,
                               plus 2 lines for working · MC: none (+ @write lines, default 2) · @lines n: n lines, never more than 8
                               Question text prints at 10 pt (tables 9 pt), so a question is never larger than the space for its answer.
+
+  PRINT RULES (from user review — follow them when writing data; the CSS already does the layout part)
+    1. Answer space prints BLANK — never ruled lines.
+    2. Handwriting = question font size: 1 line of space = 5 mm = one printed line of question text. Give only the space a real
+       answer needs (count the handwritten lines), never the length of the model answer. 1 step ≈ 1 line.
+    3. Within one exhibit group, the question that needs more writing gets more space (a hand-drawn worksheet > a short calculation).
+    4. A worksheet the student can lay out by hand → "No worksheet is provided — lay out your own table" + @space n
+       (≈ half the area of the printed @grid). Keep @grid only when the given row/column labels are essential.
+    5. Never ask for the same computation twice; two different data sets (e.g. two stocks) are fine.
+    6. All questions of an exhibit print on the SAME page as the exhibit when possible: keep their space tight and do not put an
+       unrelated question just before the exhibit (move it after the group).
+    7. Exhibits are compact: tables only as wide as their content, small row padding (CSS: .p-ex tables width:auto, td 0.2 mm).
+    8. Question text prints at 10 pt, tables at 9 pt.
 
   EXPLANATION STYLE  explain the CORRECT answer only. For calculations give BOTH the formula with the substituted numbers AND the
               calculator solution. A leading label before " = " or ":" (≤ 30 characters, e.g. "OCF = ...", "BA II Plus: ...") is set in
@@ -63,7 +81,7 @@
               Ctrl+Enter check.  Ctrl+Q memo.
   FEATURES    exam mode (MC and written graded together at the end), review incorrect / not passed, mark for review, question search
               (1, 3-5), memo, save in browser, night mode, single-question view, copy question + answer.
-  PRINT       A4 exam paper: each exhibit once before its questions, ruled answer space and empty table boxes as above.
+  PRINT       A4 exam paper: each exhibit once before its questions, blank answer space (no ruled lines) and empty table boxes as above.
               "Print with solution" adds the answer key: MC letters, every explanation / model answer and the filled-in tables.
   Mistakes in the data are listed in a red box at the top of the page.
 
@@ -98,7 +116,13 @@
   - MC: 개념, 판단, 한 단계 계산. 4지선다 단일정답.
   - MC + WRITE (@write): 고른 뒤 근거를 1–2문장으로 쓰게 할 때 — 판단의 이유가 핵심인 문항.
   - WRITTEN: 다단계 계산(공식을 쓰고 숫자를 대입). key results = 중간값과 최종값. @short = 2문장 서술(정의·이유·비교).
-  - 인쇄 답안 칸은 "실제로 손으로 쓸 분량"만큼만 남긴다(한 줄 7 mm ≈ 손글씨 한 단계). 템플릿이 모범답안의 단계 수로 자동 계산하므로
+  - 표를 손으로 직접 그려 풀게 할 때는 @grid 대신 @space n(줄 없는 빈칸, 같은 표의 절반 정도 면적)을 쓰고, 같은 계산을
+    문제에 "No worksheet is provided — lay out your own table" 처럼 적는다. 한 exhibit 을 쓰는 문항은 exhibit 과 같은 쪽에 들어가도록
+    답안 칸을 꼭 필요한 만큼만 잡는다.
+  - 인쇄 규칙(사용자 검토 반영, 위 PRINT RULES 1–8): 답안 칸은 밑줄 없이 빈칸 · 손글씨 = 문제 글자 크기(한 줄 5 mm) · 같은 exhibit 안에서는
+    더 많이 쓰는 문항에 더 큰 칸 · 손으로 그릴 표는 @space · 같은 계산 반복 금지 · exhibit 문항은 exhibit 과 같은 쪽 ·
+    exhibit 표는 내용 폭만큼 작게, 행 여백 최소.
+  - 인쇄 답안 칸은 "실제로 손으로 쓸 분량"만큼만 남긴다(한 줄 5 mm = 문제 글자 한 줄 — 손글씨도 문제 글자 크기와 같다고 본다). 템플릿이 모범답안의 단계 수로 자동 계산하므로
     (계산형 단계당 1줄, 3–8줄 · @short·짧은 서술 2줄 · 표 풀이 2줄) @lines 는 꼭 필요할 때만, 8 이하로 쓴다. 모범답안의 "; " 단계는
     학생이 실제로 적을 계산 단계 단위로 나누고, 해설·계산기 풀이를 길게 늘려 칸이 커지지 않게 한다.
   - TABLE (@grid): 참고 자료가 표를 채우게 하는 계산(예: 현금흐름표, 재무제표·pro forma, 상환표, 감가상각표, 진리표,
@@ -163,6 +187,23 @@ In CAPM equilibrium the average coefficient of risk aversion is Ā = 2.5 and σ_
 0.08|*0.50|1.00|2.00
 Market risk premium = Ā·σ_M^2 = 2.5 × 0.16^2 = 2.5 × 0.0256 = 0.064 = 6.4%; y* = 0.064 / (5 × 0.0256) = 0.064 / 0.128 = 0.50; In general y* = Ā / A: an investor twice as risk averse as the average holds half in M and half in the risk-free asset — everyone holds M as the risky part and sits on the CML.
 ===
+@case S
+Analyst forecasts (r_f = 2.5%, E(r_M) = 8.5%)
+@tbl Forecasts for next year :: Stock|Beta|Analyst's forecast E(r);;Harbor Utilities|0.40|6.0%;;Vertex Semiconductors|1.60|11.5%;;Pinewood Foods|0.75|7.0%;;Bullion Miners|−0.25|1.5%
+===
+7.1 SML and alpha · p.13–16
+Analyst forecasts. Write the SML equation, then find the CAPM required return, the alpha and the decision (Buy / Sell / Hold) for each stock. No worksheet is provided — lay out your own table.
+4.9|12.1|7.0 / 7%|1.0 / 1%|1.1|0.6|0.5|buy|sell|hold / fair
+SML: E(r) = 2.5 + β(8.5 − 2.5) = 2.5 + 6β; Harbor = 2.5 + 0.40 × 6 = 4.9%, α = 6.0 − 4.9 = +1.1% → Buy; Vertex = 2.5 + 1.60 × 6 = 12.1%, α = 11.5 − 12.1 = −0.6% → Sell; Pinewood = 2.5 + 0.75 × 6 = 7.0%, α = 7.0 − 7.0 = 0 → Hold (fairly priced, on the SML); Bullion = 2.5 − 0.25 × 6 = 1.0%, α = 1.5 − 1.0 = +0.5% → Buy (a negative-beta hedge can earn less than r_f and still be underpriced)
+@use S
+@space 5
+===
+7.1 Alpha and price adjustment · p.16
+Analyst forecasts. If the analyst's forecast for Vertex Semiconductors is correct and investors act on it, what does the CAPM predict?
+Buying pressure raises its price until its expected return falls back to the SML|Its beta falls until the SML return for its beta equals 11.5%|Nothing changes — a negative alpha is an equilibrium outcome|*Selling pressure lowers its price today until its expected return rises to the SML
+Vertex: required = 2.5 + 1.60 × 6 = 12.1% > forecast 11.5%, α = −0.6% → below the SML → overpriced → SELL; A lower price today means a higher expected return, until α = 0 — in equilibrium every security lies on the SML.
+@use S
+===
 7.1 Reading beta · p.11–12
 Biogenix, a biotech stock, has a standard deviation of 55% (σ_M = 20%), but its returns are uncorrelated with the market (ρ = 0). r_f = 3.5% and E(r_M) = 9%. What expected return does the CAPM require on Biogenix?
 *3.5% — with β = 0 it carries no systematic risk and earns only r_f|9.0% — every risky stock must offer at least the market return|18.6% — its risk is 55 / 20 = 2.75 times the market's|It cannot be determined without its residual variance
@@ -172,23 +213,6 @@ Biogenix, a biotech stock, has a standard deviation of 55% (σ_M = 20%), but its
 Stock Q: σ_Q = 45%, σ_M = 18%, ρ_{QM} = 0.36; r_f = 3%, E(r_M) = 10.5%. Write the formulas and compute (1) Cov(r_Q, r_M), (2) β_Q, checking it with the second beta formula, and (3) the CAPM required return on Q.
 0.02916 / 291.6|0.90 / 0.9|9.75
 Cov = ρσ_Qσ_M = 0.36 × 0.45 × 0.18 = 0.02916 (= 291.6 %^2); β_Q = Cov / σ_M^2 = 0.02916 / 0.0324 = 0.90; Check: β_Q = ρσ_Q / σ_M = 0.36 × 45 / 18 = 0.90; E(r_Q) = r_f + β[E(r_M) − r_f] = 3 + 0.90 × 7.5 = 3 + 6.75 = 9.75%; BA II Plus: 0.18 x² = 0.0324, 0.02916 ÷ 0.0324 = 0.9, × 7.5 + 3 = 9.75
-===
-@case S
-Analyst forecasts (r_f = 2.5%, E(r_M) = 8.5%)
-@tbl Forecasts for next year :: Stock|Beta|Analyst's forecast E(r);;Harbor Utilities|0.40|6.0%;;Vertex Semiconductors|1.60|11.5%;;Pinewood Foods|0.75|7.0%;;Bullion Miners|−0.25|1.5%
-===
-7.1 SML and alpha · p.13–16
-Analyst forecasts (Exhibit S). Write the SML equation, then complete the table: the CAPM required return, alpha and the decision (Buy / Sell / Hold) for each stock.
-~
-SML: E(r) = 2.5 + β(8.5 − 2.5) = 2.5 + 6β; Harbor = 2.5 + 0.40 × 6 = 4.9%, α = 6.0 − 4.9 = +1.1% → Buy; Vertex = 2.5 + 1.60 × 6 = 12.1%, α = 11.5 − 12.1 = −0.6% → Sell; Pinewood = 2.5 + 0.75 × 6 = 7.0%, α = 7.0 − 7.0 = 0 → Hold (fairly priced, on the SML); Bullion = 2.5 − 0.25 × 6 = 1.0%, α = 1.5 − 1.0 = +0.5% → Buy (a negative-beta hedge can earn less than r_f and still be underpriced)
-@use S
-@grid CAPM check :: Stock|Required E(r)|Alpha|Decision;;Harbor Utilities|?4.9%|?1.1%|?Buy;;Vertex Semiconductors|?12.1%|?−0.6%|?Sell;;Pinewood Foods|?7.0%|?0|?Hold / Fair / Fairly priced;;Bullion Miners|?1.0%|?0.5%|?Buy
-===
-7.1 Alpha and price adjustment · p.16
-Analyst forecasts (Exhibit S). If the analyst's forecast for Vertex Semiconductors is correct and investors act on it, what does the CAPM predict?
-Buying pressure raises its price until its expected return falls back to the SML|Its beta falls until the SML return for its beta equals 11.5%|Nothing changes — a negative alpha is an equilibrium outcome|*Selling pressure lowers its price today until its expected return rises to the SML
-Vertex: required = 2.5 + 1.60 × 6 = 12.1% > forecast 11.5%, α = −0.6% → below the SML → overpriced → SELL; A lower price today means a higher expected return, until α = 0 — in equilibrium every security lies on the SML.
-@use S
 ===
 7.1 Alpha and fair price · p.17
 Lumen Corp. trades at P_0 = $64. Analysts expect a price of E(P_1) = $68 and a dividend of D_1 = $1.60 in one year. β = 1.20, r_f = 3%, E(r_M) = 9%. Write the formulas and compute (1) the forecast holding-period return, (2) the CAPM required return, (3) alpha and the buy/sell decision, (4) the price today that would make alpha zero.
@@ -210,18 +234,17 @@ Corvid Airlines — index-model regression
 @tbl 60 monthly excess returns (58 degrees of freedom) :: Statistic|Estimate|Std. error|t-stat|p-value;;Intercept α|0.45% / month|0.30%|1.50|0.139;;Slope β|1.40|0.20|7.00|< 0.001;;Residual SD σ(e)|7.0% / month|–|–|–;;Market SD σ_M|4.0% / month|–|–|–
 ===
 7.2 Index model · p.21–23
-Corvid Airlines (Exhibit R). A fund manager who holds Corvid says its 0.45% monthly alpha proves his stock-picking skill. Which response is correct?
+Corvid Airlines. A fund manager who holds Corvid says its 0.45% monthly alpha proves his stock-picking skill. Which response is correct?
 He is right — a positive intercept means the stock beat the CAPM|*The intercept is not significant (p = 0.139 > 0.05), so α = 0 cannot be rejected|He is right — a t-statistic of 1.50 is greater than 1|The intercept must be significant because β is highly significant
 t = 0.45 / 0.30 = 1.50, p = 0.139 > 0.05: we cannot reject α = 0, which is what the CAPM predicts — no statistical evidence of stock-picking skill.
 @use R
 ===
 7.2 Risk decomposition · p.24, p.41
-Corvid Airlines (Exhibit R). Write the risk decomposition and complete the tables (monthly; variances in %^2). Use t ≈ 2.00 for the 95% interval of β and β_{adj} = (2/3)β + 1/3 for the adjusted beta.
-~
+Corvid Airlines. Write the risk decomposition formulas and compute (monthly; variances in %^2) the systematic, firm-specific and total variance, the total SD and R^2; then the 95% interval for β (use t ≈ 2.00) and the adjusted beta β_{adj} = (2/3)β + 1/3. No worksheet is provided — lay out your own table.
+31.36|49|80.36|8.96|0.39 / .39 / 39%|1.00 / 1.0|1.80 / 1.8|1.27 / 1.267
 Systematic = β^2σ_M^2 = 1.40^2 × 4^2 = 1.96 × 16 = 31.36 %^2; Firm-specific = σ^2(e) = 7^2 = 49 %^2; Total = 31.36 + 49 = 80.36 %^2, σ = √80.36 = 8.96% per month; R^2 = 31.36 / 80.36 = 0.39 — about 61% of the variance is diversifiable; 95% interval = 1.40 ± 2.00 × 0.20 = 1.00 to 1.80; β_{adj} = (2/3)(1.40) + 1/3 = 0.933 + 0.333 = 1.27; BA II Plus: 1.4 x² × 16 = 31.36, + 49 = 80.36, √x = 8.96
 @use R
-@grid Risk decomposition (monthly) :: Item|Formula|Value;;Systematic variance (%^2)|β^2σ_M^2|?31.36;;Firm-specific variance (%^2)|σ^2(e)|?49;;Total variance (%^2)|sum of the two|?80.36;;Total SD (%)|√total variance|?8.96;;R^2|systematic / total|?0.39 / 0.390
-@grid Beta precision :: Item|Value;;95% interval, lower bound|?1.00;;95% interval, upper bound|?1.80;;Adjusted beta|?1.27 / 1.267
+@space 7
 ===
 7.2 R-squared · p.24
 Fund Z, a diversified equity fund, has β = 0.95 and R^2 = 0.94. Stock Y has β = 1.40 and R^2 = 0.25. Which statement is correct?
@@ -253,28 +276,27 @@ A fund's Fama-French loadings are β_{SMB} = −0.50 and β_{HML} = −0.40. Whi
 *Large-cap growth tilt|Large-cap value tilt|Small-cap growth tilt|Small-cap value tilt
 SMB = small minus big, so a negative loading means the fund behaves like big stocks; HML = high minus low book-to-market, so a negative loading tilts toward growth (low B/M) stocks.
 ===
-7.5 Arbitrage · p.36
-Each of the following is a defining feature of an arbitrage opportunity EXCEPT:
-Zero net investment — the long position is financed by a short sale|Zero risk — the factor exposures of the two legs cancel|A positive profit in every state of the world|*A high expected return relative to the risk taken
-Arbitrage = zero net investment + zero risk + a certain positive profit; a high expected return (or a positive alpha) still carries risk, so it is not arbitrage.
-===
 @case T
 Well-diversified portfolios (r_f = 3%)
 @tbl Single-factor economy :: Portfolio|Beta|E(r);;M (market factor)|1.00|11%;;Q (well diversified)|0.75|9.5%;;T-bills|0.00|3%
 ===
 7.5 Arbitrage trade · p.37–38
-Well-diversified portfolios (Exhibit T). Build a benchmark with the same beta as Q from M and T-bills, then complete the arbitrage trade for a $4,000,000 position (cash flows: + received, − paid; payoffs in one year). Say which portfolio you buy and which you short.
-~
+Well-diversified portfolios. Build a benchmark with the same beta as Q from M and T-bills, then set up the arbitrage trade for a $4,000,000 position: the cash flow today, the factor exposure and the payoff in one year of Q, of the benchmark and of the net position (cash flows: + received, − paid). Say which portfolio you buy and which you short. No worksheet is provided — lay out your own table.
+75%|25%|9.0 / 9%|4,000,000 / 4000000|0.75|380,000 / 380000|360,000 / 360000|20,000 / 20000
 Weight in M = 0.75 → β = 0.75(1.00) + 0.25(0) = 0.75; E(r_bench) = 0.75(11) + 0.25(3) = 8.25 + 0.75 = 9.0% < 9.5% offered by Q → Q is underpriced: buy Q, short the benchmark; Q: −4,000,000 today, exposure +0.75, payoff 0.095 × 4,000,000 = +380,000; Benchmark ($3,000,000 M + $1,000,000 bills): +4,000,000 today, exposure −0.75, payoff −0.09 × 4,000,000 = −360,000; Net: $0 today, zero exposure, +$20,000 for certain
 @use T
-@grid Benchmark :: Item|Value;;Weight in M|?75%;;Weight in T-bills|?25%;;Benchmark E(r)|?9.0%
-@grid Arbitrage trade :: Position|Cash flow today|Factor exposure|Payoff in one year;;Q|?−4,000,000|?0.75|?380,000;;Benchmark (M + T-bills)|?4,000,000|?−0.75|?−360,000;;=Net|?0|?0|?20,000
+@space 6
 ===
 7.5 Restoring equilibrium · p.38
-Well-diversified portfolios (Exhibit T). As arbitrageurs scale the trade up without limit, what restores equilibrium?
+Well-diversified portfolios. As arbitrageurs scale the trade up without limit, what restores equilibrium?
 *Buying pressure raises Q's price until its expected return falls to the APT level for β = 0.75|Selling pressure lowers Q's price until its expected return rises above 9.5%|M's expected return rises until the market factor is fairly priced|The T-bill rate falls until Q lies exactly on the line
 APT: E(r_Q) = 3 + 0.75 × (11 − 3) = 9.0%; Q offers 9.5%, so it is underpriced; arbitrageurs buy Q, its price rises and its expected return falls until it equals 9.0%.
 @use T
+===
+7.5 Arbitrage · p.36
+Each of the following is a defining feature of an arbitrage opportunity EXCEPT:
+Zero net investment — the long position is financed by a short sale|Zero risk — the factor exposures of the two legs cancel|A positive profit in every state of the world|*A high expected return relative to the risk taken
+Arbitrage = zero net investment + zero risk + a certain positive profit; a high expected return (or a positive alpha) still carries risk, so it is not arbitrage.
 ===
 7.5 Multifactor APT · p.39
 A three-factor APT economy: r_f = 3.5%. Factor 1 (GDP growth surprise): β = 1.10, premium +4.0%. Factor 2 (unexpected inflation): β = 0.60, premium −2.5%. Factor 3 (credit-spread shock): β = 0.80, premium +1.5%. Write the APT equation and compute the required return on portfolio P. Then compute the required return from a single-factor model that uses only the GDP factor, and explain in one sentence why the inflation premium is negative.
@@ -519,24 +541,26 @@ CAPM: all investors optimize, exactly one factor (M), applies to every security,
     #printSheet .p-ref{color:#444;}
     #printSheet .p-opt{margin:0 0 0 5mm !important;}
     #printSheet .p-fig{margin:1.5mm 0 2mm; max-width:130mm;}
-    #printSheet .p-lines{height:calc(var(--n, 3) * 7mm); background-image:linear-gradient(to bottom, transparent calc(7mm - 0.2mm), #bbb calc(7mm - 0.2mm)); background-size:100% 7mm; -webkit-print-color-adjust:exact; print-color-adjust:exact; margin-top:1mm;}
+    #printSheet .p-lines{height:calc(var(--n, 3) * 5mm); margin-top:1mm;}   /* answer space prints blank: no ruled lines */
+    #printSheet .p-space{height:calc(var(--n, 6) * 5mm);}
     #printSheet .p-gridq{margin:2mm 0 1mm;}
     #printSheet .p-gridq table.t{margin-bottom:3mm;}
     #printSheet table.grid td{height:7mm; vertical-align:middle;}
     #printSheet table.grid td.p-blank{min-width:22mm; border:0.2mm solid #999 !important; background:#fff;}
-    #printSheet .p-ex{break-inside:avoid; page-break-inside:avoid; border-top:0.3mm solid #000; border-bottom:0.3mm solid #000; padding:3mm 0 1mm; margin:2mm 0 6mm;}
+    #printSheet .p-ex{break-inside:avoid; page-break-inside:avoid; border-top:0.3mm solid #000; border-bottom:0.3mm solid #000; padding:2.5mm 0 1mm; margin:2mm 0 5mm;}
     #printSheet .p-ex h2{font-size:12.5pt; font-weight:400; margin:0;}
-    #printSheet .p-ex .uses{font-size:9pt; margin:0 0 3mm; font-style:italic; color:#333;}
+    #printSheet .p-ex .uses{font-size:9pt; margin:0 0 2mm; font-style:italic; color:#333;}
     #printSheet .p-ex .tables{display:flex; flex-wrap:wrap; gap:4mm 8mm; align-items:flex-start;}
-    #printSheet .p-ex .tables > table{flex:1 1 0;}
-    #printSheet table.t{font-size:9pt; color:#000;}
-    #printSheet table.t caption{color:#000; font-size:10pt; padding-bottom:1.5mm;}
+    #printSheet .p-ex .tables > table{flex:0 0 auto; width:auto; margin-bottom:1mm;}   /* exhibits stay as narrow as their content */
+    #printSheet table.t{font-size:9pt; line-height:1.25; color:#000; width:auto;}
+    #printSheet table.t th + th, #printSheet table.t td + td{padding-left:5mm;}   /* compact width: modest gap between columns */
+    #printSheet table.t caption{color:#000; font-size:10pt; padding-bottom:1mm;}
     #printSheet table.t thead th{border-top:0.35mm solid #000;}
     #printSheet table.t tbody tr:last-child td{border-bottom:0.35mm solid #000;}
     #printSheet table.t th, #printSheet table.t td{color:#000;}
-    #printSheet table.t th{ border-bottom:0.3mm solid #000; padding:0.8mm 1.5mm;}
-    #printSheet table.t td{padding:0.4mm 1.5mm; border-bottom:0.1mm solid #ddd;}
-    #printSheet table.t tr.sec td{color:#000; border-bottom:none; padding-top:2mm;}
+    #printSheet table.t th{ border-bottom:0.3mm solid #000; padding:0.5mm 1.5mm;}
+    #printSheet table.t td{padding:0.2mm 1.5mm; border-bottom:0.1mm solid #ddd;}
+    #printSheet table.t tr.sec td{color:#000; border-bottom:none; padding-top:1.2mm;}
     #printSheet table.t tr.tot td{border-top:0.25mm solid #000;}
     #printSheet table.t td.kcell{font-style:italic;}
     #printSheet .p-key{break-before:page; page-break-before:always;}
@@ -727,7 +751,7 @@ function parseQuizData(raw){
     prevTag = tag;
     const raw3 = L[2].split('|');
     const kind0 = raw3.some(o => o.trim().startsWith('*')) ? 'mc' : 'written';
-    const q = { tag, text: L[1], explain: L[3], ch, who, kind: kind0, options: [], correct: 0, kws: [], self: false, grids: [], blanks: [], fig: null, use: null, focus: null, write: 0, lines: 0 };
+    const q = { tag, text: L[1], explain: L[3], ch, who, kind: kind0, options: [], correct: 0, kws: [], self: false, grids: [], blanks: [], fig: null, use: null, focus: null, write: 0, lines: 0, space: 0 };
     if(kind0 === 'mc'){
       q.options = raw3.map((o, i) => { o = o.trim(); if(o.startsWith('*')){ q.correct = i; return o.slice(1).trim(); } return o; });
       const stars = raw3.filter(o => o.trim().startsWith('*')).length;
@@ -748,7 +772,8 @@ function parseQuizData(raw){
       else if(l === '@write' || l.startsWith('@write ')) q.write = Math.min(8, parseInt(l.slice(6), 10) || 2);
       else if(l.startsWith('@lines ')) linesN = parseInt(l.slice(7), 10) || 0;
       else if(l === '@short') short = true;
-      else if(l.startsWith('@')) errs.push(`${who}: unknown line "${l.slice(0, 12)}…" (use @use, @focus, @tbl, @img, @grid, @write, @lines or @short)`);
+      else if(l.startsWith('@space ')) q.space = Math.min(30, parseInt(l.slice(7), 10) || 0);
+      else if(l.startsWith('@')) errs.push(`${who}: unknown line "${l.slice(0, 12)}…" (use @use, @focus, @tbl, @img, @grid, @write, @lines, @space or @short)`);
     });
     if(q.kind === 'mc' && q.grids.length) errs.push(`${who}: @grid belongs to a written question (line 3 = key results or ~), not to MC`);
     if(q.kind === 'written' && q.write) errs.push(`${q.who}: @write is for MC questions; use @lines for a written question`);
@@ -758,7 +783,7 @@ function parseQuizData(raw){
     const steps = explLines(q.explain).length;
     const calc = /=\s*[−\-$(]?\d/.test(q.explain);
     /* print space = what a handwritten answer needs (1 line ≈ 1 step), not the length of the model answer */
-    q.lines = q.kind === 'mc' ? q.write : linesN !== null ? Math.min(8, linesN) : short ? 2 : q.kind === 'grid' ? 2 : (!calc && steps <= 2) ? 2 : Math.min(8, Math.max(3, steps));
+    q.lines = q.kind === 'mc' ? q.write : linesN !== null ? Math.min(8, linesN) : q.space ? 0 : short ? 2 : q.kind === 'grid' ? 2 : (!calc && steps <= 2) ? 2 : Math.min(8, Math.max(3, steps));
     if(q.focus && !q.use) errs.push(`${who}: @focus without @use`);
     chapters[ch].idx.push(questions.length);
     q.n = chapters[ch].idx.length;
@@ -990,7 +1015,7 @@ function writtenBody(qi, main, side){
     });
     main.appendChild(w);
   });
-  const ed = answerBox(qi, q.grids.length ? 'Working (formulas, NPV / IRR, decision)…' : 'Write the formulas and your working here…', q.lines <= 3 ? 2 : Math.min(5, Math.ceil(q.lines / 2)));
+  const ed = answerBox(qi, q.grids.length ? 'Working (formulas, NPV / IRR, decision)…' : 'Write the formulas and your working here…', q.space ? Math.min(6, Math.ceil(q.space / 2)) : q.lines <= 3 ? 2 : Math.min(5, Math.ceil(q.lines / 2)));
   main.appendChild(ed);
   if(g && !g.self && q.kws.length) markIn(ed, q.kws.filter((_, i) => g.kwHits[i]), 'ok');
   const acts = document.createElement('div'); acts.className = 'acts';
@@ -1264,7 +1289,7 @@ function sheetHtml(title, idx){
     html += `<div class="p-q"><p>${qno(qi)}. ${q.use ? `<span class="p-ref">[Exhibit ${esc(q.use)}]</span> ` : ''}${fm(q.text)}</p>` + (q.fig ? `<div class="p-fig">${figHTML(q.fig)}</div>` : '') +
       (q.kind === 'mc' ? q.options.map((o, oi) => `<p class="p-opt">${L(oi)}. ${fm(o)}</p>`).join('') : '') +
       (q.grids.length ? `<div class="p-gridq">${q.grids.map(t => gridHTML(t, 'print')).join('')}</div>` : '') +
-      (q.lines ? `<div class="p-lines" style="--n:${q.lines}"></div>` : '') + '</div>';
+      (q.lines ? `<div class="p-lines" style="--n:${q.lines}"></div>` : '') + (q.space ? `<div class="p-space" style="--n:${q.space}"></div>` : '') + '</div>';
   });
   const mcs = idx.filter(isMC);
   html += `<div class="p-key"><h1>${esc(title)} — Answers</h1><div class="p-letters">` + mcs.map(qi => `<div>${qno(qi)}. ${L(QUESTIONS[qi].correct)}</div>`).join('') +
