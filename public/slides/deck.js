@@ -36,9 +36,9 @@
   const clamp = (n) => Math.max(0, Math.min(slides.length - 1, n));
   function isEditable(t) { return !!t && (t.isContentEditable || /^(INPUT|TEXTAREA|SELECT)$/.test(t.tagName)); }
   function slideTitle(s) {
-    const t = s.getAttribute('data-title');
+    const t = (state.lang && s.getAttribute('data-title-' + state.lang)) || s.getAttribute('data-title');   // 여러 언어 덱: data-title-ko 처럼 언어별 제목이 있으면 그것
     if (t) return t;
-    const h = s.querySelector('h1,h2,h3');
+    const h = s.querySelector(':not([hidden]) > h1, :not([hidden]) > h2, :not([hidden]) > h3');
     return h ? h.textContent.replace(/\s+/g, ' ').trim() : '';
   }
 
@@ -88,8 +88,10 @@
   // 언어: <html data-langs="ko,en"> 처럼 여러 언어를 가진 덱만. 첫 값이 기본 언어
   const langs = (root.getAttribute('data-langs') || '').split(',').map((x) => x.trim()).filter(Boolean);
   const LANG_NAME = { ko: '한국어', en: 'English' };
-  const bLang = langs.length > 1 ? btn('bLang', 'Language', 'Language', () => { setLang(langs[(langs.indexOf(state.lang) + 1) % langs.length], true); closeMenu(); }) : null;
-  if (bLang) menu.appendChild(bLang);
+  // 언어 단추는 도구줄에 바로 보이게(… 앞) — 단추 글자는 "바꿀 언어" 이름(영어 화면이면 '한국어'). L 키로도 바꾼다
+  const bLang = langs.length > 1 ? btn('bLang', 'Language', 'Language (L)', cycleLang) : null;
+  if (bLang) ui.insertBefore(bLang, more);
+  function cycleLang() { setLang(langs[(langs.indexOf(state.lang) + 1) % langs.length], true); closeMenu(); }
   function menuOpen() { return !menu.hidden; }
   function openMenu() {
     menu.classList.toggle('left', more.getBoundingClientRect().left < 170);   // 좁은 화면에서 … 이 왼쪽으로 줄바꿈되면 메뉴를 오른쪽으로 펼친다
@@ -295,7 +297,18 @@
       img.setAttribute('src', img.getAttribute('data-' + l) || img.getAttribute('data-' + langs[0]));
     });
     each(document.querySelectorAll('[data-l]'), (e) => { e.hidden = e.getAttribute('data-l') !== l; });
-    if (bLang) bLang.textContent = 'Language: ' + (LANG_NAME[l] || l);
+    // 단계(.step)는 보이는 언어의 것만 센다 — 숨긴 언어의 단계까지 세면 → 를 눌러도 아무것도 안 나타나는 단계가 생긴다
+    slides.forEach((s) => {
+      s._steps = Array.prototype.filter.call(s.querySelectorAll('.step'), (x) => !x.closest('[data-l][hidden]'));
+      setSteps(s, Math.min(s._shown, s._steps.length), true);
+    });
+    if (cur >= 0) updateUi();
+    if (bLang) {
+      const nx = langs[(langs.indexOf(l) + 1) % langs.length];
+      bLang.textContent = LANG_NAME[nx] || nx;
+      bLang.setAttribute('lang', nx);
+      bLang.title = (l === 'ko' ? '언어 바꾸기' : 'Switch language') + ' (L)';
+    }
     if (save) LS.set('lang', l);
     window.dispatchEvent(new CustomEvent('deck:lang', { detail: { lang: l } }));
   }
@@ -343,6 +356,7 @@
     else if (k === 'd' || k === 'D') toggleTheme();
     else if (k === 't' || k === 'T') toggleFont();
     else if (k === 'f' || k === 'F') toggleFull();
+    else if ((k === 'l' || k === 'L') && bLang) cycleLang();
     else used = false;
     if (used) e.preventDefault();
   }

@@ -1,43 +1,61 @@
 <!DOCTYPE html>
-<html lang="ko">
+<html lang="en" data-langs="en,ko">
 <head>
 <meta name="pinterest" content="nopin">
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <meta name="robots" content="noindex">
-<title>BF Ch.11 Risk and Return — 예습</title>
+<title>BF Ch.11 Risk and Return — Preview</title>
 <link rel="stylesheet" href="/slides/deck.css">
+<link rel="stylesheet" href="/study/deck-study.css">
 <!--
-  BF Ch.11 Risk and Return 예습 덱(HTML 장 11장). 숫자 예시는 강의 PDF(BF_Chap11_students.pdf) 그대로.
-  글자색은 고정하지 않는다(흰/검은 바탕 전환 D 키). 테두리는 currentColor, 흐린 글은 opacity.
+  BF Ch.11 Risk and Return preview deck (HTML chapter 11). Numerical examples are taken as-is from the lecture PDF (BF_Chap11_students.pdf).
+  Text color is not fixed (white/black background toggle with the D key). Borders use currentColor, faded text uses opacity.
 -->
 <style>
-  .slide h2{font-size:58px;margin-bottom:34px}
-  .slide p,.slide ul,.slide ol{font-size:32px}
-  .slide li{margin:.3em 0}
-  .slide table{font-size:27px;line-height:1.3}
-  .slide th,.slide td{padding:8px 18px}
-  .slide .small{font-size:25px}
-  .slide .muted{opacity:.68}
-  .flow{display:flex;flex-wrap:wrap;align-items:center;gap:10px 8px;font-size:25px;line-height:1.25;margin:0 0 26px}
-  .flow>span{border:2px solid currentColor;padding:8px 12px}
-  .flow>i{font-style:normal;opacity:.7}
-  .eq{display:inline-block;border:3px solid currentColor;padding:12px 26px;font-size:34px;margin:0 0 22px;font-family:"Cambria Math",Cambria,Georgia,serif}
+  /* components only — base typography lives in /study/deck-study.css */
+  .flow{display:flex;flex-wrap:wrap;align-items:center;gap:10px;font-size:22px;line-height:1.25;margin:0 0 32px}
+  .flow>span{border:1.5px solid currentColor;padding:8px 14px}
+  .flow>i{font-style:normal;opacity:.45}
+  .eq{display:inline-block;border:1.5px solid currentColor;padding:12px 28px;font-size:30px;margin:0 0 22px;font-family:"Cambria Math",Cambria,Georgia,serif}
   .slide td.r,.slide th.r{text-align:right}
 </style>
 </head>
-<body>
+<body class="study">
 <noscript>JavaScript is required.</noscript>
 
 <main id="stage">
 
-  <section class="slide title" data-title="표지">
+  <section class="slide title" data-title="Title" data-title-ko="표지">
+    <div class="lw" data-l="en">
+    <h1>Ch.11 Risk and Return</h1>
+    <p class="sub">Risk and return — which <b>part</b> of risk earns a reward? · Business Finance · Prof. Gemma Lee · RWJ Essentials of Corporate Finance</p>
+    <p class="hint">→ next / reveal step &nbsp;·&nbsp; O overview &nbsp;·&nbsp; D black/white &nbsp;·&nbsp; F full screen &nbsp;·&nbsp; L 한국어</p>
+    </div>
+    <div class="lw" data-l="ko" hidden>
     <h1>Ch.11 Risk and Return</h1>
     <p class="sub">위험과 수익률 — 위험 중 <b>어느 부분</b>에 보상이 붙는가</p>
-    <p class="hint">Business Finance · Prof. Gemma Lee · RWJ Essentials of Corporate Finance · 예습</p>
+    <p class="hint">Business Finance · Prof. Gemma Lee · RWJ Essentials of Corporate Finance · 예습 &nbsp;·&nbsp; L English</p>
+    </div>
   </section>
 
-  <section class="slide" data-title="장 전체 지도">
+<section class="slide" data-title="Chapter map" data-title-ko="장 전체 지도">
+    <div class="lw" data-l="en">
+    <h2>Chapter map</h2>
+    <div class="flow">
+      <span>Expected return · variance</span><i>→</i><span>Portfolios</span><i>→</i><span>Expected + surprise (U)</span><i>→</i><span>Systematic / unsystematic</span><i>→</i><span>Diversification</span><i>→</i><span>Beta β</span><i>→</i><span>SML · CAPM</span><i>→</i><span>Cost of capital</span>
+    </div>
+    <table>
+      <tr><th>§</th><th>Key question</th><th>Tool that answers it</th></tr>
+      <tr><td>11.1–11.2</td><td>How do we measure future return and risk? What if we mix assets?</td><td>E(R), σ², weighted average</td></tr>
+      <tr><td>11.3–11.4</td><td>What moves prices? How many kinds of risk?</td><td>R = E(R) + U, systematic/unsystematic</td></tr>
+      <tr><td>11.5</td><td>Which risk disappears as we mix more?</td><td>Diversification</td></tr>
+      <tr><td>11.6</td><td>How do we measure the risk that remains?</td><td>Beta</td></tr>
+      <tr><td>11.7–11.8</td><td>How much reward does that risk require? Where is it used?</td><td>SML·CAPM → discount rate</td></tr>
+    </table>
+    <p class="small muted" style="margin-top:22px">Why this order: measure risk (σ) → split it (systematic/unsystematic) → diversify away part → measure what remains (β) → price it (CAPM).</p>
+    </div>
+    <div class="lw" data-l="ko" hidden>
     <h2>장 전체 지도</h2>
     <div class="flow">
       <span>기대수익률·분산</span><i>→</i><span>포트폴리오</span><i>→</i><span>기대 + 놀람(U)</span><i>→</i><span>체계적 / 비체계적</span><i>→</i><span>분산투자</span><i>→</i><span>베타 β</span><i>→</i><span>SML · CAPM</span><i>→</i><span>자본비용</span>
@@ -51,9 +69,22 @@
       <tr><td>11.7–11.8</td><td>그 위험에 얼마를 요구하나? 어디에 쓰나?</td><td>SML·CAPM → 할인율</td></tr>
     </table>
     <p class="small muted" style="margin-top:22px">왜 이 순서인가: 위험을 재고(σ) → 쪼개고(체계적/비체계적) → 분산으로 걸러낸 뒤 → 남는 것만 재서(β) → 값을 매긴다(CAPM).</p>
+    </div>
   </section>
 
-  <section class="slide" data-title="앞 장과의 연결: Ch.10 → 11">
+<section class="slide" data-title="Link to the previous chapter: Ch.10 → 11" data-title-ko="앞 장과의 연결: Ch.10 → 11">
+    <div class="lw" data-l="en">
+    <h2>Link to the previous chapter: Ch.10 → Ch.11</h2>
+    <table>
+      <tr><th></th><th>Ch.10 Lessons from capital market history</th><th>Ch.11 Risk and return</th></tr>
+      <tr><td>Time frame</td><td>Past — average of realized returns</td><td>Future — probability-weighted average of possible states</td></tr>
+      <tr><td>Risk measure</td><td>Variance · standard deviation = total risk</td><td>Beta = systematic risk only</td></tr>
+      <tr><td>Reward</td><td>Risk premium: riskier assets earned higher average returns</td><td>Reward only for risk that diversification <b>cannot</b> remove</td></tr>
+      <tr><td>Open question</td><td>“How much per unit of risk?”</td><td>Answer: SML / CAPM</td></tr>
+    </table>
+    <p class="small muted" style="margin-top:22px">Ch.10: “how risky is it?” → Ch.11: “how much of that risk is rewarded?”</p>
+    </div>
+    <div class="lw" data-l="ko" hidden>
     <h2>앞 장과의 연결: Ch.10 → Ch.11</h2>
     <table>
       <tr><th></th><th>Ch.10 자본시장 역사의 교훈</th><th>Ch.11 위험과 수익률</th></tr>
@@ -63,10 +94,30 @@
       <tr><td>남긴 질문</td><td>“위험 1단위에 얼마?”</td><td>답: SML / CAPM</td></tr>
     </table>
     <p class="small muted" style="margin-top:22px">Ch.10 의 “얼마나 위험한가” → Ch.11 의 “그 위험 중 얼마만큼이 보상받는가”.</p>
+    </div>
   </section>
 
-  <section class="slide" data-title="11.1 기대수익률과 분산">
-    <h2>11.1 기대수익률과 분산</h2>
+<section class="slide" data-title="11.1 Expected return and variance" data-title-ko="11.1 기대수익률과 분산">
+    <div class="lw" data-l="en">
+    <h2><span class="no">11.1</span>Expected return and variance</h2>
+    <div class="cols wide-right">
+      <div>
+        <p><b>Key question</b> How do we summarize a return that hasn't happened yet?</p>
+        <p><span class="eq">E(R) = Σ p<sub>s</sub>·R<sub>s</sub></span><br><span class="eq">σ² = Σ p<sub>s</sub>·(R<sub>s</sub> − E(R))²</span></p>
+        <p class="small muted">Expected return, variance, standard deviation σ = √σ²</p>
+      </div>
+      <table>
+        <tr><th>State</th><th>Prob.</th><th class="r">A</th><th class="r">B</th></tr>
+        <tr><td>Recession</td><td>0.50</td><td class="r">−20%</td><td class="r">+30%</td></tr>
+        <tr><td>Boom</td><td>0.50</td><td class="r">+70%</td><td class="r">+10%</td></tr>
+        <tr><th>E(R)</th><td></td><td class="r">25%</td><td class="r">20%</td></tr>
+        <tr><th>σ²</th><td></td><td class="r">0.2025</td><td class="r">0.0100</td></tr>
+        <tr><th>σ</th><td></td><td class="r">45%</td><td class="r">10%</td></tr>
+      </table>
+    </div>
+    </div>
+    <div class="lw" data-l="ko" hidden>
+    <h2><span class="no">11.1</span>기대수익률과 분산</h2>
     <div class="cols wide-right">
       <div>
         <p><b>핵심 질문</b> 아직 안 일어난 수익률을 어떻게 요약하나?</p>
@@ -82,10 +133,23 @@
         <tr><th>σ</th><td></td><td class="r">45%</td><td class="r">10%</td></tr>
       </table>
     </div>
+    </div>
   </section>
 
-  <section class="slide" data-title="11.2 포트폴리오">
-    <h2>11.2 포트폴리오(portfolio)</h2>
+<section class="slide" data-title="11.2 Portfolios" data-title-ko="11.2 포트폴리오">
+    <div class="lw" data-l="en">
+    <h2><span class="no">11.2</span>Portfolios</h2>
+    <p><b>Key question</b> What happens to return and risk when we mix? (A 50% + B 50%)</p>
+    <p><span class="eq">E(R<sub>P</sub>) = w<sub>1</sub>E(R<sub>1</sub>) + w<sub>2</sub>E(R<sub>2</sub>) + …</span></p>
+    <table>
+      <tr><th></th><th>Weighted average</th><th>From the portfolio's own state returns</th><th>Same?</th></tr>
+      <tr><td>Expected return</td><td>0.5×25% + 0.5×20% = 22.5%</td><td>0.5×5% + 0.5×40% = 22.5%</td><td>Same</td></tr>
+      <tr><td>Standard deviation</td><td>0.5×45% + 0.5×10% = 27.5%</td><td>√0.030625 = 17.5%</td><td><b>Different</b></td></tr>
+    </table>
+    <p class="small muted" style="margin-top:22px">The two stocks move in opposite directions and offset each other, so risk is below the weighted average — the seed of diversification.</p>
+    </div>
+    <div class="lw" data-l="ko" hidden>
+    <h2><span class="no">11.2</span>포트폴리오(portfolio)</h2>
     <p><b>핵심 질문</b> 섞으면 수익률과 위험이 어떻게 되나? (A 50% + B 50%)</p>
     <p><span class="eq">E(R<sub>P</sub>) = w<sub>1</sub>E(R<sub>1</sub>) + w<sub>2</sub>E(R<sub>2</sub>) + …</span></p>
     <table>
@@ -94,9 +158,23 @@
       <tr><td>표준편차</td><td>0.5×45% + 0.5×10% = 27.5%</td><td>√0.030625 = 17.5%</td><td><b>다르다</b></td></tr>
     </table>
     <p class="small muted" style="margin-top:22px">두 주식이 반대로 움직여 서로를 상쇄하므로 위험은 가중평균보다 작다 — 분산투자의 씨앗.</p>
+    </div>
   </section>
 
-  <section class="slide" data-title="11.3–11.4 놀람과 두 종류의 위험">
+<section class="slide" data-title="11.3–11.4 Surprises and two kinds of risk" data-title-ko="11.3–11.4 놀람과 두 종류의 위험">
+    <div class="lw" data-l="en">
+    <h2>11.3–11.4 Surprise and two kinds of risk</h2>
+    <p><span class="eq">R = E(R) + U</span> &nbsp; <span class="small muted">Actual return = expected (already priced in) + unexpected return</span></p>
+    <table>
+      <tr><th></th><th>Systematic risk</th><th>Unsystematic risk</th></tr>
+      <tr><td>Other names</td><td>Market risk, non-diversifiable risk</td><td>Unique risk, asset-specific risk</td></tr>
+      <tr><td>Scope</td><td>Nearly all assets</td><td>One firm or a few</td></tr>
+      <tr><td>Examples</td><td>Interest rates, inflation, GDP, tax law changes</td><td>Strike, product failure, lawsuit, fire</td></tr>
+      <tr><td>In a large portfolio</td><td>Remains</td><td>Offsets and disappears</td></tr>
+    </table>
+    <p class="small muted" style="margin-top:20px">E.g. expected 25%, actual 30% → U = +5%. Of all the news, only the <b>surprise</b> moves prices.</p>
+    </div>
+    <div class="lw" data-l="ko" hidden>
     <h2>11.3–11.4 놀람(surprise)과 두 종류의 위험</h2>
     <p><span class="eq">R = E(R) + U</span> &nbsp; <span class="small muted">실제 수익률 = 기대(이미 가격에 반영) + 예상치 못한 부분(unexpected return)</span></p>
     <table>
@@ -107,10 +185,34 @@
       <tr><td>큰 포트폴리오에서</td><td>남는다</td><td>상쇄되어 사라진다</td></tr>
     </table>
     <p class="small muted" style="margin-top:20px">예: 기대 25%, 실제 30% → U = +5%. 가격을 움직이는 건 뉴스 중 <b>놀람</b>뿐.</p>
+    </div>
   </section>
 
-  <section class="slide" data-title="11.5 분산투자">
-    <h2>11.5 분산투자(diversification)</h2>
+<section class="slide" data-title="11.5 Diversification" data-title-ko="11.5 분산투자">
+    <div class="lw" data-l="en">
+    <h2><span class="no">11.5</span>Diversification</h2>
+    <div class="cols">
+      <div>
+        <p><b>Key question</b> How far does risk fall as we add stocks?</p>
+        <p><span class="eq">Total risk = systematic + unsystematic</span></p>
+        <ul>
+          <li>Unsystematic risk → removed almost free</li>
+          <li>Systematic risk → remains as a floor</li>
+          <li><b>Systematic risk principle</b>: reward only for systematic risk</li>
+        </ul>
+      </div>
+      <table>
+        <tr><th>Number of stocks</th><th class="r">Portfolio σ</th></tr>
+        <tr><td>1</td><td class="r">49.0%</td></tr>
+        <tr><td>5</td><td class="r">25.2%</td></tr>
+        <tr><td>10</td><td class="r">22.2%</td></tr>
+        <tr><td>30</td><td class="r">20.2%</td></tr>
+        <tr><td>50</td><td class="r">19.8%</td></tr>
+      </table>
+    </div>
+    </div>
+    <div class="lw" data-l="ko" hidden>
+    <h2><span class="no">11.5</span>분산투자(diversification)</h2>
     <div class="cols">
       <div>
         <p><b>핵심 질문</b> 종목을 늘리면 위험은 어디까지 줄어드나?</p>
@@ -130,10 +232,32 @@
         <tr><td>50</td><td class="r">19.8%</td></tr>
       </table>
     </div>
+    </div>
   </section>
 
-  <section class="slide" data-title="11.6 베타">
-    <h2>11.6 베타(beta, β)</h2>
+<section class="slide" data-title="11.6 Beta" data-title-ko="11.6 베타">
+    <div class="lw" data-l="en">
+    <h2><span class="no">11.6</span>Beta (β)</h2>
+    <div class="cols">
+      <div>
+        <p><b>Key question</b> How do we measure the risk left after diversifying?</p>
+        <table>
+          <tr><th>β</th><th>Meaning</th></tr>
+          <tr><td>= 1</td><td>Moves 1:1 with the market</td></tr>
+          <tr><td>&gt; 1</td><td>Amplifies market moves (airlines, tech)</td></tr>
+          <tr><td>0 ~ 1</td><td>Dampens market moves (utilities, food)</td></tr>
+          <tr><td>= 0</td><td>Unrelated to the market</td></tr>
+        </table>
+      </div>
+      <div>
+        <p><span class="eq">β<sub>P</sub> = w<sub>1</sub>β<sub>1</sub> + w<sub>2</sub>β<sub>2</sub> + …</span></p>
+        <p class="small">40% × 1.60 + 60% × 0.80 = 0.64 + 0.48 = <b>1.12</b></p>
+        <p class="small muted">Portfolio beta <b>is</b> a weighted average. Standard deviation is not.<br>A high σ does not mean a high β (gold mining firm).</p>
+      </div>
+    </div>
+    </div>
+    <div class="lw" data-l="ko" hidden>
+    <h2><span class="no">11.6</span>베타(beta, β)</h2>
     <div class="cols">
       <div>
         <p><b>핵심 질문</b> 분산 뒤에 남는 위험을 어떻게 재나?</p>
@@ -151,10 +275,23 @@
         <p class="small muted">포트폴리오 베타는 가중평균이 <b>된다</b>. 표준편차는 안 된다.<br>σ 가 크다고 β 가 큰 것은 아니다(금광회사).</p>
       </div>
     </div>
+    </div>
   </section>
 
-  <section class="slide" data-title="11.7 SML과 CAPM">
-    <h2>11.7 증권시장선(SML)과 CAPM</h2>
+<section class="slide" data-title="11.7 SML and CAPM" data-title-ko="11.7 SML과 CAPM">
+    <div class="lw" data-l="en">
+    <h2><span class="no">11.7</span>Security market line (SML) and CAPM</h2>
+    <p><span class="eq">Reward-to-risk = (E(R<sub>i</sub>) − R<sub>f</sub>) / β<sub>i</sub></span> &nbsp;→ equal for all assets in equilibrium</p>
+    <p><span class="eq">E(R<sub>i</sub>) = R<sub>f</sub> + β<sub>i</sub> × [E(R<sub>M</sub>) − R<sub>f</sub>]</span></p>
+    <table>
+      <tr><th>R<sub>f</sub> = 8%, market risk premium 7%</th><th class="r">β</th><th class="r">Offered</th><th class="r">SML required</th><th>Verdict</th></tr>
+      <tr><td>Asset A — above SML</td><td class="r">1.60</td><td class="r">22%</td><td class="r">19.2%</td><td>Undervalued</td></tr>
+      <tr><td>Asset B — below SML</td><td class="r">1.20</td><td class="r">13%</td><td class="r">16.4%</td><td>Overvalued</td></tr>
+    </table>
+    <p class="small muted" style="margin-top:20px">SML slope = market risk premium. Intercept = risk-free rate.</p>
+    </div>
+    <div class="lw" data-l="ko" hidden>
+    <h2><span class="no">11.7</span>증권시장선(SML)과 CAPM</h2>
     <p><span class="eq">Reward-to-risk = (E(R<sub>i</sub>) − R<sub>f</sub>) / β<sub>i</sub></span> &nbsp;→ 균형에서는 모든 자산이 같다</p>
     <p><span class="eq">E(R<sub>i</sub>) = R<sub>f</sub> + β<sub>i</sub> × [E(R<sub>M</sub>) − R<sub>f</sub>]</span></p>
     <table>
@@ -163,10 +300,24 @@
       <tr><td>Asset B — SML 아래</td><td class="r">1.20</td><td class="r">13%</td><td class="r">16.4%</td><td>고평가(overvalued)</td></tr>
     </table>
     <p class="small muted" style="margin-top:20px">SML 의 기울기 = 시장위험프리미엄(market risk premium). 절편 = 무위험이자율(risk-free rate).</p>
+    </div>
   </section>
 
-  <section class="slide" data-title="11.8 자본비용 · 다음 장 연결">
-    <h2>11.8 SML과 자본비용 → Ch.12</h2>
+<section class="slide" data-title="11.8 Cost of capital · link to next chapter" data-title-ko="11.8 자본비용 · 다음 장 연결">
+    <div class="lw" data-l="en">
+    <h2><span class="no">11.8</span>SML and cost of capital → Ch.12</h2>
+    <div class="flow">
+      <span>Project's β</span><i>→</i><span>SML required return</span><i>→</i><span>NPV discount rate</span><i>→</i><span>Ch.12 Cost of capital</span>
+    </div>
+    <ul>
+      <li>Project above the SML = NPV &gt; 0 — same verdict</li>
+      <li>Discount at the <b>project's β</b>, not the firm's β</li>
+      <li>Ch.12: blend cost of equity R<sub>E</sub> = R<sub>f</sub> + β<sub>E</sub>(R<sub>M</sub> − R<sub>f</sub>) with cost of debt to get <b>WACC</b> (weighted average cost of capital)</li>
+    </ul>
+    <p class="small muted">This closes the loop on where the “given” discount rate in Ch.8–9 comes from; Ch.12 extends it to the whole firm.</p>
+    </div>
+    <div class="lw" data-l="ko" hidden>
+    <h2><span class="no">11.8</span>SML과 자본비용 → Ch.12</h2>
     <div class="flow">
       <span>프로젝트의 β</span><i>→</i><span>SML 요구수익률</span><i>→</i><span>NPV 할인율</span><i>→</i><span>Ch.12 자본비용(cost of capital)</span>
     </div>
@@ -176,9 +327,23 @@
       <li>Ch.12: 자기자본비용 R<sub>E</sub> = R<sub>f</sub> + β<sub>E</sub>(R<sub>M</sub> − R<sub>f</sub>) 를 부채비용과 섞어 <b>WACC</b>(가중평균자본비용)를 만든다</li>
     </ul>
     <p class="small muted">Ch.8–9 에서 “주어진” 할인율이 어디서 오는지 여기서 닫히고, Ch.12 에서 회사 전체로 넓힌다.</p>
+    </div>
   </section>
 
-  <section class="slide" data-title="수업 전 체크리스트">
+<section class="slide" data-title="Pre-class checklist" data-title-ko="수업 전 체크리스트">
+    <div class="lw" data-l="en">
+    <h2>Pre-class checklist — pairs that get confused</h2>
+    <table>
+      <tr><th>Confused pair</th><th>How to tell them apart</th></tr>
+      <tr><td>Standard deviation σ vs beta β</td><td>σ = total risk, β = systematic risk only. Reward goes to β.</td></tr>
+      <tr><td>Systematic vs unsystematic risk</td><td>Hits the whole market (rates, economy) vs one firm only (strike, lawsuit)</td></tr>
+      <tr><td>Portfolio E(R)·β vs σ</td><td>E(R)·β: weighted average OK; σ: weighted average NOT OK (smaller)</td></tr>
+      <tr><td>Above vs below the SML</td><td>Above = undervalued (buy, price ↑), below = overvalued</td></tr>
+      <tr><td>E(R<sub>M</sub>) − R<sub>f</sub> vs β × [E(R<sub>M</sub>) − R<sub>f</sub>]</td><td>Market risk premium (slope) vs that asset's risk premium</td></tr>
+    </table>
+    <p class="small muted" style="margin-top:20px">Self-check: can you recompute the 50/50 A·B portfolio's E(R) 22.5% and σ 17.5% by hand?</p>
+    </div>
+    <div class="lw" data-l="ko" hidden>
     <h2>수업 전 체크리스트 — 헷갈리는 쌍</h2>
     <table>
       <tr><th>헷갈리는 쌍</th><th>구별 기준</th></tr>
@@ -189,6 +354,7 @@
       <tr><td>E(R<sub>M</sub>) − R<sub>f</sub> vs β × [E(R<sub>M</sub>) − R<sub>f</sub>]</td><td>시장위험프리미엄(기울기) vs 그 자산의 위험프리미엄</td></tr>
     </table>
     <p class="small muted" style="margin-top:20px">스스로 확인: A·B 반반 포트폴리오의 E(R) 22.5%, σ 17.5% 를 손으로 다시 계산할 수 있는가?</p>
+    </div>
   </section>
 
 </main>

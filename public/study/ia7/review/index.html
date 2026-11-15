@@ -1,57 +1,69 @@
 <!DOCTYPE html>
-<html lang="ko">
+<html lang="en" data-langs="en,ko">
 <head>
 <meta name="pinterest" content="nopin">
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <meta name="robots" content="noindex">
-<title>IA Ch.7 CAPM and APT — 복습 문제</title>
+<title>IA Ch.7 CAPM and APT — Review</title>
 <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Cpath d='M4 4v24h24' fill='none' stroke='%23000' stroke-width='3'/%3E%3Cpath d='M7 22L27 9' stroke='%23000' stroke-width='2.5'/%3E%3C/svg%3E">
 <link rel="stylesheet" href="/slides/deck.css">
+<link rel="stylesheet" href="/study/deck-study.css">
 <!--
-  IA Ch.7 Capital Asset Pricing and Arbitrage Pricing Theory — 복습 덱(복습 요약 12장 + 연습문제 18문제).
-  원본: IA_Chap07_students.pdf (54쪽), 정답판 Investment_Chap07_filled.pdf. 연습문제 숫자는 강의 예제 구조를 따르되 새로 바꿨다(파이썬 검산).
-  문제 장: 문제는 위, 풀이는 class="step" 블록(→ 를 누를 때마다 하나씩).
+  IA Ch.7 Capital Asset Pricing and Arbitrage Pricing Theory — review deck (12 summary slides + 18 practice problems).
+  Source: IA_Chap07_students.pdf (54 pages), answer version Investment_Chap07_filled.pdf. Practice-problem numbers follow the lecture examples' structure but were changed (checked in Python).
+  Problem slides: problem on top, solution in class="step" blocks (one per → press).
 -->
 <style>
-  .slide.rv{padding:56px 92px 40px}
-  .slide.rv h2{margin:0 0 30px;padding-left:28px;border-left-width:6px;font-size:58px}
-  .slide.rv p,.slide.rv ul,.slide.rv ol{font-size:35px;line-height:1.42}
-  .slide.rv p{margin:0 0 .45em}
-  .slide.rv li{margin:.22em 0}
-  .slide.rv h3{font-size:38px;margin:0 0 10px}
-  .slide.rv table{font-size:30px;line-height:1.3}
-  .slide.rv th,.slide.rv td{padding:7px 16px;vertical-align:top}
-  .slide.rv .cols{gap:56px}
-  .slide .eq{display:inline-block;margin:0 0 18px;padding:8px 24px;border:3px solid currentColor;font-size:37px;line-height:1.35}
-  .slide .eqs{display:flex;flex-wrap:wrap;gap:0 24px}
-  .slide.rv .note{font-size:28px;opacity:.7;line-height:1.4}
-  .slide .tag{font-size:24px;letter-spacing:.12em;opacity:.6;margin:0 0 6px}
-  .slide.qz .prob{font-size:37px;line-height:1.45;margin:0 0 12px}
-  .slide.qz .sol{font-size:33px;line-height:1.42;margin:12px 0 0;padding:2px 0 2px 22px;border-left:4px solid currentColor}
-  .slide.qz .sol b:first-child{margin-right:.4em}
-  .slide.qz .sol table{font-size:30px;margin-top:6px}
-  .slide.qz .sol th,.slide.qz .sol td{padding:4px 14px}
-  .slide.rv.big table{font-size:33px}
-  .slide.rv.big p{font-size:36px}
-  .slide .kbd{font-family:Consolas,"Cascadia Mono",Menlo,monospace;font-size:.85em;opacity:.85}
-  .slide sub,.slide sup{font-size:.68em}
+  /* components only — base typography lives in /study/deck-study.css */
+  .slide .eq{display:inline-block;margin:0 0 20px;padding:10px 26px;border:1.5px solid currentColor;font-size:31px;line-height:1.35}
+  .slide .eqs{display:flex;flex-wrap:wrap;gap:0 20px}
+  .slide.rv .note{font-size:23px;line-height:1.5;color:var(--soft)}
+  .slide .tag{font-size:19px;font-weight:600;letter-spacing:.16em;text-transform:uppercase;opacity:.5;margin:0 0 12px}
+  .slide.qz .prob{font-size:31px;line-height:1.5;margin:0 0 14px}
+  .slide.qz .sol{font-size:27px;line-height:1.45;margin:10px 0 0;padding:2px 0 2px 24px;border-left:2px solid currentColor}
+  .slide.qz .sol b:first-child{margin-right:.5em}
+  .slide.qz .sol table{font-size:23px;margin-top:6px}
+  .slide.qz .sol th,.slide.qz .sol td{padding-top:5px;padding-bottom:5px}
+  .slide.rv.big table{font-size:28px}
+  .slide.rv.big p{font-size:32px}
+  .slide .kbd{font-family:Consolas,"Cascadia Mono",Menlo,monospace;font-size:.82em;opacity:.8}
 </style>
 </head>
-<body>
+<body class="study">
 <noscript>JavaScript is required.</noscript>
 
 <main id="stage">
 
-  <!-- ───────── 표지 ───────── -->
-  <section class="slide title" data-title="표지">
+  <!-- ───────── Title ───────── -->
+  <section class="slide title" data-title="Title" data-title-ko="표지">
+    <div class="lw" data-l="en">
+    <h1>IA Ch.7<br>CAPM and APT — Review</h1>
+    <p class="sub">Capital Asset Pricing and Arbitrage Pricing Theory<br>12 summary slides · 18 practice problems (→ reveals each solution step) · Investment Analysis · Prof. G. Lee · BKM <i>Essentials of Investments</i></p>
+    <p class="hint">→ next / reveal step &nbsp;·&nbsp; O overview &nbsp;·&nbsp; D black/white &nbsp;·&nbsp; F full screen &nbsp;·&nbsp; L 한국어</p>
+    </div>
+    <div class="lw" data-l="ko" hidden>
     <h1>IA Ch.7<br>CAPM과 APT — 복습</h1>
     <p class="sub">Capital Asset Pricing and Arbitrage Pricing Theory<br>복습 요약 12장 · 연습문제 18문제 (풀이는 → 로 한 단계씩)</p>
-    <p class="hint">Investment Analysis · Prof. G. Lee · BKM <i>Essentials of Investments</i> &nbsp;·&nbsp; → ← 이동 · O 목록 · D 흰/검은 바탕</p>
+    <p class="hint">Investment Analysis · Prof. G. Lee · BKM <i>Essentials of Investments</i> &nbsp;·&nbsp; → ← 이동 · O 목록 · D 흰/검은 바탕 &nbsp;·&nbsp; L English</p>
+    </div>
   </section>
 
-  <!-- ───────── 복습 요약 ───────── -->
-  <section class="slide rv" data-title="장 전체 지도">
+<section class="slide rv" data-title="Chapter map" data-title-ko="장 전체 지도">
+    <div class="lw" data-l="en">
+    <h2>Chapter map — one equation, revisited three times</h2>
+    <table>
+      <tr><th>Section</th><th>Key question</th><th>Key result</th></tr>
+      <tr><td>7.1 CAPM</td><td>If everyone does the Ch.6 optimization, what must expected returns be?</td><td>E(r<sub>i</sub>) = r<sub>f</sub> + β<sub>i</sub>[E(r<sub>M</sub>) − r<sub>f</sub>] · SML · alpha (α)</td></tr>
+      <tr><td>7.2 Index model</td><td>How do we estimate the unobservable expectations?</td><td>Excess-return regression = SCL, slope β, R²</td></tr>
+      <tr><td>7.3 CAPM and the real world</td><td>Can it be tested? Does it fit the data?</td><td>Roll's critique · SML too flat · anomalies</td></tr>
+      <tr><td>7.4 Multifactor models</td><td>Is the market the only risk factor?</td><td>Fama-French 3 factors (SMB, HML) · Carhart · FF5</td></tr>
+      <tr><td>7.5 APT</td><td>Can we get the same equation with much weaker assumptions?</td><td>No arbitrage → E(r) = r<sub>f</sub> + Σβ<sub>k</sub>RP<sub>k</sub></td></tr>
+    </table>
+    <p style="margin-top:22px">Flow: <b>Theory (7.1)</b> → <b>Estimation (7.2)</b> → <b>Tests &amp; limits (7.3)</b> → <b>More factors (7.4)</b> → <b>Weaker assumptions (7.5)</b></p>
+    <p class="note">Ch.6: "given expected returns, what is my optimal portfolio?" (input). Ch.7: "if everyone does that, what are expected returns?" (equilibrium output)</p>
+    </div>
+    <div class="lw" data-l="ko" hidden>
     <h2>장 전체 지도 — 한 줄의 식을 세 번 다시 본다</h2>
     <table>
       <tr><th>절</th><th>핵심 질문</th><th>핵심 결과</th></tr>
@@ -63,9 +75,40 @@
     </table>
     <p style="margin-top:22px">흐름: <b>이론(7.1)</b> → <b>추정(7.2)</b> → <b>검증·한계(7.3)</b> → <b>요인 추가(7.4)</b> → <b>가정 완화(7.5)</b></p>
     <p class="note">Ch.6 은 "기대수익률이 주어지면 내 최적 포트폴리오는?"(입력), Ch.7 은 "모두가 그렇게 하면 기대수익률은?"(균형의 결과물)</p>
+    </div>
   </section>
 
-  <section class="slide rv" data-title="7.1 CAPM 가정과 세 결과">
+<section class="slide rv" data-title="7.1 CAPM assumptions and three results" data-title-ko="7.1 CAPM 가정과 세 결과">
+    <div class="lw" data-l="en">
+    <p class="tag">7.1 THE CAPM</p>
+    <h2>Assumptions and three results</h2>
+    <div class="cols">
+      <div>
+        <h3>Investor assumptions</h3>
+        <ul>
+          <li>Look only at mean and variance (Markowitz)</li>
+          <li>Same horizon</li>
+          <li>Same estimates — homogeneous expectations</li>
+          <li>Price takers</li>
+        </ul>
+        <h3 style="margin-top:16px">Market assumptions</h3>
+        <ul>
+          <li>All assets tradable and divisible; borrow and lend at one r<sub>f</sub></li>
+          <li>No taxes (or identical) · no transaction costs</li>
+        </ul>
+        <p class="note">Judge a model by the accuracy of its predictions, not the realism of its assumptions.</p>
+      </div>
+      <div>
+        <h3>Result 1 · Everyone holds market portfolio M</h3>
+        <p>Same frontier + same r<sub>f</sub> → same tangency portfolio = <b>value-weighted</b> M. Only the mix of M and r<sub>f</sub> differs → everyone is on the <b>CML</b>.</p>
+        <h3>Result 2 · Passive strategy is efficient</h3>
+        <p>Mutual fund theorem: an index fund plus T-bills is enough. Passive investors are free-riders.</p>
+        <h3>Result 3 · Market risk premium</h3>
+        <p class="eq">E(r<sub>M</sub>) − r<sub>f</sub> = Ā · σ<sub>M</sub><sup>2</sup></p>
+      </div>
+    </div>
+    </div>
+    <div class="lw" data-l="ko" hidden>
     <p class="tag">7.1 THE CAPM</p>
     <h2>가정(assumptions)과 세 가지 결과(results)</h2>
     <div class="cols">
@@ -93,9 +136,34 @@
         <p class="eq">E(r<sub>M</sub>) − r<sub>f</sub> = Ā · σ<sub>M</sub><sup>2</sup></p>
       </div>
     </div>
+    </div>
   </section>
 
-  <section class="slide rv" data-title="7.1 베타와 기대수익률–베타 관계">
+<section class="slide rv" data-title="7.1 Beta and the expected return–beta relationship" data-title-ko="7.1 베타와 기대수익률–베타 관계">
+    <div class="lw" data-l="en">
+    <p class="tag">7.1 THE CAPM</p>
+    <h2>Beta and the expected return–beta relationship</h2>
+    <div class="eqs">
+      <p class="eq">β<sub>i</sub> = Cov(r<sub>i</sub>, r<sub>M</sub>) / σ<sub>M</sub><sup>2</sup> = ρ<sub>iM</sub> σ<sub>i</sub> / σ<sub>M</sub></p>
+      <p class="eq">E(r<sub>i</sub>) = r<sub>f</sub> + β<sub>i</sub> [E(r<sub>M</sub>) − r<sub>f</sub>]</p>
+    </div>
+    <div class="cols wide-right">
+      <div>
+        <p><b>Why β:</b> in a diversified portfolio, a stock's risk is only its contribution to market variance, w<sub>i</sub>·Cov(r<sub>i</sub>, r<sub>M</sub>).</p>
+        <p>r<sub>f</sub> = time value · β<sub>i</sub> = <b>quantity</b> of risk · E(r<sub>M</sub>) − r<sub>f</sub> = <b>price</b> of risk (same for all assets)</p>
+        <p class="note">The asset's own σ is not in the equation — diversifiable risk is not rewarded.</p>
+      </div>
+      <table>
+        <tr><th>β</th><th>How to read it</th></tr>
+        <tr><td>β &gt; 1</td><td>Aggressive — amplifies market moves</td></tr>
+        <tr><td>β = 1</td><td>Moves 1:1 with market (market portfolio)</td></tr>
+        <tr><td>0 &lt; β &lt; 1</td><td>Defensive — utilities, consumer staples</td></tr>
+        <tr><td>β = 0</td><td>No systematic risk → only r<sub>f</sub>, even if σ is large</td></tr>
+        <tr><td>β &lt; 0</td><td>Hedge asset → E(r) &lt; r<sub>f</sub></td></tr>
+      </table>
+    </div>
+    </div>
+    <div class="lw" data-l="ko" hidden>
     <p class="tag">7.1 THE CAPM</p>
     <h2>베타(beta)와 기대수익률–베타 관계</h2>
     <div class="eqs">
@@ -117,9 +185,25 @@
         <tr><td>β &lt; 0</td><td>헤지 자산 → E(r) &lt; r<sub>f</sub></td></tr>
       </table>
     </div>
+    </div>
   </section>
 
-  <section class="slide rv big" data-title="7.1 SML vs CML">
+<section class="slide rv big" data-title="7.1 SML vs CML" data-title-ko="7.1 SML vs CML">
+    <div class="lw" data-l="en">
+    <p class="tag">7.1 THE CAPM</p>
+    <h2>SML vs CML — don't mix them up</h2>
+    <table>
+      <tr><th></th><th>Capital Market Line (CML)</th><th>Security Market Line (SML)</th></tr>
+      <tr><td>Horizontal axis</td><td>Standard deviation σ (total risk)</td><td>Beta β (systematic risk)</td></tr>
+      <tr><td>What plots on it</td><td>Efficient portfolios only (mixes of M and r<sub>f</sub>)</td><td>All securities and portfolios (efficient or not)</td></tr>
+      <tr><td>Slope</td><td>[E(r<sub>M</sub>) − r<sub>f</sub>] / σ<sub>M</sub> = Sharpe ratio of M</td><td>E(r<sub>M</sub>) − r<sub>f</sub> = market risk premium</td></tr>
+      <tr><td>Below the line</td><td>Inefficient — normal for an individual stock</td><td>Overpriced — a true mispricing signal</td></tr>
+      <tr><td>Use</td><td>Choosing my complete portfolio</td><td>Asset pricing · hurdle rate</td></tr>
+    </table>
+    <p style="margin-top:22px">SML: intercept r<sub>f</sub>, slope MRP, always passes through the point (β = 1, E(r<sub>M</sub>)).</p>
+    <p class="note">If only r<sub>f</sub> rises and E(r<sub>M</sub>) is unchanged: intercept↑, slope↓ → SML pivots around β = 1.</p>
+    </div>
+    <div class="lw" data-l="ko" hidden>
     <p class="tag">7.1 THE CAPM</p>
     <h2>SML 과 CML — 헷갈리지 말 것</h2>
     <table>
@@ -132,9 +216,33 @@
     </table>
     <p style="margin-top:22px">SML: 절편 r<sub>f</sub>, 기울기 MRP, 반드시 점 (β = 1, E(r<sub>M</sub>)) 을 지난다.</p>
     <p class="note">r<sub>f</sub> 만 오르고 E(r<sub>M</sub>) 이 그대로면 절편↑ 기울기↓ → SML 이 β = 1 을 축으로 돈다.</p>
+    </div>
   </section>
 
-  <section class="slide rv" data-title="7.1 알파와 포트폴리오 베타">
+<section class="slide rv" data-title="7.1 Alpha and portfolio beta" data-title-ko="7.1 알파와 포트폴리오 베타">
+    <div class="lw" data-l="en">
+    <p class="tag">7.1 THE CAPM</p>
+    <h2>Alpha decision rule and portfolio beta</h2>
+    <div class="eqs">
+      <p class="eq">α = E(r)<sub>forecast</sub> − [r<sub>f</sub> + β(E(r<sub>M</sub>) − r<sub>f</sub>)]</p>
+      <p class="eq">E(r)<sub>forecast</sub> = [E(P<sub>1</sub>) − P<sub>0</sub> + D<sub>1</sub>] / P<sub>0</sub></p>
+    </div>
+    <div class="cols">
+      <table>
+        <tr><th>α</th><th>Position</th><th>Verdict → adjustment</th></tr>
+        <tr><td>α &gt; 0</td><td>Above SML</td><td>Underpriced BUY → price↑, E(r)↓</td></tr>
+        <tr><td>α &lt; 0</td><td>Below SML</td><td>Overpriced SELL → price↓, E(r)↑</td></tr>
+        <tr><td>α = 0</td><td>On SML</td><td>Fairly priced (all zero in equilibrium)</td></tr>
+      </table>
+      <div>
+        <p>Price that gives α = 0: P<sub>0</sub> = [E(P<sub>1</sub>) + D<sub>1</sub>] / (1 + required return)</p>
+        <p class="eq">β<sub>P</sub> = Σ w<sub>i</sub> β<sub>i</sub></p>
+        <p>Unlike variance, β is a <b>weighted average</b> → E(r<sub>P</sub>) = r<sub>f</sub> + β<sub>P</sub>·MRP (equals the weighted average of individual CAPM returns)</p>
+        <p>Hitting a target β: portfolio weight w = β<sub>target</sub> / β<sub>P</sub>, the remaining 1 − w in r<sub>f</sub> (negative = borrow)</p>
+      </div>
+    </div>
+    </div>
+    <div class="lw" data-l="ko" hidden>
     <p class="tag">7.1 THE CAPM</p>
     <h2>알파(alpha) 판단 규칙과 포트폴리오 베타</h2>
     <div class="eqs">
@@ -155,9 +263,33 @@
         <p>목표 β 맞추기: 포트폴리오 비중 w = β<sub>target</sub> / β<sub>P</sub>, 나머지 1 − w 는 r<sub>f</sub> (음수면 차입)</p>
       </div>
     </div>
+    </div>
   </section>
 
-  <section class="slide rv" data-title="7.2 지수모형·SCL·R²">
+<section class="slide rv" data-title="7.2 Index model, SCL, R²" data-title-ko="7.2 지수모형·SCL·R²">
+    <div class="lw" data-l="en">
+    <p class="tag">7.2 THE CAPM AND INDEX MODELS</p>
+    <h2>Index model, SCL, and risk decomposition</h2>
+    <div class="cols">
+      <div>
+        <p class="eq">R<sub>i,t</sub> = α<sub>i</sub> + β<sub>i</sub> R<sub>M,t</sub> + e<sub>i,t</sub></p>
+        <ul>
+          <li>R = <b>excess return</b> (r − r<sub>f</sub>) — observable, estimated by OLS (typically 60 months)</li>
+          <li>Regression line = security characteristic line (SCL): slope β, intercept α (CAPM predicts α = 0), vertical distance = residual e</li>
+          <li>t = estimate / standard error; significant if p &lt; 0.05 · 95% interval ≈ β ± 2·se</li>
+          <li>Adjusted beta β<sub>adj</sub> = (2/3)β<sub>sample</sub> + 1/3 (pulled toward 1)</li>
+        </ul>
+      </div>
+      <div>
+        <p class="eq">σ<sub>i</sub><sup>2</sup> = β<sub>i</sub><sup>2</sup>σ<sub>M</sub><sup>2</sup> + σ<sup>2</sup>(e<sub>i</sub>)</p>
+        <p>Total risk = systematic + firm-specific</p>
+        <p class="eq">R<sup>2</sup> = β<sup>2</sup>σ<sub>M</sub><sup>2</sup> / σ<sub>i</sub><sup>2</sup></p>
+        <p>R² = systematic share of variance. Individual stocks 0.20–0.40, diversified funds above 0.90</p>
+        <p class="note">Lecture example: β = 1.20, σ<sub>M</sub> = 5%, σ(e) = 6% → 36 + 36 = 72 (%²), R² = 0.50</p>
+      </div>
+    </div>
+    </div>
+    <div class="lw" data-l="ko" hidden>
     <p class="tag">7.2 THE CAPM AND INDEX MODELS</p>
     <h2>지수모형(index model), SCL, 위험 분해</h2>
     <div class="cols">
@@ -178,9 +310,36 @@
         <p class="note">강의 예: β = 1.20, σ<sub>M</sub> = 5%, σ(e) = 6% → 36 + 36 = 72 (%²), R² = 0.50</p>
       </div>
     </div>
+    </div>
   </section>
 
-  <section class="slide rv" data-title="7.3 Roll's critique·평평한 SML">
+<section class="slide rv" data-title="7.3 Roll's critique, flat SML" data-title-ko="7.3 Roll's critique·평평한 SML">
+    <div class="lw" data-l="en">
+    <p class="tag">7.3 THE CAPM AND THE REAL WORLD</p>
+    <h2>Roll's critique and the too-flat SML</h2>
+    <div class="cols">
+      <div>
+        <h3>Roll (1977)</h3>
+        <ul>
+          <li>The only testable implication = the <b>true</b> market portfolio is mean-variance efficient</li>
+          <li>The true M (including bonds, real estate, human capital) is unobservable</li>
+          <li>Testing with a proxy (e.g., S&amp;P 500) = testing the proxy's efficiency</li>
+          <li>With an efficient proxy the β–return relation holds like an <b>identity</b> → circular</li>
+        </ul>
+        <p class="note">Response: treat the index model as a useful approximation and judge it by explanatory and predictive power</p>
+      </div>
+      <div>
+        <h3>Evidence: the SML is too flat</h3>
+        <ul>
+          <li>Intercept too high → low-β assets earned <b>more</b> than CAPM predicts</li>
+          <li>Slope too flat → high-β assets earned <b>less</b> than predicted</li>
+          <li>β is not everything → size, value, momentum</li>
+        </ul>
+        <p>Low-beta anomaly → betting-against-beta, low-volatility funds</p>
+      </div>
+    </div>
+    </div>
+    <div class="lw" data-l="ko" hidden>
     <p class="tag">7.3 THE CAPM AND THE REAL WORLD</p>
     <h2>Roll's critique 와 너무 평평한 SML</h2>
     <div class="cols">
@@ -204,9 +363,24 @@
         <p>저베타 이상현상(low-beta anomaly) → betting-against-beta, 저변동성 펀드</p>
       </div>
     </div>
+    </div>
   </section>
 
-  <section class="slide rv big" data-title="7.3 이상현상과 CAPM 이 살아남는 이유">
+<section class="slide rv big fit" data-title="7.3 Anomalies and why the CAPM survives" data-title-ko="7.3 이상현상과 CAPM 이 살아남는 이유">
+    <div class="lw" data-l="en">
+    <p class="tag">7.3 THE CAPM AND THE REAL WORLD</p>
+    <h2>Anomalies and why the CAPM survives</h2>
+    <table>
+      <tr><th>Anomaly</th><th>What it is (what β can't explain)</th><th>Source</th></tr>
+      <tr><td>Size</td><td>Small caps earn high returns relative to β</td><td>Banz (1981)</td></tr>
+      <tr><td>Value</td><td>High book-to-market (B/M) value stocks &gt; low-B/M growth stocks</td><td>Fama-French (1992)</td></tr>
+      <tr><td>Momentum</td><td>Past 3–12-month winners keep winning for a few months</td><td>Jegadeesh-Titman (1993)</td></tr>
+      <tr><td>Profitability / investment</td><td>Firms with high profitability and conservative investment earn more</td><td>Fama-French (2015)</td></tr>
+    </table>
+    <p style="margin-top:18px">Two readings: (a) market inefficiency → mispricing &nbsp;/&nbsp; (b) efficient market, multiple risk factors → <b>7.4 follows (b)</b></p>
+    <p>Still, the CAPM: right qualitative conclusion (only systematic risk is rewarded) · disciplined benchmark · simple and hard to game (rate hearings, courts) · rival models' factor premiums are also unstable</p>
+    </div>
+    <div class="lw" data-l="ko" hidden>
     <p class="tag">7.3 THE CAPM AND THE REAL WORLD</p>
     <h2>이상현상(anomalies)과 CAPM 이 살아남는 이유</h2>
     <table>
@@ -218,9 +392,31 @@
     </table>
     <p style="margin-top:18px">두 해석: (a) 시장 비효율 → 가격 오류 &nbsp;/&nbsp; (b) 시장은 효율적, 위험 요인이 여럿 → <b>7.4 는 (b)</b></p>
     <p>그래도 CAPM: 옳은 정성적 결론(체계적 위험만 보상) · 규율 있는 기준(benchmark) · 단순하고 조작하기 어렵다(요율 심사·법정) · 경쟁 모형도 요인 프리미엄이 불안정</p>
+    </div>
   </section>
 
-  <section class="slide rv" data-title="7.4 다요인 모형">
+<section class="slide rv" data-title="7.4 Multifactor models" data-title-ko="7.4 다요인 모형">
+    <div class="lw" data-l="en">
+    <p class="tag">7.4 MULTIFACTOR MODELS</p>
+    <h2>Multifactor models — Fama-French and beyond</h2>
+    <p class="eq">E(r<sub>i</sub>) − r<sub>f</sub> = β<sub>M</sub>[E(r<sub>M</sub>) − r<sub>f</sub>] + β<sub>SMB</sub>E(SMB) + β<sub>HML</sub>E(HML)</p>
+    <div class="cols">
+      <table>
+        <tr><th>Factor / loading</th><th>Meaning</th></tr>
+        <tr><td>SMB (Small Minus Big)</td><td>Small-cap − large-cap return</td></tr>
+        <tr><td>HML (High Minus Low)</td><td>High B/M (value) − low B/M (growth)</td></tr>
+        <tr><td>β<sub>SMB</sub> &gt; 0 / &lt; 0</td><td>Small-cap tilt / large-cap tilt</td></tr>
+        <tr><td>β<sub>HML</sub> &gt; 0 / &lt; 0</td><td>Value tilt / growth tilt</td></tr>
+      </table>
+      <ul>
+        <li><b>Carhart 4 factors (1997)</b>: + momentum UMD — standard for fund performance evaluation</li>
+        <li><b>FF 5 factors (2015)</b>: + profitability RMW, investment CMA → HML nearly redundant in US data</li>
+        <li>Factor zoo: hundreds of factors, weaker out of sample and after publication</li>
+        <li>CAPM α &gt; 0 but FF α &lt; 0 → not "skill" but a small-cap/value tilt (cheap to buy via ETFs)</li>
+      </ul>
+    </div>
+    </div>
+    <div class="lw" data-l="ko" hidden>
     <p class="tag">7.4 MULTIFACTOR MODELS</p>
     <h2>다요인 모형 — Fama-French 와 그 너머</h2>
     <p class="eq">E(r<sub>i</sub>) − r<sub>f</sub> = β<sub>M</sub>[E(r<sub>M</sub>) − r<sub>f</sub>] + β<sub>SMB</sub>E(SMB) + β<sub>HML</sub>E(HML)</p>
@@ -239,9 +435,32 @@
         <li>CAPM α &gt; 0 인데 FF α &lt; 0 → "실력"이 아니라 소형·가치 기울기(ETF 로 싸게 살 수 있음)</li>
       </ul>
     </div>
+    </div>
   </section>
 
-  <section class="slide rv" data-title="7.5 APT 와 차익거래">
+<section class="slide rv" data-title="7.5 APT and arbitrage" data-title-ko="7.5 APT 와 차익거래">
+    <div class="lw" data-l="en">
+    <p class="tag">7.5 ARBITRAGE PRICING THEORY</p>
+    <h2>Arbitrage and the APT</h2>
+    <div class="cols">
+      <div>
+        <p><b>Arbitrage = </b>zero net investment + zero risk (factor exposures offset) + a sure profit in every state. "High expected return" or α &gt; 0 is not arbitrage.</p>
+        <h3>Steps with well-diversified portfolios</h3>
+        <ol>
+          <li>Same-β benchmark: w in M, 1 − w in T-bills (w = β)</li>
+          <li>Compare E(r) → buy the higher, short the lower (same amount)</li>
+          <li>Net investment 0, exposure 0, profit = return gap × amount</li>
+          <li>Scale up without limit → prices adjust → gap vanishes</li>
+        </ol>
+      </div>
+      <div>
+        <p class="eq">E(r<sub>i</sub>) = r<sub>f</sub> + β<sub>i1</sub>RP<sub>1</sub> + … + β<sub>ik</sub>RP<sub>k</sub></p>
+        <p>A factor premium can be <b>negative</b>: exposure that pays in bad states (e.g., unexpected inflation) is insurance → accept a lower return.</p>
+        <p class="note">Lecture Ex.12: 4% + 1.20(6%) + 0.70(−7%) = 6.3% (11.2% using the production factor only)</p>
+      </div>
+    </div>
+    </div>
+    <div class="lw" data-l="ko" hidden>
     <p class="tag">7.5 ARBITRAGE PRICING THEORY</p>
     <h2>차익거래(arbitrage)와 APT</h2>
     <div class="cols">
@@ -261,9 +480,24 @@
         <p class="note">강의 Ex.12: 4% + 1.20(6%) + 0.70(−7%) = 6.3% (생산 요인만 쓰면 11.2%)</p>
       </div>
     </div>
+    </div>
   </section>
 
-  <section class="slide rv big" data-title="7.5 APT vs CAPM">
+<section class="slide rv big" data-title="7.5 APT vs CAPM" data-title-ko="7.5 APT vs CAPM">
+    <div class="lw" data-l="en">
+    <p class="tag">7.5 ARBITRAGE PRICING THEORY</p>
+    <h2>APT vs CAPM</h2>
+    <table>
+      <tr><th></th><th>CAPM</th><th>APT</th></tr>
+      <tr><td>Key assumption</td><td>All investors optimize mean-variance</td><td>No arbitrage in a factor-model world</td></tr>
+      <tr><td>Who must be rational</td><td>Virtually all investors</td><td>A few well-funded arbitrageurs</td></tr>
+      <tr><td>Number of factors</td><td>Exactly one: the market portfolio</td><td>Any number — theory is silent</td></tr>
+      <tr><td>Applies to</td><td>All securities, exactly</td><td>Well-diversified portfolios</td></tr>
+      <tr><td>Weakness</td><td>Strong assumptions, empirically rejected</td><td>Silent on which factors matter</td></tr>
+    </table>
+    <p style="margin-top:22px">Same form of conclusion: expected return = r<sub>f</sub> + Σ(factor beta × factor premium). The CAPM looks like the special case with the market as the only factor.</p>
+    </div>
+    <div class="lw" data-l="ko" hidden>
     <p class="tag">7.5 ARBITRAGE PRICING THEORY</p>
     <h2>APT 대 CAPM</h2>
     <table>
@@ -275,9 +509,25 @@
       <tr><td>약점</td><td>강한 가정, 실증적으로 기각</td><td>어떤 요인이 중요한지 침묵</td></tr>
     </table>
     <p style="margin-top:22px">결론은 같은 꼴: 기대수익률 = r<sub>f</sub> + Σ(요인 베타 × 요인 프리미엄). CAPM 은 요인이 시장 하나인 특수한 경우처럼 보인다.</p>
+    </div>
   </section>
 
-  <section class="slide rv big" data-title="헷갈리는 쌍 비교표">
+<section class="slide rv big" data-title="Easily confused pairs" data-title-ko="헷갈리는 쌍 비교표">
+    <div class="lw" data-l="en">
+    <h2>Easily confused pairs</h2>
+    <table>
+      <tr><th>Pair</th><th>How to tell them apart</th></tr>
+      <tr><td>σ vs β</td><td>σ = total risk (CML axis) · β = systematic risk (SML axis, drives pricing)</td></tr>
+      <tr><td>Below CML vs below SML</td><td>Inefficient (normal for a single stock) vs overpriced (SELL signal)</td></tr>
+      <tr><td>SCL vs SML</td><td>One stock's time-series regression line (slope β) vs the E(r)–β line for all assets (slope MRP)</td></tr>
+      <tr><td>β vs R²</td><td>Sensitivity to the market vs systematic share of variance (β can be large while R² is low)</td></tr>
+      <tr><td>Cov vs ρ</td><td>β = Cov/σ<sub>M</sub><sup>2</sup> = ρσ<sub>i</sub>/σ<sub>M</sub> — Cov already contains σ<sub>i</sub>σ<sub>M</sub></td></tr>
+      <tr><td>CAPM α vs FF α</td><td>Different benchmarks: remove the factor tilts and the "skill" may vanish</td></tr>
+      <tr><td>α &gt; 0 vs arbitrage</td><td>α = expected excess return with risk remaining · arbitrage = zero net investment, zero risk, sure profit</td></tr>
+      <tr><td>% vs decimal</td><td>Ā σ<sub>M</sub><sup>2</sup> in decimals (2 × 0.20² = 0.08) · variance may be in %², but don't mix units</td></tr>
+    </table>
+    </div>
+    <div class="lw" data-l="ko" hidden>
     <h2>헷갈리는 쌍 비교표</h2>
     <table>
       <tr><th>쌍</th><th>구분하는 기준</th></tr>
@@ -290,33 +540,70 @@
       <tr><td>α &gt; 0 대 차익거래</td><td>α 는 위험이 남은 기대 초과수익 · 차익거래는 순투자 0·위험 0·확실한 이익</td></tr>
       <tr><td>% 대 소수</td><td>Ā σ<sub>M</sub><sup>2</sup> 는 소수로 (2 × 0.20² = 0.08) · 분산은 %² 로 써도 되지만 단위를 섞지 말 것</td></tr>
     </table>
+    </div>
   </section>
 
-  <!-- ───────── 연습문제 ───────── -->
-  <section class="slide section" data-title="연습문제">
+<section class="slide section" data-title="Practice problems" data-title-ko="연습문제">
+    <div class="lw" data-l="en">
+    <h1>Practice problems</h1>
+    <p class="sub" style="margin:40px 0 0 6px;font-size:44px;opacity:.72">18 problems · solve first, then → for each solution step</p>
+    </div>
+    <div class="lw" data-l="ko" hidden>
     <h1>연습문제</h1>
     <p class="sub" style="margin:40px 0 0 6px;font-size:44px;opacity:.72">18문제 · 문제를 먼저 풀고 → 로 풀이를 한 단계씩</p>
+    </div>
   </section>
 
-  <section class="slide rv qz" data-title="Q1 · 시장위험프리미엄">
-    <h2>Q1 · 시장위험프리미엄</h2>
+<section class="slide rv qz" data-title="Q1 · Market risk premium" data-title-ko="Q1 · 시장위험프리미엄">
+    <div class="lw" data-l="en">
+    <h2><span class="no">Q1</span>Market risk premium</h2>
+    <p class="prob">Investors' average risk aversion Ā = 3 and the market portfolio's standard deviation σ<sub>M</sub> = 18%. (a) What is the equilibrium market risk premium? (b) If only σ<sub>M</sub> rises to 27%, the premium becomes how many times larger?</p>
+    <div class="sol step"><b>Formula</b> E(r<sub>M</sub>) − r<sub>f</sub> = Ā · σ<sub>M</sub><sup>2</sup> (σ in decimals)</div>
+    <div class="sol step"><b>(a)</b> 3 × 0.18<sup>2</sup> = 3 × 0.0324 = 0.0972 = <b>9.72%</b> <span class="kbd">· BA II Plus: 0.18 x² × 3 = 0.0972</span></div>
+    <div class="sol step"><b>(b)</b> 3 × 0.27<sup>2</sup> = 0.2187 = 21.87% → (27/18)<sup>2</sup> = <b>2.25×</b>. The premium is proportional to the <b>variance</b>, not σ (σ 1.5× → 2.25×).</div>
+    </div>
+    <div class="lw" data-l="ko" hidden>
+    <h2><span class="no">Q1</span>시장위험프리미엄</h2>
     <p class="prob">투자자들의 평균 위험회피계수 Ā = 3, 시장 포트폴리오의 표준편차 σ<sub>M</sub> = 18% 이다. (a) 균형 시장위험프리미엄(market risk premium)은? (b) σ<sub>M</sub> 만 27% 로 오르면 프리미엄은 몇 배가 되나?</p>
     <div class="sol step"><b>공식</b> E(r<sub>M</sub>) − r<sub>f</sub> = Ā · σ<sub>M</sub><sup>2</sup> (σ 는 소수로)</div>
     <div class="sol step"><b>(a)</b> 3 × 0.18<sup>2</sup> = 3 × 0.0324 = 0.0972 = <b>9.72%</b> <span class="kbd">· BA II Plus: 0.18 x² × 3 = 0.0972</span></div>
     <div class="sol step"><b>(b)</b> 3 × 0.27<sup>2</sup> = 0.2187 = 21.87% → (27/18)<sup>2</sup> = <b>2.25배</b>. 프리미엄은 σ 가 아니라 <b>분산</b>에 비례한다(σ 1.5배 → 2.25배).</div>
+    </div>
   </section>
 
-  <section class="slide rv qz" data-title="Q2 · 베타 계산 (두 공식)">
-    <h2>Q2 · 베타 계산 (두 공식)</h2>
+<section class="slide rv qz" data-title="Q2 · Computing beta (two formulas)" data-title-ko="Q2 · 베타 계산 (두 공식)">
+    <div class="lw" data-l="en">
+    <h2><span class="no">Q2</span>Computing beta (two formulas)</h2>
+    <p class="prob">Stock K: σ<sub>K</sub> = 40%, σ<sub>M</sub> = 16%, ρ<sub>KM</sub> = 0.48. Find the covariance Cov(r<sub>K</sub>, r<sub>M</sub>) and β<sub>K</sub>, and verify with the second formula. K is far more volatile than the market, so how do you read its β?</p>
+    <div class="sol step"><b>Step 1</b> Cov = ρσ<sub>K</sub>σ<sub>M</sub> = 0.48 × 0.40 × 0.16 = <b>0.03072</b> (= 307.2 %²)</div>
+    <div class="sol step"><b>Step 2</b> β<sub>K</sub> = Cov / σ<sub>M</sub><sup>2</sup> = 0.03072 / 0.0256 = <b>1.20</b> <span class="kbd">· BA II Plus: 0.16 x² = 0.0256 → 0.03072 ÷ 0.0256 = 1.2</span></div>
+    <div class="sol step"><b>Check</b> β = ρσ<sub>K</sub>/σ<sub>M</sub> = 0.48 × 40 / 16 = 1.20 ✓</div>
+    <div class="sol step"><b>Interpretation</b> σ<sub>K</sub>/σ<sub>M</sub> = 2.5× but ρ = 0.48, so β is 1.20 — aggressive, yet much of the total volatility is firm-specific risk, which is not priced.</div>
+    </div>
+    <div class="lw" data-l="ko" hidden>
+    <h2><span class="no">Q2</span>베타 계산 (두 공식)</h2>
     <p class="prob">주식 K: σ<sub>K</sub> = 40%, σ<sub>M</sub> = 16%, ρ<sub>KM</sub> = 0.48. 공분산 Cov(r<sub>K</sub>, r<sub>M</sub>) 과 β<sub>K</sub> 를 구하고 두 번째 공식으로 확인하라. K 는 시장보다 훨씬 변동성이 큰데 β 는 어떻게 읽나?</p>
     <div class="sol step"><b>Step 1</b> Cov = ρσ<sub>K</sub>σ<sub>M</sub> = 0.48 × 0.40 × 0.16 = <b>0.03072</b> (= 307.2 %²)</div>
     <div class="sol step"><b>Step 2</b> β<sub>K</sub> = Cov / σ<sub>M</sub><sup>2</sup> = 0.03072 / 0.0256 = <b>1.20</b> <span class="kbd">· BA II Plus: 0.16 x² = 0.0256 → 0.03072 ÷ 0.0256 = 1.2</span></div>
     <div class="sol step"><b>확인</b> β = ρσ<sub>K</sub>/σ<sub>M</sub> = 0.48 × 40 / 16 = 1.20 ✓</div>
     <div class="sol step"><b>해석</b> σ<sub>K</sub>/σ<sub>M</sub> = 2.5배지만 ρ = 0.48 이라 β 는 1.20 — 공격적(aggressive)이지만 총변동성의 상당 부분은 기업 고유 위험이라 가격에 반영되지 않는다.</div>
+    </div>
   </section>
 
-  <section class="slide rv qz" data-title="Q3 · CAPM 요구수익률 표">
-    <h2>Q3 · CAPM 요구수익률 표</h2>
+<section class="slide rv qz" data-title="Q3 · CAPM required return table" data-title-ko="Q3 · CAPM 요구수익률 표">
+    <div class="lw" data-l="en">
+    <h2><span class="no">Q3</span>CAPM required return table</h2>
+    <p class="prob">r<sub>f</sub> = 3%, E(r<sub>M</sub>) = 11%. Find the CAPM required return for assets with β of 0.50, 0.90, 1.00, 1.50, −0.25, and 0.</p>
+    <div class="sol step"><b>Step 1</b> Market risk premium = 11% − 3% = 8% → E(r) = 3% + β × 8%</div>
+    <div class="sol step"><table>
+      <tr><th>β</th><th>0.50</th><th>0.90</th><th>1.00</th><th>1.50</th><th>−0.25</th><th>0</th></tr>
+      <tr><td>Calc.</td><td>3 + 0.5(8)</td><td>3 + 0.9(8)</td><td>3 + 1.0(8)</td><td>3 + 1.5(8)</td><td>3 − 0.25(8)</td><td>3 + 0</td></tr>
+      <tr><th>E(r)</th><th>7.0%</th><th>10.2%</th><th>11.0%</th><th>15.0%</th><th>1.0%</th><th>3.0%</th></tr>
+    </table></div>
+    <div class="sol step"><b>Reading</b> β = 1 earns the market's 11%. A hedge asset with β &lt; 0 is held even at 1%, below r<sub>f</sub>. All points lie on one SML.</div>
+    </div>
+    <div class="lw" data-l="ko" hidden>
+    <h2><span class="no">Q3</span>CAPM 요구수익률 표</h2>
     <p class="prob">r<sub>f</sub> = 3%, E(r<sub>M</sub>) = 11%. β 가 0.50, 0.90, 1.00, 1.50, −0.25, 0 인 자산의 CAPM 요구수익률을 구하라.</p>
     <div class="sol step"><b>Step 1</b> 시장위험프리미엄 = 11% − 3% = 8% → E(r) = 3% + β × 8%</div>
     <div class="sol step"><table>
@@ -325,45 +612,98 @@
       <tr><th>E(r)</th><th>7.0%</th><th>10.2%</th><th>11.0%</th><th>15.0%</th><th>1.0%</th><th>3.0%</th></tr>
     </table></div>
     <div class="sol step"><b>읽기</b> β = 1 은 시장과 같은 11%. β &lt; 0 인 헤지 자산은 r<sub>f</sub> 보다 낮은 1% 로도 보유된다. 모든 점이 하나의 SML 위에 있다.</div>
+    </div>
   </section>
 
-  <section class="slide rv qz" data-title="Q4 · SML 과 CML 로 판단하기">
-    <h2>Q4 · SML 과 CML 로 판단하기</h2>
+<section class="slide rv qz" data-title="Q4 · Judging with the SML and CML" data-title-ko="Q4 · SML 과 CML 로 판단하기">
+    <div class="lw" data-l="en">
+    <h2><span class="no">Q4</span>Judging with the SML and CML</h2>
+    <p class="prob">Stock X's forecast expected return is 1.5 percentage points above what the SML requires. Yet in the (σ, E(r)) plot, X lies well below the CML. (a) Is X overpriced or underpriced? (b) What does being below the CML mean? (c) Which line do you use to judge price?</p>
+    <div class="sol step"><b>(a)</b> 1.5 pp above the SML → α = +1.5% → <b>underpriced, BUY</b>. Buying pressure: price↑, expected return↓ → back to the SML.</div>
+    <div class="sol step"><b>(b)</b> Below the CML only means an <b>inefficient</b> portfolio. A single stock is almost always below the CML because of firm-specific risk — not a mispricing signal.</div>
+    <div class="sol step"><b>(c)</b> Price judgment and hurdle rate = <b>SML</b> (β on the axis, all assets). The CML (σ on the axis, efficient portfolios only) is for choosing your own complete portfolio.</div>
+    </div>
+    <div class="lw" data-l="ko" hidden>
+    <h2><span class="no">Q4</span>SML 과 CML 로 판단하기</h2>
     <p class="prob">주식 X 의 예측 기대수익률은 SML 이 요구하는 값보다 1.5%p 높다. 그런데 (σ, E(r)) 그림에서 X 는 CML 보다 한참 아래에 있다. (a) X 는 고평가인가 저평가인가? (b) CML 아래라는 사실은 무엇을 뜻하나? (c) 가격 판단에는 어느 선을 쓰나?</p>
     <div class="sol step"><b>(a)</b> SML 위 1.5%p → α = +1.5% → <b>저평가(underpriced), BUY</b>. 매수 압력으로 가격↑, 기대수익률↓ → SML 로 돌아간다.</div>
     <div class="sol step"><b>(b)</b> CML 아래 = <b>비효율적</b>(inefficient) 포트폴리오라는 뜻일 뿐. 단일 종목은 기업 고유 위험 때문에 거의 늘 CML 아래 — 가격 오류 신호가 아니다.</div>
     <div class="sol step"><b>(c)</b> 가격 판단·기준수익률 = <b>SML</b>(가로축 β, 모든 자산). CML(가로축 σ, 효율적 포트폴리오만)은 자기 완전 포트폴리오를 고를 때 쓴다.</div>
+    </div>
   </section>
 
-  <section class="slide rv qz" data-title="Q5 · 알파와 매수·매도">
-    <h2>Q5 · 알파와 매수·매도</h2>
+<section class="slide rv qz" data-title="Q5 · Alpha and buy/sell" data-title-ko="Q5 · 알파와 매수·매도">
+    <div class="lw" data-l="en">
+    <h2><span class="no">Q5</span>Alpha and buy/sell</h2>
+    <p class="prob">Stock L: current price P<sub>0</sub> = $40, expected price in one year E(P<sub>1</sub>) = $43, expected dividend D<sub>1</sub> = $1.00, β = 0.80, r<sub>f</sub> = 3.5%, E(r<sub>M</sub>) = 9.5%. (a) Forecast holding-period return (b) CAPM required return (c) α and verdict (d) Current price at which α = 0?</p>
+    <div class="sol step"><b>(a)</b> [E(P<sub>1</sub>) − P<sub>0</sub> + D<sub>1</sub>] / P<sub>0</sub> = (43 − 40 + 1.00) / 40 = 4.00 / 40 = <b>10.0%</b></div>
+    <div class="sol step"><b>(b)</b> 3.5% + 0.80 × (9.5% − 3.5%) = 3.5% + 4.8% = <b>8.3%</b></div>
+    <div class="sol step"><b>(c)</b> α = 10.0% − 8.3% = <b>+1.7%</b> → above SML → underpriced → <b>BUY</b></div>
+    <div class="sol step"><b>(d)</b> P<sub>0</sub> = (43 + 1.00) / 1.083 = <b>$40.63</b> <span class="kbd">· BA II Plus: 44 ÷ 1.083 = 40.63</span> — once buying pressure lifts the price to $40.63, α = 0.</div>
+    </div>
+    <div class="lw" data-l="ko" hidden>
+    <h2><span class="no">Q5</span>알파와 매수·매도</h2>
     <p class="prob">주식 L: 현재가 P<sub>0</sub> = $40, 1년 뒤 예상가격 E(P<sub>1</sub>) = $43, 예상배당 D<sub>1</sub> = $1.00, β = 0.80, r<sub>f</sub> = 3.5%, E(r<sub>M</sub>) = 9.5%. (a) 예측 보유기간수익률 (b) CAPM 요구수익률 (c) α 와 판단 (d) α = 0 이 되는 현재가격은?</p>
     <div class="sol step"><b>(a)</b> [E(P<sub>1</sub>) − P<sub>0</sub> + D<sub>1</sub>] / P<sub>0</sub> = (43 − 40 + 1.00) / 40 = 4.00 / 40 = <b>10.0%</b></div>
     <div class="sol step"><b>(b)</b> 3.5% + 0.80 × (9.5% − 3.5%) = 3.5% + 4.8% = <b>8.3%</b></div>
     <div class="sol step"><b>(c)</b> α = 10.0% − 8.3% = <b>+1.7%</b> → SML 위 → 저평가 → <b>BUY</b></div>
     <div class="sol step"><b>(d)</b> P<sub>0</sub> = (43 + 1.00) / 1.083 = <b>$40.63</b> <span class="kbd">· BA II Plus: 44 ÷ 1.083 = 40.63</span> — 매수 압력이 가격을 $40.63 까지 올리면 α = 0.</div>
+    </div>
   </section>
 
-  <section class="slide rv qz" data-title="Q6 · 포트폴리오 베타">
-    <h2>Q6 · 포트폴리오 베타</h2>
+<section class="slide rv qz" data-title="Q6 · Portfolio beta" data-title-ko="Q6 · 포트폴리오 베타">
+    <div class="lw" data-l="en">
+    <h2><span class="no">Q6</span>Portfolio beta</h2>
+    <p class="prob">Portfolio: 50% stock A (β = 1.40), 30% stock B (β = 0.70), 20% T-bills. r<sub>f</sub> = 4%, E(r<sub>M</sub>) = 10%. Find β<sub>P</sub> and E(r<sub>P</sub>), and verify with the weighted average of the individual CAPM returns.</p>
+    <div class="sol step"><b>Step 1</b> β<sub>P</sub> = Σw<sub>i</sub>β<sub>i</sub> = 0.50(1.40) + 0.30(0.70) + 0.20(0) = 0.70 + 0.21 + 0 = <b>0.91</b></div>
+    <div class="sol step"><b>Step 2</b> E(r<sub>P</sub>) = 4% + 0.91 × 6% = 4% + 5.46% = <b>9.46%</b></div>
+    <div class="sol step"><b>Check</b> A: 4 + 1.40(6) = 12.4% · B: 4 + 0.70(6) = 8.2% · T-bill: 4% → 0.5(12.4) + 0.3(8.2) + 0.2(4) = 6.2 + 2.46 + 0.8 = 9.46% ✓</div>
+    <div class="sol step"><b>Takeaway</b> β is a weighted average, so it adds up directly (variance doesn't, because of covariance terms).</div>
+    </div>
+    <div class="lw" data-l="ko" hidden>
+    <h2><span class="no">Q6</span>포트폴리오 베타</h2>
     <p class="prob">포트폴리오: 주식 A 50% (β = 1.40), 주식 B 30% (β = 0.70), T-bill 20%. r<sub>f</sub> = 4%, E(r<sub>M</sub>) = 10%. β<sub>P</sub> 와 E(r<sub>P</sub>) 를 구하고, 개별 CAPM 수익률의 가중평균으로 확인하라.</p>
     <div class="sol step"><b>Step 1</b> β<sub>P</sub> = Σw<sub>i</sub>β<sub>i</sub> = 0.50(1.40) + 0.30(0.70) + 0.20(0) = 0.70 + 0.21 + 0 = <b>0.91</b></div>
     <div class="sol step"><b>Step 2</b> E(r<sub>P</sub>) = 4% + 0.91 × 6% = 4% + 5.46% = <b>9.46%</b></div>
     <div class="sol step"><b>확인</b> A: 4 + 1.40(6) = 12.4% · B: 4 + 0.70(6) = 8.2% · T-bill: 4% → 0.5(12.4) + 0.3(8.2) + 0.2(4) = 6.2 + 2.46 + 0.8 = 9.46% ✓</div>
     <div class="sol step"><b>포인트</b> β 는 가중평균이라 그대로 더해진다(분산은 공분산 항 때문에 그렇지 않다).</div>
+    </div>
   </section>
 
-  <section class="slide rv qz" data-title="Q7 · 목표 베타 맞추기">
-    <h2>Q7 · 목표 베타 맞추기</h2>
+<section class="slide rv qz" data-title="Q7 · Hitting a target beta" data-title-ko="Q7 · 목표 베타 맞추기">
+    <div class="lw" data-l="en">
+    <h2><span class="no">Q7</span>Hitting a target beta</h2>
+    <p class="prob">Fund F has β = 1.25. r<sub>f</sub> = 3%, market risk premium 6%. Using only the fund and the risk-free asset, what fund weight gives (a) β = 0.75 (b) β = 1.50? What is each expected return?</p>
+    <div class="sol step"><b>Rule</b> w × β<sub>F</sub> + (1 − w) × 0 = β<sub>target</sub> → w = β<sub>target</sub> / β<sub>F</sub></div>
+    <div class="sol step"><b>(a)</b> w = 0.75 / 1.25 = <b>0.60</b> → 60% fund, 40% T-bills (lending) · E(r) = 3% + 0.75 × 6% = <b>7.5%</b></div>
+    <div class="sol step"><b>(b)</b> w = 1.50 / 1.25 = <b>1.20</b> → 120% fund, borrow 20% at r<sub>f</sub> · E(r) = 3% + 1.50 × 6% = <b>12.0%</b></div>
+    <div class="sol step"><b>Check</b> E(r<sub>F</sub>) = 3 + 1.25(6) = 10.5% → 1.20(10.5) − 0.20(3) = 12.6 − 0.6 = 12.0% ✓</div>
+    </div>
+    <div class="lw" data-l="ko" hidden>
+    <h2><span class="no">Q7</span>목표 베타 맞추기</h2>
     <p class="prob">펀드 F 의 β = 1.25. r<sub>f</sub> = 3%, 시장위험프리미엄 6%. 펀드와 무위험자산만으로 (a) β = 0.75 (b) β = 1.50 을 만들려면 펀드 비중은? 각 기대수익률은?</p>
     <div class="sol step"><b>규칙</b> w × β<sub>F</sub> + (1 − w) × 0 = β<sub>target</sub> → w = β<sub>target</sub> / β<sub>F</sub></div>
     <div class="sol step"><b>(a)</b> w = 0.75 / 1.25 = <b>0.60</b> → 펀드 60%, T-bill 40% (대출) · E(r) = 3% + 0.75 × 6% = <b>7.5%</b></div>
     <div class="sol step"><b>(b)</b> w = 1.50 / 1.25 = <b>1.20</b> → 펀드 120%, r<sub>f</sub> 로 20% 차입 · E(r) = 3% + 1.50 × 6% = <b>12.0%</b></div>
     <div class="sol step"><b>확인</b> E(r<sub>F</sub>) = 3 + 1.25(6) = 10.5% → 1.20(10.5) − 0.20(3) = 12.6 − 0.6 = 12.0% ✓</div>
+    </div>
   </section>
 
-  <section class="slide rv qz" data-title="Q8 · 무위험이자율 변화와 SML">
-    <h2>Q8 · 무위험이자율 변화와 SML</h2>
+<section class="slide rv qz" data-title="Q8 · Risk-free rate change and the SML" data-title-ko="Q8 · 무위험이자율 변화와 SML">
+    <div class="lw" data-l="en">
+    <h2><span class="no">Q8</span>Risk-free rate change and the SML</h2>
+    <p class="prob">E(r<sub>M</sub>) = 11% stays the same, but r<sub>f</sub> rises from 3% to 5%. How do the required returns of assets with β = 0.5, 1.0, 1.5 change? What happens to the SML's shape?</p>
+    <div class="sol step"><table>
+      <tr><th>β</th><th>Before: 3% + β(8%)</th><th>After: 5% + β(6%)</th><th>Change</th></tr>
+      <tr><td>0.5</td><td>7.0%</td><td>8.0%</td><td>+1.0 pp</td></tr>
+      <tr><td>1.0</td><td>11.0%</td><td>11.0%</td><td>0</td></tr>
+      <tr><td>1.5</td><td>15.0%</td><td>14.0%</td><td>−1.0 pp</td></tr>
+    </table></div>
+    <div class="sol step"><b>Shape</b> Intercept r<sub>f</sub> 3% → 5%↑, slope MRP 8% → 6%↓ → the SML <b>pivots</b> around the point (1, 11%). Not a parallel shift.</div>
+    <div class="sol step"><b>Why</b> E(r) = r<sub>f</sub>(1 − β) + βE(r<sub>M</sub>) — the weight on r<sub>f</sub> is positive if β &lt; 1, negative if β &gt; 1.</div>
+    </div>
+    <div class="lw" data-l="ko" hidden>
+    <h2><span class="no">Q8</span>무위험이자율 변화와 SML</h2>
     <p class="prob">E(r<sub>M</sub>) = 11% 는 그대로인데 r<sub>f</sub> 가 3% 에서 5% 로 오른다. β = 0.5, 1.0, 1.5 자산의 요구수익률은 어떻게 바뀌나? SML 의 모양은?</p>
     <div class="sol step"><table>
       <tr><th>β</th><th>전: 3% + β(8%)</th><th>후: 5% + β(6%)</th><th>변화</th></tr>
@@ -373,70 +713,151 @@
     </table></div>
     <div class="sol step"><b>모양</b> 절편 r<sub>f</sub> 3% → 5%↑, 기울기 MRP 8% → 6%↓ → SML 이 점 (1, 11%) 을 축으로 <b>회전</b>. 평행이동이 아니다.</div>
     <div class="sol step"><b>이유</b> E(r) = r<sub>f</sub>(1 − β) + βE(r<sub>M</sub>) — β &lt; 1 이면 r<sub>f</sub> 비중이 양(+), β &gt; 1 이면 음(−).</div>
+    </div>
   </section>
 
-  <section class="slide rv qz" data-title="Q9 · 회귀 출력 읽기">
-    <h2>Q9 · 회귀 출력 읽기</h2>
+<section class="slide rv qz" data-title="Q9 · Reading regression output" data-title-ko="Q9 · 회귀 출력 읽기">
+    <div class="lw" data-l="en">
+    <h2><span class="no">Q9</span>Reading regression output</h2>
+    <p class="prob">60-month excess-return regression: intercept α = 0.30%/month (standard error 0.40%), slope β = 0.85 (standard error 0.10). (a) Is α significant? (b) Is β? (c) What is the 95% interval for β (t ≈ 2)? (d) What does the CAPM predict for α?</p>
+    <div class="sol step"><b>(a)</b> t = 0.30 / 0.40 = <b>0.75</b> &lt; 2 → cannot reject α = 0 → no statistical evidence of stock-picking skill</div>
+    <div class="sol step"><b>(b)</b> t = 0.85 / 0.10 = <b>8.5</b> → reject β = 0, significant</div>
+    <div class="sol step"><b>(c)</b> 0.85 ± 2 × 0.10 = <b>0.65 to 1.05</b> — significant, but the interval is wide → the hurdle rate is equally uncertain</div>
+    <div class="sol step"><b>(d)</b> In R<sub>i,t</sub> = α + βR<sub>M,t</sub> + e the CAPM predicts <b>α = 0</b>. Slope = β, each month's vertical distance = residual e (SCL).</div>
+    </div>
+    <div class="lw" data-l="ko" hidden>
+    <h2><span class="no">Q9</span>회귀 출력 읽기</h2>
     <p class="prob">60개월 초과수익률 회귀: 절편 α = 0.30%/월 (표준오차 0.40%), 기울기 β = 0.85 (표준오차 0.10). (a) α 는 유의한가? (b) β 는? (c) β 의 95% 구간(t ≈ 2)은? (d) CAPM 은 α 에 대해 무엇을 예측하나?</p>
     <div class="sol step"><b>(a)</b> t = 0.30 / 0.40 = <b>0.75</b> &lt; 2 → α = 0 을 기각 못 함 → 종목선택 실력(stock-picking skill)의 통계적 증거 없음</div>
     <div class="sol step"><b>(b)</b> t = 0.85 / 0.10 = <b>8.5</b> → β = 0 기각, 유의</div>
     <div class="sol step"><b>(c)</b> 0.85 ± 2 × 0.10 = <b>0.65 ~ 1.05</b> — 유의해도 구간이 넓다 → 기준수익률(hurdle rate)이 그만큼 불확실</div>
     <div class="sol step"><b>(d)</b> 회귀식 R<sub>i,t</sub> = α + βR<sub>M,t</sub> + e 에서 CAPM 은 <b>α = 0</b> 을 예측한다. 기울기 = β, 각 달의 세로 거리 = 잔차 e (SCL).</div>
+    </div>
   </section>
 
-  <section class="slide rv qz" data-title="Q10 · 위험 분해와 R²">
-    <h2>Q10 · 위험 분해와 R²</h2>
+<section class="slide rv qz" data-title="Q10 · Risk decomposition and R²" data-title-ko="Q10 · 위험 분해와 R²">
+    <div class="lw" data-l="en">
+    <h2><span class="no">Q10</span>Risk decomposition and R²</h2>
+    <p class="prob">Annual excess-return regression: β = 1.10, σ<sub>M</sub> = 20%, σ(e) = 30%. Find (a) systematic variance and systematic standard deviation (b) total variance and total standard deviation (c) R².</p>
+    <div class="sol step"><b>Formula</b> σ<sup>2</sup> = β<sup>2</sup>σ<sub>M</sub><sup>2</sup> + σ<sup>2</sup>(e), &nbsp; R<sup>2</sup> = β<sup>2</sup>σ<sub>M</sub><sup>2</sup> / σ<sup>2</sup> (all in % units, variance in %²)</div>
+    <div class="sol step"><b>(a)</b> β<sup>2</sup>σ<sub>M</sub><sup>2</sup> = 1.21 × 400 = <b>484 (%²)</b>, systematic SD = 1.10 × 20 = <b>22%</b></div>
+    <div class="sol step"><b>(b)</b> σ<sup>2</sup> = 484 + 30<sup>2</sup> = 484 + 900 = <b>1,384 (%²)</b>, σ = √1,384 = <b>37.20%</b> <span class="kbd">· BA II Plus: 1.1 x² × 400 = 484 + 900 = 1384 √x</span></div>
+    <div class="sol step"><b>(c)</b> R<sup>2</sup> = 484 / 1,384 = <b>0.350</b> → only 35% of variance is systematic, 65% is diversifiable — typical for an individual stock (0.20–0.40).</div>
+    </div>
+    <div class="lw" data-l="ko" hidden>
+    <h2><span class="no">Q10</span>위험 분해와 R²</h2>
     <p class="prob">연간 초과수익률 회귀: β = 1.10, σ<sub>M</sub> = 20%, σ(e) = 30%. (a) 체계적 분산과 체계적 표준편차 (b) 총분산과 총표준편차 (c) R² 를 구하라.</p>
     <div class="sol step"><b>공식</b> σ<sup>2</sup> = β<sup>2</sup>σ<sub>M</sub><sup>2</sup> + σ<sup>2</sup>(e), &nbsp; R<sup>2</sup> = β<sup>2</sup>σ<sub>M</sub><sup>2</sup> / σ<sup>2</sup> (모두 % 단위, 분산은 %²)</div>
     <div class="sol step"><b>(a)</b> β<sup>2</sup>σ<sub>M</sub><sup>2</sup> = 1.21 × 400 = <b>484 (%²)</b>, 체계적 SD = 1.10 × 20 = <b>22%</b></div>
     <div class="sol step"><b>(b)</b> σ<sup>2</sup> = 484 + 30<sup>2</sup> = 484 + 900 = <b>1,384 (%²)</b>, σ = √1,384 = <b>37.20%</b> <span class="kbd">· BA II Plus: 1.1 x² × 400 = 484 + 900 = 1384 √x</span></div>
     <div class="sol step"><b>(c)</b> R<sup>2</sup> = 484 / 1,384 = <b>0.350</b> → 분산의 35% 만 체계적, 65% 는 분산 가능(diversifiable) — 개별 주식의 전형적 범위(0.20–0.40).</div>
+    </div>
   </section>
 
-  <section class="slide rv qz" data-title="Q11 · 조정 베타 (adjusted beta)">
-    <h2>Q11 · 조정 베타 (adjusted beta)</h2>
+<section class="slide rv qz" data-title="Q11 · Adjusted beta" data-title-ko="Q11 · 조정 베타 (adjusted beta)">
+    <div class="lw" data-l="en">
+    <h2><span class="no">Q11</span>Adjusted beta</h2>
+    <p class="prob">Stock G has a sample beta of 1.50 and stock U has 0.60. Find their adjusted betas using β<sub>adj</sub> = (2/3)β<sub>sample</sub> + 1/3, and explain what the adjustment does.</p>
+    <div class="sol step"><b>G</b> (2/3)(1.50) + 1/3 = 1.000 + 0.333 = <b>1.333</b></div>
+    <div class="sol step"><b>U</b> (2/3)(0.60) + 1/3 = 0.400 + 0.333 = <b>0.733</b></div>
+    <div class="sol step"><b>Meaning</b> Both are pulled <b>toward 1</b> (1.50↓, 0.60↑). Sample betas have large estimation error, and extreme values tend to revert toward the average of 1 in the next period.</div>
+    </div>
+    <div class="lw" data-l="ko" hidden>
+    <h2><span class="no">Q11</span>조정 베타 (adjusted beta)</h2>
     <p class="prob">표본 베타가 1.50 인 주식 G 와 0.60 인 주식 U 의 조정 베타를 공식 β<sub>adj</sub> = (2/3)β<sub>sample</sub> + 1/3 로 구하고, 무엇을 하는 조정인지 설명하라.</p>
     <div class="sol step"><b>G</b> (2/3)(1.50) + 1/3 = 1.000 + 0.333 = <b>1.333</b></div>
     <div class="sol step"><b>U</b> (2/3)(0.60) + 1/3 = 0.400 + 0.333 = <b>0.733</b></div>
     <div class="sol step"><b>의미</b> 둘 다 <b>1 쪽으로</b> 당겨진다(1.50↓, 0.60↑). 표본 베타는 추정오차가 크고, 극단값은 다음 기간에 평균 1 쪽으로 돌아가는 경향이 있기 때문.</div>
+    </div>
   </section>
 
-  <section class="slide rv qz" data-title="Q12 · Roll's critique">
-    <h2>Q12 · Roll's critique</h2>
+<section class="slide rv qz" data-title="Q12 · Roll's critique" data-title-ko="Q12 · Roll's critique">
+    <div class="lw" data-l="en">
+    <h2><span class="no">Q12</span>Roll's critique</h2>
+    <p class="prob">Researcher 1 tests the CAPM using the S&amp;P 500 as the market portfolio and finds the β–average return relation does not hold. Researcher 2 finds an index that is ex post mean-variance efficient and the relation holds perfectly. According to Roll (1977), what does each show?</p>
+    <div class="sol step"><b>Core</b> The CAPM's only testable implication = the <b>true</b> market portfolio is efficient. The true M (world stocks, bonds, real estate, private firms, human capital) is unobservable.</div>
+    <div class="sol step"><b>Researcher 1</b> Showed only that the proxy, the S&amp;P 500, is not efficient — not a rejection of the CAPM.</div>
+    <div class="sol step"><b>Researcher 2</b> With an efficient proxy, the β–return relation holds mathematically like an <b>identity</b> → circular logic, not evidence.</div>
+    <div class="sol step"><b>Response</b> Treat the index model as a useful approximation and judge it by explanatory and predictive power.</div>
+    </div>
+    <div class="lw" data-l="ko" hidden>
+    <h2><span class="no">Q12</span>Roll's critique</h2>
     <p class="prob">연구자 1 은 S&amp;P 500 을 시장 포트폴리오로 써서 CAPM 을 검정했더니 β–평균수익률 관계가 맞지 않았다. 연구자 2 는 사후적으로 평균-분산 효율적인 지수를 찾아 관계가 완벽히 맞았다. Roll (1977) 에 따르면 각각 무엇을 보여 주나?</p>
     <div class="sol step"><b>핵심</b> CAPM 의 유일한 검증 가능 함의 = <b>진짜</b> 시장 포트폴리오가 효율적이라는 것. 진짜 M(전 세계 주식·채권·부동산·비상장기업·인적자본)은 관측할 수 없다.</div>
     <div class="sol step"><b>연구자 1</b> S&amp;P 500 이라는 대용치(proxy)가 효율적이지 않다는 것만 보였다 — CAPM 기각이 아니다.</div>
     <div class="sol step"><b>연구자 2</b> 효율적 대용치를 쓰면 β–수익률 관계는 수학적으로 <b>항등식</b>처럼 성립 → 증거가 아니라 순환 논리.</div>
     <div class="sol step"><b>대응</b> 지수모형을 유용한 근사로 보고, 설명력·예측력으로 평가한다.</div>
+    </div>
   </section>
 
-  <section class="slide rv qz" data-title="Q13 · 평평한 SML 과 이상현상">
-    <h2>Q13 · 평평한 SML 과 이상현상</h2>
+<section class="slide rv qz" data-title="Q13 · Flat SML and anomalies" data-title-ko="Q13 · 평평한 SML 과 이상현상">
+    <div class="lw" data-l="en">
+    <h2><span class="no">Q13</span>Flat SML and anomalies</h2>
+    <p class="prob">(a) In classic cross-sectional tests, how does the estimated SML differ from the CAPM prediction? What does it imply for low-β and high-β stocks? (b) Match each to an anomaly name and source paper: ① small caps earn high returns relative to β ② past 3–12-month winners keep winning ③ high-B/M stocks beat low-B/M stocks ④ firms with high profitability and conservative investment earn high returns</p>
+    <div class="sol step"><b>(a)</b> Intercept too high and slope too flat → low-β earned <b>more</b> than predicted, high-β <b>less</b> = low-beta anomaly → basis for betting-against-beta and low-volatility funds</div>
+    <div class="sol step"><b>(b)</b> ① Size — Banz (1981) · ② Momentum — Jegadeesh-Titman (1993) · ③ Value — Fama-French (1992) · ④ Profitability / investment — Fama-French (2015)</div>
+    <div class="sol step"><b>Interpretation</b> (a) Market inefficiency (mispricing) or (b) multiple risk factors — the multifactor models of 7.4 follow (b).</div>
+    </div>
+    <div class="lw" data-l="ko" hidden>
+    <h2><span class="no">Q13</span>평평한 SML 과 이상현상</h2>
     <p class="prob">(a) 고전적 횡단면 검정에서 추정 SML 은 CAPM 예측과 비교해 어떻게 다른가? 저β·고β 주식에 대해 무엇을 뜻하나? (b) 다음을 이상현상 이름·근거 논문과 짝지어라: ① 소형주가 β 에 비해 높은 수익 ② 지난 3–12개월 승자가 계속 이김 ③ 고 B/M 주식이 저 B/M 주식을 이김 ④ 수익성 높고 투자가 보수적인 기업이 높은 수익</p>
     <div class="sol step"><b>(a)</b> 절편이 너무 높고 기울기가 너무 평평 → 저β 는 예측보다 <b>더</b>, 고β 는 <b>덜</b> 벌었다 = 저베타 이상현상 → betting-against-beta·저변동성 펀드의 근거</div>
     <div class="sol step"><b>(b)</b> ① 규모(size) — Banz (1981) · ② 모멘텀(momentum) — Jegadeesh-Titman (1993) · ③ 가치(value) — Fama-French (1992) · ④ 수익성·투자 — Fama-French (2015)</div>
     <div class="sol step"><b>해석</b> (a) 시장 비효율(가격 오류) 또는 (b) 위험 요인이 여럿 — 7.4 의 다요인 모형은 (b) 를 따른다.</div>
+    </div>
   </section>
 
-  <section class="slide rv qz" data-title="Q14 · Fama-French 3요인 대 CAPM">
-    <h2>Q14 · Fama-French 3요인 대 CAPM</h2>
+<section class="slide rv qz" data-title="Q14 · Fama-French 3 factors vs CAPM" data-title-ko="Q14 · Fama-French 3요인 대 CAPM">
+    <div class="lw" data-l="en">
+    <h2><span class="no">Q14</span>Fama-French 3 factors vs CAPM</h2>
+    <p class="prob">r<sub>f</sub> = 3%. Factor premiums: market 6%, SMB 3%, HML 5%. Fund loadings: β<sub>M</sub> = 0.90, β<sub>SMB</sub> = 0.50, β<sub>HML</sub> = 0.60. The fund earned 11.0% last year. (a) 3-factor required return (b) CAPM required return (c) Both alphas and interpretation</p>
+    <div class="sol step"><b>(a)</b> 3% + 0.90(6%) + 0.50(3%) + 0.60(5%) = 3 + 5.4 + 1.5 + 3.0 = <b>12.9%</b></div>
+    <div class="sol step"><b>(b)</b> 3% + 0.90(6%) = 3 + 5.4 = <b>8.4%</b></div>
+    <div class="sol step"><b>(c)</b> CAPM α = 11.0 − 8.4 = <b>+2.6%</b> · 3-factor α = 11.0 − 12.9 = <b>−1.9%</b></div>
+    <div class="sol step"><b>Interpretation</b> Loadings SMB +, HML + → small-cap/value tilt. The "outperformance" vs the CAPM came from this systematic tilt, and vs the 3-factor benchmark the fund actually lagged — the tilt can be bought cheaply via index ETFs. The 3-factor α is more informative.</div>
+    </div>
+    <div class="lw" data-l="ko" hidden>
+    <h2><span class="no">Q14</span>Fama-French 3요인 대 CAPM</h2>
     <p class="prob">r<sub>f</sub> = 3%. 요인 프리미엄: 시장 6%, SMB 3%, HML 5%. 펀드 로딩: β<sub>M</sub> = 0.90, β<sub>SMB</sub> = 0.50, β<sub>HML</sub> = 0.60. 펀드는 작년에 11.0% 를 벌었다. (a) 3요인 요구수익률 (b) CAPM 요구수익률 (c) 두 알파와 해석</p>
     <div class="sol step"><b>(a)</b> 3% + 0.90(6%) + 0.50(3%) + 0.60(5%) = 3 + 5.4 + 1.5 + 3.0 = <b>12.9%</b></div>
     <div class="sol step"><b>(b)</b> 3% + 0.90(6%) = 3 + 5.4 = <b>8.4%</b></div>
     <div class="sol step"><b>(c)</b> CAPM α = 11.0 − 8.4 = <b>+2.6%</b> · 3요인 α = 11.0 − 12.9 = <b>−1.9%</b></div>
     <div class="sol step"><b>해석</b> 로딩이 SMB +, HML + → 소형·가치 기울기. CAPM 기준의 "초과성과"는 이 체계적 기울기에서 왔고, 3요인 기준으로는 오히려 부진 — 이 기울기는 인덱스 ETF 로 싸게 살 수 있다. 3요인 α 가 더 정보가 많다.</div>
+    </div>
   </section>
 
-  <section class="slide rv qz" data-title="Q15 · 요인 로딩 해석과 확장 모형">
-    <h2>Q15 · 요인 로딩 해석과 확장 모형</h2>
+<section class="slide rv qz" data-title="Q15 · Reading factor loadings and extended models" data-title-ko="Q15 · 요인 로딩 해석과 확장 모형">
+    <div class="lw" data-l="en">
+    <h2><span class="no">Q15</span>Reading factor loadings and extended models</h2>
+    <p class="prob">(a) What styles do Fund A: β<sub>SMB</sub> = +0.6, β<sub>HML</sub> = +0.5 and Fund B: β<sub>SMB</sub> = −0.3, β<sub>HML</sub> = −0.7 have? (b) Name the model that adds momentum to FF3 and the one that adds profitability and investment, with their factor symbols. (c) What is the "factor zoo" problem?</p>
+    <div class="sol step"><b>(a)</b> SMB = small − big, HML = high B/M (value) − low B/M (growth) → A: <b>small-cap value</b> · B: <b>large-cap growth</b></div>
+    <div class="sol step"><b>(b)</b> <b>Carhart 4 factors (1997)</b>: + UMD (up minus down, momentum) · <b>Fama-French 5 factors (2015)</b>: + RMW (profitability), CMA (investment) → HML nearly redundant in US data</div>
+    <div class="sol step"><b>(c)</b> Hundreds of factors have been published; many fail out of sample and weaken after publication. Adding factors always improves in-sample fit — the question is which factors will still earn a risk premium in the future.</div>
+    </div>
+    <div class="lw" data-l="ko" hidden>
+    <h2><span class="no">Q15</span>요인 로딩 해석과 확장 모형</h2>
     <p class="prob">(a) 펀드 A: β<sub>SMB</sub> = +0.6, β<sub>HML</sub> = +0.5 / 펀드 B: β<sub>SMB</sub> = −0.3, β<sub>HML</sub> = −0.7 의 스타일은? (b) FF3 에 모멘텀을 더한 모형과 수익성·투자를 더한 모형의 이름과 요인 기호는? (c) "factor zoo" 문제란?</p>
     <div class="sol step"><b>(a)</b> SMB = 소형 − 대형, HML = 고 B/M(가치) − 저 B/M(성장) → A: <b>소형 가치(small-cap value)</b> · B: <b>대형 성장(large-cap growth)</b></div>
     <div class="sol step"><b>(b)</b> <b>Carhart 4요인 (1997)</b>: + UMD(up minus down, 모멘텀) · <b>Fama-French 5요인 (2015)</b>: + RMW(수익성), CMA(투자) → 미국 자료에서 HML 이 거의 중복</div>
     <div class="sol step"><b>(c)</b> 발표된 요인이 수백 개, 상당수는 표본 밖에서 재현되지 않고 발표 후 약해진다. 요인을 더하면 과거 적합도는 늘 좋아진다 — 문제는 어느 요인이 미래에도 위험프리미엄을 받는가.</div>
+    </div>
   </section>
 
-  <section class="slide rv qz" data-title="Q16 · 차익거래 (arbitrage)">
-    <h2>Q16 · 차익거래 (arbitrage)</h2>
+<section class="slide rv qz" data-title="Q16 · Arbitrage" data-title-ko="Q16 · 차익거래 (arbitrage)">
+    <div class="lw" data-l="en">
+    <h2><span class="no">Q16</span>Arbitrage</h2>
+    <p class="prob">Well-diversified portfolio A: β = 1.00, E(r) = 12% / B: β = 0.60, E(r) = 8%. r<sub>f</sub> = 5%. Is there an arbitrage opportunity? Show a $1,000,000 trade, and find B's expected return in equilibrium.</p>
+    <div class="sol step"><b>Step 1</b> Same-β benchmark D = 60% A + 40% T-bills → β<sub>D</sub> = 0.6(1.00) + 0.4(0) = 0.60, E(r<sub>D</sub>) = 0.6(12) + 0.4(5) = <b>9.2%</b> &gt; 8% → B overpriced</div>
+    <div class="sol step"><table>
+      <tr><th>Position</th><th>Cash flow today</th><th>Factor exposure</th><th>P&amp;L in 1 year</th></tr>
+      <tr><td>Short B $1,000,000</td><td>+$1,000,000</td><td>−0.60</td><td>−$80,000</td></tr>
+      <tr><td>Buy D ($600,000 A + $400,000 T-bills)</td><td>−$1,000,000</td><td>+0.60</td><td>+$92,000</td></tr>
+      <tr><th>Net</th><th>$0</th><th>0</th><th>+$12,000 sure</th></tr>
+    </table></div>
+    <div class="sol step"><b>Equilibrium</b> Short-selling pressure → B's price↓ → E(r<sub>B</sub>) rises until it reaches 5% + 0.60 × (12% − 5%) = <b>9.2%</b>.</div>
+    </div>
+    <div class="lw" data-l="ko" hidden>
+    <h2><span class="no">Q16</span>차익거래 (arbitrage)</h2>
     <p class="prob">잘 분산된 포트폴리오 A: β = 1.00, E(r) = 12% / B: β = 0.60, E(r) = 8%. r<sub>f</sub> = 5%. 차익거래 기회가 있나? $1,000,000 규모의 거래를 보이고, 균형에서 B 의 기대수익률은?</p>
     <div class="sol step"><b>Step 1</b> 같은 β 의 기준 D = 60% A + 40% T-bill → β<sub>D</sub> = 0.6(1.00) + 0.4(0) = 0.60, E(r<sub>D</sub>) = 0.6(12) + 0.4(5) = <b>9.2%</b> &gt; 8% → B 고평가</div>
     <div class="sol step"><table>
@@ -446,29 +867,56 @@
       <tr><th>순(net)</th><th>$0</th><th>0</th><th>+$12,000 확실</th></tr>
     </table></div>
     <div class="sol step"><b>균형</b> 공매도 압력 → B 가격↓ → E(r<sub>B</sub>) 가 5% + 0.60 × (12% − 5%) = <b>9.2%</b> 가 될 때까지 오른다.</div>
+    </div>
   </section>
 
-  <section class="slide rv qz" data-title="Q17 · 다요인 APT">
-    <h2>Q17 · 다요인 APT</h2>
+<section class="slide rv qz" data-title="Q17 · Multifactor APT" data-title-ko="Q17 · 다요인 APT">
+    <div class="lw" data-l="en">
+    <h2><span class="no">Q17</span>Multifactor APT</h2>
+    <p class="prob">r<sub>f</sub> = 3%. Factor 1 (economy / GDP surprise): β<sub>1</sub> = 1.40, RP<sub>1</sub> = +4%. Factor 2 (unexpected inflation): β<sub>2</sub> = 0.50, RP<sub>2</sub> = −3%. (a) APT required return (b) Compare with a single-factor model using factor 1 only (c) Why is RP<sub>2</sub> negative?</p>
+    <div class="sol step"><b>(a)</b> E(r) = r<sub>f</sub> + β<sub>1</sub>RP<sub>1</sub> + β<sub>2</sub>RP<sub>2</sub> = 3% + 1.40(4%) + 0.50(−3%) = 3 + 5.6 − 1.5 = <b>7.1%</b></div>
+    <div class="sol step"><b>(b)</b> 3% + 5.6% = <b>8.6%</b> → ignoring the inflation hedge overstates the required return by 1.5 pp</div>
+    <div class="sol step"><b>(c)</b> Exposure to the inflation factor pays in the bad state where prices rise more than expected = insurance (hedge). Investors accept a lower expected return as the price of insurance → negative premium.</div>
+    </div>
+    <div class="lw" data-l="ko" hidden>
+    <h2><span class="no">Q17</span>다요인 APT</h2>
     <p class="prob">r<sub>f</sub> = 3%. 요인 1(경기·GDP 서프라이즈): β<sub>1</sub> = 1.40, RP<sub>1</sub> = +4%. 요인 2(예상 밖 인플레이션): β<sub>2</sub> = 0.50, RP<sub>2</sub> = −3%. (a) APT 요구수익률 (b) 요인 1 만 쓰는 단일요인 모형과 비교 (c) RP<sub>2</sub> 가 음수인 이유</p>
     <div class="sol step"><b>(a)</b> E(r) = r<sub>f</sub> + β<sub>1</sub>RP<sub>1</sub> + β<sub>2</sub>RP<sub>2</sub> = 3% + 1.40(4%) + 0.50(−3%) = 3 + 5.6 − 1.5 = <b>7.1%</b></div>
     <div class="sol step"><b>(b)</b> 3% + 5.6% = <b>8.6%</b> → 인플레이션 헤지를 무시하면 요구수익률을 1.5%p 과대평가</div>
     <div class="sol step"><b>(c)</b> 인플레이션 요인에 대한 노출은 물가가 예상보다 오르는 나쁜 상태에서 돈을 준다 = 보험(hedge). 투자자는 보험의 대가로 더 낮은 기대수익률을 받아들인다 → 프리미엄 음수.</div>
+    </div>
   </section>
 
-  <section class="slide rv qz" data-title="Q18 · APT 대 CAPM">
-    <h2>Q18 · APT 대 CAPM</h2>
+<section class="slide rv qz" data-title="Q18 · APT vs CAPM" data-title-ko="Q18 · APT 대 CAPM">
+    <div class="lw" data-l="en">
+    <h2><span class="no">Q18</span>APT vs CAPM</h2>
+    <p class="prob">Compare the CAPM and the APT on five items: key assumption · who must be rational · number of factors · applies to · weakness. What does it mean that the APT has "weaker assumptions"?</p>
+    <div class="sol step"><b>Assumption</b> CAPM: all investors optimize mean-variance / APT: no arbitrage in a factor-model world</div>
+    <div class="sol step"><b>Who</b> CAPM: virtually all investors / APT: a few well-funded arbitrageurs</div>
+    <div class="sol step"><b>Factors / applies to</b> CAPM: one (market), all securities exactly / APT: any number (theory is silent), well-diversified portfolios</div>
+    <div class="sol step"><b>Weakness</b> CAPM: strong assumptions, empirically rejected / APT: doesn't say which factors matter</div>
+    <div class="sol step"><b>Meaning</b> Everyone need not optimize — "no free lunch" alone yields E(r) = r<sub>f</sub> + Σβ<sub>k</sub>RP<sub>k</sub>.</div>
+    </div>
+    <div class="lw" data-l="ko" hidden>
+    <h2><span class="no">Q18</span>APT 대 CAPM</h2>
     <p class="prob">다섯 항목으로 CAPM 과 APT 를 비교하라: 핵심 가정 · 합리적이어야 하는 사람 · 요인 수 · 적용 대상 · 약점. APT 가 "더 약한 가정"이라는 말의 뜻은?</p>
     <div class="sol step"><b>가정</b> CAPM: 모든 투자자가 평균-분산 최적화 / APT: 요인모형 세계에서 무차익(no-arbitrage)</div>
     <div class="sol step"><b>누가</b> CAPM: 사실상 모든 투자자 / APT: 자금력 있는 소수의 차익거래자</div>
     <div class="sol step"><b>요인·대상</b> CAPM: 시장 하나, 모든 증권에 정확히 / APT: 몇 개든(이론은 침묵), 잘 분산된 포트폴리오</div>
     <div class="sol step"><b>약점</b> CAPM: 강한 가정, 실증적으로 기각 / APT: 어떤 요인이 중요한지 말해 주지 않음</div>
     <div class="sol step"><b>뜻</b> 모두가 최적화할 필요 없이 "공짜 점심은 없다" 하나로 E(r) = r<sub>f</sub> + Σβ<sub>k</sub>RP<sub>k</sub> 를 얻는다.</div>
+    </div>
   </section>
 
-  <section class="slide title" data-title="끝">
+<section class="slide title" data-title="End" data-title-ko="끝">
+    <div class="lw" data-l="en">
+    <h1>End</h1>
+    <p class="sub">Next: quiz /study/ia7/quiz.html (English, 22 questions)</p>
+    </div>
+    <div class="lw" data-l="ko" hidden>
     <h1>끝</h1>
     <p class="sub">다음: 퀴즈 /study/ia7/quiz.html (영어, 22문항)</p>
+    </div>
   </section>
 
 </main>

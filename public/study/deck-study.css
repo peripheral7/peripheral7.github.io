@@ -1,0 +1,68 @@
+/* BF·IA study decks (preview / review) — shared typography on top of /slides/deck.css.
+   Load order: /slides/deck.css → this file → the deck's own <style> (components only: .q .sol .eq .flow …).
+   A deck opts in with <body class="study">. Sizes are stage px (the 1600×900 stage is scaled to fit the screen).
+   Bilingual decks wrap each slide's content in <div class="lw" data-l="en|ko">; .lw is display:contents,
+   so every selector here uses descendant combinators (never ".slide > x"). */
+
+.study{
+  --fs: 30px;          /* body text */
+  --fs-sm: 23px;       /* notes, captions */
+  --fs-tb: 25px;       /* tables */
+  --rule: color-mix(in srgb, currentColor 22%, transparent);   /* hairlines */
+  --soft: color-mix(in srgb, currentColor 60%, transparent);   /* secondary text */
+}
+.study .lw{display:contents}
+
+/* ── slide frame ── */
+.study .slide{padding:76px 112px 60px}
+.study .slide :is(p, li, td, th){text-wrap:pretty}
+.study .slide :is(h1, h2, h3){text-wrap:balance}
+.study .slide :is(b, strong){font-weight:650}
+
+/* ── headings ── */
+.study .slide h2{
+  margin:0 0 34px; padding:0; border:0;
+  font-size:48px; line-height:1.14; font-weight:640; letter-spacing:-.024em;
+}
+.study .slide h2 .no{font-weight:480; opacity:.42; margin-right:.32em; font-variant-numeric:tabular-nums}
+.study .slide h3{margin:0 0 12px; font-size:31px; line-height:1.25; font-weight:640; letter-spacing:-.012em}
+
+/* ── text ── */
+.study .slide p{margin:0 0 .55em; font-size:var(--fs); line-height:1.5}
+.study .slide :is(ul, ol){font-size:var(--fs); line-height:1.45}
+.study .slide li{margin:.32em 0; padding-left:1.25em}
+.study .slide ul>li::before{top:.74em; width:.5em; height:2px; opacity:.7}
+.study .slide ol>li::before{font-weight:640; opacity:.6; font-variant-numeric:tabular-nums}
+.study .slide .small{font-size:var(--fs-sm); line-height:1.5}
+.study .slide .muted{opacity:1; color:var(--soft)}
+.study .slide sub, .study .slide sup{font-size:.66em; line-height:0}
+
+/* ── tables: horizontal hairlines only, numbers aligned ── */
+.study .slide table{font-size:var(--fs-tb); line-height:1.3; font-variant-numeric:tabular-nums lining-nums; border-top:2px solid currentColor; border-bottom:2px solid currentColor}
+.study .slide :is(th, td){border:0; border-bottom:1px solid var(--rule); padding:9px 20px 9px 0; vertical-align:top}
+.study .slide :is(th, td):last-child{padding-right:0}
+.study .slide th{font-weight:640; border-bottom:1.5px solid currentColor; padding-top:11px; padding-bottom:10px}
+.study .slide tr:last-child td{border-bottom:0}
+.study .slide tr.tot td{font-weight:650; border-top:1.5px solid currentColor}
+
+/* ── layout helpers ── */
+.study .cols{gap:56px}
+
+/* ── cover & section slides ── */
+.study .slide.title{padding-left:150px; padding-right:150px}
+.study .slide.title h1{
+  padding-left:44px; border-left-width:6px;
+  font-size:100px !important; line-height:1.04; font-weight:700; letter-spacing:-.035em;
+}
+.study .slide.title .sub{margin:40px 0 0 50px; max-width:1150px; font-size:34px; line-height:1.4; opacity:1; color:var(--soft)}
+.study .slide.title .hint{margin:64px 0 0 50px; font-size:20px; letter-spacing:.01em; opacity:.45}
+.study .slide.section h1{font-size:112px; line-height:1.05; letter-spacing:-.035em; font-weight:700}
+.study .slide.section p{color:var(--soft)}
+
+/* ── print (PDF): same typography, black on white ── */
+@media print{ .study .slide{padding:76px 112px 60px} }
+
+/* ── dense slides: add class="fit" to a <section> whose content runs into the bottom margin ── */
+.study .slide.fit{--fs:27px; --fs-tb:22px; --fs-sm:21px}
+.study .slide.fit h2{margin-bottom:26px}
+.study .slide.fit :is(th, td){padding-top:6px; padding-bottom:6px}

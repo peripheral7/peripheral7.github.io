@@ -1,58 +1,70 @@
 <!DOCTYPE html>
-<html lang="ko">
+<html lang="en" data-langs="en,ko">
 <head>
 <meta name="pinterest" content="nopin">
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <meta name="robots" content="noindex">
-<title>BF Ch.9 Making Capital Investment Decisions — 복습 문제</title>
+<title>BF Ch.9 Making Capital Investment Decisions — Review</title>
 <link rel="stylesheet" href="/slides/deck.css">
+<link rel="stylesheet" href="/study/deck-study.css">
 <!--
-  BF Ch.9 복습 덱 — 복습 요약 11장 + 연습문제 20문제(한 장에 한 문제, 풀이는 class="step" 블록: → 를 누르면 나타남).
-  원본: BF_Chap09_students.pdf (Prof. Gemma Lee, RWJ Essentials of Corporate Finance). 학생용 PDF 의 빈 풀이 칸은 직접 계산해 채웠다(파이썬 검산).
-  글자색은 고정하지 않는다(흰/검은 바탕 전환 D 키).
+  BF Ch.9 review deck — 11 review-summary slides + 20 practice problems (one problem per slide; the solution is a class="step" block: press → to reveal it).
+  Source: BF_Chap09_students.pdf (Prof. Gemma Lee, RWJ Essentials of Corporate Finance). The blank solution spaces in the student PDF were filled in by hand calculation (checked with Python).
+  Text color is not fixed (toggle white/black background with the D key).
 -->
 <style>
-  .slide.d{padding:58px 96px 40px}
-  .slide.d h2{font-size:50px;margin:0 0 24px;padding-left:26px;border-left-width:6px}
-  .slide.d h3{font-size:35px;margin:0 0 10px}
-  .slide.d p{font-size:32px;line-height:1.42;margin:0 0 .4em}
-  .slide.d ul,.slide.d ol{font-size:31px;line-height:1.38}
-  .slide.d li{margin:.22em 0;padding-left:1.3em}
-  .slide.d ul>li::before{top:.66em;width:.65em;height:2px}
-  .slide.d table{font-size:27px;line-height:1.25}
-  .slide.d th,.slide.d td{padding:5px 14px;border-width:1.5px}
+  /* components only — base typography lives in /study/deck-study.css */
   .slide.d table.num td+td,.slide.d table.num th+th{text-align:right}
   .slide.d table.wide{width:100%}
-  .slide.d .cols{gap:44px}
-  .slide.d .small{font-size:25px}
-  .slide.d .q{font-size:31px}
-  .slide.d .sol{margin-top:14px;padding-top:12px;border-top:3px dashed currentColor}
-  .slide.d .sol p,.slide.d .sol li{font-size:28px;line-height:1.38}
-  .slide.d .sol table{font-size:25px}
-  .slide.d .sol th,.slide.d .sol td{padding:3px 12px}
-  .slide.d pre.ba{font-size:22px;line-height:1.35;padding:10px 16px;border-width:2px}
-  .slide.d .box{border:3px solid currentColor;padding:12px 22px;margin:8px 0}
+  .slide.d .q{font-size:30px;line-height:1.5;margin:0 0 6px}
+  .slide.d .sol{margin-top:18px;padding-left:24px;border-left:2px solid currentColor}
+  .slide.d .sol p,.slide.d .sol li{font-size:27px;line-height:1.45}
+  .slide.d .sol table{font-size:23px}
+  .slide.d .sol th,.slide.d .sol td{padding-top:6px;padding-bottom:6px}
+  .slide.d pre.ba{font-size:21px;line-height:1.4;padding:12px 18px 12px 24px;border-width:1.5px}
+  .slide.d .box{border:1.5px solid currentColor;padding:14px 26px;margin:4px 0 24px}
   .slide.d .box p{margin:0}
-  .slide.d .eq{font-size:32px;font-weight:700;text-align:center;margin:6px 0 14px}
-  .slide.d tr.tot td{font-weight:700;border-top-width:3px}
+  .slide.d .eq{font-size:30px;font-weight:600;text-align:center;margin:6px 0 14px}
   .slide.d td.st{min-width:120px}
+  .slide.d svg.sml{width:100%;height:auto;display:block}
+  .slide.d svg.sml text{font-family:inherit}
 </style>
 </head>
-<body>
+<body class="study">
 <noscript>JavaScript is required.</noscript>
 
 <main id="stage">
 
-<!-- ───────────── 표지 ───────────── -->
-<section class="slide title" data-title="표지">
+<!-- ───────────── Cover ───────────── -->
+<section class="slide title" data-title="Cover" data-title-ko="표지">
+  <div class="lw" data-l="en">
+  <h1 style="font-size:104px">BF Ch.9<br>Making Capital<br>Investment Decisions</h1>
+  <p class="sub">Review summary + 20 practice problems · Business Finance (Prof. Gemma Lee)</p>
+  <p class="hint">→ next / reveal step &nbsp;·&nbsp; O overview &nbsp;·&nbsp; D black/white &nbsp;·&nbsp; F full screen &nbsp;·&nbsp; L 한국어</p>
+  </div>
+  <div class="lw" data-l="ko" hidden>
   <h1 style="font-size:104px">BF Ch.9<br>Making Capital<br>Investment Decisions</h1>
   <p class="sub">복습 요약 + 연습문제 20 · Business Finance (Prof. Gemma Lee)</p>
-  <p class="hint">→ 다음 / 풀이 한 단계씩 &nbsp;·&nbsp; O 목록 &nbsp;·&nbsp; D 흰/검은 바탕 &nbsp;·&nbsp; F 전체 화면</p>
+  <p class="hint">→ 다음 / 풀이 한 단계씩 &nbsp;·&nbsp; O 목록 &nbsp;·&nbsp; D 흰/검은 바탕 &nbsp;·&nbsp; F 전체 화면 &nbsp;·&nbsp; L English</p>
+  </div>
 </section>
 
-<!-- ───────────── 복습 요약 ───────────── -->
-<section class="slide d" data-title="장 전체 지도">
+<section class="slide d" data-title="Chapter roadmap" data-title-ko="장 전체 지도">
+  <div class="lw" data-l="en">
+  <h2>Chapter roadmap — decide what to count, compute it, discount it</h2>
+  <table class="wide">
+    <tr><th>Section</th><th>Key question</th><th>Output</th></tr>
+    <tr><td>9.1 Project cash flows</td><td>Which cash flows are relevant? — with vs without</td><td>Stand-alone principle</td></tr>
+    <tr><td>9.2 Incremental cash flows</td><td>Sunk and opportunity costs, side effects, NWC, financing costs: in or out?</td><td>In / Out call</td></tr>
+    <tr><td>9.3 Pro forma &amp; project CF</td><td>Pro forma income statement → OCF → project cash flow by year</td><td>CF<sub>0</sub> … CF<sub>T</sub>, NPV·IRR</td></tr>
+    <tr><td>9.4 More about project CF</td><td>Change in NWC, tax depreciation (MACRS), after-tax salvage value</td><td>Correct first and last years</td></tr>
+    <tr><td>9.5 Alternative OCF definitions</td><td>Bottom-up · Top-down · Tax shield — why all agree</td><td>OCF cross-check tool</td></tr>
+  </table>
+  <p style="margin-top:22px"><b>Why this order?</b> Discounting (Ch.8) is easy. The hard part is building the <b>right cash flows</b> — so: "what to include (9.1–9.2) → how to compute (9.3) → refine the end years (9.4) → cross-check (9.5)."</p>
+  <p class="small muted">Flow: incremental call → pro forma (EBIT, taxes, NOPAT) → OCF − net capital spending − ΔNWC → Project CF → NPV / IRR</p>
+  </div>
+  <div class="lw" data-l="ko" hidden>
   <h2>장 전체 지도 — 무엇을 셀지 정한 뒤, 계산하고, 할인한다</h2>
   <table class="wide">
     <tr><th>절</th><th>핵심 질문</th><th>결과물</th></tr>
@@ -64,10 +76,32 @@
   </table>
   <p style="margin-top:22px"><b>왜 이 순서?</b> 할인(Ch.8)은 쉽다. 어려운 것은 <b>올바른 현금흐름</b>을 만드는 것 — 그래서 "무엇을 넣나(9.1–9.2) → 어떻게 계산하나(9.3) → 양 끝 연도 다듬기(9.4) → 검산(9.5)" 순서로 간다.</p>
   <p class="small muted">흐름: 증분 판단 → pro forma (EBIT, 세금, NOPAT) → OCF − 순자본지출 − ΔNWC → Project CF → NPV / IRR</p>
+  </div>
 </section>
 
-<section class="slide d" data-title="9.1 관련 현금흐름">
-  <h2>9.1 관련 현금흐름 (relevant cash flow)</h2>
+<section class="slide d" data-title="9.1 Relevant cash flows" data-title-ko="9.1 관련 현금흐름">
+  <div class="lw" data-l="en">
+  <h2><span class="no">9.1</span>Relevant cash flow</h2>
+  <div class="box"><p><b>Definition</b> — the change in the firm's total future cash flow that is a <b>direct consequence</b> of accepting the project.</p></div>
+  <div class="cols">
+    <div>
+      <h3>With and without — not "before and after"</h3>
+      <ul>
+        <li>Firm cash flow <b>with</b> the project minus <b>without</b> it = incremental cash flow</li>
+        <li>If an existing division's sales fall after launch, the part that <b>would have fallen anyway</b> is not the project's fault</li>
+      </ul>
+    </div>
+    <div>
+      <h3>Stand-alone principle</h3>
+      <ul>
+        <li>Once incremental cash flows are found, evaluate the project as a <b>mini-firm</b> — with its own sales, costs, assets, and cash flows</li>
+        <li>No need to value the whole firm twice</li>
+      </ul>
+    </div>
+  </div>
+  </div>
+  <div class="lw" data-l="ko" hidden>
+  <h2><span class="no">9.1</span>관련 현금흐름 (relevant cash flow)</h2>
   <div class="box"><p><b>정의</b> — 프로젝트를 채택하기로 한 결정의 <b>직접적 결과</b>로 생기는 회사 전체 미래 현금흐름의 변화.</p></div>
   <div class="cols">
     <div>
@@ -85,10 +119,25 @@
       </ul>
     </div>
   </div>
+  </div>
 </section>
 
-<section class="slide d" data-title="9.2 증분 판단 규칙">
-  <h2>9.2 증분 판단 — "프로젝트를 기각해도 이 현금흐름이 생기는가?"</h2>
+<section class="slide d" data-title="9.2 Incremental rule" data-title-ko="9.2 증분 판단 규칙">
+  <div class="lw" data-l="en">
+  <h2><span class="no">9.2</span>Incremental call — "Does this cash flow occur even if we reject the project?"</h2>
+  <p>Yes → not incremental, exclude. &nbsp;No → incremental, include (regardless of accounting treatment).</p>
+  <table class="wide">
+    <tr><th>Item</th><th>Call</th><th>Rule · example</th></tr>
+    <tr><td>Sunk cost</td><td><b>Out</b></td><td>Already paid or irrevocably committed. E.g., completed marketing study $120,000. Exclude even if capitalized and expensed later</td></tr>
+    <tr><td>Opportunity cost</td><td><b>In</b></td><td>Best alternative use of an owned asset. Charge <b>today's market value (net of sale taxes)</b> — not purchase price or book value</td></tr>
+    <tr><td>Erosion (cannibalization)</td><td><b>In (−)</b></td><td>Cash flow taken from existing products. Exclude the part competitors would take anyway</td></tr>
+    <tr><td>Synergy</td><td><b>In (+)</b></td><td>Boost to existing product sales</td></tr>
+    <tr><td>Net working capital (NWC)</td><td><b>In</b></td><td>Outflow at start, recovered at end. Nominal sum is zero, yet a real cost via time value</td></tr>
+    <tr><td>Financing costs (interest, dividends, principal)</td><td><b>Out</b></td><td>Already in the discount rate (required return, Ch.12). Deducting = double-counting → no interest line in pro forma</td></tr>
+  </table>
+  </div>
+  <div class="lw" data-l="ko" hidden>
+  <h2><span class="no">9.2</span>증분 판단 — "프로젝트를 기각해도 이 현금흐름이 생기는가?"</h2>
   <p>생긴다 → 증분 아님, 제외. &nbsp;생기지 않는다 → 증분, 포함 (회계 처리와 무관).</p>
   <table class="wide">
     <tr><th>항목</th><th>판단</th><th>규칙 · 예</th></tr>
@@ -99,9 +148,26 @@
     <tr><td>순운전자본 (NWC)</td><td><b>In</b></td><td>시작 때 유출, 끝에 회수. 명목 합은 0이어도 시간가치만큼 실제 비용</td></tr>
     <tr><td>금융비용 (interest, dividends, principal)</td><td><b>Out</b></td><td>할인율(요구수익률, Ch.12)에 이미 반영. 빼면 이중 차감 → pro forma에 이자 줄 없음</td></tr>
   </table>
+  </div>
 </section>
 
-<section class="slide d" data-title="Quick check: Is it incremental?">
+<section class="slide d fit" data-title="Quick check: Is it incremental?" data-title-ko="Quick check: Is it incremental?">
+  <div class="lw" data-l="en">
+  <h2>Quick check — Is it incremental? (lecture p.12 answers)</h2>
+  <table class="wide">
+    <tr><th>Item</th><th>In or out?</th><th>Why</th></tr>
+    <tr><td>Marketing study completed last year</td><td><b>Out</b></td><td>Sunk — paid regardless of the decision</td></tr>
+    <tr><td>Market value of land the firm already owns</td><td><b>In</b></td><td>Opportunity cost — forgo the sale</td></tr>
+    <tr><td>Original purchase price of that land</td><td><b>Out</b></td><td>Sunk — book value is not an economic cost</td></tr>
+    <tr><td>Lost profit on an existing product</td><td><b>In</b> (partly)</td><td>Erosion — only the part this project causes</td></tr>
+    <tr><td>Increase in inventory and receivables</td><td><b>In</b></td><td>NWC investment, recovered at end</td></tr>
+    <tr><td>Interest on the loan financing the project</td><td><b>Out</b></td><td>Financing cost — in the discount rate</td></tr>
+    <tr><td>Allocated head-office overhead</td><td><b>In only to the extent total overhead actually rises</b></td><td>A change in allocation alone is not incremental</td></tr>
+    <tr><td>Depreciation on the new equipment</td><td><b>In (via tax effect)</b></td><td>Not a cash flow, but it changes taxes (D × T)</td></tr>
+  </table>
+  <p class="small muted" style="margin-top:12px">The last two rows separate careful analysts from careless ones.</p>
+  </div>
+  <div class="lw" data-l="ko" hidden>
   <h2>Quick check — Is it incremental? (강의 p.12 정답)</h2>
   <table class="wide">
     <tr><th>Item</th><th>In or out?</th><th>Why</th></tr>
@@ -115,10 +181,40 @@
     <tr><td>Depreciation on the new equipment</td><td><b>In (세금 효과로)</b></td><td>현금흐름은 아니지만 세금을 바꾼다 (D × T)</td></tr>
   </table>
   <p class="small muted" style="margin-top:12px">마지막 두 줄이 꼼꼼한 분석가와 부주의한 분석가를 가른다.</p>
+  </div>
 </section>
 
-<section class="slide d" data-title="9.3 Pro forma와 프로젝트 현금흐름">
-  <h2>9.3 Pro forma → OCF → 프로젝트 현금흐름</h2>
+<section class="slide d" data-title="9.3 Pro forma and project cash flow" data-title-ko="9.3 Pro forma와 프로젝트 현금흐름">
+  <div class="lw" data-l="en">
+  <h2><span class="no">9.3</span>Pro forma → OCF → project cash flow</h2>
+  <div class="cols">
+    <div>
+      <h3>Pro forma income statement</h3>
+      <table class="num">
+        <tr><td>Sales</td><td>Units × price</td></tr>
+        <tr><td>− Variable costs</td><td>Units × cost/unit</td></tr>
+        <tr><td>− Fixed costs</td><td>Incremental only</td></tr>
+        <tr><td>− Depreciation</td><td>Tax depreciation</td></tr>
+        <tr class="tot"><td>= EBIT</td><td></td></tr>
+        <tr><td>− Taxes</td><td>EBIT × T</td></tr>
+        <tr class="tot"><td>= NOPAT</td><td>EBIT × (1 − T)</td></tr>
+      </table>
+      <p class="small" style="margin-top:10px">No interest line → NOPAT = net income. Depreciation enters only because it lowers taxes.</p>
+    </div>
+    <div>
+      <h3>Project cash flow — just three pieces</h3>
+      <div class="box"><p class="eq" style="margin:0">Project CF = OCF − Net capital spending − ΔNWC</p></div>
+      <p><b>OCF</b> = EBIT + D − Taxes = NOPAT + D</p>
+      <ul>
+        <li>Net capital spending: asset purchase (Year 0); <b>after-tax</b> sale proceeds at the end are an inflow</li>
+        <li>ΔNWC: increase = outflow; unless told otherwise, fully recovered in the last year</li>
+        <li>Shape: big outflow at Year 0 → middle years are OCF only → last year is large from NWC and salvage recovery</li>
+      </ul>
+    </div>
+  </div>
+  </div>
+  <div class="lw" data-l="ko" hidden>
+  <h2><span class="no">9.3</span>Pro forma → OCF → 프로젝트 현금흐름</h2>
   <div class="cols">
     <div>
       <h3>추정 손익계산서 (pro forma)</h3>
@@ -144,10 +240,35 @@
       </ul>
     </div>
   </div>
+  </div>
 </section>
 
-<section class="slide d" data-title="9.4 순운전자본">
-  <h2>9.4 순운전자본 (NWC) — 매출과 현금 수입은 다르다</h2>
+<section class="slide d" data-title="9.4 Net working capital" data-title-ko="9.4 순운전자본">
+  <div class="lw" data-l="en">
+  <h2><span class="no">9.4</span>Net working capital (NWC) — sales are not cash receipts</h2>
+  <div class="cols">
+    <div>
+      <h3>Accrual vs cash</h3>
+      <ul>
+        <li>Accounting records sales and costs when they occur (accrual basis). Credit sale of $1,000 → sales $1,000, receivables $1,000, cash 0</li>
+        <li><b>Cash collected = sales − increase in receivables</b></li>
+        <li>Pro forma is accrual → <b>subtracting ΔNWC converts back to cash</b> (it is not an extra cost)</li>
+      </ul>
+    </div>
+    <div>
+      <h3>Sign and timing</h3>
+      <table class="wide">
+        <tr><th>Situation</th><th>Cash flow</th></tr>
+        <tr><td>NWC increases (inventory, receivables up)</td><td>Outflow (−)</td></tr>
+        <tr><td>NWC decreases (receivables collected)</td><td>Inflow (+)</td></tr>
+        <tr><td>Last year</td><td>Remaining NWC fully recovered (+)</td></tr>
+      </table>
+      <p class="small" style="margin-top:12px">In growth, NWC rises with sales so early adjustments are negative (−); it reverses when the business winds down. Count the <b>change (Δ), not the level</b>.</p>
+    </div>
+  </div>
+  </div>
+  <div class="lw" data-l="ko" hidden>
+  <h2><span class="no">9.4</span>순운전자본 (NWC) — 매출과 현금 수입은 다르다</h2>
   <div class="cols">
     <div>
       <h3>발생주의 vs 현금</h3>
@@ -168,10 +289,38 @@
       <p class="small" style="margin-top:12px">성장기에는 NWC가 매출과 함께 늘어 초반 조정이 음(−), 사업을 접을 때 반대로 돈다. 셀 것은 <b>수준이 아니라 변화(Δ)</b>.</p>
     </div>
   </div>
+  </div>
 </section>
 
-<section class="slide d" data-title="9.4 세법 감가상각과 MACRS">
-  <h2>9.4 세법 감가상각 — 정액법 vs MACRS</h2>
+<section class="slide d" data-title="9.4 Tax depreciation and MACRS" data-title-ko="9.4 세법 감가상각과 MACRS">
+  <div class="lw" data-l="en">
+  <h2><span class="no">9.4</span>Tax depreciation — straight-line vs MACRS</h2>
+  <div class="cols wide-right">
+    <div>
+      <ul>
+        <li><b>Straight-line</b>: cost ÷ useful life, down to zero or a given salvage value. Course default</li>
+        <li><b>MACRS</b>: each asset has a class life; fixed percentage of <b>original cost</b> each year</li>
+        <li><b>Half-year convention</b>: assumes mid-year purchase → 3-year class depreciates over 4 years, 5-year class over 6</li>
+        <li>MACRS ignores salvage value, always depreciates to zero</li>
+        <li>Total deductions are equal — MACRS only <b>accelerates</b> them</li>
+      </ul>
+    </div>
+    <div>
+      <table class="num wide">
+        <tr><th>Year</th><th>3-year</th><th>5-year</th><th>7-year</th></tr>
+        <tr><td>1</td><td>33.33%</td><td>20.00%</td><td>14.29%</td></tr>
+        <tr><td>2</td><td>44.45%</td><td>32.00%</td><td>24.49%</td></tr>
+        <tr><td>3</td><td>14.81%</td><td>19.20%</td><td>17.49%</td></tr>
+        <tr><td>4</td><td>7.41%</td><td>11.52%</td><td>12.49%</td></tr>
+        <tr><td>5</td><td></td><td>11.52%</td><td>8.93%</td></tr>
+        <tr><td>6</td><td></td><td>5.76%</td><td>8.92%</td></tr>
+      </table>
+      <p class="small" style="margin-top:10px">D<sub>t</sub> = cost × rate<sub>t</sub> (not applied to the declining book value)</p>
+    </div>
+  </div>
+  </div>
+  <div class="lw" data-l="ko" hidden>
+  <h2><span class="no">9.4</span>세법 감가상각 — 정액법 vs MACRS</h2>
   <div class="cols wide-right">
     <div>
       <ul>
@@ -195,10 +344,28 @@
       <p class="small" style="margin-top:10px">D<sub>t</sub> = 원가 × rate<sub>t</sub> (줄어든 장부가에 곱하지 않는다)</p>
     </div>
   </div>
+  </div>
 </section>
 
-<section class="slide d" data-title="9.4 세후 잔존가치">
-  <h2>9.4 장부가 vs 시장가 — 세후 잔존가치 (after-tax salvage)</h2>
+<section class="slide d" data-title="9.4 After-tax salvage value" data-title-ko="9.4 세후 잔존가치">
+  <div class="lw" data-l="en">
+  <h2><span class="no">9.4</span>Book value vs market value — after-tax salvage</h2>
+  <div class="box"><p class="eq" style="margin:0">After-tax salvage = MV − T × (MV − BV)</p></div>
+  <div class="cols">
+    <div>
+      <h3>Sold above book value (MV &gt; BV)</h3>
+      <ul><li>Too much depreciation was taken → gain is taxed (recapture)</li><li>After-tax proceeds &lt; sale price</li></ul>
+    </div>
+    <div>
+      <h3>Sold below book value (MV &lt; BV)</h3>
+      <ul><li>Too little depreciation was taken → loss deduction, add the tax savings</li><li>After-tax proceeds &gt; sale price</li></ul>
+    </div>
+  </div>
+  <p><b>Lecture example</b>: $90,000, straight-line 5 years, sold after 3 → BV = 90,000 − 3 × 18,000 = 36,000. Sell at $25,000: loss 11,000 × 0.21 = 2,310 tax saved → <b>$27,310</b>; sell at $45,000: gain 9,000 × 0.21 = 1,890 taxed → <b>$43,110</b>.</p>
+  <p class="small muted">BV = cost − accumulated depreciation. Selling a MACRS asset before its class life ends leaves the remaining percentages as BV.</p>
+  </div>
+  <div class="lw" data-l="ko" hidden>
+  <h2><span class="no">9.4</span>장부가 vs 시장가 — 세후 잔존가치 (after-tax salvage)</h2>
   <div class="box"><p class="eq" style="margin:0">After-tax salvage = MV − T × (MV − BV)</p></div>
   <div class="cols">
     <div>
@@ -212,10 +379,26 @@
   </div>
   <p><b>강의 예</b>: $90,000, 정액 5년, 3년 뒤 매각 → BV = 90,000 − 3 × 18,000 = 36,000. $25,000에 팔면 손실 11,000 × 0.21 = 2,310 절세 → <b>$27,310</b>; $45,000에 팔면 차익 9,000 × 0.21 = 1,890 과세 → <b>$43,110</b>.</p>
   <p class="small muted">BV = 원가 − 누적 감가상각. MACRS 자산을 class life 전에 팔면 남은 비율만큼 BV가 남는다.</p>
+  </div>
 </section>
 
-<section class="slide d" data-title="9.5 OCF 세 가지 정의">
-  <h2>9.5 OCF 세 가지 정의 — 한 항등식의 재배열</h2>
+<section class="slide d" data-title="9.5 Three OCF definitions" data-title-ko="9.5 OCF 세 가지 정의">
+  <div class="lw" data-l="en">
+  <h2><span class="no">9.5</span>Three OCF definitions — one identity rearranged</h2>
+  <table class="wide">
+    <tr><th>Method</th><th>Formula</th><th>Lecture project (S 160,000 · C 110,000 · D 30,000 · T 21%)</th></tr>
+    <tr><td>Bottom-up</td><td>OCF = NOPAT + D<br><span class="small">(textbook: net income + D, same when no interest)</span></td><td>15,800 + 30,000 = 45,800</td></tr>
+    <tr><td>Top-down</td><td>OCF = Sales − Costs − Taxes</td><td>160,000 − 110,000 − 4,200 = 45,800</td></tr>
+    <tr><td>Tax shield</td><td>OCF = (Sales − Costs)(1 − T) + D × T</td><td>39,500 + 6,300 = 45,800</td></tr>
+  </table>
+  <ul style="margin-top:18px">
+    <li><b>Depreciation tax shield</b> = D × T — the only way depreciation affects cash flow</li>
+    <li>D is not visible in the top-down formula, but it is <b>inside Taxes</b></li>
+    <li>If the three differ, there is a calculation error — use them to cross-check each other</li>
+  </ul>
+  </div>
+  <div class="lw" data-l="ko" hidden>
+  <h2><span class="no">9.5</span>OCF 세 가지 정의 — 한 항등식의 재배열</h2>
   <table class="wide">
     <tr><th>방법</th><th>식</th><th>강의 프로젝트 (S 160,000 · C 110,000 · D 30,000 · T 21%)</th></tr>
     <tr><td>Bottom-up</td><td>OCF = NOPAT + D<br><span class="small">(교재: net income + D, 이자 없으면 같음)</span></td><td>15,800 + 30,000 = 45,800</td></tr>
@@ -227,9 +410,25 @@
     <li>Top-down은 식에 D가 안 보이지만 <b>Taxes 안에</b> D가 들어 있다</li>
     <li>셋이 다르게 나오면 계산 실수 — 서로 검산용으로 쓴다</li>
   </ul>
+  </div>
 </section>
 
-<section class="slide d" data-title="헷갈리는 쌍 비교">
+<section class="slide d" data-title="Commonly confused pairs" data-title-ko="헷갈리는 쌍 비교">
+  <div class="lw" data-l="en">
+  <h2>Commonly confused pairs</h2>
+  <table class="wide">
+    <tr><th>Pair</th><th>Key distinction</th></tr>
+    <tr><td>With/without vs before/after</td><td>The comparison is with "no project" — not earlier vs later in time</td></tr>
+    <tr><td>Sunk cost vs opportunity cost</td><td>Money spent in the past (exclude) vs value given up now (include, at market value)</td></tr>
+    <tr><td>Erosion vs synergy</td><td>Existing-product cash flow falls (−) vs rises (+); a loss that would happen anyway is not erosion</td></tr>
+    <tr><td>NOPAT vs OCF</td><td>Add D to NOPAT to get OCF. Discounting NOPAT alone undervalues</td></tr>
+    <tr><td>Book value vs market value</td><td>Tax applies to the difference: MV − T(MV − BV)</td></tr>
+    <tr><td>Straight-line vs MACRS</td><td>Same total deductions; MACRS is earlier → higher PV of tax shield. But on early sale BV is lower, so taxable gain is higher</td></tr>
+    <tr><td>NWC level vs change</td><td>Cash flow is ΔNWC. Even if the nominal sum is 0, the PV cost is positive (+)</td></tr>
+    <tr><td>Project taxes vs firm's actual taxes</td><td>Project taxes = EBIT × T (assumes all-equity financing). Interest tax shield belongs in the discount rate</td></tr>
+  </table>
+  </div>
+  <div class="lw" data-l="ko" hidden>
   <h2>헷갈리는 쌍 비교</h2>
   <table class="wide">
     <tr><th>쌍</th><th>구별 포인트</th></tr>
@@ -242,9 +441,38 @@
     <tr><td>NWC 수준 vs 변화</td><td>현금흐름은 ΔNWC. 명목 합 0이어도 PV 비용은 양(+)</td></tr>
     <tr><td>프로젝트 세금 vs 회사 실제 세금</td><td>프로젝트 세금 = EBIT × T (전액 자기자본 조달 가정). 이자 절세는 할인율 쪽</td></tr>
   </table>
+  </div>
 </section>
 
-<section class="slide d" data-title="풀이 순서와 자주 하는 실수">
+<section class="slide d" data-title="Solution steps and common mistakes" data-title-ko="풀이 순서와 자주 하는 실수">
+  <div class="lw" data-l="en">
+  <h2>Solution steps · Common mistakes</h2>
+  <div class="cols">
+    <div>
+      <h3>Solution steps</h3>
+      <ol>
+        <li>In / Out call for each item (exclude sunk costs and interest; include opportunity cost and erosion)</li>
+        <li>Depreciation schedule (straight-line or MACRS) → BV at sale</li>
+        <li>Pro forma: EBIT → Taxes → NOPAT</li>
+        <li>OCF = NOPAT + D (cross-check with another definition)</li>
+        <li>Year 0: −asset − NWC; last year: + NWC + after-tax salvage</li>
+        <li>NPV · IRR (BA II Plus CF worksheet)</li>
+      </ol>
+    </div>
+    <div>
+      <h3>Common mistakes (Sorensen example, correct NPV $11,565.74)</h3>
+      <table class="num wide">
+        <tr><th>Mistake</th><th>Wrong NPV</th></tr>
+        <tr><td>Include sunk cost $75,000</td><td>−63,434.26</td></tr>
+        <tr><td>Omit NWC recovery</td><td>−59,483.89</td></tr>
+        <tr><td>Subtract after-tax interest</td><td>−36,772.75</td></tr>
+        <tr><td>Omit opportunity cost (rent)</td><td>+103,639.05</td></tr>
+      </table>
+      <p class="small" style="margin-top:10px">The first three lead to rejecting a good project; the last one badly inflates value.</p>
+    </div>
+  </div>
+  </div>
+  <div class="lw" data-l="ko" hidden>
   <h2>풀이 순서 · 자주 하는 실수</h2>
   <div class="cols">
     <div>
@@ -270,16 +498,35 @@
       <p class="small" style="margin-top:10px">앞 세 실수는 좋은 프로젝트를 기각하게 만들고, 마지막은 가치를 크게 부풀린다.</p>
     </div>
   </div>
+  </div>
 </section>
 
-<!-- ───────────── 연습문제 ───────────── -->
-<section class="slide section" data-title="연습문제">
+<section class="slide section" data-title="Practice problems" data-title-ko="연습문제">
+  <div class="lw" data-l="en">
+  <h1>Practice problems</h1>
+  <p class="sub" style="font-size:44px;opacity:.72;margin-top:30px">20 problems · one per slide · → for the solution</p>
+  </div>
+  <div class="lw" data-l="ko" hidden>
   <h1>연습문제</h1>
   <p class="sub" style="font-size:44px;opacity:.72;margin-top:30px">20문제 · 한 장에 한 문제 · → 로 풀이</p>
+  </div>
 </section>
 
-<section class="slide d" data-title="Q1 · With and without">
-  <h2>Q1 · With and without</h2>
+<section class="slide d" data-title="Q1 · With and without" data-title-ko="Q1 · With and without">
+  <div class="lw" data-l="en">
+  <h2><span class="no">Q1</span>With and without</h2>
+  <p class="q">A division's sales are currently $2,000,000. Because of a competitor's entry, next year's sales were already expected to fall <b>5%</b>. After the firm launched a new product, the division's sales fell <b>8%</b>. How much of the decline is due to the new product (erosion)? Also explain why a "before and after" launch comparison is wrong.</p>
+  <div class="sol step">
+    <p><b>Without</b> (no project): −5% → 2,000,000 × 5% = 100,000 decline — due to the competitor, happens anyway</p>
+    <p><b>With</b> (project): −8% → 2,000,000 × 8% = 160,000 decline</p>
+    <p><b>Incremental erosion</b> = (8% − 5%) × 2,000,000 = <b>$60,000</b> (in the analysis, subtract the contribution margin lost on these sales as a cost)</p>
+  </div>
+  <div class="sol step">
+    <p>Before/after blames the full 160,000 on the new product and undervalues the project. The benchmark is "had we not launched," not "before launch."</p>
+  </div>
+  </div>
+  <div class="lw" data-l="ko" hidden>
+  <h2><span class="no">Q1</span>With and without</h2>
   <p class="q">한 사업부의 매출은 현재 $2,000,000이다. 경쟁사 진입 때문에 내년 매출이 <b>5%</b> 줄 것으로 이미 예상돼 있었다. 회사가 신제품을 출시한 뒤 이 사업부 매출은 <b>8%</b> 줄었다. 매출 감소 중 신제품 때문인 부분(잠식, erosion)은 얼마인가? 출시 "전후(before and after)" 비교가 왜 틀리는지도 설명하라.</p>
   <div class="sol step">
     <p><b>Without</b> (프로젝트 없음): −5% → 2,000,000 × 5% = 100,000 감소 — 경쟁사 탓, 어차피 발생</p>
@@ -289,10 +536,24 @@
   <div class="sol step">
     <p>전후 비교는 160,000 전부를 신제품 탓으로 돌려 프로젝트를 과소평가한다. 기준은 "출시 전"이 아니라 "출시하지 않았을 때"다.</p>
   </div>
+  </div>
 </section>
 
-<section class="slide d" data-title="Q2 · 매몰원가">
-  <h2>Q2 · 매몰원가 (sunk cost)</h2>
+<section class="slide d" data-title="Q2 · Sunk cost" data-title-ko="Q2 · 매몰원가">
+  <div class="lw" data-l="en">
+  <h2><span class="no">Q2</span>Sunk cost</h2>
+  <p class="q">The firm has already spent <b>$3.0 million</b> on a prototype (non-refundable). Finishing costs <b>$1.2 million</b> more, and the PV of the finished product's future cash flows is <b>$2.0 million</b>. An executive says, "Total cost 4.2 &gt; value 2.0, so stop." Is this right?</p>
+  <div class="sol step">
+    <p>Today's decision: finishing gives +2.0 − 1.2 = <b>NPV +$0.8 million</b> &gt; 0 → <b>finish</b></p>
+    <p>The $3.0 million is gone whether we finish or stop — no decision can change it, so drop it from the analysis entirely</p>
+  </div>
+  <div class="sol step">
+    <p>Stopping on the executive's logic throws away 0.8 million of value — wasting the sunk cost "twice" (lecture p.7)</p>
+    <p class="small">Note: spending not yet paid but <b>irrevocably committed</b> is also sunk — even if capitalized and expensed later.</p>
+  </div>
+  </div>
+  <div class="lw" data-l="ko" hidden>
+  <h2><span class="no">Q2</span>매몰원가 (sunk cost)</h2>
   <p class="q">회사는 시제품 개발에 이미 <b>$3.0 million</b>을 썼다(환불 불가). 완성하려면 <b>$1.2 million</b>이 더 들고, 완성된 제품의 미래 현금흐름 현재가치는 <b>$2.0 million</b>이다. 한 임원은 "총비용 4.2 &gt; 가치 2.0이니 중단하자"고 한다. 옳은가?</p>
   <div class="sol step">
     <p>오늘의 결정: 완성하면 +2.0 − 1.2 = <b>NPV +$0.8 million</b> &gt; 0 → <b>완성한다</b></p>
@@ -302,10 +563,25 @@
     <p>임원의 논리대로 중단하면 0.8 million의 가치를 버린다 — 매몰원가를 "두 번" 낭비하는 셈 (강의 p.7)</p>
     <p class="small">주의: 아직 돈이 나가지 않았어도 <b>취소할 수 없게 약정된(irrevocably committed)</b> 지출은 매몰원가다. 자본화돼 나중에 비용 처리되더라도 마찬가지.</p>
   </div>
+  </div>
 </section>
 
-<section class="slide d" data-title="Q3 · 기회비용">
-  <h2>Q3 · 기회비용 (opportunity cost)</h2>
+<section class="slide d" data-title="Q3 · Opportunity cost" data-title-ko="Q3 · 기회비용">
+  <div class="lw" data-l="en">
+  <h2><span class="no">Q3</span>Opportunity cost</h2>
+  <p class="q">A project uses a warehouse the firm bought years ago for <b>$200,000</b> (book value also $200,000). It could be sold today for <b>$550,000</b>. Tax rate 21%. What opportunity cost is charged to the project at Year 0? How is the purchase price treated?</p>
+  <div class="sol step">
+    <p>Rule: today's market value, <b>net of tax on the sale</b> (lecture p.8 "net of any tax on the sale")</p>
+    <p>Tax on gain = 0.21 × (550,000 − 200,000) = 73,500</p>
+    <p>Opportunity cost = 550,000 − 73,500 = <b>$476,500</b> → −476,500 in the Year 0 cash flow</p>
+  </div>
+  <div class="sol step">
+    <p>The $200,000 purchase price is sunk — not used in the decision. Book value is not an economic cost either (used only for tax calculation).</p>
+    <p>"We already own it, so it's free" — the most common mistake that makes bad projects look good.</p>
+  </div>
+  </div>
+  <div class="lw" data-l="ko" hidden>
+  <h2><span class="no">Q3</span>기회비용 (opportunity cost)</h2>
   <p class="q">프로젝트가 회사가 몇 년 전 <b>$200,000</b>에 산 창고를 쓴다(장부가도 $200,000). 이 창고는 오늘 <b>$550,000</b>에 팔 수 있다. 세율 21%. Year 0에 프로젝트에 부과할 기회비용은? 매입가는 어떻게 처리하나?</p>
   <div class="sol step">
     <p>규칙: 오늘 시장가치, <b>매각 세금 차감 후</b> (강의 p.8 "net of any tax on the sale")</p>
@@ -316,10 +592,29 @@
     <p>매입가 $200,000은 매몰원가 — 판단에 쓰지 않는다. 장부가도 경제적 비용이 아니다(세금 계산에만 쓰인다).</p>
     <p>"이미 갖고 있으니 공짜" — 나쁜 프로젝트를 좋아 보이게 만드는 가장 흔한 실수.</p>
   </div>
+  </div>
 </section>
 
-<section class="slide d" data-title="Q4 · 부수효과">
-  <h2>Q4 · 부수효과 (side effects): 잠식과 시너지</h2>
+<section class="slide d" data-title="Q4 · Side effects" data-title-ko="Q4 · 부수효과">
+  <div class="lw" data-l="en">
+  <h2><span class="no">Q4</span>Side effects: erosion and synergy</h2>
+  <p class="q">A new product's contribution is $600,000 per year. Existing products' contribution falls $100,000 per year, of which $40,000 would be lost to competitors even without the new product. The new product also boosts accessory sales, adding $25,000 of contribution per year. What is the project's annual incremental contribution?</p>
+  <div class="sol step">
+    <p>Erosion — only the part the project causes: 100,000 − 40,000 = 60,000</p>
+    <p>Synergy: +25,000</p>
+    <p>Incremental contribution = 600,000 − 60,000 + 25,000 = <b>$565,000</b></p>
+  </div>
+  <div class="sol step">
+    <table class="num">
+      <tr><th>Common wrong answer</th><th>Value</th><th>Mistake</th></tr>
+      <tr><td>Deduct all erosion</td><td>525,000</td><td>Also deducts the 40,000 lost anyway</td></tr>
+      <tr><td>Omit synergy</td><td>540,000</td><td>Ignores the existing-product gain</td></tr>
+      <tr><td>Ignore side effects</td><td>600,000</td><td>Applies stand-alone without firm-wide effects</td></tr>
+    </table>
+  </div>
+  </div>
+  <div class="lw" data-l="ko" hidden>
+  <h2><span class="no">Q4</span>부수효과 (side effects): 잠식과 시너지</h2>
   <p class="q">신제품의 공헌이익(contribution)은 연 $600,000이다. 기존 제품의 공헌이익이 연 $100,000 줄어드는데, 그중 $40,000은 경쟁사 때문에 신제품이 없어도 잃을 몫이다. 신제품은 액세서리 판매를 늘려 공헌이익을 연 $25,000 더한다. 프로젝트의 연간 증분 공헌이익은?</p>
   <div class="sol step">
     <p>잠식 (erosion) — 프로젝트가 일으킨 몫만: 100,000 − 40,000 = 60,000</p>
@@ -334,10 +629,26 @@
       <tr><td>부수효과 무시</td><td>600,000</td><td>독립 원칙을 회사 전체 효과 없이 적용</td></tr>
     </table>
   </div>
+  </div>
 </section>
 
-<section class="slide d" data-title="Q5 · Is it incremental?">
-  <h2>Q5 · Is it incremental? — 각 항목 In / Out</h2>
+<section class="slide d" data-title="Q5 · Is it incremental?" data-title-ko="Q5 · Is it incremental?">
+  <div class="lw" data-l="en">
+  <h2><span class="no">Q5</span>Is it incremental? — In / Out for each item</h2>
+  <table class="wide">
+    <tr><th>Item</th><th>Call · reason</th></tr>
+    <tr><td>Marketing study completed last year</td><td class="step"><b>Out</b> — sunk</td></tr>
+    <tr><td>Market value of land the firm already owns</td><td class="step"><b>In</b> — opportunity cost (after-tax sale proceeds)</td></tr>
+    <tr><td>Original purchase price of that land</td><td class="step"><b>Out</b> — sunk; book value is not an economic cost</td></tr>
+    <tr><td>Lost profit on an existing product</td><td class="step"><b>In</b> — erosion, only the part this project causes</td></tr>
+    <tr><td>Increase in inventory and receivables</td><td class="step"><b>In</b> — NWC investment, recovered at end</td></tr>
+    <tr><td>Interest on the loan financing the project</td><td class="step"><b>Out</b> — financing, in the discount rate</td></tr>
+    <tr><td>Allocated head-office overhead</td><td class="step"><b>In only to the extent</b> total overhead actually rises</td></tr>
+    <tr><td>Depreciation on the new equipment</td><td class="step">Not a cash flow, but <b>In because it changes taxes</b> (D × T)</td></tr>
+  </table>
+  </div>
+  <div class="lw" data-l="ko" hidden>
+  <h2><span class="no">Q5</span>Is it incremental? — 각 항목 In / Out</h2>
   <table class="wide">
     <tr><th>Item</th><th>판단 · 이유</th></tr>
     <tr><td>Marketing study completed last year</td><td class="step"><b>Out</b> — sunk</td></tr>
@@ -349,10 +660,24 @@
     <tr><td>Allocated head-office overhead</td><td class="step">총 간접비가 <b>실제로 늘어난 만큼만 In</b></td></tr>
     <tr><td>Depreciation on the new equipment</td><td class="step">현금흐름은 아니지만 <b>세금을 바꾸므로 In</b> (D × T)</td></tr>
   </table>
+  </div>
 </section>
 
-<section class="slide d" data-title="Q6 · 금융비용 제외">
-  <h2>Q6 · 금융비용은 현금흐름에서 뺀다</h2>
+<section class="slide d" data-title="Q6 · Exclude financing costs" data-title-ko="Q6 · 금융비용 제외">
+  <div class="lw" data-l="en">
+  <h2><span class="no">Q6</span>Financing costs stay out of cash flow</h2>
+  <p class="q">A project has EBIT of $180,000 per year and depreciation of $50,000 per year. Part of the funding is a loan, with interest of $30,000 per year. Tax rate 21%. What taxes and OCF go into the project cash flow forecast?</p>
+  <div class="sol step">
+    <p>No interest line in the pro forma → tax directly on EBIT: Taxes = 0.21 × 180,000 = <b>$37,800</b></p>
+    <p>OCF = EBIT + D − Taxes = 180,000 + 50,000 − 37,800 = <b>$192,200</b></p>
+  </div>
+  <div class="sol step">
+    <p>Wrong answer 0.21 × (180,000 − 30,000) = 31,500: puts the interest tax shield into cash flow — that effect belongs in the discount rate (Ch.12)</p>
+    <p>Deducting interest and also discounting at a rate that includes the cost of debt penalizes the same borrowing <b>twice</b>. So project taxes are "the taxes we would pay if all-equity financed."</p>
+  </div>
+  </div>
+  <div class="lw" data-l="ko" hidden>
+  <h2><span class="no">Q6</span>금융비용은 현금흐름에서 뺀다</h2>
   <p class="q">프로젝트의 EBIT는 연 $180,000, 감가상각은 연 $50,000이다. 자금 일부를 대출로 조달해 이자가 연 $30,000이다. 세율 21%. 프로젝트 현금흐름 예측에 넣을 세금과 OCF는?</p>
   <div class="sol step">
     <p>Pro forma에 이자 줄 없음 → EBIT에서 바로 세금: Taxes = 0.21 × 180,000 = <b>$37,800</b></p>
@@ -362,10 +687,34 @@
     <p>오답 0.21 × (180,000 − 30,000) = 31,500: 이자 절세효과를 현금흐름에 넣은 것 — 그 효과는 할인율(Ch.12) 쪽에 있다</p>
     <p>이자를 빼고 부채비용이 들어간 할인율로 다시 할인하면 같은 차입을 <b>두 번</b> 벌주는 셈. 그래서 프로젝트 세금은 "전액 자기자본 조달일 때 낼 세금"이다.</p>
   </div>
+  </div>
 </section>
 
-<section class="slide d" data-title="Q7 · 강의 프로젝트 ① Pro forma와 OCF">
-  <h2>Q7 · 강의 프로젝트 ① Pro forma와 OCF</h2>
+<section class="slide d" data-title="Q7 · Lecture project ① Pro forma and OCF" data-title-ko="Q7 · 강의 프로젝트 ① Pro forma와 OCF">
+  <div class="lw" data-l="en">
+  <h2><span class="no">Q7</span>Lecture project ① Pro forma and OCF</h2>
+  <p class="q">Fixed assets $90,000 (3-year straight-line, zero salvage) · life 3 years · NWC $20,000 (recovered at end of year 3) · sales $160,000 per year · costs (variable + fixed, excluding depreciation) $110,000 per year · tax rate 21% · required return 12%. Build the same pro forma for each year and find OCF. How much tax does depreciation save?</p>
+  <div class="cols">
+    <div class="sol step">
+      <table class="num">
+        <tr><th>Each year</th><th>$</th></tr>
+        <tr><td>Sales</td><td>160,000</td></tr>
+        <tr><td>− Costs</td><td>110,000</td></tr>
+        <tr><td>− Depreciation (90,000 / 3)</td><td>30,000</td></tr>
+        <tr class="tot"><td>= EBIT</td><td>20,000</td></tr>
+        <tr><td>− Taxes (21%)</td><td>4,200</td></tr>
+        <tr class="tot"><td>= NOPAT</td><td>15,800</td></tr>
+      </table>
+    </div>
+    <div class="sol step">
+      <p>OCF = EBIT + D − Taxes = 20,000 + 30,000 − 4,200 = <b>$45,800</b></p>
+      <p>= NOPAT + D = 15,800 + 30,000</p>
+      <p>Tax shield = 30,000 × 0.21 = <b>$6,300</b> — without depreciation, taxes would be 50,000 × 0.21 = 10,500 (actual 4,200)</p>
+    </div>
+  </div>
+  </div>
+  <div class="lw" data-l="ko" hidden>
+  <h2><span class="no">Q7</span>강의 프로젝트 ① Pro forma와 OCF</h2>
   <p class="q">고정자산 $90,000 (3년 정액, 잔존가치 0) · 수명 3년 · NWC $20,000 (3년 말 회수) · 매출 연 $160,000 · 비용(변동+고정, 감가상각 제외) 연 $110,000 · 세율 21% · 요구수익률 12%. 매년 같은 pro forma를 만들고 OCF를 구하라. 감가상각은 세금을 얼마나 줄이나?</p>
   <div class="cols">
     <div class="sol step">
@@ -385,10 +734,38 @@
       <p>절세효과 = 30,000 × 0.21 = <b>$6,300</b> — 감가상각이 없으면 세금은 50,000 × 0.21 = 10,500 (실제 4,200)</p>
     </div>
   </div>
+  </div>
 </section>
 
-<section class="slide d" data-title="Q8 · 강의 프로젝트 ② 현금흐름과 NPV">
-  <h2>Q8 · 강의 프로젝트 ② 현금흐름, NPV, IRR</h2>
+<section class="slide d" data-title="Q8 · Lecture project ② Cash flow and NPV" data-title-ko="Q8 · 강의 프로젝트 ② 현금흐름과 NPV">
+  <div class="lw" data-l="en">
+  <h2><span class="no">Q8</span>Lecture project ② Cash flow, NPV, IRR</h2>
+  <p class="q">The Q7 project (OCF $45,800 per year, asset $90,000, NWC $20,000 recovered at end of year 3, r = 12%). Build the Year 0–3 cash flow table, find NPV and IRR, and decide.</p>
+  <div class="sol step">
+    <table class="num wide">
+      <tr><th>Year</th><th>0</th><th>1</th><th>2</th><th>3</th></tr>
+      <tr><td>Operating cash flow</td><td></td><td>45,800</td><td>45,800</td><td>45,800</td></tr>
+      <tr><td>Capital spending</td><td>−90,000</td><td></td><td></td><td></td></tr>
+      <tr><td>Change in NWC</td><td>−20,000</td><td></td><td></td><td>+20,000</td></tr>
+      <tr class="tot"><td>Project cash flow</td><td>−110,000</td><td>45,800</td><td>45,800</td><td>65,800</td></tr>
+    </table>
+  </div>
+  <div class="cols">
+    <div class="sol step">
+      <p>NPV = −110,000 + 45,800/1.12 + 45,800/1.12<sup>2</sup> + 65,800/1.12<sup>3</sup></p>
+      <p>= −110,000 + 40,892.86 + 36,511.48 + 46,835.14 = <b>$14,239.48</b></p>
+      <p>IRR = <b>18.93%</b> &gt; 12% → <b>accept</b> (conventional project, so both rules agree)</p>
+    </div>
+    <pre class="ba sol step">CF  2nd [CLR WORK]
+CF0 −110000 ENTER ↓
+C01  45800 ENTER ↓  F01 2 ENTER ↓
+C02  65800 ENTER ↓  F02 1 ENTER ↓
+NPV  I 12 ENTER ↓  CPT → 14,239.48
+IRR  CPT → 18.93</pre>
+  </div>
+  </div>
+  <div class="lw" data-l="ko" hidden>
+  <h2><span class="no">Q8</span>강의 프로젝트 ② 현금흐름, NPV, IRR</h2>
   <p class="q">Q7의 프로젝트 (OCF 연 $45,800, 자산 $90,000, NWC $20,000 3년 말 회수, r = 12%). Year 0–3 현금흐름표를 만들고 NPV·IRR을 구해 결정하라.</p>
   <div class="sol step">
     <table class="num wide">
@@ -412,10 +789,36 @@ C02  65800 ENTER ↓  F02 1 ENTER ↓
 NPV  I 12 ENTER ↓  CPT → 14,239.48
 IRR  CPT → 18.93</pre>
   </div>
+  </div>
 </section>
 
-<section class="slide d" data-title="Q9 · Sorensen (a) 증분 판단">
-  <h2>Q9 · Sorensen Manufacturing (a) — 증분이 아닌 항목은?</h2>
+<section class="slide d" data-title="Q9 · Sorensen (a) Incremental call" data-title-ko="Q9 · Sorensen (a) 증분 판단">
+  <div class="lw" data-l="en">
+  <h2><span class="no">Q9</span>Sorensen Manufacturing (a) — which items are not incremental?</h2>
+  <ul class="q" style="font-size:27px">
+    <li>Market research $75,000 paid last year</li>
+    <li>Equipment $540,000, straight-line over 4 years to zero, no value at end</li>
+    <li>Uses a firm-owned building — currently leased out at $40,000 per year (pre-tax); tenant must leave</li>
+    <li>Sell 30,000 units per year × $42, variable cost $28/unit, additional fixed costs $95,000 per year</li>
+    <li>Existing product sales fall by 4,000 units per year, contribution $15 per unit</li>
+    <li>NWC $120,000 invested at start, fully recovered at end</li>
+    <li>Borrow $300,000 at 7%, interest $21,000 per year · tax rate 21% · required return 14%</li>
+  </ul>
+  <div class="cols">
+    <div class="sol step">
+      <p><b>Not incremental</b></p>
+      <p>· Market research $75,000 — sunk, independent of go/no-go</p>
+      <p>· Interest $21,000/year — financing cost, in the 14% discount rate</p>
+    </div>
+    <div class="sol step">
+      <p><b>Incremental and easy to miss</b></p>
+      <p>· Forgone rent $40,000/year — opportunity cost of the building</p>
+      <p>· Erosion 4,000 × $15 = $60,000/year — lost contribution on existing product</p>
+    </div>
+  </div>
+  </div>
+  <div class="lw" data-l="ko" hidden>
+  <h2><span class="no">Q9</span>Sorensen Manufacturing (a) — 증분이 아닌 항목은?</h2>
   <ul class="q" style="font-size:27px">
     <li>작년 시장조사비 $75,000 지급</li>
     <li>장비 $540,000, 4년 정액법으로 0까지, 종료 시 가치 없음</li>
@@ -437,10 +840,39 @@ IRR  CPT → 18.93</pre>
       <p>· 잠식 4,000 × $15 = $60,000/년 — 기존 제품 공헌이익 손실</p>
     </div>
   </div>
+  </div>
 </section>
 
-<section class="slide d" data-title="Q10 · Sorensen (b) Pro forma와 OCF">
-  <h2>Q10 · Sorensen (b) — Pro forma와 OCF</h2>
+<section class="slide d" data-title="Q10 · Sorensen (b) Pro forma and OCF" data-title-ko="Q10 · Sorensen (b) Pro forma와 OCF">
+  <div class="lw" data-l="en">
+  <h2><span class="no">Q10</span>Sorensen (b) — Pro forma and OCF</h2>
+  <p class="q">Using the Sorensen data from Q9, build the same pro forma income statement for each year and find OCF. (Tax rate 21%)</p>
+  <div class="cols">
+    <div class="sol step">
+      <table class="num">
+        <tr><th>Pro forma, each year</th><th>$</th></tr>
+        <tr><td>Sales (30,000 × $42)</td><td>1,260,000</td></tr>
+        <tr><td>− Variable costs (30,000 × $28)</td><td>840,000</td></tr>
+        <tr><td>− Fixed costs</td><td>95,000</td></tr>
+        <tr><td>− Forgone rent</td><td>40,000</td></tr>
+        <tr><td>− Erosion (4,000 × $15)</td><td>60,000</td></tr>
+        <tr><td>− Depreciation (540,000 / 4)</td><td>135,000</td></tr>
+        <tr class="tot"><td>= EBIT</td><td>90,000</td></tr>
+        <tr><td>− Taxes (21%)</td><td>18,900</td></tr>
+        <tr class="tot"><td>= NOPAT</td><td>71,100</td></tr>
+      </table>
+    </div>
+    <div class="sol step">
+      <p>OCF = NOPAT + D = 71,100 + 135,000 = <b>$206,100</b></p>
+      <p>Cross-check (tax shield):</p>
+      <p>S − C = 1,260,000 − 840,000 − 95,000 − 40,000 − 60,000 = 225,000</p>
+      <p>225,000 × 0.79 + 135,000 × 0.21 = 177,750 + 28,350 = 206,100 ✓</p>
+      <p class="small">The $21,000 interest appears nowhere — tax is computed directly on EBIT.</p>
+    </div>
+  </div>
+  </div>
+  <div class="lw" data-l="ko" hidden>
+  <h2><span class="no">Q10</span>Sorensen (b) — Pro forma와 OCF</h2>
   <p class="q">Q9의 Sorensen 자료로 매년 같은 pro forma 손익계산서를 만들고 OCF를 구하라. (세율 21%)</p>
   <div class="cols">
     <div class="sol step">
@@ -465,10 +897,38 @@ IRR  CPT → 18.93</pre>
       <p class="small">이자 $21,000은 어디에도 없다 — EBIT에서 바로 세금.</p>
     </div>
   </div>
+  </div>
 </section>
 
-<section class="slide d" data-title="Q11 · Sorensen (c)(d) 현금흐름과 NPV">
-  <h2>Q11 · Sorensen (c)(d) — 현금흐름, NPV, IRR</h2>
+<section class="slide d" data-title="Q11 · Sorensen (c)(d) Cash flow and NPV" data-title-ko="Q11 · Sorensen (c)(d) 현금흐름과 NPV">
+  <div class="lw" data-l="en">
+  <h2><span class="no">Q11</span>Sorensen (c)(d) — Cash flow, NPV, IRR</h2>
+  <p class="q">OCF $206,100 per year (4 years), equipment $540,000, NWC $120,000 (recovered at end of year 4), r = 14%. Build the Year 0–4 cash flows and decide using NPV and IRR.</p>
+  <div class="sol step">
+    <table class="num wide">
+      <tr><th>Year</th><th>0</th><th>1</th><th>2</th><th>3</th><th>4</th></tr>
+      <tr><td>Operating cash flow</td><td></td><td>206,100</td><td>206,100</td><td>206,100</td><td>206,100</td></tr>
+      <tr><td>Capital spending</td><td>−540,000</td><td></td><td></td><td></td><td></td></tr>
+      <tr><td>Change in NWC</td><td>−120,000</td><td></td><td></td><td></td><td>+120,000</td></tr>
+      <tr class="tot"><td>Project cash flow</td><td>−660,000</td><td>206,100</td><td>206,100</td><td>206,100</td><td>326,100</td></tr>
+    </table>
+  </div>
+  <div class="cols">
+    <div class="sol step">
+      <p>NPV = −660,000 + 206,100 × [1 − 1/1.14<sup>4</sup>]/0.14 + 120,000/1.14<sup>4</sup></p>
+      <p>= −660,000 + 600,516.11 + 71,049.63 = <b>$11,565.74</b></p>
+      <p>IRR = <b>14.79%</b> &gt; 14% → <b>accept</b> (thin margin)</p>
+    </div>
+    <pre class="ba sol step">CF  2nd [CLR WORK]
+CF0 −660000 ENTER ↓
+C01 206100 ENTER ↓  F01 3 ENTER ↓
+C02 326100 ENTER ↓  F02 1 ENTER ↓
+NPV  I 14 ENTER ↓  CPT → 11,565.74
+IRR  CPT → 14.79</pre>
+  </div>
+  </div>
+  <div class="lw" data-l="ko" hidden>
+  <h2><span class="no">Q11</span>Sorensen (c)(d) — 현금흐름, NPV, IRR</h2>
   <p class="q">OCF 연 $206,100 (4년), 장비 $540,000, NWC $120,000 (4년 말 회수), r = 14%. Year 0–4 현금흐름을 만들고 NPV·IRR로 결정하라.</p>
   <div class="sol step">
     <table class="num wide">
@@ -492,10 +952,25 @@ C02 326100 ENTER ↓  F02 1 ENTER ↓
 NPV  I 14 ENTER ↓  CPT → 11,565.74
 IRR  CPT → 14.79</pre>
   </div>
+  </div>
 </section>
 
-<section class="slide d" data-title="Q12 · Sorensen 흔한 실수의 대가">
-  <h2>Q12 · Sorensen — 실수 하나가 NPV를 얼마나 바꾸나?</h2>
+<section class="slide d" data-title="Q12 · Cost of common Sorensen mistakes" data-title-ko="Q12 · Sorensen 흔한 실수의 대가">
+  <div class="lw" data-l="en">
+  <h2><span class="no">Q12</span>Sorensen — how much does one mistake change NPV?</h2>
+  <p class="q">The correct NPV is $11,565.74 (r = 14%, 4 years). If an analyst made each of the following mistakes <b>one at a time</b>, what would NPV be? (1) Subtract the $75,000 market research at Year 0 (2) Omit NWC recovery (3) Subtract after-tax interest each year (4) Omit the rent opportunity cost</p>
+  <div class="sol step">
+    <p>(1) 11,565.74 − 75,000 = <b>−$63,434.26</b> → wrongly rejected</p>
+    <p>(2) PV of recovery = 120,000 / 1.14<sup>4</sup> = 71,049.63 → 11,565.74 − 71,049.63 = <b>−$59,483.89</b> → wrongly rejected</p>
+  </div>
+  <div class="sol step">
+    <p>(3) After-tax interest = 21,000 × 0.79 = 16,590/year, PV = 16,590 × 2.91371 = 48,338.49 → <b>−$36,772.75</b> → wrongly rejected (double-counts financing cost)</p>
+    <p>(4) After-tax rent = 40,000 × 0.79 = 31,600/year, PV = 92,073.31 → <b>+$103,639.05</b> → treats the building as "free" and inflates value 9-fold</p>
+  </div>
+  <p class="small muted step">Annuity factor [1 − 1/1.14<sup>4</sup>]/0.14 = 2.91371 · BA II Plus: 4 N, 14 I/Y, −16590 PMT, 0 FV, CPT PV</p>
+  </div>
+  <div class="lw" data-l="ko" hidden>
+  <h2><span class="no">Q12</span>Sorensen — 실수 하나가 NPV를 얼마나 바꾸나?</h2>
   <p class="q">정답 NPV는 $11,565.74 (r = 14%, 4년). 분석가가 다음 실수를 <b>하나씩</b> 했다면 NPV는 각각 얼마인가? (1) 시장조사 $75,000을 Year 0에 차감 (2) NWC 회수 누락 (3) 세후 이자를 매년 차감 (4) 임대료 기회비용 누락</p>
   <div class="sol step">
     <p>(1) 11,565.74 − 75,000 = <b>−$63,434.26</b> → 잘못 기각</p>
@@ -506,10 +981,29 @@ IRR  CPT → 14.79</pre>
     <p>(4) 세후 임대료 = 40,000 × 0.79 = 31,600/년, PV = 92,073.31 → <b>+$103,639.05</b> → "공짜 건물"로 가치를 9배 부풀림</p>
   </div>
   <p class="small muted step">연금현가계수 [1 − 1/1.14<sup>4</sup>]/0.14 = 2.91371 · BA II Plus: 4 N, 14 I/Y, −16590 PMT, 0 FV, CPT PV</p>
+  </div>
 </section>
 
-<section class="slide d" data-title="Q13 · NWC 변화와 비용">
-  <h2>Q13 · NWC — 수준이 아니라 변화를 센다</h2>
+<section class="slide d" data-title="Q13 · Change in NWC and its cost" data-title-ko="Q13 · NWC 변화와 비용">
+  <div class="lw" data-l="en">
+  <h2><span class="no">Q13</span>NWC — count the change, not the level</h2>
+  <p class="q">Year-end NWC requirements for a 3-year project: Year 0 $30,000 · Year 1 $45,000 · Year 2 $45,000 · Year 3 $0 (fully recovered). (a) What is the NWC cash flow each year? (b) At r = 10%, what is the PV cost of NWC to the project?</p>
+  <div class="sol step">
+    <table class="num wide">
+      <tr><th>Year</th><th>0</th><th>1</th><th>2</th><th>3</th></tr>
+      <tr><td>NWC level (year end)</td><td>30,000</td><td>45,000</td><td>45,000</td><td>0</td></tr>
+      <tr><td>ΔNWC</td><td>+30,000</td><td>+15,000</td><td>0</td><td>−45,000</td></tr>
+      <tr class="tot"><td>Cash flow = −ΔNWC</td><td>−30,000</td><td>−15,000</td><td>0</td><td>+45,000</td></tr>
+    </table>
+  </div>
+  <div class="sol step">
+    <p>(b) PV = −30,000 − 15,000/1.10 + 45,000/1.10<sup>3</sup> = −30,000 − 13,636.36 + 33,809.17 = <b>−$9,827.20</b></p>
+    <p>The nominal sum is zero, but tying up money for the project's life is a real PV cost of $9,827.20.</p>
+    <p class="small">Same logic: credit sale of $1,000 → sales 1,000, cash 0. Cash collected = sales − increase in receivables.</p>
+  </div>
+  </div>
+  <div class="lw" data-l="ko" hidden>
+  <h2><span class="no">Q13</span>NWC — 수준이 아니라 변화를 센다</h2>
   <p class="q">3년 프로젝트의 연말 NWC 필요액: Year 0 $30,000 · Year 1 $45,000 · Year 2 $45,000 · Year 3 $0 (전액 회수). (a) 연도별 NWC 현금흐름은? (b) r = 10%에서 NWC가 프로젝트에 주는 PV 비용은?</p>
   <div class="sol step">
     <table class="num wide">
@@ -524,10 +1018,36 @@ IRR  CPT → 14.79</pre>
     <p>명목 합은 0이지만, 돈을 프로젝트 기간 동안 묶어 두므로 PV로는 $9,827.20의 실제 비용이다.</p>
     <p class="small">같은 논리: 외상 매출 $1,000 → 매출 1,000, 현금 0. 현금 회수 = 매출 − 매출채권 증가.</p>
   </div>
+  </div>
 </section>
 
-<section class="slide d" data-title="Q14 · MACRS vs 정액법">
-  <h2>Q14 · MACRS vs 정액법 — 연간 감가상각</h2>
+<section class="slide d" data-title="Q14 · MACRS vs straight-line" data-title-ko="Q14 · MACRS vs 정액법">
+  <div class="lw" data-l="en">
+  <h2><span class="no">Q14</span>MACRS vs straight-line — annual depreciation</h2>
+  <p class="q">Equipment cost $200,000, 5-year MACRS class. The alternative is 5-year straight-line to zero. Build both depreciation schedules and show the Year 2 MACRS depreciation as a formula.</p>
+  <div class="cols wide-left">
+    <div class="sol step">
+      <table class="num wide">
+        <tr><th>Year</th><th>MACRS rate</th><th>MACRS D</th><th>Straight-line</th></tr>
+        <tr><td>1</td><td>20.00%</td><td>40,000</td><td>40,000</td></tr>
+        <tr><td>2</td><td>32.00%</td><td>64,000</td><td>40,000</td></tr>
+        <tr><td>3</td><td>19.20%</td><td>38,400</td><td>40,000</td></tr>
+        <tr><td>4</td><td>11.52%</td><td>23,040</td><td>40,000</td></tr>
+        <tr><td>5</td><td>11.52%</td><td>23,040</td><td>40,000</td></tr>
+        <tr><td>6</td><td>5.76%</td><td>11,520</td><td>—</td></tr>
+        <tr class="tot"><td>Total</td><td>100%</td><td>200,000</td><td>200,000</td></tr>
+      </table>
+    </div>
+    <div class="sol step">
+      <p>Year 2 = 200,000 × 32.00% = <b>$64,000</b> — the rate always applies to <b>cost</b> (not the declining book value)</p>
+      <p>Why Year 1 is equal: the half-year convention halves the accelerated rate, matching the straight-line amount</p>
+      <p>A 5-year asset depreciates over 6 years — the half-year missed at the start is recovered at the end</p>
+      <p>Totals are equal — MACRS only <b>accelerates</b> the deductions</p>
+    </div>
+  </div>
+  </div>
+  <div class="lw" data-l="ko" hidden>
+  <h2><span class="no">Q14</span>MACRS vs 정액법 — 연간 감가상각</h2>
   <p class="q">장비 원가 $200,000, 5-year MACRS class. 대안은 5년 정액법으로 0까지. 두 감가상각표를 만들고 Year 2의 MACRS 감가상각을 식으로 보여라.</p>
   <div class="cols wide-left">
     <div class="sol step">
@@ -549,10 +1069,32 @@ IRR  CPT → 14.79</pre>
       <p>총액은 같다 — MACRS는 공제를 <b>앞당길</b> 뿐</p>
     </div>
   </div>
+  </div>
 </section>
 
-<section class="slide d" data-title="Q15 · 세후 잔존가치 (손실·차익)">
-  <h2>Q15 · 세후 잔존가치 — 손실일 때와 차익일 때</h2>
+<section class="slide d" data-title="Q15 · After-tax salvage (loss and gain)" data-title-ko="Q15 · 세후 잔존가치 (손실·차익)">
+  <div class="lw" data-l="en">
+  <h2><span class="no">Q15</span>After-tax salvage — loss case and gain case</h2>
+  <p class="q">An asset costing $90,000 is depreciated straight-line over 5 years, but the project ends after 3 years. Tax rate 21%. What is the after-tax salvage value if sold (a) for $25,000 (b) for $45,000?</p>
+  <div class="sol step">
+    <p>Annual depreciation = 90,000 / 5 = 18,000 → BV = 90,000 − 3 × 18,000 = <b>36,000</b></p>
+    <p class="eq" style="font-size:28px">After-tax salvage = MV − T × (MV − BV)</p>
+  </div>
+  <div class="cols">
+    <div class="sol step">
+      <p><b>(a) MV 25,000 &lt; BV</b></p>
+      <p>Loss 11,000 → tax saved 0.21 × 11,000 = 2,310</p>
+      <p>= 25,000 − 0.21 × (25,000 − 36,000) = <b>$27,310</b> (more than the sale price)</p>
+    </div>
+    <div class="sol step">
+      <p><b>(b) MV 45,000 &gt; BV</b></p>
+      <p>Gain 9,000 → tax 0.21 × 9,000 = 1,890</p>
+      <p>= 45,000 − 0.21 × (45,000 − 36,000) = <b>$43,110</b> (less than the sale price)</p>
+    </div>
+  </div>
+  </div>
+  <div class="lw" data-l="ko" hidden>
+  <h2><span class="no">Q15</span>세후 잔존가치 — 손실일 때와 차익일 때</h2>
   <p class="q">원가 $90,000 자산을 5년 정액법으로 상각 중인데 프로젝트가 3년 만에 끝난다. 세율 21%. (a) $25,000에 팔 때 (b) $45,000에 팔 때 세후 잔존가치는?</p>
   <div class="sol step">
     <p>연 감가상각 = 90,000 / 5 = 18,000 → BV = 90,000 − 3 × 18,000 = <b>36,000</b></p>
@@ -570,10 +1112,30 @@ IRR  CPT → 14.79</pre>
       <p>= 45,000 − 0.21 × (45,000 − 36,000) = <b>$43,110</b> (매각가보다 작음)</p>
     </div>
   </div>
+  </div>
 </section>
 
-<section class="slide d" data-title="Q16 · 세후 잔존가치: 정액법 vs MACRS">
-  <h2>Q16 · 같은 자산, 다른 세후 대금 — 정액법 vs MACRS</h2>
+<section class="slide d" data-title="Q16 · After-tax salvage: straight-line vs MACRS" data-title-ko="Q16 · 세후 잔존가치: 정액법 vs MACRS">
+  <div class="lw" data-l="en">
+  <h2><span class="no">Q16</span>Same asset, different after-tax proceeds — straight-line vs MACRS</h2>
+  <p class="q">The $200,000 asset from Q14 is sold for <b>$60,000 at the end of year 4</b>. Tax rate 21%. Find the after-tax salvage value under (a) 5-year straight-line and (b) 5-year MACRS, and the difference.</p>
+  <div class="sol step">
+    <table class="num wide">
+      <tr><th></th><th>Straight-line</th><th>MACRS</th></tr>
+      <tr><td>Accumulated depreciation (Years 1–4)</td><td>4 × 40,000 = 160,000</td><td>200,000 × 82.72% = 165,440</td></tr>
+      <tr><td>Book value, end of year 4</td><td>40,000</td><td>34,560</td></tr>
+      <tr><td>Taxable gain (60,000 − BV)</td><td>20,000</td><td>25,440</td></tr>
+      <tr><td>Tax (21%)</td><td>4,200</td><td>5,342.40</td></tr>
+      <tr class="tot"><td>After-tax salvage</td><td>55,800</td><td>54,657.60</td></tr>
+    </table>
+  </div>
+  <div class="sol step">
+    <p>Difference = 55,800 − 54,657.60 = <b>$1,142.40</b> = BV difference 5,440 × 21%</p>
+    <p>MACRS depreciates faster, so BV is lower → larger taxable gain. Part of the earlier deductions is paid back at sale.</p>
+  </div>
+  </div>
+  <div class="lw" data-l="ko" hidden>
+  <h2><span class="no">Q16</span>같은 자산, 다른 세후 대금 — 정액법 vs MACRS</h2>
   <p class="q">Q14의 $200,000 자산을 <b>4년 말 $60,000</b>에 판다. 세율 21%. (a) 5년 정액법 (b) 5-year MACRS 각각의 세후 잔존가치와 그 차이를 구하라.</p>
   <div class="sol step">
     <table class="num wide">
@@ -589,10 +1151,28 @@ IRR  CPT → 14.79</pre>
     <p>차이 = 55,800 − 54,657.60 = <b>$1,142.40</b> = BV 차이 5,440 × 21%</p>
     <p>MACRS가 빨리 상각해 BV가 낮다 → 과세 차익이 크다. 앞서 받은 공제의 일부를 매각 때 되돌려 준다.</p>
   </div>
+  </div>
 </section>
 
-<section class="slide d" data-title="Q17 · OCF 세 가지 정의">
-  <h2>Q17 · OCF 세 가지 정의로 같은 답</h2>
+<section class="slide d" data-title="Q17 · Three OCF definitions" data-title-ko="Q17 · OCF 세 가지 정의">
+  <div class="lw" data-l="en">
+  <h2><span class="no">Q17</span>Three OCF definitions, same answer</h2>
+  <p class="q">A project has annual sales of $500,000, cash costs of $310,000, depreciation of $80,000, tax rate 21%, and no interest. Find OCF by the bottom-up, top-down, and tax shield methods.</p>
+  <div class="sol step">
+    <p>EBIT = 500,000 − 310,000 − 80,000 = 110,000 · Taxes = 0.21 × 110,000 = 23,100 · NOPAT = 86,900</p>
+  </div>
+  <div class="sol step">
+    <table class="wide">
+      <tr><th>Method</th><th>Formula and substitution</th><th>OCF</th></tr>
+      <tr><td>Bottom-up</td><td>NOPAT + D = 86,900 + 80,000</td><td><b>166,900</b></td></tr>
+      <tr><td>Top-down</td><td>S − C − Taxes = 500,000 − 310,000 − 23,100</td><td><b>166,900</b></td></tr>
+      <tr><td>Tax shield</td><td>(S − C)(1 − T) + D × T = 190,000 × 0.79 + 80,000 × 0.21 = 150,100 + 16,800</td><td><b>166,900</b></td></tr>
+    </table>
+  </div>
+  <p class="small step">Traps: using NOPAT 86,900 as OCF omits depreciation 80,000. Using only (S − C)(1 − T) = 150,100 omits the tax shield 16,800.</p>
+  </div>
+  <div class="lw" data-l="ko" hidden>
+  <h2><span class="no">Q17</span>OCF 세 가지 정의로 같은 답</h2>
   <p class="q">어떤 프로젝트의 연간 매출 $500,000, 현금 비용 $310,000, 감가상각 $80,000, 세율 21%, 이자 없음. OCF를 bottom-up, top-down, tax shield 세 방법으로 구하라.</p>
   <div class="sol step">
     <p>EBIT = 500,000 − 310,000 − 80,000 = 110,000 · Taxes = 0.21 × 110,000 = 23,100 · NOPAT = 86,900</p>
@@ -606,10 +1186,33 @@ IRR  CPT → 14.79</pre>
     </table>
   </div>
   <p class="small step">함정: NOPAT 86,900을 OCF로 쓰면 감가상각 80,000을 빠뜨린다. (S − C)(1 − T) = 150,100만 쓰면 절세효과 16,800을 빠뜨린다.</p>
+  </div>
 </section>
 
-<section class="slide d" data-title="Q18 · Northfield (a)(b) 증분 판단과 MACRS">
-  <h2>Q18 · Northfield Precision (a)(b)</h2>
+<section class="slide d" data-title="Q18 · Northfield (a)(b) Incremental call and MACRS" data-title-ko="Q18 · Northfield (a)(b) 증분 판단과 MACRS">
+  <div class="lw" data-l="en">
+  <h2><span class="no">Q18</span>Northfield Precision (a)(b)</h2>
+  <p class="q" style="font-size:26px">Equipment $900,000 (5-year MACRS), sold for $250,000 after 4 years of operation · NWC $80,000 (invested at start, recovered at end) · 40,000 units per year × $60, variable cost $44/unit, incremental fixed costs $180,000 · space currently leased at $50,000 per year (tenant evicted) · existing product contribution falls $90,000 per year · feasibility study completed last year $150,000 · borrow $400,000 at 8%, interest $32,000 per year · tax rate 21% · r = 13%.<br>(a) Which items are not incremental? (b) What are the MACRS depreciation schedule and the book value at the end of year 4?</p>
+  <div class="cols">
+    <div class="sol step">
+      <p><b>Not incremental</b>: feasibility study $150,000 (sunk) · interest $32,000/year (financing, in the 13%)</p>
+      <p><b>Incremental, easy to miss</b>: forgone rent $50,000/year (opportunity cost) · lost contribution $90,000/year (erosion)</p>
+    </div>
+    <div class="sol step">
+      <table class="num">
+        <tr><th>Year</th><th>Rate</th><th>Depreciation</th></tr>
+        <tr><td>1</td><td>20.00%</td><td>180,000</td></tr>
+        <tr><td>2</td><td>32.00%</td><td>288,000</td></tr>
+        <tr><td>3</td><td>19.20%</td><td>172,800</td></tr>
+        <tr><td>4</td><td>11.52%</td><td>103,680</td></tr>
+        <tr class="tot"><td>Cumulative</td><td>82.72%</td><td>744,480</td></tr>
+      </table>
+      <p class="small">BV = 900,000 − 744,480 = <b>$155,520</b> — sold before taking the year 5 and 6 deductions (17.28%)</p>
+    </div>
+  </div>
+  </div>
+  <div class="lw" data-l="ko" hidden>
+  <h2><span class="no">Q18</span>Northfield Precision (a)(b)</h2>
   <p class="q" style="font-size:26px">장비 $900,000 (5-year MACRS), 4년 운영 후 $250,000에 매각 · NWC $80,000 (처음 투입, 끝에 회수) · 매년 40,000개 × $60, 변동비 $44/개, 증분 고정비 $180,000 · 공간은 현재 연 $50,000에 임대 중(세입자 퇴거) · 기존 제품 공헌이익 연 $90,000 감소 · 작년 끝난 타당성 조사 $150,000 · $400,000을 8%로 차입, 이자 연 $32,000 · 세율 21% · r = 13%.<br>(a) 증분이 아닌 항목은? (b) MACRS 감가상각표와 4년 말 장부가는?</p>
   <div class="cols">
     <div class="sol step">
@@ -628,10 +1231,43 @@ IRR  CPT → 14.79</pre>
       <p class="small">BV = 900,000 − 744,480 = <b>$155,520</b> — 5·6년차 공제(17.28%)를 받지 못하고 판다</p>
     </div>
   </div>
+  </div>
 </section>
 
-<section class="slide d" data-title="Q19 · Northfield (c) OCF">
-  <h2>Q19 · Northfield (c) — OCF, 세 방법으로 Year 1 확인</h2>
+<section class="slide d" data-title="Q19 · Northfield (c) OCF" data-title-ko="Q19 · Northfield (c) OCF">
+  <div class="lw" data-l="en">
+  <h2><span class="no">Q19</span>Northfield (c) — OCF, check Year 1 three ways</h2>
+  <p class="q">Using the Q18 data, build the Year 1 pro forma and find OCF for all 4 years with the tax shield method. Check Year 1 with all three definitions.</p>
+  <div class="cols">
+    <div class="sol step">
+      <table class="num">
+        <tr><th>Year 1 pro forma</th><th>$</th></tr>
+        <tr><td>Sales (40,000 × $60)</td><td>2,400,000</td></tr>
+        <tr><td>− Variable (40,000 × $44)</td><td>1,760,000</td></tr>
+        <tr><td>− Fixed / − Rent / − Erosion</td><td>180,000 / 50,000 / 90,000</td></tr>
+        <tr><td>− Depreciation</td><td>180,000</td></tr>
+        <tr class="tot"><td>= EBIT</td><td>140,000</td></tr>
+        <tr><td>− Taxes (21%)</td><td>29,400</td></tr>
+        <tr class="tot"><td>= NOPAT</td><td>110,600</td></tr>
+      </table>
+    </div>
+    <div class="sol step">
+      <p>Bottom-up: 110,600 + 180,000 = <b>290,600</b></p>
+      <p>Top-down: 320,000 − 29,400 = <b>290,600</b> (S − C = 320,000)</p>
+      <p>Tax shield: 320,000 × 0.79 + 180,000 × 0.21 = 252,800 + 37,800 = <b>290,600</b></p>
+    </div>
+  </div>
+  <div class="sol step">
+    <table class="num wide">
+      <tr><th>Year</th><th>1</th><th>2</th><th>3</th><th>4</th></tr>
+      <tr><td>(S − C)(1 − T)</td><td>252,800</td><td>252,800</td><td>252,800</td><td>252,800</td></tr>
+      <tr><td>D × T</td><td>37,800</td><td>60,480</td><td>36,288</td><td>21,772.80</td></tr>
+      <tr class="tot"><td>OCF</td><td>290,600</td><td>313,280</td><td>289,088</td><td>274,572.80</td></tr>
+    </table>
+  </div>
+  </div>
+  <div class="lw" data-l="ko" hidden>
+  <h2><span class="no">Q19</span>Northfield (c) — OCF, 세 방법으로 Year 1 확인</h2>
   <p class="q">Q18 자료로 Year 1 pro forma를 만들고, 4년 동안의 OCF를 tax shield 방식으로 구하라. Year 1은 세 정의로 확인하라.</p>
   <div class="cols">
     <div class="sol step">
@@ -660,10 +1296,38 @@ IRR  CPT → 14.79</pre>
       <tr class="tot"><td>OCF</td><td>290,600</td><td>313,280</td><td>289,088</td><td>274,572.80</td></tr>
     </table>
   </div>
+  </div>
 </section>
 
-<section class="slide d" data-title="Q20 · Northfield (d) 현금흐름과 NPV">
-  <h2>Q20 · Northfield (d) — 현금흐름, NPV, 결정</h2>
+<section class="slide d" data-title="Q20 · Northfield (d) Cash flow and NPV" data-title-ko="Q20 · Northfield (d) 현금흐름과 NPV">
+  <div class="lw" data-l="en">
+  <h2><span class="no">Q20</span>Northfield (d) — Cash flow, NPV, decision</h2>
+  <p class="q">Using the Q18–Q19 results (OCF 290,600 / 313,280 / 289,088 / 274,572.80, BV 155,520, sale price 250,000), build the Year 0–4 cash flows and find NPV and IRR at r = 13%.</p>
+  <div class="sol step">
+    <p>After-tax salvage = 250,000 − 0.21 × (250,000 − 155,520) = 250,000 − 19,840.80 = <b>230,159.20</b></p>
+    <table class="num wide">
+      <tr><th>Year</th><th>0</th><th>1</th><th>2</th><th>3</th><th>4</th></tr>
+      <tr><td>OCF</td><td></td><td>290,600</td><td>313,280</td><td>289,088</td><td>274,572.80</td></tr>
+      <tr><td>Capital spending</td><td>−900,000</td><td></td><td></td><td></td><td></td></tr>
+      <tr><td>Change in NWC</td><td>−80,000</td><td></td><td></td><td></td><td>+80,000</td></tr>
+      <tr><td>After-tax salvage</td><td></td><td></td><td></td><td></td><td>+230,159.20</td></tr>
+      <tr class="tot"><td>Project cash flow</td><td>−980,000</td><td>290,600</td><td>313,280</td><td>289,088</td><td>584,732</td></tr>
+    </table>
+  </div>
+  <div class="cols">
+    <div class="sol step">
+      <p>NPV = −980,000 + 290,600/1.13 + 313,280/1.13<sup>2</sup> + 289,088/1.13<sup>3</sup> + 584,732/1.13<sup>4</sup> = <b>$81,491.91</b></p>
+      <p>IRR = <b>16.52%</b> &gt; 13% → <b>accept</b></p>
+    </div>
+    <pre class="ba sol step">CF0 −980000 · C01 290600 F01 1
+C02 313280 F02 1 · C03 289088 F03 1
+C04 584732 F04 1
+NPV I 13 ENTER ↓ CPT → 81,491.91
+IRR CPT → 16.52</pre>
+  </div>
+  </div>
+  <div class="lw" data-l="ko" hidden>
+  <h2><span class="no">Q20</span>Northfield (d) — 현금흐름, NPV, 결정</h2>
   <p class="q">Q18–Q19 결과(OCF 290,600 / 313,280 / 289,088 / 274,572.80, BV 155,520, 매각가 250,000)로 Year 0–4 현금흐름을 만들고 r = 13%에서 NPV·IRR을 구하라.</p>
   <div class="sol step">
     <p>세후 잔존가치 = 250,000 − 0.21 × (250,000 − 155,520) = 250,000 − 19,840.80 = <b>230,159.20</b></p>
@@ -687,11 +1351,18 @@ C04 584732 F04 1
 NPV I 13 ENTER ↓ CPT → 81,491.91
 IRR CPT → 16.52</pre>
   </div>
+  </div>
 </section>
 
-<section class="slide title" data-title="끝">
+<section class="slide title" data-title="End" data-title-ko="끝">
+  <div class="lw" data-l="en">
+  <h1>End</h1>
+  <p class="sub">Get the cash flows right and the rest is Ch.8 discounting</p>
+  </div>
+  <div class="lw" data-l="ko" hidden>
   <h1>끝</h1>
   <p class="sub">현금흐름이 맞으면 나머지는 Ch.8의 할인 계산이다</p>
+  </div>
 </section>
 
 </main>

@@ -27,4 +27,5 @@ Next.js 정적 사이트(`output: "export"`). `main` 에 푸시하면 `.github/w
   - 모바일 점검 항목: 가로 스크롤 없음, iframe·이미지가 부모 `overflow-hidden` 에 잘리지 않음, 버튼이 글자를 밀어내지 않음.
 - 빌드가 건드리는 `next-env.d.ts` 와 작업과 무관한 기존 변경(`.claude/launch.json`, `tsconfig.tsbuildinfo` 등)은 커밋에 넣지 않는다.
 - 커밋 메시지는 한국어로 `영역: 무엇을 왜` (예: `플레이리스트: 모바일에서 플레이어가 사진 높이에 잘리지 않게`). 커밋에 `Co-Authored-By` 줄을 넣지 않는다.
+- BF·IA 학습 슬라이드 덱(`public/study/*/preview|review/`)은 **영어가 기본**이다. 새 덱은 영어로 쓰고 `/study/deck-study.css` + `<body class="study">` 를 붙인다. 한국어판도 만들 때는 같은 구조로 따로 써서 `node scripts/deck-bilingual.mjs <en> <ko> <out>` 으로 합친다(영어 기본, 도구줄 `한국어` 단추·L 키로 전환). 글자 크기는 덱 `<style>` 에 다시 적지 말고 deck-study.css 를 따른다(넘치는 장만 `class="fit"`).
 - 사용자가 올린 원본 HTML(퀴즈 등)은 내용을 고치지 않는다. 꼭 필요하면(예: 저장 키 충돌) 한 줄만 고치고 커밋 메시지와 보고에 적는다.
