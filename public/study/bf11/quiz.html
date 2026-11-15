@@ -171,7 +171,7 @@
 <!--DATA-START-->
 <script type="text/plain" id="quizData">
 title: Business Finance Review Quiz — Chapter 11
-sub: Chapter 11 · 23 questions (17 MC · 6 written)
+sub: Chapter 11 · 22 questions (18 MC · 4 problems)
 subject: Business Finance, Prof. Gemma Lee, Kyung Hee University
 textbook: Lecture notes, Chapter 11 (RWJ, Essentials of Corporate Finance)
 ===
@@ -180,37 +180,32 @@ Kumsan Electronics (K) and Gwangmyeong Gold (G)
 @tbl Returns by state of the economy :: State|Probability|Return on K|Return on G;;Boom|0.20|+30%|+4%;;Normal|0.60|+12%|+8%;;Recession|0.20|−10%|+14%
 ===
 11.1 Expected return and variance
-Kumsan and Gwangmyeong. Using Exhibit A, compute the expected return, the variance (in decimals) and the standard deviation of each stock. No worksheet is provided — lay out your own table and write the formulas you use.
+Using Exhibit A, compute the expected return, the variance (in decimals) and the standard deviation of each stock. No worksheet is provided — lay out your own table and write the formulas you use.
 11.2 / 11.20 / 0.112|8.4 / 8.40 / 0.084|0.016096 / 0.0161|0.001024|12.69 / 0.1269|3.2 / 3.20 / 0.032
-E(R) = Σ p × R: E(R_K) = 0.20 × 30% + 0.60 × 12% + 0.20 × (−10%) = 6.00% + 7.20% − 2.00% = 11.20%; E(R_G) = 0.20 × 4% + 0.60 × 8% + 0.20 × 14% = 0.80% + 4.80% + 2.80% = 8.40%; σ² = Σ p × (R − E(R))²: σ_K² = 0.20 × 0.188² + 0.60 × 0.008² + 0.20 × (−0.212)² = 0.0070688 + 0.0000384 + 0.0089888 = 0.016096; σ_G² = 0.20 × (−0.044)² + 0.60 × (−0.004)² + 0.20 × 0.056² = 0.0003872 + 0.0000096 + 0.0006272 = 0.001024; σ_K = √0.016096 = 12.69%; σ_G = √0.001024 = 3.20%; BA II Plus (K): 2nd DATA, 2nd CLR WORK, 30 ENTER ↓ 20 ENTER ↓ 12 ENTER ↓ 60 ENTER ↓ 10 +/− ENTER ↓ 20 ENTER, 2nd STAT ↓ ↓ → x̄ = 11.20, σx = 12.69; K has the higher expected return — and four times the standard deviation.
+E(R) = Σ p × R: E(R_K) = 0.20 × 30% + 0.60 × 12% + 0.20 × (−10%) = 6.00% + 7.20% − 2.00% = 11.20%; E(R_G) = 0.20 × 4% + 0.60 × 8% + 0.20 × 14% = 0.80% + 4.80% + 2.80% = 8.40%; σ² = Σ p × (R − E(R))²: σ_K² = 0.20 × 0.188² + 0.60 × 0.008² + 0.20 × (−0.212)² = 0.0070688 + 0.0000384 + 0.0089888 = 0.016096; σ_G² = 0.20 × (−0.044)² + 0.60 × (−0.004)² + 0.20 × 0.056² = 0.0003872 + 0.0000096 + 0.0006272 = 0.001024; σ_K = √0.016096 = 12.69%; σ_G = √0.001024 = 3.20%; BA II Plus (K): 2nd DATA, 2nd CLR WORK, 30 ENTER ↓ 20 ENTER ↓ 12 ENTER ↓ 60 ENTER ↓ 10 +/− ENTER ↓ 20 ENTER, 2nd STAT ↓ ↓ → x̄ = 11.20, σx = 12.69
 @use A
 @focus 1
 @space 10
 ===
 11.2 Portfolio expected return and variance
-Kumsan and Gwangmyeong. You put 60% of your money in K and 40% in G. Compute the portfolio's return in each state, its expected return, its variance and its standard deviation, writing each formula. Then compare the standard deviation with the 60/40 weighted average of the two stocks' own standard deviations.
-19.6 / 19.60 / 0.196|10.4 / 10.40 / 0.104|10.08 / 0.1008|0.004015 / 0.00402 / 0.0040|6.34 / 0.0634|8.89 / 0.0889
-State returns R_P = 0.60 × R_K + 0.40 × R_G: Boom = 0.60 × 30% + 0.40 × 4% = 19.60%; Normal = 0.60 × 12% + 0.40 × 8% = 10.40%; Recession = 0.60 × (−10%) + 0.40 × 14% = −0.40%; E(R_P) = 0.20 × 19.60% + 0.60 × 10.40% + 0.20 × (−0.40%) = 10.08% (= 0.60 × 11.20% + 0.40 × 8.40%, the same by either route); σ_P² = 0.20 × (0.196 − 0.1008)² + 0.60 × (0.104 − 0.1008)² + 0.20 × (−0.004 − 0.1008)² = 0.0018126 + 0.0000061 + 0.0021966 = 0.004015; σ_P = √0.004015 = 6.34%; Weighted average of SDs = 0.60 × 12.69% + 0.40 × 3.20% = 8.89%; The portfolio's 6.34% is well below 8.89% — risk is not a weighted average.
+Using Exhibit A, you invest $6,000 in K and $4,000 in G. Compute the portfolio weights, the portfolio's return in each state, its expected return, its variance and its standard deviation. Write each formula.
+0.60 / 60%|19.6 / 19.60 / 0.196|10.4 / 10.40 / 0.104|10.08 / 0.1008|0.004015 / 0.00402|6.34 / 0.0634
+Weights = dollars ÷ $10,000: w_K = 0.60, w_G = 0.40; State returns R_P = 0.60 × R_K + 0.40 × R_G: boom = 0.60 × 30% + 0.40 × 4% = 19.60%, normal = 0.60 × 12% + 0.40 × 8% = 10.40%, recession = 0.60 × (−10%) + 0.40 × 14% = −0.40%; E(R_P) = 0.20 × 19.60% + 0.60 × 10.40% + 0.20 × (−0.40%) = 10.08% (check: 0.60 × 11.20% + 0.40 × 8.40% = 10.08%); σ_P² = 0.20 × (0.196 − 0.1008)² + 0.60 × (0.104 − 0.1008)² + 0.20 × (−0.004 − 0.1008)² = 0.0018126 + 0.0000061 + 0.0021966 = 0.004015; σ_P = √0.004015 = 6.34%
 @use A
 @focus 1
-@lines 5
+@lines 6
 ===
 -
-Kumsan and Gwangmyeong. The 60/40 portfolio of K and G has a standard deviation of 6.34%, although the 60/40 weighted average of the two stocks' standard deviations is 8.89%. Why is the portfolio's figure lower?
-Diversification removes the systematic risk of K and G|The portfolio's expected return is lower than K's, and lower return always means lower risk|Portfolio variance is the weighted average of the two variances, and its square root is always below the weighted average of the SDs|*K does well in a boom and G does well in a recession, so part of each stock's swings cancels when they are combined state by state
-The portfolio is combined state by state before squaring: boom 19.60%, normal 10.40%, recession −0.40% sit much closer together than K's 30% / 12% / −10%; K and G move in opposite directions across the states, so their swings partly offset; (The weighted average of variances, 0.60 × 0.016096 + 0.40 × 0.001024 = 0.010067, has a square root of 10.03% — not 6.34%; diversification removes unsystematic, not systematic, risk.)
+Using Exhibit A, the 60/40 portfolio of K and G has a standard deviation of 6.34%, while the 60/40 weighted average of the two stocks' standard deviations is 8.89%. Which of the following accounts for the difference?
+Diversification removes the systematic risk of K and G|The portfolio's expected return is lower than K's, and a lower expected return always means lower risk|Portfolio variance is the weighted average of the two variances, and its square root is always below the weighted average of the standard deviations|*K does well in a boom and G does well in a recession, so part of each stock's swings cancels when they are combined state by state
+The portfolio is combined state by state before squaring: boom 19.60%, normal 10.40%, recession −0.40% sit much closer together than K's 30% / 12% / −10%; K and G move in opposite directions across the states, so their swings partly offset; Portfolio risk is not a weighted average (√(0.60 × 0.016096 + 0.40 × 0.001024) = 10.03%, not 6.34%).
 @use A
 @focus 1
 ===
-11.1 Expected return
-An analyst gives the economy a 30% chance of a boom and a 50% chance of a normal year; the only other possibility is a recession. Stock M returns 25% in a boom, 10% in a normal year and −15% in a recession. What is the expected return on M?
-6.67%|*9.50%|12.50%|15.50%
-P(recession) = 1 − 0.30 − 0.50 = 0.20 (probabilities sum to 1); E(R) = Σ p × R = 0.30 × 25% + 0.50 × 10% + 0.20 × (−15%) = 7.50% + 5.00% − 3.00% = 9.50%; BA II Plus: 2nd DATA, 25 ENTER ↓ 30 ENTER ↓ 10 ENTER ↓ 50 ENTER ↓ 15 +/− ENTER ↓ 20 ENTER, 2nd STAT ↓ → x̄ = 9.50; (6.67% weights the states equally; 12.50% leaves out the recession; 15.50% adds the recession return with the wrong sign.)
-===
-11.2 Portfolio expected return
-You invest $5,000 in Stock X (expected return 12%), $3,000 in Stock Y (expected return 18%) and $2,000 in Stock Z (expected return 6%). What is the expected return on your portfolio?
-11.40%|12.00%|*12.60%|13.80%
-Weights = dollars ÷ total $10,000: w_X = 0.50, w_Y = 0.30, w_Z = 0.20; E(R_P) = Σ w × E(R) = 0.50 × 12% + 0.30 × 18% + 0.20 × 6% = 6.00% + 5.40% + 1.20% = 12.60%; (12.00% is the simple average; 11.40% drops Z; 13.80% attaches the 50% weight to Y and 30% to X.)
+11.2 Portfolio weights
+Stock X has an expected return of 15% and Stock Y has an expected return of 9%. What percentage of a two-stock portfolio must be invested in X for the portfolio's expected return to be 13%?
+33.33%|50.00%|*66.67%|86.67%
+E(R_P) = w_X × 15% + (1 − w_X) × 9% = 13%; 9% + w_X × 6% = 13% → w_X = 4% ÷ 6% = 66.67% (33.33% in Y); (33.33% is the weight in Y; 86.67% = 13% ÷ 15%.)
 ===
 11.3 Announcements and surprises
 Kumho Retail announces that quarterly earnings rose 12% on a year earlier. On the day of the announcement its share price falls 4%, with the overall market flat. Which explanation is most consistent with R = E(R) + U?
@@ -218,36 +213,34 @@ Kumho Retail announces that quarterly earnings rose 12% on a year earlier. On th
 Only the surprise moves the price: the expected part of the announcement was already built into the price before the news arrived; Here U < 0 — growth came in below what the market had priced in, so the price fell even though earnings rose.
 ===
 -
-Analysts expected Stock N to return 12% this year. It actually returned −3%. What was the unexpected return, and what does the unexpected part of returns average over many years?
-−3%, and it averages zero|+15%, and it averages the risk premium|−15%, and it averages the expected return|*−15%, and it averages zero
-R = E(R) + U, so U = R − E(R) = −3% − 12% = −15%; U averages to zero over many periods — by definition, since anything with a predictable sign would already be in E(R); (−3% is the actual return, not the surprise; +15% reverses the subtraction.)
+Analysts expected Stock N to return 12% this year; it actually returned −3%. What was N's unexpected return, and what does the unexpected return average over many periods?
+−15%, and it averages the expected return|*−15%, and it averages zero|−3%, and it averages zero|+15%, and it averages the risk premium
+R = E(R) + U, so U = R − E(R) = −3% − 12% = −15%; U averages zero over many periods — anything with a predictable sign would already be in E(R); (−3% is the actual return, not the surprise; +15% reverses the subtraction.)
 ===
-11.4 Systematic risk
-Which of the following events is a source of systematic risk?
-A strike at one of Hanbit Motors' assembly plants|A failed clinical trial at a single biotech firm|*An unexpected rise in the central bank's policy interest rate|A product-liability lawsuit against a toy maker
-Systematic (market, nondiversifiable) risk reaches nearly every asset: interest rates, inflation, GDP growth, a change in tax law; A strike, a failed product or a lawsuit hits one firm or a small group — unsystematic (unique, asset-specific) risk.
-===
-11.4 Unsystematic risk in a portfolio
-You hold equal amounts of 60 stocks spread across many industries. One holding, a chemical maker, loses 30% of its value after a factory fire. In the same month inflation comes in two points above forecast. Which statement is correct?
-*The fire is unsystematic and costs the portfolio only about 0.5%, while the inflation surprise is systematic and touches nearly every holding|Both events are unsystematic, because each is a one-off surprise|The fire is systematic because nobody expected it, and the inflation news is unsystematic because inflation is forecast every month|Both events are systematic, because both change the value of the portfolio
-Fire: one firm → unsystematic; with 1/60 of the money in it, the hit is 30% ÷ 60 = 0.5% of the portfolio, and other firms' good luck offsets it; Inflation surprise: affects nearly every asset → systematic, it remains however many stocks are held; Being a surprise does not make a risk systematic — both kinds of risk are surprises (U).
-===
-11.5 Diversification
-A study reports the average standard deviation of randomly chosen portfolios: 1 stock 45.0%, 5 stocks 26.0%, 20 stocks 21.5%, 100 stocks 20.3%, 500 stocks 20.1%. Which statement is correct?
-With enough stocks the portfolio's standard deviation would fall to zero|*Most of the reduction comes from the first few stocks, and the level near 20% that remains is systematic risk, which no number of holdings removes|Going from 20 to 100 stocks removes more risk than going from 1 to 5, because more stocks are added|Adding stocks lowers the portfolio's beta toward zero, which is why the standard deviation falls
-1 → 5 stocks removes 45.0 − 26.0 = 19.0 points; 20 → 100 removes only 21.5 − 20.3 = 1.2 points: most of the benefit arrives early; Diversification removes unsystematic risk; the floor near 20% is systematic risk, which every holding shares, so the SD never reaches zero; (Adding stocks moves the portfolio's beta toward the market's 1, not toward 0.)
+11.4 Systematic and unsystematic risk
+Which pair of terms both describe the risk that remains in a large, well-diversified portfolio?
+Unique risk and asset-specific risk|Market risk and asset-specific risk|*Market risk and nondiversifiable risk|Total risk and unique risk
+Systematic risk = market risk = nondiversifiable risk: it reaches nearly every asset, so every holding stays exposed to it; Unsystematic risk = unique (asset-specific) risk: it cancels out across many holdings; Total risk is the two together.
 ===
 -
-In two sentences, explain why the market rewards investors only for bearing systematic risk.
-diversif|free / no cost / costless / close to zero / almost nothing / cheaply|systematic / market risk / nondiversifiable / beta
-Unsystematic risk can be eliminated by diversifying across enough firms, at a cost close to zero, so a market will not pay anyone for bearing a risk they could have shed for free; The reward (risk premium) attaches to systematic risk — the part that cannot be diversified away — which is why expected return depends on beta, not on total risk.
-@short
+You hold equal amounts of 60 stocks spread across many industries. One holding, a chemical maker, loses 30% of its value after a factory fire. In the same month inflation comes in two points above forecast. Which statement is correct?
+*The fire is unsystematic and costs the portfolio only about 0.5%, while the inflation surprise is systematic and touches nearly every holding|Both events are unsystematic, because each is a one-off surprise|The fire is systematic because nobody expected it, and the inflation news is unsystematic because inflation is forecast every month|Both events are systematic, because both change the value of the portfolio
+Fire: one firm → unsystematic; with 1/60 of the money in it, the hit is 30% ÷ 60 = 0.5% of the portfolio, and other firms' good luck offsets it; Inflation surprise: affects nearly every asset → systematic, it remains however many stocks are held; Being a surprise does not make a risk systematic — both kinds of risk are parts of U.
+===
+11.5 Diversification
+As randomly selected stocks are added to a portfolio, the portfolio's standard deviation typically:
+falls in proportion to the number of stocks, approaching zero in a very large portfolio|falls by about the same amount with each stock added, until it reaches the market's standard deviation|stays roughly constant, because each added stock brings its own unsystematic risk|*falls sharply over the first few holdings and then levels off at a floor set by systematic risk
+Diversification removes unsystematic risk — one firm's bad luck offsets another's good — and most of the reduction comes with the first few holdings; Systematic risk is shared by every holding, so it sets a floor the standard deviation cannot fall below: it never reaches zero.
+===
+11.5 Systematic risk principle
+Why does the expected return on a risky asset depend only on its systematic risk?
+Systematic risk is always larger than an asset's unsystematic risk|*Unsystematic risk can be eliminated at almost no cost by diversifying, so the market pays no premium for bearing it|Unsystematic risk is part of the expected return, so it is already built into the price|Systematic risk is the only kind of risk that produces surprises in returns
+Unsystematic risk can be shed by spreading holdings across enough firms, at a cost close to zero; A market will not pay anyone for bearing a risk they could have shed for free, so the reward attaches only to systematic risk — which is why expected return depends on beta, not on total risk.
 ===
 11.6 Beta versus standard deviation
-Rf = 4% and the market risk premium is 7%. Stock G, a gold miner, has a standard deviation of 55% and a beta of 0.3. Stock U, an electronics maker, has a standard deviation of 25% and a beta of 1.3. Which stock has the higher required return under the CAPM? Choose, then explain.
-G, because its total risk is more than twice as large|Neither — high-σ and high-β stocks earn the same on average|It cannot be determined without the correlation between G and U|*U, because its required return is 13.1% against G's 6.1% — only systematic risk is rewarded
-CAPM: E(R_U) = 4% + 1.3 × 7% = 13.1%; E(R_G) = 4% + 0.3 × 7% = 6.1%; Standard deviation is total risk, most of G's is unsystematic and can be diversified away for free, so it earns no reward; A high standard deviation does not imply a high beta.
-@write 3
+Stock G, a biotech firm whose value hinges on a single drug trial, has a standard deviation of 60% and a beta of 0.4. Stock U, an industrial-machinery maker, has a standard deviation of 28% and a beta of 1.3. Under the CAPM, which statement is correct?
+G has the higher required return, because its total risk is more than twice U's|Both stocks have the same required return, because their unsystematic risk can be diversified away|*U has the higher required return, because only systematic risk, measured by beta, earns a risk premium|The comparison cannot be made without the correlation between G and U
+Standard deviation measures total risk; beta measures only the part that moves with the market; Most of G's risk is unsystematic and can be diversified away at almost no cost, so it earns no premium; Required return = R_f + β × [E(R_M) − R_f] rises with β: U (1.3) > G (0.4); A high standard deviation does not imply a high beta.
 ===
 11.6 Reading a beta
 Which statement about beta is correct?
@@ -257,53 +250,53 @@ Which statement about beta is correct?
 11.6 Portfolio beta
 You hold $40,000 in Stock A (β = 1.40), $35,000 in Stock B (β = 0.90) and $25,000 in Treasury bills. What is the beta of your portfolio?
 0.767|*0.875|1.150|1.167
-Weights = dollars ÷ $100,000: 0.40, 0.35, 0.25; T-bills have no systematic risk, β = 0; β_P = Σ w × β = 0.40 × 1.40 + 0.35 × 0.90 + 0.25 × 0 = 0.56 + 0.315 + 0 = 0.875; (0.767 is the simple average of 1.40, 0.90 and 0; 1.150 averages only the two stocks; 1.167 ignores the T-bills' weight: 0.875 ÷ 0.75.)
+Weights = dollars ÷ $100,000: 0.40, 0.35, 0.25; T-bills carry no systematic risk, β = 0; β_P = Σ w × β = 0.40 × 1.40 + 0.35 × 0.90 + 0.25 × 0 = 0.56 + 0.315 + 0 = 0.875; (0.767 is the simple average of 1.40, 0.90 and 0; 1.150 averages only the two stocks; 1.167 ignores the T-bills' weight: 0.875 ÷ 0.75.)
 ===
 -
-A $1,000,000 portfolio holds $350,000 in Stock A (β = 1.40), $250,000 in Stock B (β = 0.90) and $150,000 in the risk-free asset. The remaining $250,000 will go into Stock C. What beta must C have for the portfolio to have a beta of 1.00? If Rf = 4% and the market risk premium is 6%, what is the portfolio's expected return under the CAPM? Write the formulas.
-0.49 / .49|0.225 / .225|0.285 / .285|1.14|10% / 10.0% / 0.10
-β_P = Σ w × β: 1.00 = 0.35 × 1.40 + 0.25 × 0.90 + 0.15 × 0 + 0.25 × β_C; 0.35 × 1.40 = 0.49 and 0.25 × 0.90 = 0.225, so 0.25 × β_C = 1.00 − 0.49 − 0.225 = 0.285; β_C = 0.285 ÷ 0.25 = 1.14; E(R_P) = R_f + β_P × MRP = 4% + 1.00 × 6% = 10% — a portfolio with β = 1 has the market's expected return.
+For a portfolio of risky stocks, which of the following equals the portfolio-weighted average of the corresponding values for the individual stocks? I. Expected return  II. Beta  III. Standard deviation
+I only|*I and II only|I and III only|I, II and III
+E(R_P) = Σ w × E(R) and β_P = Σ w × β are weighted averages; σ_P must be computed from the portfolio's own returns — the holdings do not move in lockstep, so part of their swings offset and σ_P falls below the weighted average of the standard deviations.
 ===
 11.7 Reward-to-risk ratio
 The risk-free rate is 4%. Stock M has an expected return of 13% and a beta of 1.5; Stock N has an expected return of 10% and a beta of 0.9. Which statement is correct?
-M is the better buy because its expected return is higher, so investors buy M until its price rises|Neither is mispriced, because M's higher return exactly compensates for its higher beta|*N pays more per unit of systematic risk, so investors buy N — its price rises and its expected return falls|N pays more per unit of risk, so its price falls until its expected return rises to M's
+M is the better buy because its expected return is higher, so investors buy M until its price rises|Neither is mispriced, because M's higher return exactly compensates for its higher beta|N pays more per unit of risk, so its price falls until its expected return rises to M's|*N pays more per unit of systematic risk, so investors buy N; its price rises and its expected return falls
 Reward-to-risk = (E(R) − R_f) ÷ β: M = (13% − 4%) ÷ 1.5 = 6.00%; N = (10% − 4%) ÷ 0.9 = 6.67%; N pays more for each unit of beta, so investors sell M and buy N; N's price rises and its expected return falls (M's does the opposite) until the two ratios meet.
 ===
-11.7 CAPM
-The risk-free rate is 3.5%, the expected return on the market is 10.5%, and Stock H has a beta of 1.3. What is H's required return under the CAPM?
-9.10%|*12.60%|13.65%|17.15%
-E(R_H) = R_f + β × [E(R_M) − R_f] = 3.5% + 1.3 × (10.5% − 3.5%) = 3.5% + 1.3 × 7% = 3.5% + 9.1% = 12.60%; (9.10% leaves out R_f; 13.65% is β × E(R_M); 17.15% uses E(R_M) instead of the risk premium.)
-===
 -
-A portfolio has 30% in a stock with β = 1.5 and 70% in a stock with β = 0.9. The risk-free rate is 5% and the expected return on the market is 11%. What is the portfolio's expected return under the CAPM?
-*11.48%|12.20%|12.92%|16.88%
-β_P = 0.30 × 1.5 + 0.70 × 0.9 = 0.45 + 0.63 = 1.08; E(R_P) = R_f + β_P × [E(R_M) − R_f] = 5% + 1.08 × (11% − 5%) = 5% + 6.48% = 11.48%; (12.20% uses the simple average beta 1.2; 12.92% swaps the weights, β = 1.32; 16.88% multiplies β by E(R_M) instead of the risk premium.)
+The risk-free rate is 4.5% and the expected return on the market is 12%. Stock T has a beta of 1.2 and is correctly priced. What is T's reward-to-risk ratio?
+*7.50%|9.00%|10.00%|13.50%
+Correctly priced → on the SML: E(R_T) = 4.5% + 1.2 × (12% − 4.5%) = 4.5% + 9.0% = 13.5%; Reward-to-risk = (13.5% − 4.5%) ÷ 1.2 = 7.50% = E(R_M) − R_f; In equilibrium every asset's ratio equals the market risk premium, the slope of the SML; (9.00% forgets to divide by β; 10.00% = 12% ÷ 1.2.)
 ===
 11.7 Security market line
-Two correctly priced stocks lie on the security market line: Stock A has β = 1.2 and an expected return of 13.4%; Stock B has β = 0.7 and an expected return of 9.4%. Find the market risk premium, the risk-free rate and the expected return on the market. Then give the required return on a stock with β = 1.5. Write the formulas.
-8% / 8.0% / 0.08|3.8 / 3.80 / 0.038|11.8 / 11.80 / 0.118|15.8 / 15.80 / 0.158
-Slope of the SML = market risk premium = (13.4% − 9.4%) ÷ (1.2 − 0.7) = 4% ÷ 0.5 = 8%; R_f = E(R_A) − β_A × MRP = 13.4% − 1.2 × 8% = 13.4% − 9.6% = 3.8% (check: 9.4% − 0.7 × 8% = 3.8%); E(R_M) = R_f + 1 × MRP = 3.8% + 8% = 11.8%; Required return at β = 1.5: 3.8% + 1.5 × 8% = 15.8%.
+Two correctly priced stocks lie on the security market line: Stock A has a beta of 1.2 and an expected return of 13.4%; Stock B has a beta of 0.7 and an expected return of 9.4%. Compute the market risk premium, the risk-free rate and the expected return on the market. Write the formulas.
+8% / 8.0% / 0.08|3.8 / 3.80 / 0.038|11.8 / 11.80 / 0.118
+Slope of the SML = market risk premium = (13.4% − 9.4%) ÷ (1.2 − 0.7) = 4% ÷ 0.5 = 8%; R_f = E(R_A) − β_A × MRP = 13.4% − 1.2 × 8% = 13.4% − 9.6% = 3.8% (check: 9.4% − 0.7 × 8% = 3.8%); E(R_M) = R_f + 1.0 × MRP = 3.8% + 8% = 11.8%
 ===
-11.7 Undervalued or overvalued
-The risk-free rate is 3% and the expected return on the market is 9.5%. An analyst forecasts the following returns: Stock P (β = 0.8) 9.5%, Stock Q (β = 1.2) 10%, Stock S (β = 1.5) 12.75%. Compute each stock's CAPM required return and say whether each is undervalued, overvalued or correctly priced. Write the formula.
-8.2 / 8.20 / 0.082|10.8 / 10.80 / 0.108|12.75 / 0.1275|undervalued / under-valued / underpriced|overvalued / over-valued / overpriced
-MRP = 9.5% − 3% = 6.5%; Formula: E(R_i) = R_f + β_i × [E(R_M) − R_f]; P = 3% + 0.8 × 6.5% = 8.2% → forecast 9.5% is 1.3 points above the SML: undervalued; Q = 3% + 1.2 × 6.5% = 10.8% → forecast 10% is 0.8 points below: overvalued; S = 3% + 1.5 × 6.5% = 12.75% → forecast 12.75% lies on the SML: correctly priced.
+11.7 CAPM
+The risk-free rate is 3% and the expected return on the market is 9.5%. Investors require a return of 12.1% on Stock H. What is H's beta under the CAPM?
+0.96|1.27|*1.40|1.86
+E(R_H) = R_f + β × [E(R_M) − R_f]: 12.1% = 3% + β × (9.5% − 3%); β = (12.1% − 3%) ÷ 6.5% = 9.1% ÷ 6.5% = 1.40; (0.96 divides by E(R_M) instead of the risk premium; 1.27 = 12.1% ÷ 9.5%; 1.86 forgets to subtract R_f.)
 ===
--
-Stock K has a beta of 1.2, and its expected return plots above the security market line. What should happen to it?
-K is overvalued: investors sell it until its price falls back to the SML|K's beta will rise until the stock sits on the SML|Nothing — K simply carries extra unsystematic risk, which the market rewards|*K is undervalued: investors buy it, its price rises and its expected return falls until it sits on the SML
-Above the SML = the asset offers more than its beta requires = undervalued (cheap); Buyers compete for it, the price rises and the expected return falls until it lies on the line; Beta does not adjust, and unsystematic risk earns no reward.
+11.7 Security market line
+The risk-free rate stays at 3%, but the market risk premium rises from 5% to 7%. Which statement is correct?
+The SML shifts up in parallel, so every asset's required return rises by 2 percentage points|Only assets with betas above 1 require higher returns; assets with betas below 1 now require lower returns|The SML becomes flatter, because investors are paid less for each unit of beta|*The SML becomes steeper: a stock with a beta of 1.5 now requires 3 percentage points more, while the risk-free asset still requires 3%
+SML: E(R_i) = R_f + β_i × [E(R_M) − R_f] — intercept R_f, slope = market risk premium; A higher premium leaves the intercept at 3% and steepens the line; Each asset's required return rises by β × 2 points: β = 1.5 → 1.5 × 2% = 3 points, β = 0.5 → 1 point, β = 0 → none.
+===
+11.7 Overvalued and undervalued
+The risk-free rate is 3% and the expected return on the market is 9%. An analyst's forecast returns are shown below. Complete the table: compute each stock's required return under the CAPM and classify each stock as undervalued, overvalued or correctly priced. Write the formula you use.
+~
+Formula: E(R_i) = R_f + β_i × [E(R_M) − R_f], with E(R_M) − R_f = 9% − 3% = 6%; P = 3% + 0.80 × 6% = 7.80% < forecast 9.00% → plots above the SML: undervalued; Q = 3% + 1.20 × 6% = 10.20% > forecast 9.50% → plots below the SML: overvalued; S = 3% + 1.50 × 6% = 12.00% = forecast → on the SML: correctly priced
+@grid CAPM required returns (R_f = 3%, E(R_M) = 9%) :: Stock|Beta|Forecast return|CAPM required return|Verdict;;P|0.80|9.00%|?7.80%|?Undervalued / Underpriced / Cheap;;Q|1.20|9.50%|?10.20%|?Overvalued / Overpriced / Dear;;S|1.50|12.00%|?12.00%|?Correctly priced / Fairly priced / On the SML
 ===
 11.8 SML and the cost of capital
-A stable water utility has a beta of 0.6. It is considering a software venture whose risk matches software firms with a beta of 1.5. The risk-free rate is 4.5% and the market risk premium is 6.5%. The venture's expected return is 12.5%. What should the utility decide? Choose, then explain.
-Accept — 12.5% exceeds the utility's own required return of 8.4%|Accept — 12.5% exceeds the market's expected return of 11%|*Reject — at the venture's beta the SML requires 14.25%, so 12.5% plots below the SML|Reject — a project riskier than the firm should never be accepted
-Use the project's risk, not the firm's: required return = 4.5% + 1.5 × 6.5% = 4.5% + 9.75% = 14.25%; 12.5% < 14.25% → below the SML → negative NPV at the correct discount rate → reject; The utility's own rate, 4.5% + 0.6 × 6.5% = 8.4%, would make almost any project look acceptable; A risky project is fine if it plots above the SML.
-@write 3
+A packaged-food company has a beta of 0.7. It is considering a battery plant whose risk matches that of battery makers, with a beta of 1.6. The risk-free rate is 4% and the market risk premium is 5.5%. The plant's expected return is 11.5%. Which decision is correct?
+Accept, because 11.5% exceeds the company's own required return of 7.85%|Accept, because 11.5% exceeds the expected return on the market of 9.5%|*Reject, because the SML requires 12.8% at the plant's beta, so the plant plots below the SML|Reject, because a project with a higher beta than the firm's should never be accepted
+Use the project's risk, not the firm's: required return = 4% + 1.6 × 5.5% = 4% + 8.8% = 12.8%; 11.5% < 12.8% → below the SML → negative NPV at the correct discount rate → reject; The company's own rate, 4% + 0.7 × 5.5% = 7.85%, would make almost any project look acceptable; A high-beta project is acceptable whenever it plots above the SML.
 ===
 -
-Daon Holdings has two divisions: a water utility (β = 0.6) and a semiconductor design unit (β = 1.6). The firm's overall beta is 1.0, and it discounts every project at one firm-wide rate, 4% + 1.0 × 7% = 11%. What will this policy tend to do over time?
-Reject too many semiconductor projects and accept too many utility projects|*Accept too many semiconductor projects and reject some good utility projects|Give correct decisions on average, because the two divisions' errors cancel|Nothing — shareholders bear the firm's beta, so the firm-wide rate is right for every project
-Correct rates from the SML: utility = 4% + 0.6 × 7% = 8.2%; semiconductor = 4% + 1.6 × 7% = 15.2%; A semiconductor project returning 13% clears 11% but lies below the SML (needs 15.2%) — wrongly accepted; A utility project returning 10% fails 11% but lies above the SML (needs 8.2%) — wrongly rejected; The firm drifts toward riskier projects that destroy value.
+Hanul Chemicals discounts a project's expected cash flows at 11%, the required return the SML gives for the project's beta, and obtains an NPV of −$25,000. Which statement is correct?
+*The project's expected return is below 11%, so it plots below the SML and should be rejected|The project plots above the SML but has a negative NPV, so the two tests disagree and the NPV should decide|The project should be accepted if its beta is below the firm's overall beta|The project should be re-evaluated at the firm's overall required return before a decision is made
+The SML required return for the project's beta is the discount rate in the NPV calculation; NPV < 0 at 11% means the project's expected return is below 11%; Positive NPV and plotting above the SML are the same test, so the project plots below the SML → reject; The firm's overall rate is the wrong rate unless the project has the firm's risk.
 ===
 </script>
 <!--DATA-END-->

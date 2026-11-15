@@ -171,29 +171,39 @@
 <!--DATA-START-->
 <script type="text/plain" id="quizData">
 title: Business Finance Review Quiz — Chapter 9
-sub: Chapter 9 · 22 questions (14 MC · 8 written)
+sub: Chapter 9 · 24 questions (20 MC · 4 problems)
 subject: Business Finance, Prof. Gemma Lee, Kyung Hee University
 textbook: Lecture notes, Chapter 9 (RWJ, Essentials of Corporate Finance)
 ===
 9.1 Relevant cash flows
-A retail chain's existing downtown store has sales of $5,000,000. Without any action, its sales were expected to rise 4% next year. If the chain opens a new store nearby, the downtown store's sales will rise only 1%. How much of the downtown store's sales should be treated as erosion caused by the new store?
-$0 — the downtown store's sales still rise, so nothing is lost|$50,000|*$150,000|$200,000
-With and without, not before and after: without the new store sales = 5,000,000 × 1.04; with it = 5,000,000 × 1.01; Erosion = (4% − 1%) × 5,000,000 = $150,000 — sales that the project takes away, even though they still grow.
+A retail chain's downtown store has sales of $5,000,000. Without any action, these sales were expected to grow 4% next year. If the chain opens a new store nearby, the downtown store's sales will grow only 1%. What amount of the downtown store's sales should be treated as erosion caused by the new store?
+$0|$50,000|*$150,000|$200,000
+With and without, not before and after: sales without the new store = 5,000,000 × 1.04, with it = 5,000,000 × 1.01; Erosion = (4% − 1%) × 5,000,000 = $150,000 — sales the project takes away even though the store still grows ($0 is the before-and-after comparison).
+===
+9.1 Stand-alone principle
+Which of the following best describes the stand-alone principle?
+*Once its incremental cash flows are identified, a project can be valued on those cash flows alone, as a small firm of its own|A project should be evaluated without regard to its effects on the firm's other products|A project should be accepted only if it can be financed without funds from the rest of the firm|A project's relevant cash flows are the firm's cash flows after the launch minus those before it
+Stand-alone principle: after the incremental cash flows (side effects included) are identified, the project is treated as a mini-firm with its own revenues, costs, assets and cash flows; The rest of the firm can be set aside, so the whole corporation never has to be valued twice.
 ===
 9.2 Sunk cost
 Last month a firm signed a non-cancellable $300,000 contract for an engineering study of a new plant; the bill will be paid next month whatever the firm decides about the plant. How should the $300,000 be treated in the plant's capital budgeting analysis?
-*Exclude it — it is irrevocably committed, so it is paid with or without the plant|Include it at year 0, because the cash has not yet been paid|Include it only if the plant is accepted|Spread it over the plant's life as an annual expense
-Sunk cost = an outlay already paid or already irrevocably committed; The firm pays the $300,000 whether or not it builds the plant, so it is not incremental — leave it out entirely.
+*Exclude it, because it is irrevocably committed and is paid whether or not the plant is built|Include it at year 0, because the cash has not yet been paid|Include it only if the plant is accepted|Include it as an annual expense, because it will be capitalized and expensed over the plant's life
+Sunk cost = an outlay already paid or already irrevocably committed; The $300,000 is paid with or without the plant, so it is not incremental — it stays out even if it is capitalized and expensed in later periods.
 ===
 9.2 Opportunity cost
 A project will use a machine the firm already owns. Its book value is $80,000, and it could be sold today for $65,000. The tax rate is 21%. What opportunity cost should be charged to the project at year 0?
-$61,850|*$68,150|$80,000|$83,150
-Opportunity cost = after-tax sale proceeds forgone; Loss = 80,000 − 65,000 = 15,000 → tax saving = 0.21 × 15,000 = 3,150; Cost = 65,000 + 3,150 = $68,150 (= MV − T × (MV − BV) = 65,000 − 0.21 × (65,000 − 80,000)).
+$61,850|$65,000|*$68,150|$80,000
+Opportunity cost = after-tax sale proceeds forgone = MV − T × (MV − BV) = 65,000 − 0.21 × (65,000 − 80,000) = 65,000 + 3,150 = $68,150; The $15,000 loss on a sale would save tax, so forgoing the sale gives up that saving too ($80,000 is book value, not an economic cost).
+===
+-
+A project will occupy a warehouse that the firm owns and currently leases to a tenant for $48,000 a year in pretax rent; the tenant would have to leave. The tax rate is 21%. By how much does the forgone rent reduce the project's annual operating cash flow?
+$10,080|*$37,920|$48,000|$58,080
+Forgone rent is an opportunity cost entered in the pro forma like a cost: it lowers EBIT by 48,000 and taxes by 0.21 × 48,000 = 10,080; Reduction in OCF = 48,000 × (1 − 0.21) = $37,920.
 ===
 9.2 Side effects
 A new phone model will earn $900,000 of contribution a year. It will take $250,000 a year of contribution from the firm's older model, but $100,000 of that would have been lost to a rival's new phone anyway. It will also add $40,000 a year of contribution from protective-case sales. What annual incremental contribution should be used for the new model?
-$690,000|$750,000|*$790,000|$940,000
-Erosion caused by the project = 250,000 − 100,000 = 150,000; Synergy = +40,000; Incremental = 900,000 − 150,000 + 40,000 = $790,000.
+$650,000|$690,000|$750,000|*$790,000
+Erosion caused by the project = 250,000 − 100,000 = 150,000; Synergy = +40,000; Incremental contribution = 900,000 − 150,000 + 40,000 = $790,000 ($690,000 also subtracts the $100,000 that would have been lost anyway).
 ===
 9.2 Overhead
 Head office will allocate $50,000 a year of its existing overhead to a new project. Because of the project, total head-office overhead will actually rise by $12,000 a year. How much overhead belongs in the project's annual cash flows?
@@ -201,21 +211,29 @@ $0|*$12,000|$38,000|$50,000
 Only the increase in total overhead is incremental: $12,000; The other $38,000 is paid with or without the project — the allocation moves it between divisions but does not create it.
 ===
 9.2 Financing costs
-An analyst computes a project's annual cash flow as EBIT − interest − taxes on (EBIT − interest) + depreciation, and then discounts it at the project's required return. What is wrong with this approach?
-*The cost of debt is already in the required return, so subtracting interest charges the project twice for the same borrowing|Nothing — interest is a real cash outflow of the project|Interest should be subtracted, but before computing EBIT|Depreciation should not be added back when interest is subtracted
-Project cash flow is the cash the assets generate for all providers of capital; Financing costs live in the discount rate; Subtracting interest as well counts them twice — the pro forma has no interest line, and taxes are EBIT × T.
+An analyst subtracts the interest on a project's loan from its annual cash flows and then discounts them at the project's required return. Which statement is correct?
+*The project is penalized twice for the same borrowing, because the required return already reflects the cost of debt|The approach is correct, because interest is a cash outflow caused by the project|The approach is correct if the loan is raised specifically to finance the project|Interest should be excluded, but the interest tax saving should be added to operating cash flow
+Project cash flow is the cash the assets generate for all providers of capital; Financing costs belong in the discount rate, so the pro forma has no interest line and taxes = EBIT × T — the tax the project would pay if it were all-equity financed.
 ===
-9.2 Is it incremental?
-Mirae Foods is deciding whether to launch a frozen-dumpling line. For each item, write In (incremental — belongs in the analysis) or Out.
-~
-Taste test: sunk — out; Rent forgone on the unused floor: opportunity cost — in; Original cost of the floor: sunk — out; Higher dipping-sauce sales: synergy — in; Noodle sales lost to dumplings: erosion — in; Dividends: financing — out; Launch inventory: NWC — in; Allocated CEO salary, total unchanged: out; Extra electricity for the line: incremental cost — in
-@grid Mirae Foods — In or out? :: Item|In or out?;;$45,000 consumer taste test completed last month|?Out / Exclude / Excluded / No;;$36,000 a year of pretax rent from leasing the factory floor the line would occupy|?In / Include / Included / Yes;;Price the firm paid for that factory floor ten years ago|?Out / Exclude / Excluded / No;;Extra dipping-sauce sales by dumpling buyers|?In / Include / Included / Yes;;Frozen-noodle sales lost to customers who switch to dumplings|?In / Include / Included / Yes;;Dividends paid to shareholders|?Out / Exclude / Excluded / No;;Raw-material inventory needed at launch|?In / Include / Included / Yes;;Share of the CEO's salary allocated to the line (total salary unchanged)|?Out / Exclude / Excluded / No;;Extra electricity used by the new line|?In / Include / Included / Yes
-@lines 0
+9.2 Incremental cash flows
+A firm is evaluating a new product line. Which of the following is a relevant cash flow for the analysis?
+Amortization of $90,000 of product-design costs that were paid two years ago and capitalized|Dividends the firm expects to pay to shareholders while the line operates|The price the firm paid ten years ago for the land the line will occupy|*The tax saving produced by depreciation on the line's new equipment
+Depreciation is not a cash flow, but it lowers taxes by D × T, and taxes are a cash flow; The design costs are sunk (capitalizing them does not change that), dividends are a financing flow, and the old land price is sunk.
 ===
 9.2 Net working capital
 A project requires $60,000 of net working capital at year 0. At the end of year 4 only $48,000 is recovered; the rest is obsolete inventory that is scrapped. The required return is 9%; ignore taxes. What is the present-value cost of the NWC to the project?
 $12,000.00|$17,494.49|*$25,995.59|$60,000.00
-PV cost = 60,000 − 48,000 / 1.09^4 = 60,000 − 34,004.41 = $25,995.59; Even the recovered part costs the firm, because it is tied up for four years ($12,000 counts only the nominal loss; $17,494.49 assumes full recovery).
+PV cost = 60,000 − 48,000 / 1.09^4 = 60,000 − 34,004.41 = $25,995.59; BA II Plus: 4 N, 9 I/Y, 0 PMT, 48000 FV, CPT PV → −34,004.41; Even the recovered part costs the firm because it is tied up for four years ($12,000 counts only the nominal loss; $17,494.49 assumes full recovery).
+===
+9.3 Pro forma statements
+Which statement about a project's pro forma income statement is correct?
+*Taxes equal EBIT × the tax rate — the tax the project would pay if financed entirely with equity|Depreciation follows the firm's book depreciation policy rather than the tax schedule|Fixed costs include the head-office overhead allocated to the project|NOPAT equals the cash the project generates in that year, so depreciation is not added back
+Project pro forma: sales − variable costs − incremental fixed costs − tax depreciation = EBIT; There is no interest line, so taxes = EBIT × T and NOPAT = EBIT × (1 − T); NOPAT is not cash — depreciation must be added back to get OCF.
+===
+9.3 Project cash flow
+In year 2 of a project, operating cash flow is $84,000, net working capital rises from $30,000 to $38,000, and the firm spends $15,000 on additional equipment. What is the project cash flow for year 2?
+$31,000|*$61,000|$76,000|$77,000
+Project cash flow = OCF − capital spending − change in NWC = 84,000 − 15,000 − (38,000 − 30,000) = $61,000 ($31,000 subtracts the NWC level instead of its change).
 ===
 9.4 Net working capital
 Pinecrest Bakery's new outlet needs net working capital equal to 15% of the next year's sales, set up at the end of the previous year. Sales are $300,000, $400,000, $440,000 and $200,000 in years 1–4, and the outlet closes after year 4, when all NWC is recovered. Find the NWC level at the end of each year 0–4 and the cash flow from NWC in each year (an increase is an outflow). No worksheet is provided — lay out your own table and write the formula you use.
@@ -226,44 +244,37 @@ NWC at end of year t = 15% × sales in year t + 1: Year 0 = 0.15 × 300,000 = 45
 -
 In its final year a project records sales of $300,000, and its accounts receivable fall from $60,000 to $20,000 as customers pay off their balances. How much cash does the project collect from customers this year?
 $260,000|$280,000|$300,000|*$340,000
-Cash collected = sales − increase in receivables = 300,000 − (20,000 − 60,000) = $340,000; The ΔNWC correction works in both directions: a fall in receivables is a cash inflow.
+Cash collected = sales − increase in receivables = 300,000 − (20,000 − 60,000) = $340,000; The ΔNWC correction turns accrual sales into cash and works in both directions: a fall in receivables is a cash inflow.
 ===
-9.4 Depreciation
+9.4 MACRS
 Which statement about MACRS depreciation is correct?
-Each year's rate is applied to the asset's remaining book value|The expected salvage value is subtracted from the cost before the rates are applied|MACRS gives a larger total deduction than straight-line over the asset's tax life|*The rates are applied to the original cost and ignore salvage value, so the asset is always written down to zero
-MACRS: D_t = original cost × rate_t; salvage value is ignored and the rates sum to 100%; Totals equal straight-line — MACRS only moves the deductions earlier.
-===
--
-Equipment costing $150,000 is in the 7-year MACRS class (rates 14.29%, 24.49%, 17.49%, … in years 1, 2, 3, …). The tax rate is 21%. What is the depreciation tax shield in year 2?
-$4,500.00|$5,509.35|*$7,714.35|$36,735.00
-D_2 = 150,000 × 24.49% = 36,735; Tax shield = D_2 × T = 36,735 × 0.21 = $7,714.35; ($4,500 = straight-line 150,000 / 7 × 0.21; $36,735 is the deduction itself, not the tax it saves.)
+Each year's rate is applied to the asset's remaining book value|Expected salvage value is subtracted from the cost before the rates are applied|*Because of the half-year convention, a 5-year-class asset is written off over six years|MACRS gives a larger total deduction than straight-line over the asset's life
+MACRS: D_t = original cost × rate_t, salvage value ignored, so the asset is written down to zero; The half-year convention assumes a mid-year purchase, so the 5-year class runs to year 6; Total deductions equal straight-line — MACRS only moves them earlier.
 ===
 9.4 After-tax salvage
-Ostra Marine bought equipment for $150,000 and sells it at the end of year 3 for $55,000. The tax rate is 21%. Under (i) straight-line to zero over 5 years and (ii) 5-year MACRS (20.00%, 32.00%, 19.20% in years 1–3), find the accumulated depreciation, the book value at the end of year 3, the gain or loss on the sale, the tax on it and the after-tax salvage. No worksheet is provided — lay out your own table and write the after-tax salvage formula.
-90,000 / 90000|106,800 / 106800|60,000 / 60000|43,200 / 43200|1,050 / 1050|2,478 / 2478|56,050 / 56050|52,522 / 52522
-After-tax salvage = MV − T × (MV − BV); Straight-line: accumulated D = 3 × 30,000 = 90,000; BV = 60,000; loss = −5,000; tax saving = 1,050; ATS = 55,000 + 1,050 = 56,050; MACRS: accumulated D = 150,000 × 71.20% = 106,800; BV = 43,200; gain = 11,800; tax = 2,478; ATS = 55,000 − 2,478 = 52,522; Gap = (60,000 − 43,200) × 0.21 = 3,528
-@space 7
+Equipment bought for $120,000 is depreciated straight-line to zero over 6 years. The project ends and the equipment is sold at the end of year 4 for $31,000. The tax rate is 21%. What is the after-tax salvage?
+$24,490|$29,110|$31,000|*$32,890
+BV = 120,000 − 4 × 20,000 = 40,000; After-tax salvage = MV − T × (MV − BV) = 31,000 − 0.21 × (31,000 − 40,000) = 31,000 + 1,890 = $32,890; Sold below book value, the loss is deductible, so the proceeds exceed the sale price ($29,110 subtracts the tax saving).
 ===
 -
-In two sentences, explain how the after-tax cash from selling a used asset can be larger than its sale price.
-book value / book|loss|tax saving / saves tax / deductible / deduction / lower tax / reduces tax
-If the asset is sold for less than its book value, the firm records a loss on the sale; The loss is deductible, so the tax saving T × (BV − MV) is added to the sale price — after-tax salvage = MV + T × (BV − MV) > MV.
-@short
+Equipment costing $180,000 is sold at the end of year 3 for $70,000. The tax rate is 21%. Compared with straight-line depreciation to zero over 5 years, how does 5-year MACRS (20.00%, 32.00%, 19.20% in years 1–3) change the after-tax salvage?
+$3,813.60 lower|*$4,233.60 lower|$4,233.60 higher|$20,160.00 lower
+Straight-line: BV = 180,000 − 3 × 36,000 = 72,000 → ATS = 70,000 − 0.21 × (70,000 − 72,000) = 70,420; MACRS: BV = 180,000 × (1 − 71.20%) = 51,840 → ATS = 70,000 − 0.21 × (70,000 − 51,840) = 66,186.40; Gap = (72,000 − 51,840) × 0.21 = $4,233.60 lower under MACRS — part of the earlier deductions is handed back at the sale.
 ===
 9.5 OCF definitions
-A project has annual sales of $420,000, cash costs of $260,000 and depreciation of $70,000. The tax rate is 21% and there is no interest. What is the operating cash flow by the top-down approach?
-$126,400|*$141,100|$155,800|$160,000
-Taxes = 0.21 × (420,000 − 260,000 − 70,000) = 0.21 × 90,000 = 18,900; Top-down: OCF = sales − costs − taxes = 420,000 − 260,000 − 18,900 = $141,100; ($126,400 = (S − C)(1 − T) leaves out the 14,700 tax shield; $155,800 = NOPAT 71,100 + D 70,000 + 14,700 counts the shield twice.)
+A project has annual sales of $420,000, cash costs of $260,000 and depreciation of $70,000. The tax rate is 21% and there is no interest. What is the operating cash flow?
+$71,100|$126,400|*$141,100|$160,000
+Taxes = 0.21 × (420,000 − 260,000 − 70,000) = 0.21 × 90,000 = 18,900; Top-down: OCF = sales − costs − taxes = 420,000 − 260,000 − 18,900 = $141,100 (= NOPAT 71,100 + D 70,000); ($126,400 = (S − C)(1 − T) leaves out the 14,700 tax shield; $71,100 is NOPAT.)
 ===
 -
-The top-down definition, OCF = Sales − Costs − Taxes, has no depreciation term. Which statement is correct?
-*Depreciation still matters, because it lowers the taxes in the formula|Top-down OCF is unaffected by depreciation, so it is higher than bottom-up OCF|Top-down and bottom-up OCF differ whenever depreciation is accelerated|Top-down OCF equals NOPAT
-Taxes = T × (S − C − D), so a larger D lowers taxes and raises top-down OCF by D × T; All three definitions are rearrangements of one identity — they cannot disagree.
+The top-down definition, OCF = Sales − Costs − Taxes, contains no depreciation term. Which statement is correct?
+*Depreciation still affects top-down OCF, because it lowers the taxes in the formula|Top-down OCF is unaffected by depreciation, so it exceeds bottom-up OCF|Top-down and bottom-up OCF differ whenever depreciation is accelerated|Top-down OCF equals NOPAT
+Taxes = T × (S − C − D), so a larger D lowers taxes and raises top-down OCF by D × T; Bottom-up, top-down and tax shield are rearrangements of one identity — they cannot disagree.
 ===
 -
-Kestrel Labs' new testing service has annual sales of $1,150,000, cash costs of $720,000 and depreciation of $160,000. The tax rate is 21% and there is no interest. Compute the operating cash flow by the bottom-up, top-down and tax shield approaches, writing each formula.
-373,300 / 373300|56,700 / 56700|213,300 / 213300|339,700 / 339700|33,600 / 33600
-EBIT = 1,150,000 − 720,000 − 160,000 = 270,000; Taxes = 0.21 × 270,000 = 56,700; NOPAT = 270,000 − 56,700 = 213,300; Bottom-up: OCF = NOPAT + D = 213,300 + 160,000 = $373,300; Top-down: OCF = S − C − taxes = 1,150,000 − 720,000 − 56,700 = $373,300; Tax shield: OCF = (S − C)(1 − T) + D × T = 430,000 × 0.79 + 160,000 × 0.21 = 339,700 + 33,600 = $373,300
+A project's sales minus cash costs are $260,000 in each of years 1–3. Its equipment cost $150,000 and is in the 7-year MACRS class (14.29%, 24.49%, 17.49% in years 1–3). The tax rate is 21%. Using the tax shield approach, by how much does the year-2 OCF exceed the year-1 OCF?
+$0|*$3,213|$12,087|$15,300
+Tax shield approach: OCF = (S − C)(1 − T) + D × T; (S − C)(1 − T) = 205,400 in every year; ΔD = 150,000 × (24.49% − 14.29%) = 15,300; ΔOCF = 15,300 × 0.21 = $3,213 — only the depreciation tax shield changes from year to year.
 ===
 @case A
 Halden Outdoor Gear — a three-year kayak line
@@ -279,7 +290,7 @@ D_t = 240,000 × rate_t; D_1 = 79,992; D_2 = 106,680; D_3 = 35,544; Book value =
 @focus 1,3
 @space 5
 ===
-9.3 Pro forma
+9.3 Pro forma statements
 Halden. Complete the pro forma income statement for years 1–3 and the operating cash flow. Enter 0 for any item that does not belong in the project's cash flows.
 ~
 Sales = 6,000 × 95 = 570,000; Variable costs = 6,000 × 52 = 312,000; Erosion = 16,000 (incremental); Interest = 0 (financing — in the 11% rate); Survey = 0 (sunk); EBIT = 570,000 − 312,000 − 110,000 − 16,000 − D_t: 52,008, 25,320, 96,456; Taxes = 0.21 × EBIT: 10,921.68, 5,317.20, 20,255.76; NOPAT: 41,086.32, 20,002.80, 76,200.24; OCF = NOPAT + D: 121,078.32, 126,682.80, 111,744.24; Check (tax shield, year 1): 132,000 × 0.79 + 79,992 × 0.21 = 104,280 + 16,798.32 = 121,078.32
@@ -287,25 +298,18 @@ Sales = 6,000 × 95 = 570,000; Variable costs = 6,000 × 52 = 312,000; Erosion =
 @focus 1,2
 @grid Pro forma ($) :: Item|Year 1|Year 2|Year 3;;Sales|570,000|570,000|570,000;;− Variable costs|?312,000|?312,000|?312,000;;− Fixed costs|110,000|110,000|110,000;;− Erosion (canoe line)|?16,000|?16,000|?16,000;;− Market survey|?0 / Out / Excluded|?0 / Out / Excluded|?0 / Out / Excluded;;− Depreciation|?79,992|?106,680|?35,544;;=EBIT|?52,008|?25,320|?96,456;;− Interest|?0 / Out / Excluded|?0 / Out / Excluded|?0 / Out / Excluded;;− Taxes (21%)|?10,921.68|?5,317.20|?20,255.76;;=NOPAT|?41,086.32|?20,002.80|?76,200.24;;=Operating cash flow|?121,078.32|?126,682.80|?111,744.24
 ===
-9.4 After-tax salvage
-Halden. The equipment ($240,000, 3-year MACRS, book value $17,784 at the end of year 3) is sold at the end of year 3 for $30,000. The tax rate is 21%. What is the after-tax salvage?
-$23,700.00|*$27,434.64|$30,000.00|$32,565.36
-After-tax salvage = MV − T × (MV − BV) = 30,000 − 0.21 × (30,000 − 17,784) = 30,000 − 2,565.36 = $27,434.64; ($23,700 taxes the whole price; $32,565.36 adds the tax instead of subtracting it.)
-@use A
-@focus 1
-===
 9.3 Project cash flow
-Halden. Using the operating cash flows and the after-tax salvage you found, find the project cash flow for each of years 0–3 (capital spending, NWC, OCF, after-tax salvage). Then compute the NPV and IRR at 11%, writing the NPV formula, and state the decision. No worksheet is provided — lay out your own cash flows.
-265,000 / 265000|164,178.88 / 164178.88|66,944.35 / 66944.35 / 66,944 / 66944|24.27|accept
-Year 0 = −240,000 − 25,000 = −265,000; Years 1–2 = OCF = 121,078.32 and 126,682.80; Year 3 = 111,744.24 + 25,000 + 27,434.64 = 164,178.88; NPV = −265,000 + 121,078.32/1.11 + 126,682.80/1.11^2 + 164,178.88/1.11^3 = −265,000 + 109,079.57 + 102,818.60 + 120,046.18 = $66,944.35; BA II Plus: CF0 −265,000, C01 121,078.32, C02 126,682.80, C03 164,178.88, NPV I = 11, CPT → 66,944.35; IRR CPT → 24.27; Decision: NPV > 0 and IRR > 11% — accept.
+Halden. Using your operating cash flows and book values, compute the after-tax salvage of the equipment and the project cash flow for each of years 0–3. Then compute the NPV and IRR at 11%, writing the NPV formula, and give the decision (Accept or Reject). No worksheet is provided — lay out your own cash flows.
+27,434.64 / 27434.64|265,000 / 265000|164,178.88 / 164178.88|66,944.35 / 66944.35 / 66,944 / 66944|24.27|accept
+After-tax salvage = MV − T × (MV − BV) = 30,000 − 0.21 × (30,000 − 17,784) = 27,434.64; Year 0 = −240,000 − 25,000 = −265,000; Years 1–2 = OCF = 121,078.32 and 126,682.80; Year 3 = 111,744.24 + 25,000 + 27,434.64 = 164,178.88; NPV = −265,000 + 121,078.32/1.11 + 126,682.80/1.11^2 + 164,178.88/1.11^3 = −265,000 + 109,079.57 + 102,818.60 + 120,046.18 = $66,944.35; BA II Plus: CF0 −265,000, C01 121,078.32 F01 1, C02 126,682.80 F02 1, C03 164,178.88 F03 1, NPV I = 11, CPT → 66,944.35; IRR CPT → 24.27; Decision: NPV > 0 and IRR > 11% — Accept.
 @use A
 @focus 1
-@space 7
+@space 8
 ===
 9.2 Incremental cash flows
 Halden (r = 11%). An analyst makes two mistakes: she charges the $18,000 market survey at year 0, and she subtracts the $9,000 of interest from the project cash flow in each of years 1–3, leaving the taxes unchanged. By how much do these mistakes change the NPV?
-$18,000 lower|$21,993.43 lower|$35,374.81 lower|*$39,993.43 lower
-Survey at year 0: −18,000; Interest: PV = 9,000 × [1 − 1/1.11^3] / 0.11 = 9,000 × 2.44371 = 21,993.43; Total change = −18,000 − 21,993.43 = −$39,993.43; Both items are not incremental — the survey is sunk and the interest is already in the 11% discount rate; ($21,993.43 counts the interest only; $35,374.81 subtracts after-tax interest of 7,110.)
+$18,000.00 lower|$21,993.43 lower|$35,374.81 lower|*$39,993.43 lower
+Survey at year 0: −18,000; Interest: PV = 9,000 × [1 − 1/1.11^3] / 0.11 = 9,000 × 2.44371 = 21,993.43; Total change = −18,000 − 21,993.43 = −$39,993.43; BA II Plus: 3 N, 11 I/Y, 9000 PMT, 0 FV, CPT PV → −21,993.43; The survey is sunk and the interest is already in the 11% rate ($35,374.81 subtracts after-tax interest of 7,110 instead).
 @use A
 @focus 1
 ===

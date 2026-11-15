@@ -171,135 +171,154 @@
 <!--DATA-START-->
 <script type="text/plain" id="quizData">
 title: Investment Analysis Review Quiz — Chapter 8
-sub: Chapter 8 · 22 questions (18 MC · 4 written)
+sub: Chapter 8 · 27 questions (23 MC · 4 problems)
 subject: Investment Analysis, Prof. G. Lee, Kyung Hee University
 textbook: Lecture notes, Chapter 8 (BKM, Essentials of Investments)
 ===
 # Chapter 8: The Efficient Market Hypothesis
 ===
 8.1 Unpredictable prices
-A widely followed model forecasts that shares of Kestrel Corp. will rise 15% over the next three days. If the market is efficient, what should happen to Kestrel's price?
-It rises about 5% a day for three days as investors gradually act on the forecast|It stays unchanged until the forecast is confirmed three days from now|It rises 15% today and then a further 15% over the next three days|*It jumps today until the stock is no longer a bargain, so the predictable part of the move is used up
-Everyone who sees the signal buys today: there is no reason to wait, so demand arrives immediately, not in three days; The price jumps now until the forecast is used up — the forecast destroys itself; What is left is the part nobody could foresee, so the remaining price changes are unpredictable.
+According to the efficient market hypothesis, why should changes in stock prices be unpredictable?
+Most investors trade on noise rather than information, so prices wander randomly around their true values|*Any information that could predict a price change is traded on at once, so prices change only with new, unforeseeable information|Prices are set arbitrarily by supply and demand, so they bear no stable relation to the value of the firm|Expected returns on stocks are zero, so the best forecast of tomorrow's price change is always zero
+If a signal predicted a rise, everyone who saw it would buy now and the price would jump until the forecast was used up; So the predictable part of any move is already in the price, and only news — unpredictable by definition — moves it; A random walk is not a claim that prices are arbitrary or that expected returns are zero.
 ===
 8.1 Random walk
-Under the random-walk view, E(P_{t+1}) = P_t × (1 + E(r)). Delta Logistics trades at $80 today and its expected return over the next month is 0.75%. Yesterday the stock fell 4%. What is its expected price one month from now?
-$76.80 — yesterday's 4% fall continues|$77.38 — the fall continues and the stock then earns its expected return|*$80.60 — today's price grown at the expected return|$83.80 — the stock recovers the 4% and earns its expected return
-E(P_{t+1}) = P_t × (1 + E(r)) = 80 × 1.0075 = $80.60; Yesterday's fall is past information that is already in today's price, so it does not change the forecast; A random walk is not a claim that returns are zero — prices drift upward at the expected return and everything else is noise.
+Ridgefield Corp. trades at $64.00 and its expected return over the next month is 1.25%. Last week the stock rose 5%. If the price follows a random walk, the expected price one month from now is closest to:
+$61.56|$64.00|*$64.80|$67.20
+E(P_{t+1}) = P_t × (1 + E(r)) = 64.00 × 1.0125 = $64.80; Last week's rise is past information already in today's price, so it does not change the forecast; $64.00 wrongly treats a random walk as a zero expected return.
 ===
 8.1 Competition and efficiency
-Even if insider trading did not exist, why can a market not be perfectly efficient with respect to publicly available information? Choose, then justify your choice in one or two sentences.
-*Research is costly, so some mispricing must survive to pay the investors who gather information and remove it|Prices follow a random walk, so they move arbitrarily and are unrelated to value|Most investors are irrational, so prices are systematically wrong in predictable ways|Public information reaches everyone at the same moment, so no one ever trades on it
-Research costs money (analysts are paid, data is bought, models are built) and investors do it only if they expect to be paid for it; If prices already reflected everything, no one would be paid to gather information — and then prices would stop reflecting it; So efficiency is produced by effort and cannot be complete — the useful question is how large the remaining mispricing is and whether it covers the cost of finding it, which is why heavily followed large stocks are the hardest to beat.
-@write
+Which of the following is the main reason a market cannot be perfectly efficient with respect to publicly available information?
+*Gathering and analysing information is costly, so some mispricing must survive to reward the investors who remove it|Prices follow a random walk, so they drift away from value in ways that no investor can correct|Most investors are irrational, so prices are systematically wrong in predictable ways|Insider trading laws prevent prices from reflecting all publicly available information
+Research costs money, and investors do it only if they expect to be paid for it; If prices already reflected everything, no one would gather information — and prices would stop reflecting it; Efficiency is produced by effort and is never complete, which is why the most heavily followed large stocks are the hardest to beat.
 ===
 8.1 Three versions of the EMH
-An investor consistently earns abnormal returns, after adjusting for risk and costs, by buying stocks right after firms publish annual reports that show strong cash flows. If the result is genuine, which versions of the EMH does it contradict? Choose, then justify.
-The weak form only — it is a trading rule|The strong form only — annual reports are prepared by insiders|*The semistrong and strong forms, but not necessarily the weak form|All three forms — each version contains the one before it
-Annual reports are publicly available information, so the rule contradicts the semistrong form; The strong form (all information, including inside information) contains the semistrong form, so it fails too; The weak form covers only past prices and trading volume — a rule based on financial statements does not test it; The nesting runs one way: semistrong efficiency implies weak-form efficiency, not the reverse.
-@write
+An investor consistently earns abnormal returns, after adjusting for risk and costs, by trading on information in firms' published financial statements. If the result is genuine, it is inconsistent with:
+The weak form only, because the strategy is a trading rule|The strong form only, because financial statements are prepared by insiders|All three forms, because each version contains the one before it|*The semistrong and strong forms, but not necessarily the weak form
+Published statements are public information, so the result contradicts the semistrong form; The strong form contains the semistrong form, so it fails too; The weak form covers only past prices and trading volume, which this rule does not use — semistrong efficiency implies weak-form efficiency, not the reverse.
+===
+8.1 Strong form
+Which of the following statements about the versions of the EMH is correct?
+Weak-form efficiency implies semistrong-form efficiency, because past prices already reflect all public information|If the market is weak-form efficient, fundamental analysis of public financial data cannot earn abnormal returns|*The fact that insider trading has to be restricted is itself evidence against strong-form efficiency|The strong form is widely maintained, because insider trading laws make inside information worthless
+Insider trading is restricted precisely because it works — inside information earns abnormal returns, so prices do not already reflect it and the strong form is not seriously maintained; Semistrong efficiency implies weak-form efficiency, not the reverse; Weak-form efficiency makes only technical analysis useless — fundamental analysis of public data is ruled out by the semistrong form.
+===
+8.1 Price response to news
+Three stocks announce good news on day 0. The table gives each stock's cumulative abnormal return (CAR). Complete the table: for each stock, compute the abnormal return earned by an investor who bought at the close of day 0 and held to day 20, and classify the price response as Efficient, Underreaction or Overreaction.
+~
+Abnormal return after day 0 = CAR_{20} − CAR_0; Halvard: 6.0 − 6.0 = 0.0 → Efficient (the whole move at the announcement, nothing left on the table); Ostrava: 6.0 − 2.5 = 3.5 → Underreaction (a gradual drift: a buyer on the news still profited); Pellam: 6.0 − 9.0 = −3.0 → Overreaction (an overshoot that later corrects)
+@grid Price response to good news :: Stock|CAR day 0 (%)|CAR day 20 (%)|Abnormal return after day 0 (points)|Response;;Halvard|6.0|6.0|?0.0|?Efficient;;Ostrava|2.5|6.0|?3.5|?Underreaction / Drift / Underreact;;Pellam|9.0|6.0|?−3.0|?Overreaction / Overshoot / Overreact
 ===
 8.2 Technical analysis
-Traders notice that Halden Steel has reliably rebounded whenever its price fell to $45. If the market is weak-form efficient, what happens once this pattern is widely known?
-The $45 level becomes stronger, because more traders now buy at exactly $45|The price falls through $45 more often, because short sellers target the level|Nothing changes, because the price record is not public information|*Traders start buying above $45 to get in first, so the $45 level is never reached again
-Traders buy at $47, then $50, to get in first, and the $45 level is never reached again; A profitable technical rule is destroyed by the very people who find it — the strongest argument against charting, and it does not depend on any evidence; Past prices are public and free, so any pattern in them is the first thing competition removes.
+According to the EMH, which of the following is the strongest argument against technical analysis?
+*If a rule based on past prices were profitable, traders using it would move prices until the rule stopped working|Price charts look like random walks, which proves that past prices contain no useful information|Past price and volume data are costly to obtain, so only a few insiders can use them|Technical analysis assumes that prices adjust to new information instantly, which is unrealistic
+Past prices are public and free, so any profitable pattern in them is the first thing competition removes — traders act earlier to get in first and the pattern disappears; The argument does not depend on any evidence; Technical analysis assumes gradual (not instant) adjustment, and the shape of a chart alone settles nothing.
 ===
 8.2 Fundamental analysis
-An analyst's careful study shows that Orion Pharma has strong earnings growth, excellent management and a promising drug pipeline. Under semistrong efficiency, what else is needed for buying Orion to earn an abnormal return?
-*Orion must be better than the market already believes — the analyst needs better data or a better reading of the same data than competitors|Orion's earnings growth must be higher than the market average|Orion must have a beta below 1.0|Nothing else — a firm with good prospects is by definition a good investment
-Everyone else can read the same statements, and the price already contains what they concluded; The test is not "is this a good firm?" but "is this firm better than the market already believes?"; The analyst must have better data or a better reading, consistently and after costs — most plausible in thinly followed firms and markets with few professionals.
+Under semistrong-form efficiency, an analyst who identifies a firm with strong earnings growth and excellent management can expect an abnormal return from buying its stock only if:
+the firm's earnings growth exceeds the average growth rate of the market|the firm's beta is below 1.0, so its risk is lower than the market's|the firm is large and followed by many analysts, so its data are reliable|*the analyst's assessment of the firm is better than the one already reflected in its price
+Everyone can read the same statements, and the price already contains what they concluded; The test is not "is this a good firm?" but "is it better than the market already believes?" — which needs better data or a better reading, consistently and after costs; The edge is most plausible in thinly followed firms and markets with few professional participants.
 ===
-8.2 Active vs passive: costs
-An active large-cap fund beats its benchmark index by 0.75% a year before fees and charges 1.10% a year. An index fund that tracks the same benchmark charges 0.05%. By how much does the active fund's investor beat (+) or trail (−) the index-fund investor each year after fees?
-−0.35%|*−0.30%|+0.70%|+0.75%
-Active fund vs index = 0.75 − 1.10 = −0.35%; Index fund vs index = 0 − 0.05 = −0.05%; Difference = −0.35 − (−0.05) = −0.30% a year; The costs are the crux: research that adds 75 bp still loses money for the client when the fee is 110 bp.
+8.2 Active vs passive
+Which of the following statements about active and passive management is correct?
+A passive strategy is sensible only if the market is perfectly efficient|*An active manager whose research adds return before fees can still leave clients worse off than a low-cost index fund|Because some active managers beat the market, active managers as a group can outperform the market before costs|Index funds earn less than the market return before costs because they do no research
+Active management must earn enough extra return to cover its own costs — research that adds less than its fee loses money for the client; All investors together hold the market, so active managers as a group earn the market return before costs and less after costs; A passive investor accepts the market return at low cost, which is sensible even if some mispricing survives.
 ===
 8.2 Arithmetic of active management
-Index funds hold 45% of the stock market and active managers hold the other 55%. Last year the market returned 9.0%. Index funds' costs average 0.1% and active managers' costs (fees and trading) average 1.2%. What return did the average actively managed dollar earn after costs?
-7.7%|*7.8%|8.9%|9.0%
-All investors together hold the market and index funds earn the market return before costs: 0.45 × 9.0 + 0.55 × r_A = 9.0 → r_A = 9.0% before costs; After costs = 9.0 − 1.2 = 7.8% (index funds: 9.0 − 0.1 = 8.9%); This holds whatever one believes about efficiency — active management in aggregate cannot win, the question is only whether particular managers can.
+Index funds hold 35% of the stock market and active managers hold the remaining 65%. This year the market returned 10.4%. A group of active managers holding 25% of the market earned 12.0% before costs. Index funds' costs average 0.08% and active managers' costs average 1.15%. Write the formulas and compute (1) the average return of all active managers before costs, (2) the before-cost return of the remaining active managers, and (3) the after-cost returns of the average active dollar and of index funds.
+10.4|9.4 / 9.40|9.25|10.32
+Aggregate: 0.35 × 10.4 + 0.65 × r_A = 10.4 → r_A = 10.4% (index funds earn the market return before costs); Remaining active: 0.25 × 12.0 + 0.40 × r_R = 0.65 × 10.4 = 6.76 → r_R = (6.76 − 3.00) / 0.40 = 9.40%; After costs: active = 10.4 − 1.15 = 9.25%, index = 10.4 − 0.08 = 10.32% → the average active dollar trails by 1.07 points
 ===
 8.2 Portfolio management
-Suppose the market is perfectly efficient. Name the four portfolio-management tasks that still remain, and explain in one sentence why efficiency does not make every portfolio equally good for every investor.
-diversif / risk tolerance|tax / taxes|horizon / liquidity|hedging / hedge / exposure
-Risk and diversification: match the investor's risk tolerance and bear no avoidable risk; Tax position: a high-bracket investor wants different securities from a tax-exempt pension fund; Horizon and liquidity: a 25-year-old saver and a retiree drawing income need different assets; Hedging particular exposures: an employee whose salary depends on one industry should not hold a portfolio concentrated in it; Efficiency is a claim about prices, not about investors — the market cannot tell you which stock to buy, but one portfolio is not as good as another for a particular person.
-@short
+In a perfectly efficient market, which of the following is NOT a remaining task of portfolio management?
+Choosing a level of risk that matches the investor's tolerance and diversifying away avoidable risk|Selecting securities that suit the investor's tax bracket|*Searching for underpriced securities through security analysis|Avoiding a portfolio concentrated in the industry on which the investor's salary depends
+Efficiency says the market cannot tell you which stock to buy, so searching for bargains is pointless; The tasks that remain: risk and diversification, tax position, horizon and liquidity, and hedging particular exposures; Efficiency is a claim about prices, not about investors — one portfolio is not as good as another for a particular person.
 ===
-8.3 Obstacles: magnitude issue
-A manager running a $12 billion fund adds 0.08% a year through genuine skill. How much is that worth each year, and what does it imply for testing market efficiency?
-$0.96 million — too small to matter to anyone|$9.6 million — large enough that a few years of data will reveal it clearly|*$9.6 million — valuable, yet far too small to detect against the noise in stock returns|$96 million — easily visible in the fund's return history
-Value added = AUM × alpha = 12,000,000,000 × 0.0008 = $9,600,000; A real achievement, but far too small to detect against the noise in stock returns — inefficiencies worth having may be invisible to statistics (the magnitude issue); The other obstacles: selection bias (profitable rules are not published) and the lucky event issue.
+8.3 Obstacles to testing
+Which of the following statements about the obstacles to testing market efficiency is correct?
+The magnitude issue disappears once a long enough history of returns is available|*An inefficiency worth exploiting for a very large fund may be too small to detect against the noise in stock returns|Because of selection bias, the trading rules researchers get to study tend to be the most profitable ones|Taken together, the obstacles are strong reasons to believe that markets are efficient
+Magnitude issue: a small alpha on billions of dollars is valuable yet statistically invisible; Selection bias works the other way — anyone with a profitable rule keeps it secret, so the rules studied are those not worth hiding; None of the obstacles can be fixed by better data — they make the hypothesis hard to refute, not more believable.
+===
+8.3 Lucky event issue
+A fund-rating service screens the 10-year records of 4,000 equity funds and promotes the 15 funds with the best records as proof that skilled managers exist. Which issue most directly undermines this conclusion?
+The magnitude issue|The selection bias issue|The joint-hypothesis problem|*The lucky event issue
+With enough funds, some will have superb records by chance alone; A record that would be remarkable if chosen in advance is unremarkable when picked out afterwards from thousands; Skill would have to show up as persistence in later periods that were not used to pick the funds.
 ===
 8.3 Joint-hypothesis problem
-Researchers find that portfolios of high book-to-market stocks earned an average CAPM alpha of +3% a year over 40 years. Which conclusion does this evidence justify by itself? Choose, then justify in one or two sentences.
-The market is inefficient — value stocks are underpriced and offer free money|The CAPM is wrong — value stocks must carry a risk that beta misses|The result must be data mining, because no theory predicted it in advance|*The result alone cannot tell whether the market is inefficient or the CAPM mis-measures risk
-To call a return abnormal you first need a model of normal returns (here the CAPM); A positive alpha means either the market is inefficient or the model understated the risk of value stocks (e.g. distress) — the data cannot say which half of the joint hypothesis failed; That is why the book-to-market anomaly remains contested, and why short-window event studies, where the risk model barely matters, are the cleanest evidence.
-@write
+Researchers find that portfolios of low P/E stocks earned an average CAPM alpha of 3% a year over several decades. Which conclusion does this evidence support by itself?
+*It cannot tell whether the market is inefficient or the CAPM mis-measures the risk of these stocks|The market is inefficient, because low P/E stocks were persistently underpriced|The CAPM is wrong, because low P/E stocks must carry a risk that beta misses|The result is data mining, because no theory predicted it in advance
+To call a return abnormal you need a model of normal returns (here the CAPM); A positive alpha means either the market is inefficient or the model understated the risk of low-P/E stocks — the data cannot say which half of the joint hypothesis failed; Short-window event studies are the partial escape, because the risk model barely matters over a day or two.
 ===
 @case E
-Brightline Foods — takeover announcement on day 0
-@tbl Daily returns (%) · market model estimated before the event: a = 0.1% per day, b = 1.2 :: Day|Stock return r_t|Market return r_{M,t};;Day −2|0.4|0.5;;Day −1|2.6|−0.5;;Day 0|8.3|1.0;;Day +1|0.1|0.0;;Day +2|−0.5|−0.5
+Calder Mining — ore discovery announced on day 0
+@tbl Daily returns (%) · market model estimated before the event: a = 0.04% per day, b = 1.3 :: Day|Stock return r_t|Market return r_{M,t};;Day −2|0.92|0.6;;Day −1|1.40|−0.8;;Day 0|6.16|0.4;;Day +1|−0.25|−0.3;;Day +2|1.24|1.0
 ===
 8.3 Abnormal returns and CAR
-Brightline Foods. Write the abnormal-return formula and compute, for each day, the market-model expected return, the abnormal return and the cumulative abnormal return (CAR), all in %. No worksheet is provided — lay out your own table.
-0.7|1.3|3.1|7.0 / 7|2.8|9.8|0.3
-Expected = a + b·r_{M,t}, e_t = r_t − (a + b·r_{M,t}), CAR = running sum of e_t; Day −2: 0.1 + 1.2(0.5) = 0.7, e = 0.4 − 0.7 = −0.3, CAR = −0.3; Day −1: 0.1 + 1.2(−0.5) = −0.5, e = 2.6 − (−0.5) = 3.1, CAR = −0.3 + 3.1 = 2.8; Day 0: 0.1 + 1.2(1.0) = 1.3, e = 8.3 − 1.3 = 7.0, CAR = 2.8 + 7.0 = 9.8; Day +1: 0.1 + 1.2(0) = 0.1, e = 0.1 − 0.1 = 0.0, CAR = 9.8; Day +2: 0.1 + 1.2(−0.5) = −0.5, e = −0.5 − (−0.5) = 0.0, CAR = 9.8
+Calder Mining. Write the abnormal-return formula and compute, for each day, the market-model expected return, the abnormal return and the cumulative abnormal return (CAR), all in %. No worksheet is provided — lay out your own table.
+0.82|2.4 / 2.40|0.56|5.6 / 5.60|8.1 / 8.10|8.2 / 8.20
+Expected = a + b·r_{M,t}, e_t = r_t − (a + b·r_{M,t}), CAR = running sum of e_t; Day −2: 0.04 + 1.3(0.6) = 0.82, e = 0.92 − 0.82 = 0.10, CAR = 0.10; Day −1: 0.04 + 1.3(−0.8) = −1.00, e = 1.40 − (−1.00) = 2.40, CAR = 2.50; Day 0: 0.04 + 1.3(0.4) = 0.56, e = 6.16 − 0.56 = 5.60, CAR = 8.10; Day +1: 0.04 + 1.3(−0.3) = −0.35, e = −0.25 − (−0.35) = 0.10, CAR = 8.20; Day +2: 0.04 + 1.3(1.0) = 1.34, e = 1.24 − 1.34 = −0.10, CAR = 8.10
 @use E
-@space 6
+@space 7
 ===
 8.3 Reading an event study
-Brightline Foods. Reading the cumulative abnormal return around the announcement, which interpretation is correct?
-*The news appears to have leaked before day 0, and after day 0 the market's response was efficient|The market underreacted — the CAR keeps drifting upward after day 0|The market overreacted — the CAR falls back after day 0|There was no abnormal move before day 0 — the 2.6% rise on day −1 just reflects the market
-Day −1: e = 2.6 − [0.1 + 1.2 × (−0.5)] = 2.6 + 0.5 = +3.1% on a day the market fell → a rise before the announcement suggests the news leaked; Day +1 and +2: e = 0.1 − 0.1 = 0 and −0.5 − (−0.5) = 0 → the CAR stays at 9.8%, flat afterwards, no drift and no reversal; A clean result is flat before, a jump on the day and flat after.
+Calder Mining. Which interpretation of the abnormal returns around the announcement is correct?
+The market underreacted, because the stock kept rising after day 0|The market overreacted, because the stock fell on day +1|*The CAR rose before day 0, suggesting the news leaked, and stayed roughly flat after day 0|There was no abnormal move before day 0, because the 1.40% rise on day −1 reflects the market
+Day −1: e = 1.40 − [0.04 + 1.3 × (−0.8)] = 1.40 + 1.00 = +2.40% on a day the market fell → a rise beforehand suggests a leak; After day 0 the abnormal returns are +0.10 and −0.10, so the CAR stays near 8.1% — no drift and no reversal; The raw returns on days +1 and +2 (−0.25%, +1.24%) mostly reflect the market's moves.
 @use E
 ===
 8.3 Short-window event studies
-On the day Corvane Inc. announces a patent win, its stock returns 5.00% while the market returns 0.10%; the daily risk-free rate is 0.02%. Using CAPM expected returns, E(r) = r_f + β(r_M − r_f), write the formulas and compute the abnormal return (1) with β = 1.5 and (2) with β = 0.8. In one sentence, explain what the comparison shows about short-window event studies.
-0.14|4.86|0.084|4.92 / 4.916
-β = 1.5: E(r) = 0.02 + 1.5 × (0.10 − 0.02) = 0.02 + 0.12 = 0.14%, AR = 5.00 − 0.14 = 4.86%; β = 0.8: E(r) = 0.02 + 0.8 × 0.08 = 0.02 + 0.064 = 0.084%, AR = 5.00 − 0.084 = 4.916 ≈ 4.92%; Difference = 4.916 − 4.86 = 0.056 percentage points; Over a one-day window expected returns are tiny next to the price reaction, so the choice of risk model barely affects the answer — short-window event studies largely escape the joint-hypothesis problem.
+On the day Brenning Corp. announces a large contract, its stock returns 3.60% and the market returns 0.20%; the daily risk-free rate is 0.01%. Using CAPM expected returns, E(r) = r_f + β(r_M − r_f), write the formulas and compute the abnormal return (1) with β = 1.6 and (2) with β = 0.9. (3) For comparison, compute the difference between the two betas' expected returns over one year if the market risk premium is 7% a year.
+0.314|3.286 / 3.29|0.181|3.419 / 3.42|4.9
+β = 1.6: E(r) = 0.01 + 1.6 × (0.20 − 0.01) = 0.314%, AR = 3.60 − 0.314 = 3.286%; β = 0.9: E(r) = 0.01 + 0.9 × 0.19 = 0.181%, AR = 3.60 − 0.181 = 3.419%; One-day gap = 3.419 − 3.286 = 0.133 point; One-year gap = (1.6 − 0.9) × 7% = 4.9 points — over a short window the risk model barely matters, so short-window event studies largely escape the joint-hypothesis problem
 ===
 8.3 Momentum and reversals
-Fund A buys the stocks with the highest returns over the past 6 months. Fund B buys the stocks with the lowest returns over the past 5 years. Based on the weak-form evidence in the lecture, which description is correct? Choose, then justify in one or two sentences, mentioning costs.
-Both funds should fail — past returns carry no information at any horizon|A exploits reversals (overreaction) and B exploits momentum (underreaction)|*A exploits momentum (underreaction) and B exploits long-horizon reversals (overreaction)|Both funds exploit momentum — the market always underreacts
-Short horizons (a few months): past winners keep winning → momentum → the market underreacts; Long horizons (3–5 years): past losers outperform past winners → reversals → the market overreacts; Both effects are measured before transaction costs — momentum needs frequent rebalancing and much of its paper profit does not survive the trading needed to capture it.
-@write
+Strategy A buys the stocks with the highest returns over the past six months. Strategy B buys the stocks with the lowest returns over the past five years. Which statement is consistent with the weak-form evidence?
+Both strategies should fail, because past returns carry no information at any horizon|*A exploits momentum, a sign of underreaction, and B exploits long-horizon reversals, a sign of overreaction|A exploits reversals, a sign of overreaction, and B exploits momentum, a sign of underreaction|Both strategies exploit momentum, because the market underreacts at every horizon
+Over a few months, past winners keep winning (momentum → underreaction); Over three to five years, past losers outperform past winners (reversals → overreaction); Both effects are measured before transaction costs, and much of momentum's paper profit does not survive the frequent rebalancing it needs.
 ===
 8.3 Predicting market returns
-Aggregate dividend yields are unusually high and credit spreads are wide, and historically such periods have been followed by higher market returns. Which interpretation is consistent with an efficient market?
-Investors are overreacting to bad news, so the market is predictably cheap|*Investors demand higher returns when the economy is weak and risk is hardest to bear — a time-varying risk premium|The finding is a weak-form anomaly, because dividend yields are past prices|The finding proves the market is inefficient, because returns should never be predictable
-Required returns should be high when the economy is weak and investors are least able to bear risk; Predictable variation in expected returns is what a rational market with time-varying risk premiums would produce; The same data also fit an inefficiency story and nothing distinguishes them — the joint-hypothesis problem in its most practical form.
+Periods of high aggregate dividend yields and wide credit spreads have tended to be followed by higher market returns. Which interpretation is consistent with market efficiency?
+*Investors demand higher expected returns when the economy is weak and risk is hardest to bear|Investors overreact to bad news, so the market is predictably cheap in such periods|The pattern is a weak-form anomaly, because dividend yields and credit spreads are past prices|No interpretation is consistent with efficiency, because predictable returns always reject it
+Required returns should be high when the economy is weak and investors are least able to bear risk — a time-varying risk premium; The same finding also fits an inefficiency story, and nothing in the data distinguishes the two — the joint-hypothesis problem in its most practical form.
+===
+8.3 Anomalies
+Which of the following correctly pairs an anomaly with its pattern and the usual counterargument?
+Book-to-market effect — high book-to-market firms are followed by few analysts, so the extra return pays for information costs|P/E effect — high P/E portfolios have outperformed, and P/E may proxy for a risk the model omits|Earnings-announcement drift — the drift is readily attributed to the higher risk of firms that report surprises|*Neglected-firm effect — firms followed by few analysts have earned more, possibly as pay for information costs and illiquidity
+Neglected firms (few analysts, costly to trade) have earned more — compensation for information costs and illiquidity, not a free lunch; High book-to-market (value) firms beat growth firms, a high ratio marking distress; Low (not high) P/E portfolios outperform; Earnings drift is the hardest of all to attribute to risk.
 ===
 8.3 Post-earnings-announcement drift
-In a post-earnings-announcement-drift study, the portfolio with the largest positive earnings surprises has a CAR of 0.2% on day −10, 2.5% on day 0 (the announcement) and 5.0% on day 60. How much abnormal return could an investor who bought at the close of day 0 have earned by day 60, and what share of the move from day −10 to day 60 is that?
-2.3 points — about 48% of the move|*2.5 points — about 52% of the move|4.8 points — the whole move|5.0 points — the whole move
-Drift after day 0 = CAR_{60} − CAR_0 = 5.0 − 2.5 = 2.5 percentage points; Total move = 5.0 − 0.2 = 4.8 points, share = 2.5 / 4.8 = 52%; Efficiency predicts the whole move at day 0 — here more than half comes after earnings are public, and a risk story would need risk to change exactly at the announcement and in proportion to the surprise, so this is the anomaly hardest to dismiss.
+Why is post-earnings-announcement drift regarded as the anomaly hardest to reconcile with semistrong efficiency?
+Exploiting it requires private information about earnings before they are announced|*The information is public on the announcement day, yet prices keep moving in the direction of the surprise for weeks|Prices do not react on the announcement day, so the whole response arrives later|It appears only in small firms during January, so it is most likely a risk premium
+The jump at day 0 is there, as efficiency predicts, but the CAR keeps moving in the same direction for weeks; Earnings are public, so no private information is needed to trade on the drift; A risk story would need risk to change exactly at the announcement and in proportion to the surprise.
 ===
-8.3 Readings of the anomalies
-A well-documented anomaly weakens sharply in the decade after it is published and widely discussed. Which conclusion is justified?
-It proves the anomaly was data mining|It proves that publication made the market efficient|It proves the anomaly was a risk premium that has since disappeared|*The theoretical cause is unclear, but either way the anomaly is not worth trading now
-Two readings: publication taught investors to trade the pattern away (efficiency working as advertised), or it was a statistical accident that was never going to repeat; If competition removed it, it is gone — if it was never real, it was never there to capture — so the practical advice is the same although the theory is opposite; An anomaly that survives out of sample (other countries, later decades) is much harder to dismiss as data mining.
+8.3 Three readings of the anomalies
+Which finding would most weaken the data-mining reading of an anomaly?
+The anomaly was found by testing many trading rules on the same decades of U.S. data|The anomaly is stronger in the original sample than in the years after it|*The anomaly also appears in other countries and in later periods the original authors never examined|The anomaly's returns are measured before transaction costs
+Data-mining reading: the returns were never there — they are artefacts of searching many rules on the same data; An anomaly that survives out of sample is much harder to dismiss that way; The other two readings: real returns that pay for a risk the model misses, or genuine abnormal returns from slow incorporation of information.
+===
+8.3 Anomalies after publication
+The small-firm effect weakened markedly after it was published and widely discussed. Which conclusion is warranted?
+*Whichever reading is right, the effect is unlikely to be profitable to trade now|The effect must have been data mining, since a genuine inefficiency would have survived publication|Publication made the market fully efficient, so no anomaly can exist after it is reported|The effect was a risk premium, and small firms have since become less risky than large firms
+Either publication taught investors to trade the pattern away, or it was a statistical accident never going to repeat; If competition removed it, it is gone; if it was never real, it was never there to capture — the practical advice is the same though the theory is opposite; By the time a rule is well known enough to read about, the easy part is over.
 ===
 8.4 Stock market analysts
-A brokerage upgrades Velta Corp. from "hold" to "buy" before the market opens, and the stock rises 4% at the open. An investor reads about the upgrade at lunchtime and buys. According to the lecture, which statement is correct?
-*The price moved when the recommendation became public, so the lunchtime buyer is too late to profit from it|The investor should earn about 4% more, because upgrades predict future returns|The 4% jump shows that the market underreacts to analyst news|The upgrade must be unbiased, because recommendations are evenly split between buy and sell
-Recommendations do move prices — but at the moment they become public, which is what efficiency predicts; An investor reading the recommendation afterwards is too late to profit from it; Complications: underwriting conflicts of interest have skewed recommendations heavily toward "buy", and analyst opinions are correlated, so a consensus is not independent information.
+Which of the following statements about stock market analysts is correct?
+Because upgraded stocks rise around the announcement, analyst recommendations contradict semistrong efficiency|Analyst recommendations have historically been evenly split between buy and sell|A portfolio built on consensus recommendations draws on many independent sources of information|*Prices move when a recommendation becomes public, so an investor who acts after reading it is usually too late to profit
+Recommendations do move prices, but at the moment they become public — which is what efficiency predicts; Underwriting conflicts of interest have skewed recommendations heavily toward "buy"; Analyst opinions are correlated, so a consensus portfolio is one view held more confidently, not independent information.
+===
+8.4 Record of active funds
+Which of the following statements about the record of actively managed equity funds is correct?
+The fraction of funds that underperform their benchmark falls as the evaluation horizon lengthens|*Averages computed over surviving funds overstate the industry's performance, because closed funds are usually poor performers|The average fund's shortfall relative to its benchmark is several times the size of the fees it charges|Before costs, the average active fund beats its benchmark by a wide margin
+The majority of active funds fail to match their benchmark, and the shortfall grows with the horizon; The gap is close to the fees charged — before costs the average fund is roughly average, as the arithmetic requires; Funds that close are usually the poor ones, so averages of surviving funds flatter the industry (survivorship bias).
 ===
 8.4 Performance persistence
-Studies of mutual-fund performance find clearer persistence among the worst funds than among the best. Which explanation fits the lecture? Choose, then justify in one or two sentences.
-The best managers retire early, so top performance cannot persist|Bad performance repeats because losing managers take on more risk|*Stable fees and trading costs make poor results repeat, while top results were mostly luck|Persistence of poor performance proves that the market is strong-form efficient
-Skill, unlike luck, repeats — top funds staying on top would make the lucky-event explanation hard to sustain; Poor performance persists largely because high costs persist (fees and trading costs are stable); Good performance not repeating is what you expect if the winners were mostly lucky; Even a market with small real inefficiencies would produce this record once costs are subtracted.
-@write
+Studies of mutual fund performance find clearer persistence among the worst-performing funds than among the best. Which interpretation best accounts for this asymmetry?
+Top managers leave to run hedge funds, so good performance cannot persist|Poorly performing managers take on more risk to catch up, which keeps their returns low|*Stable fees and trading costs make poor results repeat, while top results were largely luck|The persistence of poor performance proves that the market is strong-form efficient
+Skill, unlike luck, repeats — if top funds stayed on top, the lucky-event reading would be hard to sustain; Poor performance repeats largely because high costs, which are stable, persist; Good performance not repeating is what you expect if the winners were mostly lucky — and this record would appear even in a market with small real inefficiencies once costs are subtracted.
 ===
-8.4 Luck and fund records
-1,000 fund managers have no skill at all: each has a 50% chance of beating the market in any year, independently of other years. After 5 years, about how many of them will have beaten the market in every single year?
-0 — five straight wins requires skill|*About 31|100|500
-Expected number = N × p^k = 1,000 × 0.5^5 = 1,000 / 32 = 31.25 ≈ 31; With enough funds, some will have superb records by chance alone — a record remarkable if chosen in advance is unremarkable when picked out afterwards from thousands (the lucky event issue); Survivorship adds to this: closed funds are usually the poor ones, so averages of surviving funds flatter the industry.
-===
-8.4 Summary: are markets efficient?
-In two or three sentences, state the lecture's overall answer to "Are markets efficient?" and give the practical conclusion for an ordinary investor.
-after costs|rational / keep trying|costs low / low cost|diversify / diversification
-Efficient enough that almost no one beats the market after costs, and inefficient enough that it is rational for a great many people to keep trying; Supported: prices react quickly to public news, most active managers do not beat their benchmark and fewer do so repeatedly, published strategies tend to stop working; Unsettled: patterns such as the earnings drift resist a risk explanation, the joint-hypothesis problem means no test is decisive, and thinly followed securities differ from large caps; Practical conclusion: keep costs low, diversify, and be sceptical of anyone selling a rule.
-@short
+8.4 Are markets efficient?
+Which of the following best summarizes the evidence on market efficiency and its practical implication for an individual investor?
+*Markets are efficient enough that almost no one beats them after costs, so investors should keep costs low and diversify|Markets are perfectly efficient, so every portfolio is equally suitable for every investor|Anomalies show that markets are inefficient enough for most active managers to beat their benchmarks after costs|Short-window event studies have resolved the joint-hypothesis problem in favour of the EMH, so no anomaly remains
+Efficient enough that almost no one beats the market after costs, and inefficient enough that it is rational for many to keep trying; Supported: quick price reactions to news, most managers trail their benchmark, published strategies stop working; Unsettled: earnings drift, the joint-hypothesis problem, thinly followed securities; Practical: keep costs low, diversify, and be sceptical of anyone selling a rule.
 </script>
 <!--DATA-END-->
 <title>Quiz</title>

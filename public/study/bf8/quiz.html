@@ -171,24 +171,24 @@
 <!--DATA-START-->
 <script type="text/plain" id="quizData">
 title: Business Finance Review Quiz — Chapter 8
-sub: Chapter 8 · 23 questions (17 MC · 6 written)
+sub: Chapter 8 · 24 questions (19 MC · 5 problems)
 subject: Business Finance, Prof. Gemma Lee, Kyung Hee University
 textbook: Lecture notes, Chapter 8 (RWJ, Essentials of Corporate Finance)
+===
+8.1 What a decision rule must do
+How does the NPV rule account for the risk of a project's cash flows?
+It does not: NPV adjusts for the time value of money but not for risk|By requiring a shorter payback period for riskier projects|*By discounting at the return investors could earn on an investment of comparable risk|By discounting every project at the firm's current borrowing rate
+r = the required return — what investors could earn on a comparable-risk investment, so riskier cash flows are discounted at a higher r; A good rule discounts every cash flow (time value), uses the r of a comparable investment (risk) and reports a dollar amount (value created) — NPV does all three.
 ===
 8.1 NPV rule
 A project's NPV at the firm's 10% required return is +$12,000. Which statement is correct?
 *Taking the project should increase the value of the firm today by about $12,000|The project's IRR is 12%|The project's undiscounted cash inflows exceed its cost by $12,000|The project's IRR is exactly 10%
-NPV = market value today of the future cash flows − cost = the value the project adds to the firm; +$12,000 is a dollar amount, not a rate; Because NPV > 0 at 10%, the IRR is above 10%, not equal to it; The inflows are discounted, so the undiscounted surplus is larger than $12,000.
+NPV = market value today of the future cash flows − cost = the value the project adds to the firm; NPV is a dollar amount, not a rate — NPV > 0 at 10% only tells us that the IRR is above 10%.
 ===
 8.1 NPV
-A project costs $150,000 and will produce $50,000 at the end of each of the next 4 years. The required return is 11%. What is its NPV?
-*$5,122.28|$30,180.18|$50,000.00|$155,122.28
-NPV = −150,000 + 50,000 × [1 − 1/1.11^4] / 0.11 = −150,000 + 50,000 × 3.102446 = −150,000 + 155,122.28 = $5,122.28; BA II Plus: CF0 150000 +/−, C01 50000, F01 4, NPV I = 11, CPT → 5,122.28; ($50,000 ignores discounting; $155,122.28 forgets the cost; $30,180.18 discounts every flow by one year only.)
-===
-8.1 NPV
-A bakery line costs $250,000 today and will save $60,000 a year in years 1–2 and $90,000 a year in years 3–5. The required return is 13%. Write the NPV formula with the numbers, compute the NPV, list the BA II Plus keystrokes (use the frequency F), and state the decision.
-16,507.74 / 16507.74|accept
-NPV = −250,000 + 60,000/1.13 + 60,000/1.13^2 + 90,000/1.13^3 + 90,000/1.13^4 + 90,000/1.13^5; = −250,000 + 53,097.35 + 46,988.80 + 62,374.51 + 55,198.69 + 48,848.39 = $16,507.74; BA II Plus: CF0 250000 +/−, C01 60000 F01 2, C02 90000 F02 3, NPV I = 13 CPT → 16,507.74; Decision: NPV > 0 — accept.
+A bakery line costs $250,000 today and will save $60,000 a year in years 1–2 and $90,000 a year in years 3–5. The required return is 13%. What is the NPV?
+−$8,846.25|*$16,507.74|$62,589.88|$266,507.74
+NPV = −250,000 + 60,000/1.13 + 60,000/1.13^2 + 90,000/1.13^3 + 90,000/1.13^4 + 90,000/1.13^5 = −250,000 + 266,507.74 = $16,507.74 > 0 — accept; BA II Plus: CF0 250000 +/−, C01 60000 F01 2, C02 90000 F02 3, NPV I = 13 CPT → 16,507.74; ($62,589.88 values the year 3–5 savings as if they started in year 1.)
 ===
 @case A
 Lumen Café — a new roasting room
@@ -203,24 +203,34 @@ Cumulative CF: −84,000, −62,000, −34,000, −4,000, +20,000; Payback = 3 +
 ===
 -
 Lumen. Suppose the year-5 cash flow were $0 instead of $10,000. Which statement is correct?
-Nothing changes, because year 5 comes after the 3.25-year cutoff|The NPV falls by $10,000, to −$3,582.45, while both payback rules are unchanged|*The payback period and its decision are unchanged, but the NPV falls to −$81.76|The payback period lengthens, so both payback rules now reject the project
-Payback is reached in year 3, so year 5 never enters it — still 3.17 years, still accepted; NPV with year 5: 6,417.55; the year-5 flow is worth 10,000 / 1.09^5 = 6,499.31 today; New NPV = 6,417.55 − 6,499.31 = −$81.76 — and the discounted cash flows now never recover the cost; Payback measures how fast the money comes back, not how much value is created.
+Nothing changes, because year 5 comes after the 3.25-year cutoff|The NPV falls by $10,000, to −$3,582.45, while both payback rules are unchanged|The payback period lengthens, so both payback rules now reject the project|*The payback period and its decision are unchanged, but the NPV falls to −$81.76
+Payback is reached in year 3, so year 5 never enters it — still 3.17 years, still accepted; The year-5 flow is worth 10,000 / 1.09^5 = 6,499.31 today, so NPV = 6,417.55 − 6,499.31 = −$81.76; Payback measures how fast the money comes back, not how much value is created; (−$3,582.45 subtracts the undiscounted $10,000.)
 @use A
 ===
 8.2 Discounted payback
 A project has only positive cash flows after year 0. At its 11% required return its discounted payback period is 4.2 years, and the project lasts 6 years. What can you conclude?
-Nothing about NPV, because discounted payback ignores the time value of money|The NPV is negative, because the money comes back slowly|The ordinary (undiscounted) payback period is longer than 4.2 years|*The NPV at 11% is positive, since the discounted flows cover the cost before the project ends
-Discounted payback of 4.2 years means Σ PV(CF_t) ≥ C_0 by year 4.2; The flows in years 5–6 are positive, so NPV = Σ PV(CF_t) − C_0 > 0 (and IRR > 11%); Undiscounted flows recover the cost sooner, so ordinary payback is shorter, not longer.
+*The NPV at 11% is positive, since the discounted flows cover the cost before the project ends|Nothing about NPV, because discounted payback ignores the time value of money|The NPV is negative, because the money comes back slowly|The ordinary (undiscounted) payback period is longer than 4.2 years
+Discounted payback of 4.2 years means Σ PV(CF_t) ≥ C_0 by year 4.2; The flows in years 5–6 are positive, so NPV = Σ PV(CF_t) − C_0 > 0; Undiscounted flows recover the cost sooner, so ordinary payback is shorter, not longer.
 ===
-8.2 What each rule ignores
-Which pairing of a criterion with what it ignores is correct?
-*Payback — the time value of money and every cash flow after the cutoff|Discounted payback — the time value of money|Average accounting return — the net income of the later years|Profitability index — the time value of money
-Payback adds undiscounted cash flows and stops at the cutoff; Discounted payback does discount, but still ignores flows after the cutoff; AAR averages every year's net income but uses accounting income and no time value; PI discounts every future cash flow.
+8.2 Payback: weaknesses
+Which statement about the payback rule is correct?
+A project that meets the payback cutoff must have a positive NPV|The cutoff is derived from the firm's required return on comparable investments|*It is biased against long-lived projects whose largest cash flows come late|It ranks projects by the dollar value they add to the firm
+Payback ignores every cash flow after the cutoff, so long-lived projects with late cash flows tend to fail it; The cutoff comes from no theory — the firm simply picks it; A negative-NPV project can pass the test and a large positive-NPV project can fail it.
+===
+8.2 Payback in practice
+Many firms, especially smaller ones, still compute the payback period. Which is the most appropriate role for it?
+As the accept/reject rule whenever distant cash flows are hard to forecast|As the tie-breaker that overrides NPV when mutually exclusive projects are compared|As a substitute for NPV on small projects, because the two rules always agree for them|*As a quick liquidity check used alongside NPV, not as the accept/reject decision
+Payback is easy to communicate, favours projects that return cash quickly and hedges forecast error in distant flows — a useful liquidity screen; It measures how fast the money comes back, not the value created, so NPV makes the accept/reject decision.
 ===
 8.3 Average accounting return
 A machine costs $240,000 and is depreciated straight-line to zero over 4 years. It is expected to produce net income of $30,000, $42,000, $38,000 and $26,000 in years 1–4. The target AAR is 25%. What is the AAR, and what does the AAR rule decide?
 14.17% — reject|*28.33% — accept|37.78% — accept|78.33% — accept
-Average net income = (30,000 + 42,000 + 38,000 + 26,000) / 4 = 136,000 / 4 = 34,000; Average book value = (240,000 + 0) / 2 = 120,000; AAR = 34,000 / 120,000 = 28.33% > 25% — accept; (14.17% divides by the cost; 37.78% averages only the end-of-year book values; 78.33% adds back depreciation — AAR uses net income, not cash flow.)
+Average net income = (30,000 + 42,000 + 38,000 + 26,000) / 4 = 136,000 / 4 = 34,000; Average book value = (240,000 + 0) / 2 = 120,000; AAR = 34,000 / 120,000 = 28.33% > 25% — accept; (14.17% divides by the cost instead of the average book value.)
+===
+8.3 Weaknesses of each criterion
+Which pairing of an investment criterion with one of its weaknesses is correct?
+*Average accounting return — it uses accounting income instead of cash flows and ignores the time value of money|Payback — it discounts every cash flow at an arbitrary rate chosen by the firm|Discounted payback — it ignores the time value of money in the years before the cutoff|Profitability index — it ignores every cash flow that arrives after the payback cutoff
+AAR = average net income / average book value: accounting income, no time value and an arbitrary target — not a market rate of return; Payback does not discount at all (its arbitrary element is the cutoff); Discounted payback does discount but ignores flows after the cutoff; PI discounts every future cash flow.
 ===
 @case B
 Kiln Robotics — a conventional project
@@ -234,14 +244,14 @@ Kiln. Write the equation that defines the IRR, find the IRR with your calculator
 ===
 8.4 NPV profile
 Kiln. Where does the project's NPV profile meet the vertical axis (r = 0), and what happens to the IRR if the required return rises from 13% to 16%?
-$50,000; the IRR rises to match the new required return|$14,000; the IRR rises to match the new required return|*$14,000; the IRR does not change|$50,000; the IRR does not change
+$14,000; the IRR rises to match the new required return|*$14,000; the IRR does not change|$50,000; the IRR rises to match the new required return|$50,000; the IRR does not change
 At r = 0: NPV = −36,000 + 12,000 + 14,000 + 15,000 + 9,000 = $14,000; The IRR is a property of the cash flows alone — a higher required return moves the hurdle, not the IRR (at 16% the NPV is −$670.41, so the project would be rejected); ($50,000 forgets the cost.)
 @use B
 ===
 8.4 IRR rule
 For which of the following are the IRR rule and the NPV rule guaranteed to give the same decision?
 Any project, provided the IRR is found with a financial calculator|A choice between two mutually exclusive projects that cost the same|A project whose cash flows end with a large cleanup cost|*An independent project with one outflow today followed only by inflows
-Conventional project: the NPV profile falls and crosses zero once, at the IRR, so IRR > r exactly when NPV > 0; Mutually exclusive projects: the higher IRR can have the lower NPV (timing or size); A cleanup cost flips the sign again — two IRRs or none; The calculator fixes neither problem.
+Conventional project: the NPV profile falls and crosses zero once, at the IRR, so IRR > r exactly when NPV > 0; Mutually exclusive projects can rank differently (timing or size), and a cleanup cost flips the sign again — two IRRs or none.
 ===
 @case C
 Ridgeback Quarry — a cleanup cost at the end
@@ -250,7 +260,7 @@ Ridgeback Quarry — a cleanup cost at the end
 8.4 Multiple IRRs
 Ridgeback. The project's two IRRs are 10% and 25%. What is its NPV at 8%, and what should the firm do?
 −$3,888.89 — reject|−$1,000.00 — reject|*−$116.60 — reject, although both IRRs exceed 8%|+$116.60 — accept, because both IRRs exceed 8%
-NPV = −40,000 + 94,000/1.08 − 55,000/1.08^2 = −40,000 + 87,037.04 − 47,153.64 = −$116.60; BA II Plus: CF0 40000 +/−, C01 94000, C02 55000 +/−, NPV I = 8 CPT → −116.60; NPV > 0 only between 10% and 25%, so at 8% reject — "Is IRR > r?" gives the wrong answer for nonconventional flows; (−3,888.89 discounts the cleanup one year only; −1,000 ignores discounting.)
+NPV = −40,000 + 94,000/1.08 − 55,000/1.08^2 = −40,000 + 87,037.04 − 47,153.64 = −$116.60; BA II Plus: CF0 40000 +/−, C01 94000, C02 55000 +/−, NPV I = 8 CPT → −116.60; NPV > 0 only between 10% and 25%, so at 8% reject — "Is IRR > r?" gives the wrong answer for nonconventional flows.
 @use C
 ===
 8.4 MIRR
@@ -263,17 +273,17 @@ Discounting: PV of outflows = −40,000 − 55,000/1.08^2 = −87,153.64; MIRR =
 8.4 MIRR
 Which statement about the modified IRR (MIRR) is correct?
 *It gives one answer even when the cash flows change sign more than once, but that answer depends on the rate used to move the cash flows|The discounting, reinvestment and combination approaches always give the same MIRR|It needs no discount rate, which is its advantage over NPV|Like the IRR, it can have two values when the cash flows change sign twice
-MIRR moves cash flows at r so that the modified stream has one sign change — exactly one IRR; The approaches move the flows differently, so their answers differ slightly (strip mine: 19.74%, 19.72%, 19.87%); Because r is needed anyway, NPV answers the question more directly.
+MIRR moves cash flows at r so that the modified stream has one sign change — exactly one IRR; The three approaches move the flows differently, so their answers differ slightly; Because r is needed anyway, NPV answers the question more directly.
 ===
 8.4 Mutually exclusive projects
 Two mutually exclusive projects have a required return of 10%. Small costs $10,000 and returns $13,000 in one year; Large costs $50,000 and returns $60,000 in one year. Which project should the firm take?
 Small — it has the higher IRR and the higher PI|*Large — its NPV is larger, even though Small has the higher IRR and PI|Large — it has the higher IRR|Either — both NPVs are positive, so the rules agree
-NPV(Small) = −10,000 + 13,000/1.10 = $1,818.18; NPV(Large) = −50,000 + 60,000/1.10 = $4,545.45; IRR: Small 30%, Large 20%; PI: Small 11,818.18 / 10,000 = 1.18, Large 54,545.45 / 50,000 = 1.09; Mutually exclusive — take the largest NPV: Large; IRR and PI are ratios and cannot see scale.
+NPV(Small) = −10,000 + 13,000/1.10 = $1,818.18; NPV(Large) = −50,000 + 60,000/1.10 = $4,545.45; IRR: Small 30%, Large 20%; PI: Small 1.18, Large 1.09; Mutually exclusive — take the largest NPV: Large; IRR and PI are ratios and cannot see scale.
 ===
 8.4 NPV vs IRR
-When the NPV rule and the IRR rule disagree, the rule for this course is to follow NPV. Why?
-NPV uses only the project's own cash flows, while the IRR needs market data|The IRR ignores the time value of money|*The IRR is a rate, and a rate cannot say how many dollars of value a project creates|NPV and IRR disagree only when the calculator is used incorrectly
-Both IRR failures — nonconventional cash flows and mutually exclusive projects — have one cause: IRR is a rate; NPV is the dollar amount the project adds to the firm, so it decides; (The IRR is the property of the cash flows alone — it is r that comes from the market.)
+When the NPV and IRR rules disagree, the NPV rule should be followed. Which reason is correct?
+NPV uses only the project's own cash flows, while the IRR needs market data|The IRR ignores the time value of money|NPV and IRR disagree only when the calculator is used incorrectly|*The IRR is a rate, and a rate cannot say how many dollars of value a project creates
+Both IRR failures — nonconventional cash flows and mutually exclusive projects — have one cause: IRR is a rate; NPV is the dollar amount the project adds to the firm, so it decides; (It is the IRR that needs no market data — r comes from the market.)
 ===
 @case D
 Tidewater Logistics — North or South warehouse (mutually exclusive)
@@ -287,27 +297,21 @@ Difference North − South: year 0: 0; year 1: 8,000; year 2: 5,000; year 3: −
 @space 4
 ===
 -
-Tidewater, r = 7%. Which project does each rule choose?
-IRR: South · NPV: South|IRR: South · NPV: North|IRR: North · NPV: North|*IRR: North · NPV: South — take South
+Tidewater, r = 7%. Which project does each rule choose, and which should the firm take?
+IRR: South; NPV: South — take South|IRR: North; NPV: North — take North|*IRR: North; NPV: South — take South|IRR: North; NPV: South — take North
 NPV(North) = −20,000 + 9,345.79 + 9,607.83 + 4,081.49 = $3,035.11; NPV(South) = −20,000 + 1,869.16 + 5,240.63 + 16,325.96 = $3,435.75; IRR: North 16.00% > South 13.71%; Below the crossover (9.20%) South has the larger NPV — for mutually exclusive projects follow NPV: take South.
 @use D
 ===
 -
-Tidewater. At 7%, South has the lower IRR but the higher NPV. Which explanation is correct? Choose, then justify in one or two sentences.
-South is larger, so this is a scale problem|South's IRR is miscalculated when its cash flows grow over time|South's NPV is higher because South is less risky|*South's cash flows arrive later, so its NPV falls faster as r rises
-Both cost $20,000, so size is not the issue — timing is; South's big flow is in year 3, and distant flows lose more value as r rises → a steeper NPV profile; Steeper profile: higher NPV at low r (8,000 vs 6,000 at r = 0) but it reaches zero sooner (IRR 13.71% vs 16.00%); IRR is a rate and cannot rank dollars of value — follow NPV.
+Tidewater. At 7%, South has the lower IRR but the higher NPV. Which explanation is correct?
+South is larger, so this is a scale problem|*South's cash flows arrive later, so its NPV falls faster as r rises|South's IRR is miscalculated when its cash flows grow over time|South's NPV is higher because South is less risky
+Both cost $20,000, so size is not the issue — timing is; South's big flow is in year 3, and distant flows lose more value as r rises → a steeper NPV profile: higher NPV at low r (8,000 vs 6,000 at r = 0) but it reaches zero sooner (IRR 13.71% vs 16.00%).
 @use D
-@write 2
 ===
 8.5 Profitability index
-A project costs $45,000 and will return $18,000 at the end of each of the next 3 years. The required return is 10%. What is its profitability index, and should it be accepted?
-−0.01 — reject|*0.99 — reject|1.01 — accept|1.20 — accept
-PV of future CFs = 18,000 × [1 − 1/1.10^3] / 0.10 = 18,000 × 2.486852 = 44,763.34; PI = 44,763.34 / 45,000 = 0.99 < 1 — reject (NPV = −236.66); BA II Plus: CF0 0, C01 18000, F01 3, NPV I = 10, CPT → 44,763.34; (1.20 ignores discounting; 1.01 is C_0 / PV, upside down; −0.01 is NPV / C_0.)
-===
--
-A project costing $75,000 has a profitability index of 1.24. What is its NPV?
-$14,516.13|*$18,000.00|$60,483.87|$93,000.00
-PI = PV(future CFs) / C_0 → PV = 1.24 × 75,000 = 93,000; NPV = PV − C_0 = 93,000 − 75,000 = $18,000 (= C_0 × (PI − 1)); ($93,000 is the PV, not the NPV; 60,483.87 and 14,516.13 divide by 1.24 instead of multiplying.)
+A project with conventional cash flows costs $64,000 and has a profitability index of 0.95 at its 12% required return. Which statement is correct?
+*NPV = −$3,200, and the IRR is below 12%|NPV = −$3,200, but the IRR is above 12%|NPV = +$3,368.42, so the project should be accepted|NPV = +$60,800, so the project should be accepted
+PV(future CFs) = PI × C_0 = 0.95 × 64,000 = 60,800; NPV = 60,800 − 64,000 = −$3,200 (= C_0 × (PI − 1)); PI < 1 exactly when NPV < 0, and for a conventional project NPV < 0 means IRR < r — reject; (+$3,368.42 divides by 0.95 instead of multiplying.)
 ===
 @case E
 Brightwater Utilities — five independent projects, $150,000 budget this year
