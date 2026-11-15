@@ -1,14 +1,18 @@
 {
   "variant": "interactive",
   "category": "RESEARCH",
-  "title": "Mark Minervini VCP 분석",
-  "meta": "Volatility Contraction Pattern Screener",
-  "ref": "RESEARCH-VCP",
-  "image": "/images/reports/vcp-dashboard/thumb.png",
-  "imageAlt": "VCP dashboard preview",
-  "href": "/reports/vcp_dashboard.html",
-  "linkLabel": "리포트 열기",
-  "date": "2026.07.23",
-  "tags": ["VCP", "Minervini", "Screener"],
+  "title": "SEPA 에이전트",
+  "meta": "미너르비니식 SEPA 추세추종 매매 확인 화면",
+  "ref": "RESEARCH-SEPA",
+  "image": "/images/reports/sepa/thumb.png",
+  "imageAlt": "SEPA 매매 확인 화면 미리보기",
+  "href": "/sepa/",
+  "linkLabel": "화면 열기",
+  "date": "2026.11.15",
+  "tags": [
+    "SEPA",
+    "Minervini",
+    "Trading"
+  ],
   "hideOnBoard": true
 }

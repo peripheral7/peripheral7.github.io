@@ -80,7 +80,7 @@ noscript{position:fixed;left:0;top:0;right:0;padding:24px;font-size:20px}
 .slide.framed .embed-box{flex:1;height:auto;min-height:0}
 
 /* ───────── 도구줄(마우스·키·터치가 있으면 3초간 보인다) ─────────
-   위쪽에 둔다: 임베드한 페이지의 자체 도구줄(시험 시계)·영상 조작줄은 보통 아래쪽에 있어 겹치지 않게 */
+   위쪽에 둔다: 임베드한 페이지의 자체 도구줄·영상 조작줄은 보통 아래쪽에 있어 겹치지 않게 */
 #ui{position:fixed;left:14px;right:14px;top:12px;z-index:20;display:flex;flex-wrap:wrap;align-items:center;gap:6px;font-size:14px;line-height:1.2;opacity:0;pointer-events:none;-webkit-transition:opacity .25s;transition:opacity .25s}
 body.ui #ui{opacity:1;pointer-events:auto}
 #counter{margin-right:auto;padding:6px 12px;border:2px solid #000;background:#fff;color:#000;font-weight:600;font-variant-numeric:tabular-nums}
