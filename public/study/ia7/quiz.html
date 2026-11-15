@@ -171,56 +171,36 @@
 <!--DATA-START-->
 <script type="text/plain" id="quizData">
 title: Ch.7 CAPM and APT — Review Quiz
-sub: Chapter 7 · 30 questions (26 MC · 4 problems)
+sub: Chapter 7 · 19 questions (16 MC · 3 problems)
 subject: Investment Analysis, Prof. G. Lee, Kyung Hee University
 textbook: BKM Essentials of Investments · Lecture slides Ch.7
 ===
 # Chapter 7: Capital Asset Pricing and Arbitrage Pricing Theory
 ===
-7.1 CAPM assumptions
-Which of the following is NOT an assumption of the CAPM?
-All investors plan over the same single-period horizon|No investor is large enough to affect prices|There are no taxes and no transaction costs|*Only a few well-funded arbitrageurs need to act rationally
-The CAPM requires that essentially every investor optimize mean-variance (with homogeneous expectations, one horizon, price-taking, unlimited borrowing and lending at r_f, no taxes, no transaction costs); "only a few arbitrageurs must be rational" is the APT's much weaker assumption.
+7.1 CAPM assumptions and results
+Which of the following statements about the CAPM is correct?
+*Every investor holds the market portfolio in market-value weights and differs only in its mix with r_f|Each investor's tangency portfolio depends on his or her own coefficient of risk aversion|A passive index investor holds an inefficient portfolio, because she does no security analysis|The model needs only a few well-funded arbitrageurs to act rationally
+Homogeneous expectations + one r_f → one tangency portfolio, which must carry market-value weights (otherwise some stock has no buyer) → everyone sits on the CML; mutual fund theorem: an index fund plus r_f is efficient, and passive investors free-ride on active research; the CAPM needs essentially every investor to optimize mean-variance (no taxes, no transaction costs, price takers) — "a few arbitrageurs" is the APT.
 ===
-7.1 Result 1: the market portfolio
-Which of the following statements about CAPM equilibrium is correct?
-A more risk-averse investor tilts her risky portfolio toward low-beta stocks|*All investors hold the same risky portfolio M and differ only in their mix of M and r_f|Each investor's tangency portfolio depends on his or her own risk aversion|Each investor holds a different efficient risky portfolio on his or her own CAL
-Homogeneous expectations → identical frontier; one common r_f → one common tangency portfolio; if everyone holds it, its weights must equal market-value weights (otherwise some stock has no buyer) → tangency portfolio = M; risk aversion only sets the mix of M and r_f, so every investor sits on the one CML.
-===
-7.1 Result 2: passive strategy
-Which of the following statements about the passive strategy is correct under the CAPM?
-*Passive investors free-ride on the research of active investors, yet still hold an efficient portfolio|A passive investor holds an inefficient portfolio because she does no security analysis|If every investor indexed, prices would remain fully informative, so active management is unnecessary|The mutual fund theorem says an investor needs one fund for each risk factor plus the risk-free asset
-Mutual fund theorem: a broad index fund plus the risk-free asset is enough for every investor; passive investors free-ride on costly active research at a far lower fee — but if everyone indexed, no one would gather information and prices would stop being informative.
-===
-7.1 Result 3: market risk premium
+7.1 Market risk premium
 The average coefficient of risk aversion is Ā = 2.5. If the standard deviation of the market portfolio rises from 16% to 20%, the equilibrium market risk premium changes from:
 6.4% to 6.4%|6.4% to 8.0%|*6.4% to 10.0%|40.0% to 50.0%
-E(r_M) − r_f = Ā·σ_M^2; Before = 2.5 × 0.16^2 = 2.5 × 0.0256 = 0.064 = 6.4%; After = 2.5 × 0.20^2 = 2.5 × 0.04 = 0.10 = 10.0%; The premium rises with the variance, not the SD: (20/16)^2 = 1.5625 times — 8.0% wrongly scales it by 20/16 = 1.25.
+E(r_M) − r_f = Ā·σ_M^2; Before = 2.5 × 0.16^2 = 2.5 × 0.0256 = 6.4%; After = 2.5 × 0.20^2 = 2.5 × 0.04 = 10.0%; The premium rises with the variance, not the SD — 8.0% wrongly scales it by 20/16.
 ===
 7.1 Why beta
 Stocks A and B both have a standard deviation of 40%. Their correlations with the market are ρ_A = 0.75 and ρ_B = 0.25; σ_M = 20%, r_f = 3% and E(r_M) = 9%. By how much does the CAPM required return on A exceed that on B?
 0.00 percentage points|0.24 percentage points|3.00 percentage points|*6.00 percentage points
-β = ρσ_i / σ_M; β_A = 0.75 × 40 / 20 = 1.50, E(r_A) = 3 + 1.50 × 6 = 12.0%; β_B = 0.25 × 40 / 20 = 0.50, E(r_B) = 3 + 0.50 × 6 = 6.0%; Difference = 6.00 points — equal σ does not mean equal priced risk: only the covariance with M (contribution to market risk) is rewarded.
+β = Cov / σ_M^2 = ρσ_i / σ_M; β_A = 0.75 × 40 / 20 = 1.50, E(r_A) = 3 + 1.50 × 6 = 12.0%; β_B = 0.25 × 40 / 20 = 0.50, E(r_B) = 3 + 0.50 × 6 = 6.0%; Difference = 6.00 points — equal σ is not equal priced risk: only the covariance with M is rewarded.
 ===
-7.1 Beta and the CAPM
-Stock Q has σ_Q = 45% and a correlation of 0.36 with the market; σ_M = 18%, r_f = 3% and E(r_M) = 10.5%. The CAPM required return on Q is closest to:
-5.70%|*9.75%|10.50%|21.75%
-β_Q = ρσ_Q / σ_M = 0.36 × 45 / 18 = 0.90 (= Cov / σ_M^2 = 0.02916 / 0.0324); E(r_Q) = r_f + β[E(r_M) − r_f] = 3 + 0.90 × 7.5 = 3 + 6.75 = 9.75%; 5.70% uses ρ as beta; 21.75% uses σ_Q / σ_M = 2.5 as beta.
-===
-7.1 Reading beta
-Firms H and L sell similar products to the same customers, so their sales respond identically to the business cycle. Firm H has much higher fixed operating costs and more debt than firm L. According to the CAPM, which statement is correct?
-*H has the higher beta and therefore the higher required return|H and L have the same beta because their sales are equally cyclical|H has more total risk but the same beta, because leverage risk is firm-specific|H has the lower beta because fixed costs make its earnings more stable
-High operating and financial leverage magnify how earnings respond to sales, so H's returns move more with the market: higher β → higher required return on the SML; leverage risk tied to the business cycle is systematic, not firm-specific.
-===
-7.1 The SML
-The expected market return stays at 10% while the risk-free rate rises from 3% to 4%. The CAPM required return on a stock with β = 1.5:
-*falls from 13.5% to 13.0%|stays at 13.5%|rises from 13.5% to 14.5%|rises from 13.5% to 15.0%
-Before = 3 + 1.5 × (10 − 3) = 13.5%; After = 4 + 1.5 × (10 − 4) = 13.0%; The intercept r_f rises and the slope E(r_M) − r_f falls, so the SML rotates about the point (β = 1, 10%): returns rise for β < 1 and fall for β > 1 — 14.5% treats it as a parallel shift.
+7.1 Beta and the SML
+Which of the following statements about beta and the SML is correct?
+A stock with β = 0 must have a standard deviation of zero|*Of two firms with equally cyclical sales, the one with more fixed costs and debt has the higher beta|A negative-beta asset must offer more than r_f to be held|If r_f rises while E(r_M) is unchanged, the SML shifts up in parallel
+Operating and financial leverage magnify how earnings respond to sales → higher β; a β = 0 asset earns only r_f whatever its σ; a negative-beta hedge is held at less than r_f; the SML has intercept r_f and slope E(r_M) − r_f, so a higher r_f with E(r_M) fixed rotates it about (β = 1, E(r_M)).
 ===
 7.1 SML versus CML
 Stock X plots 1.5 percentage points above the SML, but in a graph of expected return against standard deviation it lies well below the CML. Which conclusion is correct?
-X is overpriced, because any asset below the CML offers too little return for its risk|X is fairly priced, because the two signals cancel|*X is underpriced; lying below the CML only shows that X alone is an inefficient portfolio|No conclusion is possible without X's Sharpe ratio
-Above the SML → α = +1.5% → underpriced → BUY (the SML, with β on the axis, prices every security); the CML (σ on the axis) holds only efficient portfolios, and a single stock lies below it because of its firm-specific risk — that is normal, not a mispricing signal.
+X is overpriced, because any asset below the CML offers too little return for its risk|X is fairly priced, because the two signals cancel|*X is underpriced, and buying pressure should raise its price until it plots on the SML|X is underpriced, but its price cannot adjust while it lies below the CML
+Above the SML → α = +1.5% → underpriced → BUY; buying raises the price and lowers the expected return until α = 0; the CML (σ on the axis) holds only efficient portfolios, and a single stock lies below it because of firm-specific risk — normal, not a mispricing signal.
 ===
 @case S
 Analyst forecasts (r_f = 2.5%, E(r_M) = 8.5%)
@@ -233,12 +213,6 @@ SML: E(r) = 2.5 + β(8.5 − 2.5) = 2.5 + 6β; Harbor = 2.5 + 0.45 × 6 = 5.2%, 
 @use S
 @space 6
 ===
-7.1 Alpha and price adjustment
-Analyst forecasts. If the forecast for Vertex Semiconductors is correct and investors act on it, what does the CAPM predict?
-Buying pressure raises its price until its expected return falls back to the SML|Its beta falls until the SML return for its beta equals 11.5%|Nothing changes, because a negative alpha is an equilibrium outcome|*Selling pressure lowers its price today until its expected return rises to the SML
-Vertex: required = 2.5 + 1.65 × 6 = 12.4% > forecast 11.5%, α = −0.9% → below the SML → overpriced → SELL; A lower price today means a higher expected return, until α = 0 — in equilibrium every security lies on the SML.
-@use S
-===
 7.1 Alpha and fair price
 Lumen Corp. trades at $64. Analysts expect a price of $68 and a dividend of $1.60 in one year. Its beta is 1.20, r_f = 3% and E(r_M) = 9%. At what price today would Lumen's alpha be zero, and how is the stock priced now?
 $61.71 — overpriced|*$63.16 — overpriced|$63.16 — underpriced|$64.00 — fairly priced
@@ -249,10 +223,10 @@ You hold $300,000 in stock A (β = 1.60), $500,000 in stock B (β = 1.10) and $2
 *75.0%; 8.62%|75.0%; 10.16%|80.0%; 8.62%|133.3%; 8.62%
 β_P = Σw_iβ_i = 0.30(1.60) + 0.50(1.10) + 0.20(0.45) = 0.48 + 0.55 + 0.09 = 1.12; w × 1.12 + (1 − w) × 0 = 0.84 → w = 0.84 / 1.12 = 0.75; E(r) = 4 + 0.84 × 5.5 = 8.62% (check: 0.75 × 10.16 + 0.25 × 4 = 8.62%); 80.0% uses the equal-weighted beta 1.05.
 ===
-7.2 Index model and SCL
-Which of the following statements about the security characteristic line (SCL) is correct?
-It plots all securities' expected returns against beta, with slope E(r_M) − r_f|It is estimated from expected returns, because realized returns are too noisy|*It regresses a stock's excess returns on the market's; the CAPM predicts a zero intercept|Its residuals are positively correlated with the market's excess return
-Expected returns are unobservable, so the CAPM is estimated with the index model R_{i,t} = α_i + β_iR_{M,t} + e_{i,t} on realized excess returns; the fitted line is the SCL (slope β, intercept α, residual e uncorrelated with the market); the line of E(r) against β with slope E(r_M) − r_f is the SML.
+7.2 Index model and R-squared
+Fund Z, a diversified equity fund, has β = 0.95 and R^2 = 0.94. Stock Y has β = 1.40 and R^2 = 0.25. Which statement about the index model is correct?
+Fund Z carries more firm-specific risk, because its beta is lower|The SCL plots the expected returns of all securities against beta, with slope E(r_M) − r_f|The CAPM predicts a positive intercept in each stock's excess-return regression|*94% of Fund Z's variance is systematic, while most of Stock Y's variance is firm-specific
+Index model: R_{i,t} = α_i + β_iR_{M,t} + e_{i,t} on realized excess returns (expected returns are unobservable); the fitted line is the SCL (slope β, CAPM predicts α = 0) — the E(r)-against-β line is the SML; R^2 = β^2σ_M^2 / σ^2 = the systematic share: 0.20–0.40 for a typical stock, above 0.90 for a diversified fund.
 ===
 @case R
 Corvid Airlines — index-model regression
@@ -260,7 +234,7 @@ Corvid Airlines — index-model regression
 ===
 7.2 Regression output
 Corvid Airlines. Which conclusion about Corvid's intercept is correct at the 5% significance level?
-Corvid beat the CAPM by 0.45% a month, so its alpha is positive and significant|*α = 0 cannot be rejected, because p = 0.139 > 0.05|α is significant, because its t-statistic of 1.50 is greater than 1|α must be significant, because β is highly significant
+Corvid beat the CAPM by 0.45% a month, so its alpha is positive and significant|α is significant, because its t-statistic of 1.50 is greater than 1|*α = 0 cannot be rejected, because p = 0.139 > 0.05|α must be significant, because β is highly significant
 t = 0.45 / 0.30 = 1.50, p = 0.139 > 0.05: α = 0 (the CAPM prediction) cannot be rejected — no statistical evidence of abnormal return; the significance of β says nothing about α.
 @use R
 ===
@@ -271,45 +245,25 @@ Systematic = β^2σ_M^2 = 1.40^2 × 4^2 = 1.96 × 16 = 31.36 %^2; Firm-specific 
 @use R
 @space 7
 ===
-7.2 R-squared
-Fund Z, a diversified equity fund, has β = 0.95 and R^2 = 0.94. Stock Y has β = 1.40 and R^2 = 0.25. Which statement is correct?
-Stock Y must have the higher R^2, because its beta is higher|Fund Z carries more firm-specific risk, because its beta is lower|R^2 is the slope of the SCL, so Fund Z is less sensitive to the market|*94% of Fund Z's variance is systematic, while most of Stock Y's variance is firm-specific
-R^2 = β^2σ_M^2 / σ^2 = the share of total variance that is systematic; a single stock typically has R^2 of 0.20–0.40 and a diversified fund often above 0.90 — beta measures sensitivity, R^2 measures the systematic share, and a high β does not imply a high R^2.
-===
 7.3 Roll's critique
 A researcher tests the CAPM using the KOSPI 200 as the market portfolio and finds that average returns are not related to beta as the SML predicts. According to Roll's critique, what has she shown?
-*Only that the KOSPI 200 is not mean-variance efficient; the CAPM itself is untested|That the CAPM is rejected, because the SML does not hold in the data|That betas must be adjusted toward 1 before the test is valid|That the CAPM holds, because any index gives an exact beta–return relation
-Roll (1977): the only testable implication of the CAPM is that the TRUE market portfolio (all risky assets, including bonds, real estate and human capital) is mean-variance efficient; it is unobservable, so a test with a proxy tests only the proxy — and with an efficient proxy the relation holds by construction.
+*Only that the KOSPI 200 is not mean-variance efficient; the CAPM itself is untested|That the CAPM is rejected, because the SML does not hold in the data|That betas must be adjusted toward 1 before the test is valid|Had the index been efficient, an exact beta–return relation would have confirmed the CAPM
+Roll (1977): the only testable implication of the CAPM is that the TRUE market portfolio (all risky assets, including bonds, real estate and human capital) is mean-variance efficient; it is unobservable, so a proxy test tests only the proxy — and with an efficient proxy the relation holds by construction, a mathematical identity rather than evidence.
 ===
-7.3 The SML is too flat
-Classic cross-sectional tests estimate: average return = 6% + 3% × β. Over the same period r_f = 3% and the market risk premium was 6%. For a stock with β = 0.5, which comparison is correct?
-The CAPM predicts 7.5% but the fitted line gives 6.0% — low-beta stocks earned less than predicted|The CAPM predicts 6.0% and the fitted line gives 6.0% — the CAPM fits|*The CAPM predicts 6.0% but the fitted line gives 7.5% — low-beta stocks earned more than predicted|The CAPM predicts 7.5% and the fitted line gives 7.5% — only the slope differs
-CAPM = 3 + 0.5 × 6 = 6.0%; Fitted = 6 + 0.5 × 3 = 7.5%; The intercept is too high and the slope too flat: low-beta assets earned MORE and high-beta assets LESS than predicted (β = 1.5: CAPM 12.0% vs fitted 10.5%) — the low-beta anomaly.
-===
-7.3 Anomalies
-Small-capitalization stocks and high book-to-market stocks have earned higher average returns than their betas imply. Which reading of this evidence leads to multifactor models such as the Fama-French model?
-Markets are inefficient, and these are mispricings that will disappear|*Markets are efficient, but more than one source of systematic risk is priced|Betas are mismeasured, and adjusting them toward 1 removes the effects|The extra returns reward firm-specific risk that small and value firms cannot diversify
-The anomalies (size, value, momentum, profitability and investment) allow two readings: (a) mispricing in inefficient markets or (b) efficient markets with MORE risk factors than one; multifactor models pursue (b) and give each extra factor its own beta and risk premium.
-===
-7.3 Why the CAPM survives
-Which of the following is a reason practitioners still use the CAPM as their default model?
-Tests with broad market proxies have confirmed the slope of the SML|Once betas are adjusted, the CAPM accounts for the size and value effects|Roll showed that the CAPM can be tested exactly with a broad stock index|*Multifactor competitors have unstable premiums and a contested set of factors
-The CAPM survives because it gives the right qualitative answer (only systematic risk is rewarded), is a disciplined benchmark for alpha, is simple and hard to game, and its competitors have their own problems; empirically the SML is too flat and Roll's critique says the CAPM cannot be tested exactly.
-===
-7.4 Factor loadings
-A fund's Fama-French loadings are β_{SMB} = +0.45 and β_{HML} = −0.35. Which description fits the fund?
-Large-cap growth tilt|Large-cap value tilt|*Small-cap growth tilt|Small-cap value tilt
-SMB = small minus big, so a positive loading means the fund behaves like small stocks; HML = high minus low book-to-market, so a negative loading tilts toward growth (low B/M) stocks.
+7.3 The empirical record
+Which of the following statements about the empirical record of the CAPM is correct?
+Small-cap stocks have earned lower average returns than their betas imply|Stocks that performed poorly over the past 3–12 months tend to keep outperforming|Practitioners keep the CAPM because multifactor premiums are stable and the factor set is agreed|*Estimated SMLs are too flat: low-beta stocks earned more and high-beta stocks less than predicted
+Cross-sectional tests: intercept too high, slope too flat (the low-beta anomaly); anomalies beta cannot account for: size (small caps earn MORE), value (high B/M beats low B/M), momentum (past 3–12-month WINNERS keep winning), profitability and investment; the CAPM survives for its qualitative insight, its role as a disciplined, hard-to-game benchmark, and because multifactor premiums are unstable and the factor set is contested.
 ===
 7.4 Fama-French vs CAPM
-Fund N: r_f = 2.5%; factor premiums: market 6.0%, SMB 3.0%, HML 4.5%; fund loadings: β_M = 1.05, β_{SMB} = 0.70, β_{HML} = −0.60. The fund earned 11.0% last year. Write both models and compute (1) the three-factor required return, (2) the CAPM required return, and (3) the three-factor alpha and the CAPM alpha.
-8.2 / 8.20|8.8 / 8.80|2.8 / 2.80|2.2 / 2.20
-Three-factor = r_f + β_M·RP_M + β_{SMB}·RP_{SMB} + β_{HML}·RP_{HML} = 2.5 + 1.05(6.0) + 0.70(3.0) + (−0.60)(4.5) = 2.5 + 6.3 + 2.1 − 2.7 = 8.2%; CAPM = 2.5 + 1.05(6.0) = 8.8%; Three-factor α = 11.0 − 8.2 = +2.8%; CAPM α = 11.0 − 8.8 = +2.2%; The growth tilt (−2.7) outweighs the small-cap tilt (+2.1), so the three-factor benchmark is lower and the alpha larger.
+Fund N: r_f = 2.5%; factor premiums: market 6.0%, SMB 3.0%, HML 4.5%; fund loadings: β_M = 1.05, β_{SMB} = 0.70, β_{HML} = −0.60. The fund earned 11.0% last year. Its CAPM alpha and its three-factor alpha are closest to:
++2.2%; −2.6%|*+2.2%; +2.8%|+2.5%; +2.8%|+2.8%; +2.2%
+CAPM = 2.5 + 1.05(6.0) = 8.8%, α = 11.0 − 8.8 = +2.2%; Three-factor = 2.5 + 1.05(6.0) + 0.70(3.0) + (−0.60)(4.5) = 2.5 + 6.3 + 2.1 − 2.7 = 8.2%, α = 11.0 − 8.2 = +2.8%; The growth tilt (−2.7) outweighs the small-cap tilt (+2.1), so the benchmark is lower — −2.6% ignores the minus sign on the HML loading.
 ===
-7.4 Beyond three factors
-Which of the following statements about extensions of the Fama-French three-factor model is correct?
-*The five-factor model adds profitability (RMW) and investment (CMA) factors|The Carhart four-factor model adds a profitability factor (RMW)|The five-factor model adds momentum (UMD) and liquidity factors|Adding factors improves out-of-sample fit as reliably as in-sample fit
-Carhart four-factor = FF3 + momentum (UMD); Fama-French five-factor = FF3 + profitability (RMW) + investment (CMA), with which HML becomes largely redundant in U.S. data; the "factor zoo": adding factors always improves the fit of past data, but many factors fail out of sample and weaken after publication.
+7.4 Multifactor models
+Which of the following statements about multifactor models is correct?
+Multifactor models treat the size and value effects as mispricings in inefficient markets|The Carhart four-factor model adds profitability (RMW) and investment (CMA) factors|*A fund with β_{SMB} = −0.40 and β_{HML} = +0.55 tilts toward large-cap value stocks|Adding factors improves out-of-sample fit as reliably as in-sample fit
+SMB = small minus big (negative → large caps), HML = high minus low B/M (positive → value); multifactor models read anomalies as extra priced risks, not mispricings; Carhart adds momentum (UMD), the Fama-French five-factor model adds RMW and CMA (making HML largely redundant in U.S. data); the factor zoo: many factors fail out of sample and weaken after publication.
 ===
 @case T
 Well-diversified portfolios (r_f = 3%)
@@ -322,21 +276,11 @@ Weight in M = 0.75 → β = 0.75(1.00) + 0.25(0) = 0.75; E(r_bench) = 0.75(11) +
 @use T
 @space 6
 ===
-7.5 Restoring equilibrium
-Well-diversified portfolios. As arbitrageurs scale up the trade without limit, what restores equilibrium?
-Selling pressure lowers Q's price until its expected return rises above 9.5%|M's expected return rises until the market factor is fairly priced|The T-bill rate falls until Q lies exactly on the line|*Buying pressure raises Q's price until its expected return falls to the APT level for β = 0.75
-APT: E(r_Q) = 3 + 0.75 × (11 − 3) = 9.0%; Q offers 9.5%, so it is underpriced; arbitrageurs buy Q, its price rises and its expected return falls until it equals 9.0%.
+7.5 Arbitrage and equilibrium
+Well-diversified portfolios. Which statement about this arbitrage is correct?
+Q's positive alpha alone is an arbitrage opportunity, even without the short position|The same trade with a single stock of β = 0.75 in place of Q would also be riskless|Selling pressure lowers Q's price until its expected return rises further|*Buying pressure raises Q's price until its expected return equals the benchmark's
+Arbitrage = zero net investment + zero risk + a certain profit — a high expected return or positive alpha alone still carries risk; only well-diversified portfolios have essentially zero residual risk, so a single stock would leave firm-specific risk; arbitrageurs buy Q without limit until E(r_Q) = 3 + 0.75 × (11 − 3) = 9.0%.
 @use T
-===
-7.5 Arbitrage
-Each of the following is a defining feature of an arbitrage opportunity EXCEPT:
-Zero net investment, because the long position is financed by a short sale|*A high expected return relative to the risk taken|Zero risk, because the factor exposures of the two legs cancel|A positive profit in every state of the world
-Arbitrage = zero net investment + zero risk + a certain positive profit; a high expected return (a positive alpha) still carries risk, so it is not arbitrage.
-===
-7.5 Well-diversified portfolios
-Why does the APT's no-arbitrage argument use well-diversified portfolios rather than individual stocks?
-*Their residual risk is essentially zero, so offsetting positions in them are riskless|They always have a beta of 1, so any two of them can be compared directly|They are the only portfolios that plot on the capital market line|Short sales are possible only in well-diversified portfolios
-A well-diversified portfolio has essentially no firm-specific risk; two such portfolios with the same beta must offer the same expected return, because a long–short position in them is riskless and needs no capital — with individual stocks, residual risk would remain.
 ===
 7.5 Multifactor APT
 A three-factor APT economy has r_f = 3.5%. Portfolio P has a beta of 1.10 on the GDP-growth factor (premium +4.0%), 0.60 on the unexpected-inflation factor (premium −2.5%) and 0.80 on the credit-spread factor (premium +1.5%). The APT required return on P is closest to:
@@ -345,7 +289,7 @@ E(r) = r_f + β_1RP_1 + β_2RP_2 + β_3RP_3 = 3.5 + 1.10(4.0) + 0.60(−2.5) + 0
 ===
 7.5 APT versus CAPM
 Which pair correctly completes the statement? "The APT applies to ____, and it is silent on ____."
-every individual security exactly — how many investors must be rational|the market portfolio only — whether arbitrage is possible|*well-diversified portfolios — which factors matter|every individual security exactly — the size of the risk-free rate
+*well-diversified portfolios — which factors matter|every individual security exactly — how many investors must be rational|the market portfolio only — whether arbitrage is possible|every individual security exactly — the size of the risk-free rate
 CAPM: all investors optimize, exactly one factor (M), applies to every security, strong assumptions and empirically rejected; APT: no arbitrage, only a few well-funded arbitrageurs must be rational, any number of factors, applies to well-diversified portfolios, silent on which factors matter.
 ===
 </script>
