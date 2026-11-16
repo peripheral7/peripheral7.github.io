@@ -1,11 +1,11 @@
 // 메인 화면 오른쪽 "기능모음"(components/site-features.tsx)에 글자로 나열하는 기능 페이지들.
+// SEPA 에이전트는 여기 대신 Magpie Labs 아래 캡처 카드(components/site-hero.tsx)로 보인다.
 // 기능을 하나 더 만들면 여기에 한 줄만 추가한다(순서 = 화면에 보이는 순서).
 // href 는 게시판 카드와 같은 방식의 일반 링크라서, 정적 HTML(/sepa/, /slides/)도 Next 경로(/field-cam 등)도 그대로 쓴다.
 
 export type Feature = { label: string; href: string }
 
 export const FEATURES: Feature[] = [
-  { label: "SEPA 에이전트", href: "/sepa/" },
   { label: "공원 촬영 앱", href: "/field-cam" },
   { label: "슬라이드", href: "/slides/" },
   { label: "Econ2 Exam2 TA Session", href: "/econ2/" },

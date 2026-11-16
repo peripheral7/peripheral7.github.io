@@ -7,6 +7,9 @@ import { FEATURES } from "@/lib/features"
 
 // 오른쪽 열 맨 위: 회사 소개 페이지(magpielabs.kr)로 가는 한 줄 링크. 물까치 로고는 whereto 저장소의 것을 복사한 /images/whereto/logo-magpie.svg.
 const MAGPIELABS_URL = "https://magpielabs.kr/"
+// Magpie Labs 바로 아래: SEPA 에이전트 주간 보드(/sepa/weekly/) 카드. 화면 캡처는 /images/sepa/weekly.png(보드 맨 위 1280×800).
+// 보드 HTML 은 sepa_agent 의 `sepa publish` 가 매주 일요일 public/sepa/weekly/ 에 커밋한다(이 저장소에서 손대지 않는다).
+const SEPA_BOARD_URL = "/sepa/weekly/"
 
 const nav: { label: string; value: Filter }[] = [
   { label: "Research", value: "RESEARCH" },
@@ -83,7 +86,7 @@ export function SiteHero() {
             </p>
           </div>
 
-          <aside className="mt-10 grid w-full max-w-xs gap-4 md:col-start-2 md:row-start-1 md:mt-0 md:max-w-none md:grid-rows-[auto_1fr] md:gap-y-3 xl:col-start-3 xl:w-60">
+          <aside className="mt-10 grid w-full max-w-xs gap-4 md:col-start-2 md:row-start-1 md:mt-0 md:max-w-none md:grid-rows-[auto_auto_1fr] md:gap-y-3 xl:col-start-3 xl:w-60">
             <a
               href={MAGPIELABS_URL}
               target="_blank"
@@ -95,6 +98,29 @@ export function SiteHero() {
                 Magpie Labs
               </span>
               <span className="ml-auto font-mono text-[0.6rem] uppercase tracking-[0.2em] text-muted-foreground">↗</span>
+            </a>
+            <a
+              href={SEPA_BOARD_URL}
+              className="group mx-auto block w-60 border-b border-foreground/25 pb-4 focus-visible:outline-none md:mx-0 md:w-full"
+            >
+              <span className="relative block aspect-[16/10] w-full overflow-hidden border border-foreground/15">
+                <Image
+                  src="/images/sepa/weekly.png"
+                  alt="SEPA 에이전트 주간 보드 화면: 다음 주 태세 제안과 코스피 · 코스닥 차트"
+                  fill
+                  sizes="15rem"
+                  className="object-cover object-left-top transition-opacity group-hover:opacity-85"
+                />
+              </span>
+              <span className="mt-3 flex items-baseline justify-between gap-2">
+                <span className="whitespace-nowrap font-sans text-sm font-extrabold tracking-[0.12em] text-foreground underline-offset-4 group-hover:text-accent group-hover:underline group-focus-visible:text-accent">
+                  SEPA 에이전트
+                </span>
+                <span className="font-mono text-[0.6rem] uppercase tracking-[0.2em] text-muted-foreground">Weekly</span>
+              </span>
+              <span className="mt-1 block text-left text-xs leading-snug text-muted-foreground">
+                주간 시장 분석 · 주도 업종 · 감시 종목
+              </span>
             </a>
             <div className="flex flex-col gap-4 text-center md:self-end md:text-left">
               <SiteFeatures title="기능모음" items={FEATURES} />
