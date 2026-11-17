@@ -6,12 +6,12 @@
   QUESTION TYPES (chosen automatically from line 3 of each question)
     MC          line 3 has options with one starting with *  ->  click to answer, graded at once, explanation as a side note.
     MC + WRITE  an MC question with "@write" (or "@write 4")  ->  the options plus a ruled box to explain / show working (not graded;
-                the explanation is the model answer). Use it for "choose, then justify" questions.
+                the explanation is the model answer). Not used in test-bank quizzes (see the prompt, D).
     WRITTEN     line 3 = key results (or ~)  ->  a ruled answer box; "Check" looks for the key results in what was written.
     TABLE       a written question with one or more "@grid" lines  ->  a table whose blank cells the student fills in; "Check" grades
                 every cell (number tolerance 0.2 %), marks wrong cells and shows the right value under them. Use it whenever the
                 slides ask the student to build or complete a table (pro forma, cash-flow table, payback table, MACRS schedule ...).
-                Rule of thumb: concepts and one-step calculations -> MC; a multi-step calculation or a whole table -> WRITTEN / TABLE.
+                Rule of thumb: concepts and one-step calculations -> MC; a multi-step calculation or a whole table -> WRITTEN / TABLE (≤ 3 per quiz).
 
   PAGE        the questions sit on a centred paper column (680 px). Explanations / model answers are SIDE NOTES in the right margin.
               A shared exhibit is a separate sheet in the LEFT margin, sticky while its questions scroll.
@@ -44,7 +44,7 @@
                             alternatives with " / " (?Out / Exclude). In a row whose label starts with "−" or "Less" the sign is not
                             checked (840,000 = (840,000)). Several @grid lines = several tables. A TABLE passes with 80 % of its items.
                   @write [n]         MC only: add a ruled box (n printed lines, default 2)
-                  @short             WRITTEN: a short descriptive answer (2 printed lines, about two handwritten sentences)
+                  @short             WRITTEN: a short descriptive answer (2 printed lines). Not used in test-bank quizzes (see the prompt, D).
                   @lines n           WRITTEN / TABLE: n printed lines (capped at 8). Use it only when the automatic size below is wrong.
                   @space n           WRITTEN: n × 5 mm of blank space instead of the automatic lines — for answers the student lays out
                                      by hand, e.g. "draw your own worksheet". n = the number of handwritten lines the answer needs at the
@@ -89,86 +89,99 @@
   QUESTION-WRITING PROMPT (기본 문제 생성 프롬프트) - give this file + the course materials to an AI with the prompt below.
   ══════════════════════════════════════════════════════════════════════════════════════════════════════
   너는 [과목명] 과목을 [N]년간 가르친 대학 교수이자 시험 출제위원이다. 첨부한 참고 자료(강의노트·연습문제·기출)를 근거로,
-  이 템플릿의 quizData 형식에 맞춰 객관식과 서술형(표 작성 포함)을 섞어 출제하라.
+  이 템플릿의 quizData 형식에 맞춰 대학 test bank 처럼 객관식 위주로 출제하고, 핵심 계산만 서술형(표 포함)으로 낸다.
 
   A. 입력 변수 (여기만 채우면 됨)
   - 과목/수준: [예: Business Finance 학부 입문 / 거시경제 입문 / 일반화학 1 / 자료구조]
   - 출제 범위: [챕터명 또는 핵심 개념 목록]
   - 참고 자료: [교재명, 강의노트, 연습문제, 기출 — 용어·기호·관례(반올림, 부호, 시점, 단위 등)는 여기를 따른다]
   - 출제 목적: [시험 대비(기본) = 숫자·회사명·상황을 새로 창작 / 복습용 = 강의노트 예제를 그대로 써도 됨]
-  - 문항 수 / 배점: [20]문항 · [MC 3점 / MC+서술 4점 / 서술 5점 / 표 8점]
-  - 형식 구성: [자동] 또는 [MC n · MC+서술 n · 서술 n · 표 n]
+  - 문항 수: [자동 = 챕터당 20문항 이내, 보통 10–18] — 원 자료의 문항 수보다 늘리지 말 것
+  - 형식 구성: [자동 = MC 80% 이상 · 계산 문제(서술·표) 장당 3개 이하]
   - 출제 언어: [영어(기본)] — Part 2·3 검토 자료는 한국어
   - 계산기·참고자료: [허용 여부, 기종] · 공식표/계수표: [제공 / 미제공]
   - 약점 개념(선택): [학생들이 자주 틀리는 개념, 기출 오답 통계]
 
-  B. 평가 목표
-  암기가 아니라 (1) 개념을 정확히 이해했는지, (2) 낯선 상황에 적용할 수 있는지를 평가한다. 범위 내 핵심 개념을 빠짐없이
-  커버하되, 참고 자료에서 비중이 큰 개념(슬라이드 수, 예제·연습문제 수, "Rule for this course" 같은 강조)에 더 많은 문항을 배정한다.
+  B. 평가 목표 — 적은 문항으로 범위 대부분을 덮는다
+  암기가 아니라 (1) 개념을 정확히 이해했는지, (2) 낯선 상황에 적용할 수 있는지를 평가한다.
+  - 핵심 개념·핵심 계산 절차마다 문항 1개. 같은 주제의 문항 2–3개는 하나로 합치고, 하위 요점은 그 문항의 보기로 나눠 넣는다
+    ("Which of the following statements about X is correct?" 의 네 보기가 각각 하위 요점 하나).
+  - 사소한 사항·실제 사례·일화·정의 하나·슬라이드 통계는 단독 문항으로 내지 않는다 → 관련 MC 의 보기(정답 또는 오답)로만 넣는다.
+  - 커버리지 기준: 큰 주제는 문항이 최소 1개, 작은 주제는 어느 문항의 보기 안에라도 반드시 들어간다(Part 3 에 위치를 적는다).
 
   C. 교수 출제방식 반영 (과적합 금지)
   - 참고 자료에서 읽어 낼 것: 자주 쓰는 질문 형식, 용어·기호·표기, 예제의 구조(무엇을 주고 무엇을 묻는지), 학생용 자료에서
     빈칸으로 남겨 둔 표와 계산, 강조 문구와 관례. 이것을 "형식"으로 따르고, 숫자·회사명·상황은 새로 만든다(복습용이면 예외).
+  - 계산 문항의 숫자는 슬라이드·예제·연습문제·복습 자료와 모두 달라야 한다.
+  - 슬라이드의 예시·사고실험(예: "20% 오를 거라는 예측", "$70 지지선", 동전 던지기 펀드매니저)을 숫자만 바꿔 다시 묻지 말 것.
+    그런 장면은 지문 맥락이나 보기로만 쓰고, 묻는 것은 개념이어야 한다. 강의 밖 산수 퍼즐(예: 0.5^5) 금지.
   - 예제 하나를 변형해 여러 문항을 만들지 말 것. 한 예제 구조는 사례(exhibit) 하나에만 쓴다.
   - 참고 자료에 없는 공식·관례·용어를 들여오지 말 것. 범위 밖 내용 금지. 가정이 자료와 다르면 문제에 명시.
 
   D. 형식 선택 (이 템플릿의 문항 형식)
-  - MC: 개념, 판단, 한 단계 계산. 4지선다 단일정답.
-  - MC + WRITE (@write): 고른 뒤 근거를 1–2문장으로 쓰게 할 때 — 판단의 이유가 핵심인 문항.
-  - WRITTEN: 다단계 계산(공식을 쓰고 숫자를 대입). key results = 중간값과 최종값. @short = 2문장 서술(정의·이유·비교).
+  - MC (80% 이상): 개념, 판단, 한 단계 계산. 4지선다 단일정답.
+  - 서술·논술형 금지: @short, @write 를 쓰지 않는다. "explain", "state", "name", "in two sentences", "justify" 같은 요구 금지 —
+    그런 내용은 진술형 MC 로 바꾼다.
+  - 계산 문제 (WRITTEN / TABLE, 장당 3개 이하): 시험에 나올 핵심 다단계 절차만. 쉬운 중간 단계를 따로 묻지 말고 한 문제로 묶는다.
+    예: 두 종목 각각의 기대수익률·분산을 따로 묻지 않고 "50/50 포트폴리오의 상황별 수익률, 기대수익률, 분산, 표준편차"를 묻는다.
+    문제 지시는 "Compute …" 로 계산 대상만 나열하고, 판정이 필요하면 한 단어(Accept/Reject, Buy/Sell, Overvalued/Undervalued)만 요구한다.
+    key results = 중간값과 최종값.
   - 표를 손으로 직접 그려 풀게 할 때는 @grid 대신 @space n(줄 없는 빈칸, 같은 표의 절반 정도 면적)을 쓰고, 같은 계산을
     문제에 "No worksheet is provided — lay out your own table" 처럼 적는다. 한 exhibit 을 쓰는 문항은 exhibit 과 같은 쪽에 들어가도록
     답안 칸을 꼭 필요한 만큼만 잡는다.
   - 인쇄 규칙(사용자 검토 반영, 위 PRINT RULES 1–8): 답안 칸은 밑줄 없이 빈칸 · 손글씨 = 문제 글자 크기(한 줄 5 mm) · 같은 exhibit 안에서는
     더 많이 쓰는 문항에 더 큰 칸 · 손으로 그릴 표는 @space · 같은 계산 반복 금지 · exhibit 문항은 exhibit 과 같은 쪽 ·
     exhibit 표는 내용 폭만큼 작게, 행 여백 최소.
-  - 인쇄 답안 칸은 "실제로 손으로 쓸 분량"만큼만 남긴다(한 줄 5 mm = 문제 글자 한 줄 — 손글씨도 문제 글자 크기와 같다고 본다). 템플릿이 모범답안의 단계 수로 자동 계산하므로
-    (계산형 단계당 1줄, 3–8줄 · @short·짧은 서술 2줄 · 표 풀이 2줄) @lines 는 꼭 필요할 때만, 8 이하로 쓴다. 모범답안의 "; " 단계는
-    학생이 실제로 적을 계산 단계 단위로 나누고, 해설·계산기 풀이를 길게 늘려 칸이 커지지 않게 한다.
-  - TABLE (@grid): 참고 자료가 표를 채우게 하는 계산(예: 현금흐름표, 재무제표·pro forma, 상환표, 감가상각표, 진리표,
-    풀이 단계표)은 반드시 표로 낸다. 학생이 계산할 칸만 빈칸(?정답)으로, 행·열 라벨과 주어진 값은 채워 둔다.
-  - 다단계 계산을 객관식 여러 개로 잘게 쪼개지 말 것. 한 사례 = 표/서술 1–2문항 + 핵심 판단 MC 1–3문항.
+  - 인쇄 답안 칸은 "실제로 손으로 쓸 분량"만큼만 남긴다(한 줄 5 mm = 문제 글자 한 줄). 템플릿이 모범답안의 단계 수로 자동 계산하므로
+    @lines 는 꼭 필요할 때만, 8 이하로 쓴다.
+  - TABLE (@grid): 참고 자료가 표를 채우게 하는 계산(현금흐름표, pro forma, 상환표, 감가상각표 등) 중 행·열 라벨이 꼭 필요한 것만 표로 낸다.
+    학생이 계산할 칸만 빈칸(?정답)으로, 행·열 라벨과 주어진 값은 채워 둔다.
+  - 다단계 계산을 객관식 여러 개로 잘게 쪼개지 말 것. 한 사례 = 계산 문제 1개 + 핵심 판단 MC 1–2개.
   - 같은 exhibit을 쓰는 문항은 연속 배치하고 각 문항에 @use, 읽는 표는 @focus. 앞 문항의 정답이 뒤 문항의 입력이면 그 값을 문제에 제시하되
     다른 문항의 정답을 드러내지 않게 한다.
 
-  E. MC 유형 비율 (과목 성격에 맞게 네가 제안하고 근거를 한 줄로 밝힐 것)
-  - 계산·절차 적용형 __%: 계산량은 작게, 어떤 공식·절차를 선택하느냐가 관건
-  - 시나리오 적용형 __%: 구체적 사례에 개념·원리·분류를 적용 (보기는 "결정 + 근거" 형태)
-  - 개념 진위형 __%: 올바른 / 올바르지 않은 진술 고르기 (부정형 NOT은 대문자, 전체의 10% 이내)
-  - 함정형(다단계 추론) __%: 직관과 반대되는 결론, 또는 2단계 이상 추론
-  (예: 수학·재무·물리는 계산형↑, 법학·사회과학은 시나리오형↑, 프로그래밍은 코드 추적형 추가)
+  E. 문항 문체 — 간결하게 (test bank 어조)
+  - 줄기는 1–3문장: 필요한 숫자·가정 + 질문 한 줄. 이야기·배경 설명·힌트를 늘어놓지 않는다.
+  - 질문 형식: "Which of the following statements about X is correct?", "… is closest to:", "Which of the following is NOT …?",
+    "Compute …". "according to the lecture", "Choose, then justify" 같은 표현 금지.
+  - 보기는 한 줄 길이로 비슷하게, 정답이 길이·구체성으로 티 나지 않게.
 
-  F. 오답 보기 설계 규칙 (가장 중요) — 오답은 반드시 다음 중 하나에서 나온다
+  F. MC 유형 비율 (과목 성격에 맞게 네가 제안하고 근거를 한 줄로 밝힐 것)
+  - 계산·절차 적용형 __%: 계산량은 작게, 어떤 공식·절차를 선택하느냐가 관건
+  - 진술형(여러 하위 요점을 보기로 묶음) __%: 올바른 / 올바르지 않은 진술 고르기 (부정형 NOT·EXCEPT 은 대문자, 전체의 10% 이내)
+  - 시나리오 적용형 __%: 구체적 사례에 개념·원리·분류를 적용 (보기는 "결정 + 근거" 형태)
+  - 함정형(다단계 추론) __%: 직관과 반대되는 결론, 또는 2단계 이상 추론
+
+  G. 오답 보기 설계 규칙 (가장 중요) — 오답은 반드시 다음 중 하나에서 나온다
   1 학생들의 전형적 오개념  2 풀이 단계를 하나 빠뜨린 결과  3 방향·부호·단위·시점을 잘못 적용한 결과
   4 부분적으로만 맞는 진술("always", "never", "only")  5 비슷한 개념 간 혼동(용어가 유사한 개념 쌍)
-  - 계산 오답은 그 실수를 실제로 계산한 값을 쓴다. 직관적으로 맞아 보이지만 틀린 보기를 문항당 최소 1개.
-  - 정답이 보기 길이·구체성·위치로 티 나지 않게. 숫자 보기는 오름차순. 정답 위치는 균등 분산(같은 번호 3연속 금지).
+  - 계산 오답은 그 실수를 실제로 계산한 값을 쓴다(예: 표준편차를 두 종목 표준편차의 가중평균으로 낸 값).
+  - 숫자 보기는 오름차순. 정답 위치는 A–D 균등 분산(같은 글자 3연속 금지).
   - "All / None of the above"는 전체의 10% 이내. 참고 자료상 참인 절대 진술은 오답으로 쓰지 않는다.
+  - 약점 개념이 있으면 개념마다 함정형 문항(또는 함정 보기)을 최소 1개.
 
-  G. 약점 보강 규칙
-  약점 개념이 있으면 개념마다 함정형 문항을 최소 1개. 없으면 범위 내에서 학생이 가장 혼동하기 쉬운 개념 쌍을 판단해 함정형으로 낸다.
+  H. 해설·모범답안 (4번째 줄) — 정답 PDF 에 그대로 찍히므로 읽기 쉽게
+  - 단계는 "; " 로 나누고, 한 단계 = 한 줄 = 계산 하나: "라벨 = 공식(숫자 대입) = 결과". 한 단계에 계산 여러 개를 이어 붙이지 않는다.
+    예: "Boom: R_P = 0.50 × 30% + 0.50 × 4% = 17%; Normal: R_P = …; E(R_P) = 0.20 × 17% + … = 9.80%; σ_P² = … = 0.002256; σ_P = √0.002256 = 4.75%"
+  - 서술형 모범답안은 계산 단계만 — 문장 설명을 섞지 않는다. 계산기 풀이는 마지막 한 줄("BA II Plus: …").
+  - MC 해설은 정답 근거 2–3단계 + 가장 유혹적인 오답 하나만 괄호로. 전체 3줄 안팎.
 
-  H. 출력 형식
+  I. 출력 형식
   Part 1. quizData — <script type="text/plain" id="quizData">와 </script> 사이에 붙일 내용만 코드블록 하나로.
-          시험지·정답표·인쇄 답안 공간·채점은 템플릿이 자동으로 만든다(정답표를 따로 만들지 말 것).
-          4번째 줄: MC는 정답만 설명, 서술·표는 모범답안. 단계마다 "; ", 숫자를 대입한 공식 + 계산기 풀이. 위·아래첨자 규칙을 따른다.
-  Part 2. 문항별 검토표(한국어): 번호 | 개념 태그 | 형식(MC / MC+서술 / 서술 / 표) | 유형 | 난이도(상·중·하) | 정답 |
+          시험지·정답표·인쇄 답안 공간·채점은 템플릿이 자동으로 만든다(정답표를 따로 만들지 말 것). sub: 줄은
+          "Chapter N · X questions (Y MC · Z problems)".
+  Part 2. 문항별 검토표(한국어): 번호 | 개념 태그 | 형식(MC / 서술 / 표) | 유형 | 난이도(상·중·하) | 정답 |
           오답 보기별 노린 오개념·실수(1줄씩) | 검산 메모
-  Part 3. 출제 점검표: 개념별 문항 수(커버리지) · 형식·유형별 문항 수 · 난이도 분포(하 30% / 중 50% / 상 20% 목표) ·
+  Part 3. 출제 점검표: 커버리지(슬라이드 주제 → 문항 번호·보기) · 형식·유형별 문항 수 · 난이도 분포(하 30% / 중 50% / 상 20% 목표) ·
           MC 정답 위치 분포 · NOT 문항 수 · 범위 밖 내용 여부
 
-  I. 품질 규칙
+  J. 품질 규칙
   - 정답이 모호하거나 둘 이상 가능한 문항 금지. 한 문항의 정답이 다른 문항의 힌트가 되지 않게.
   - 가정(세율, 시점, 방법, 반올림 자릿수 등)을 문제마다 명시. 모든 문항은 단독으로 인쇄돼도 풀 수 있어야 한다.
   - 확신이 없는 사실·수치·판례·공식은 쓰지 말 것.
   - 출제 후 모든 문항을 스스로(가능하면 코드로) 풀어 정답, 오답 값, 표 빈칸의 정답, key results를 검산하고, 불일치는 수정한 최종본만 제시.
   - 데이터 형식: === 구분, 보기 안에 | 금지, * 정확히 1개, 표 빈칸은 ?정답, exhibit 문항은 연속 배치.
--->
-<html lang="en">
-<head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<!--DATA-START-->
+  - 파일에 붙여 넣을 때: 4번째 줄 주석 안에도 quizData 태그 문자열이 있으므로, 실제 데이터 위치(<!--DATA-START-->
 <script type="text/plain" id="quizData">
 title: Ch.7 CAPM and APT — Review Quiz
 sub: Chapter 7 · 19 questions (16 MC · 3 problems)
@@ -241,7 +254,7 @@ t = 0.45 / 0.30 = 1.50, p = 0.139 > 0.05: α = 0 (the CAPM prediction) cannot be
 7.2 Risk decomposition
 Corvid Airlines. Write the formulas and compute (monthly; variances in %^2) the systematic, firm-specific and total variance, the total SD and R^2; then the 95% interval for β (use t ≈ 2.00) and the adjusted beta β_{adj} = (2/3)β + 1/3. No worksheet is provided — lay out your own table.
 31.36|49|80.36|8.96|0.39 / .39 / 39%|1.00 / 1.0|1.80 / 1.8|1.27 / 1.267
-Systematic = β^2σ_M^2 = 1.40^2 × 4^2 = 1.96 × 16 = 31.36 %^2; Firm-specific = σ^2(e) = 7^2 = 49 %^2; Total = 31.36 + 49 = 80.36 %^2, σ = √80.36 = 8.96% per month; R^2 = 31.36 / 80.36 = 0.39 — about 61% of the variance is diversifiable; 95% interval = 1.40 ± 2.00 × 0.20 = 1.00 to 1.80; β_{adj} = (2/3)(1.40) + 1/3 = 0.933 + 0.333 = 1.27; BA II Plus: 1.4 x² × 16 = 31.36, + 49 = 80.36, √x = 8.96
+Systematic = β^2σ_M^2 = 1.40^2 × 4^2 = 1.96 × 16 = 31.36 %^2; Firm-specific = σ^2(e) = 7^2 = 49 %^2; Total = 31.36 + 49 = 80.36 %^2; σ = √80.36 = 8.96% per month; R^2 = 31.36 / 80.36 = 0.39 — about 61% of the variance is diversifiable; 95% interval = 1.40 ± 2.00 × 0.20 = 1.00 to 1.80; β_{adj} = (2/3)(1.40) + 1/3 = 0.933 + 0.333 = 1.27; BA II Plus: 1.4 x² × 16 = 31.36, + 49 = 80.36, √x = 8.96
 @use R
 @space 7
 ===
