@@ -1,0 +1,253 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="robots" content="noindex">
+<title>Econ 2 Exam 3 · 계산기와 정리표</title>
+<!--
+  Econ 2 Exam 3 도구 — 필립스곡선·희생률 계산기(Ch35), 실질환율·PPP 계산기와 NX·NCO 거래 분류(Ch31), 정책·사건별 방향 요약표(Ch32).
+  예전 Econoland(Artifact) 복습 탭의 도구를 옮긴 것. 한국어 기본, 영어는 오른쪽 위 단추(언어 선택은 덱·그래프와 같은 'slides.lang' 에 저장, ?lang=en|ko 로도 고른다).
+-->
+<style>
+  @font-face{font-family:"Pretendard Variable";font-weight:45 920;font-style:normal;font-display:swap;src:local("Pretendard Variable"),url("/fonts/PretendardVariable.woff2") format("woff2-variations")}
+  :root{--ink:#1f2537;--soft:#5b6170;--line:#d8dbe0;--tint:#f3f6fb;--blue:#1f6fd1;--up:#d6322b;--down:#1f6fd1;--good:#1d7348;--bad:#c8352e}
+  *{box-sizing:border-box}
+  html,body{margin:0;background:#fff;color:var(--ink);font-family:"Pretendard Variable",Pretendard,-apple-system,BlinkMacSystemFont,"Segoe UI","Apple SD Gothic Neo","Malgun Gothic",sans-serif;-webkit-font-smoothing:antialiased}
+  html[lang=ko] body{word-break:keep-all}
+  main{max-width:1000px;margin:0 auto;padding:40px max(16px,env(safe-area-inset-left)) 56px}
+  .top{display:flex;flex-wrap:wrap;align-items:baseline;gap:8px 16px}
+  .eyebrow{margin:0;font-size:14px;font-weight:700;letter-spacing:.06em;color:var(--soft)}
+  .lang{margin-left:auto;border:2px solid var(--ink);border-radius:8px;background:#fff;font:inherit;font-weight:700;font-size:14px;padding:4px 12px;cursor:pointer}
+  h1{margin:6px 0 8px;font-size:36px;line-height:1.15;letter-spacing:-.01em}
+  .lead{margin:0 0 8px;max-width:680px;font-size:17px;line-height:1.55;color:var(--soft)}
+  .links{display:flex;flex-wrap:wrap;gap:8px 16px;margin:0 0 8px;font-size:15px}
+  .links a{color:var(--blue)}
+  section.ch{margin-top:30px;padding-top:16px;border-top:3px solid var(--ink)}
+  section.ch>h2{margin:0 0 4px;font-size:24px}
+  section.ch>h2 small{display:block;font-size:13px;font-weight:800;letter-spacing:.06em;color:var(--blue)}
+  .card{margin-top:14px;padding:16px 18px;border:2px solid var(--ink);border-radius:12px}
+  .card h3{margin:0 0 10px;font-size:18px}
+  .grid2{display:grid;grid-template-columns:minmax(0,1fr) minmax(240px,340px);gap:18px;align-items:start}
+  .rg{display:grid;grid-template-columns:9.5em minmax(0,1fr) 4.4em;align-items:center;gap:8px;margin:0 0 8px;font-size:15px}
+  .rg input{width:100%;accent-color:var(--blue)}
+  .rg output{text-align:right;font-weight:800;font-variant-numeric:tabular-nums}
+  .out{margin-top:6px;font-size:16px;line-height:1.7}
+  .big{font-size:24px;font-weight:800;color:var(--blue)}
+  .sep{margin:16px 0 10px;border:0;border-top:1px solid var(--line)}
+  svg.pc{width:100%;height:auto;overflow:visible}
+  svg.pc text{font-family:inherit}
+  .nin{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px;margin:10px 0}
+  .nin label{display:flex;flex-direction:column;gap:4px;font-size:13px;color:var(--soft)}
+  .nin input{height:38px;border:2px solid var(--line);border-radius:8px;padding:0 10px;font:inherit;font-size:16px;color:var(--ink);min-width:0}
+  .chips{display:flex;flex-wrap:wrap;gap:6px}
+  .chip{border:2px solid var(--line);border-radius:999px;background:#fff;padding:5px 12px;font:inherit;font-size:14px;font-weight:600;color:var(--ink);cursor:pointer}
+  .chip:hover{border-color:var(--ink)}
+  .chip.on{border-color:var(--blue);color:var(--blue);background:var(--tint)}
+  .chip.right{border-color:var(--good);color:var(--good);background:#eef7f1}
+  .chip.wrong{border-color:var(--bad);color:var(--bad);text-decoration:line-through}
+  .srow{padding:10px 0;border-top:1px solid var(--line)}
+  .srow:first-of-type{border-top:0}
+  .srow p{margin:0 0 6px;font-size:16px}
+  .fb{margin:6px 0 0;font-size:14.5px}
+  .fb.good{color:var(--good)} .fb.bad{color:var(--bad)}
+  .tbl{overflow-x:auto}
+  table{border-collapse:collapse;width:100%;font-size:15px}
+  th,td{border-bottom:1px solid var(--line);padding:8px 8px;text-align:center;white-space:nowrap}
+  th:first-child,td:first-child,th:nth-child(2),td:nth-child(2){text-align:left}
+  th{color:var(--soft);font-weight:700}
+  td.v{font-weight:800}
+  td.v.up{color:var(--up)} td.v.dn{color:var(--down)}
+  table.hide td.v:not(.show){color:transparent!important;background:var(--tint);cursor:pointer}
+  .chk{display:inline-flex;gap:8px;align-items:center;font-size:14.5px;margin-bottom:8px;cursor:pointer}
+  .note{margin:8px 0 0;font-size:14px;color:var(--soft);line-height:1.55}
+  :focus-visible{outline:2px solid var(--blue);outline-offset:2px}
+  td small.sub{display:none}
+  @media (max-width:720px){h1{font-size:28px}.grid2{grid-template-columns:minmax(0,1fr)}.nin{grid-template-columns:minmax(0,1fr)}.rg{grid-template-columns:7.5em minmax(0,1fr) 4em}}
+  @media (max-width:560px){th:nth-child(2),td:nth-child(2){display:none}td:first-child{white-space:normal;min-width:8em}td small.sub{display:block;margin-top:2px;font-size:12.5px;color:var(--soft)}th,td{padding:8px 5px}}
+</style>
+</head>
+<body>
+<main>
+  <div class="top"><p class="eyebrow">Econ 2 · Exam 3</p><button type="button" class="lang" id="lang"></button></div>
+  <h1 id="h1"></h1>
+  <p class="lead" id="lead"></p>
+  <p class="links" id="links"></p>
+
+  <section class="ch" id="ch35">
+    <h2><small>CH 35</small><span data-t="h35"></span></h2>
+    <div class="card"><div class="grid2"><div>
+      <h3 data-t="pcH"></h3>
+      <label class="rg"><span data-t="un"></span><input type="range" id="r-un" min="3" max="8" step="0.5" value="5"><output id="o-un"></output></label>
+      <label class="rg"><span data-t="pe"></span><input type="range" id="r-pe" min="0" max="8" step="0.5" value="3"><output id="o-pe"></output></label>
+      <label class="rg"><span>a</span><input type="range" id="r-a" min="0.25" max="1" step="0.25" value="0.5"><output id="o-a"></output></label>
+      <label class="rg"><span data-t="pi"></span><input type="range" id="r-pi" min="0" max="10" step="0.5" value="3"><output id="o-pi"></output></label>
+      <div class="out" id="pc-out"></div>
+    </div><svg class="pc" id="pc-svg" viewBox="0 0 320 260" role="img" aria-label="Phillips curve"></svg></div>
+    <hr class="sep">
+      <h3 data-t="srH"></h3>
+      <label class="rg"><span data-t="sr"></span><input type="range" id="r-sr" min="1" max="8" step="0.5" value="5"><output id="o-sr"></output></label>
+      <label class="rg"><span data-t="p0"></span><input type="range" id="r-p0" min="1" max="15" step="0.5" value="10"><output id="o-p0"></output></label>
+      <label class="rg"><span data-t="p1"></span><input type="range" id="r-p1" min="0" max="10" step="0.5" value="4"><output id="o-p1"></output></label>
+      <label class="rg"><span data-t="yr"></span><input type="range" id="r-yr" min="1" max="5" step="1" value="1"><output id="o-yr"></output></label>
+      <div class="out" id="sr-out"></div>
+    </div>
+  </section>
+
+  <section class="ch" id="ch31">
+    <h2><small>CH 31</small><span data-t="h31"></span></h2>
+    <div class="card">
+      <h3 data-t="rerH"></h3>
+      <div class="chips" id="pre"></div>
+      <div class="nin">
+        <label><span data-t="tE"></span><input type="number" id="n-e" step="any" min="0"></label>
+        <label><span data-t="tP"></span><input type="number" id="n-P" step="any" min="0"></label>
+        <label><span data-t="tPs"></span><input type="number" id="n-Ps" step="any" min="0"></label>
+      </div>
+      <div class="out" id="rer-out"></div>
+    </div>
+    <div class="card">
+      <h3 data-t="sortH"></h3>
+      <div id="sort"></div>
+    </div>
+  </section>
+
+  <section class="ch" id="ch32">
+    <h2><small>CH 32</small><span data-t="h32"></span></h2>
+    <div class="card">
+      <h3 data-t="polH"></h3>
+      <label class="chk"><input type="checkbox" id="pol-hide"> <span data-t="hide"></span></label>
+      <div class="tbl"><table id="pol"></table></div>
+      <p class="note" data-t="polNote"></p>
+    </div>
+  </section>
+</main>
+<script>
+(function () {
+  'use strict';
+  var $ = function (s, r) { return (r || document).querySelector(s); };
+  var $$ = function (s, r) { return Array.prototype.slice.call((r || document).querySelectorAll(s)); };
+  var KEY = 'slides.lang';
+  var LANG = (function () {
+    var q = /[?&]lang=(en|ko)\b/.exec(location.search);
+    try { if (q) { localStorage.setItem(KEY, q[1]); return q[1]; } return localStorage.getItem(KEY) === 'en' ? 'en' : 'ko'; } catch (e) { return q ? q[1] : 'ko'; }
+  })();
+  var L = function (a) { return LANG === 'en' ? a[1] : a[0]; };
+  var esc = function (s) { return String(s).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;'); };
+  var nf = function (v) { var a = Math.abs(v); if (a >= 1000) return v.toLocaleString('en-US', { maximumFractionDigits: 0 }); if (a >= 100) return v.toLocaleString('en-US', { maximumFractionDigits: 1 }); if (a >= 1) return String(+v.toFixed(2)); return String(+v.toPrecision(3)); };
+  var T = {
+    lang: ['English', '한국어'],
+    h1: ['계산기와 정리표', 'Calculators and summary tables'],
+    lead: ['숫자를 바꿔 가며 필립스곡선 식, 희생률, 실질환율 · PPP 를 확인하고, 거래 분류와 정책 방향표로 Ch31 · Ch32 를 정리한다.', 'Change the numbers to check the Phillips-curve equation, the sacrifice ratio and the real exchange rate / PPP, then review Ch31 and Ch32 with the transaction sort and the policy table.'],
+    links: [['복습 슬라이드', '/econ2/exam3/'], ['퀴즈', '/econ2/exam3/quiz.html'], ['Interactive', '/econ2/graphs/#ch35'], ['TA 세션', '/econ2/']],
+    linksEn: [['Review slides', '/econ2/exam3/'], ['Quiz', '/econ2/exam3/quiz.html'], ['Interactive', '/econ2/graphs/en/#ch35'], ['TA session', '/econ2/']],
+    h35: ['필립스곡선', 'The Phillips curve'], h31: ['개방경제 기초', 'Open-economy basics'], h32: ['개방경제 이론', 'Open-economy theory'],
+    pcH: ['필립스곡선 식 u = u* − a(π − πᵉ)', 'Phillips-curve equation u = u* − a(π − πᵉ)'],
+    un: ['자연실업률 u*', 'Natural rate u*'], pe: ['기대인플레이션 πᵉ', 'Expected inflation πᵉ'], pi: ['실제 인플레이션 π', 'Actual inflation π'],
+    pcHi: ['π > πᵉ: 예상보다 높은 인플레이션 → 실업률이 자연실업률보다 낮다 (단기, SRPC 위)', 'π > πᵉ: inflation beats expectations → u below u* (short run, on the SRPC)'],
+    pcLo: ['π < πᵉ: 예상보다 낮은 인플레이션 → 실업률이 자연실업률보다 높다', 'π < πᵉ: inflation falls short of expectations → u above u*'],
+    pcEq: ['π = πᵉ → u = u*: SRPC 와 LRPC 가 만나는 장기 균형', 'π = πᵉ → u = u*: the long-run point where the SRPC meets the LRPC'],
+    srH: ['희생률 계산기', 'Sacrifice-ratio calculator'], sr: ['희생률', 'Sacrifice ratio'], p0: ['현재 인플레이션', 'Inflation now'], p1: ['목표 인플레이션', 'Target inflation'], yr: ['나눌 햇수', 'Spread over (years)'],
+    srNone: ['목표 인플레이션이 현재보다 낮아야 한다.', 'The target must be below current inflation.'], srUnit: ['(연간 산출 대비 손실 · 대표 추정치 5)', 'of a year’s output lost (typical estimate: 5)'], srSpread: ['{y}년에 나누면 해마다 {v}%', 'Spread over {y} years: {v}% a year'],
+    rerH: ['실질환율 · PPP 계산기  ε = e × P ÷ P*', 'Real exchange rate & PPP  ε = e × P ÷ P*'],
+    tE: ['e (외국 통화 / 자국 통화 1단위)', 'e (foreign currency per unit of domestic)'], tP: ['P (자국 가격, 자국 통화)', 'P (domestic price, domestic currency)'], tPs: ['P* (외국 가격, 외국 통화)', 'P* (foreign price, foreign currency)'],
+    rerBad: ['세 값을 모두 0보다 크게 넣으세요.', 'Enter three positive numbers.'], rerEP: ['자국 재화의 외국 통화 가격', 'Domestic good priced in foreign currency'], rerEps: ['실질환율', 'Real exchange rate'],
+    rerHi: ['자국 재화 1개 = 외국 재화 {x}개 → 자국 재화가 상대적으로 비싸다. 외국에서 사서 자국에서 팔면 이익이고, 순수출에 불리하다.', 'One domestic good = {x} foreign goods → domestic goods are relatively dear: buy abroad, sell at home; bad for net exports.'],
+    rerLo: ['자국 재화 1개 = 외국 재화 {x}개 → 자국 재화가 상대적으로 싸다. 자국에서 사서 외국에서 팔면 이익이고, 순수출에 유리하다.', 'One domestic good = {x} foreign goods → domestic goods are relatively cheap: buy at home, sell abroad; good for net exports.'],
+    rerEq: ['ε ≈ 1 → 구매력평가(PPP)가 성립한다. 차익거래 이익이 없다.', 'ε ≈ 1 → PPP holds; no arbitrage profit.'], rerPPP: ['PPP 환율', 'PPP exchange rate'],
+    rerOver: ['실제 e 가 PPP 환율보다 높다 → 자국 통화가 PPP 기준 고평가', 'Actual e is above the PPP rate → the domestic currency is overvalued by PPP'],
+    rerUnder: ['실제 e 가 PPP 환율보다 낮다 → 자국 통화가 PPP 기준 저평가', 'Actual e is below the PPP rate → the domestic currency is undervalued by PPP'],
+    rerFair: ['실제 e ≈ PPP 환율', 'Actual e ≈ PPP rate'], rerInv: ['(외국 통화 1단위의 자국 통화 가격 · 뉴스 표기)', '(domestic-currency price of one unit of foreign currency, as quoted in the news)'],
+    sortH: ['NX 냐 NCO 냐: 한국 입장에서 거래 분류', 'NX or NCO? Sort each transaction from Korea’s side'],
+    right: ['맞았습니다.', 'Correct.'], wrong: ['다시 보세요.', 'Not quite.'],
+    polH: ['정책 · 사건별 방향 요약', 'Directions by policy or event'], hide: ['정답 가리기 (칸을 누르면 하나씩 보임)', 'Hide answers (click a cell to reveal it)'],
+    polEv: ['정책 · 사건', 'Policy or event'], polFirst: ['먼저 움직이는 곡선', 'First curve to move'],
+    polNote: ['↑ 증가 · ↓ 감소 · – 변화 없음 (처음과 최종 균형 비교). 그래프로 보려면 Interactive 의 Ch32 탭.', '↑ up · ↓ down · – no change (start versus final equilibrium). See the Ch32 tab of the Interactive for the graphs.']
+  };
+  var PRE = [
+    { n: ['미국 vs 일본 · 빅맥', 'U.S. vs Japan · Big Mac'], e: 150, P: 5.5, Ps: 480 },
+    { n: ['한국 vs 미국 · 빅맥', 'Korea vs U.S. · Big Mac'], e: 0.000725, P: 5500, Ps: 5.5 },
+    { n: ['미국 vs 유로 · 빅맥', 'U.S. vs euro area · Big Mac'], e: 0.92, P: 5.5, Ps: 5.06 },
+    { n: ['유제 31-6', 'Practice 31-6'], e: 150, P: 5, Ps: 600 }
+  ];
+  var OPT = [['NX+', ['NX↑', 'NX↑']], ['NX-', ['NX↓', 'NX↓']], ['NCO+d', ['NCO↑ · 직접', 'NCO↑ · direct']], ['NCO+p', ['NCO↑ · 포트폴리오', 'NCO↑ · portfolio']], ['NCO-d', ['NCO↓ · 직접', 'NCO↓ · direct']], ['NCO-p', ['NCO↓ · 포트폴리오', 'NCO↓ · portfolio']]];
+  var SORT = [
+    { t: ['한국 대학생이 미국 스트리밍 서비스 구독료를 낸다', 'A Korean student pays for a U.S. streaming subscription'], a: 'NX-', x: ['서비스 수입↑ → NX↓. 대가로 원화가 해외로 나가므로 NCO 도 같은 만큼 줄어든다.', 'Service imports rise → NX falls; the won paid abroad lowers NCO by the same amount.'] },
+    { t: ['중국 관광객이 명동에서 화장품을 산다', 'A Chinese tourist buys cosmetics in Seoul'], a: 'NX+', x: ['외국인이 한국 재화를 산다 = 수출↑ → NX↑.', 'A foreigner buying Korean goods is an export → NX up.'] },
+    { t: ['현대차가 미국 조지아에 공장을 짓는다', 'Hyundai builds a plant in Georgia, U.S.'], a: 'NCO+d', x: ['한국 기업이 해외 자본을 직접 소유 · 경영한다 → NCO↑, 직접투자.', 'A Korean firm owns and runs capital abroad → NCO up, direct investment.'] },
+    { t: ['한국 개인투자자가 미국 기업 주식을 산다', 'A Korean retail investor buys shares of a U.S. company'], a: 'NCO+p', x: ['해외 주식 매입 → NCO↑, 포트폴리오 투자.', 'Buying foreign stock → NCO up, portfolio investment.'] },
+    { t: ['노르웨이 국부펀드가 한국 국채를 산다', 'Norway’s sovereign fund buys Korean government bonds'], a: 'NCO-p', x: ['외국인의 국내 자산 매입 → 한국 NCO↓, 포트폴리오 투자.', 'Foreigners buying Korean assets → Korean NCO down, portfolio investment.'] },
+    { t: ['일본 기업이 경기도 공장을 증설한다', 'A Japanese firm expands its factory in Gyeonggi-do'], a: 'NCO-d', x: ['외국 기업의 국내 직접투자 → 한국 NCO↓, 직접투자.', 'Foreign direct investment in Korea → Korean NCO down, direct investment.'] },
+    { t: ['외국 팬이 서울 콘서트 티켓을 산다', 'A foreign fan buys a ticket to a Seoul concert'], a: 'NX+', x: ['한국 서비스 수출 → NX↑.', 'A Korean service export → NX up.'] },
+    { t: ['한국 연기금이 보유한 독일 기업 주식을 프랑스 투자자에게 판다', 'A Korean pension fund sells its German shares to a French investor'], a: 'NCO-p', x: ['해외 포트폴리오 투자를 줄인다 → NCO↓.', 'It cuts portfolio holdings abroad → NCO down.'] }
+  ];
+  // 시뮬레이터 모형(S = I + NCO, NX = NCO)의 처음과 최종 균형을 비교한 방향 (+ 증가, - 감소, 0 그대로)
+  var POL = [
+    [['재정적자 확대', 'Larger budget deficit'], ['대부자금 공급 왼쪽', 'LF supply left'], '+', '-', '-', '+', '-'],
+    [['재정적자 축소', 'Smaller budget deficit'], ['대부자금 공급 오른쪽', 'LF supply right'], '-', '+', '+', '-', '+'],
+    [['투자세액공제', 'Investment tax credit'], ['대부자금 수요 오른쪽', 'LF demand right'], '+', '+', '-', '+', '-'],
+    [['수입 할당 · 관세', 'Import quota or tariff'], ['외환 수요(NX) 오른쪽', 'Currency demand (NX) right'], '0', '0', '0', '+', '0'],
+    [['해외에서 한국 상품 인기', 'Foreigners like our goods'], ['외환 수요(NX) 오른쪽', 'Currency demand (NX) right'], '0', '0', '0', '+', '0'],
+    [['자본 도피', 'Capital flight'], ['NCO 곡선 오른쪽', 'NCO curve right'], '+', '-', '+', '-', '+']
+  ];
+
+  function rg(id) { return +$('#r-' + id).value; }
+  function pc() {
+    var un = rg('un'), pe = rg('pe'), a = rg('a'), pi = rg('pi'), u = un - a * (pi - pe);
+    ['un', 'pe', 'pi', 'p0', 'p1'].forEach(function (k) { $('#o-' + k).textContent = rg(k).toFixed(1) + '%'; });
+    ['a', 'sr', 'yr'].forEach(function (k) { $('#o-' + k).textContent = String(rg(k)); });
+    $('#pc-out').innerHTML = 'u = ' + un.toFixed(1) + ' − ' + a + ' × (' + pi.toFixed(1) + ' − ' + pe.toFixed(1) + ') = <span class="big">' + u.toFixed(2) + '%</span><br>' + esc(L(pi > pe + 1e-9 ? T.pcHi : pi < pe - 1e-9 ? T.pcLo : T.pcEq));
+    var W = 320, H = 260, m = { l: 40, r: 18, t: 22, b: 34 }, X = function (v) { return m.l + v / 12 * (W - m.l - m.r); }, Y = function (v) { return H - m.b - v / 12 * (H - m.t - m.b); };
+    var pts = []; for (var x = 0; x <= 12.001; x += 0.1) { var p = pe - (x - un) / a; if (p >= 0 && p <= 12) pts.push([X(x).toFixed(1), Y(p).toFixed(1)]); }
+    var lp = pts[Math.max(0, Math.floor(pts.length * 0.9) - 1)], inb = u >= 0 && u <= 12 && pi >= 0 && pi <= 12;
+    var s = '<path d="M' + m.l + ',' + (H - m.b) + ' L' + (W - m.r + 6) + ',' + (H - m.b) + ' M' + m.l + ',' + (H - m.b) + ' L' + m.l + ',' + (m.t - 10) + '" fill="none" stroke="#1f2537" stroke-width="1.6"/>' +
+      '<text x="' + (W - m.r + 6) + '" y="' + (H - m.b + 28) + '" text-anchor="end" font-size="12" fill="#5b6170">u (%)</text><text x="' + (m.l + 6) + '" y="' + (m.t - 8) + '" font-size="12" fill="#5b6170">π (%)</text>';
+    [0, 4, 8, 12].forEach(function (v) { s += '<text x="' + X(v) + '" y="' + (H - m.b + 15) + '" text-anchor="middle" font-size="11" fill="#5b6170">' + v + '</text>' + (v ? '<text x="' + (m.l - 6) + '" y="' + (Y(v) + 4) + '" text-anchor="end" font-size="11" fill="#5b6170">' + v + '</text>' : ''); });
+    s += '<line x1="' + X(un) + '" x2="' + X(un) + '" y1="' + Y(0) + '" y2="' + Y(12) + '" stroke="#1f2537" stroke-width="2.4"/><text x="' + (X(un) + 5) + '" y="' + (Y(12) + 12) + '" font-size="13" font-weight="700" fill="#1f2537">LRPC</text>';
+    if (pts.length > 1) s += '<path d="M' + pts.map(function (q) { return q.join(','); }).join(' L') + '" fill="none" stroke="#1f6fd1" stroke-width="3"/><text x="' + (+lp[0] + 8) + '" y="' + (+lp[1] - 4) + '" font-size="13" font-weight="700" fill="#1f6fd1">SRPC</text>';
+    if (inb) s += '<path d="M' + m.l + ',' + Y(pi) + ' H' + X(u) + ' V' + Y(0) + '" fill="none" stroke="#8d93a0" stroke-dasharray="4 4"/><circle cx="' + X(u) + '" cy="' + Y(pi) + '" r="6" fill="#1f6fd1" stroke="#fff" stroke-width="2"/>';
+    $('#pc-svg').innerHTML = s;
+    var sr = rg('sr'), p0 = rg('p0'), p1 = rg('p1'), yr = rg('yr'), d = p0 - p1;
+    $('#sr-out').innerHTML = d <= 0 ? esc(L(T.srNone)) : sr + ' × (' + p0.toFixed(1) + ' − ' + p1.toFixed(1) + ') = <span class="big">' + (sr * d).toFixed(1) + '%</span> ' + esc(L(T.srUnit)) + (yr > 1 ? '<br>' + esc(L(T.srSpread).replace('{y}', yr).replace('{v}', (sr * d / yr).toFixed(1))) : '');
+  }
+  function rer() {
+    var e = parseFloat($('#n-e').value), P = parseFloat($('#n-P').value), Ps = parseFloat($('#n-Ps').value), out = $('#rer-out');
+    if (!(e > 0 && P > 0 && Ps > 0)) { out.textContent = L(T.rerBad); return; }
+    var eP = e * P, eps = eP / Ps, ppp = Ps / P;
+    out.innerHTML = esc(L(T.rerEP)) + ': e × P = ' + nf(e) + ' × ' + nf(P) + ' = <b>' + nf(eP) + '</b><br>' + esc(L(T.rerEps)) + ': ε = ' + nf(eP) + ' ÷ ' + nf(Ps) + ' = <span class="big">' + eps.toFixed(2) + '</span><br>' +
+      esc(L(eps > 1.02 ? T.rerHi : eps < 0.98 ? T.rerLo : T.rerEq).replace('{x}', eps.toFixed(2))) + '<br>' + esc(L(T.rerPPP)) + ': e = P* ÷ P = <b>' + nf(ppp) + '</b> · ' + esc(L(e > ppp * 1.02 ? T.rerOver : e < ppp * 0.98 ? T.rerUnder : T.rerFair)) +
+      '<br><span style="color:#5b6170">1 ÷ e = ' + nf(1 / e) + ' ' + esc(L(T.rerInv)) + '</span>';
+  }
+  function setPre(i) { var p = PRE[i]; $('#n-e').value = p.e; $('#n-P').value = p.P; $('#n-Ps').value = p.Ps; $$('#pre .chip').forEach(function (b, k) { b.classList.toggle('on', k === i); }); rer(); }
+  function render() {
+    document.documentElement.lang = LANG;
+    $('#lang').textContent = L(T.lang); $('#h1').textContent = L(T.h1); $('#lead').textContent = L(T.lead);
+    $('#links').innerHTML = (LANG === 'en' ? T.linksEn : T.links).map(function (x) { return '<a href="' + x[1] + '">' + esc(x[0]) + ' →</a>'; }).join('');
+    $$('[data-t]').forEach(function (n) { n.textContent = L(T[n.getAttribute('data-t')]); });
+    $('#pre').innerHTML = PRE.map(function (p, i) { return '<button type="button" class="chip">' + esc(L(p.n)) + '</button>'; }).join('');
+    $$('#pre .chip').forEach(function (b, i) { b.addEventListener('click', function () { setPre(i); }); });
+    $('#sort').innerHTML = SORT.map(function (s, i) { return '<div class="srow" data-i="' + i + '"><p>' + (i + 1) + '. ' + esc(L(s.t)) + '</p><div class="chips">' + OPT.map(function (o) { return '<button type="button" class="chip" data-k="' + o[0] + '">' + esc(L(o[1])) + '</button>'; }).join('') + '</div><p class="fb" hidden></p></div>'; }).join('');
+    $$('#sort .srow').forEach(function (r) {
+      var s = SORT[+r.getAttribute('data-i')];
+      $$('.chip', r).forEach(function (b) { b.addEventListener('click', function () {
+        var ok = b.getAttribute('data-k') === s.a;
+        $$('.chip', r).forEach(function (x) { x.classList.toggle('right', x.getAttribute('data-k') === s.a); x.classList.toggle('wrong', x === b && !ok); });
+        var fb = $('.fb', r); fb.hidden = false; fb.className = 'fb ' + (ok ? 'good' : 'bad'); fb.textContent = L(ok ? T.right : T.wrong) + ' ' + L(s.x);
+      }); });
+    });
+    var cell = function (d) { return '<td class="v ' + (d === '+' ? 'up' : d === '-' ? 'dn' : '') + '">' + (d === '+' ? '↑' : d === '-' ? '↓' : '–') + '</td>'; };
+    $('#pol').innerHTML = '<thead><tr><th>' + esc(L(T.polEv)) + '</th><th>' + esc(L(T.polFirst)) + '</th><th>r</th><th>I</th><th>NCO</th><th>E</th><th>NX</th></tr></thead><tbody>' +
+      POL.map(function (p) { return '<tr><td>' + esc(L(p[0])) + '<small class="sub">' + esc(L(p[1])) + '</small></td><td>' + esc(L(p[1])) + '</td>' + p.slice(2).map(cell).join('') + '</tr>'; }).join('') + '</tbody>';
+    $('#pol').classList.toggle('hide', $('#pol-hide').checked);
+    $$('#pol td.v').forEach(function (c) { c.addEventListener('click', function () { c.classList.add('show'); }); });
+    pc(); if (!$('#n-e').value) setPre(0); else rer();
+  }
+  $$('input[type=range]').forEach(function (i) { i.addEventListener('input', pc); });
+  $$('.nin input').forEach(function (i) { i.addEventListener('input', function () { $$('#pre .chip').forEach(function (b) { b.classList.remove('on'); }); rer(); }); });
+  $('#pol-hide').addEventListener('change', function (e) { $('#pol').classList.toggle('hide', e.target.checked); $$('#pol td.v').forEach(function (c) { c.classList.remove('show'); }); });
+  $('#lang').addEventListener('click', function () { LANG = LANG === 'en' ? 'ko' : 'en'; try { localStorage.setItem(KEY, LANG); } catch (e) {} render(); });
+  render();
+})();
+</script>
+</body>
+</html>
