@@ -8,7 +8,7 @@
 <meta name="robots" content="noindex">
 <title>Econ 2 Interactive</title>
 <!--
-  Econ 2 Interactive — 영문 대문. 챕터 넷을 고르면 /econ2/graphs/en/#chXX 로 바로 연다. 한국어판 대문은 /econ2/ko/ (/econ2/ 는 TA 세션 슬라이드).
+  Econ 2 Interactive — 영문 대문. 챕터를 고르면 /econ2/graphs/en/#chXX 로 바로 연다. Exam 2(Ch29·30·33·28)와 Exam 3(Ch35·31·32)을 구분선과 소제목으로 나눈다. 한국어판 대문은 /econ2/ko/ (/econ2/ 는 TA 세션 슬라이드).
 -->
 <style>
   @font-face{font-family:"Pretendard Variable";font-weight:45 920;font-style:normal;font-display:swap;src:local("Pretendard Variable"),url("/fonts/PretendardVariable.woff2") format("woff2-variations")}
@@ -25,6 +25,10 @@
   .grid .ch{font-size:13px;font-weight:800;letter-spacing:.06em;color:var(--blue)}
   .grid .nm{display:block;margin:4px 0 6px;font-size:24px;font-weight:800}
   .grid .ds{font-size:15px;line-height:1.5;color:var(--soft)}
+  .exh{display:flex;align-items:baseline;gap:10px;margin:30px 0 12px;padding-top:16px;border-top:4px double var(--ink)}
+  .exh:first-of-type{margin-top:0;padding-top:0;border-top:0}
+  .exh h2{margin:0;font-size:22px;font-weight:800;letter-spacing:.02em}
+  .exh span{font-size:14px;font-weight:700;color:var(--soft)}
   .foot{display:flex;flex-wrap:wrap;gap:10px 18px;margin:28px 0 0;font-size:15px}
   .foot a{color:var(--soft)}
   @media (max-width:640px){main{padding:36px 16px 40px}h1{font-size:34px}.grid{grid-template-columns:minmax(0,1fr)}}
@@ -35,13 +39,20 @@
   <p class="eyebrow">Econ 2 · Mankiw, Principles of Economics</p>
   <h1>Econ 2 Interactive</h1>
   <p class="lead">Select an event to explore how the graph and the equilibrium change.</p>
+  <div class="exh"><h2>Exam 2</h2><span>Ch29 · 30 · 33 · 28</span></div>
   <ul class="grid">
     <li><a href="/econ2/graphs/en/#ch29"><span class="ch">CH 29</span><span class="nm">Money multiplier</span><span class="ds">Reserves × multiplier = money supply, bank T-account, bank capital and leverage</span></a></li>
     <li><a href="/econ2/graphs/en/#ch30"><span class="ch">CH 30</span><span class="nm">Money &amp; prices</span><span class="ds">Money market, value of money 1/P, quantity theory</span></a></li>
     <li><a href="/econ2/graphs/en/#ch33"><span class="ch">CH 33</span><span class="nm">AD–AS</span><span class="ds">What shifts AD and AS, short run and long run</span></a></li>
     <li><a href="/econ2/graphs/en/#ch28"><span class="ch">CH 28</span><span class="nm">Unemployment</span><span class="ds">Wages above equilibrium, unemployment rate, participation rate</span></a></li>
   </ul>
-  <p class="foot"><a href="/econ2/graphs/en/">Open the graphs</a><a href="/econ2/ko/">한국어</a></p>
+  <div class="exh"><h2>Exam 3</h2><span>Ch35 · 31 · 32</span></div>
+  <ul class="grid">
+    <li><a href="/econ2/graphs/en/#ch35"><span class="ch">CH 35</span><span class="nm">Phillips curve</span><span class="ds">The short-run trade-off, expected inflation, supply shocks, the natural-rate hypothesis and the sacrifice ratio</span></a></li>
+    <li><a href="/econ2/graphs/en/#ch31"><span class="ch">CH 31</span><span class="nm">Open-economy basics</span><span class="ds">NX = NCO, S = I + NCO, the real exchange rate, purchasing-power parity</span></a></li>
+    <li><a href="/econ2/graphs/en/#ch32"><span class="ch">CH 32</span><span class="nm">Open-economy theory</span><span class="ds">Loanable funds · NCO · foreign-currency exchange; deficits, trade policy, capital flight</span></a></li>
+  </ul>
+  <p class="foot"><a href="/econ2/">TA session · Exam 3 review</a><a href="/econ2/graphs/en/">Open the graphs</a><a href="/econ2/ko/">한국어</a></p>
 </main>
 </body>
 </html>

@@ -441,6 +441,20 @@
     .bankfig .eqdetail{font-size:13px}
     .bankfig .tnote{font-size:12.5px}
   }
+  /* Exam 2 · Exam 3 탭 구분과 Exam 3 챕터 (exam3.js) */
+  .tabs .tgl{flex:none;align-self:center;padding:0 4px 0 10px;font-size:11.5px;font-weight:800;letter-spacing:.08em;color:#9aa0aa;text-transform:uppercase;white-space:nowrap}
+  .tabs .tgl:first-child{padding-left:2px}
+  .tabs .tsep{flex:none;align-self:center;width:2px;height:22px;margin:0 4px 0 10px;background:var(--line);border-radius:1px}
+  .tabs button{padding:0 14px}
+  @media (min-width:901px){.top .in{flex-wrap:wrap;height:auto;padding:8px 12px 0;gap:4px 16px}.tabs{order:3;width:100%;height:44px}.tabs button{padding:0 9px;font-size:14px}.tabs .tgl{padding:0 2px 0 8px}.tabs .tsep{margin:0 2px 0 8px}}
+  #f31,#x31{gap:14px}
+  #f31 .eqdetail,#x31 .eqdetail{margin:0}
+  .eqrow.e4{grid-template-columns:1fr auto 1fr auto 1fr auto 1fr;max-width:860px}
+  .eqrow.e2{grid-template-columns:1fr auto 1fr;max-width:520px}
+  #f31 .term span,#x31 .term span{font-size:clamp(16px,3.2cqi,26px)}
+  #x31 .e4 .term span{font-size:clamp(14px,2.6cqi,22px)}
+  #f31 .term b,#x31 .term b{font-size:15px}
+  @media (max-width:900px){.tabs .tgl{padding:0 2px 0 8px;font-size:10.5px}.tabs .tsep{margin:0 2px 0 6px}#f31 .term span,#x31 .term span,#x31 .e4 .term span{font-size:14px}#f31 .term i,#x31 .term i{font-size:10.5px}.eqrow.e4{gap:2px 3px}}
 </style>
 <link rel="stylesheet" href="/econ2/graphs/real.css?v=20261106l">
 <link rel="stylesheet" href="/econ2/graphs/search.css?v=20261106i">
@@ -450,10 +464,15 @@
 <header class="top"><div class="in">
   <h1><a href="/econ2/ko/">Econ 2 Interactive</a></h1>
   <nav class="tabs" role="tablist" aria-label="챕터">
+    <span class="tgl" aria-hidden="true">Exam 2</span>
     <button role="tab" data-ch="ch29">Ch29 통화승수</button>
     <button role="tab" data-ch="ch30">Ch30 화폐·물가</button>
     <button role="tab" data-ch="ch33">Ch33 AD–AS</button>
     <button role="tab" data-ch="ch28">Ch28 실업</button>
+    <span class="tsep" aria-hidden="true"></span><span class="tgl" aria-hidden="true">Exam 3</span>
+    <button role="tab" data-ch="ch35">Ch35 필립스곡선</button>
+    <button role="tab" data-ch="ch31">Ch31 개방경제 기초</button>
+    <button role="tab" data-ch="ch32">Ch32 개방경제 이론</button>
   </nav>
   <div class="links"><a href="/econ2/graphs/en/">EN</a></div>
 </div></header>
@@ -577,6 +596,97 @@
       <div class="player" id="pl28s"></div>
     </div>
   </section>
+    <section class="ch" id="c35" aria-label="Ch35 필립스곡선">
+    <div class="fig">
+      <div class="stage" id="plot35"></div>
+      <div class="sitline"></div><p class="rsent auto"></p>
+    </div>
+    <div class="side">
+      <h2><small>Ch35 The Short-Run Trade-off between Inflation and Unemployment</small>필립스곡선</h2>
+      <div class="eq">
+        <span class="f">u = u* − a(π − π<sup>e</sup>)</span>
+        <span class="f">장기: u = u* (LRPC 수직)</span>
+        <small>u* = 자연실업률, π<sup>e</sup> = 기대인플레이션. <b>AD 변화</b>(통화 · 재정 · 소비 · 투자)는 SRPC <b>위의 이동</b>, π<sup>e</sup> 와 공급 충격은 <b>SRPC 이동</b>, 자연실업률 변화는 <b>LRPC 이동</b>. 장기에 통화정책은 인플레이션만 바꾸고 실업률은 바꾸지 못한다(자연율 가설).</small>
+        <details class="drop">
+          <summary><span>디스인플레이션의 비용: 희생률 (Sacrifice ratio)</span></summary>
+          <p>희생률 = 인플레이션을 1%p 낮출 때 잃는 연간 산출(%). 대표 추정치 <b>5</b> → 6%p 를 낮추면 연간 산출의 30%(한 해에 30%, 또는 3년간 10%씩).</p>
+          <p><mark><b>합리적 기대</b></mark>: 정책을 믿으면 π<sup>e</sup> 가 곧바로 내려가 희생률이 작아진다(극단적으로 0). 실제 볼커 디스인플레이션(1980년대 초)에서는 실업률이 10% 가까이 올라 비용이 컸다.</p>
+        </details>
+      </div>
+      <div class="opts" data-o="A"><h3>곡선 위 이동 <small>· AD 변화</small></h3><ul></ul></div>
+      <div class="opts" data-o="S"><h3>SRPC 이동 <small>· π<sup>e</sup> · 공급 충격</small></h3><ul></ul></div>
+      <div class="opts" data-o="L"><h3>LRPC 이동 <small>· 자연실업률</small></h3><ul></ul></div>
+    </div>
+    <div class="player" id="pl35"></div>
+  </section>
+
+    <section class="ch tabbed" id="c31" aria-label="Ch31 개방경제 기본 개념">
+    <div class="sub" role="tablist" aria-label="NX · NCO · 환율"><button role="tab" data-sub="f">NX · NCO</button><button role="tab" data-sub="x">환율 · PPP</button></div>
+    <div class="panel" id="p31f">
+      <div class="fig"><div class="bankfig" id="f31"></div><div class="sitline"></div><p class="rsent auto"></p></div>
+      <div class="side">
+        <h2><small>Ch31 Open-Economy Macroeconomics: Basic Concepts</small>재화 · 자본의 흐름</h2>
+        <div class="eq">
+          <span class="f">NX = 수출 − 수입</span>
+          <span class="f">NCO = 해외 자산 매입 − 외국인의 국내 자산 매입</span>
+          <span class="f">NX = NCO · S = I + NCO</span>
+          <small>모든 거래는 NX 와 NCO 를 같은 크기만큼 바꾼다. 외국인이 국내 자산을 사면 <b>NCO 감소</b>(자본 유입). 무역흑자 ⇔ S &gt; I ⇔ NCO &gt; 0. S = I 는 폐쇄경제에서만 성립한다.</small>
+          <details class="drop">
+            <summary><span>직접투자와 포트폴리오 투자</span></summary>
+            <p><b>해외직접투자</b> — 공장 · 지사를 직접 소유하고 경영한다(현대차의 미국 공장). <b>해외포트폴리오투자</b> — 주식 · 채권만 산다(미국 주식 매입).</p>
+            <p>NCO 를 움직이는 것: 국내 · 해외 실질이자율, 해외 자산의 위험, 외국인 소유 규제.</p>
+          </details>
+        </div>
+        <div class="opts" id="o31f"><h3>거래 <small>· 다시 누르면 풀림</small></h3><ul></ul></div>
+      </div>
+      <div class="player" id="pl31f"></div>
+    </div>
+    <div class="panel" id="p31x" hidden>
+      <div class="fig"><div class="bankfig" id="x31"></div><div class="sitline"></div><p class="rsent auto"></p></div>
+      <div class="side">
+        <h2><small>Ch31 Open-Economy Macroeconomics · 환율</small>실질환율 · 구매력평가</h2>
+        <div class="eq">
+          <span class="f">실질환율 ε = e × P ÷ P*</span>
+          <span class="f">PPP: e = P* ÷ P</span>
+          <small>e = 자국 통화 1단위로 사는 외국 통화(교과서 표기). e 상승 = 절상. ε 가 오르면 자국 재화가 비싸져 NX 가 준다. PPP 에서는 물가가 빨리 오르는 나라의 통화가 절하된다.</small>
+          <details class="drop">
+            <summary><span>뉴스의 “원/달러 환율”은 반대 표기</span></summary>
+            <p>“원/달러 1,300원 → 1,400원”은 달러 1단위의 원화 가격이다. 이 숫자가 오르면 <mark><b>원화 절하</b></mark>이고, 교과서 e(달러/원)는 내려간다.</p>
+          </details>
+        </div>
+        <div class="opts" id="o31x"><h3>사건 <small>· 다시 누르면 풀림</small></h3><ul></ul></div>
+      </div>
+      <div class="player" id="pl31x"></div>
+    </div>
+  </section>
+
+    <section class="ch tabbed" id="c32" aria-label="Ch32 개방경제 이론">
+    <div class="sub" role="tablist" aria-label="세 시장"><button role="tab" data-sub="lf">대부자금 · r</button><button role="tab" data-sub="nco">순자본유출</button><button role="tab" data-sub="fx">외환 · E</button></div>
+    <div class="fig">
+      <div class="stage" id="plot32lf"></div>
+      <div class="stage" id="plot32nco" hidden></div>
+      <div class="stage" id="plot32fx" hidden></div>
+      <div class="sitline"></div><p class="rsent auto"></p>
+    </div>
+    <div class="side">
+      <h2><small>Ch32 A Macroeconomic Theory of the Open Economy</small>두 시장을 잇는 NCO</h2>
+      <div class="eq">
+        <span class="f">대부자금: S = I + NCO</span>
+        <span class="f">외환시장: NCO = NX</span>
+        <small>대부자금시장에서 r 이, 외환시장에서 실질환율 E 가 정해진다. 대부자금 공급은 국민저축 S, 수요는 I + NCO. 외환시장 공급(NCO)은 E 와 무관해 수직, 수요는 NX. <b>r 상승 → NCO 감소</b> 가 두 시장을 잇는다.</small>
+        <details class="drop">
+          <summary><span>수입 할당 · 관세가 순수출을 못 늘리는 이유</span></summary>
+          <p>할당 · 관세는 S · I 를 바꾸지 않으므로 NCO 가 그대로이고 <mark><b>NX = NCO</b></mark> 도 그대로다. 외환 수요가 오른쪽으로 옮겨 E 만 오르고, 그만큼 다른 수출이 줄고 수입이 는다.</p>
+          <p>재정적자와 투자세액공제는 둘 다 r 상승 → NCO 감소 → E 상승 → NX 감소. 차이는 국내투자 I (재정적자 감소, 투자공제 증가).</p>
+        </details>
+      </div>
+      <div class="opts" data-o="S"><h3>대부자금 공급 <small>· 국민저축 S</small></h3><ul></ul></div>
+      <div class="opts" data-o="I"><h3>대부자금 수요 <small>· 투자 I</small></h3><ul></ul></div>
+      <div class="opts" data-o="N"><h3>NCO 곡선</h3><ul></ul></div>
+      <div class="opts" data-o="X"><h3>외환 수요 <small>· NX</small></h3><ul></ul></div>
+    </div>
+    <div class="player" id="pl32"></div>
+  </section>
 </main>
 
 <script>
@@ -604,7 +714,8 @@
   document.body.appendChild(box);
 })();
 </script>
-<script src="/econ2/graphs/app.js?v=20261106n"></script>
+<script src="/econ2/graphs/exam3.js?v=20261126a"></script>
+<script src="/econ2/graphs/app.js?v=20261126a"></script>
 <script src="/econ2/graphs/real-ko.js?v=20261106n"></script>
 <script src="/econ2/graphs/real.js?v=20261106n"></script>
 <script src="/econ2/graphs/search.js?v=20261107a"></script>

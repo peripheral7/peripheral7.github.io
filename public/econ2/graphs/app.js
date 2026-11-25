@@ -142,7 +142,7 @@
       label(g, box[0] + box[2] + 20, box[1] + box[3] + 50, cfg.xTitle, { anchor: 'end', size: 16, color: C.soft, weight: 600 });
 
       const P = S.map((s, i) => (hideNow && i === n - 1 ? [] : pointsOf(offs[i], s.vis)));
-      const lr = byId.LRAS, sx = (d[1] - d[0]) * 0.012;
+      const lr = byId[cfg.lr || 'LRAS'], sx = (d[1] - d[0]) * 0.012;
       const xName = (pt, off, i) => {
         if (pt.o.xl) return pt.o.xl + (i > 0 && P[0][0] && Math.abs(P[0][0].x - pt.x) > 1e-6 ? "'" : '');
         if (cfg.star && lr && Math.abs(lr.x + offOf(lr, off) - pt.x) < sx) return same(offOf(lr, off), 0) ? cfg.xName + '*' : cfg.xName + '*_2';
@@ -187,6 +187,7 @@
       });
 
       cfg.curves.forEach((c) => {
+        if (c.invisible) return;
         const pos = [];
         S.forEach((s) => { if (!s.vis[c.id]) return; const v = offOf(c, s.off); if (!pos.some((u) => same(u, v))) pos.push(v); });
         const lab = (v) => (c.plain || pos.length < 2 ? c.lab : c.lab + '_' + (pos.findIndex((u) => same(u, v)) + 1));
@@ -215,6 +216,7 @@
       });
 
       if (n > 1 && !moving) cfg.curves.forEach((c) => {
+        if (c.invisible) return;
         const a = S[n - 2];
         if (!a.vis[c.id] || !cur.vis[c.id]) return;
         const oa = offOf(c, a.off), oz = offOf(c, tgt);
@@ -315,8 +317,8 @@
     const toks = [];
     parts.forEach((p, pi) => (p.mv ? [{ mv: p.mv }] : rsTok(p.rs)).forEach((t, ti, all) => toks.push(Object.assign({ pre: ti ? '' : lead(p, pi), on: p.on, b: p.b, partEnd: multi && ti === all.length - 1 && (pi === parts.length - 1 || parts[pi + 1].g !== p.g) }, t))));
 
-    const josa = (n) => { const c = n.replace(/[\s*′']+$/, '').slice(-1), h = c.charCodeAt(0) - 0xac00; return h >= 0 && h < 11172 ? (h % 28 ? '은' : '는') : /[LMNR]/.test(c) ? '은' : '는'; };
-    const qty = (n) => /^(Y|L|U|실업|통화량|자산|자본|대출|예금)/.test(n);
+    const josa = (n) => { const c = n.replace(/[\s*′']+$/, '').slice(-1), h = c.charCodeAt(0) - 0xac00; return h >= 0 && h < 11172 ? (h % 28 ? '은' : '는') : /[LMNRlmnr]/.test(c) ? '은' : '는'; };
+    const qty = (n) => /^(Y|L|U|실업|통화량|자산|자본|대출|예금|NX|NCO|순수출|순자본유출|국민저축|국내투자|저축|투자|수출|수입|해외 자산|외국인)/.test(n) || /^[SI]$/.test(n);
     const slot = (t, k) => {
       const last = k === toks.length - 1, end = last ? '다.' : t.partEnd ? '며,' : '고';
       if (!t.on) return '<b class="slot q" data-b="' + t.b + '"></b>' + (last ? '.' : t.partEnd ? ',' : '');
@@ -977,18 +979,22 @@
   ch29();
   const p30 = ch30(), c33 = ch33(), c28 = ch28();
   const plots = { ch30: [p30] };
+  const EXT = {};
+  const API = { $, $$, el, label, arrow, C, Plot, Player, Keys, runner, list, unpress, apply, dirOf, dirW, arrows, esc, fmt, rsHTML, sitHTML, COND, dur, reduce, alignTabs, markMore, lang: document.documentElement.lang, speed: () => SPEED };
+  (window.E2_EXT || []).forEach((f) => { try { const r = f(API); if (r && r.id) EXT[r.id] = r; } catch (e) { if (window.console) console.error(e); } });
   function show(id, sub) {
     $$('.ch').forEach((s) => s.classList.toggle('on', s.id === id.replace('ch', 'c')));
     $$('.tabs button').forEach((b) => b.setAttribute('aria-selected', String(b.getAttribute('data-ch') === id)));
     if (id === 'ch33') c33.showSub(sub === 'as' || sub === 'ad' ? sub : c33.current(), false);
     if (id === 'ch28') c28.showSub(sub === 'u' || sub === 'w' ? sub : c28.current(), false);
+    if (EXT[id] && EXT[id].show) EXT[id].show(sub);
     alignTabs(); alignBank(); markMore();
     (plots[id] || []).forEach((p) => p.render());
   }
   $$('.tabs button').forEach((b) => b.addEventListener('click', () => { show(b.getAttribute('data-ch')); history.replaceState(null, '', '#' + b.getAttribute('data-ch')); }));
   function fromHash() {
-    const m = /^(ch29|ch30|ch33|ch28)(?:-(as|ad|u|w))?$/.exec(location.hash.slice(1));
-    show(m ? m[1] : 'ch29', m && m[2]);
+    const m = /^(ch\d+)(?:-([a-z]+))?$/.exec(location.hash.slice(1)), ok = m && $('#c' + m[1].slice(2));
+    show(ok ? m[1] : 'ch29', ok ? m[2] : null);
   }
   window.addEventListener('hashchange', fromHash);
   $$('.links a').forEach((a) => { if (/\/econ2\/graphs\//.test(a.getAttribute('href'))) a.addEventListener('click', () => { a.href = a.getAttribute('href').split('#')[0] + location.hash; }); });

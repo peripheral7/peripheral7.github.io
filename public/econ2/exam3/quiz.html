@@ -1,0 +1,1417 @@
+<!DOCTYPE html>
+<!--
+  INTEGRATED QUIZ TEMPLATE - multiple choice, written answers and fill-in tables on one textbook page, with side notes.
+  Make a quiz: copy this file and replace ONLY the text between <script type="text/plain" id="quizData"> and </script>. Do not edit anything else.
+
+  QUESTION TYPES (chosen automatically from line 3 of each question)
+    MC          line 3 has options with one starting with *  ->  click to answer, graded at once, explanation as a side note.
+    MC + WRITE  an MC question with "@write" (or "@write 4")  ->  the options plus a ruled box to explain / show working (not graded;
+                the explanation is the model answer). Not used in test-bank quizzes (see the prompt, D).
+    WRITTEN     line 3 = key results (or ~)  ->  a ruled answer box; "Check" looks for the key results in what was written.
+    TABLE       a written question with one or more "@grid" lines  ->  a table whose blank cells the student fills in; "Check" grades
+                every cell (number tolerance 0.2 %), marks wrong cells and shows the right value under them. Use it whenever the
+                slides ask the student to build or complete a table (pro forma, cash-flow table, payback table, MACRS schedule ...).
+                Rule of thumb: concepts and one-step calculations -> MC; a multi-step calculation or a whole table -> WRITTEN / TABLE (≤ 3 per quiz).
+
+  PAGE        the questions sit on a centred paper column (680 px). Explanations / model answers are SIDE NOTES in the right margin.
+              A shared exhibit is a separate sheet in the LEFT margin, sticky while its questions scroll.
+  TABLET      700-1500 px wide (or any touch screen 700 px and wider): SPLIT VIEW - the exhibit is a panel on the LEFT, the questions
+              on the RIGHT; the panel stays in place and scrolls inside itself. The exhibit FOLLOWS THE QUESTION: with "@focus 2" the
+              panel scrolls to table 2 of its exhibit and dims the others. Side notes are printed under each question in split view.
+  PHONE       below 700 px: the exhibit moves onto the page above its questions; side notes move under each question.
+              Style: one serif font, hairline rules only, no boxes, no coloured bars. Tables: one size, one weight, cells never wrap,
+              a caption larger than the cells, a dark rule above the header and below the last row.
+
+  DATA FORMAT (blocks separated by a line that is only ===)
+    meta        title: / sub: / subject: / textbook:   then ===      (sub: = scope and number of questions only)
+    chapter     "# Chapter 3: Title" as its own block (optional; 2+ chapters show chapter tabs).
+    exhibit     @case ID  /  title line  /  one or more  @tbl Caption :: H1|H2|H3;;row;;!Section row;;=Total|1|2   (tables numbered 1, 2, 3 for @focus)
+                Questions that use the same exhibit must be CONSECUTIVE.
+    question    lines, then ===:
+                1 tag (or "-" = same tag as the previous question)
+                2 question text (written questions: say what to compute and that formulas must be written)
+                3 MC:       options  a|b|*c|d   (* marks the correct one; 2-4 options; never put | inside an option)
+                  WRITTEN:  key results for checking: groups separated by |, accepted wordings inside a group by " / ".
+                            Give a comma-free alternative for numbers of 1,000 or more (1,648 / 1648). A short entry (4 characters or
+                            fewer) must appear as a whole number. A written answer passes when 60 % of the groups are found.
+                            ~ = no key results (self-check: the model answer is just shown; a TABLE question is then graded on its cells).
+                4 explanation (MC) or model answer (WRITTEN), ONE line, one step per item separated by "; ".
+                5+ optional:
+                  @use ID            uses exhibit ID            @focus 2  or  @focus 1,3   table(s) of the exhibit this question reads
+                  @tbl Caption :: H1|H2;;a|b   a small given table under the question        @img file.png
+                  @grid Caption :: H1|H2|H3;;Label|?1,260,000|given;;...   a FILL-IN table: a cell that starts with ? is blank, and the
+                            text after ? is its answer. Numbers: 1,260,000  (840,000)  −540,000  20.00%  are all read as numbers;
+                            alternatives with " / " (?Out / Exclude). In a row whose label starts with "−" or "Less" the sign is not
+                            checked (840,000 = (840,000)). Several @grid lines = several tables. A TABLE passes with 80 % of its items.
+                  @write [n]         MC only: add a ruled box (n printed lines, default 2)
+                  @short             WRITTEN: a short descriptive answer (2 printed lines). Not used in test-bank quizzes (see the prompt, D).
+                  @lines n           WRITTEN / TABLE: n printed lines (capped at 8). Use it only when the automatic size below is wrong.
+                  @space n           WRITTEN: n × 5 mm of blank space instead of the automatic lines — for answers the student lays out
+                                     by hand, e.g. "draw your own worksheet". n = the number of handwritten lines the answer needs at the
+                                     question's font size (≈ half the area of the same @grid). Example: a 3-state E(R)/variance table for two
+                                     stocks (header, 3 states, E(R), variance, SD) plus 2 formula lines ≈ @space 9.
+    ALL VIEW "All chapters" numbers every question 1..N straight through (no chapter headings or restarts); printing from that view gives one sheet with the same numbers.
+    PRINT SPACE (automatic)   leave only the room a real handwritten answer needs — not the length of the model answer (which also explains).
+                              Answer space prints BLANK (no ruled lines). One line of space = 5 mm = one line of question text (10 pt): handwriting is assumed to be the same size as
+                              the printed question, so a line holds one step (a formula with numbers, or one short sentence).
+                              written calculation (model answer has a computed "= number"): one line per step, 3-8 lines
+                              short written / @short / other written with 1-2 steps: 2 lines · TABLE: every blank cell is an empty box 7 mm high,
+                              plus 2 lines for working · MC: none (+ @write lines, default 2) · @lines n: n lines, never more than 8
+                              Question text prints at 10 pt (tables 9 pt), so a question is never larger than the space for its answer.
+
+  PRINT RULES (from user review — follow them when writing data; the CSS already does the layout part)
+    1. Answer space prints BLANK — never ruled lines.
+    2. Handwriting = question font size: 1 line of space = 5 mm = one printed line of question text. Give only the space a real
+       answer needs (count the handwritten lines), never the length of the model answer. 1 step ≈ 1 line.
+    3. Within one exhibit group, the question that needs more writing gets more space (a hand-drawn worksheet > a short calculation).
+    4. A worksheet the student can lay out by hand → "No worksheet is provided — lay out your own table" + @space n
+       (≈ half the area of the printed @grid). Keep @grid only when the given row/column labels are essential.
+    5. Never ask for the same computation twice; two different data sets (e.g. two stocks) are fine.
+    6. All questions of an exhibit print on the SAME page as the exhibit when possible: keep their space tight and do not put an
+       unrelated question just before the exhibit (move it after the group).
+    7. Exhibits are compact: tables only as wide as their content, small row padding (CSS: .p-ex tables width:auto, td 0.2 mm).
+    8. Question text prints at 10 pt, tables at 9 pt.
+
+  EXPLANATION STYLE  explain the CORRECT answer only. For calculations give BOTH the formula with the substituted numbers AND the
+              calculator solution. A leading label before " = " or ":" (≤ 30 characters, e.g. "OCF = ...", "BA II Plus: ...") is set in
+              semibold. "BA II Plus:", "Formula:" also start a new line. Every question must stand alone (restate numbers or @use).
+  SUPERSCRIPTS / SUBSCRIPTS   ^ one character (1.08)^5 · ^{..} two or more (1.10)^{-3} (FV ÷ PV)^{1/t} · _ one character C_0 CF_t · _{..} D_{t+1}
+              Calculator keys stay plain: CF0, C01, F01, I/Y. \_ \^ = literal. Symbols: \pi \Delta \times \le \ge \approx. `code` in backticks.
+  KEYS        MC: 1-4 answer · Enter / ↓ next · ↑ previous.  Answer box: Enter new line · Ctrl+Enter check.  Table cell: Enter next cell ·
+              Ctrl+Enter check.  Ctrl+Q memo.
+  FEATURES    exam mode (MC and written graded together at the end), review incorrect / not passed, mark for review, question search
+              (1, 3-5), memo, save in browser, night mode, single-question view, copy question + answer.
+  PRINT       A4 exam paper: each exhibit once before its questions, blank answer space (no ruled lines) and empty table boxes as above.
+              "Print with solution" adds the answer key: MC letters, every explanation / model answer and the filled-in tables.
+  Mistakes in the data are listed in a red box at the top of the page.
+
+  ══════════════════════════════════════════════════════════════════════════════════════════════════════
+  QUESTION-WRITING PROMPT (기본 문제 생성 프롬프트) - give this file + the course materials to an AI with the prompt below.
+  ══════════════════════════════════════════════════════════════════════════════════════════════════════
+  너는 [과목명] 과목을 [N]년간 가르친 대학 교수이자 시험 출제위원이다. 첨부한 참고 자료(강의노트·연습문제·기출)를 근거로,
+  이 템플릿의 quizData 형식에 맞춰 대학 test bank 처럼 객관식 위주로 출제하고, 핵심 계산만 서술형(표 포함)으로 낸다.
+
+  A. 입력 변수 (여기만 채우면 됨)
+  - 과목/수준: [예: Business Finance 학부 입문 / 거시경제 입문 / 일반화학 1 / 자료구조]
+  - 출제 범위: [챕터명 또는 핵심 개념 목록]
+  - 참고 자료: [교재명, 강의노트, 연습문제, 기출 — 용어·기호·관례(반올림, 부호, 시점, 단위 등)는 여기를 따른다]
+  - 출제 목적: [시험 대비(기본) = 숫자·회사명·상황을 새로 창작 / 복습용 = 강의노트 예제를 그대로 써도 됨]
+  - 문항 수: [자동 = 챕터당 20문항 이내, 보통 10–18] — 원 자료의 문항 수보다 늘리지 말 것
+  - 형식 구성: [자동 = MC 80% 이상 · 계산 문제(서술·표) 장당 3개 이하]
+  - 출제 언어: [영어(기본)] — Part 2·3 검토 자료는 한국어
+  - 계산기·참고자료: [허용 여부, 기종] · 공식표/계수표: [제공 / 미제공]
+  - 약점 개념(선택): [학생들이 자주 틀리는 개념, 기출 오답 통계]
+
+  B. 평가 목표 — 적은 문항으로 범위 대부분을 덮는다
+  암기가 아니라 (1) 개념을 정확히 이해했는지, (2) 낯선 상황에 적용할 수 있는지를 평가한다.
+  - 핵심 개념·핵심 계산 절차마다 문항 1개. 같은 주제의 문항 2–3개는 하나로 합치고, 하위 요점은 그 문항의 보기로 나눠 넣는다
+    ("Which of the following statements about X is correct?" 의 네 보기가 각각 하위 요점 하나).
+  - 사소한 사항·실제 사례·일화·정의 하나·슬라이드 통계는 단독 문항으로 내지 않는다 → 관련 MC 의 보기(정답 또는 오답)로만 넣는다.
+  - 커버리지 기준: 큰 주제는 문항이 최소 1개, 작은 주제는 어느 문항의 보기 안에라도 반드시 들어간다(Part 3 에 위치를 적는다).
+
+  C. 교수 출제방식 반영 (과적합 금지)
+  - 참고 자료에서 읽어 낼 것: 자주 쓰는 질문 형식, 용어·기호·표기, 예제의 구조(무엇을 주고 무엇을 묻는지), 학생용 자료에서
+    빈칸으로 남겨 둔 표와 계산, 강조 문구와 관례. 이것을 "형식"으로 따르고, 숫자·회사명·상황은 새로 만든다(복습용이면 예외).
+  - 계산 문항의 숫자는 슬라이드·예제·연습문제·복습 자료와 모두 달라야 한다.
+  - 슬라이드의 예시·사고실험(예: "20% 오를 거라는 예측", "$70 지지선", 동전 던지기 펀드매니저)을 숫자만 바꿔 다시 묻지 말 것.
+    그런 장면은 지문 맥락이나 보기로만 쓰고, 묻는 것은 개념이어야 한다. 강의 밖 산수 퍼즐(예: 0.5^5) 금지.
+  - 예제 하나를 변형해 여러 문항을 만들지 말 것. 한 예제 구조는 사례(exhibit) 하나에만 쓴다.
+  - 참고 자료에 없는 공식·관례·용어를 들여오지 말 것. 범위 밖 내용 금지. 가정이 자료와 다르면 문제에 명시.
+
+  D. 형식 선택 (이 템플릿의 문항 형식)
+  - MC (80% 이상): 개념, 판단, 한 단계 계산. 4지선다 단일정답.
+  - 서술·논술형 금지: @short, @write 를 쓰지 않는다. "explain", "state", "name", "in two sentences", "justify" 같은 요구 금지 —
+    그런 내용은 진술형 MC 로 바꾼다.
+  - 계산 문제 (WRITTEN / TABLE, 장당 3개 이하): 시험에 나올 핵심 다단계 절차만. 쉬운 중간 단계를 따로 묻지 말고 한 문제로 묶는다.
+    예: 두 종목 각각의 기대수익률·분산을 따로 묻지 않고 "50/50 포트폴리오의 상황별 수익률, 기대수익률, 분산, 표준편차"를 묻는다.
+    문제 지시는 "Compute …" 로 계산 대상만 나열하고, 판정이 필요하면 한 단어(Accept/Reject, Buy/Sell, Overvalued/Undervalued)만 요구한다.
+    key results = 중간값과 최종값.
+  - 표를 손으로 직접 그려 풀게 할 때는 @grid 대신 @space n(줄 없는 빈칸, 같은 표의 절반 정도 면적)을 쓰고, 같은 계산을
+    문제에 "No worksheet is provided — lay out your own table" 처럼 적는다. 한 exhibit 을 쓰는 문항은 exhibit 과 같은 쪽에 들어가도록
+    답안 칸을 꼭 필요한 만큼만 잡는다.
+  - 인쇄 규칙(사용자 검토 반영, 위 PRINT RULES 1–8): 답안 칸은 밑줄 없이 빈칸 · 손글씨 = 문제 글자 크기(한 줄 5 mm) · 같은 exhibit 안에서는
+    더 많이 쓰는 문항에 더 큰 칸 · 손으로 그릴 표는 @space · 같은 계산 반복 금지 · exhibit 문항은 exhibit 과 같은 쪽 ·
+    exhibit 표는 내용 폭만큼 작게, 행 여백 최소.
+  - 인쇄 답안 칸은 "실제로 손으로 쓸 분량"만큼만 남긴다(한 줄 5 mm = 문제 글자 한 줄). 템플릿이 모범답안의 단계 수로 자동 계산하므로
+    @lines 는 꼭 필요할 때만, 8 이하로 쓴다.
+  - TABLE (@grid): 참고 자료가 표를 채우게 하는 계산(현금흐름표, pro forma, 상환표, 감가상각표 등) 중 행·열 라벨이 꼭 필요한 것만 표로 낸다.
+    학생이 계산할 칸만 빈칸(?정답)으로, 행·열 라벨과 주어진 값은 채워 둔다.
+  - 다단계 계산을 객관식 여러 개로 잘게 쪼개지 말 것. 한 사례 = 계산 문제 1개 + 핵심 판단 MC 1–2개.
+  - 같은 exhibit을 쓰는 문항은 연속 배치하고 각 문항에 @use, 읽는 표는 @focus. 앞 문항의 정답이 뒤 문항의 입력이면 그 값을 문제에 제시하되
+    다른 문항의 정답을 드러내지 않게 한다.
+
+  E. 문항 문체 — 간결하게 (test bank 어조)
+  - 줄기는 1–3문장: 필요한 숫자·가정 + 질문 한 줄. 이야기·배경 설명·힌트를 늘어놓지 않는다.
+  - 질문 형식: "Which of the following statements about X is correct?", "… is closest to:", "Which of the following is NOT …?",
+    "Compute …". "according to the lecture", "Choose, then justify" 같은 표현 금지.
+  - 보기는 한 줄 길이로 비슷하게, 정답이 길이·구체성으로 티 나지 않게.
+
+  F. MC 유형 비율 (과목 성격에 맞게 네가 제안하고 근거를 한 줄로 밝힐 것)
+  - 계산·절차 적용형 __%: 계산량은 작게, 어떤 공식·절차를 선택하느냐가 관건
+  - 진술형(여러 하위 요점을 보기로 묶음) __%: 올바른 / 올바르지 않은 진술 고르기 (부정형 NOT·EXCEPT 은 대문자, 전체의 10% 이내)
+  - 시나리오 적용형 __%: 구체적 사례에 개념·원리·분류를 적용 (보기는 "결정 + 근거" 형태)
+  - 함정형(다단계 추론) __%: 직관과 반대되는 결론, 또는 2단계 이상 추론
+
+  G. 오답 보기 설계 규칙 (가장 중요) — 오답은 반드시 다음 중 하나에서 나온다
+  1 학생들의 전형적 오개념  2 풀이 단계를 하나 빠뜨린 결과  3 방향·부호·단위·시점을 잘못 적용한 결과
+  4 부분적으로만 맞는 진술("always", "never", "only")  5 비슷한 개념 간 혼동(용어가 유사한 개념 쌍)
+  - 계산 오답은 그 실수를 실제로 계산한 값을 쓴다(예: 표준편차를 두 종목 표준편차의 가중평균으로 낸 값).
+  - 숫자 보기는 오름차순. 정답 위치는 A–D 균등 분산(같은 글자 3연속 금지).
+  - "All / None of the above"는 전체의 10% 이내. 참고 자료상 참인 절대 진술은 오답으로 쓰지 않는다.
+  - 약점 개념이 있으면 개념마다 함정형 문항(또는 함정 보기)을 최소 1개.
+
+  H. 해설·모범답안 (4번째 줄) — 정답 PDF 에 그대로 찍히므로 읽기 쉽게
+  - 단계는 "; " 로 나누고, 한 단계 = 한 줄 = 계산 하나: "라벨 = 공식(숫자 대입) = 결과". 한 단계에 계산 여러 개를 이어 붙이지 않는다.
+    예: "Boom: R_P = 0.50 × 30% + 0.50 × 4% = 17%; Normal: R_P = …; E(R_P) = 0.20 × 17% + … = 9.80%; σ_P² = … = 0.002256; σ_P = √0.002256 = 4.75%"
+  - 서술형 모범답안은 계산 단계만 — 문장 설명을 섞지 않는다. 계산기 풀이는 마지막 한 줄("BA II Plus: …").
+  - MC 해설은 정답 근거 2–3단계 + 가장 유혹적인 오답 하나만 괄호로. 전체 3줄 안팎.
+
+  I. 출력 형식
+  Part 1. quizData — <script type="text/plain" id="quizData">와 </script> 사이에 붙일 내용만 코드블록 하나로.
+          시험지·정답표·인쇄 답안 공간·채점은 템플릿이 자동으로 만든다(정답표를 따로 만들지 말 것). sub: 줄은
+          "Chapter N · X questions (Y MC · Z problems)".
+  Part 2. 문항별 검토표(한국어): 번호 | 개념 태그 | 형식(MC / 서술 / 표) | 유형 | 난이도(상·중·하) | 정답 |
+          오답 보기별 노린 오개념·실수(1줄씩) | 검산 메모
+  Part 3. 출제 점검표: 커버리지(슬라이드 주제 → 문항 번호·보기) · 형식·유형별 문항 수 · 난이도 분포(하 30% / 중 50% / 상 20% 목표) ·
+          MC 정답 위치 분포 · NOT 문항 수 · 범위 밖 내용 여부
+
+  J. 품질 규칙
+  - 정답이 모호하거나 둘 이상 가능한 문항 금지. 한 문항의 정답이 다른 문항의 힌트가 되지 않게.
+  - 가정(세율, 시점, 방법, 반올림 자릿수 등)을 문제마다 명시. 모든 문항은 단독으로 인쇄돼도 풀 수 있어야 한다.
+  - 확신이 없는 사실·수치·판례·공식은 쓰지 말 것.
+  - 출제 후 모든 문항을 스스로(가능하면 코드로) 풀어 정답, 오답 값, 표 빈칸의 정답, key results를 검산하고, 불일치는 수정한 최종본만 제시.
+  - 데이터 형식: === 구분, 보기 안에 | 금지, * 정확히 1개, 표 빈칸은 ?정답, exhibit 문항은 연속 배치.
+  - 파일에 붙여 넣을 때: 4번째 줄 주석 안에도 quizData 태그 문자열이 있으므로, 실제 데이터 위치(DATA-START 표식 바로 뒤)를 기준으로 교체한다.
+-->
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<!--DATA-START-->
+<script type="text/plain" id="quizData">
+title: Econ 2 Exam 3 Review Quiz — Ch35 · Ch31 · Ch32
+sub: Chapters 35, 31, 32 · 26 questions (all MC)
+subject: Introduction to Economics II (Macroeconomics) · Exam 3 TA session
+textbook: Mankiw, Principles of Economics (8th ed.), Chapters 35, 31, 32 — new problems modelled on the problem-set types
+===
+# Chapter 35: The Short-Run Trade-off between Inflation and Unemployment
+===
+35.1 Like MC 3
+This year’s AD–AS equilibrium has a price level of 157.5, and the matching point on the Phillips curve shows 5% inflation. What was last year’s price level?
+*150|152.5|157.5|165.4
+Inflation = (this year’s P − last year’s P) ÷ last year’s P; 157.5 ÷ 1.05 = 150; Check: (157.5 − 150) ÷ 150 = 5%; Trap: 152.5 subtracts a percentage as if it were index points; 165.4 is next year’s level.
+===
+35.3 Like MC 8
+The government keeps expanding money fast to hold unemployment below its natural rate. What happens in the long run?
+Higher inflation, lower unemployment|*Higher inflation, unemployment at the natural rate|Same inflation, lower unemployment|Higher inflation, higher unemployment
+Short run: π > πᵉ, so u < u* (along the SRPC); Expectations catch up: πᵉ rises and the SRPC shifts up; Long run: u returns to u* and only inflation is higher (vertical LRPC); Trap: (a) is the short-run answer. When a question says “long run,” start from the vertical LRPC.
+===
+35.4 Like MC 10
+The government shortens unemployment-benefit duration and at the same time slows money growth. In the long run, unemployment and inflation are
+both higher|unemployment higher, inflation lower|*both lower|unemployment lower, inflation higher
+Shorter benefits → less frictional unemployment → lower u* → LRPC shifts left; Slower money growth → lower long-run inflation; Long-run u = u* (lower); long-run π follows money growth (lower); Trap: In the long run the two are set by different forces; monetary policy cannot move long-run unemployment.
+===
+35.5 Like MC 11
+Unemployment is above its natural rate. How does the economy get back to long-run equilibrium?
+Expected inflation rises; SRPC shifts right|Expected inflation rises; SRPC shifts left|Expected inflation falls; SRPC shifts right|*Expected inflation falls; SRPC shifts left
+u > u* means π < πᵉ: inflation is below expectations; People revise expectations down: πᵉ falls; Lower πᵉ shifts the SRPC down/left and u returns to u*; Trap: Problem-set MC 11 is the mirror case (u < u*): πᵉ rises and the SRPC shifts right.
+===
+35.6 Like MC 14
+Right after an adverse supply shock the central bank accommodates by expanding money. Compared with just after the shock, in the short run
+*unemployment falls, inflation rises|both fall|unemployment rises, inflation falls|unemployment and inflation both rise
+Supply shock: the SRPC shifts up/right → π and u both rise; Accommodation = expansion → AD up → up and left along the new SRPC; Versus just after the shock: u down, π up. Unemployment returns to normal; inflation ends above its pre-shock level
+===
+35.7 Like MC 16
+Imported raw-material prices drop sharply (a favorable supply shock). The short-run Phillips curve shifts
+right: unemployment is higher at each inflation rate|right: unemployment is lower at each inflation rate|*left: unemployment is lower at each inflation rate|left: unemployment is higher at each inflation rate
+Lower costs → SRAS shifts right → lower prices at each output; On the PC: lower π at each u, i.e. lower u at each π → SRPC shifts down/left; Trap: Check that direction and description match: a leftward shift always means lower u at each π. Problem-set MC 16 is the adverse case (right).
+===
+35.8 Like MC 17
+A country’s sacrifice ratio is estimated at 4. It wants to cut inflation from 9% to 3%. Is 4 above or below the textbook’s typical estimate, and how much output is lost?
+Higher · 36% of a year’s output|*Lower · 24% of a year’s output|Lower · 36% of a year’s output|Higher · 24% of a year’s output
+Inflation to remove = 9 − 3 = 6 points; Output lost = 4 × 6 = 24% of a year’s output (8% a year over three years); The typical estimate is 5, so 4 is lower; Trap: 36% multiplies the starting rate (9) instead of the reduction.
+===
+35.9 Like MC 18
+In the extreme rational-expectations case, if the central bank credibly commits to lower inflation and people cut their expectations at once, the sacrifice ratio is
+*0|1|5|infinite
+If πᵉ falls immediately, the SRPC shifts down at once; Unemployment never leaves u*; only inflation falls, so no output is lost; Trap: The actual Volcker disinflation was costly; “extreme case” decides the answer.
+===
+# Chapter 31: Open-Economy Macroeconomics: Basic Concepts
+===
+31.1 Like MC 2
+A country with an $8 billion trade surplus sees exports rise by $2.5 billion and imports by $4 billion. Its net exports are now
+$1.5 billion|*$6.5 billion|$9.5 billion|$14.5 billion
+Add the rise in exports, subtract the rise in imports; NX = 8 + 2.5 − 4 = 6.5 ($ billion); Trap: 9.5 swaps the signs of exports and imports.
+===
+31.2 Like MC 5
+One year: exports 450, imports 520, domestic investment 900 (trillion won). National saving was
+70|380|*830|970
+NX = 450 − 520 = −70; NX = NCO, so NCO = −70; S = I + NCO = 900 − 70 = 830; Trap: 970 uses the wrong sign for NCO; 70 is just the size of NX (= NCO). With a trade deficit, S < I.
+===
+31.3 Like MC 6
+GDP is 2,000, investment 400, government purchases 350 and net capital outflow 120. Consumption is
+1,010|*1,130|1,250|1,370
+NX = NCO = 120; C = Y − I − G − NX = 2,000 − 400 − 350 − 120 = 1,130; Trap: 1,370 adds NX instead of subtracting it; 1,250 leaves NX out.
+===
+31.4 Like MC 4
+Other things equal, if a country saves less,
+NCO rises, so NX rises|NCO rises, so NX falls|NCO falls, so NX rises|*NCO falls, so NX falls
+In S = I + NCO with I fixed, lower S means lower NCO; NX = NCO, so NX falls too; Trap: Problem-set MC 4 is a rise in saving (NCO up → NX up).
+===
+31.5 Like MC 7
+The won appreciates against the yen. What happens to the textbook exchange rate e (yen per won) and to the yen cost of a trip to Korea?
+*e rises; the trip costs more yen|e falls; the trip costs more yen|e rises; the trip costs fewer yen|e falls; the trip costs fewer yen
+Appreciation: each won buys more yen, so e rises; Japanese visitors need more yen for the same won, so Korea gets dearer; Trap: Problem-set MC 7 is the mirror case (a depreciating dollar).
+===
+31.6 Like MC 8 and 12
+e = ¥150 per dollar; a Big Mac costs $5 in the U.S. and ¥600 in Japan. What is the U.S. real exchange rate, and which arbitrage is profitable?
+1.25 · buy in the U.S., sell in Japan|*1.25 · buy in Japan, sell in the U.S.|0.8 · buy in the U.S., sell in Japan|0.8 · buy in Japan, sell in the U.S.
+U.S. Big Mac in yen: e × P = 150 × 5 = ¥750; ε = 750 ÷ 600 = 1.25: one U.S. Big Mac trades for 1.25 Japanese ones; The U.S. is dearer, so buy in Japan and sell in the U.S.; Trap: 0.8 divides the wrong way round.
+===
+31.7 Like MC 15
+A Big Mac costs $5 in the U.S., €4.50 in the euro area and ₩6,500 in Korea. Exchange rates are €0.90 and ₩1,400 per dollar. Where does PPP hold?
+Both|Neither|*Euro area only|Korea only
+Euro area: 5 × 0.9 = €4.50, the actual price → holds; Korea: 5 × 1,400 = ₩7,000 ≠ ₩6,500 → fails (the won is undervalued); Or compare PPP rates: Korea 6,500 ÷ 5 = ₩1,300/$ ≠ 1,400
+===
+31.8 Like MC 16 and 18
+In a country where PPP holds, the central bank expands the money supply a lot. Its price level and currency
+P rises · appreciates|P falls · appreciates|P falls · depreciates|*P rises · depreciates
+More money → higher P (Ch30 quantity theory); PPP: e = P* ÷ P, so higher P lowers e: depreciation; Trap: Problem-set MC 16 is a cut in money (P falls, appreciation).
+===
+31.9 Like MC 19
+Korean prices rise 4% a year and U.S. prices 1%. Under PPP, how should the won price of a dollar (₩ per $) change?
+fall about 5%|fall about 3%|*rise about 3%|rise about 5%
+PPP: ₩/$ = P(Korea) ÷ P(U.S.); Numerator +4%, denominator +1% → the ratio rises about 3%; ₩/$ rising means the won depreciates: the higher-inflation currency weakens; Trap: Check the quote first: in the same case the textbook e ($ per ₩) falls about 3%.
+===
+# Chapter 32: A Macroeconomic Theory of the Open Economy
+===
+32.1 Like MC 1 and 3
+In the open-economy model, where do the supply of and demand for loanable funds come from?
+*Supply: national saving · Demand: investment + NCO|Supply: national saving · Demand: investment only|Supply: private saving · Demand: investment + NCO|Supply: investment + NCO · Demand: national saving
+In S = I + NCO, the left side is supply and the right side is demand; Buying capital assets, at home or abroad, is demand for loanable funds; Trap: It is national saving (private + public), not private saving.
+===
+32.2 Like MC 2
+National saving 900, government purchases 300, investment 600, NCO 300. The supply of loanable funds is
+300|600|*900|1,200
+Supply of loanable funds = national saving = 900; Check: demand I + NCO = 600 + 300 = 900, so the market clears; Trap: Government purchases are already inside national saving (S = Y − C − G); do not add or subtract them again.
+===
+32.3 Like MC 5
+If there is a shortage in the loanable-funds market,
+NCO > I|*I + NCO > S|NCO < I|I + NCO < S
+Shortage: quantity demanded > quantity supplied; Demand is I + NCO and supply is S, so I + NCO > S; r rises to clear it; Trap: Problem-set MC 5 asks about a surplus, so its answer is I + NCO < S.
+===
+32.4 Like MC 6 and 9
+Korea’s supply of loanable funds shifts right (more saving). Then
+*NCO rises; quantity of loanable funds demanded rises|NCO rises; quantity demanded falls|NCO falls; quantity demanded rises|NCO falls; quantity demanded falls
+Supply shifts right → r falls; Lower r makes domestic assets less attractive → NCO rises (along its curve); Lower r raises the quantity demanded along the demand curve; the curve itself does not move; Trap: It is quantity demanded, not demand. Problem-set MC 6 is a fall in supply (NCO down, quantity demanded down).
+===
+32.5 Like MC 10 and 11
+If the domestic real interest rate rises, what moves in the foreign-currency market?
+Demand shifts right|Demand shifts left|Supply shifts right|*Supply shifts left
+Higher r → lower NCO; Supply of currency = NCO → supply shifts left → E rises; This is how NCO links the two markets; Trap: Problem-set MC 11 has the rate falling (supply shifts right).
+===
+32.6 Like MC 13 and 14
+Korea’s government sharply increases its budget deficit. The won and Korean net exports
+depreciates; NX rises|*appreciates; NX falls|appreciates; NX rises|depreciates; NX falls
+Deficit → national saving down → LF supply left → r up; r up → NCO down → supply of won left → appreciation (E up); E up → NX down (consistent with NX = NCO)
+===
+32.7 Like MC 16 and 17
+The government puts a high tariff on imported cars. The open-economy model predicts that
+imports fall, so net exports rise|the real exchange rate falls|*car imports fall, but other exports fall by the same amount, leaving NX unchanged|net capital outflow rises
+A tariff changes neither saving nor investment → r and NCO unchanged; At each E, NX is higher → demand for currency shifts right → E rises; Since NX = NCO is unchanged, the higher E cuts exports until NX is back where it was
+===
+32.8 Like MC 18
+Country A suffers capital flight. In the foreign-currency market, the supply of A’s currency and its real exchange rate
+supply shifts left; appreciates|supply shifts left; depreciates|supply shifts right; appreciates|*supply shifts right; depreciates
+Capital flight: NCO is higher at every r (the NCO curve shifts right); Supply of currency = NCO → shifts right → E falls (depreciation); LF demand (I + NCO) rises too, so r rises and NX rises
+===
+32.9 Like MC 19 and 20
+Which of the following reduces net exports?
+*Both a larger budget deficit and an investment tax credit|A larger budget deficit only|An investment tax credit only|Neither
+Deficit: S down → r up → NCO down → NX down; Investment credit: I demand up → r up → NCO down → NX down; Both raise r and cut NX; they differ in investment (down with a deficit, up with the credit)
+
+</script>
+<!--DATA-END-->
+<title>Quiz</title>
+<style>
+  :root{
+    --serif:Georgia,"Times New Roman","Noto Serif KR",serif;
+    --bg:#EFEEEA; --paper:#FFFFFF; --ink:#1D1D1F; --ink-soft:#6E6E73; --faint:#A1A1A6; --rule:#E6E5E1; --line:#E9E8E4;
+    --correct:#2F6B47; --wrong:#A3402F; --part:#8A6414;
+    --paper-w:680px; --pad:56px; --note-w:250px; --ex-w:440px; --gap:30px; --bar-h:52px; --lh:1.75em;
+  }
+  html.dark{
+    --bg:#1A1A1C; --paper:#262628; --ink:#ECECEE; --ink-soft:#A1A1A6; --faint:#6E6E73; --rule:#38383B; --line:#343437;
+    --correct:#8CC6A0; --wrong:#E39A8C; --part:#E0B965;
+  }
+  *{box-sizing:border-box;}
+  button, input, select, textarea, code, pre, kbd, table, caption{font-family:inherit;}
+  html{-webkit-font-smoothing:antialiased;}
+  body{margin:0; background:var(--bg); color:var(--ink); font-family:var(--serif); line-height:1.6; padding:0 0 60px;}
+  sup, sub{font-size:0.72em; line-height:0;}
+  code.ic{font-size:0.95em; background:rgba(128,128,128,0.10); border-radius:3px; padding:0 3px;}
+
+  .sheet{position:relative; isolation:isolate;}
+  .sheet::before{content:""; position:absolute; z-index:-1; top:0; bottom:0; left:50%; width:var(--paper-w); transform:translateX(-50%); background:var(--paper); box-shadow:0 0 0 1px rgba(0,0,0,0.03), 0 10px 40px rgba(0,0,0,0.05);}
+  .pg{display:grid; grid-template-columns:minmax(0,1fr) var(--paper-w) minmax(0,1fr);}
+  .pg > *{grid-column:2;}
+  .inpage{padding-left:var(--pad); padding-right:var(--pad);}
+
+  header{padding-top:64px; padding-bottom:18px; text-align:center;}
+  header h1{font-weight:400; font-size:2.3rem; line-height:1.15; margin:0 0 10px; letter-spacing:-0.005em;}
+  header p.sub{margin:0; color:var(--ink-soft); font-size:0.95rem;}
+  .tools{display:flex; flex-wrap:wrap; justify-content:center; align-items:center; gap:4px 18px; margin-top:22px; font-size:0.85rem; position:relative;}
+  .link{background:none; border:none; padding:0; font-size:0.85rem; color:var(--ink-soft); cursor:pointer;}
+  .link:hover{color:var(--ink);}
+  .link.on{color:var(--ink); text-decoration:underline; text-underline-offset:4px; text-decoration-thickness:1px;}
+  .link:disabled{color:var(--faint); cursor:default;}
+  .qsearch{position:relative; display:inline-flex; align-items:center; gap:8px;}
+  .setwrap{position:relative; display:inline-block;}
+  .setrow{display:none; position:absolute; z-index:20; top:calc(100% + 8px); left:50%; transform:translateX(-50%); flex-direction:column; align-items:flex-start; gap:7px; padding:12px 18px; white-space:nowrap; background:var(--paper); border:1px solid var(--rule); box-shadow:0 8px 24px rgba(0,0,0,0.06);}
+  .setrow.open{display:flex;}
+  .qsearch input{width:150px; font-size:0.85rem; color:var(--ink); background:none; border:none; border-bottom:1px solid var(--rule); padding:2px 0; outline:none; text-align:center;}
+  .qsearch input:focus{border-bottom-color:var(--ink-soft);}
+  .qsearch input.bad{border-bottom-color:var(--wrong);}
+  .qwarn{position:absolute; left:50%; transform:translateX(-50%); top:calc(100% + 4px); font-size:0.75rem; color:var(--wrong); white-space:nowrap; display:none;}
+  .qwarn.show{display:block;}
+  #qClear{visibility:hidden;} .qsearch.active #qClear{visibility:visible;}
+  .howto{font-size:0.8rem; color:var(--faint); text-align:center; margin-top:12px;}
+  .toc{display:none;} .toc.on{display:flex; flex-wrap:wrap; justify-content:center; gap:4px 16px; padding-bottom:10px;}
+
+  .scorebar{position:sticky; top:0; z-index:10; width:var(--paper-w); max-width:100%; margin:0 auto; background:var(--paper); border-bottom:1px solid var(--rule);}
+  .scorebar .in{padding:12px var(--pad) 11px; display:flex; flex-wrap:wrap; gap:4px 14px; justify-content:space-between; align-items:baseline; font-size:0.8rem;}
+  .scorebar .link{font-size:0.8rem;}
+  .tally{color:var(--ink-soft);} .tally b{color:var(--ink); font-weight:600;}
+  .bar-links{display:flex; flex-wrap:wrap; gap:4px 13px;}
+  .link.danger{color:var(--wrong);}
+
+  .banner{display:none; padding-top:18px; padding-bottom:4px; font-size:0.9rem; color:var(--ink-soft); text-align:center;}
+  .banner.show{display:block;}
+  .banner .link{margin-left:14px;}
+  .exam-result{display:none; padding-top:26px; text-align:center;}
+  .exam-result.show{display:block;}
+  .er-score{font-size:2.4rem; line-height:1.2;}
+  .er-score small{font-size:1rem; color:var(--ink-soft);}
+  .er-detail{font-size:0.85rem; color:var(--ink-soft);}
+  .exam-bar{display:none; padding-top:26px; padding-bottom:30px; text-align:center; font-size:0.88rem; color:var(--ink-soft);}
+  .exam-bar.show{display:block;}
+  .exam-bar .link{display:block; margin:10px auto 0; font-size:1rem; color:var(--ink);}
+
+  main{padding-top:6px;}
+  .ch-head{padding-top:40px; padding-bottom:4px; font-size:0.78rem; letter-spacing:0.12em; text-transform:uppercase; color:var(--ink-soft); text-align:center;}
+
+  .qmain{position:relative; padding-top:28px; padding-bottom:24px;}
+  .qmain::before{content:""; position:absolute; top:0; left:var(--pad); right:var(--pad); border-top:1px solid var(--rule);}
+  .qmain.first::before{display:none;}
+  .qhead{display:flex; align-items:baseline; gap:10px; margin-bottom:6px; font-size:0.82rem; color:var(--ink-soft);}
+  .qnum{font-weight:400; color:var(--ink); font-size:0.95rem; min-width:1.4em;}
+  .exref, .kind{color:var(--faint); font-size:0.78rem;}
+  .retry{color:var(--wrong); font-size:0.78rem;}
+  .qtools{margin-left:auto; display:inline-flex; align-items:baseline; gap:14px;}
+  .qcopy, .qflag{cursor:pointer; user-select:none; color:var(--faint); font-size:0.78rem; transition:color .2s;}
+  .qcopy:hover, .qflag:hover{color:var(--ink-soft);}
+  .qflag.on{color:var(--ink); animation:flagpop .3s ease;}
+  .qflag.on::before{content:"●"; display:inline-block; font-size:0.62em; margin-right:5px; vertical-align:0.18em; color:#B9822A;}
+  @keyframes flagpop{0%{opacity:.25; letter-spacing:0.08em;} 100%{opacity:1; letter-spacing:0;}}
+  .qtext{font-size:1.08rem; margin:0 0 12px;}
+  .qfig{margin:0 0 14px; overflow-x:auto;}
+  .options{display:flex; flex-direction:column;}
+  .opt{display:flex; gap:8px; padding:3px 0; cursor:pointer; user-select:text;}
+  .opt:hover > span:last-child{text-decoration:underline; text-decoration-thickness:1px; text-underline-offset:4px; text-decoration-color:var(--faint);}
+  .optnum{flex:none; color:var(--ink-soft); min-width:1.3em; user-select:none;}
+  .optnum::after{content:".";}
+  .opt.correct{color:var(--correct);} .opt.correct .optnum{color:var(--correct);}
+  .opt.incorrect{color:var(--wrong);} .opt.incorrect > span:last-child{text-decoration:line-through; text-decoration-thickness:1px;}
+  .opt.dim{color:var(--faint);} .opt.dim .optnum{color:var(--faint);}
+  .opt.picked{text-decoration:underline; text-underline-offset:4px; text-decoration-thickness:1px;}
+
+  /* ruled writing space */
+  .answer{display:block; width:100%; min-height:calc(var(--lh) * var(--rows, 2)); outline:none; font-size:0.92rem; line-height:var(--lh); color:var(--ink); overflow-wrap:anywhere; white-space:pre-wrap; margin-top:4px;
+    background-image:linear-gradient(to bottom, transparent calc(var(--lh) - 1px), var(--line) calc(var(--lh) - 1px)); background-size:100% var(--lh); background-attachment:local;}
+  .answer:empty::before{content:attr(data-placeholder); color:var(--faint);}
+  .options + .answer{margin-top:12px;}
+  .acts{display:flex; gap:18px; margin-top:8px; font-size:0.82rem;}
+  .mk{text-decoration-line:underline; text-decoration-thickness:1px; text-underline-offset:3px;}
+  .mk.ok{text-decoration-color:var(--correct);}
+  .mk.no{text-decoration-color:var(--wrong);}
+
+  /* fill-in tables */
+  .gridwrap{overflow-x:auto; margin:4px 0 16px; -webkit-overflow-scrolling:touch;}
+  .gridwrap table.t{width:auto; min-width:100%;}
+  table.t td.bcell{padding-top:3px; padding-bottom:3px; vertical-align:top;}
+  .cell{width:calc(var(--w, 8) * 1ch + 8px); font:inherit; font-size:0.86rem; font-variant-numeric:tabular-nums lining-nums; text-align:right; color:var(--ink); background:transparent;
+    border:none; border-bottom:1px solid var(--faint); border-radius:0; padding:1px 2px; outline:none; -webkit-appearance:none; appearance:none;}
+  .cell:focus{border-bottom-color:var(--ink); background:rgba(128,128,128,0.06);}
+  .cell.txt{text-align:left;}
+  .cell.ok{color:var(--correct); border-bottom-color:var(--correct);}
+  .cell.no{color:var(--wrong); border-bottom-color:var(--wrong);}
+  .fix{display:block; font-size:0.72rem; line-height:1.25; color:var(--correct); text-align:right; padding-right:2px;}
+
+  .qside{grid-column:3; align-self:start; padding-top:28px; margin-left:var(--gap); max-width:var(--note-w); font-size:0.8rem; line-height:1.55; color:var(--ink-soft);}
+  .sn-head{color:var(--faint); font-size:0.74rem; letter-spacing:0.04em; margin-bottom:4px;}
+  .sn-head .ok{color:var(--correct);} .sn-head .no{color:var(--wrong);} .sn-head .part{color:var(--part);}
+  .sn-line{margin:0 0 3px;}
+  .sn-line .lb{font-weight:400; color:var(--ink); text-shadow:0.35px 0 0 currentColor;}
+
+  table.t{border-collapse:collapse; width:100%; font-variant-numeric:tabular-nums lining-nums; font-size:0.86rem; line-height:1.45; color:var(--ink);}
+  table.t caption{caption-side:top; text-align:left; font-size:1rem; line-height:1.3; color:var(--ink); padding:0 0 8px;}
+  table.t thead th{border-top:1px solid var(--ink);}
+  table.t tbody tr:last-child td{border-bottom:1px solid var(--ink);}
+  table.t th, table.t td{font-weight:400; font-style:normal; color:var(--ink); padding:2px 6px; text-align:right; white-space:nowrap;}
+  table.t th{border-bottom:1px solid var(--rule);}
+  table.t th:first-child, table.t td:first-child{text-align:left; padding-left:0;}
+  table.t td:last-child, table.t th:last-child{padding-right:0;}
+  table.t tr.sec td{padding-top:10px;}
+  table.t tr.tot td{border-top:1px solid var(--rule);}
+  .zoomable{cursor:zoom-in;}
+
+  .case{grid-column:1 / -1;}
+  .case-ex{grid-column:1; grid-row:1 / span var(--n, 1); align-self:start; justify-self:end; position:sticky; top:calc(var(--bar-h) + 18px);
+    width:min(var(--ex-w), calc(100% - var(--gap) - 16px)); margin:28px var(--gap) 0 0; max-height:calc(100vh - var(--bar-h) - 36px); overflow:auto;
+    background:var(--paper); padding:22px 24px 10px; box-shadow:0 0 0 1px rgba(0,0,0,0.03), 0 10px 40px rgba(0,0,0,0.06);}
+  .case-ex h2{font-size:1.2rem; font-weight:400; margin:0;}
+  .case-ex .uses{font-size:0.76rem; color:var(--faint); margin:2px 0 14px;}
+  .case-ex table.t{margin-bottom:30px; transition:opacity .25s;}
+  .case-ex table.t.dimmed{opacity:0.32;}
+  .case-ex .tables{min-width:0;}
+  .case.stacked .case-ex, .case-ex.flow{overflow-x:auto;}
+  .case.stacked .case-ex{grid-column:2; grid-row:auto; position:static; justify-self:stretch; width:auto; max-height:none; overflow-x:auto; overflow-y:visible; margin:0; box-shadow:none; padding:28px var(--pad) 6px;}
+  .case.stacked .case-ex .tables{display:flex; flex-wrap:wrap; align-items:flex-start; gap:0 28px;}
+  .case.stacked .case-ex .tables > table{flex:1 1 auto; width:auto;}
+
+  .single-nav{display:flex; justify-content:space-between; padding-top:16px; padding-bottom:30px;}
+  .single-nav .link{font-size:0.9rem;}
+  .single-progress{padding-top:20px; font-size:0.8rem; color:var(--faint); text-align:center;}
+  .next-ch{padding-top:10px; padding-bottom:30px; text-align:right;}
+
+  .data-errors{max-width:var(--paper-w); margin:16px auto 0; padding:12px 18px; color:var(--wrong); font-size:0.88rem; background:var(--paper);}
+  .empty-state{padding-top:60px; padding-bottom:60px; text-align:center; color:var(--ink-soft);}
+  footer{padding-top:28px; padding-bottom:40px; color:var(--faint); font-size:0.78rem; text-align:center;}
+
+  .lightbox{position:fixed; inset:0; z-index:40; background:rgba(20,20,22,0.6); display:none; align-items:center; justify-content:center; padding:24px; cursor:zoom-out;}
+  .lightbox.show{display:flex;}
+  .lightbox .lb-body{background:var(--paper); padding:26px 30px; max-width:94vw; max-height:92vh; overflow:auto; min-width:min(560px,90vw);}
+  .lightbox table.t{font-size:1rem;}
+  .lightbox img{max-width:90vw; max-height:84vh;}
+
+  :root{--memo-w:min(300px,86vw);}
+  .memo{position:fixed; top:0; right:0; bottom:0; width:var(--memo-w); z-index:22; background:var(--paper); box-shadow:-10px 0 40px rgba(0,0,0,0.08); display:flex; flex-direction:column; transform:translateX(100%); transition:transform .2s; visibility:hidden;}
+  body.memo-open .memo{transform:none; visibility:visible;}
+  .memo-head{display:flex; justify-content:space-between; align-items:center; padding:16px 20px 10px; font-size:0.8rem; letter-spacing:0.1em; text-transform:uppercase; color:var(--ink-soft);}
+  .memo-head .link{text-transform:none; letter-spacing:0; margin-left:14px;}
+  .memo-text{flex:1; overflow-y:auto; outline:none; white-space:pre-wrap; word-break:break-word; font-size:0.95rem; padding:6px 20px 16px;}
+  .memo-text:empty::before{content:attr(data-placeholder); color:var(--faint);}
+  .memo-tab{position:fixed; top:50%; right:0; z-index:22; transform:translateY(-50%); writing-mode:vertical-rl; background:var(--paper); border:none; box-shadow:0 0 0 1px var(--rule); padding:14px 6px; font-size:0.78rem; color:var(--ink-soft); cursor:pointer;}
+  body.memo-open .memo-tab{display:none;}
+  .tip{position:fixed; z-index:30; transform:translateX(-50%); font-size:0.78rem; color:var(--ink-soft); opacity:0; pointer-events:none; transition:opacity .12s;}
+  .tip.show{opacity:1;}
+  .to-top{position:fixed; left:50%; bottom:20px; z-index:20; transform:translateX(-50%); background:var(--paper); border:none; box-shadow:0 4px 20px rgba(0,0,0,0.1); border-radius:20px; padding:8px 22px; font-size:0.85rem; color:var(--ink-soft); cursor:pointer; opacity:0; pointer-events:none; transition:opacity .25s;}
+  .to-top.show{opacity:1; pointer-events:auto;}
+
+  /* phone: the exhibit goes onto the page above its questions */
+  @media (max-width:699px){
+    .case-ex{grid-column:2; grid-row:auto; position:static; justify-self:stretch; width:auto; max-height:none; overflow-x:auto; overflow-y:visible; margin:0; box-shadow:none; padding:28px var(--pad) 6px;}
+    .case-ex .tables{display:flex; flex-wrap:wrap; align-items:flex-start; gap:0 28px;}
+    .case-ex .tables > table{flex:1 1 auto; width:auto;}
+  }
+  @media (max-width:1000px){
+    .qside{grid-column:2; margin:-10px 0 0; max-width:none; padding:0 var(--pad) 20px;}
+    .qside:empty{display:none;}
+  }
+  @media (max-width:760px){
+    :root{--paper-w:100vw; --pad:20px;}
+    .sheet::before{box-shadow:none;}
+    header{padding-top:40px;} header h1{font-size:1.8rem;}
+  }
+
+  /* tablet split view: exhibit panel on the left, questions on the right (keep this query in sync with SPLIT_MQ in the script) */
+  @media (min-width:700px) and (max-width:1500px), (min-width:700px) and (hover:none) and (pointer:coarse){
+    :root{--pad:34px;}
+    .sheet::before{width:100%; box-shadow:none;}
+    .pg{grid-template-columns:minmax(0,1fr) min(760px,100%) minmax(0,1fr);}
+    .scorebar{width:100%;}
+    .scorebar .in{max-width:760px; margin:0 auto;}
+    header{padding-top:44px;}
+    .qside{grid-column:2; margin:-10px 0 0; max-width:none; padding:0 var(--pad) 20px;}
+    .qside:empty{display:none;}
+    .case{grid-template-columns:minmax(0,9fr) minmax(0,11fr); margin-top:8px;}
+    .case > .qmain, .case > .qside{grid-column:2;}
+    .case-ex, .case.stacked .case-ex{grid-column:1; grid-row:1 / span var(--n2, 2); align-self:start; justify-self:stretch; position:sticky; top:calc(var(--bar-h) + 12px);
+      width:auto; margin:12px 4px 12px 16px; max-height:calc(100vh - var(--bar-h) - 24px); max-height:calc(100dvh - var(--bar-h) - 24px);
+      overflow:auto; overscroll-behavior:contain; padding:20px 22px 6px; background:var(--paper); box-shadow:0 0 0 1px var(--rule), 0 8px 28px rgba(0,0,0,0.06);}
+    .case-ex .tables, .case.stacked .case-ex .tables{display:block;}
+    .case-ex table.t, .case.stacked .case-ex .tables > table{width:100%; font-size:0.82rem; margin-bottom:26px;}
+    .case-ex h2{font-size:1.1rem;}
+  }
+  @media (min-width:700px) and (max-width:999px){
+    :root{--pad:24px;}
+    .case{grid-template-columns:minmax(0,1fr) minmax(0,1fr);}
+    .case-ex, .case.stacked .case-ex{margin-left:10px; padding:16px 16px 4px;}
+    .qtext{font-size:1.02rem;}
+    .cell{font-size:0.82rem;}
+  }
+
+  #printSheet{display:none;}
+  @page{size:A4 portrait; margin:22mm 20mm 20mm; @bottom-center{content:counter(page); font-family:Georgia,"Times New Roman",serif; font-size:9pt;}}
+  @media print{
+    html, body{background:#fff !important; color:#000 !important; padding:0 !important; margin:0 !important;}
+    body > *:not(#printSheet){display:none !important;}
+    #printSheet{display:block; font-family:var(--serif); font-size:10pt; line-height:1.42; color:#000;}
+    #printSheet h1{font-size:12.5pt; font-weight:400; text-align:center; margin:0 0 7mm;}
+    #printSheet .p-q{break-inside:avoid; page-break-inside:avoid; margin:0 0 4.5mm;}
+    #printSheet .p-q p{margin:0;}
+    #printSheet .p-ref{color:#444;}
+    #printSheet .p-opt{margin:0 0 0 5mm !important;}
+    #printSheet .p-fig{margin:1.5mm 0 2mm; max-width:130mm;}
+    #printSheet .p-lines{height:calc(var(--n, 3) * 5mm); margin-top:1mm;}   /* answer space prints blank: no ruled lines */
+    #printSheet .p-space{height:calc(var(--n, 6) * 5mm);}
+    #printSheet .p-gridq{margin:2mm 0 1mm;}
+    #printSheet .p-gridq table.t{margin-bottom:3mm;}
+    #printSheet table.grid td{height:7mm; vertical-align:middle;}
+    #printSheet table.grid td.p-blank{min-width:22mm; border:0.2mm solid #999 !important; background:#fff;}
+    #printSheet .p-ex{break-inside:avoid; page-break-inside:avoid; border-top:0.3mm solid #000; border-bottom:0.3mm solid #000; padding:2.5mm 0 1mm; margin:2mm 0 5mm;}
+    #printSheet .p-ex h2{font-size:12.5pt; font-weight:400; margin:0;}
+    #printSheet .p-ex .uses{font-size:9pt; margin:0 0 2mm; font-style:italic; color:#333;}
+    #printSheet .p-ex .tables{display:flex; flex-wrap:wrap; gap:4mm 8mm; align-items:flex-start;}
+    #printSheet .p-ex .tables > table{flex:0 0 auto; width:auto; margin-bottom:1mm;}   /* exhibits stay as narrow as their content */
+    #printSheet table.t{font-size:9pt; line-height:1.25; color:#000; width:auto;}
+    #printSheet table.t th + th, #printSheet table.t td + td{padding-left:5mm;}   /* compact width: modest gap between columns */
+    #printSheet table.t caption{color:#000; font-size:10pt; padding-bottom:1mm;}
+    #printSheet table.t thead th{border-top:0.35mm solid #000;}
+    #printSheet table.t tbody tr:last-child td{border-bottom:0.35mm solid #000;}
+    #printSheet table.t th, #printSheet table.t td{color:#000;}
+    #printSheet table.t th{ border-bottom:0.3mm solid #000; padding:0.5mm 1.5mm;}
+    #printSheet table.t td{padding:0.2mm 1.5mm; border-bottom:0.1mm solid #ddd;}
+    #printSheet table.t tr.sec td{color:#000; border-bottom:none; padding-top:1.2mm;}
+    #printSheet table.t tr.tot td{border-top:0.25mm solid #000;}
+    #printSheet table.t td.kcell{font-style:italic;}
+    #printSheet .p-key{break-before:page; page-break-before:always;}
+    #printSheet .p-letters{columns:4; font-size:10pt;}
+    #printSheet .p-sol{display:none;}
+    body.print-solution #printSheet .p-letters{display:none;}
+    body.print-solution #printSheet .p-sol{display:block; column-count:2; column-gap:9mm; font-size:9pt; line-height:1.3;}
+    #printSheet .p-s{break-inside:avoid; margin:0 0 3mm;}
+    #printSheet .p-s.wide{column-span:all;}
+    #printSheet .p-s p{margin:0;}
+    #printSheet .p-s table.t{font-size:8.6pt; margin:1mm 0 2mm;}
+    #printSheet .p-kw{font-style:italic; color:#333;}
+    #printSheet .sn-line .lb{font-weight:400; text-shadow:0.3px 0 0 currentColor;}
+  }
+</style>
+</head>
+<body>
+
+<div class="sheet" id="sheet">
+  <header class="pg"><div class="inpage">
+    <h1 id="quizTitle">Quiz</h1>
+    <p class="sub" id="quizSub"></p>
+    <div class="tools">
+      <button class="link" id="allChBtn" type="button">All chapters</button>
+      <button class="link" id="printBtn" type="button">Print</button>
+      <button class="link" id="printSolBtn" type="button">Print with solution</button>
+      <span class="setwrap"><button class="link" id="menuBtn" type="button" aria-expanded="false">Settings</button>
+<div class="setrow" id="settings">
+        <button class="link" id="layoutToggleBtn" type="button">Single question view</button>
+        <button class="link" id="examModeBtn" type="button">Exam mode</button>
+        <button class="link" id="darkSw" type="button">Night mode</button>
+      </div></span>
+      <form class="qsearch" id="qSearchForm" autocomplete="off">
+        <input id="qSearch" type="text" inputmode="numeric" placeholder="Go to no. (1, 3-5)" aria-label="Question numbers">
+        <button class="link" id="qClear" type="button">Clear</button>
+        <div class="qwarn" id="qWarn" role="alert"></div>
+      </form>
+
+    </div>
+    <div class="howto">MC: 1–4 answer · Enter / ↓ next · Written: write the formulas, Ctrl+Enter check · Table: Enter next cell · Ctrl+Q memo · the exhibit follows the question</div>
+  </div></header>
+
+  <nav class="pg"><div class="toc inpage" id="toc" aria-label="Chapters"></div></nav>
+  <div class="pg"><div class="exam-result inpage" id="examResult"></div></div>
+
+  <div class="scorebar" id="scorebar"><div class="in">
+    <div class="tally">Answered <b id="answeredCount">0</b>/<span id="totalCount">0</span> · Correct <b id="correctCount">0</b> <span id="modeLabel"></span></div>
+    <div class="bar-links">
+      <button class="link on" id="allViewBtn" type="button">All</button>
+      <button class="link" id="reviewBtn" type="button" disabled>Review incorrect (0)</button>
+      <button class="link" id="flagBtn" type="button" disabled>Marked (0)</button>
+      <button class="link" id="copyMissedBtn" type="button" disabled>Copy incorrect #</button>
+      <button class="link" id="saveBtn" type="button">Save</button>
+      <button class="link" id="resetBtn" type="button">Restart</button>
+    </div>
+  </div></div>
+
+  <div class="pg"><div class="banner inpage" id="reviewBanner"><span id="reviewBannerText"></span><span id="reviewBannerActions"></span></div></div>
+  <main class="pg" id="quiz"></main>
+  <div class="pg"><div class="exam-bar inpage" id="examBar"><span id="examInfo"></span><button class="link" id="gradeBtn" type="button">Grade exam →</button></div></div>
+  <footer class="pg"><div class="inpage" id="quizFooter"></div></footer>
+</div>
+
+<button class="memo-tab" id="memoTab" type="button">Memo</button>
+<aside class="memo" id="memo" aria-label="Memo">
+  <div class="memo-head"><span>Memo</span><span><button class="link" id="memoBold" type="button" style="font-weight:700">B</button><button class="link" id="memoClose" type="button">Close</button></span></div>
+  <div class="memo-text" id="memoText" contenteditable="true" spellcheck="false" data-placeholder="Notes…  Ctrl+B bold"></div>
+</aside>
+
+<div id="printSheet"></div>
+<div class="lightbox" id="lightbox"><div class="lb-body" id="lbBody"></div></div>
+<button class="to-top" id="toTopBtn" type="button">↑ Top</button>
+
+<script>
+const esc = t => String(t).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+const MATH = { alpha:'α', beta:'β', gamma:'γ', delta:'δ', epsilon:'ε', theta:'θ', lambda:'λ', mu:'μ', pi:'π', rho:'ρ', sigma:'σ', tau:'τ', phi:'φ', omega:'ω',
+  Delta:'Δ', Sigma:'Σ', Pi:'Π', Omega:'Ω', times:'×', div:'÷', pm:'±', le:'≤', ge:'≥', ne:'≠', approx:'≈', infty:'∞', to:'→', sqrt:'√', cdot:'·', deg:'°' };
+const mathFm = t => esc(t)
+  .replace(/\\([_^])/g, (m, c) => c === '_' ? '&#95;' : '&#94;')
+  .replace(/\\([A-Za-z]+)/g, (m, k) => MATH[k] || m)
+  .replace(/\^(\{[^}]*\}|-?[0-9A-Za-z])/g, (m, s) => `<sup>${s.replace(/^\{|\}$/g, '')}</sup>`)
+  .replace(/_(\{[^}]*\}|[0-9A-Za-z])/g, (m, s) => `<sub>${s.replace(/^\{|\}$/g, '')}</sub>`);
+const fm = t => String(t).split(/`([^`]+)`/).map((p, i) => i % 2 ? `<code class="ic">${esc(p)}</code>` : mathFm(p)).join('');
+const plain = t => String(t).replace(/\\([_^])/g, '$1').replace(/\^\{([^}]*)\}/g, '^$1').replace(/_\{([^}]*)\}/g, '_$1');
+
+/* explanation -> one line per item; a short leading label in semibold */
+const explLines = t => String(t).split(/;\s+|\.\s+(?=(?:BA II Plus|Formula|ICONV|CF worksheet)\b)/).map(s => s.trim()).filter(Boolean);
+function fmtExpl(t){
+  return explLines(t).map(line => {
+    const m = line.match(/^([A-Za-zΔ(][^=:]{0,30}?)(\s=\s|:\s)([\s\S]*)$/);
+    if(m && !m[1].includes(',')) return `<p class="sn-line"><span class="lb">${fm(m[1])}</span>${m[2] === ': ' ? ': ' : ' = '}${fm(m[3])}</p>`;
+    return `<p class="sn-line">${fm(line)}</p>`;
+  }).join('');
+}
+
+function parseTbl(src){
+  let cap = '', body = src;
+  const k = src.indexOf('::');
+  if(k > -1){ cap = src.slice(0, k).trim(); body = src.slice(k + 2); }
+  const rows = body.split(';;').map(r => r.trim()).filter(Boolean);
+  const head = (rows.shift() || '').split('|').map(c => c.trim());
+  return { cap, head, rows: rows.map(r => r[0] === '!' ? { sec: r.slice(1).trim() } : r[0] === '=' ? { tot: true, cells: r.slice(1).split('|').map(c => c.trim()) } : { cells: r.split('|').map(c => c.trim()) }) };
+}
+function tblHTML(t){
+  const n = t.head.length;
+  return `<table class="t">${t.cap ? `<caption>${fm(t.cap)}</caption>` : ''}<thead><tr>${t.head.map(h => `<th>${fm(h)}</th>`).join('')}</tr></thead><tbody>` +
+    t.rows.map(r => r.sec ? `<tr class="sec"><td colspan="${n}">${fm(r.sec)}</td></tr>` : `<tr${r.tot ? ' class="tot"' : ''}>${r.cells.map(c => `<td>${fm(c)}</td>`).join('')}</tr>`).join('') + '</tbody></table>';
+}
+const tblText = t => (t.cap ? t.cap + '\n' : '') + t.head.join(' | ') + '\n' + t.rows.map(r => r.sec ? '-- ' + r.sec : r.cells.join(' | ')).join('\n');
+
+/* ---------- fill-in tables ---------- */
+const norm = s => String(s).toLowerCase().replace(/[^a-z0-9가-힣]/g, '');
+function parseNum(s){
+  let t = String(s).trim().replace(/[−–—]/g, '-').replace(/[$,\s]/g, '');
+  let neg = false; const m = /^-?\((.*)\)$/.exec(t); if(m){ neg = true; t = m[1]; }
+  let pct = false; if(t.endsWith('%')){ pct = true; t = t.slice(0, -1); }
+  if(t.startsWith('+')) t = t.slice(1);
+  if(!/^-?(\d+\.?\d*|\.\d+)$/.test(t)) return null;
+  let v = parseFloat(t); if(neg) v = -v;
+  return { v, pct };
+}
+const ZERO = /^\s*(0|0\.0+|[-−–—])\s*$/;
+function matchCell(val, b){
+  const s = String(val || '').trim(); if(!s) return false;
+  return b.alts.some(alt => {
+    const k = parseNum(alt);
+    if(!k) return !!norm(alt) && norm(alt) === norm(s);
+    if(k.v === 0 && ZERO.test(s)) return true;
+    const x = parseNum(s); if(!x) return false;
+    const tol = Math.max(Math.abs(k.v) * 0.002, 0.006);
+    const cands = [x.v]; if(k.pct && !x.pct && Math.abs(x.v) <= 1.5) cands.push(x.v * 100);
+    return cands.some(v => b.absOK ? Math.abs(Math.abs(v) - Math.abs(k.v)) <= tol : Math.abs(v - k.v) <= tol);
+  });
+}
+function gridify(t, blanks){
+  t.grid = true;
+  t.rows.forEach(r => {
+    if(r.sec) return;
+    const label = r.cells[0] || '';
+    r.cells = r.cells.map((c, ci) => {
+      if(c[0] !== '?') return c;
+      const key = c.slice(1).trim(), alts = key.split(' / ').map(s => s.trim()).filter(Boolean);
+      const num = !!parseNum(alts[0] || '');
+      const b = { alts, disp: alts[0] || '', num, absOK: /^\s*([−–-]|less\b)/i.test(label), w: Math.max(6, (alts[0] || '').length + 1), label: `${label} · ${t.head[ci] || ''}` };
+      blanks.push(b);
+      return { blank: b, k: blanks.length - 1 };
+    });
+  });
+  return t;
+}
+function gridHTML(t, mode){   /* mode: 'input' (screen), 'print' (empty boxes), 'key' (answers filled in) */
+  const n = t.head.length;
+  const cell = c => {
+    if(typeof c === 'string') return `<td>${fm(c)}</td>`;
+    if(mode === 'key') return `<td class="kcell">${fm(c.blank.disp)}</td>`;
+    if(mode === 'print') return '<td class="p-blank"></td>';
+    return `<td class="bcell"><input class="cell${c.blank.num ? '' : ' txt'}" data-k="${c.k}" style="--w:${c.blank.w}" inputmode="${c.blank.num ? 'decimal' : 'text'}" autocomplete="off" autocapitalize="off" spellcheck="false" aria-label="${esc(c.blank.label)}"></td>`;
+  };
+  return `<table class="t grid">${t.cap ? `<caption>${fm(t.cap)}</caption>` : ''}<thead><tr>${t.head.map(h => `<th>${fm(h)}</th>`).join('')}</tr></thead><tbody>` +
+    t.rows.map(r => r.sec ? `<tr class="sec"><td colspan="${n}">${fm(r.sec)}</td></tr>` : `<tr${r.tot ? ' class="tot"' : ''}>${r.cells.map(cell).join('')}</tr>`).join('') + '</tbody></table>';
+}
+const gridText = (t, vals) => (t.cap ? t.cap + '\n' : '') + t.head.join(' | ') + '\n' + t.rows.map(r => r.sec ? '-- ' + r.sec : r.cells.map(c => typeof c === 'string' ? c : (vals ? (vals[c.k] || '___') + (vals.mark ? vals.mark(c) : '') : c.blank.disp)).join(' | ')).join('\n');
+
+function parseQuizData(raw){
+  const blocks = raw.replace(/\r\n?/g, '\n').trim().split(/\n===\n?/).filter(b => b.trim() && b.trim() !== '===');
+  const meta = {};
+  blocks.shift().split('\n').forEach(l => { const i = l.indexOf(':'); if(i > 0) meta[l.slice(0, i).trim()] = l.slice(i + 1).trim(); });
+  const questions = [], chapters = [], cases = {}, errs = [];
+  let prevTag = '';
+  if(!meta.title) errs.push('meta block: title: is missing');
+  blocks.forEach(block => {
+    const L = block.trim().split('\n').map(l => l.trim()).filter(l => l);
+    if(L.length === 1 && L[0].startsWith('# ')){ chapters.push({ title: L[0].slice(2).trim(), idx: [] }); return; }
+    if(L[0].startsWith('@case ')){
+      const id = L[0].slice(6).trim();
+      const tbls = L.filter(l => l.startsWith('@tbl ')).map(l => parseTbl(l.slice(5)));
+      if(!tbls.length) errs.push(`exhibit ${id}: needs at least one @tbl line`);
+      cases[id] = { id, title: (L[1] && !L[1].startsWith('@')) ? L[1] : 'Exhibit ' + id, tbls };
+      return;
+    }
+    if(!chapters.length) chapters.push({ title: meta.title || 'Quiz', idx: [] });
+    const ch = chapters.length - 1;
+    chapters[ch].seen = (chapters[ch].seen || 0) + 1;
+    const who = `${chapters[ch].title} · Q${chapters[ch].seen}`;
+    if(L.length < 4){ errs.push(`${who}: needs at least 4 lines (tag, question, options or key results, explanation) - check for a missing ===`); return; }
+    if(L[0] === '-' && !prevTag) errs.push(`${who}: tag "-" has no previous tag`);
+    const tag = L[0] === '-' ? prevTag : L[0];
+    prevTag = tag;
+    const raw3 = L[2].split('|');
+    const kind0 = raw3.some(o => o.trim().startsWith('*')) ? 'mc' : 'written';
+    const q = { tag, text: L[1], explain: L[3], ch, who, kind: kind0, options: [], correct: 0, kws: [], self: false, grids: [], blanks: [], fig: null, use: null, focus: null, write: 0, lines: 0, space: 0 };
+    if(kind0 === 'mc'){
+      q.options = raw3.map((o, i) => { o = o.trim(); if(o.startsWith('*')){ q.correct = i; return o.slice(1).trim(); } return o; });
+      const stars = raw3.filter(o => o.trim().startsWith('*')).length;
+      if(stars !== 1) errs.push(`${who}: exactly one option must start with * (found ${stars})`);
+      if(q.options.length < 2 || q.options.length > 4) errs.push(`${who}: ${q.options.length} options (use 2-4)`);
+      if(q.options.some(o => !o)) errs.push(`${who}: empty option`);
+    } else if(L[2] !== '~'){
+      q.kws = raw3.map(g => g.split(' / ').map(s => s.trim()).filter(Boolean));
+      if(q.kws.some(g => !g.length)) errs.push(`${who}: empty key-result group`);
+    }
+    let linesN = null, short = false;
+    L.slice(4).forEach(l => {
+      if(l.startsWith('@use ')) q.use = l.slice(5).trim();
+      else if(l.startsWith('@focus ')){ q.focus = l.slice(7).split(',').map(s => parseInt(s, 10) - 1); if(q.focus.some(n => !(n >= 0))) errs.push(`${who}: @focus needs table numbers such as "@focus 2" or "@focus 1,3"`); }
+      else if(l.startsWith('@tbl ')) q.fig = { type: 'tbl', t: parseTbl(l.slice(5)) };
+      else if(l.startsWith('@img ')) q.fig = { type: 'img', src: l.slice(5).trim() };
+      else if(l.startsWith('@grid ')) q.grids.push(gridify(parseTbl(l.slice(6)), q.blanks));
+      else if(l === '@write' || l.startsWith('@write ')) q.write = Math.min(8, parseInt(l.slice(6), 10) || 2);
+      else if(l.startsWith('@lines ')) linesN = parseInt(l.slice(7), 10) || 0;
+      else if(l === '@short') short = true;
+      else if(l.startsWith('@space ')) q.space = Math.min(30, parseInt(l.slice(7), 10) || 0);
+      else if(l.startsWith('@')) errs.push(`${who}: unknown line "${l.slice(0, 12)}…" (use @use, @focus, @tbl, @img, @grid, @write, @lines, @space or @short)`);
+    });
+    if(q.kind === 'mc' && q.grids.length) errs.push(`${who}: @grid belongs to a written question (line 3 = key results or ~), not to MC`);
+    if(q.kind === 'written' && q.write) errs.push(`${q.who}: @write is for MC questions; use @lines for a written question`);
+    if(q.kind === 'written' && q.grids.length) q.kind = 'grid';
+    if(q.kind === 'grid' && !q.blanks.length) errs.push(`${who}: @grid has no blank cells (start a cell with ?)`);
+    q.self = q.kind === 'written' && !q.kws.length;
+    const steps = explLines(q.explain).length;
+    const calc = /=\s*[−\-$(]?\d/.test(q.explain);
+    /* print space = what a handwritten answer needs (1 line ≈ 1 step), not the length of the model answer */
+    q.lines = q.kind === 'mc' ? q.write : linesN !== null ? Math.min(8, linesN) : q.space ? 0 : short ? 2 : q.kind === 'grid' ? 2 : (!calc && steps <= 2) ? 2 : Math.min(8, Math.max(3, steps));
+    if(q.focus && !q.use) errs.push(`${who}: @focus without @use`);
+    chapters[ch].idx.push(questions.length);
+    q.n = chapters[ch].idx.length;
+    questions.push(q);
+  });
+  questions.forEach(q => {
+    if(q.use && !cases[q.use]) errs.push(`question ${q.n}: @use ${q.use} but no "@case ${q.use}" block exists`);
+    else if(q.use && q.focus && q.focus.some(n => n >= cases[q.use].tbls.length)) errs.push(`${q.who}: @focus ${q.focus.map(n => n + 1).join(',')} but exhibit ${q.use} has ${cases[q.use].tbls.length} table(s)`);
+  });
+  chapters.filter(c => !c.idx.length).forEach(c => errs.push(`chapter "${c.title}" has no questions`));
+  if(!questions.length) errs.push('no questions found');
+  const good = chapters.filter(c => c.idx.length);
+  return { meta, questions, cases, chapters: good.length ? good : [{ title: meta.title || 'Quiz', idx: [] }], errs };
+}
+
+const PARSED = parseQuizData(document.getElementById('quizData').textContent);
+const META = PARSED.meta, QUIZ_TITLE = META.title || 'Quiz', QUESTIONS = PARSED.questions, CHAPTERS = PARSED.chapters, CASES = PARSED.cases, NQ = QUESTIONS.length;
+if(PARSED.errs.length){
+  const box = document.createElement('div'); box.className = 'data-errors';
+  box.innerHTML = '<b>Quiz data needs fixing</b><ul>' + PARSED.errs.slice(0, 12).map(e => `<li>${esc(e)}</li>`).join('') + '</ul>';
+  document.body.insertBefore(box, document.body.firstChild);
+}
+const $ = id => document.getElementById(id);
+$('quizTitle').textContent = QUIZ_TITLE;
+$('quizSub').textContent = META.sub || '';
+document.title = QUIZ_TITLE;
+$('quizFooter').textContent = `${META.subject || ''} — ${META.textbook || ''}`;
+
+let activeCh = 0, viewAll = false, pickNums = null;
+const baseIdx = () => viewAll ? QUESTIONS.map((_, i) => i) : CHAPTERS[activeCh].idx;
+const scopeIdx = () => pickNums ? baseIdx().filter(i => pickNums.has(qno(i))) : baseIdx();
+const chLabel = ci => { const t = CHAPTERS[ci].title, m = /^\s*(?:chapter|ch\.?|week|lecture)\s*(\d+)/i.exec(t); return m ? 'Ch.' + m[1] : t; };
+const qno = i => viewAll ? i + 1 : QUESTIONS[i].n;   // "All chapters" view and its printout: one running number 1..N, no chapter breaks
+
+/* ---------- state ---------- */
+let current = 0, filterMode = 'all', layoutMode = 'list', reviewList = [], flagList = [];
+let answered = new Array(NQ).fill(null);                                  /* MC: option index, -1 = unanswered in a graded exam */
+let drafts = new Array(NQ).fill('');                                      /* written box (MC + write, written, table) */
+let cells = QUESTIONS.map(q => q.blanks.map(() => ''));                   /* table cells */
+let snap = new Array(NQ).fill(null);                                      /* written: { html, cells } once checked */
+const missed = new Set(), flagged = new Set();
+let examMode = false;
+let examPick = new Array(NQ).fill(null), examGraded = new Array(NQ).fill(false), examRes = new Array(NQ).fill(null);
+const isMC = qi => QUESTIONS[qi].kind === 'mc';
+const examActive = qi => examMode && !examGraded[qi];
+const setOn = (btn, on) => { btn.classList.toggle('on', on); btn.setAttribute('aria-pressed', String(on)); };
+const quizEl = $('quiz'), reviewBtn = $('reviewBtn'), flagBtn = $('flagBtn'), copyMissedBtn = $('copyMissedBtn'), reviewBanner = $('reviewBanner');
+
+/* ---------- checking written answers ---------- */
+const PASS_TEXT = 0.6, PASS_GRID = 0.8;
+const reEsc = s => s.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+const isShort = alt => /^[\x00-\x7f]+$/.test(alt) && norm(alt).length <= 4;
+const shortRe = alt => new RegExp('(^|[^a-z0-9.,])' + reEsc(alt.toLowerCase()).replace(/\s+/g, '\\s*') + '($|[^a-z0-9.,]|[.,](?![0-9]))', 'i');
+function altMatch(alt, text){ const n = norm(alt); if(!n) return false; return isShort(alt) ? shortRe(alt).test(text) : norm(text).includes(n); }
+function findRange(alt, full){
+  const n = norm(alt);
+  if(!n) return null;
+  if(isShort(alt)){ const m = shortRe(alt).exec(full); return m ? [m.index + m[1].length, m.index + m[0].length - m[2].length] : null; }
+  let ns = ''; const idx = [];
+  for(let i = 0; i < full.length; i++){ const c = full[i].toLowerCase(); if(/[a-z0-9가-힣]/.test(c)){ ns += c; idx.push(i); } }
+  const p = ns.indexOf(n);
+  return p < 0 ? null : [idx[p], idx[p + n.length - 1] + 1];
+}
+const htmlToText = h => { const d = document.createElement('div'); d.innerHTML = String(h).replace(/<br\s*\/?>/gi, '\n').replace(/<\/?(div|p)[^>]*>/gi, '\n'); return d.textContent; };
+function grade(qi){
+  const q = QUESTIONS[qi], s = snap[qi];
+  if(q.kind === 'mc' || s === null) return null;
+  if(q.self) return { self: true };
+  const text = htmlToText(s.html);
+  const kwHits = q.kws.map(g => g.some(a => altMatch(a, text)));
+  const cellHits = q.blanks.map((b, k) => matchCell(s.cells[k], b));
+  const n = kwHits.filter(Boolean).length + cellHits.filter(Boolean).length, t = kwHits.length + cellHits.length;
+  return { kwHits, cellHits, n, t, pass: t > 0 && n / t >= (q.blanks.length ? PASS_GRID : PASS_TEXT) };
+}
+/* 2 = correct / passed, 1 = partly, 0 = wrong / not yet, 's' = self-check shown, null = not answered */
+function resultOf(qi){
+  if(isMC(qi)) return answered[qi] === null ? null : answered[qi] === QUESTIONS[qi].correct ? 2 : 0;
+  const g = grade(qi); if(!g) return null; if(g.self) return 's';
+  return g.pass ? 2 : g.n ? 1 : 0;
+}
+const hasDraft = qi => !!htmlToText(drafts[qi]).trim() || cells[qi].some(c => String(c).trim());
+const isAnswered = qi => isMC(qi) ? (examActive(qi) ? examPick[qi] !== null : answered[qi] !== null && answered[qi] !== -1) : (examActive(qi) ? hasDraft(qi) : snap[qi] !== null);
+const isWrong = qi => { const r = resultOf(qi); return r === 0 || r === 1; };
+const wrongIndices = () => scopeIdx().filter(isWrong);
+const visibleIndices = () => filterMode === 'review' ? reviewList : filterMode === 'flagged' ? flagList : scopeIdx();
+function resetForRetry(i){ if(isMC(i)) answered[i] = null; else snap[i] = null; }
+function markIn(el, groups, cls){   /* underline the first occurrence of each listed wording group inside an element */
+  const nodes = [], w = document.createTreeWalker(el, NodeFilter.SHOW_TEXT);
+  while(w.nextNode()) nodes.push(w.currentNode);
+  const starts = []; let full = '';
+  nodes.forEach(n => { starts.push(full.length); full += n.nodeValue + '\n'; });
+  const rr = [];
+  groups.forEach(grp => { for(const a of grp){ const r = findRange(a, full); if(r){ rr.push(r); break; } } });
+  rr.sort((a, b) => b[0] - a[0]);
+  let limit = Infinity;
+  rr.forEach(([s, e]) => {
+    if(e > limit) return; limit = s;
+    for(let k = nodes.length - 1; k >= 0; k--){
+      const ns = starts[k], len = nodes[k].nodeValue.length, a = Math.max(s, ns) - ns, b = Math.min(e, ns + len) - ns;
+      if(b <= a) continue;
+      let node = nodes[k];
+      if(b < len) node.splitText(b);
+      if(a > 0) node = node.splitText(a);
+      const sp = document.createElement('span'); sp.className = 'mk ' + cls; node.parentNode.insertBefore(sp, node); sp.appendChild(node);
+    }
+  });
+}
+const richHtml = node => { const out = n => [...n.childNodes].map(c => c.nodeType === 3 ? esc(c.nodeValue) : c.nodeName === 'BR' ? '<br>' : ['DIV', 'P'].includes(c.nodeName) ? '<div>' + out(c) + '</div>' : out(c)).join(''); return out(node); };
+const cleanHtml = s => { const x = document.createElement('div'); x.innerHTML = s; return richHtml(x); };
+
+function ranges(nums){
+  const a = [...nums].sort((x, y) => x - y), out = [];
+  for(let i = 0; i < a.length; i++){ let j = i; while(j + 1 < a.length && a[j + 1] === a[j] + 1) j++; out.push(j > i ? `${a[i]}–${a[j]}` : `${a[i]}`); i = j; }
+  return out.join(', ');
+}
+function exhibitHTML(id, idx){
+  const c = CASES[id], nums = idx.filter(i => QUESTIONS[i].use === id).map(qno);
+  return `<h2>Exhibit ${esc(id)} · ${fm(c.title)}</h2><p class="uses">Used in question${nums.length > 1 ? 's' : ''} ${ranges(nums)}</p><div class="tables">${c.tbls.map(tblHTML).join('')}</div>`;
+}
+const lightbox = $('lightbox'), lbBody = $('lbBody');
+lightbox.addEventListener('click', () => lightbox.classList.remove('show'));
+function openLightbox(html){ lbBody.innerHTML = html; lightbox.classList.add('show'); }
+const figHTML = f => f.type === 'img' ? `<img src="${esc(f.src)}" alt="Figure" style="max-width:100%">` : tblHTML(f.t);
+
+function qaText(qi){
+  const q = QUESTIONS[qi], L = i => String.fromCharCode(97 + i);
+  const ex = q.use ? `[Exhibit ${q.use}: ${CASES[q.use].title}]\n` + CASES[q.use].tbls.map(tblText).join('\n') + '\n' : '';
+  let s = ex + `Q${qno(qi)}. ${q.text}\n` + (q.fig && q.fig.type === 'tbl' ? tblText(q.fig.t) + '\n' : '');
+  if(q.kind === 'mc'){
+    s += q.options.map((o, i) => `${L(i)}. ${o}`).join('\n') + `\nAnswer: ${L(q.correct)}. ${q.options[q.correct]}\n`;
+    if(drafts[qi].trim()) s += `My explanation:\n${htmlToText(drafts[qi]).trim()}\n`;
+    return s + `Explanation:\n${explLines(q.explain).join('\n')}`;
+  }
+  const g = grade(qi);
+  if(q.grids.length){
+    const vals = Object.assign([...cells[qi]], { mark: c => g && !g.self ? (g.cellHits[c.k] ? ' ✓' : ` ✗ (${c.blank.disp})`) : '' });
+    s += 'My table:\n' + q.grids.map(t => gridText(t, vals)).join('\n') + '\n';
+  }
+  if(htmlToText(drafts[qi]).trim()) s += `My answer:\n${htmlToText(drafts[qi]).trim()}\n`;
+  if(g && !g.self && q.kws.length) s += 'Key results: ' + q.kws.map((k, i) => (g.kwHits[i] ? '[x] ' : '[ ] ') + k[0]).join('  ') + '\n';
+  return s + `Model answer:\n${explLines(q.explain).join('\n')}`;
+}
+
+/* ---------- one question = a block on the page (.qmain) + a side note in the margin (.qside) ---------- */
+function headNode(qi, retry){
+  const q = QUESTIONS[qi];
+  const head = document.createElement('div'); head.className = 'qhead';
+  const kl = q.kind === 'grid' ? 'table' : q.kind === 'written' ? 'written' : q.write ? 'MC + written' : '';
+  head.innerHTML = `<span class="qnum">${qno(qi)}</span>` + (CHAPTERS.length > 1 ? `<span>${esc(chLabel(q.ch))} ·</span>` : '') + `<span class="qtag">${fm(q.tag)}</span>` +
+    (kl ? `<span class="kind">· ${kl}</span>` : '') + (q.use ? `<span class="exref">· Exhibit ${esc(q.use)}</span>` : '') + (retry ? '<span class="retry">· retry</span>' : '');
+  const tools = document.createElement('span'); tools.className = 'qtools';
+  const done = q.kind === 'mc' ? answered[qi] !== null : snap[qi] !== null;
+  if(!examActive(qi) && done){
+    const cp = document.createElement('span'); cp.className = 'qcopy'; cp.setAttribute('role', 'button'); cp.textContent = 'copy'; cp.title = 'Copy question, answer and explanation';
+    cp.addEventListener('click', e => { e.stopPropagation(); copyText(qaText(qi)).then(() => showTip(cp, 'Copied'), () => showTip(cp, 'Copy failed')); });
+    tools.appendChild(cp);
+  }
+  const fl = document.createElement('span');
+  fl.className = 'qflag' + (flagged.has(qi) ? ' on' : ''); fl.setAttribute('role', 'button'); fl.textContent = 'review'; fl.title = 'Mark for review';
+  fl.addEventListener('click', e => { e.stopPropagation(); const on = !flagged.has(qi); on ? flagged.add(qi) : flagged.delete(qi); fl.classList.toggle('on', on); updateChrome(); });
+  tools.appendChild(fl); head.appendChild(tools);
+  return head;
+}
+function answerBox(qi, placeholder, rows){
+  const ed = document.createElement('div'); ed.className = 'answer'; ed.contentEditable = 'true'; ed.spellcheck = false;
+  ed.setAttribute('role', 'textbox'); ed.setAttribute('aria-multiline', 'true'); ed.dataset.placeholder = placeholder;
+  ed.style.setProperty('--rows', String(rows));
+  ed.innerHTML = drafts[qi];
+  ed.addEventListener('focus', () => { current = qi; focusExhibit(qi, 'smooth'); });
+  ed.addEventListener('input', () => { drafts[qi] = richHtml(ed); if(examActive(qi)) updateChrome(); });
+  ed.addEventListener('paste', e => { e.preventDefault(); document.execCommand('insertText', false, (e.clipboardData || window.clipboardData).getData('text')); });
+  ed.addEventListener('keydown', e => { if(e.key === 'Enter' && (e.ctrlKey || e.metaKey) && !isMC(qi)){ e.preventDefault(); check(qi); } });
+  return ed;
+}
+function questionNodes(qi, first, retry){
+  const q = QUESTIONS[qi];
+  const main = document.createElement('div');
+  main.className = 'qmain inpage' + (first ? ' first' : '');
+  main.dataset.index = qi;
+  main.addEventListener('click', () => { if(!String(window.getSelection())){ current = qi; focusExhibit(qi, 'smooth'); } });
+  main.appendChild(headNode(qi, retry));
+  const p = document.createElement('p'); p.className = 'qtext'; p.innerHTML = fm(q.text); main.appendChild(p);
+  if(q.fig){
+    const f = document.createElement('div'); f.className = 'qfig zoomable'; f.innerHTML = figHTML(q.fig);
+    f.addEventListener('click', e => { e.stopPropagation(); openLightbox(figHTML(q.fig)); });
+    main.appendChild(f);
+  }
+  const side = document.createElement('aside'); side.className = 'qside';
+  if(q.kind === 'mc') mcBody(qi, main, side); else writtenBody(qi, main, side);
+  return [main, side];
+}
+function mcBody(qi, main, side){
+  const q = QUESTIONS[qi];
+  const opts = document.createElement('div'); opts.className = 'options';
+  q.options.forEach((o, oi) => {
+    const b = document.createElement('div'); b.className = 'opt'; b.setAttribute('role', 'button');
+    b.innerHTML = `<span class="optnum">${oi + 1}</span><span>${fm(o)}</span>`;
+    if(examActive(qi)){ if(examPick[qi] === oi) b.classList.add('picked'); }
+    else if(answered[qi] !== null){ b.classList.add(oi === q.correct ? 'correct' : oi === answered[qi] ? 'incorrect' : 'dim'); }
+    b.addEventListener('click', () => { if(String(window.getSelection())) return; selectAnswer(qi, oi); });
+    opts.appendChild(b);
+  });
+  main.appendChild(opts);
+  if(q.write) main.appendChild(answerBox(qi, 'Explain your choice / show your working…', Math.min(4, Math.max(2, Math.ceil(q.write / 2)))));
+  if(!examActive(qi) && answered[qi] !== null){
+    const ok = answered[qi] === q.correct;
+    side.innerHTML = `<div class="sn-head"><span class="${ok ? 'ok' : 'no'}">${ok ? 'Correct' : answered[qi] === -1 ? 'Not answered' : 'Incorrect'}</span> · answer ${q.correct + 1}</div>${fmtExpl(q.explain)}`;
+  }
+}
+function writtenBody(qi, main, side){
+  const q = QUESTIONS[qi], g = examActive(qi) ? null : grade(qi);
+  q.grids.forEach(t => {
+    const w = document.createElement('div'); w.className = 'gridwrap'; w.innerHTML = gridHTML(t, 'input');
+    w.querySelectorAll('input.cell').forEach(inp => {
+      const k = +inp.dataset.k; inp.value = cells[qi][k] || '';
+      inp.addEventListener('focus', () => { current = qi; focusExhibit(qi, 'smooth'); });
+      inp.addEventListener('input', () => { cells[qi][k] = inp.value; if(examActive(qi)) updateChrome(); });
+      inp.addEventListener('keydown', e => {
+        if(e.key !== 'Enter') return;
+        e.preventDefault();
+        if(e.ctrlKey || e.metaKey){ check(qi); return; }
+        const all = [...main.querySelectorAll('input.cell')], i = all.indexOf(inp);
+        if(i < all.length - 1) all[i + 1].focus(); else { const ed = main.querySelector('.answer'); if(ed) ed.focus(); }
+      });
+      if(g && !g.self){
+        const ok = g.cellHits[k]; inp.classList.add(ok ? 'ok' : 'no');
+        if(!ok){ const fx = document.createElement('span'); fx.className = 'fix'; fx.innerHTML = fm(q.blanks[k].disp); inp.after(fx); }
+      }
+    });
+    main.appendChild(w);
+  });
+  const ed = answerBox(qi, q.grids.length ? 'Working (formulas, NPV / IRR, decision)…' : 'Write the formulas and your working here…', q.space ? Math.min(6, Math.ceil(q.space / 2)) : q.lines <= 3 ? 2 : Math.min(5, Math.ceil(q.lines / 2)));
+  main.appendChild(ed);
+  if(g && !g.self && q.kws.length) markIn(ed, q.kws.filter((_, i) => g.kwHits[i]), 'ok');
+  const acts = document.createElement('div'); acts.className = 'acts';
+  if(!examActive(qi)){
+    const cb = document.createElement('button'); cb.type = 'button'; cb.className = 'link'; cb.style.color = 'var(--ink)';
+    cb.textContent = q.self ? (snap[qi] ? 'Model answer shown' : 'Show model answer') : snap[qi] !== null ? 'Check again' : 'Check';
+    cb.addEventListener('click', () => check(qi)); acts.appendChild(cb);
+    if(snap[qi] !== null){
+      const rb = document.createElement('button'); rb.type = 'button'; rb.className = 'link'; rb.textContent = 'Hide answer';
+      rb.addEventListener('click', () => { snap[qi] = null; render(); }); acts.appendChild(rb);
+    }
+  }
+  main.appendChild(acts);
+  if(g){
+    const what = q.blanks.length && q.kws.length ? 'cells and key results' : q.blanks.length ? 'cells' : 'key results';
+    side.innerHTML = (g.self ? '<div class="sn-head">Model answer</div>' :
+      `<div class="sn-head"><span class="${g.pass ? 'ok' : g.n ? 'part' : 'no'}">${g.pass ? 'Passed' : g.n ? 'Partly' : 'Not yet'}</span> · ${g.n} of ${g.t} ${what}</div>`) + fmtExpl(q.explain);
+    if(!g.self && q.kws.length) markIn(side, q.kws.filter((_, i) => !g.kwHits[i]), 'no');
+  }
+}
+function check(qi){
+  if(examActive(qi)) return;
+  snap[qi] = { html: drafts[qi], cells: [...cells[qi]] }; current = qi;
+  if(isWrong(qi)) missed.add(qi);
+  render();
+}
+
+function caseSection(id, qis, idxForNums, retry){
+  const sec = document.createElement('section'); sec.className = 'case pg'; sec.dataset.case = id;
+  const ex = document.createElement('div'); ex.className = 'case-ex'; ex.innerHTML = exhibitHTML(id, idxForNums);
+  ex.style.setProperty('--n', String(qis.length + 1));
+  ex.style.setProperty('--n2', String(2 * qis.length + 1));
+  ex.querySelectorAll('table').forEach((t, ti) => { t.dataset.ti = ti; t.classList.add('zoomable'); t.addEventListener('click', () => openLightbox(t.outerHTML.replace(' dimmed', ''))); });
+  sec.appendChild(ex);
+  qis.forEach(qi => questionNodes(qi, false, retry).forEach(n => sec.appendChild(n)));
+  return sec;
+}
+
+/* split view (tablet): keep this query in sync with the CSS media query of the same name */
+const SPLIT_MQ = window.matchMedia('(min-width:700px) and (max-width:1500px), (min-width:700px) and (hover:none) and (pointer:coarse)');
+function fitExhibits(){   /* desktop: an exhibit that cannot fit in the margin without wrapping goes onto the page above its questions */
+  document.querySelectorAll('.case').forEach(sec => {
+    sec.classList.remove('stacked');
+    if(SPLIT_MQ.matches) return;
+    const ex = sec.querySelector('.case-ex');
+    if(ex && getComputedStyle(ex).position === 'sticky' && ex.scrollWidth > ex.clientWidth + 1) sec.classList.add('stacked');
+  });
+}
+window.addEventListener('resize', fitExhibits);
+
+/* the exhibit follows the question: scroll the exhibit panel to the table(s) named by @focus and dim the others */
+function focusExhibit(qi, behavior){
+  const q = QUESTIONS[qi]; if(!q || !q.use) return;
+  const main = quizEl.querySelector(`.qmain[data-index="${qi}"]`); if(!main) return;
+  const sec = main.closest('.case'), ex = sec && sec.querySelector('.case-ex'); if(!ex) return;
+  const tables = [...ex.querySelectorAll('.tables > table')];
+  const panel = getComputedStyle(ex).position === 'sticky';
+  const keep = panel && q.focus && tables.length > 1 ? new Set(q.focus) : null;
+  tables.forEach((t, ti) => t.classList.toggle('dimmed', !!keep && !keep.has(ti)));
+  if(!panel || !q.focus || !tables[q.focus[0]]) return;
+  const target = tables[q.focus[0]], last = tables[q.focus[q.focus.length - 1]];
+  const exTop = ex.getBoundingClientRect().top, rT = target.getBoundingClientRect(), rL = last.getBoundingClientRect();
+  if(rT.top >= exTop + 12 && rL.bottom <= exTop + ex.clientHeight) return;   /* already fully in view: leave the panel alone */
+  const top = q.focus[0] === 0 ? 0 : rT.top - exTop + ex.scrollTop - 14;
+  ex.scrollTo({ top: Math.max(0, top), left: 0, behavior: behavior || 'smooth' });
+}
+let exRaf = 0, lastExQ = -1;
+function syncExhibit(force){
+  let qi = -1;
+  if(force && QUESTIONS[current] && QUESTIONS[current].use && quizEl.querySelector(`.qmain[data-index="${current}"]`)) qi = current;
+  else {
+    const line = window.innerHeight * 0.42; let bd = Infinity;
+    quizEl.querySelectorAll('.case .qmain').forEach(el => {
+      const r = el.getBoundingClientRect(); if(r.bottom < 0 || r.top > window.innerHeight) return;
+      const d = r.top <= line && r.bottom >= line ? 0 : Math.min(Math.abs(r.top - line), Math.abs(r.bottom - line));
+      if(d < bd){ bd = d; qi = +el.dataset.index; }
+    });
+  }
+  if(qi < 0) return;
+  if(qi !== lastExQ || force){ lastExQ = qi; focusExhibit(qi, force ? 'auto' : 'smooth'); }
+}
+window.addEventListener('scroll', () => { if(exRaf) return; exRaf = requestAnimationFrame(() => { exRaf = 0; syncExhibit(false); }); }, { passive: true });
+const onSplitChange = () => { fitExhibits(); syncExhibit(true); };
+if(SPLIT_MQ.addEventListener) SPLIT_MQ.addEventListener('change', onSplitChange); else if(SPLIT_MQ.addListener) SPLIT_MQ.addListener(onSplitChange);
+
+const nextChapterIdx = () => (!viewAll && !pickNums && filterMode === 'all' && CHAPTERS.length > 1 && activeCh < CHAPTERS.length - 1) ? activeCh + 1 : -1;
+function render(){
+  ignoreScrollUntil = performance.now() + 400;
+  const y0 = window.scrollY;
+  quizEl.innerHTML = '';
+  const vis = visibleIndices(), retry = filterMode === 'review';
+  if(!vis.length){
+    quizEl.innerHTML = `<div class="empty-state inpage">${filterMode === 'flagged' ? 'No questions marked for review.' : 'Nothing to review.'}</div>`;
+    updateChrome(); return;
+  }
+  if(layoutMode === 'single'){
+    const pos = Math.max(0, vis.indexOf(current)), qi = vis[pos];
+    current = qi;
+    const pr = document.createElement('div'); pr.className = 'single-progress inpage'; pr.textContent = `${pos + 1} / ${vis.length}`; quizEl.appendChild(pr);
+    const q = QUESTIONS[qi];
+    if(q.use){ const sec = caseSection(q.use, [qi], vis, retry); sec.querySelector('.qmain').classList.add('first'); quizEl.appendChild(sec); }
+    else questionNodes(qi, true, retry).forEach(n => quizEl.appendChild(n));
+    const nav = document.createElement('div'); nav.className = 'single-nav inpage';
+    const prev = document.createElement('button'); prev.className = 'link'; prev.textContent = '← Previous'; prev.disabled = pos === 0; prev.addEventListener('click', goPrev);
+    const nc = nextChapterIdx(), last = pos === vis.length - 1;
+    const next = document.createElement('button'); next.className = 'link'; next.style.color = 'var(--ink)'; next.textContent = last && nc > -1 ? `Next chapter: ${chLabel(nc)} →` : 'Next →'; next.disabled = last && nc < 0;
+    next.addEventListener('click', () => { if(last && nc > -1) switchChapter(nc); else goNext(); });
+    nav.appendChild(prev); nav.appendChild(next); quizEl.appendChild(nav);
+  } else {
+    let prevCh = -1, first = true;
+    for(let k = 0; k < vis.length; ){
+      const qi = vis[k], q = QUESTIONS[qi];
+      if(q.use){
+        const group = [];
+        while(k < vis.length && QUESTIONS[vis[k]].use === q.use && QUESTIONS[vis[k]].ch === q.ch){ group.push(vis[k]); k++; }
+        const sec = caseSection(q.use, group, vis, retry);
+        if(first) sec.querySelector('.qmain').classList.add('first');
+        quizEl.appendChild(sec);
+      } else { questionNodes(qi, first, retry).forEach(n => quizEl.appendChild(n)); k++; }
+      first = false;
+    }
+    const nc = nextChapterIdx();
+    if(nc > -1){ const w = document.createElement('div'); w.className = 'next-ch inpage'; const b = document.createElement('button'); b.className = 'link'; b.textContent = `Next chapter: ${chLabel(nc)} →`; b.addEventListener('click', () => switchChapter(nc)); w.appendChild(b); quizEl.appendChild(w); }
+    window.scrollTo(0, y0);
+  }
+  fitExhibits();
+  updateChrome();
+  syncExhibit(true);
+}
+
+function selectAnswer(qi, oi){
+  if(examActive(qi)){ if(examPick[qi] === oi) return; examPick[qi] = oi; current = qi; render(); return; }
+  if(answered[qi] === oi) return;
+  answered[qi] = oi;
+  if(oi !== QUESTIONS[qi].correct) missed.add(qi);
+  current = qi; render();
+}
+function setActive(qi){ const v = visibleIndices(); if(!v.length) return; if(!v.includes(qi)) qi = v[0]; current = qi; render(); scrollToActive(); }
+function smoothTop(){ ignoreScrollUntil = performance.now() + 1500; window.scrollTo({ top: 0, behavior: 'smooth' }); }
+function scrollToActive(){
+  if(layoutMode === 'single') return;
+  const el = quizEl.querySelector(`.qmain[data-index="${current}"]`);
+  ignoreScrollUntil = performance.now() + 1200;
+  if(el) el.scrollIntoView({ behavior: 'smooth', block: 'center' });
+}
+function goNext(){ const v = visibleIndices(), p = v.indexOf(current); if(p === -1){ if(v.length) setActive(v[0]); return; } if(p < v.length - 1) setActive(v[p + 1]); }
+function goPrev(){ const v = visibleIndices(), p = v.indexOf(current); if(p > 0) setActive(v[p - 1]); }
+function enterReviewMode(){ const wl = wrongIndices(); if(!wl.length) return; reviewList = wl; wl.forEach(resetForRetry); filterMode = 'review'; current = wl[0]; render(); scrollToActive(); }
+function exitReviewMode(){ filterMode = 'all'; render(); smoothTop(); }
+
+function updateChrome(){
+  const ids = scopeIdx(), ex = examMode && ids.some(i => !examGraded[i]);
+  const ansN = ids.filter(isAnswered).length;
+  $('totalCount').textContent = ids.length;
+  $('answeredCount').textContent = ansN;
+  $('correctCount').textContent = ex ? '–' : ids.filter(i => resultOf(i) === 2).length;
+  const graded = ids.filter(i => examRes[i] !== 's');
+  const res = examMode && ids.length && ids.every(i => examGraded[i]) ? { c: graded.filter(i => examRes[i] === 'c').length, u: graded.filter(i => examRes[i] === 'u').length, n: graded.length } : null;
+  const er = $('examResult'); er.classList.toggle('show', !!res);
+  if(res){
+    er.innerHTML = `<div class="er-detail">Exam score</div><div class="er-score">${res.c}<small> / ${res.n} · ${Math.round(res.c / Math.max(1, res.n) * 100)}%</small></div><div class="er-detail">${res.n - res.c - res.u} incorrect / not passed · ${res.u} unanswered (counted as incorrect)</div><button class="link" id="retakeBtn" type="button" style="margin-top:8px">Retake exam</button>`;
+    $('retakeBtn').addEventListener('click', () => { resetScope(); smoothTop(); });
+  }
+  $('examBar').classList.toggle('show', ex);
+  if(ex){ const left = ids.length - ansN; $('examInfo').textContent = `${ansN} of ${ids.length} answered` + (left ? ` · ${left} unanswered will count as incorrect` : '') + ' · written answers and tables are checked when you grade'; }
+  const wl = wrongIndices();
+  reviewBtn.disabled = ex || !wl.length || filterMode === 'review';
+  reviewBtn.textContent = filterMode === 'review' ? 'Reviewing…' : `Review incorrect (${wl.length})`;
+  setOn(reviewBtn, filterMode === 'review');
+  copyMissedBtn.disabled = ex || !ids.some(i => missed.has(i));
+  setOn($('allViewBtn'), filterMode === 'all');
+  const fc = ids.filter(i => flagged.has(i)).length;
+  flagBtn.textContent = `Marked (${fc})`; flagBtn.disabled = !fc && filterMode !== 'flagged'; setOn(flagBtn, filterMode === 'flagged');
+  $('modeLabel').textContent = ex ? '· exam in progress' : '';
+  const still = filterMode === 'review' ? reviewList.filter(isWrong) : [];
+  const done = filterMode === 'review' && reviewList.length && reviewList.every(i => resultOf(i) !== null);
+  reviewBanner.classList.toggle('show', !!done);
+  if(done){
+    $('reviewBannerText').textContent = still.length ? `Review complete — ${still.length} of ${reviewList.length} still incorrect.` : `Review complete — all ${reviewList.length} correct.`;
+    const a = $('reviewBannerActions'); a.innerHTML = '';
+    if(still.length){ const r = document.createElement('button'); r.className = 'link'; r.textContent = 'Retry remaining'; r.addEventListener('click', () => { reviewList = still; still.forEach(resetForRetry); current = still[0]; render(); scrollToActive(); }); a.appendChild(r); }
+    const b = document.createElement('button'); b.className = 'link'; b.textContent = 'Back to all'; b.addEventListener('click', exitReviewMode); a.appendChild(b);
+  }
+  document.documentElement.style.setProperty('--bar-h', $('scorebar').offsetHeight + 'px');
+}
+
+document.addEventListener('keydown', e => {
+  if(e.target.closest && e.target.closest('textarea, input, [contenteditable]')) return;
+  if(lightbox.classList.contains('show')){ if(['Escape', 'Enter', ' '].includes(e.key)){ e.preventDefault(); lightbox.classList.remove('show'); } return; }
+  if(!visibleIndices().length) return;
+  if(e.key >= '1' && e.key <= '4'){ const q = QUESTIONS[current], oi = +e.key - 1; if(q && q.kind === 'mc' && oi < q.options.length){ e.preventDefault(); selectAnswer(current, oi); } }
+  else if(e.key === 'Enter' || e.key === ' ' || e.key === 'ArrowDown'){ if(e.target.closest && e.target.closest('button')) return; if(e.altKey || e.ctrlKey || e.metaKey) return; e.preventDefault(); goNext(); }
+  else if(e.key === 'ArrowUp'){ if(e.altKey || e.ctrlKey || e.metaKey) return; e.preventDefault(); goPrev(); }
+});
+
+reviewBtn.addEventListener('click', enterReviewMode);
+$('allViewBtn').addEventListener('click', exitReviewMode);
+flagBtn.addEventListener('click', () => { flagList = scopeIdx().filter(i => flagged.has(i)); if(!flagList.length) return; filterMode = 'flagged'; reviewList = []; if(!flagList.includes(current)) current = flagList[0]; render(); smoothTop(); });
+$('layoutToggleBtn').addEventListener('click', () => { layoutMode = layoutMode === 'list' ? 'single' : 'list'; setOn($('layoutToggleBtn'), layoutMode === 'single'); render(); });
+$('darkSw').addEventListener('click', () => setOn($('darkSw'), document.documentElement.classList.toggle('dark')));
+const examModeBtn = $('examModeBtn');
+examModeBtn.addEventListener('click', () => { examMode = !examMode; setOn(examModeBtn, examMode); if(examMode){ filterMode = 'all'; reviewList = []; } render(); });
+$('gradeBtn').addEventListener('click', () => {
+  scopeIdx().filter(i => !examGraded[i]).forEach(i => {
+    missed.delete(i); examGraded[i] = true; const q = QUESTIONS[i];
+    if(q.kind === 'mc'){
+      const p = examPick[i];
+      if(p === null){ examRes[i] = 'u'; answered[i] = -1; missed.add(i); }
+      else { answered[i] = p; if(p === q.correct) examRes[i] = 'c'; else { examRes[i] = 'w'; missed.add(i); } }
+    } else {
+      const empty = !hasDraft(i);
+      snap[i] = { html: drafts[i], cells: [...cells[i]] };
+      if(q.self){ examRes[i] = 's'; return; }
+      examRes[i] = empty ? 'u' : resultOf(i) === 2 ? 'c' : 'w';
+      if(examRes[i] !== 'c') missed.add(i);
+    }
+  });
+  filterMode = 'all'; reviewList = []; current = scopeIdx()[0]; render(); smoothTop();
+});
+
+const qSearch = $('qSearch'), qWarn = $('qWarn'), qForm = $('qSearchForm');
+function qBad(m){ qWarn.textContent = m; qWarn.classList.toggle('show', !!m); qSearch.classList.toggle('bad', !!m); }
+function parseNums(txt){
+  const t = txt.replace(/[，、;；]/g, ',').replace(/[–—~～]/g, '-').replace(/\s*-\s*/g, '-').trim();
+  if(!t) return { empty: true };
+  const out = new Set();
+  for(const tok of t.split(/[\s,]+/).filter(Boolean)){
+    let m;
+    if(/^\d+$/.test(tok)) out.add(+tok);
+    else if((m = tok.match(/^(\d+)-(\d+)$/)) && +m[1] <= +m[2]){ for(let k = +m[1]; k <= +m[2]; k++) out.add(k); }
+    else return { err: `Not recognised: "${tok}"` };
+  }
+  return { set: out };
+}
+function clearPick(silent){ pickNums = null; qSearch.value = ''; qBad(''); qForm.classList.remove('active'); if(!silent){ filterMode = 'all'; current = scopeIdx()[0]; render(); smoothTop(); } }
+qForm.addEventListener('submit', e => {
+  e.preventDefault();
+  const r = parseNums(qSearch.value);
+  if(r.empty){ clearPick(false); return; }
+  if(r.err){ qBad(r.err); return; }
+  const have = new Set(baseIdx().map(qno)), miss = [...r.set].filter(n => !have.has(n));
+  if(miss.length){ qBad(`No question ${miss.slice(0, 6).join(', ')} (1–${Math.max(...have)})`); return; }
+  qBad(''); pickNums = r.set; qForm.classList.add('active'); qSearch.value = [...r.set].sort((a, b) => a - b).join(', ');
+  filterMode = 'all'; reviewList = []; current = scopeIdx()[0]; render(); smoothTop();
+});
+qSearch.addEventListener('input', () => qBad(''));
+$('qClear').addEventListener('click', () => clearPick(false));
+
+const allChBtn = $('allChBtn'), tocEl = $('toc');
+if(CHAPTERS.length < 2) allChBtn.remove();
+function setViewAll(on){ viewAll = on; clearPick(true); setOn(allChBtn, on); filterMode = 'all'; reviewList = []; if(!scopeIdx().includes(current)) current = scopeIdx()[0]; renderToc(); }
+allChBtn.addEventListener('click', () => { setViewAll(!viewAll); render(); smoothTop(); });
+function renderToc(){
+  tocEl.classList.toggle('on', CHAPTERS.length > 1);
+  if(CHAPTERS.length < 2) return;
+  tocEl.innerHTML = '';
+  CHAPTERS.forEach((c, ci) => { const b = document.createElement('button'); b.type = 'button'; b.className = 'link' + (ci === activeCh && !viewAll ? ' on' : ''); b.textContent = chLabel(ci); b.title = c.title; b.addEventListener('click', () => switchChapter(ci)); tocEl.appendChild(b); });
+}
+function switchChapter(ci){ if(ci === activeCh && !viewAll) return; clearPick(true); if(viewAll) setViewAll(false); activeCh = ci; filterMode = 'all'; reviewList = []; current = CHAPTERS[ci].idx[0]; renderToc(); render(); smoothTop(); }
+
+/* ---------- print ---------- */
+$('printBtn').addEventListener('click', () => { document.body.classList.remove('print-solution'); window.print(); });
+$('printSolBtn').addEventListener('click', () => { document.body.classList.add('print-solution'); window.print(); });
+function sheetHtml(title, idx){
+  const L = i => String.fromCharCode(97 + i);
+  let html = `<h1>${esc(title)}</h1>`, lastCase = null;
+  idx.forEach(qi => {
+    const q = QUESTIONS[qi];
+    if(q.use && q.use !== lastCase) html += `<div class="p-ex">${exhibitHTML(q.use, idx)}</div>`;
+    lastCase = q.use;
+    html += `<div class="p-q"><p>${qno(qi)}. ${q.use ? `<span class="p-ref">[Exhibit ${esc(q.use)}]</span> ` : ''}${fm(q.text)}</p>` + (q.fig ? `<div class="p-fig">${figHTML(q.fig)}</div>` : '') +
+      (q.kind === 'mc' ? q.options.map((o, oi) => `<p class="p-opt">${L(oi)}. ${fm(o)}</p>`).join('') : '') +
+      (q.grids.length ? `<div class="p-gridq">${q.grids.map(t => gridHTML(t, 'print')).join('')}</div>` : '') +
+      (q.lines ? `<div class="p-lines" style="--n:${q.lines}"></div>` : '') + (q.space ? `<div class="p-space" style="--n:${q.space}"></div>` : '') + '</div>';
+  });
+  const mcs = idx.filter(isMC);
+  html += `<div class="p-key"><h1>${esc(title)} — Answers</h1><div class="p-letters">` + mcs.map(qi => `<div>${qno(qi)}. ${L(QUESTIONS[qi].correct)}</div>`).join('') +
+    (idx.length > mcs.length ? `<div>Written ${ranges(idx.filter(i => !isMC(i)).map(qno))}: see “Print with solution”</div>` : '') +
+    '</div><div class="p-sol">' + idx.map(qi => {
+      const q = QUESTIONS[qi];
+      const head = q.kind === 'mc' ? `<b>${qno(qi)}. ${L(q.correct)}</b>` : `<b>${qno(qi)}.</b> ${fm(q.tag)}`;
+      return `<div class="p-s${q.grids.length ? ' wide' : ''}"><p>${head}${q.use ? ` [Exhibit ${esc(q.use)}]` : ''}</p>${q.grids.map(t => gridHTML(t, 'key')).join('')}${fmtExpl(q.explain)}` +
+        (q.kws.length ? `<p class="p-kw">Key results: ${q.kws.map(k => fm(k[0])).join(' · ')}</p>` : '') + '</div>';
+    }).join('') + '</div></div>';
+  return html;
+}
+function buildPrintSheet(sel){
+  sel = sel || scopeIdx();
+  $('printSheet').innerHTML = sheetHtml(viewAll || CHAPTERS.length < 2 ? QUIZ_TITLE : CHAPTERS[activeCh].title, sel);   // all chapters: one sheet, one running number
+}
+window.addEventListener('beforeprint', () => buildPrintSheet(visibleIndices()));
+window.addEventListener('afterprint', () => document.body.classList.remove('print-solution'));
+
+function copyText(t){
+  if(navigator.clipboard && window.isSecureContext) return navigator.clipboard.writeText(t);
+  return new Promise((ok, fail) => { const ta = document.createElement('textarea'); ta.value = t; ta.style.cssText = 'position:fixed;opacity:0'; document.body.appendChild(ta); ta.select(); let d = false; try{ d = document.execCommand('copy'); }catch(e){} ta.remove(); d ? ok() : fail(); });
+}
+copyMissedBtn.addEventListener('click', () => {
+  const nums = [...missed].filter(i => scopeIdx().includes(i)).map(qno);
+  if(!nums.length) return;
+  copyText(`${QUIZ_TITLE} incorrect: ${nums.sort((a, b) => a - b).join(', ')}`).then(() => showTip(copyMissedBtn, 'Copied'), () => showTip(copyMissedBtn, 'Copy failed'));
+});
+function showTip(anchor, msg, ms = 800){
+  const el = document.createElement('div'); el.className = 'tip'; el.textContent = msg; document.body.appendChild(el);
+  const r = anchor.getBoundingClientRect(); el.style.left = (r.left + r.width / 2) + 'px'; el.style.top = Math.max(4, r.top - 22) + 'px';
+  requestAnimationFrame(() => el.classList.add('show'));
+  setTimeout(() => { el.classList.remove('show'); setTimeout(() => el.remove(), 150); }, ms);
+}
+
+const toTopBtn = $('toTopBtn');
+let lastY = window.scrollY, upAcc = 0, topTimer = null, lastUser = 0, ignoreScrollUntil = 0;
+['wheel', 'touchmove'].forEach(ev => window.addEventListener(ev, () => lastUser = performance.now(), { passive: true }));
+window.addEventListener('scroll', () => {
+  const y = window.scrollY, d = y - lastY; lastY = y;
+  if(performance.now() - lastUser > 700 || performance.now() < ignoreScrollUntil) return;
+  if(d > 0 || y < 900){ toTopBtn.classList.remove('show'); upAcc = 0; return; }
+  upAcc -= d;
+  if(upAcc > 30){ toTopBtn.classList.add('show'); clearTimeout(topTimer); topTimer = setTimeout(() => { toTopBtn.classList.remove('show'); upAcc = 0; }, 2200); }
+}, { passive: true });
+toTopBtn.addEventListener('click', () => window.scrollTo({ top: 0, behavior: 'smooth' }));
+window.addEventListener('resize', () => document.documentElement.style.setProperty('--bar-h', $('scorebar').offsetHeight + 'px'));
+
+const resetBtn = $('resetBtn'); let armed = false, armTimer = null;
+resetBtn.addEventListener('click', () => {
+  if(!armed){ armed = true; resetBtn.classList.add('danger'); resetBtn.textContent = 'Click again to restart'; armTimer = setTimeout(disarm, 4000); return; }
+  clearTimeout(armTimer); disarm(); resetScope(); smoothTop();
+});
+function disarm(){ armed = false; resetBtn.classList.remove('danger'); resetBtn.textContent = 'Restart'; }
+function resetScope(){ scopeIdx().forEach(i => { answered[i] = null; examPick[i] = null; examGraded[i] = false; examRes[i] = null; missed.delete(i); drafts[i] = ''; cells[i] = cells[i].map(() => ''); snap[i] = null; }); current = scopeIdx()[0]; filterMode = 'all'; reviewList = []; render(); }
+
+const memoEl = $('memoText'), memoTab = $('memoTab');
+function setMemoOpen(on){ document.body.classList.toggle('memo-open', on); }
+function memoHtml(){ const out = n => [...n.childNodes].map(c => c.nodeType === 3 ? esc(c.nodeValue) : c.nodeName === 'BR' ? '<br>' : ['B', 'STRONG'].includes(c.nodeName) ? `<b>${out(c)}</b>` : ['DIV', 'P'].includes(c.nodeName) ? `<div>${out(c)}</div>` : out(c)).join(''); return out(memoEl); }
+memoEl.addEventListener('paste', e => { e.preventDefault(); document.execCommand('insertText', false, (e.clipboardData || window.clipboardData).getData('text')); });
+$('memoBold').addEventListener('mousedown', e => e.preventDefault());
+$('memoBold').addEventListener('click', () => { memoEl.focus(); document.execCommand('bold'); });
+memoTab.addEventListener('click', () => { setMemoOpen(true); memoEl.focus(); });
+$('memoClose').addEventListener('click', () => setMemoOpen(false));
+document.addEventListener('mousedown', e => { if(document.body.classList.contains('memo-open') && !e.target.closest('#memo, #memoTab')) setMemoOpen(false); });
+window.addEventListener('keydown', e => { if(e.ctrlKey && !e.altKey && e.key.toLowerCase() === 'q'){ e.preventDefault(); const on = !document.body.classList.contains('memo-open'); setMemoOpen(on); if(on) memoEl.focus(); } });
+
+const saveBtn = $('saveBtn');
+const hashStr = t => { let h = 5381; for(let i = 0; i < t.length; i++) h = ((h << 5) + h + t.charCodeAt(i)) | 0; return String(h); };
+const SAVE_KEY = 'integratedQuiz:' + QUIZ_TITLE, SAVE_SIG = hashStr(QUESTIONS.map(q => q.kind + '|' + q.text + '|' + q.options.join('|') + '|' + q.correct + '|' + q.kws.map(k => k.join('/')).join('|') + '|' + q.blanks.map(b => b.alts.join('/')).join('|')).join('\n'));
+saveBtn.addEventListener('click', () => {
+  try{ localStorage.setItem(SAVE_KEY, JSON.stringify({ sig: SAVE_SIG, t: Date.now(), answered, drafts, cells, snap, missed: [...missed], flagged: [...flagged], activeCh, current, examMode, examPick, examGraded, examRes, memo: memoHtml() })); showTip(saveBtn, 'Saved'); }
+  catch(e){ showTip(saveBtn, 'Save failed'); }
+});
+function loadProgress(){
+  let d; try{ d = JSON.parse(localStorage.getItem(SAVE_KEY) || 'null'); }catch(e){ return false; }
+  if(!d) return false;
+  if(typeof d.memo === 'string'){ memoEl.innerHTML = d.memo; memoEl.innerHTML = memoHtml(); }
+  if(d.sig !== SAVE_SIG || !Array.isArray(d.answered) || d.answered.length !== NQ) return 'mismatch';
+  answered = d.answered; (d.missed || []).forEach(i => missed.add(i)); (d.flagged || []).forEach(i => flagged.add(i));
+  if(Array.isArray(d.drafts) && d.drafts.length === NQ) drafts = d.drafts.map(cleanHtml);
+  if(Array.isArray(d.cells) && d.cells.length === NQ) cells = d.cells.map((c, i) => QUESTIONS[i].blanks.map((_, k) => String((c || [])[k] || '')));
+  if(Array.isArray(d.snap) && d.snap.length === NQ) snap = d.snap.map((s, i) => s && typeof s === 'object' ? { html: cleanHtml(s.html || ''), cells: QUESTIONS[i].blanks.map((_, k) => String((s.cells || [])[k] || '')) } : null);
+  if(Array.isArray(d.examPick) && d.examPick.length === NQ){ examPick = d.examPick; examGraded = d.examGraded || examGraded; examRes = d.examRes || examRes; }
+  examMode = !!d.examMode; setOn(examModeBtn, examMode);
+  activeCh = CHAPTERS[d.activeCh] ? d.activeCh : 0;
+  current = QUESTIONS[d.current] ? d.current : 0;
+  return true;
+}
+let restored = false; try{ restored = loadProgress(); }catch(e){}
+
+if(CHAPTERS.length > 1 && /midterm|final/i.test(QUIZ_TITLE)) setViewAll(true);
+if(!scopeIdx().includes(current)) current = scopeIdx()[0];
+renderToc();
+render();
+if(restored === true) showTip(saveBtn, 'Progress restored');
+else if(restored === 'mismatch') showTip(saveBtn, 'Saved data is from another version');
+const menuBtn = document.getElementById('menuBtn'), settingsEl = document.getElementById('settings');
+menuBtn.addEventListener('click', e => { e.stopPropagation(); const on = settingsEl.classList.toggle('open'); menuBtn.setAttribute('aria-expanded', String(on)); menuBtn.classList.toggle('on', on); });
+document.addEventListener('click', e => { if(settingsEl.classList.contains('open') && !e.target.closest('.setwrap')){ settingsEl.classList.remove('open'); menuBtn.classList.remove('on'); menuBtn.setAttribute('aria-expanded', 'false'); } });
+</script>
+</body>
+</html>

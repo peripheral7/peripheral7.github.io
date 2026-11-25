@@ -6,10 +6,11 @@
 <style>html{touch-action:manipulation}</style>
 <script>document.addEventListener('gesturestart',function(e){e.preventDefault()});document.addEventListener('touchmove',function(e){if(e.touches.length>1)e.preventDefault()},{passive:false});</script>
 <meta name="robots" content="noindex">
-<title>Econ2 Exam2 TA Session</title>
+<title>Econ2 TA Session</title>
 <!--
-  Econ2 Exam2 TA Session — PDF 를 바로 보고, PPT(원본 _v4.pptx)는 내려받는다.
-  파일을 바꾸면 같은 이름(econ2-exam2-ta-session.pdf / .pptx)으로 덮어쓰고 커밋·푸시만 하면 된다.
+  Econ2 TA Session — Exam 3 와 Exam 2 자료를 구분선과 소제목으로 나눈다. 아래 칸에는 고른 시험의 자료를 띄운다(#exam3 · #exam2, 기본 Exam 3).
+  Exam 3: 복습 덱 /econ2/exam3/ · 퀴즈 /econ2/exam3/quiz.html (둘 다 scripts/econ2-exam3/build.mjs 로 만든다) · 인터랙티브 /econ2/graphs/#ch35
+  Exam 2: PDF 를 바로 보고, PPT(원본 _v4.pptx)는 내려받는다. 파일을 바꾸면 같은 이름(econ2-exam2-ta-session.pdf / .pptx)으로 덮어쓰고 커밋·푸시만 하면 된다.
 -->
 <style>
   :root { color-scheme: light; --fg: #111; --muted: #666; --line: #d8d8d8; --bg: #fafafa; }
@@ -19,35 +20,69 @@
     display: flex; flex-direction: column; background: var(--bg); color: var(--fg);
     font-family: "Pretendard", -apple-system, BlinkMacSystemFont, "Segoe UI", "Apple SD Gothic Neo", "Malgun Gothic", sans-serif;
   }
-  header {
-    display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 10px 16px;
-    padding: 14px 16px; border-bottom: 1px solid var(--line); background: #fff;
-  }
-  h1 { margin: 0; font-size: 1.05rem; font-weight: 800; letter-spacing: 0.01em; }
+  header { padding: 12px 16px 0; border-bottom: 1px solid var(--line); background: #fff; }
+  h1 { margin: 0 0 10px; font-size: 1.05rem; font-weight: 800; letter-spacing: 0.01em; }
+  .ex { display: flex; flex-wrap: wrap; align-items: center; gap: 8px 14px; padding: 10px 0 12px; border-top: 3px double var(--fg); }
+  .ex + .ex { border-top-width: 1px; border-top-style: solid; border-top-color: var(--line); }
+  .ex h2 { flex: none; display: flex; align-items: baseline; gap: 8px; min-width: 11.5rem; margin: 0; font-size: 1rem; font-weight: 800; }
+  .ex h2 small { font-size: 0.78rem; font-weight: 600; color: var(--muted); }
   .actions { display: flex; flex-wrap: wrap; gap: 8px; }
   .btn {
     display: inline-flex; align-items: center; gap: 6px; padding: 8px 12px; border: 1px solid var(--fg);
-    font-size: 0.85rem; font-weight: 600; color: var(--fg); text-decoration: none; white-space: nowrap; background: #fff;
+    font: inherit; font-size: 0.85rem; font-weight: 600; color: var(--fg); text-decoration: none; white-space: nowrap; background: #fff; cursor: pointer;
   }
   .btn:hover, .btn:focus-visible { background: var(--fg); color: #fff; outline: none; }
   .btn.primary { background: var(--fg); color: #fff; }
   .btn.primary:hover, .btn.primary:focus-visible { background: #fff; color: var(--fg); }
+  .btn.view[aria-pressed="true"] { background: var(--fg); color: #fff; }
+  .btn.view[aria-pressed="true"]::before { content: "▸"; }
   main { flex: 1; min-height: 0; }
   iframe { display: block; width: 100%; height: 100%; min-height: 70vh; border: 0; background: #e9e9e9; }
+  @media (max-width: 640px) { .ex h2 { min-width: 0; width: 100%; } }
 </style>
 </head>
 <body>
 <header>
-  <h1>Econ2 Exam2 TA Session</h1>
-  <div class="actions">
-    <a class="btn primary" href="/slides/econ2/">슬라이드로 보기 (그래프 움직임)</a>
-    <a class="btn" href="/econ2/graphs/">Econ 2 Interactive</a>
-    <a class="btn" href="/econ2/econ2-exam2-ta-session.pptx" download="Econ2 Exam2 TA Session_v4.pptx">PPT 다운로드 (1.3MB)</a>
-    <a class="btn" href="/econ2/econ2-exam2-ta-session.pdf" target="_blank" rel="noopener">PDF 새 창으로 열기</a>
-  </div>
+  <h1>Econ2 TA Session</h1>
+  <section class="ex" id="exam3" aria-label="Exam 3">
+    <h2>Exam 3 <small>Ch35 · Ch31 · Ch32</small></h2>
+    <div class="actions">
+      <button type="button" class="btn view" data-view="exam3" aria-pressed="false">여기서 보기 · 복습 슬라이드</button>
+      <a class="btn" href="/econ2/exam3/">복습 · 문제풀이 슬라이드 (새 화면)</a>
+      <a class="btn" href="/econ2/exam3/quiz.html">퀴즈 (객관식 26문항)</a>
+      <a class="btn" href="/econ2/graphs/#ch35">Econ 2 Interactive · Exam 3</a>
+    </div>
+  </section>
+  <section class="ex" id="exam2" aria-label="Exam 2">
+    <h2>Exam 2 <small>Ch29 · Ch30 · Ch33 · Ch28</small></h2>
+    <div class="actions">
+      <button type="button" class="btn view" data-view="exam2" aria-pressed="false">여기서 보기 · PDF</button>
+      <a class="btn" href="/slides/econ2/">슬라이드로 보기 (그래프 움직임)</a>
+      <a class="btn" href="/econ2/graphs/">Econ 2 Interactive</a>
+      <a class="btn" href="/econ2/econ2-exam2-ta-session.pptx" download="Econ2 Exam2 TA Session_v4.pptx">PPT 다운로드 (1.3MB)</a>
+      <a class="btn" href="/econ2/econ2-exam2-ta-session.pdf" target="_blank" rel="noopener">PDF 새 창으로 열기</a>
+    </div>
+  </section>
 </header>
 <main>
-  <iframe src="/econ2/econ2-exam2-ta-session.pdf#view=FitH" title="Econ2 Exam2 TA Session PDF"></iframe>
+  <iframe id="view" title="TA Session"></iframe>
 </main>
+<script>
+(function () {
+  var SRC = { exam3: '/econ2/exam3/', exam2: '/econ2/econ2-exam2-ta-session.pdf#view=FitH' };
+  var TITLE = { exam3: 'Econ2 Exam 3 Review', exam2: 'Econ2 Exam2 TA Session PDF' };
+  var frame = document.getElementById('view');
+  var btns = document.querySelectorAll('[data-view]');
+  function show(v) {
+    if (!SRC[v]) v = 'exam3';
+    if (frame.getAttribute('src') !== SRC[v]) frame.setAttribute('src', SRC[v]);
+    frame.title = TITLE[v];
+    for (var i = 0; i < btns.length; i++) btns[i].setAttribute('aria-pressed', String(btns[i].getAttribute('data-view') === v));
+  }
+  for (var i = 0; i < btns.length; i++) btns[i].addEventListener('click', function () { var v = this.getAttribute('data-view'); history.replaceState(null, '', '#' + v); show(v); });
+  window.addEventListener('hashchange', function () { show(location.hash.slice(1)); });
+  show(location.hash.slice(1));
+})();
+</script>
 </body>
 </html>
