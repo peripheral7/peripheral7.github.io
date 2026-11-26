@@ -223,16 +223,20 @@
     const EN = A.lang === 'en', T = (k, e) => (EN ? e : k);
     const term = (k, ko, en) => '<div class="term" data-k="' + k + '"><i>' + (EN ? '' : en) + '</i><span>' + (EN ? en : ko) + '</span><b></b></div>';
     const op = (s) => '<span class="kop">' + s + '</span>';
+    // 나누기는 분수(가로줄 위 · 아래)로 쓴다
+    const frac = (top, bot) => '<div class="frac"><div class="fn">' + top + '</div><div class="fbar"></div><div class="fd">' + bot + '</div></div>';
+    // 식 한 묶음(eqblk). 사건을 고르면 그 사건의 eq 에 든 묶음만 보이고, 보이는 묶음 사이에 가는 구분선이 생긴다
+    const blk = (id, html) => '<div class="eqblk" data-eq="' + id + '">' + html + '</div>';
     $('#f31').innerHTML =
-      '<div class="eqrow">' + term('X', '수출', 'Exports') + op('−') + term('M', '수입', 'Imports') + op('=') + term('NX', '순수출 NX', 'Net exports NX') + '</div>' +
-      '<div class="eqrow">' + term('A', '해외 자산 매입', 'Buying foreign assets') + op('−') + term('F', '외국인의 국내 자산 매입', 'Foreigners buying ours') + op('=') + term('NCO', '순자본유출 NCO', 'Net capital outflow NCO') + '</div>' +
-      '<p class="eqdetail f31id"><b>NX = NCO</b></p>' +
-      '<div class="eqrow">' + term('S', '국민저축 S', 'National saving S') + op('=') + term('I', '국내투자 I', 'Investment I') + op('+') + term('NCO2', '순자본유출 NCO', 'NCO') + '</div>';
+      blk('nx', '<div class="eqrow">' + term('X', '수출', 'Exports') + op('−') + term('M', '수입', 'Imports') + op('=') + term('NX', '순수출 NX', 'Net exports NX') + '</div>') +
+      blk('nco', '<div class="eqrow">' + term('A', '해외 자산 매입', 'Buying foreign assets') + op('−') + term('F', '외국인의 국내 자산 매입', 'Foreigners buying ours') + op('=') + term('NCO', '순자본유출 NCO', 'Net capital outflow NCO') + '</div>') +
+      blk('snco', '<div class="eqrow">' + term('S', '국민저축 S', 'National saving S') + op('=') + term('I', '국내투자 I', 'Investment I') + op('+') + term('NCO2', '순자본유출 NCO', 'NCO') + '</div>');
     $('#x31').innerHTML =
-      '<div class="eqrow e4">' + term('e', '명목환율 e', 'Nominal rate e') + op('×') + term('P', '국내 물가 P', 'Domestic prices P') + op('÷') + term('Ps', '외국 물가 P*', 'Foreign prices P*') + op('=') + term('eps', '실질환율 ε', 'Real rate ε') + '</div>' +
-      '<div class="eqrow e2">' + term('eps2', '실질환율 ε', 'Real rate ε') + op('→') + term('NXx', '순수출 NX', 'Net exports NX') + '</div>' +
-      '<p class="eqdetail">' + T('구매력평가(PPP): 같은 재화는 어디서나 같은 가격 → ε = 1', 'Purchasing-power parity: one price everywhere → ε = 1') + '</p>' +
-      '<div class="eqrow">' + term('pe', 'PPP 환율 e', 'PPP rate e') + op('=') + term('Ps2', '외국 물가 P*', 'Foreign prices P*') + op('÷') + term('P2', '국내 물가 P', 'Domestic prices P') + '</div>';
+      blk('eps', '<div class="eqrow fr">' + frac(term('e', '명목환율 e', 'Nominal rate e') + op('×') + term('P', '국내 물가 P', 'Domestic prices P'), term('Ps', '외국 물가 P*', 'Foreign prices P*')) + op('=') + term('eps', '실질환율 ε', 'Real rate ε') + '</div>') +
+      blk('nx', '<div class="eqrow e2">' + term('eps2', '실질환율 ε', 'Real rate ε') + op('→') + term('NXx', '순수출 NX', 'Net exports NX') + '</div>') +
+      blk('ppp', '<p class="eqdetail">' + T('구매력평가(PPP): 같은 재화는 어디서나 같은 가격 → ε = 1', 'Purchasing-power parity: one price everywhere → ε = 1') + '</p>' +
+        '<div class="eqrow fr">' + term('pe', 'PPP 환율 e', 'PPP rate e') + op('=') + frac(term('Ps2', '외국 물가 P*', 'Foreign prices P*'), term('P2', '국내 물가 P', 'Domestic prices P')) + '</div>');
+    const only = (host, eq) => $$('.eqblk', host).forEach((b) => { b.hidden = !!eq && eq.indexOf(b.getAttribute('data-eq')) < 0; });
 
     function paint(host, st, hi) {
       $$('.term', host).forEach((t) => {
@@ -253,55 +257,55 @@
       });
     }
     const FLOW = [
-      { t: T('외국 관광객이 한국 화장품 구매', 'A foreign tourist buys Korean cosmetics'), q: 'SA 1', dir: 'r', steps: [
+      { t: T('외국 관광객이 한국 화장품 구매', 'A foreign tourist buys Korean cosmetics'), q: 'SA 1', dir: 'r', eq: ['nx', 'nco'], steps: [
         { set: { X: 1 }, k: T('수출 ↑', 'Exports ↑'), t: T('외국인이 한국 재화를 산다', 'a foreigner buys a Korean good'), rs: T('수출 ↑', 'exports ↑') },
         { set: { NX: 1 }, k: 'NX ↑', t: T('NX = 수출 − 수입', 'NX = exports − imports'), rs: 'NX ↑' },
         { set: { A: 1, NCO: 1, NCO2: 1 }, k: 'NCO ↑', t: T('대금으로 받은 외국 통화 = 해외 자산 ↑', 'the foreign currency received is a foreign asset'), rs: 'NCO ↑' }] },
-      { t: T('한국 학생이 미국 스트리밍 구독', 'A Korean student subscribes to a U.S. streaming service'), q: 'SA 1 · 2', dir: 'l', steps: [
+      { t: T('한국 학생이 미국 스트리밍 구독', 'A Korean student subscribes to a U.S. streaming service'), q: 'SA 1 · 2', dir: 'l', eq: ['nx', 'nco'], steps: [
         { set: { M: 1 }, k: T('수입 ↑', 'Imports ↑'), t: T('한국인이 외국 서비스를 산다', 'a Korean buys a foreign service'), rs: T('수입 ↑', 'imports ↑') },
         { set: { NX: -1 }, k: 'NX ↓', t: T('NX = 수출 − 수입', 'NX = exports − imports'), rs: 'NX ↓' },
         { set: { F: 1, NCO: -1, NCO2: -1 }, k: 'NCO ↓', t: T('외국인이 받은 원화 = 외국인의 국내 자산 ↑', 'the won paid is a Korean asset held abroad'), rs: 'NCO ↓' }] },
-      { t: T('현대차가 미국에 공장 건설', 'Hyundai builds a plant in the U.S.'), q: 'SA 3', dir: 'r', steps: [
+      { t: T('현대차가 미국에 공장 건설', 'Hyundai builds a plant in the U.S.'), q: 'SA 3', dir: 'r', eq: ['nco'], steps: [
         { set: { A: '▲ ' + T('직접투자', 'direct') }, k: T('해외 자산 ↑', 'Foreign assets ↑'), t: T('직접 소유 · 경영 = 해외직접투자', 'owned and run = foreign direct investment'), rs: T('해외 자산 ↑', 'foreign assets ↑') },
         { set: { NCO: 1, NCO2: 1 }, k: 'NCO ↑', t: T('국내 거주자의 해외 자산 매입 ↑', 'residents buy more foreign assets'), rs: 'NCO ↑' }] },
-      { t: T('한국인이 미국 주식 매입', 'A Korean buys U.S. stock'), q: 'SA 2 · 3', dir: 'r', steps: [
+      { t: T('한국인이 미국 주식 매입', 'A Korean buys U.S. stock'), q: 'SA 2 · 3', dir: 'r', eq: ['nco'], steps: [
         { set: { A: '▲ ' + T('포트폴리오', 'portfolio') }, k: T('해외 자산 ↑', 'Foreign assets ↑'), t: T('주식 · 채권만 산다 = 해외포트폴리오투자', 'shares or bonds only = portfolio investment'), rs: T('해외 자산 ↑', 'foreign assets ↑') },
         { set: { NCO: 1, NCO2: 1 }, k: 'NCO ↑', t: '', rs: 'NCO ↑' }] },
-      { t: T('일본 연기금이 한국 국채 매입', 'A Japanese pension fund buys Korean bonds'), q: 'SA 2', dir: 'l', steps: [
+      { t: T('일본 연기금이 한국 국채 매입', 'A Japanese pension fund buys Korean bonds'), q: 'SA 2', dir: 'l', eq: ['nco'], steps: [
         { set: { F: '▲ ' + T('포트폴리오', 'portfolio') }, k: T('외국인의 국내 자산 ↑', 'Foreign-owned Korean assets ↑'), t: T('외국인이 한국 자산을 산다 = 자본 유입', 'a foreigner buys a Korean asset = capital inflow'), rs: T('외국인의 국내 자산 ↑', 'foreign-owned Korean assets ↑') },
         { set: { NCO: -1, NCO2: -1 }, k: 'NCO ↓', t: T('NCO = 해외 자산 매입 − 외국인의 국내 자산 매입', 'NCO = our purchases − their purchases'), rs: 'NCO ↓' }] },
-      { t: T('국민저축 증가', 'National saving rises'), q: 'MC 4', dir: 'r', steps: [
+      { t: T('국민저축 증가', 'National saving rises'), q: 'MC 4', dir: 'r', eq: ['snco', 'nx'], steps: [
         { set: { S: 1, I: 0 }, k: 'S ↑', t: T('국내투자 I 는 그대로', 'investment I unchanged'), rs: 'S ↑' },
         { set: { NCO2: 1, NCO: 1 }, k: 'NCO ↑', t: 'S = I + NCO', rs: 'NCO ↑' },
         { set: { NX: 1 }, k: 'NX ↑', t: 'NX = NCO', rs: 'NX ↑' }] },
-      { t: T('수출 30 · 수입 40 · 투자 60 → 저축?', 'Exports 30 · imports 40 · investment 60 → saving?'), q: 'MC 5', steps: [
+      { t: T('수출 30 · 수입 40 · 투자 60 → 저축?', 'Exports 30 · imports 40 · investment 60 → saving?'), q: 'MC 5', eq: ['nx', 'snco'], steps: [
         { set: { X: '30', M: '40' }, k: T('수출 30 · 수입 40', 'Exports 30 · imports 40'), t: '', rs: '' },
         { set: { NX: '▼ −10' }, k: 'NX = −10', t: '30 − 40', rs: 'NX ↓ −10' },
         { set: { NCO: '▼ −10', NCO2: '▼ −10' }, k: 'NCO = −10', t: 'NX = NCO', rs: 'NCO ↓ −10' },
         { set: { I: '60', S: '50' }, k: 'S = 50', t: 'S = I + NCO = 60 + (−10)', rs: T('국민저축 50', 'saving 50') }] }
     ];
     const XR = [
-      { t: T('원화 절상', 'The won appreciates'), q: 'MC 7 · SA 4', dir: 'r', steps: [
+      { t: T('원화 절상', 'The won appreciates'), q: 'MC 7 · SA 4', dir: 'r', eq: ['eps', 'nx'], steps: [
         { set: { e: 1 }, k: 'e ↑', t: T('원화 1단위로 사는 외국 통화 ↑', 'each won buys more foreign currency'), rs: 'e ↑' },
         { set: { eps: 1, eps2: 1 }, k: 'ε ↑', t: T('한국 재화가 상대적으로 비싸짐', 'Korean goods relatively dearer'), rs: 'ε ↑' },
         { set: { NXx: -1 }, k: 'NX ↓', t: T('수출 ↓ · 수입 ↑', 'exports ↓ · imports ↑'), rs: 'NX ↓' }] },
-      { t: T('한국 물가가 외국보다 빠르게 상승', 'Korean prices rise faster than foreign prices'), q: 'SA 5', dir: 'r', steps: [
+      { t: T('한국 물가가 외국보다 빠르게 상승', 'Korean prices rise faster than foreign prices'), q: 'SA 5', dir: 'r', eq: ['eps', 'nx'], steps: [
         { set: { e: 0, P: 1 }, k: 'P ↑', t: T('명목환율 e 는 그대로', 'nominal rate e unchanged'), rs: 'P ↑' },
-        { set: { eps: 1, eps2: 1 }, k: 'ε ↑', t: 'ε = e × P ÷ P*', rs: 'ε ↑' },
+        { set: { eps: 1, eps2: 1 }, k: 'ε ↑', t: 'ε = e × P / P*', rs: 'ε ↑' },
         { set: { NXx: -1 }, k: 'NX ↓', t: '', rs: 'NX ↓' }] },
-      { t: T('외국 물가가 더 빠르게 상승', 'Foreign prices rise faster'), q: 'SA 5', dir: 'l', steps: [
+      { t: T('외국 물가가 더 빠르게 상승', 'Foreign prices rise faster'), q: 'SA 5', dir: 'l', eq: ['eps', 'nx'], steps: [
         { set: { e: 0, Ps: 1 }, k: 'P* ↑', t: T('명목환율 e 는 그대로', 'nominal rate e unchanged'), rs: 'P* ↑' },
-        { set: { eps: -1, eps2: -1 }, k: 'ε ↓', t: 'ε = e × P ÷ P*', rs: 'ε ↓' },
+        { set: { eps: -1, eps2: -1 }, k: 'ε ↓', t: 'ε = e × P / P*', rs: 'ε ↓' },
         { set: { NXx: 1 }, k: 'NX ↑', t: '', rs: 'NX ↑' }] },
-      { t: T('한국은행 통화량 증가 (PPP)', 'Bank of Korea expands money (PPP)'), q: 'MC 16 · 18', dir: 'l', steps: [
+      { t: T('한국은행 통화량 증가 (PPP)', 'Bank of Korea expands money (PPP)'), q: 'MC 16 · 18', dir: 'l', eq: ['ppp'], steps: [
         { set: { P2: 1 }, k: 'P ↑', t: T('통화량 ↑ → 물가 ↑ (Ch30)', 'more money → higher prices (Ch30)'), rs: 'P ↑' },
-        { set: { pe: -1 }, k: T('e ↓ 원화 절하', 'e ↓ won depreciates'), t: 'e = P* ÷ P', rs: T('e ↓', 'e ↓') }] },
-      { t: T('한국 물가 연 4% · 미국 연 1% 상승 (PPP)', 'Korean prices +4% a year, U.S. +1% (PPP)'), q: 'MC 19', dir: 'l', steps: [
+        { set: { pe: -1 }, k: T('e ↓ 원화 절하', 'e ↓ won depreciates'), t: 'e = P* / P', rs: T('e ↓', 'e ↓') }] },
+      { t: T('한국 물가 연 4% · 미국 연 1% 상승 (PPP)', 'Korean prices +4% a year, U.S. +1% (PPP)'), q: 'MC 19', dir: 'l', eq: ['ppp'], steps: [
         { set: { P2: '▲ 4%', Ps2: '▲ 1%' }, k: 'P +4% · P* +1%', t: '', rs: '' },
         { set: { pe: '▼ ≈ 3%' }, k: T('e(달러/원) ≈ −3%', 'e ($ per won) ≈ −3%'), t: T('원/달러는 약 3% 상승 = 원화 절하', 'won per dollar ≈ +3% = the won depreciates'), rs: T('e ↓ 약 3%', 'e ↓ about 3%') }] },
-      { t: T('빅맥: 150엔/$ · 미국 $5 · 일본 600엔', 'Big Mac: ¥150/$ · U.S. $5 · Japan ¥600'), q: 'MC 8 · 12', steps: [
+      { t: T('빅맥: 150엔/$ · 미국 $5 · 일본 600엔', 'Big Mac: ¥150/$ · U.S. $5 · Japan ¥600'), q: 'MC 8 · 12', eq: ['eps', 'ppp'], steps: [
         { set: { e: '150', P: '$5', Ps: '¥600' }, k: 'e × P = ¥750', t: T('미국 빅맥의 엔화 가격 (미국 = 자국)', 'U.S. Big Mac in yen (home = U.S.)'), rs: '' },
-        { set: { eps: '1.25', eps2: '1.25' }, k: 'ε = 750 ÷ 600 = 1.25', t: T('미국 빅맥 1개 = 일본 빅맥 1.25개', 'one U.S. Big Mac = 1.25 Japanese'), rs: T('ε ↑ 1.25', 'ε ↑ 1.25') },
+        { set: { eps: '1.25', eps2: '1.25' }, k: 'ε = 750 / 600 = 1.25', t: T('미국 빅맥 1개 = 일본 빅맥 1.25개', 'one U.S. Big Mac = 1.25 Japanese'), rs: T('ε ↑ 1.25', 'ε ↑ 1.25') },
         { set: { pe: '120', Ps2: '¥600', P2: '$5' }, k: T('PPP e = 120엔', 'PPP e = ¥120'), t: T('ε > 1 → 일본에서 사서 미국에서 판다 · 달러 고평가', 'ε > 1 → buy in Japan, sell in the U.S. · the dollar is overvalued'), rs: '' }] }
     ];
     Object.assign(A.COND, EN ? {} : {
@@ -312,7 +316,7 @@
       '한국 물가 연 4% · 미국 연 1% 상승 (PPP)': 'PPP 가 성립할 때 한국 물가가 4%, 미국 물가가 1% 오르면'
     });
     const plF = A.Player($('#pl31f')), plX = A.Player($('#pl31x'));
-    const wire = (opts, list, pl, host) => A.list($(opts), list, (i) => { if (i < 0) { pl.clear(); paint(host, {}, []); } else pl.load(mkBeats(host, list[i])); });
+    const wire = (opts, list, pl, host) => A.list($(opts), list, (i) => { if (i < 0) { pl.clear(); paint(host, {}, []); only(host, null); } else { paint(host, {}, []); only(host, list[i].eq); pl.load(mkBeats(host, list[i])); } });
     wire('#o31f', FLOW, plF, $('#f31')); wire('#o31x', XR, plX, $('#x31'));
     paint($('#f31'), {}, []); paint($('#x31'), {}, []);
     let cur = 'f';
