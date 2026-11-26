@@ -2,6 +2,8 @@
    · PPT 의 흑백 그래프 자리(<div class="g" data-g="pNN">)를 움직이는 SVG 그래프로 덮는다. 시작 상태 뒤의 상태 수 = 그 장의 빈 <i class="step"> 개수.
    · Exam 2 엔진에 더한 것: 판 3개(대부자금 · NCO · 외환시장) 나란히, 보이지 않는 곡선(hidden: 점 위치만 정함),
      starId(u* 처럼 별표를 붙일 수직선), 판마다 같은 자리의 점은 하나로(A · B · C 는 판마다 차례로), sayOnly(위 띠에 설명만, 두 줄이면 줄바꿈 문자로 나눔).
+   · 모양은 PPT 그림(make_ta.py 의 StaticGraph)과 같은 규칙: 이동한 곡선 · 화살표 · 지금 점 = 빨강, 곡선 이름은 위쪽 끝 바로 위,
+     점 이름은 언제나 점 오른쪽, 화살표는 곡선 아래쪽, 축 위 이름은 한 줄 · 한 열에 두고 겹치면 사이를 벌린다.
    좌표: 곡선·점은 각 판의 데이터 단위(dom = [x0, x1, y0, y1]), 글자 위치·여백은 SVG 픽셀(= 무대 픽셀). 글자의 '_' 뒤는 아래 첨자. */
 (function () {
   'use strict';
@@ -94,6 +96,26 @@
     const pick = cands.find((c) => !hit(box(c))) || cands[0];
     boxes.push(box(pick));
     return pick;
+  }
+  // 직선 곡선 이름 자리 [x, 기준선 y, anchor]. t = 위쪽 끝(우하향은 왼쪽 끝, 우상향은 오른쪽 끝)
+  //   mode 0: 끝과 같은 높이로 끝 바깥쪽 · mode 1: 끝 바로 위
+  function lcand(c, mode, t) {
+    if (c.m < 0) return mode === 0 ? [t[0] - 6, t[1] + 6, 'end'] : [t[0] - 2, t[1] - 10, 'start'];
+    return mode === 0 ? [t[0] + 6, t[1] + 6, 'start'] : [t[0] + 2, t[1] - 10, 'end'];
+  }
+  // 축 위 이름 벌리기: 원래 자리(at) · 폭(size)을 가진 이름들이 한 줄에서 겹치지 않게 서로 밀어낸다(겹친 쌍은 양쪽으로 반씩)
+  function spread(items, gap) {
+    const a = items.slice().sort((p, q) => p.at - q.at);
+    a.forEach((v) => { v.pos = v.at; });
+    for (let it = 0; it < 40; it++) {
+      let moved = false;
+      for (let i = 1; i < a.length; i++) {
+        const need = (a[i - 1].size + a[i].size) / 2 + gap, d = a[i].pos - a[i - 1].pos;
+        if (d < need - 0.01) { const s = (need - d) / 2; a[i - 1].pos -= s; a[i].pos += s; moved = true; }
+      }
+      if (!moved) break;
+    }
+    return a;
   }
   function segDist(x, y, pts) {
     let best = Infinity;
@@ -247,20 +269,25 @@
         svg('path', { d: 'M' + b[0] + ' ' + Y(p.y) + 'H' + X(p.x) + 'V' + (b[1] + b[3]), fill: 'none', stroke: col, 'stroke-width': 1.4, 'stroke-dasharray': '5 5' }, g);
         if (rp) svg('path', { d: 'M' + X(p.x) + ' ' + Y(p.y) + 'H' + xR, fill: 'none', stroke: col, 'stroke-width': 1.4, 'stroke-dasharray': '2 5' }, g);
       }));
-      const usedY = [], usedX = [], usedR = [];                        // 겹치는 이름은 지금 것을 먼저
-      [now].concat(P.map((_, i) => i).filter((i) => i !== now)).forEach((si) => (P[si] || []).forEach((p) => {
+      // 축 위 이름: 같은 이름은 한 번(지금 것의 색), 모두 한 줄(가로축) · 한 열(세로축)에 두고 겹치면 사이를 벌린다
+      const ax = { x: new Map(), y: new Map() };
+      P.forEach((pts, si) => pts.forEach((p) => {
         if (p.o.guide === false || p.skip) return;
-        const col = si === now ? C.ink : C.soft;
-        if (p._yl.trim() && !usedY.some((v) => Math.abs(v - Y(p.y)) < 15)) { usedY.push(Y(p.y)); label(g, b[0] - 8, Y(p.y) + 6, p._yl, { anchor: 'end', size: 18, color: col }); }
-        // 가로축 이름: 글자 폭만큼 떨어져 있지 않으면 한 줄 아래에(NCO_1 · NCO_2 처럼 긴 이름)
-        const xw = Math.max(26, textW(p._xl, 18) + 4), xr = usedX.some((u) => u.r === 0 && Math.abs(u.x - X(p.x)) < (xw + u.w) / 2) ? 1 : 0;
-        if (!usedX.some((u) => u.r === xr && Math.abs(u.x - X(p.x)) < (xw + u.w) / 2)) { usedX.push({ x: X(p.x), w: xw, r: xr }); label(g, X(p.x), b[1] + b[3] + 24 + xr * 20, p._xl, { anchor: 'middle', size: 18, color: col }); }
-        if (rp && !usedR.some((v) => Math.abs(v - Y(p.y)) < 15)) {
-          usedR.push(Y(p.y));
-          if (rp.num) label(g, xR + 44, Y(p.y) + 6, 'P = ' + fmt(1 / p.y, 2), { size: 15, color: si === now ? C.blue : C.soft, weight: 700 });
-          else label(g, xR + 9, Y(p.y) + 6, String(p._yl).replace('1/P', 'P'), { size: 18, color: col });
-        }
+        const isNow = si === now;
+        if (p._yl.trim() && (!ax.y.has(p._yl) || isNow)) ax.y.set(p._yl, { at: Y(p.y), now: isNow, size: 18 });
+        if (!ax.x.has(p._xl) || isNow) ax.x.set(p._xl, { at: X(p.x), now: isNow, size: Math.max(22, textW(p._xl, 18)) });
       }));
+      spread([...ax.y].map(([t, v]) => Object.assign(v, { t })), 4).forEach((v) => label(g, b[0] - 8, v.pos + 6, v.t, { anchor: 'end', size: 18, color: v.now ? C.ink : C.soft }));
+      spread([...ax.x].map(([t, v]) => Object.assign(v, { t })), 12).forEach((v) => label(g, v.pos, b[1] + b[3] + 24, v.t, { anchor: 'middle', size: 18, color: v.now ? C.ink : C.soft }));
+      if (rp) {
+        const usedR = [];
+        P.forEach((pts, si) => pts.forEach((p) => {
+          if (p.o.guide === false || p.skip || usedR.some((v) => Math.abs(v - Y(p.y)) < 15)) return;
+          usedR.push(Y(p.y));
+          if (rp.num) label(g, xR + 44, Y(p.y) + 6, 'P = ' + fmt(1 / p.y, 2), { size: 15, color: si === now ? C.red : C.soft, weight: 700 });
+          else label(g, xR + 9, Y(p.y) + 6, String(p._yl).replace('1/P', 'P'), { size: 18, color: si === now ? C.ink : C.soft });
+        }));
+      }
 
       // 곡선: 앞 상태 위치는 흐리게, 지금 위치는 진하게(처음 자리에서 옮겨졌으면 파랑). 이름은 서로 겹치지 않는 자리에
       const boxes = [];
@@ -269,6 +296,24 @@
         if (c.hidden || !this.visible(c, shown[now].j)) return;
         const offs = shown.filter((st) => this.visible(c, st.j)).map((st) => offOf(c, st.off));
         const oNow = offOf(c, shown[now].off), drawn = [];
+        // 곡선 이름 방식: 단계 자리(애니메이션 중간값이 아닌 states 의 자리)에서 모두 들어가는 첫 방식
+        let lmode = 0;
+        if (c.kind === 'line') {
+          const fam = [];
+          for (let j = 0; j <= k; j++) { const o = offOf(c, sc.states[j].off); if (this.visible(c, j) && !fam.some((v) => same(v, o))) fam.push(o); }
+          const vx = pn.curves.filter((v) => v.kind === 'vert' && !v.hidden).flatMap((v) => sc.states.slice(0, k + 1).map((st) => X(v.x + offOf(v, st.off))));
+          const w = textW(c.lab + '_1', 18) + 6;
+          const ok = (md) => {
+            const bx = [];
+            return fam.every((o) => {
+              const p = this.path(pn, c, o); if (p.length < 2) return true;
+              const cd = lcand(c, md, c.m < 0 ? p[0] : p[p.length - 1]), l = cd[2] === 'end' ? cd[0] - w : cd[0], q = [l, cd[1] - 16, l + w, cd[1] + 4];
+              const good = l >= b[0] + 4 && !vx.some((v) => v > l - 3 && v < l + w + 3) && !bx.some((z) => q[0] < z[2] + 3 && z[0] < q[2] + 3 && q[1] < z[3] + 2 && z[1] < q[3] + 2);
+              bx.push(q); return good;
+            });
+          };
+          lmode = ok(0) ? 0 : ok(1) ? 1 : 0;
+        }
         shown.forEach((st, si) => {
           if (!this.visible(c, st.j)) return;
           const o = offOf(c, st.off), isNow = si === now;
@@ -277,15 +322,19 @@
           const pts = this.path(pn, c, o);
           if (pts.length < 2) return;
           const moved = isNow && !same(o, offs[0]);
-          const col = isNow ? (c.color || (moved ? C.blue : C.ink)) : C.ghost;
+          const col = isNow ? (c.color || (moved ? C.red : C.ink)) : C.ghost;      // 이동한 결과 = 빨간 선
           svg('path', { d: this.d(pts), fill: 'none', stroke: col, 'stroke-width': isNow ? 3 : 2.2, 'stroke-linecap': 'round' }, g);
           const lab = this.curveLab(c, isNow ? offOf(c, labelOff) : o, offs), e = pts[pts.length - 1];
           if (c.axisLab) { label(g, b[0] - 8, e[1] + 6, lab, { anchor: 'end', size: 19, color: col, weight: 700 }); }
           else {
-            const dn = c.m < 0 || c.kind === 'hyper';
-            const at = place(boxes, lab, c.kind === 'vert'
+            // 이름: 곡선 위쪽 끝과 같은 높이로 끝 바깥쪽(우하향은 왼쪽, 우상향은 오른쪽) — PPT 그림과 같은 자리.
+            // 한 곡선의 모든 자리가 같은 방식(lmode: 0 = 끝 바깥쪽, 1 = 끝 바로 위)이라 평행이동한 이름끼리 늘 같은 높이
+            const t0 = c.kind === 'line' && c.m < 0 ? pts[0] : e;
+            const cands = c.kind === 'vert'
               ? [[e[0], e[1] - 10, 'middle'], [e[0] - 4, e[1] - 10, 'end'], [e[0] + 4, e[1] - 10, 'start'], [e[0], e[1] - 30, 'middle']]
-              : [[e[0] + 7, e[1] + (dn ? 14 : 2), 'start'], [e[0] - 4, e[1] + (dn ? 28 : -12), 'end'], [e[0] + 7, e[1] + (dn ? 32 : -18), 'start']]);
+              : c.kind === 'line' ? [lcand(c, lmode, t0), lcand(c, 1 - lmode, t0), [t0[0], t0[1] - 30, c.m < 0 ? 'start' : 'end']]
+              : [[e[0] + 7, e[1] + 14, 'start'], [e[0] - 4, e[1] + 28, 'end'], [e[0] + 7, e[1] + 32, 'start']];
+            const at = place(boxes, lab, cands);
             label(g, at[0], at[1], lab, { anchor: at[2], size: 18, color: col });
           }
           if (isNow && c.drag) c._hit = pts;
@@ -301,14 +350,17 @@
           if (same(oa, oz)) return;
           if (c.kind === 'horiz') {
             const x = X(pn.dom[0] + (pn.dom[1] - pn.dom[0]) * 0.9), y1 = Y(c.y + oa), y2 = Y(c.y + oz);
-            if (Math.abs(y2 - y1) > 20) arrow(g, x, y1 + Math.sign(y2 - y1) * 6, x, y2 - Math.sign(y2 - y1) * 8, C.blue);
+            if (Math.abs(y2 - y1) > 20) arrow(g, x, y1 + Math.sign(y2 - y1) * 6, x, y2 - Math.sign(y2 - y1) * 8, C.red);
             return;
           }
+          // 화살표 높이: 곡선 위쪽 · 아래쪽 중 지금까지 나온 점에서 먼 쪽(PPT 그림과 같은 규칙)
+          const allP = [].concat(...P).filter((p) => !p.skip), far = (v) => Math.min(9, ...allP.map((p) => Math.abs(p.y - v)));
+          const ud = c.kind === 'line' ? [c.y - Math.abs(c.m) * c.span * 0.6, c.y + Math.abs(c.m) * c.span * 0.6] : [];
           const yy = c.kind === 'vert' ? (c.y1 != null ? c.y1 : pn.dom[3]) - (pn.dom[3] - pn.dom[2]) * 0.08
-            : c.kind === 'line' ? c.y + Math.abs(c.m) * c.span * 0.78 : pn.dom[2] + (pn.dom[3] - pn.dom[2]) * 0.62;
+            : c.kind === 'line' ? (far(ud[0]) >= far(ud[1]) ? ud[0] : ud[1]) : pn.dom[2] + (pn.dom[3] - pn.dom[2]) * 0.62;
           const inv = (o) => (c.kind === 'vert' ? c.x + o : c.kind === 'line' ? (yy - c.y) / c.m + c.x + o : c.k / yy + o);
           const x1 = X(inv(oa)), x2 = X(inv(oz)), yp = Y(yy);
-          if (Math.abs(x2 - x1) > 22) arrow(g, x1 + Math.sign(x2 - x1) * 8, yp, x2 - Math.sign(x2 - x1) * 10, yp, C.blue);
+          if (Math.abs(x2 - x1) > 22) arrow(g, x1 + Math.sign(x2 - x1) * 8, yp, x2 - Math.sign(x2 - x1) * 10, yp, C.red);
         });
       }
 
@@ -316,10 +368,9 @@
       P.forEach((pts, si) => pts.forEach((p) => {
         if (p.skip) return;
         const isNow = si === now, px = X(p.x), py = Y(p.y);
-        svg('circle', { cx: px, cy: py, r: isNow ? 7 : 5.5, fill: isNow ? C.blue : C.ink, stroke: '#fff', 'stroke-width': 2 }, g);
-        const lr = pn.curves.find((c) => c.id === (pn.starId || 'LRAS'));     // LRAS · LRPC 왼쪽 점은 왼쪽 빈 쐐기에
-        const d = p.o.d || pn.ptD || (lr && p.x < lr.x - 0.05 ? [-30, 7] : [16, 7]);
-        if (p.lab) label(g, px + d[0], py + d[1], p.lab, { size: p.lab.length > 2 ? 16 : 20, weight: 700, color: isNow ? C.blue : C.ink });
+        svg('circle', { cx: px, cy: py, r: isNow ? 7 : 5.5, fill: isNow ? C.red : C.ink, stroke: '#fff', 'stroke-width': 2 }, g);
+        const d = p.o.d || pn.ptD || [13, 7];                                  // 점 이름은 언제나 점 오른쪽 같은 자리
+        if (p.lab) label(g, px + d[0], py + d[1], p.lab, { size: p.lab.length > 2 ? 16 : 20, weight: 700, color: isNow ? C.red : C.ink });
       }));
       if (sc.extra) sc.extra.call(this, g, pn, shown[now], ctx, shown, P);
     });

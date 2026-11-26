@@ -105,29 +105,33 @@ SA_KEY = {
 }
 
 # ─────────────────────────── 그래프(덱의 graphs.js 와 같은 모양) ───────────────────────────
+# 모든 판: 축 0~12, 곡선은 가운데 (6, 6)을 지나는 기울기 ±0.85, 반쪽 길이 3.2. 좌우로 M 만큼 옮겨도 판 안이라
+# 잘리지 않으므로 옮긴 곡선의 길이 · 기울기 · 이름 높이가 처음 곡선과 똑같다(평행이동)
+G0, SPAN = 6, 3.2
+def ln(id_, m, lab, hidden=False):
+    c = {'id': id_, 'kind': 'line', 'x': G0, 'y': G0, 'm': m, 'span': SPAN, 'lab': lab}
+    if hidden: c['hidden'] = True
+    return c
+
 def pc_panel(pts):
-    return {'dom': [0, 10, 0, 10], 'xName': 'u', 'yName': 'π', 'xTitle': 'u', 'yTitle': 'π', 'star': True, 'starId': 'LRPC',
-            'curves': [{'id': 'LRPC', 'kind': 'vert', 'x': 5, 'y0': 0, 'y1': 9.4, 'lab': 'LRPC'},
-                       {'id': 'SRPC', 'kind': 'line', 'x': 5, 'y': 5, 'm': -0.85, 'span': 4.0, 'lab': 'SRPC'},
-                       {'id': 'DM', 'kind': 'line', 'x': 5, 'y': 5, 'm': 0.85, 'span': 4.0, 'lab': '', 'hidden': True}],
+    return {'dom': [0, 12, 0, 12], 'xName': 'u', 'yName': 'π', 'xTitle': 'u', 'yTitle': 'π', 'star': True, 'starId': 'LRPC',
+            'curves': [{'id': 'LRPC', 'kind': 'vert', 'x': G0, 'y0': 0, 'y1': 11, 'lab': 'LRPC'},
+                       ln('SRPC', -0.85, 'SRPC'), ln('DM', 0.85, '', hidden=True)],
             'pts': pts}
 
 def pc(states, pts=None):
     return {'panels': [pc_panel(pts or [['SRPC', 'DM']])], 'states': [{'off': s[0], 'say': s[1]} for s in states]}
 
-def open3(states, two=None):
-    lf = {'title': 'Loanable funds', 'dom': [0, 10, 0, 10], 'xName': 'LF', 'yName': 'r', 'xTitle': 'LF', 'yTitle': 'r',
-          'curves': [{'id': 'S', 'kind': 'line', 'x': 5, 'y': 5, 'm': 0.85, 'span': 4.0, 'lab': 'S'},
-                     {'id': 'D', 'kind': 'line', 'x': 5, 'y': 5, 'm': -0.85, 'span': 4.0, 'lab': 'D'}], 'pts': [['S', 'D']]}
-    nco = {'title': 'Net capital outflow', 'dom': [0, 10, 0, 10], 'xName': 'NCO', 'yName': 'r', 'xTitle': 'NCO', 'yTitle': 'r',
-           'curves': [{'id': 'N', 'kind': 'line', 'x': 5, 'y': 5, 'm': -0.85, 'span': 4.0, 'lab': 'NCO'},
-                      {'id': 'RL', 'kind': 'horiz', 'y': 5, 'x0': 0, 'x1': 10, 'lab': '', 'hidden': True}], 'pts': [['N', 'RL']]}
-    fx = {'title': 'Foreign-currency exchange', 'dom': [0, 10, 0, 10], 'xName': 'Q', 'yName': 'E', 'xTitle': 'Q', 'yTitle': 'E',
-          'curves': [{'id': 'FS', 'kind': 'vert', 'x': 5, 'y0': 0, 'y1': 9.4, 'lab': 'S'},
-                     {'id': 'FD', 'kind': 'line', 'x': 5, 'y': 5, 'm': -0.85, 'span': 4.0, 'lab': 'D'}], 'pts': [['FS', 'FD']]}
+def open3(states):
+    lf = {'title': 'Loanable funds', 'dom': [0, 12, 0, 12], 'xName': 'LF', 'yName': 'r', 'xTitle': 'LF', 'yTitle': 'r',
+          'curves': [ln('S', 0.85, 'S'), ln('D', -0.85, 'D')], 'pts': [['S', 'D']]}
+    nco = {'title': 'Net capital outflow', 'dom': [0, 12, 0, 12], 'xName': 'NCO', 'yName': 'r', 'xTitle': 'NCO', 'yTitle': 'r',
+           'curves': [ln('N', -0.85, 'NCO'), {'id': 'RL', 'kind': 'horiz', 'y': G0, 'x0': 0, 'x1': 12, 'lab': '', 'hidden': True}], 'pts': [['N', 'RL']]}
+    fx = {'title': 'Foreign-currency exchange', 'dom': [0, 12, 0, 12], 'xName': 'Q', 'yName': 'E', 'xTitle': 'Q', 'yTitle': 'E',
+          'curves': [{'id': 'FS', 'kind': 'vert', 'x': G0, 'y0': 0, 'y1': 11, 'lab': 'S'}, ln('FD', -0.85, 'D')], 'pts': [['FS', 'FD']]}
     return {'panels': [lf, nco, fx], 'states': [{'off': s[0], 'say': s[1]} for s in states], 'sayOnly': True}
 
-M = 2.4    # 곡선 이동 폭(축 0~10)
+M = 2.4    # 곡선 이동 폭(축 0~12)
 K = 1.02   # 대부자금 곡선을 M 만큼 옮기면 r 이 K(= 0.85 × M ÷ 2) 오르내리고, NCO 는 M ÷ 2 움직인다(기울기 ±0.85)
 SCN = {
     'pc_concept': pc([({}, ['장기 균형 A: π = πᵉ, u = u*', 'Long-run point A: π = πᵉ, u = u*']),
@@ -293,14 +297,37 @@ def sublab(s):
         out.append((part[1:], -25000) if part[0] == '_' else (part, 0))
     return out
 
+RED = 'C8352E'          # 이동한 결과(옮겨 간 곡선 · 그 이름 · 화살표) = 빨강. 덱 그래프의 C.red 와 같은 색
+
+def spread(items, gap):
+    """축 위 이름 벌리기: [(원래 자리, 폭, 글자)] 가 한 줄에서 겹치지 않게 서로 밀어낸다(겹친 쌍은 양쪽으로 반씩). 끝에 새 자리를 붙여 돌려준다"""
+    a = sorted([list(t) for t in items], key=lambda t: t[0])
+    for t in a: t.append(t[0])
+    for _ in range(40):
+        moved = False
+        for i in range(1, len(a)):
+            need = (a[i - 1][1] + a[i][1]) / 2 + gap; d = a[i][-1] - a[i - 1][-1]
+            if d < need - 0.01:
+                sft = (need - d) / 2; a[i - 1][-1] -= sft; a[i][-1] += sft; moved = True
+        if not moved: break
+    return a
+
+def plain_style(el):
+    """도형의 테마 스타일(그림자 등 효과 참조)을 떼고 효과 없음으로"""
+    st = el.find(qn('p:style'))
+    if st is not None: el.remove(st)
+    sp = el.find(qn('p:spPr'))
+    if sp is not None and sp.find(qn('a:effectLst')) is None: SE(sp, 'a:effectLst')
+
 class StaticGraph:
-    """흑백 정적 그래프. 모든 상태의 곡선 자리를 실선 + 아래 첨자로, 곡선 사이에 짧은 화살표, 균형점 A · B · C, 점선 안내선"""
+    """정적 그래프(PPT 도형, 그림자 없음). 처음 곡선은 검정, 옮겨 간 곡선은 빨강 실선 + 아래 첨자, 곡선 사이 짧은 빨간 화살표,
+    균형점 A · B · C(이름은 언제나 점 오른쪽 같은 자리), 점선 안내선, 축 위 이름은 한 줄 · 한 열에 두고 겹치면 벌린다"""
     def __init__(self, slide, region, sc, name):
         self.g = slide.shapes.add_group_shape(); self.g.name = name
         self.x0, self.y0 = region[0], region[1]
         self.W, self.H = region[2] / PXE, region[3] / PXE
         multi = len(sc['panels']) > 1
-        p = {'l': 46, 'r': 66 if multi else 84, 't': 52 if multi else 34, 'b': 44, 'gap': 46}
+        p = {'l': 46, 'r': 62 if multi else 76, 't': 52 if multi else 34, 'b': 44, 'gap': 46}
         n = len(sc['panels']); w = (self.W - n * p['l'] - n * p['r'] - (n - 1) * p['gap']) / n; h = self.H - p['t'] - p['b']
         for i, pn in enumerate(sc['panels']): pn['_box'] = (p['l'] + i * (w + p['r'] + p['gap'] + p['l']), p['t'], w, h)
         for pn in sc['panels']: self.panel(pn, sc['states'])
@@ -313,31 +340,37 @@ class StaticGraph:
         c = self.g.shapes.add_connector(MSO_CONNECTOR.STRAIGHT, self.E(self.x0 + x1 * PXE), self.E(self.y0 + y1 * PXE), self.E(self.x0 + x2 * PXE), self.E(self.y0 + y2 * PXE))
         c.line.color.rgb = RGBColor.from_string(color); c.line.width = Pt(w)
         if dash: c.line.dash_style = MSO_LINE.DASH
-        if head:
-            ln = c.line._get_or_add_ln(); te = SE(ln, 'a:tailEnd', type='triangle', w='med', len='med')
+        ln_ = c.line._get_or_add_ln(); ln_.set('cap', 'flat')
+        if head: SE(ln_, 'a:tailEnd', type='triangle', w='med', len='med')
+        plain_style(c._element)
         return c
 
-    def dot(self, x, y, r=4.6):
+    def dot(self, x, y, r=4.4):
         s = self.g.shapes.add_shape(MSO_SHAPE.OVAL, self.E(self.x0 + (x - r) * PXE), self.E(self.y0 + (y - r) * PXE), self.E(2 * r * PXE), self.E(2 * r * PXE))
-        s.fill.solid(); s.fill.fore_color.rgb = RGBColor(0, 0, 0); s.line.fill.background(); s.shadow.inherit = False
+        s.fill.solid(); s.fill.fore_color.rgb = RGBColor(0, 0, 0); s.line.fill.background()
+        plain_style(s._element)
+
+    def tw(self, s, size):                  # 글자 폭(px) 어림: Arial 평균 0.6em, 아래 첨자 0.42em
+        return sum((0.45 if b else 0.68) * size * 1.667 for t, b in sublab(s) for ch in t)
 
     def text(self, x, y, s, size=11, anchor='l', bold=False, color='000000'):
         """(x, y) = 글자 기준선(px). anchor l/c/r"""
         if not s: return
         hpx = size * 12700 / PXE * 1.25
-        wpx = sum((0.42 if b else 0.62) * size * 1.667 for t, b in sublab(s) for ch in t) + 8
+        wpx = self.tw(s, size) + 8
         left = x if anchor == 'l' else x - wpx / 2 if anchor == 'c' else x - wpx
-        runs = [(t, {'sz': size if not b else size, 'b': bold, 'color': color, 'font': GF, 'base': b}) for t, b in sublab(s)]
+        runs = [(t, {'sz': size, 'b': bold, 'color': color, 'font': GF, 'base': b}) for t, b in sublab(s)]
         textbox(self.g.shapes, self.x0 + left * PXE, self.y0 + (y - hpx * 0.82) * PXE, wpx * PXE, hpx * PXE,
                 [para(runs, algn={'l': 'l', 'c': 'ctr', 'r': 'r'}[anchor])], wrap=False)
 
     def panel(self, pn, states):
         b = pn['_box']; X = lambda v: self.X(pn, v); Y = lambda v: self.Y(pn, v)
+        base = b[1] + b[3]
         if pn.get('title'): self.text(b[0] + b[2] / 2, b[1] - 30, pn['title'], 11, 'c', color=GREY)
-        # 축(축 이름은 각 축 끝)
-        self.line(b[0], b[1] - 12, b[0], b[1] + b[3], 1.5); self.line(b[0], b[1] + b[3], b[0] + b[2] + 12, b[1] + b[3], 1.5)
+        # 축(축 이름은 각 축 끝: 세로축은 위 끝 왼쪽, 가로축은 오른쪽 끝에 축선과 같은 높이)
+        self.line(b[0], b[1] - 12, b[0], base, 1.5); self.line(b[0], base, b[0] + b[2] + 12, base, 1.5)
         self.text(b[0] - 7, b[1] - 6, pn['yTitle'], 12, 'r')
-        self.text(b[0] + b[2] + 16, b[1] + b[3] + 6, pn['xTitle'], 12, 'l')
+        self.text(b[0] + b[2] + 17, base + 5, pn['xTitle'], 12, 'l')
         cur = {c['id']: c for c in pn['curves']}
         # 균형점: 상태마다, 바로 앞과 같은 자리면 이름을 물려받는다
         P, letters = [], iter('ABCDEFGH')
@@ -347,56 +380,80 @@ class StaticGraph:
                 c1, c2 = cur[q[0]], cur[q[1]]
                 x, y = meet(c1, off_of(c1, st['off']), c2, off_of(c2, st['off']))
                 prev = P[j - 1][qi] if j else None
-                if prev and abs(prev['x'] - x) < 1e-6 and abs(prev['y'] - y) < 1e-6: row.append(dict(prev)); prev['skip'] = True
+                if prev and abs(prev['x'] - x) < 1e-6 and abs(prev['y'] - y) < 1e-6:
+                    row.append(dict(prev)); prev['skip'] = True
                 else: row.append({'x': x, 'y': y, 'lab': next(letters)})
             P.append(row)
         pts = [p for row in P for p in row if not p.get('skip')]
-        # 안내선과 축 위 이름(π_1 · u* · u_2 …)
+        # 안내선(점선)과 축 위 이름(π_1 · u* · u_2 …)
         star = cur.get(pn.get('starId', '')) if pn.get('star') else None
-        ys, xs = [], []
-        def nm(lst, v, base, frm):
+        ys, xs, yl_, xl_ = [], [], {}, {}
+        def nm(lst, v, base_, frm):
             for i, u in enumerate(lst):
-                if abs(u - v) < 0.05: return base + '_' + str(i + frm)
-            lst.append(v); return base + '_' + str(len(lst) - 1 + frm)
-        usedY, usedX = [], []
+                if abs(u - v) < 0.05: return base_ + '_' + str(i + frm)
+            lst.append(v); return base_ + '_' + str(len(lst) - 1 + frm)
         for p in pts:
             px, py = X(p['x']), Y(p['y'])
-            self.line(b[0], py, px, py, 1, dash=True); self.line(px, py, px, b[1] + b[3], 1, dash=True)
-            yl = nm(ys, p['y'], pn['yName'], 1)
-            xl = pn['xName'] + '*' if star and abs(star['x'] - p['x']) < 0.05 else nm(xs, p['x'], pn['xName'], 2 if star else 1)
-            if not any(abs(v - py) < 14 for v in usedY): usedY.append(py); self.text(b[0] - 6, py + 5, yl, 11, 'r')
-            wl = len(xl.replace('_', '')) * 8.5 + 6               # 가로축 이름: 겹치면 한 줄 아래로, 같은 이름은 한 번만
-            if any(n == xl for v, wv, r, n in usedX): continue
-            for row in (0, 1):
-                if not any(r == row and abs(v - px) < (wl + wv) / 2 + 2 for v, wv, r, n in usedX):
-                    usedX.append((px, wl, row, xl)); self.text(px, b[1] + b[3] + 17 + row * 14, xl, 11, 'c'); break
-        # 곡선: 서로 다른 자리마다 실선, 여러 자리면 아래 첨자 1 · 2
+            self.line(b[0], py, px, py, 1, dash=True); self.line(px, py, px, base, 1, dash=True)
+            yl_.setdefault(nm(ys, p['y'], pn['yName'], 1), py)
+            xl_.setdefault(pn['xName'] + '*' if star and abs(star['x'] - p['x']) < 0.05 else nm(xs, p['x'], pn['xName'], 2 if star else 1), px)
+        for at, h, t, pos in spread([(v, 14, k) for k, v in yl_.items()], 3):          # 세로축: 한 열(오른쪽 맞춤)
+            self.text(b[0] - 6, pos + 5, t, 11, 'r')
+        for at, w, t, pos in spread([(v, max(16, self.tw(k, 11)), k) for k, v in xl_.items()], 10):  # 가로축: 한 줄, 겹치면 사이를 벌림
+            self.text(pos, base + 17, t, 11, 'c')
+        # 곡선: 처음 자리는 검정, 옮겨 간 자리는 빨강(실선 · 같은 길이 · 아래 첨자 1 · 2).
+        # 이름은 Exam 2 그림처럼 곡선의 위쪽 끝 바로 위 — 평행이동한 곡선끼리 같은 높이, 점 · 안내선과 떨어진 자리
+        vx = [X(c['x'] + off_of(c, st['off'])) for c in pn['curves'] if c['kind'] == 'vert' and not c.get('hidden') for st in states]
+        boxes = []                                   # 이미 놓은 곡선 이름 칸 (왼, 위, 오른, 아래)
+        def box(anchor, x, y, w): left = x - w if anchor == 'r' else x; return (left, y - 13, left + w, y + 3)
+        def fits(bx_):                               # 세로축 밖 · 수직선(LRPC · 외환 공급) · 다른 이름과 겹치지 않나
+            l, t, r, bt = bx_
+            return l >= b[0] + 4 and not any(l - 3 < v < r + 3 for v in vx) and not any(l < q[2] + 3 and q[0] < r + 3 and t < q[3] + 2 and q[1] < bt + 2 for q in boxes)
+        def cand(c, mode, ax, ay, bx, by):
+            # mode 0: 위쪽 끝과 같은 높이로 끝 바깥쪽(우하향은 왼쪽, 우상향은 오른쪽) · mode 1: 위쪽 끝 바로 위
+            if c['m'] < 0: return ('r', X(ax) - 4, Y(ay) + 4) if mode == 0 else ('l', X(ax) - 2, Y(ay) - 7)
+            return ('l', X(bx) + 4, Y(by) + 4) if mode == 0 else ('r', X(bx) + 2, Y(by) - 7)
         for c in pn['curves']:
             if c.get('hidden'): continue
             pos = []
             for st in states:
                 o = off_of(c, st['off'])
                 if not any(abs(o - v) < 1e-6 for v in pos): pos.append(o)
+            labs = [c['lab'] + ('_' + str(i + 1) if len(pos) > 1 else '') for i in range(len(pos))]
+            segs = [seg_of(pn, c, o) for o in pos]
+            mode = 0
+            if c['kind'] == 'line':                  # 한 곡선의 모든 자리에 같은 방식(0 → 안 되면 1): 평행이동한 이름끼리 늘 같은 높이
+                def ok(md):
+                    placed = []
+                    for lab, ((ax, ay), (bx, by)) in zip(labs, segs):
+                        an, tx, ty = cand(c, md, ax, ay, bx, by); bb = box(an, tx, ty, self.tw(lab, 11) + 8)
+                        if not fits(bb) or any(bb[0] < q[2] + 3 and q[0] < bb[2] + 3 and bb[1] < q[3] + 2 and q[1] < bb[3] + 2 for q in placed): return False
+                        placed.append(bb)
+                    return True
+                mode = 0 if ok(0) else 1 if ok(1) else 0
             for i, o in enumerate(pos):
-                (ax, ay), (bx, by) = seg_of(pn, c, o)
-                self.line(X(ax), Y(ay), X(bx), Y(by), 2.2)
-                lab = c['lab'] + ('_' + str(i + 1) if len(pos) > 1 else '')
-                if c['kind'] == 'vert': self.text(X(bx), Y(by) - 6, lab, 11, 'c')
-                else:
-                    ex, ey = (X(bx), Y(by))
-                    self.text(ex + 5, ey + (12 if c['m'] < 0 else 2), lab, 11, 'l')
-            for o1, o2 in zip(pos, pos[1:]):         # 곡선 사이 짧은 화살표(실제 이동 방향)
+                col = '000000' if i == 0 else RED
+                (ax, ay), (bx, by) = segs[i]
+                self.line(X(ax), Y(ay), X(bx), Y(by), 2.2, color=col)
+                if c['kind'] == 'vert': self.text(X(bx), Y(by) - 6, labs[i], 11, 'c', color=col); continue
+                an, tx, ty = cand(c, mode, ax, ay, bx, by)
+                boxes.append(box(an, tx, ty, self.tw(labs[i], 11) + 8))
+                self.text(tx, ty, labs[i], 11, an, color=col)
+            for o1, o2 in zip(pos, pos[1:]):         # 곡선 사이 짧은 화살표(실제 이동 방향): 곡선 위쪽 · 아래쪽 중 점에서 먼 쪽
                 d = pn['dom']
-                if c['kind'] == 'vert': yy = c.get('y1', d[3]) - (d[3] - d[2]) * 0.1; inv = lambda o: c['x'] + o
-                else: yy = c['y'] + abs(c['m']) * c['span'] * 0.72; inv = lambda o: (yy - c['y']) / c['m'] + c['x'] + o
+                if c['kind'] == 'vert':
+                    yy = c.get('y1', d[3]) - (d[3] - d[2]) * 0.1; inv = lambda o: c['x'] + o
+                else:
+                    ups = [c['y'] - abs(c['m']) * c['span'] * 0.6, c['y'] + abs(c['m']) * c['span'] * 0.6]
+                    yy = max(ups, key=lambda v: min([abs(p['y'] - v) for p in pts] or [9]))
+                    inv = lambda o: (yy - c['y']) / c['m'] + c['x'] + o
                 x1, x2 = X(inv(o1)), X(inv(o2)); yp = Y(yy)
                 if abs(x2 - x1) > 18:
                     sgn = 1 if x2 > x1 else -1
-                    self.line(x1 + sgn * 7, yp, x2 - sgn * 9, yp, 1.6, head=True)
-        for p in pts:
+                    self.line(x1 + sgn * 7, yp, x2 - sgn * 9, yp, 1.6, head=True, color=RED)
+        for p in pts:                                # 점 이름: 언제나 점 오른쪽, 점과 같은 높이
             px, py = X(p['x']), Y(p['y']); self.dot(px, py)
-            left = star and p['x'] < star['x'] - 0.05
-            self.text(px + (-22 if left else 9), py + 6, p['lab'], 12, 'l', bold=True)
+            self.text(px + 8, py + 5, p['lab'], 12, 'l', bold=True)
 
 # ─────────────────────────── 슬라이드 ───────────────────────────
 prs = Presentation(TEMPLATE)
