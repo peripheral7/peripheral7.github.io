@@ -1,0 +1,237 @@
+<!DOCTYPE html>
+<html lang="ko" data-langs="ko,en">
+<head>
+<meta name="pinterest" content="nopin">
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="robots" content="noindex">
+<title>Econ2 Exam3 TA Session</title>
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Cpath d='M4 4v24h24' fill='none' stroke='%23000' stroke-width='3'/%3E%3Cpath d='M8 8l18 18M8 24L26 8' stroke='%231f6fd1' stroke-width='2.5'/%3E%3C/svg%3E">
+<link rel="stylesheet" href="/slides/deck.css">
+<!--
+  Econ2 Exam3 TA Session 덱 — scripts/econ2-exam3/ta/make_ta.py 가 만든다(이 파일을 직접 고치지 말고 make_ta.py · deck-template.html 을 고친다).
+  PDF(/econ2/econ2-exam3-ta-session.pdf)를 장마다 그림(pNN.jpg, 1920×1080)으로 넣고,
+  그래프가 있는 장은 <div class="g" data-g="pNN"> 가 PPT 의 흑백 그래프 자리를 움직이는 그래프로 덮는다(graphs.js + scn.js).
+    자리(left/top/width/height)는 무대 px = EMU ÷ 7620. 빈 <i class="step"> 개수 = 그 장에서 → 로 넘기는 그래프 단계 수.
+  PPT 는 영어. 그래프 위 설명 줄만 … 메뉴의 Language 로 한국어 · 영어를 바꾼다.
+-->
+<style>
+  /* 마지막 장: 덱 주소 QR(qr.svg 는 make_ta.py 가 segno 로 만든다) */
+  .slide.qr{flex-direction:row;align-items:center;justify-content:center;gap:80px;padding:60px;background:#fff;color:#1f2537}
+  .slide.qr>img{width:640px;height:640px;max-width:none;max-height:none;image-rendering:pixelated}
+  .qr-t p{margin:0}
+  .slide .qr-h{font-size:48px;font-weight:800;line-height:1.25;margin-bottom:28px}
+  .slide .qr-u{font-size:34px;font-weight:700;color:#1f6fd1;margin-bottom:40px}
+  .slide .qr-s{font-size:26px;color:#5b6170;line-height:1.5}
+  .slide.pg{padding:0}
+  .slide.pg>img{position:absolute;left:0;top:0;width:1600px;height:900px;max-width:none;max-height:none}
+  .g{position:absolute;touch-action:none;-webkit-user-select:none;user-select:none}
+  .gsvg{display:block;width:100%;height:100%;font-family:inherit;overflow:visible}
+  .g.orig .gsvg{opacity:0;pointer-events:none}
+  .gtools{position:absolute;right:4px;top:4px;display:flex;gap:6px;opacity:.5;transition:opacity .2s}
+  .g:hover .gtools,.gtools:focus-within{opacity:1}
+  .gtools button{font-family:inherit;font-size:16px;font-weight:600;line-height:1;padding:6px 10px;border:1.5px solid #1f2537;border-radius:0;background:#fff;color:#1f2537;cursor:pointer;-webkit-appearance:none;appearance:none}
+  .gtools button:hover{background:#1f2537;color:#fff}
+  .g.orig .gtools button:last-child{background:#1f2537;color:#fff}
+  #overview .gtools{display:none}
+  @media print{.gtools{display:none}}
+</style>
+</head>
+<body>
+<noscript>JavaScript is required.</noscript>
+
+<main id="stage">
+  <section class="slide pg" data-title="Exam 3 Review">
+    <img src="p01.jpg" alt="Exam 3 Review" fetchpriority="high">
+  </section>
+  <section class="slide pg" data-title="Ch35 The Short-Run Trade-off between Inflation and Unemployment">
+    <img src="p02.jpg" alt="Ch35 The Short-Run Trade-off between Inflation and Unemployment" decoding="async">
+  </section>
+  <section class="slide pg" data-title="Ch35 Phillips Curve Overview · Curve Shifters">
+    <img src="p03.jpg" alt="Ch35 Phillips Curve Overview · Curve Shifters" decoding="async">
+    <div class="g" data-g="p03" style="left:96px;top:164px;width:591px;height:650px"></div>
+    <i class="step"></i>
+  </section>
+  <section class="slide pg" data-title="Ch35 MC 1 · Price Level ↔ Inflation">
+    <img src="p04.jpg" alt="Ch35 MC 1 · Price Level ↔ Inflation" decoding="async">
+  </section>
+  <section class="slide pg" data-title="Ch35 SA 1 · Phillips-Curve Equation">
+    <img src="p05.jpg" alt="Ch35 SA 1 · Phillips-Curve Equation" decoding="async">
+  </section>
+  <section class="slide pg" data-title="Ch35 MC 2 · Exploiting the Trade-off">
+    <img src="p06.jpg" alt="Ch35 MC 2 · Exploiting the Trade-off" decoding="async">
+    <div class="g" data-g="p06" style="left:1010px;top:413px;width:533px;height:433px"></div>
+    <i class="step"></i><i class="step"></i>
+  </section>
+  <section class="slide pg" data-title="Ch35 MC 3 · Natural Rate · Money Growth">
+    <img src="p07.jpg" alt="Ch35 MC 3 · Natural Rate · Money Growth" decoding="async">
+  </section>
+  <section class="slide pg" data-title="Ch35 MC 4 · Expectations · SRPC Shift">
+    <img src="p08.jpg" alt="Ch35 MC 4 · Expectations · SRPC Shift" decoding="async">
+    <div class="g" data-g="p08" style="left:1010px;top:413px;width:533px;height:433px"></div>
+    <i class="step"></i><i class="step"></i>
+  </section>
+  <section class="slide pg" data-title="Ch35 MC 5 · Accommodating a Supply Shock">
+    <img src="p09.jpg" alt="Ch35 MC 5 · Accommodating a Supply Shock" decoding="async">
+    <div class="g" data-g="p09" style="left:1010px;top:413px;width:533px;height:433px"></div>
+    <i class="step"></i><i class="step"></i>
+  </section>
+  <section class="slide pg" data-title="Ch35 MC 6 · Favorable Supply Shock">
+    <img src="p10.jpg" alt="Ch35 MC 6 · Favorable Supply Shock" decoding="async">
+    <div class="g" data-g="p10" style="left:1010px;top:413px;width:533px;height:433px"></div>
+    <i class="step"></i>
+  </section>
+  <section class="slide pg" data-title="Ch35 MC 7 · Sacrifice Ratio">
+    <img src="p11.jpg" alt="Ch35 MC 7 · Sacrifice Ratio" decoding="async">
+    <div class="g" data-g="p11" style="left:1010px;top:413px;width:533px;height:433px"></div>
+    <i class="step"></i><i class="step"></i>
+  </section>
+  <section class="slide pg" data-title="Ch35 MC 8 · Rational Expectations">
+    <img src="p12.jpg" alt="Ch35 MC 8 · Rational Expectations" decoding="async">
+    <div class="g" data-g="p12" style="left:1010px;top:413px;width:533px;height:433px"></div>
+    <i class="step"></i>
+  </section>
+  <section class="slide pg" data-title="Ch35 SA 2 · Four Developments · SRPC and LRPC">
+    <img src="p13.jpg" alt="Ch35 SA 2 · Four Developments · SRPC and LRPC" decoding="async">
+  </section>
+  <section class="slide pg" data-title="Ch35 SA 3 · Recession and Adjustment">
+    <img src="p14.jpg" alt="Ch35 SA 3 · Recession and Adjustment" decoding="async">
+    <div class="g" data-g="p14" style="left:1010px;top:164px;width:533px;height:669px"></div>
+    <i class="step"></i><i class="step"></i>
+  </section>
+  <section class="slide pg" data-title="Ch35 SA 4 · Demand vs Supply Shock · Policy">
+    <img src="p15.jpg" alt="Ch35 SA 4 · Demand vs Supply Shock · Policy" decoding="async">
+  </section>
+  <section class="slide pg" data-title="Ch31 Open-Economy Macroeconomics: Basic Concepts">
+    <img src="p16.jpg" alt="Ch31 Open-Economy Macroeconomics: Basic Concepts" decoding="async">
+  </section>
+  <section class="slide pg" data-title="Ch31 Open-Economy Identities · Exchange Rates">
+    <img src="p17.jpg" alt="Ch31 Open-Economy Identities · Exchange Rates" decoding="async">
+  </section>
+  <section class="slide pg" data-title="Ch31 MC 1 · Net Exports">
+    <img src="p18.jpg" alt="Ch31 MC 1 · Net Exports" decoding="async">
+  </section>
+  <section class="slide pg" data-title="Ch31 MC 2 · S = I + NCO">
+    <img src="p19.jpg" alt="Ch31 MC 2 · S = I + NCO" decoding="async">
+  </section>
+  <section class="slide pg" data-title="Ch31 MC 3 · Y = C + I + G + NX">
+    <img src="p20.jpg" alt="Ch31 MC 3 · Y = C + I + G + NX" decoding="async">
+  </section>
+  <section class="slide pg" data-title="Ch31 MC 4 · Saving · NCO · NX">
+    <img src="p21.jpg" alt="Ch31 MC 4 · Saving · NCO · NX" decoding="async">
+  </section>
+  <section class="slide pg" data-title="Ch31 MC 5 · Appreciation · Travel Cost">
+    <img src="p22.jpg" alt="Ch31 MC 5 · Appreciation · Travel Cost" decoding="async">
+  </section>
+  <section class="slide pg" data-title="Ch31 MC 6 · Real Exchange Rate · Arbitrage">
+    <img src="p23.jpg" alt="Ch31 MC 6 · Real Exchange Rate · Arbitrage" decoding="async">
+  </section>
+  <section class="slide pg" data-title="Ch31 MC 7 · Big Mac PPP">
+    <img src="p24.jpg" alt="Ch31 MC 7 · Big Mac PPP" decoding="async">
+  </section>
+  <section class="slide pg" data-title="Ch31 MC 8 · Money Supply · PPP">
+    <img src="p25.jpg" alt="Ch31 MC 8 · Money Supply · PPP" decoding="async">
+  </section>
+  <section class="slide pg" data-title="Ch31 MC 9 · Inflation Gap · Exchange Rate">
+    <img src="p26.jpg" alt="Ch31 MC 9 · Inflation Gap · Exchange Rate" decoding="async">
+  </section>
+  <section class="slide pg" data-title="Ch31 SA 1 · NX or NCO?">
+    <img src="p27.jpg" alt="Ch31 SA 1 · NX or NCO?" decoding="async">
+  </section>
+  <section class="slide pg" data-title="Ch31 SA 2 · Who Gains from Appreciation">
+    <img src="p28.jpg" alt="Ch31 SA 2 · Who Gains from Appreciation" decoding="async">
+  </section>
+  <section class="slide pg" data-title="Ch31 SA 3 · Direction of the Real Exchange Rate">
+    <img src="p29.jpg" alt="Ch31 SA 3 · Direction of the Real Exchange Rate" decoding="async">
+  </section>
+  <section class="slide pg" data-title="Ch31 SA 4 · Big Mac Index">
+    <img src="p30.jpg" alt="Ch31 SA 4 · Big Mac Index" decoding="async">
+  </section>
+  <section class="slide pg" data-title="Ch31 SA 5 · PPP · Rule of 70 · Fisher Effect">
+    <img src="p31.jpg" alt="Ch31 SA 5 · PPP · Rule of 70 · Fisher Effect" decoding="async">
+  </section>
+  <section class="slide pg" data-title="Ch32 A Macroeconomic Theory of the Open Economy">
+    <img src="p32.jpg" alt="Ch32 A Macroeconomic Theory of the Open Economy" decoding="async">
+  </section>
+  <section class="slide pg" data-title="Ch32 Three Markets · Order of Attack">
+    <img src="p33.jpg" alt="Ch32 Three Markets · Order of Attack" decoding="async">
+    <div class="g" data-g="p33" style="left:96px;top:125px;width:1408px;height:453px"></div>
+    <i class="step"></i><i class="step"></i><i class="step"></i>
+  </section>
+  <section class="slide pg" data-title="Ch32 MC 1 · Supply and Demand for Loanable Funds">
+    <img src="p34.jpg" alt="Ch32 MC 1 · Supply and Demand for Loanable Funds" decoding="async">
+  </section>
+  <section class="slide pg" data-title="Ch32 MC 2 · Supply of Loanable Funds">
+    <img src="p35.jpg" alt="Ch32 MC 2 · Supply of Loanable Funds" decoding="async">
+  </section>
+  <section class="slide pg" data-title="Ch32 MC 3 · Shortage of Loanable Funds">
+    <img src="p36.jpg" alt="Ch32 MC 3 · Shortage of Loanable Funds" decoding="async">
+  </section>
+  <section class="slide pg" data-title="Ch32 MC 4 · More Saving · NCO">
+    <img src="p37.jpg" alt="Ch32 MC 4 · More Saving · NCO" decoding="async">
+    <div class="g" data-g="p37" style="left:96px;top:449px;width:1408px;height:394px"></div>
+    <i class="step"></i><i class="step"></i><i class="step"></i>
+  </section>
+  <section class="slide pg" data-title="Ch32 MC 5 · Interest Rate · Supply of Currency">
+    <img src="p38.jpg" alt="Ch32 MC 5 · Interest Rate · Supply of Currency" decoding="async">
+  </section>
+  <section class="slide pg" data-title="Ch32 MC 6 · Budget Deficit">
+    <img src="p39.jpg" alt="Ch32 MC 6 · Budget Deficit" decoding="async">
+    <div class="g" data-g="p39" style="left:96px;top:449px;width:1408px;height:394px"></div>
+    <i class="step"></i><i class="step"></i><i class="step"></i>
+  </section>
+  <section class="slide pg" data-title="Ch32 MC 7 · Import Tariff">
+    <img src="p40.jpg" alt="Ch32 MC 7 · Import Tariff" decoding="async">
+    <div class="g" data-g="p40" style="left:96px;top:449px;width:1408px;height:394px"></div>
+    <i class="step"></i>
+  </section>
+  <section class="slide pg" data-title="Ch32 MC 8 · Capital Flight">
+    <img src="p41.jpg" alt="Ch32 MC 8 · Capital Flight" decoding="async">
+    <div class="g" data-g="p41" style="left:96px;top:449px;width:1408px;height:394px"></div>
+    <i class="step"></i><i class="step"></i><i class="step"></i>
+  </section>
+  <section class="slide pg" data-title="Ch32 MC 9 · Budget Deficit vs Investment Credit">
+    <img src="p42.jpg" alt="Ch32 MC 9 · Budget Deficit vs Investment Credit" decoding="async">
+    <div class="g" data-g="p42" style="left:96px;top:449px;width:1408px;height:394px"></div>
+    <i class="step"></i><i class="step"></i><i class="step"></i>
+  </section>
+  <section class="slide pg" data-title="Ch32 SA 1 · Foreign Taste for Korean Goods   (1/2)">
+    <img src="p43.jpg" alt="Ch32 SA 1 · Foreign Taste for Korean Goods   (1/2)" decoding="async">
+  </section>
+  <section class="slide pg" data-title="Ch32 SA 1 · Foreign Taste for Korean Goods (2/2)">
+    <img src="p44.jpg" alt="Ch32 SA 1 · Foreign Taste for Korean Goods (2/2)" decoding="async">
+    <div class="g" data-g="p44" style="left:96px;top:217px;width:1408px;height:617px"></div>
+    <i class="step"></i>
+  </section>
+  <section class="slide pg" data-title="Ch32 SA 2 · Budget Deficit vs Investment Tax Credit">
+    <img src="p45.jpg" alt="Ch32 SA 2 · Budget Deficit vs Investment Tax Credit" decoding="async">
+  </section>
+  <section class="slide pg" data-title="Ch32 SA 3 · Capital Flight (1997)   (1/2)">
+    <img src="p46.jpg" alt="Ch32 SA 3 · Capital Flight (1997)   (1/2)" decoding="async">
+  </section>
+  <section class="slide pg" data-title="Ch32 SA 3 · Capital Flight (1997) (2/2)">
+    <img src="p47.jpg" alt="Ch32 SA 3 · Capital Flight (1997) (2/2)" decoding="async">
+    <div class="g" data-g="p47" style="left:96px;top:217px;width:1408px;height:617px"></div>
+    <i class="step"></i><i class="step"></i><i class="step"></i>
+  </section>
+  <section class="slide pg" data-title="Answers 1 / 2 · Ch35 · Ch31">
+    <img src="p48.jpg" alt="Answers 1 / 2 · Ch35 · Ch31" decoding="async">
+  </section>
+  <section class="slide pg" data-title="Answers 2 / 2 · Ch32">
+    <img src="p49.jpg" alt="Answers 2 / 2 · Ch32" decoding="async">
+  </section>
+  <section class="slide qr" data-title="QR · 이 슬라이드 열기">
+    <img src="qr.svg" alt="QR: https://peripheral7.github.io/slides/econ2-exam3/">
+    <div class="qr-t">
+      <p class="qr-h"><span data-l="ko">휴대폰으로 이 슬라이드 열기</span><span data-l="en" hidden>Open these slides on your phone</span></p>
+      <p class="qr-u">peripheral7.github.io/slides/econ2-exam3/</p>
+      <p class="qr-s"><span data-l="ko">그래프를 직접 움직여 보기: peripheral7.github.io/econ2/graphs/#ch35</span><span data-l="en" hidden>Try the graphs yourself: peripheral7.github.io/econ2/graphs/en/#ch35</span></p>
+    </div>
+  </section>
+</main>
+
+<script src="/slides/deck.js"></script>
+<script src="/slides/econ2-exam3/scn.js"></script>
+<script src="/slides/econ2-exam3/graphs.js"></script>
+</body>
+</html>

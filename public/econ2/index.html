@@ -9,7 +9,8 @@
 <title>Econ2 TA Session</title>
 <!--
   Econ2 TA Session — Exam 3 와 Exam 2 자료를 구분선과 소제목으로 나눈다. 아래 칸에는 고른 시험의 자료를 띄운다(#exam3 · #exam2, 기본 Exam 3).
-  Exam 3: 복습 덱 /econ2/exam3/ · 퀴즈 /econ2/exam3/quiz.html (둘 다 scripts/econ2-exam3/build.mjs 로 만든다) · 인터랙티브 /econ2/graphs/#ch35 · 계산기와 정리표 /econ2/exam3/tools.html
+  Exam 3: Exam 2 와 같은 구성. PDF · PPT(econ2-exam3-ta-session.*)와 덱 /slides/econ2-exam3/ 은 scripts/econ2-exam3/ta/make_ta.py 로 만든다.
+          덧붙여 퀴즈 /econ2/exam3/quiz.html (scripts/econ2-exam3/build.mjs) · 계산기와 정리표 /econ2/exam3/tools.html · 인터랙티브 /econ2/graphs/#ch35
   Exam 2: PDF 를 바로 보고, PPT(원본 _v4.pptx)는 내려받는다. 파일을 바꾸면 같은 이름(econ2-exam2-ta-session.pdf / .pptx)으로 덮어쓰고 커밋·푸시만 하면 된다.
 -->
 <style>
@@ -47,10 +48,12 @@
   <section class="ex" id="exam3" aria-label="Exam 3">
     <h2>Exam 3 <small>Ch35 · Ch31 · Ch32</small></h2>
     <div class="actions">
-      <button type="button" class="btn view" data-view="exam3" aria-pressed="false">여기서 보기 · 복습 슬라이드</button>
-      <a class="btn" href="/econ2/exam3/">복습 · 문제풀이 슬라이드 (새 화면)</a>
+      <button type="button" class="btn view" data-view="exam3" aria-pressed="false">여기서 보기 · PDF</button>
+      <a class="btn" href="/slides/econ2-exam3/">슬라이드로 보기 (그래프 움직임)</a>
+      <a class="btn" href="/econ2/graphs/#ch35">Econ 2 Interactive</a>
+      <a class="btn" href="/econ2/econ2-exam3-ta-session.pptx" download="Econ2 Exam3 TA Session_v1.pptx">PPT 다운로드 (150KB)</a>
+      <a class="btn" href="/econ2/econ2-exam3-ta-session.pdf" target="_blank" rel="noopener">PDF 새 창으로 열기</a>
       <a class="btn" href="/econ2/exam3/quiz.html">퀴즈 (객관식 26문항)</a>
-      <a class="btn" href="/econ2/graphs/#ch35">Econ 2 Interactive · Exam 3</a>
       <a class="btn" href="/econ2/exam3/tools.html?lang=ko">계산기 · 정리표</a>
     </div>
   </section>
@@ -70,8 +73,8 @@
 </main>
 <script>
 (function () {
-  var SRC = { exam3: '/econ2/exam3/', exam2: '/econ2/econ2-exam2-ta-session.pdf#view=FitH' };
-  var TITLE = { exam3: 'Econ2 Exam 3 Review', exam2: 'Econ2 Exam2 TA Session PDF' };
+  var SRC = { exam3: '/econ2/econ2-exam3-ta-session.pdf#view=FitH', exam2: '/econ2/econ2-exam2-ta-session.pdf#view=FitH' };
+  var TITLE = { exam3: 'Econ2 Exam3 TA Session PDF', exam2: 'Econ2 Exam2 TA Session PDF' };
   var frame = document.getElementById('view');
   var btns = document.querySelectorAll('[data-view]');
   function show(v) {
