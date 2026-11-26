@@ -181,7 +181,7 @@
   - 확신이 없는 사실·수치·판례·공식은 쓰지 말 것.
   - 출제 후 모든 문항을 스스로(가능하면 코드로) 풀어 정답, 오답 값, 표 빈칸의 정답, key results를 검산하고, 불일치는 수정한 최종본만 제시.
   - 데이터 형식: === 구분, 보기 안에 | 금지, * 정확히 1개, 표 빈칸은 ?정답, exhibit 문항은 연속 배치.
-  - 파일에 붙여 넣을 때: 4번째 줄 주석 안에도 quizData 태그 문자열이 있으므로, 실제 데이터 위치(<!--DATA-START--> 바로 뒤)를 기준으로 교체한다.
+  - 파일에 붙여 넣을 때: 4번째 줄 주석 안에도 quizData 태그 문자열이 있으므로, 실제 데이터 위치(DATA-START 표식 바로 뒤)를 기준으로 교체한다.
 -->
 <html lang="en">
 <head>
@@ -248,11 +248,11 @@ FV = PV × (1 + r)^5 = 1,000 × (1.08)^5 = $1,469.33; BA II Plus: 5 N, 8 I/Y, �
   *{box-sizing:border-box;}
   button, input, select, textarea, code, pre, kbd, table, caption{font-family:inherit;}
   html{-webkit-font-smoothing:antialiased;}
-  body{margin:0; background:var(--bg); color:var(--ink); font-family:var(--serif); line-height:1.6; padding:0 0 60px;}
+  body{margin:0; background:var(--bg); color:var(--ink); font-family:var(--serif); line-height:1.6; padding:0;}
   sup, sub{font-size:0.72em; line-height:0;}
   code.ic{font-size:0.95em; background:rgba(128,128,128,0.10); border-radius:3px; padding:0 3px;}
 
-  .sheet{position:relative; isolation:isolate;}
+  .sheet{position:relative; isolation:isolate; min-height:100vh;}  /* 종이(흰 바탕)가 화면 맨 아래까지 — 아래에 회색 띠가 남지 않게 */
   .sheet::before{content:""; position:absolute; z-index:-1; top:0; bottom:0; left:50%; width:var(--paper-w); transform:translateX(-50%); background:var(--paper); box-shadow:0 0 0 1px rgba(0,0,0,0.03), 0 10px 40px rgba(0,0,0,0.05);}
   .pg{display:grid; grid-template-columns:minmax(0,1fr) var(--paper-w) minmax(0,1fr);}
   .pg > *{grid-column:2;}
@@ -387,7 +387,7 @@ FV = PV × (1 + r)^5 = 1,000 × (1.08)^5 = $1,469.33; BA II Plus: 5 N, 8 I/Y, �
 
   .data-errors{max-width:var(--paper-w); margin:16px auto 0; padding:12px 18px; color:var(--wrong); font-size:0.88rem; background:var(--paper);}
   .empty-state{padding-top:60px; padding-bottom:60px; text-align:center; color:var(--ink-soft);}
-  footer{padding-top:28px; padding-bottom:40px; color:var(--faint); font-size:0.78rem; text-align:center;}
+  footer{padding-top:28px; padding-bottom:100px; color:var(--faint); font-size:0.78rem; text-align:center;}  /* 아래 여백은 종이 안에서(맨 위로 단추 자리) */
 
   .lightbox{position:fixed; inset:0; z-index:40; background:rgba(20,20,22,0.6); display:none; align-items:center; justify-content:center; padding:24px; cursor:zoom-out;}
   .lightbox.show{display:flex;}

@@ -1,0 +1,187 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="robots" content="noindex">
+<title>Econ 2 Exam 3 Quiz</title>
+<!--
+  Econ 2 Exam 3 퀴즈 — scripts/econ2-exam3/build.mjs 가 이 틀(scripts/econ2-exam3/quiz-page.html)에 review-data.json 의 객관식 · 거래 분류를 넣어
+  public/econ2/exam3/quiz.html 로 만든다. 이 사본을 직접 고치지 말고 틀이나 데이터를 고쳐 다시 만든다.
+  고르면 바로 맞음 · 틀림과 풀이가 나온다(점수는 처음 고른 답으로). 기본 영어, 오른쪽 위 단추로 한국어(?lang=ko 로도 열림).
+  정책 · 사건별 방향표는 처음에 모두 가려 두고, 「Show answers」 또는 칸을 눌러 본다.
+-->
+<style>
+  @font-face{font-family:"Pretendard Variable";font-weight:45 920;font-style:normal;font-display:swap;src:local("Pretendard Variable"),url("/fonts/PretendardVariable.woff2") format("woff2-variations")}
+  :root{--ink:#1f2537;--soft:#5b6170;--line:#d8dbe0;--tint:#f3f6fb;--blue:#1f6fd1;--up:#d6322b;--down:#1f6fd1;--good:#1d7348;--bad:#c8352e}
+  *{box-sizing:border-box}
+  html,body{margin:0;background:#fff;color:var(--ink);font-family:"Pretendard Variable",Pretendard,-apple-system,BlinkMacSystemFont,"Segoe UI","Apple SD Gothic Neo","Malgun Gothic",sans-serif;-webkit-font-smoothing:antialiased}
+  html[lang=ko] body{word-break:keep-all}
+  main{max-width:900px;margin:0 auto;padding:40px max(16px,env(safe-area-inset-left)) 64px}
+  .top{display:flex;flex-wrap:wrap;align-items:baseline;gap:8px 16px}
+  .eyebrow{margin:0;font-size:14px;font-weight:700;letter-spacing:.06em;color:var(--soft)}
+  .lang{margin-left:auto;border:2px solid var(--ink);border-radius:8px;background:#fff;font:inherit;font-weight:700;font-size:14px;padding:4px 12px;cursor:pointer}
+  h1{margin:6px 0 8px;font-size:36px;line-height:1.15;letter-spacing:-.01em}
+  .lead{margin:0 0 8px;max-width:680px;font-size:17px;line-height:1.55;color:var(--soft)}
+  .links{display:flex;flex-wrap:wrap;gap:8px 16px;margin:0 0 4px;font-size:15px}
+  .links a{color:var(--blue)}
+  .score{position:sticky;top:0;z-index:5;display:flex;align-items:center;gap:12px;margin:14px 0 0;padding:10px 0;border-bottom:1px solid var(--line);background:#fff;font-size:15px;font-weight:600}
+  .score b{font-variant-numeric:tabular-nums}
+  .score button{margin-left:auto;border:1.5px solid var(--line);border-radius:8px;background:#fff;font:inherit;font-size:14px;padding:4px 12px;cursor:pointer}
+  section.ch{margin-top:30px;padding-top:16px;border-top:2px solid var(--ink)}
+  section.ch>h2{margin:0 0 4px;font-size:24px}
+  section.ch>h2 small{display:block;font-size:13px;font-weight:800;letter-spacing:.06em;color:var(--blue)}
+  .card{margin-top:14px;padding:6px 18px 10px;border:2px solid var(--ink);border-radius:12px}
+  .card>h3{margin:10px 0 2px;font-size:18px}
+  .card>.sub{margin:0 0 4px;font-size:14px;color:var(--soft)}
+  .row{padding:14px 0;border-top:1px solid var(--line)}
+  .card>h3+.row,.card>.sub+.row{border-top:0}
+  .row>p.q{margin:0 0 8px;font-size:16.5px;line-height:1.55}
+  .row>p.q .src{margin-left:6px;font-size:12.5px;font-weight:700;color:var(--soft)}
+  .opts{display:flex;flex-direction:column;gap:6px}
+  .chips{display:flex;flex-wrap:wrap;gap:6px}
+  .opt,.chip{border:2px solid var(--line);background:#fff;font:inherit;color:var(--ink);cursor:pointer;text-align:left}
+  .opt{display:flex;gap:8px;border-radius:10px;padding:7px 12px;font-size:15.5px;line-height:1.45}
+  .opt i{font-style:normal;font-weight:700;color:var(--soft)}
+  .chip{border-radius:999px;padding:5px 12px;font-size:14px;font-weight:600}
+  .opt:hover,.chip:hover{border-color:var(--ink)}
+  .opt.right,.chip.right{border-color:var(--good);color:var(--good);background:#eef7f1}
+  .opt.wrong,.chip.wrong{border-color:var(--bad);color:var(--bad);text-decoration:line-through}
+  .fb{margin:8px 0 0;font-size:14.5px;line-height:1.55}
+  .fb b{margin-right:4px}
+  .fb.good b{color:var(--good)} .fb.bad b{color:var(--bad)}
+  .fb ol{margin:4px 0 0;padding-left:1.3em;color:var(--soft)}
+  .tblbar{display:flex;align-items:center;gap:12px;margin:6px 0 8px;font-size:14px;color:var(--soft)}
+  .tblbar button{border:2px solid var(--ink);border-radius:8px;background:#fff;font:inherit;font-weight:700;font-size:14px;color:var(--ink);padding:4px 12px;cursor:pointer}
+  .tbl{overflow-x:auto}
+  table{border-collapse:collapse;width:100%;font-size:15px}
+  th,td{border-bottom:1px solid var(--line);padding:8px 8px;text-align:center;white-space:nowrap}
+  th:first-child,td:first-child,th:nth-child(2),td:nth-child(2){text-align:left}
+  th{color:var(--soft);font-weight:700}
+  td.v{font-weight:800}
+  td.v.up{color:var(--up)} td.v.dn{color:var(--down)}
+  table.hide td.v:not(.show){color:transparent!important;background:var(--tint);cursor:pointer}
+  td small.sub{display:none}
+  .note{margin:8px 0 6px;font-size:14px;color:var(--soft);line-height:1.55}
+  :focus-visible{outline:2px solid var(--blue);outline-offset:2px}
+  @media (max-width:720px){h1{font-size:28px}}
+  @media (max-width:560px){th:nth-child(2),td:nth-child(2){display:none}td:first-child{white-space:normal;min-width:8em}td small.sub{display:block;margin-top:2px;font-size:12.5px;color:var(--soft)}th,td{padding:8px 5px}}
+</style>
+</head>
+<body>
+<main>
+  <div class="top"><p class="eyebrow">Econ 2 · Exam 3</p><button type="button" class="lang" id="lang"></button></div>
+  <h1 id="h1"></h1>
+  <p class="lead" id="lead"></p>
+  <p class="links" id="links"></p>
+  <div class="score"><span id="score"></span><button type="button" id="reset"></button></div>
+  <div id="quiz"></div>
+</main>
+<script>
+const DATA = /*QUIZ-DATA*/null;
+(function () {
+  'use strict';
+  var $ = function (s, r) { return (r || document).querySelector(s); };
+  var $$ = function (s, r) { return Array.prototype.slice.call((r || document).querySelectorAll(s)); };
+  var q = /[?&]lang=(en|ko)\b/.exec(location.search);
+  var LANG = q ? q[1] : 'en';                       // 기본 영어
+  var L = function (a) { return Array.isArray(a) ? (LANG === 'en' ? a[1] : a[0]) : a; };
+  var esc = function (s) { return String(s).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;'); };
+  var LET = 'abcd';
+  var T = {
+    lang: ['English', '한국어'], h1: ['Exam 3 퀴즈', 'Exam 3 Quiz'],
+    lead: ['답을 고르면 바로 맞았는지와 풀이가 나온다. 점수는 처음 고른 답으로 센다.', 'Pick an answer to see right away whether it is correct, and why. The score counts your first pick.'],
+    links: [['TA 세션 슬라이드', '/slides/econ2-exam3/'], ['Interactive', '/econ2/graphs/#ch35'], ['TA 세션', '/econ2/']],
+    linksEn: [['TA session slides', '/slides/econ2-exam3/'], ['Interactive', '/econ2/graphs/en/#ch35'], ['TA session', '/econ2/']],
+    score: ['푼 문제 {a} / {n} · 맞음 {c}', 'Answered {a} / {n} · Correct {c}'], reset: ['다시 풀기', 'Restart'],
+    mc: ['객관식', 'Multiple choice'], right: ['맞았습니다.', 'Correct.'], wrong: ['다시 보세요.', 'Not quite.'],
+    sortH: ['NX or NCO', 'NX or NCO'], sortSub: ['한국 입장에서 각 거래가 NX 와 NCO 중 무엇을 어느 쪽으로 움직이나? NCO 라면 직접투자인가, 포트폴리오 투자인가?', 'From Korea’s side, does each transaction move NX or NCO, and which way? If NCO, is it direct or portfolio investment?'],
+    polH: ['정책 · 사건별 방향 요약', 'Directions by policy or event'], polSub: ['칸을 눌러 하나씩 보거나, 단추로 모두 본다.', 'Click a cell to reveal it, or show them all.'],
+    show: ['정답 보기', 'Show answers'], hide: ['정답 가리기', 'Hide answers'],
+    polEv: ['정책 · 사건', 'Policy or event'], polFirst: ['먼저 움직이는 곡선', 'First curve to move'],
+    polNote: ['↑ 증가 · ↓ 감소 · – 변화 없음 (처음과 최종 균형 비교). 그래프로 보려면 Interactive 의 Ch32 탭.', '↑ up · ↓ down · – no change (start versus final equilibrium). See the Ch32 tab of the Interactive for the graphs.']
+  };
+  var POL = [
+    [['재정적자 확대', 'Larger budget deficit'], ['대부자금 공급 왼쪽', 'LF supply left'], '+', '-', '-', '+', '-'],
+    [['재정적자 축소', 'Smaller budget deficit'], ['대부자금 공급 오른쪽', 'LF supply right'], '-', '+', '+', '-', '+'],
+    [['투자세액공제', 'Investment tax credit'], ['대부자금 수요 오른쪽', 'LF demand right'], '+', '+', '-', '+', '-'],
+    [['수입 할당 · 관세', 'Import quota or tariff'], ['외환 수요(NX) 오른쪽', 'Currency demand (NX) right'], '0', '0', '0', '+', '0'],
+    [['해외에서 한국 상품 인기', 'Foreigners like our goods'], ['외환 수요(NX) 오른쪽', 'Currency demand (NX) right'], '0', '0', '0', '+', '0'],
+    [['자본 도피', 'Capital flight'], ['NCO 곡선 오른쪽', 'NCO curve right'], '+', '-', '+', '-', '+']
+  ];
+  // 문항 하나 = { key, ans, ex(풀이 줄들) }. 점수는 처음 고른 답
+  var ITEMS = [], first = {}, polShown = false;
+
+  function mcRow(p, n) {
+    var key = 'mc' + p.id;
+    ITEMS.push({ key: key, ans: String(p.ans) });
+    return '<div class="row" data-key="' + key + '"><p class="q">' + n + '. ' + esc(L(p.q)) + '<span class="src">' + esc(L(p.src)) + '</span></p><div class="opts">' +
+      p.opts.map(function (o, i) { return '<button type="button" class="opt" data-k="' + i + '"><i>' + LET[i] + '.</i><span>' + esc(L(o)) + '</span></button>'; }).join('') +
+      '</div><div class="fb" hidden></div></div>';
+  }
+  function sortRow(s, n) {
+    var key = 'sort' + n;
+    ITEMS.push({ key: key, ans: s.a });
+    return '<div class="row" data-key="' + key + '"><p class="q">' + n + '. ' + esc(L(s.t)) + '</p><div class="chips">' +
+      DATA.sortopt.map(function (o) { return '<button type="button" class="chip" data-k="' + o[0] + '">' + esc(L(o[1])) + '</button>'; }).join('') +
+      '</div><div class="fb" hidden></div></div>';
+  }
+  function explain(key) {
+    var id = key.replace(/^mc/, ''), p = null;
+    DATA.ch.forEach(function (c) { c.mc.forEach(function (x) { if (x.id === id) p = x; }); });
+    if (p) return '<ol>' + p.sol.map(function (s) { return '<li>' + esc(L(s)) + '</li>'; }).join('') + (p.trap ? '<li>' + esc(L(p.trap)) + '</li>' : '') + '</ol>';
+    var s = DATA.sort[+key.replace('sort', '') - 1];
+    return s ? ' ' + esc(L(s.x)) : '';
+  }
+  function mark(row, k) {
+    var key = row.getAttribute('data-key'), it = ITEMS.filter(function (x) { return x.key === key; })[0], ok = k === it.ans;
+    $$('.opt,.chip', row).forEach(function (b) {
+      b.classList.toggle('right', b.getAttribute('data-k') === it.ans);
+      b.classList.toggle('wrong', b.getAttribute('data-k') === k && !ok);
+    });
+    var fb = $('.fb', row); fb.hidden = false; fb.className = 'fb ' + (ok ? 'good' : 'bad');
+    fb.innerHTML = '<b>' + esc(L(ok ? T.right : T.wrong)) + '</b>' + explain(key);
+  }
+  function tally() {
+    var a = 0, c = 0;
+    ITEMS.forEach(function (it) { if (first[it.key] != null) { a++; if (first[it.key] === it.ans) c++; } });
+    $('#score').textContent = L(T.score).replace('{a}', a).replace('{n}', ITEMS.length).replace('{c}', c);
+  }
+  function render() {
+    document.documentElement.lang = LANG;
+    ITEMS = [];
+    $('#lang').textContent = L(T.lang); $('#h1').textContent = L(T.h1); $('#lead').textContent = L(T.lead); $('#reset').textContent = L(T.reset);
+    $('#links').innerHTML = (LANG === 'en' ? T.linksEn : T.links).map(function (x) { return '<a href="' + x[1] + '">' + esc(x[0]) + ' →</a>'; }).join('');
+    var cell = function (d) { return '<td class="v ' + (d === '+' ? 'up' : d === '-' ? 'dn' : '') + '">' + (d === '+' ? '↑' : d === '-' ? '↓' : '–') + '</td>'; };
+    $('#quiz').innerHTML = DATA.ch.map(function (c) {
+      var h = '<section class="ch" id="ch' + c.n + '"><h2><small>CH ' + c.n + '</small>' + esc(L(c.short)) + '</h2>' +
+        '<div class="card"><h3>' + esc(L(T.mc)) + '</h3>' + c.mc.map(function (p, i) { return mcRow(p, i + 1); }).join('') + '</div>';
+      if (c.n === 31) h += '<div class="card"><h3>' + esc(L(T.sortH)) + '</h3><p class="sub">' + esc(L(T.sortSub)) + '</p>' + DATA.sort.map(function (s, i) { return sortRow(s, i + 1); }).join('') + '</div>';
+      if (c.n === 32) h += '<div class="card"><h3>' + esc(L(T.polH)) + '</h3><div class="tblbar"><button type="button" id="polBtn"></button><span>' + esc(L(T.polSub)) + '</span></div>' +
+        '<div class="tbl"><table id="pol"><thead><tr><th>' + esc(L(T.polEv)) + '</th><th>' + esc(L(T.polFirst)) + '</th><th>r</th><th>I</th><th>NCO</th><th>E</th><th>NX</th></tr></thead><tbody>' +
+        POL.map(function (p) { return '<tr><td>' + esc(L(p[0])) + '<small class="sub">' + esc(L(p[1])) + '</small></td><td>' + esc(L(p[1])) + '</td>' + p.slice(2).map(cell).join('') + '</tr>'; }).join('') +
+        '</tbody></table></div><p class="note">' + esc(L(T.polNote)) + '</p></div>';
+      return h + '</section>';
+    }).join('');
+    $$('#quiz .row').forEach(function (row) {
+      var key = row.getAttribute('data-key');
+      if (first[key] != null) mark(row, row.getAttribute('data-last') || first[key]);
+      $$('.opt,.chip', row).forEach(function (b) { b.addEventListener('click', function () {
+        var k = b.getAttribute('data-k');
+        if (first[key] == null) first[key] = k;
+        row.setAttribute('data-last', k); mark(row, k); tally();
+      }); });
+    });
+    var pol = $('#pol'), btn = $('#polBtn');
+    var setPol = function () { pol.classList.toggle('hide', !polShown); $$('td.v', pol).forEach(function (c) { c.classList.remove('show'); }); btn.textContent = L(polShown ? T.hide : T.show); };
+    btn.addEventListener('click', function () { polShown = !polShown; setPol(); });
+    $$('td.v', pol).forEach(function (c) { c.addEventListener('click', function () { c.classList.add('show'); }); });
+    setPol(); tally();
+  }
+  $('#reset').addEventListener('click', function () { first = {}; polShown = false; render(); window.scrollTo(0, 0); });
+  $('#lang').addEventListener('click', function () { LANG = LANG === 'en' ? 'ko' : 'en'; render(); });
+  render();
+})();
+</script>
+</body>
+</html>
